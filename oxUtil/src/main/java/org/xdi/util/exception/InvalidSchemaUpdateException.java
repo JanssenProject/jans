@@ -1,0 +1,22 @@
+package org.xdi.util.exception;
+
+/**
+ * @author Yuriy Movchan Date: 10.15.2010
+ */
+public class InvalidSchemaUpdateException extends RuntimeException {
+
+	private static final long serialVersionUID = 3071969232087073304L;
+
+	public InvalidSchemaUpdateException(Throwable root) {
+		super(root);
+	}
+
+	public InvalidSchemaUpdateException(String string, Throwable root) {
+		super(string, root);
+	}
+
+	public InvalidSchemaUpdateException(String s) {
+		super(s);
+	}
+
+}

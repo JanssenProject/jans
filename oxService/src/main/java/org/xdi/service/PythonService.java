@@ -1,0 +1,138 @@
+package org.xdi.service;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Properties;
+
+import org.gluu.site.ldap.persistence.util.ReflectHelper;
+import org.jboss.seam.Component;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.log.Log;
+import org.python.core.PyObject;
+import org.python.util.PythonInterpreter;
+import org.xdi.exception.PythonException;
+import org.xdi.util.StringHelper;
+
+/**
+ * Provides operations with python module
+ *
+ * @author Yuriy Movchan Date: 08.21.2012
+ */
+@Scope(ScopeType.APPLICATION)
+@Name("pythonService")
+@AutoCreate
+public class PythonService implements Serializable {
+
+	private static final long serialVersionUID = 3398422090669045605L;
+
+	@Logger
+	private Log log;
+
+	/*
+	 * Initialize singleton instance during startup
+	 */
+	public void  initPythonInterpreter() {
+        try {
+    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
+		} catch (Exception ex) {
+			log.error("Failed to initialize PythonInterpreter", ex);
+		}
+	}
+
+	private Properties getPreProperties() {
+		Properties props = System.getProperties();
+		Properties clonedProps = (Properties) props.clone();
+		clonedProps.setProperty("java.class.path", ".");
+		clonedProps.setProperty("java.library.path", "");
+		clonedProps.remove("javax.net.ssl.trustStore");
+		clonedProps.remove("javax.net.ssl.trustStorePassword");
+
+		return clonedProps;
+	}
+
+	private Properties getPostProperties() {
+		Properties props = getPreProperties();
+
+		String catalinaTmpFolder = System.getProperty("java.io.tmpdir") + File.separator + "python" + File.separator + "cachedir";
+		props.setProperty("python.cachedir", catalinaTmpFolder);
+
+		String pythonHome = System.getenv("PYTHON_HOME");
+		if (StringHelper.isNotEmpty(pythonHome)) {
+			props.setProperty("python.home", pythonHome);
+		}
+		
+		// Register custom python modules
+		String oxAuthPythonModulesPath = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + "python";
+		props.setProperty("python.path", oxAuthPythonModulesPath);
+
+		return props;
+	}
+
+	public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
+		if (StringHelper.isEmpty(scriptName)) {
+			return null;
+		}
+
+		PythonInterpreter interpret = new PythonInterpreter();
+        try {
+			interpret.execfile(scriptName);
+		} catch (Exception ex) {
+			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
+		}
+
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, interpret);
+	}
+
+	public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
+		if (scriptFile == null) {
+			return null;
+		}
+
+		PythonInterpreter interpret = new PythonInterpreter();
+        try {
+			interpret.execfile(scriptFile);
+		} catch (Exception ex) {
+			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
+		}
+
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, interpret);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T loadPythonScript(String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs, PythonInterpreter interpret)
+			throws PythonException {
+		PyObject scriptPythonTypeObject = interpret.get(scriptPythonType);
+        if (scriptPythonTypeObject == null) {
+        	return null;
+        }
+
+        PyObject scriptPythonTypeClass;
+        try {
+        	scriptPythonTypeClass = scriptPythonTypeObject.__call__(constructorArgs);
+		} catch (Exception ex) {
+			throw new PythonException(String.format("Failed to initialize python class '%s'", scriptPythonType), ex);
+		}
+
+        Object scriptJavaClass = scriptPythonTypeClass.__tojava__(scriptJavaType);
+        if (!ReflectHelper.assignableFrom(scriptJavaClass.getClass(), scriptJavaType)) {
+        	return null;
+
+        }
+
+        return (T) scriptJavaClass;
+	}
+
+	/**
+	 * Get pythonService instance
+	 * @return PythonService instance
+	 */
+	public static PythonService instance() {
+		return (PythonService) Component.getInstance(PythonService.class);
+	}
+
+}

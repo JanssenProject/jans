@@ -1,0 +1,19 @@
+package org.gluu.site.ldap.persistence.property;
+
+import org.gluu.site.ldap.persistence.exception.PropertyNotFoundException;
+
+/**
+ * Abstracts the notion of a "property". Defines a strategy for accessing the
+ * value of an attribute.
+ */
+public interface PropertyAccessor {
+	/**
+	 * Create a "getter" for the named attribute
+	 */
+	public Getter getGetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
+
+	/**
+	 * Create a "setter" for the named attribute
+	 */
+	public Setter getSetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
+}
