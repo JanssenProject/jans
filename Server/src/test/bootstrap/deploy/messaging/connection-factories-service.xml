@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Messaging Connection Factories deployment descriptor.
+
+     $Id: connection-factories-service.xml 3201 2007-10-19 10:39:50Z timfox $
+ -->
+
+<server>
+
+   <!-- The default connection factory does not support automatic failover or load balancing-
+        this is so we can maintain compatiblity with applications written for JBoss MQ which use this
+        connection factory.
+   -->     
+   <mbean code="org.jboss.jms.server.connectionfactory.ConnectionFactory"
+      name="jboss.messaging.connectionfactory:service=ConnectionFactory"
+      xmbean-dd="xmdesc/ConnectionFactory-xmbean.xml">
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      <depends optional-attribute-name="Connector">jboss.messaging:service=Connector,transport=bisocket</depends>
+      <depends>jboss.messaging:service=PostOffice</depends>
+
+      <attribute name="JNDIBindings">
+         <bindings>
+            <binding>/ConnectionFactory</binding>
+            <binding>/XAConnectionFactory</binding>
+            <binding>java:/ConnectionFactory</binding>
+            <binding>java:/XAConnectionFactory</binding>
+         </bindings>
+      </attribute>
+   </mbean>
+
+   <!-- A clustered connection factory that supports automatic failover and load balancing of created
+        connections.
+        This factory is not suitable to be used by MDBs.
+   -->
+   <mbean code="org.jboss.jms.server.connectionfactory.ConnectionFactory"
+      name="jboss.messaging.connectionfactory:service=ClusteredConnectionFactory"
+      xmbean-dd="xmdesc/ConnectionFactory-xmbean.xml">
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      <depends optional-attribute-name="Connector">jboss.messaging:service=Connector,transport=bisocket</depends>
+      <depends>jboss.messaging:service=PostOffice</depends>
+
+      <attribute name="JNDIBindings">
+         <bindings>
+            <binding>/ClusteredConnectionFactory</binding>
+            <binding>/ClusteredXAConnectionFactory</binding>
+            <binding>java:/ClusteredConnectionFactory</binding>
+            <binding>java:/ClusteredXAConnectionFactory</binding>
+         </bindings>
+      </attribute>
+
+      <attribute name="SupportsFailover">true</attribute>
+      <attribute name="SupportsLoadBalancing">true</attribute>      
+   </mbean>
+   
+   <!-- A connection factory with no JNDI bindings that is used in clustering to create the connections that
+        pull messages from one node to another
+   -->
+   <mbean code="org.jboss.jms.server.connectionfactory.ConnectionFactory"
+      name="jboss.messaging.connectionfactory:service=ClusterPullConnectionFactory"
+      xmbean-dd="xmdesc/ConnectionFactory-xmbean.xml">
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      <depends optional-attribute-name="Connector">jboss.messaging:service=Connector,transport=bisocket</depends>
+      <depends>jboss.messaging:service=PostOffice</depends>
+      <attribute name="SupportsFailover">false</attribute>
+      <attribute name="SupportsLoadBalancing">false</attribute>      
+   </mbean>
+   
+   <!-- An example connection factory with all attributes shown 
+   
+   <mbean code="org.jboss.jms.server.connectionfactory.ConnectionFactory"
+      name="jboss.messaging.connectionfactory:service=MyExampleConnectionFactory"
+      xmbean-dd="xmdesc/ConnectionFactory-xmbean.xml">
+      
+      <constructor>
+      
+         <!- - You can specify the default Client ID to use for connections created using this factory - -> 
+         
+         <arg type="java.lang.String" value="MyClientID"/>
+         
+      </constructor>
+      
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      
+      <!- - The transport to use - can be bisocket, sslbisocket or http - ->
+      
+      <depends optional-attribute-name="Connector">jboss.messaging:service=Connector,transport=http</depends>
+      
+      <depends>jboss.messaging:service=PostOffice</depends>
+      
+      <!- - PrefetchSize determines the approximate maximum number of messages the client consumer will buffer locally - ->
+      
+      <attribute name="PrefetchSize">150</attribute>
+      
+      <!- - Paging params to be used for temporary queues - ->
+      
+      <attribute name="DefaultTempQueueFullSize">200000</attribute>
+      
+      <attribute name="DefaultTempQueuePageSizeSize">2000</attribute>
+      
+      <attribute name="DefaultTempQueueDownCacheSize">2000</attribute>
+      
+      <!- - The batch size to use when using the DUPS_OK_ACKNOWLEDGE acknowledgement mode - ->
+      
+      <attribute name="DupsOKBatchSize">5000</attribute>
+      
+      <!- - Does this connection factory support automatic failover? - ->
+      
+      <attribute name="SupportsFailover">false</attribute>
+      
+      <!- - Does this connection factory support automatic client side load balancing? - ->
+      
+      <attribute name="SupportsLoadBalancing">false</attribute>  
+            
+      <!- - The class name of the factory used to create the load balancing policy to use on the client side - ->
+      
+      <attribute name="LoadBalancingFactory">org.jboss.jms.client.plugin.RoundRobinLoadBalancingFactory</attribute>  
+
+      <!- - Whether we should be strict TCK compliant, i.e. how we deal with foreign messages, defaults to false- ->
+
+      <attribute name="StrictTck">false</attribute>
+      
+      <!- - Disable JBoss Remoting Connector sanity checks - There is rarely a good reason to set this to true - ->
+      
+      <attribute name="DisableRemotingChecks">false</attribute>
+
+      <!- - The connection factory will be bound in the following places in JNDI - ->
+
+      <attribute name="JNDIBindings">
+      
+         <bindings>
+         
+            <binding>/acme/MyExampleConnectionFactory</binding>
+            
+            <binding>/acme/MyExampleConnectionFactoryDupe</binding>
+            
+            <binding>java:/xyz/CF1</binding>
+            
+            <binding>java:/connectionfactories/acme/connection_factory</binding>
+            
+         </bindings>
+         
+      </attribute>   
+       
+   </mbean>
+   
+   -->
+
+</server>

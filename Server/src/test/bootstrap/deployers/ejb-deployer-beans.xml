@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    EJB 2.x Deployer
+-->
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+   <!-- ejb-jar.xml parsing deployer -->
+   <bean name="Ejb2ParsingDeployer" class="org.jboss.deployment.EjbParsingDeployer">
+      <property name="type">ejb2x</property>   
+      <property name="useSchemaValidation">false</property>
+      <property name="relativeOrder">3000</property>
+   </bean>
+   <bean name="JBossEjb2ParsingDeployer" class="org.jboss.deployment.JBossEjbParsingDeployer">
+      <property name="type">ejb2x</property>      
+      <property name="relativeOrder">3001</property>
+      <property name="useSchemaValidation">false</property>
+      <property name="ignoreMissingStandardJBossXml">true</property>
+      <!-- Can be used to override the default location of the standardjboss.xml -->
+      <!-- ><property name="standardJBossXmlPath">${jboss.server.config.url}/standardjboss.xml</property>-->
+   </bean>
+
+    <bean name="EJB2xDeployer" class="org.jboss.ejb.deployers.EjbDeployer">
+        <!-- The EJBDeployer needs the JTA transaction manager service -->
+        <property name="transactionManagerServiceName">jboss:service=TransactionManager</property>
+       <!-- The dynamic class loading simple web server -->
+       <property name="webServiceName">jboss:service=WebService</property>
+       <!-- The CachedConnectionManager service used by the CachedConnectionInterceptor -->
+       <property name="cachedConnectionManagerName">jboss.jca:service=CachedConnectionManager</property>
+       <!-- The ejb timer service -->
+       <property name="timerServiceName">jboss.ejb:service=EJBTimerService</property>
+       <!-- A flag indicating if the ejb components should have in VM call
+          optimization disabled.
+       -->
+       <property name="callByValue">false</property>
+        
+       <!-- Specify an unauthenticated identity -->
+       <property name="unauthenticatedIdentity">anonymous</property>
+       
+       <!-- Specify a SecurityManagement Wrapper -->
+       <property name="securityManagement">
+         <inject bean="JNDIBasedSecurityManagement"/>
+       </property>
+       <!-- Specify a SecurityContext FQN class name -->
+       <property name="securityContextClassName">org.jboss.security.plugins.JBossSecurityContext</property>
+
+       <!-- Specify a SecurityDomain as fallback -->
+       <property name="defaultSecurityDomain">jboss-ejb-policy</property>
+
+       <depends>SecurityDeployer</depends>
+    </bean>
+
+   <bean name="MergedJBossMetaDataDeployer" class="org.jboss.ejb.deployers.MergedJBossMetaDataDeployer">
+   </bean>
+   <bean name="StandardJBossMetaDataDeployer" class="org.jboss.ejb.deployers.StandardJBossMetaDataDeployer">
+   </bean>
+</deployment>

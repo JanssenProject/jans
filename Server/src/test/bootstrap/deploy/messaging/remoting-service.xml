@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Standard bisocket-based Remoting service deployment descriptor.
+
+     $Id: remoting-bisocket-service.xml 3237 2007-10-21 15:27:51Z timfox $
+ -->
+
+<server>
+
+   <!-- Standard bisocket connector - the bisocket transport only opens connection from client->server
+        so can be used with firewalls where only outgoing connections are allowed.
+        For examples of HTTP and SSL transports see docs/examples -->
+   <mbean code="org.jboss.remoting.transport.Connector"
+          name="jboss.messaging:service=Connector,transport=bisocket"
+          display-name="Bisocket Transport Connector">
+      <attribute name="Configuration">
+         <config>
+            <invoker transport="bisocket">
+            
+               <!-- There should be no reason to change these parameters - warning!
+                    Changing them may stop JBoss Messaging working correctly -->            
+               <attribute name="marshaller" isParam="true">org.jboss.jms.wireformat.JMSWireFormat</attribute>
+               <attribute name="unmarshaller" isParam="true">org.jboss.jms.wireformat.JMSWireFormat</attribute>
+               <attribute name="dataType" isParam="true">jms</attribute>
+               <attribute name="socket.check_connection" isParam="true">false</attribute>
+               <attribute name="timeout" isParam="true">0</attribute>
+               <attribute name="serverBindAddress">${jboss.bind.address}</attribute>
+               <attribute name="serverBindPort">4457</attribute>
+               <attribute name="clientSocketClass" isParam="true">org.jboss.jms.client.remoting.ClientSocketWrapper</attribute>
+               <attribute name="serverSocketClass">org.jboss.jms.server.remoting.ServerSocketWrapper</attribute>
+               <attribute name="numberOfCallRetries" isParam="true">1</attribute>
+               <attribute name="pingFrequency" isParam="true">214748364</attribute>
+               <attribute name="pingWindowFactor" isParam="true">10</attribute>
+               <attribute name="onewayThreadPool">org.jboss.jms.server.remoting.DirectThreadPool</attribute>
+               <!-- End immutable parameters -->
+               
+               <!-- Periodicity of client pings. Server window by default is twice this figure -->                               
+               <attribute name="clientLeasePeriod" isParam="true">10000</attribute>
+
+               <!-- Number of seconds to wait for a connection in the client pool to become free -->
+               <attribute name="numberOfRetries" isParam="true">10</attribute>
+
+               <!-- Max Number of connections in client pool. This should be significantly higher than
+                    the max number of sessions/consumers you expect -->
+               <attribute name="clientMaxPoolSize" isParam="true">200</attribute>
+               
+               <!-- Use these parameters to specify values for binding and connecting control connections to 
+                    work with your firewall/NAT configuration
+               <attribute name="secondaryBindPort">xyz</attribute>                           
+               <attribute name="secondaryConnectPort">abc</attribute>               
+               -->
+                          
+            </invoker>
+            <handlers>
+               <handler subsystem="JMS">org.jboss.jms.server.remoting.JMSServerInvocationHandler</handler>
+            </handlers>
+         </config>
+      </attribute>
+   </mbean>
+
+</server>

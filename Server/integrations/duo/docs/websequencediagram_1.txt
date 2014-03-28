@@ -1,0 +1,14 @@
+title External authenticator plugin (enabled)
+
+Login form->Default authenticator: Authenticator.authenticate()
+Default authenticator->External authenticator: ExternalAuthenticator.authenticate(step: 1)
+External authenticator->External authenticator: ExternalAuthenticator.getCountAuthenticationSteps()
+External authenticator->External authenticator: ExternalAuthenticator.getPageForStep(1)
+External authenticator->Login form 1: Redirect to custom page 1 (duologin.xhtml)
+
+Login form 1->Default authenticator: Authenticator.authenticate()
+Default authenticator->External authenticator: ExternalAuthenticator.authenticate(step: 2)
+ExternalAuthenticator.getCountAuthenticationSteps()
+External authenticator->External authenticator: ExternalAuthenticator.getPageForStep(2)
+
+External authenticator->Default authenticator: User authenticated. All steps were passed

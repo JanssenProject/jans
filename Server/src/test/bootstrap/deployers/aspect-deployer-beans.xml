@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Aspect  Deployer
+-->
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+   <bean name="AOPJBossIntegration" class="org.jboss.aop.asintegration.embedded.JBossEmbeddedUCLIntegration"/>
+
+   <!--
+      Valid values for the AspectManager bean for use with enableTransformer=true are:
+      * org.jboss.aop.deployers.AspectManagerJDK5 - works with the -javaagent:pluggable-instrumentor.jar switch
+      * org.jboss.aop.deployers.AspectManagerJRockit - works with JRockit and the -Xmanagement:class=org.jboss.aop.hook.JRockitPluggableClassPreProcessor switch
+   -->
+   <bean name="AspectManager" class="org.jboss.aop.deployers.AspectManagerJDK5">
+      <constructor>
+         <parameter><![CDATA[
+	         <aop>
+				</aop>]]>
+	      </parameter>
+      </constructor>
+
+      <property name="jbossIntegration"><inject bean="AOPJBossIntegration"/></property>
+
+      <property name="enableLoadtimeWeaving">false</property>
+      <!-- only relevant when EnableLoadtimeWeaving is true.
+           When transformer is on, every loaded class gets
+           transformed.  If AOP can't find the class, then it
+           throws an exception.  Sometimes, classes may not have
+           all the classes they reference.  So, the Suppressing
+           is needed.  (i.e. Jboss cache in the default configuration -->
+      <property name="suppressTransformationErrors">true</property>
+      <property name="prune">true</property>
+      <property name="include">org.jboss.test., org.jboss.injbossaop.</property>
+      <property name="exclude">org.jboss.</property>
+      <!-- This avoids instrumentation of hibernate cglib enhanced proxies
+      <property name="ignore">*$$EnhancerByCGLIB$$*</property> -->
+      <property name="optimized">true</property>
+      <property name="verbose">false</property>
+      <!--
+         Available choices for this attribute are:
+            org.jboss.aop.instrument.ClassicInstrumentor (default)
+            org.jboss.aop.instrument.GeneratedAdvisorInstrumentor
+       <property name="instrumentor">org.jboss.aop.instrument.ClassicInstrumentor</property>
+      -->
+   </bean>
+
+   <!-- Aspect Deployment -->
+   <bean name="AspectDeployer" class="org.jboss.aop.deployers.AspectDeployer">
+      <property name="type">aop</property>
+      <property name="aspectManager"><inject bean="AspectManager" property="aspectManager"/></property>
+   </bean>
+
+</deployment>

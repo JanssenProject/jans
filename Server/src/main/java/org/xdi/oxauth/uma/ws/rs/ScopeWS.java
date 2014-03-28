@@ -1,0 +1,60 @@
+package org.xdi.oxauth.uma.ws.rs;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+/**
+ * @author Yuriy Zabrovarnyy
+ * @version 0.9, 22/04/2013
+ */
+@Path("/uma/scopes")
+@Name("umaScopeRestWebService")
+public class ScopeWS {
+
+    @Logger
+    private Log log;
+    @In
+    private ErrorResponseFactory errorResponseFactory;
+    @In
+    private ScopeService umaScopeService;
+
+    @GET
+    @Path("{id}")
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response getScopeDescription(@PathParam("id") String id) {
+        log.trace("UMA - get scope description: id: {0}", id);
+        try {
+            if (StringUtils.isNotBlank(id)) {
+                final ScopeDescription scope = umaScopeService.getInternalScope(id);
+                if (scope != null) {
+                    final org.xdi.oxauth.model.uma.ScopeDescription jsonScope = new org.xdi.oxauth.model.uma.ScopeDescription();
+                    jsonScope.setIconUri(scope.getIconUrl());
+                    jsonScope.setName(scope.getDisplayName());
+                    return Response.status(Response.Status.OK).entity(ServerUtil.asJson(jsonScope)).build();
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+        }
+        throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
+                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
+    }
+}

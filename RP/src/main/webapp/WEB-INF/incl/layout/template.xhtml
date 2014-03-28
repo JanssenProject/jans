@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:s="http://jboss.com/products/seam/taglib">
+<f:view>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>oxAuth</title>
+        <a4j:loadStyle src="resource:///stylesheet/theme.xcss"/>
+        <a4j:loadStyle src="/stylesheet/theme.css"/>
+        <a4j:loadStyle src="/stylesheet/site.css"/>
+        <ui:insert name="head"/>
+    </head>
+    <body>
+    <div class="body">
+        <a4j:status startText="Loading..."
+                    startStyle="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px;"/>
+        <h:messages id="messages" globalOnly="true" styleClass="message"
+                    errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+                    rendered="#{showGlobalMessages != 'false'}"/>
+        <ui:insert name="body"/>
+    </div>
+    <s:fragment>
+        <div class="footer">
+            <p>Copyright <a href="http://www.gluu.org">Gluu</a> All rights reserved.</p>
+        </div>
+    </s:fragment>
+    </body>
+</f:view>
+</html>

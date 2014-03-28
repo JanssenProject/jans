@@ -1,0 +1,335 @@
+{
+    "authorize":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"unauthorized_client",
+            "description":"The client is not authorized to request an access token using this method.",
+            "uri":null
+        },
+        {
+            "id":"access_denied",
+            "description":"The resource owner or authorization server denied the request.",
+            "uri":null
+        },
+        {
+            "id":"unsupported_response_type",
+            "description":"The authorization server does not support obtaining an access token using this method.",
+            "uri":null
+        },
+        {
+            "id":"invalid_scope",
+            "description":"The requested scope is invalid, unknown, or malformed.",
+            "uri":null
+        },
+        {
+            "id":"server_error",
+            "description":"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.",
+            "uri":null
+        },
+        {
+            "id":"temporarily_unavailable",
+            "description":"The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.",
+            "uri":null
+        },
+        {
+            "id":"invalid_request_redirect_uri",
+            "description":"The redirect_uri in the Authorization Request does not match any of the Client's pre-registered redirect_uris.",
+            "uri":null
+        },
+        {
+            "id":"login_required",
+            "description":"The Authorization Server requires End-User authentication. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface for user authentication.",
+            "uri":null
+        },
+        {
+            "id":"session_selection_required",
+            "description":"The End-User is required to select a session at the Authorization Server. The End-User MAY be authenticated at the Authorization Server with different associated accounts, but the End-User did not select a session. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface to prompt for a session to use.",
+            "uri":null
+        },
+        {
+            "id":"consent_required",
+            "description":"The Authorization Server requires End-User consent. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface for End-User consent.",
+            "uri":null
+        },
+        {
+            "id":"user_mismatched",
+            "description":"The current logged in End-User at the Authorization Server does not match the requested user. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface to prompt for the correct End-User authentication.",
+            "uri":null
+        },
+        {
+            "id":"invalid_request_uri",
+            "description":"The request_uri in the Authorization Request returns an error or invalid data.",
+            "uri":null
+        },
+        {
+            "id":"invalid_openid_request_object",
+            "description":"The request parameter contains an invalid OpenID Request Object.",
+            "uri":null
+        }
+    ],
+    "clientInfo":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_token",
+            "description":"The access token provided is expired, revoked, malformed, or invalid for other reasons. Try to request a new access token and retry the protected resource.",
+            "uri":null
+        }
+    ],
+    "endSession":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_grant",
+            "description":"The provided access token is invalid, or was issued to another client.",
+            "uri":null
+        }
+    ],
+    "federation":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_federation_id",
+            "description":"The value of federation_id is invalid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_entity_type",
+            "description":"The request value of \"invalid_entity_type\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_display_name",
+            "description":"The request value of \"invalid_display_name\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_op_id",
+            "description":"The request value of \"invalid_op_id\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_domain",
+            "description":"The request value of \"invalid_domain\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_redirect_uri",
+            "description":"The request value of \"invalid_redirect_uri\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_x509_url",
+            "description":"The request value of \"invalid_x509_url\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"invalid_x509_pem",
+            "description":"The request value of \"invalid_x509_pem\" is invalid or not supported.",
+            "uri":null
+        },
+        {
+            "id":"request_forbidden",
+            "description":"The request is forbidden and is not processed. (Federation does not join new members right now.)",
+            "uri":null
+        }
+    ],
+    "register":[
+        {
+            "id":"invalid_client_id",
+            "description":"The value of client_id is invalid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_redirect_uri",
+            "description":"Value of one or more redirect_uris is invalid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_configuration_parameter",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_token",
+            "description":"The access token provided is expired, revoked, malformed, or invalid for other reasons.",
+            "uri":null
+        },
+        {
+            "id":"access_denied",
+            "description":"The authorization server denied the request.",
+            "uri":null
+        }
+    ],
+    "token":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_client",
+            "description":"Client authentication failed (e.g. unknown client, no client authentication included, or unsupported authentication method). The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate which HTTP authentication schemes are supported. If the client attempted to authenticate via the Authorization request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code, and include the WWW-Authenticate response header field matching the authentication scheme used by the client.",
+            "uri":null
+        },
+        {
+            "id":"invalid_grant",
+            "description":"The provided authorization grant is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.",
+            "uri":null
+        },
+        {
+            "id":"unauthorized_client",
+            "description":"The authenticated client is not authorized to use this authorization grant type.",
+            "uri":null
+        },
+        {
+            "id":"unsupported_grant_type",
+            "description":"The authorization grant type is not supported by the authorization server.",
+            "uri":null
+        },
+        {
+            "id":"invalid_scope",
+            "description":"The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner.",
+            "uri":null
+        }
+    ],
+    "uma":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"client_not_in_trust_relationship",
+            "description":"The client is not in any trust relationship however federation is enabled for server.",
+            "uri":null
+        },
+        {
+            "id":"unauthorized_client",
+            "description":"The client is not authorized to request an access token using this method.",
+            "uri":null
+        },
+        {
+            "id":"access_denied",
+            "description":"The resource owner or AM server denied the request.",
+            "uri":null
+        },
+        {
+            "id":"unsupported_response_type",
+            "description":"The AM server does not support an access using this method.",
+            "uri":null
+        },
+        {
+            "id":"invalid_client_scope",
+            "description":"The requested scope is invalid, unknown, or malformed.",
+            "uri":null
+        },
+        {
+            "id":"server_error",
+            "description":"The AM server encountered an unexpected condition which prevented it from fulfilling the request.",
+            "uri":null
+        },
+        {
+            "id":"temporarily_unavailable",
+            "description":"The AM server is currently unable to handle the request due to a temporary overloading or maintenance of the server.",
+            "uri":null
+        },
+        {
+            "id":"precondition_failed",
+            "description":"The resource set that was requested to be deleted or updated at the AM did not match the If-Match value present in the request.",
+            "uri":null
+        },
+        {
+            "id":"not_found",
+            "description":"The resource set requested from the AM cannot be found.",
+            "uri":null
+        },
+        {
+            "id":"unsupported_method_type",
+            "description":"The host request used an unsupported HTTP method.",
+            "uri":null
+        },
+        {
+            "id":"invalid_token",
+            "description":"The access token expired.",
+            "uri":null
+        },
+        {
+            "id":"invalid_resource_set_id",
+            "description":"The provided resource set identifier was not found at the AM.",
+            "uri":null
+        },
+        {
+            "id":"invalid_scope",
+            "description":"At least one of the scopes included in the request was not registered previously by this host.",
+            "uri":null
+        },
+        {
+            "id":"invalid_requester_ticket",
+            "description":"The provided ticket was not found at the AM.",
+            "uri":null
+        },
+        {
+            "id":"expired_requester_ticket",
+            "description":"The provided ticket has expired.",
+            "uri":null
+        },
+        {
+            "id":"not_authorized_permission",
+            "description":"The requester is definitively not authorized for this permission according to user policy.",
+            "uri":null
+        },
+        {
+            "id":"need_claims",
+            "description":"The AM is unable to determine whether the requester is authorized for this permission without gathering claims from the requesting party.",
+            "uri":null
+        }
+    ],
+    "userInfo":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_token",
+            "description":"The access token provided is expired, revoked, malformed, or invalid for other reasons. Try to request a new access token and retry the protected resource.",
+            "uri":null
+        },
+        {
+            "id":"insufficient_scope",
+            "description":"The request requires higher privileges than provided by the access token.",
+            "uri":null
+        }
+    ],
+    "validateToken":[
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_grant",
+            "description":"The provided access token is invalid, or was issued to another client.",
+            "uri":null
+        }
+    ]
+}

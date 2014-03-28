@@ -1,0 +1,127 @@
+package org.xdi.oxauth.model.common;
+
+import java.net.URI;
+
+/**
+ * This class allows to enumerate and identify the possible values of the
+ * parameter grant_type for access token requests.
+ *
+ * @author Javier Rojas Date: 09.21.2011
+ */
+public enum GrantType {
+
+    /**
+     * The authorization code is obtained by using an authorization server as an
+     * intermediary between the client and resource owner. Instead of requesting
+     * authorization directly from the resource owner, the client directs the
+     * resource owner to an authorization server (via its user- agent as defined
+     * in [RFC2616]), which in turn directs the resource owner back to the
+     * client with the authorization code.
+     */
+    AUTHORIZATION_CODE("authorization_code"),
+
+    /**
+     * The implicit grant type is used to obtain access tokens (it does not
+     * support the issuance of refresh tokens) and is optimized for public
+     * clients known to operate a particular redirection URI.  These clients
+     * are typically implemented in a browser using a scripting language
+     * such as JavaScript.
+     */
+    IMPLICIT("implicit"),
+
+    /**
+     * The resource owner password credentials (i.e. username and password) can
+     * be used directly as an authorization grant to obtain an access token. The
+     * credentials should only be used when there is a high degree of trust
+     * between the resource owner and the client (e.g. its device operating
+     * system or a highly privileged application), and when other authorization
+     * grant types are not available (such as an authorization code).
+     */
+    RESOURCE_OWNER_PASSWORD_CREDENTIALS("password"),
+
+    /**
+     * The client credentials (or other forms of client authentication) can be
+     * used as an authorization grant when the authorization scope is limited to
+     * the protected resources under the control of the client, or to protected
+     * resources previously arranged with the authorization server. Client
+     * credentials are used as an authorization grant typically when the client
+     * is acting on its own behalf (the client is also the resource owner), or
+     * is requesting access to protected resources based on an authorization
+     * previously arranged with the authorization server.
+     */
+    CLIENT_CREDENTIALS("client_credentials"),
+
+    /**
+     * If the authorization server issued a refresh token to the client, the
+     * client makes a refresh request to the token endpoint.
+     */
+    REFRESH_TOKEN("refresh_token"),
+
+    /**
+     * The client uses an extension grant type by specifying the grant type
+     * using an absolute URI (defined by the authorization server) as the value
+     * of the grant_type parameter of the token endpoint, and by adding any
+     * additional parameters necessary.
+     */
+    EXTENSION,
+
+    /**
+     * Grant Type for extending the expiration of existing short-lived access_tokens
+     * by exchanging it for a long-lived access_token.
+     */
+    OXAUTH_EXCHANGE_TOKEN("oxauth_exchange_token");
+
+    private final String paramName;
+    private String uri;
+
+    private GrantType() {
+        this.paramName = null;
+    }
+
+    private GrantType(String paramName) {
+        this.paramName = paramName;
+    }
+
+    /**
+     * Returns the corresponding {@link GrantType} for a parameter grant_type of
+     * the access token requests. For the extension grant type, the parameter
+     * should be a valid URI.
+     *
+     * @param param The grant_type parameter.
+     * @return The corresponding grant type if found, otherwise
+     *         <code>null</code>.
+     */
+    public static GrantType fromString(String param) {
+        if (param != null) {
+            for (GrantType gt : GrantType.values()) {
+                if (param.equals(gt.paramName)) {
+                    return gt;
+                }
+            }
+            try {
+                URI.create(param);
+                GrantType extension = EXTENSION;
+                extension.uri = param;
+                return extension;
+            } catch (IllegalArgumentException ex) {
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a string representation of the object. In this case the parameter
+     * name for the grant_type parameter.
+     *
+     * @return The string representation of the object.
+     */
+    @Override
+    public String toString() {
+        if (this == EXTENSION) {
+            return uri;
+        } else {
+            return paramName;
+        }
+    }
+}

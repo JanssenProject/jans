@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     The JBoss Messaging service deployment descriptor.
+
+     $Id: messaging-service.xml 3204 2007-10-19 12:42:17Z timfox $
+ -->
+
+<server>
+
+   <!-- ServerPeer MBean configuration
+        ============================== -->
+
+   <mbean code="org.jboss.jms.server.ServerPeer"
+      name="jboss.messaging:service=ServerPeer"
+      xmbean-dd="xmdesc/ServerPeer-xmbean.xml">
+
+      <!-- The unique id of the server peer - in a cluster each node MUST have a unique value - must be an integer -->
+
+      <attribute name="ServerPeerID">0</attribute>
+      
+      <!-- The default JNDI context to use for queues when they are deployed without specifying one --> 
+      
+      <attribute name="DefaultQueueJNDIContext">/queue</attribute>
+      
+      <!-- The default JNDI context to use for topics when they are deployed without specifying one --> 
+      
+      <attribute name="DefaultTopicJNDIContext">/topic</attribute>
+
+	  <attribute name="PostOffice">jboss.messaging:service=PostOffice</attribute>
+	  
+	  <!-- The JAAS security domain to use for JBoss Messaging -->
+	  
+      <attribute name="SecurityDomain">java:/jaas/messaging</attribute>
+      
+      <!-- The default security configuration to apply to destinations - this can be overridden on a per destination basis -->
+      
+      <attribute name="DefaultSecurityConfig">
+        <security>
+            <role name="Administrator" read="true" write="true" create="true"/>
+            <role name="Manager" read="true" write="true" create="true"/>
+            <role name="guest" read="true" write="true" create="true"/>
+        </security>
+      </attribute>
+      
+      <!-- The default Dead Letter Queue (DLQ) to use for destinations.
+           This can be overridden on a per destinatin basis -->
+      
+      <attribute name="DefaultDLQ">jboss.messaging.destination:service=Queue,name=DLQ</attribute>
+      
+      <!-- The default maximum number of times to attempt delivery of a message before sending to the DLQ (if configured).
+           This can be overridden on a per destinatin basis -->
+      
+      <attribute name="DefaultMaxDeliveryAttempts">10</attribute>
+      
+      <!-- The default Expiry Queue to use for destinations. This can be overridden on a per destinatin basis -->
+      
+      <attribute name="DefaultExpiryQueue">jboss.messaging.destination:service=Queue,name=ExpiryQueue</attribute>
+      
+      <!-- The default redelivery delay to impose. This can be overridden on a per destination basis -->
+      
+      <attribute name="DefaultRedeliveryDelay">0</attribute>
+      
+      <!-- The periodicity of the message counter manager enquiring on queues for statistics -->
+      
+      <attribute name="MessageCounterSamplePeriod">5000</attribute>
+      
+      <!-- The maximum amount of time for a client to wait for failover to start on the server side after
+           it has detected failure -->
+      
+      <attribute name="FailoverStartTimeout">60000</attribute>
+      
+      <!-- The maximum amount of time for a client to wait for failover to complete on the server side after
+           it has detected failure -->
+      
+      <attribute name="FailoverCompleteTimeout">300000</attribute>
+
+      <attribute name="StrictTck">false</attribute>
+      
+      <!-- The maximum number of days results to maintain in the message counter history -->
+      
+      <attribute name="DefaultMessageCounterHistoryDayLimit">-1</attribute>
+      
+      <!-- The name of the connection factory to use for creating connections between nodes to pull messages -->
+      
+      <attribute name="ClusterPullConnectionFactoryName">jboss.messaging.connectionfactory:service=ClusterPullConnectionFactory</attribute>
+      
+      <!-- Use XA when pulling persistent messages from a remote node to this one. -->
+      
+      <attribute name="UseXAForMessagePull">false</attribute>
+      
+      <!-- When redistributing messages in the cluster. Do we need to preserve the order of messages received
+            by a particular consumer from a particular producer? -->
+            
+      <attribute name="DefaultPreserveOrdering">false</attribute>
+      
+      <!-- Max. time to hold previously delivered messages back waiting for clients to reconnect after failover -->
+      
+      <attribute name="RecoverDeliveriesTimeout">300000</attribute>
+      
+      <!-- The password used by the message sucker connections to create connections.
+           THIS SHOULD ALWAYS BE CHANGED AT INSTALL TIME TO SECURE SYSTEM
+      <attribute name="SuckerPassword"></attribute>
+      -->
+
+      <depends optional-attribute-name="PersistenceManager">jboss.messaging:service=PersistenceManager</depends>
+      
+      <depends optional-attribute-name="JMSUserManager">jboss.messaging:service=JMSUserManager</depends>
+      
+      <depends>jboss.messaging:service=Connector,transport=bisocket</depends>
+
+   </mbean>
+
+</server>

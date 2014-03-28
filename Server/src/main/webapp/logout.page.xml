@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page xmlns="http://jboss.com/products/seam/pages"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://jboss.com/products/seam/pages http://jboss.com/products/seam/pages-2.2.xsd"
+	  view-id="/logout.xhtml" login-required="true">
+
+    <action execute="#{identity.logout}"/>
+    <action execute="#{logoutAction.redirect}"/>
+
+    <param name="id_token_hint"
+           value="#{logoutAction.idTokenHint}"
+           required="true"/>
+    <param name="post_logout_redirect_uri"
+           value="#{logoutAction.postLogoutRedirectUri}"
+           required="true"/>
+
+</page>

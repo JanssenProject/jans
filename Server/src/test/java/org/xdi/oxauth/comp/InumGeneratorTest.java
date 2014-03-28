@@ -1,0 +1,34 @@
+package org.xdi.oxauth.comp;
+
+import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseComponentTest;
+import org.xdi.oxauth.idgen.ws.rs.InumGenerator;
+import org.xdi.oxauth.model.common.IdType;
+
+/**
+ * @author Yuriy Zabrovarnyy
+ * @version 0.9, 26/06/2013
+ */
+
+public class InumGeneratorTest extends BaseComponentTest {
+
+    @Test
+    public void test() {
+        final InumGenerator inumGenerator = InumGenerator.instance();
+        final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
+        Assert.assertTrue(StringUtils.isNotBlank(inum));
+
+//        final boolean contains = inumGenerator.contains("@!1111!0008!298D.5B20", IdType.LINK_CONTRACTS);
+//        Assert.assertTrue(contains);
+    }
+
+    @Override
+    public void beforeClass() {
+    }
+
+    @Override
+    public void afterClass() {
+    }
+}

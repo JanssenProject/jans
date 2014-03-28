@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Messaging Destinations deployment descriptor.
+
+     $Id: destinations-service.xml 64130 2007-07-18 23:21:27Z clebert.suconic@jboss.com $
+ -->
+
+<server>
+
+   <!--
+      The Default Dead Letter Queue. This destination is a dependency of an EJB MDB container.
+   -->
+
+   <mbean code="org.jboss.jms.server.destination.QueueService"
+      name="jboss.messaging.destination:service=Queue,name=DLQ"
+      xmbean-dd="xmdesc/Queue-xmbean.xml">
+      <annotation>@org.jboss.system.deployers.managed.ManagementObjectClass(code=org.jboss.jms.server.destination.QueueServiceMO)</annotation>      
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      <depends>jboss.messaging:service=PostOffice</depends>
+   </mbean>
+   
+   <!--
+      The Default Expiry Queue.
+   -->
+
+   <mbean code="org.jboss.jms.server.destination.QueueService"
+      name="jboss.messaging.destination:service=Queue,name=ExpiryQueue"
+      xmbean-dd="xmdesc/Queue-xmbean.xml">
+      <annotation>@org.jboss.system.deployers.managed.ManagementObjectClass(code=org.jboss.jms.server.destination.QueueServiceMO)</annotation>      
+      <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+      <depends>jboss.messaging:service=PostOffice</depends>
+   </mbean>   
+
+
+</server>

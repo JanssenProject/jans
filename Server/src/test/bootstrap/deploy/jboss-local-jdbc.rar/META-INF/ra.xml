@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id: ra.xml 62224 2007-04-10 16:23:42Z vicky.kak@jboss.com $ -->
+
+<connector xmlns="http://java.sun.com/xml/ns/j2ee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+           http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
+           version="1.5">
+
+   <description>JBoss LocalTransaction JDBC Wrapper Resource Adapter</description>
+   <display-name>JBoss LocalTransaction JDBC Wrapper</display-name>
+
+   <vendor-name>JBoss, Inc</vendor-name>
+   <eis-type>JDBC 3.0 Relational Database</eis-type>
+   <resourceadapter-version>5.0</resourceadapter-version>
+   
+   <license>
+      <description>
+ JBoss, Home of Professional Open Source
+ Copyright 2005, JBoss Inc., and individual contributors as indicated
+ by the @authors tag. See the copyright.txt in the distribution for a
+ full listing of individual contributors.
+
+ This is free software; you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of
+ the License, or (at your option) any later version.
+
+ This software is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this software; if not, write to the Free
+ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+      </description>
+      <license-required>true</license-required>
+   </license>
+   
+   <resourceadapter>
+      <resourceadapter-class>org.jboss.resource.deployment.DummyResourceAdapter</resourceadapter-class>
+
+      <outbound-resourceadapter>
+         <connection-definition>
+            <managedconnectionfactory-class>org.jboss.resource.adapter.jdbc.local.LocalManagedConnectionFactory</managedconnectionfactory-class>
+            <config-property>
+               <description>The jdbc driver class.</description>
+               <config-property-name>DriverClass</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The jdbc connection url class.</description>
+               <config-property-name>ConnectionURL</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The jdbc connection url delimeter.</description>
+               <config-property-name>URLDelimiter</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The configurable URLSelectorStrategy class name.</description>
+               <config-property-name>UrlSelectorStrategyClassName</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The default transaction isolation of the connections.</description>
+               <config-property-name>TransactionIsolation</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The number of cached prepared statements per connection.</description>
+               <config-property-name>PreparedStatementCacheSize</config-property-name>
+               <config-property-type>java.lang.Integer</config-property-type>
+            </config-property>
+            <config-property>
+               <description>Whether to share prepared statements.</description>
+               <config-property-name>SharePreparedStatements</config-property-name>
+               <config-property-type>java.lang.Boolean</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The user name to connect to the database.</description>
+               <config-property-name>UserName</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The password to connect to the database.</description>
+               <config-property-name>Password</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>Connection properties for the database.</description>
+               <config-property-name>ConnectionProperties</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>An SQL statement to be executed when a new connection is created as auxillary setup.</description>
+               <config-property-name>NewConnectionSQL</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>An SQL statement that may be executed when a managed connection is taken out of the pool and is about to be given to a client: the purpose is to verify that the connection still works.</description>
+               <config-property-name>CheckValidConnectionSQL</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The fully qualified name of a class implementing org.jboss.resource.adapter.jdbc.ValidConnectionChecker that can determine for a particular vender db when a connection is valid.</description>
+               <config-property-name>ValidConnectionCheckerClassName</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>The fully qualified name of a class implementing org.jboss.resource.adapter.jdbc.ExceptionSorter that can determine for a particular vender db which exceptions are fatal and mean a connection should be discarded.</description>
+               <config-property-name>ExceptionSorterClassName</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+			<config-property>
+               <description>The fully qualified name of a class implementing org.jboss.resource.adapter.jdbc.StaleConnectionChecker that can determine for a particular vender db when a connection is stale.</description>
+               <config-property-name>StaleConnectionCheckerClassName</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>			
+            <config-property>
+               <description>Whether to track unclosed statements - false/true/nowarn</description>
+               <config-property-name>TrackStatements</config-property-name>
+               <config-property-type>java.lang.String</config-property-type>
+            </config-property>
+            <config-property>
+               <description>Whether to validate the connection on the ManagedConnectionFactory.matchManagedConnection method</description>
+               <config-property-name>ValidateOnMatch</config-property-name>
+               <config-property-type>java.lang.Boolean</config-property-type>
+            </config-property>            
+            <config-property>
+               <description>Whether to set the query timeout based on the transaction timeout</description>
+               <config-property-name>TransactionQueryTimeout</config-property-name>
+               <config-property-type>java.lang.Boolean</config-property-type>
+            </config-property>
+            <config-property>
+               <description>A configured query timeout</description>
+               <config-property-name>QueryTimeout</config-property-name>
+               <config-property-type>java.lang.Integer</config-property-type>
+            </config-property>
+            <connectionfactory-interface>javax.sql.DataSource</connectionfactory-interface>
+            <connectionfactory-impl-class>org.jboss.resource.adapter.jdbc.WrapperDataSource</connectionfactory-impl-class>
+            <connection-interface>java.sql.Connection</connection-interface>
+            <connection-impl-class>org.jboss.resource.adapter.jdbc.WrappedConnection</connection-impl-class>
+         </connection-definition>
+         <transaction-support>LocalTransaction</transaction-support>
+         <authentication-mechanism>
+            <authentication-mechanism-type>BasicPassword</authentication-mechanism-type>
+            <credential-interface>javax.resource.spi.security.PasswordCredential</credential-interface>
+         </authentication-mechanism>
+         <reauthentication-support>false</reauthentication-support>
+      </outbound-resourceadapter>
+
+   </resourceadapter>
+</connector>
