@@ -118,7 +118,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
 			String[] currentLdapReturnAttributes = null;
-			currentLdapReturnAttributes = getLdapAttributes(propertiesAnnotations, false);
+			currentLdapReturnAttributes = getLdapAttributes(entry, propertiesAnnotations, false);
 			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributes);
 		}
 		Map<String, AttributeData> attributesFromLdapMap = getAttributesMap(attributesFromLdap);
@@ -325,7 +325,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
-		String[] ldapReturnAttributes = getLdapAttributes(propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
 
 		return contains(dnValue.toString(), attributes, objectClasses, ldapReturnAttributes);
 	}
@@ -367,17 +367,24 @@ public abstract class AbstractEntryManager implements EntityManager {
 		return find(entryClass, primaryKey, ldapReturnAttributes, propertiesAnnotations);
 	}
 
-	protected String[] getLdapAttributes(List<PropertyAnnotation> propertiesAnnotations, boolean isIgnoreLdapAttributesList) {
+	protected <T> String[] getLdapAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations, boolean isIgnoreLdapAttributesList) {
 		List<String> attributes = new ArrayList<String>();
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
 
-			// If entry contains LdapAttributesList we must load all attributes
 			if (!isIgnoreLdapAttributesList) {
 				ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LdapAttributesList.class);
 				if (ldapAttribute != null) {
-					return null;
+					if (entry == null) {
+						return null;
+					} else {
+						List<AttributeData> ldapAttributesList = getAttributesFromLdapAttributesList(entry, ldapAttribute, propertyName);
+						for (AttributeData attributeData : ldapAttributesList) {
+							String ldapAttributeName = attributeData.getName();
+							attributes.add(ldapAttributeName);
+						}
+					}
 				}
 			}
 
@@ -400,17 +407,12 @@ public abstract class AbstractEntryManager implements EntityManager {
 		return attributes.toArray(new String[0]);
 	}
 
-	public String[] getEntryLdapAttributesList(Class<?> entryClass) {
-		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-		return getLdapAttributes(propertiesAnnotations, true);
-	}
-
 	private <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes, List<PropertyAnnotation> propertiesAnnotations) {
 		Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>();
 
 		String[] currentLdapReturnAttributes = ldapReturnAttributes;
 		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-			currentLdapReturnAttributes = getLdapAttributes(propertiesAnnotations, false);
+			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
 		}
 
 		List<AttributeData> ldapAttributes = find(primaryKey.toString(), currentLdapReturnAttributes);
@@ -803,8 +805,6 @@ public abstract class AbstractEntryManager implements EntityManager {
 	}
 
 	protected List<AttributeData> getAttributesListForPersist(Object entry, List<PropertyAnnotation> propertiesAnnotations) {
-		Class<?> entryClass = entry.getClass();
-
 		// Prepare list of properties to persist
 		List<AttributeData> attributes = new ArrayList<AttributeData>();
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
@@ -814,19 +814,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			// Process properties with LdapAttribute annotation
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LdapAttribute.class);
 			if (ldapAttribute != null) {
-				String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
-				if (StringHelper.isEmpty(ldapAttributeName)) {
-					ldapAttributeName = propertyName;
-				}
-
-				Getter getter = getGetter(entryClass, propertyName);
-				if (getter == null) {
-					throw new MappingException("Entry should has getter for property " + propertyName);
-				}
-
-				Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LdapJsonObject.class);
-				boolean jsonObject = ldapJsonObject != null;
-				AttributeData attribute = getAttribute(propertyName, ldapAttributeName, getter, entry, jsonObject);
+				AttributeData attribute = getAttributeFromLdapAttribute(entry, ldapAttribute, propertiesAnnotation, propertyName);
 				if (attribute != null) {
 					attributes.add(attribute);
 				}
@@ -837,38 +825,10 @@ public abstract class AbstractEntryManager implements EntityManager {
 			// Process properties with LdapAttributesList annotation
 			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LdapAttributesList.class);
 			if (ldapAttribute != null) {
-				Getter getter = getGetter(entryClass, propertyName);
-				if (getter == null) {
-					throw new MappingException("Entry should has getter for property " + propertyName);
-				}
-
-				Object propertyValue = getter.get(entry);
-				if (propertyValue == null) {
-					continue;
-				}
-				if (!(propertyValue instanceof List<?>)) {
-					throw new MappingException("Entry property should has List base type");
-				}
-
-				Class<?> elementType = ReflectHelper.getListType(getter);
-
-				String entryPropertyName = ((LdapAttributesList) ldapAttribute).name();
-				Getter entryPropertyNameGetter = getGetter(elementType, entryPropertyName);
-				if (entryPropertyNameGetter == null) {
-					throw new MappingException("Entry should has getter for property " + propertyName + "." + entryPropertyName);
-				}
-
-				String entryPropertyValue = ((LdapAttributesList) ldapAttribute).value();
-				Getter entryPropertyValueGetter = getGetter(elementType, entryPropertyValue);
-				if (entryPropertyValueGetter == null) {
-					throw new MappingException("Entry should has getter for property " + propertyName + "." + entryPropertyValue);
-				}
-
-				for (Object entryAttribute : (List<?>) propertyValue) {
-					AttributeData attribute = getAttribute(propertyName, entryPropertyNameGetter, entryPropertyValueGetter, entryAttribute, false);
-					if (attribute != null) {
-						attributes.add(attribute);
-					}
+				
+				List<AttributeData> listAttributes = getAttributesFromLdapAttributesList(entry, ldapAttribute, propertyName);
+				if (listAttributes != null) {
+					attributes.addAll(listAttributes);
 				}
 
 				continue;
@@ -876,6 +836,69 @@ public abstract class AbstractEntryManager implements EntityManager {
 		}
 
 		return attributes;
+	}
+
+	private AttributeData getAttributeFromLdapAttribute(Object entry, Annotation ldapAttribute,
+			PropertyAnnotation propertiesAnnotation, String propertyName) {
+		Class<?> entryClass = entry.getClass();
+
+		String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
+		if (StringHelper.isEmpty(ldapAttributeName)) {
+			ldapAttributeName = propertyName;
+		}
+
+		Getter getter = getGetter(entryClass, propertyName);
+		if (getter == null) {
+			throw new MappingException("Entry should has getter for property " + propertyName);
+		}
+
+		Annotation ldapJsonObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LdapJsonObject.class);
+		boolean jsonObject = ldapJsonObject != null;
+		AttributeData attribute = getAttribute(propertyName, ldapAttributeName, getter, entry, jsonObject);
+
+		return attribute;
+	}
+
+	private List<AttributeData> getAttributesFromLdapAttributesList(Object entry, Annotation ldapAttribute, String propertyName) {
+		Class<?> entryClass = entry.getClass();
+		List<AttributeData> listAttributes = new ArrayList<AttributeData>();
+
+		Getter getter = getGetter(entryClass, propertyName);
+		if (getter == null) {
+			throw new MappingException("Entry should has getter for property " + propertyName);
+		}
+
+		Object propertyValue = getter.get(entry);
+		if (propertyValue == null) {
+			return null;
+		}
+
+		if (!(propertyValue instanceof List<?>)) {
+			throw new MappingException("Entry property should has List base type");
+		}
+
+		Class<?> elementType = ReflectHelper.getListType(getter);
+
+		String entryPropertyName = ((LdapAttributesList) ldapAttribute).name();
+		Getter entryPropertyNameGetter = getGetter(elementType, entryPropertyName);
+		if (entryPropertyNameGetter == null) {
+			throw new MappingException("Entry should has getter for property " + propertyName + "." + entryPropertyName);
+		}
+
+		String entryPropertyValue = ((LdapAttributesList) ldapAttribute).value();
+		Getter entryPropertyValueGetter = getGetter(elementType, entryPropertyValue);
+		if (entryPropertyValueGetter == null) {
+			throw new MappingException("Entry should has getter for property " + propertyName + "." + entryPropertyValue);
+		}
+
+		for (Object entryAttribute : (List<?>) propertyValue) {
+			AttributeData attribute = getAttribute(propertyName, entryPropertyNameGetter, entryPropertyValueGetter, entryAttribute, false);
+			if (attribute != null) {
+				listAttributes.add(attribute);
+			}
+		}
+		
+		return listAttributes;
 	}
 
 	protected <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {

@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
+/**
+ * Decrypt encripted properties
+ * 
+ * @author Yuriy Movchan Date: 04/24/2013
+ */
 public class PropertiesDecrypter {
 
 	private static final Logger log = LoggerFactory.getLogger(PropertiesDecrypter.class);

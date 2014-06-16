@@ -5,10 +5,12 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
@@ -33,14 +35,28 @@ public class PythonService implements Serializable {
 	@Logger
 	private Log log;
 
+	private PythonInterpreter pythonInterpreter;
+
 	/*
 	 * Initialize singleton instance during startup
 	 */
-	public void  initPythonInterpreter() {
+	public void initPythonInterpreter() {
         try {
     		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
 		} catch (Exception ex) {
-			log.error("Failed to initialize PythonInterpreter", ex);
+			log.error("Failed to initialize PythonInterpreter correctly", ex);
+		}
+        this.pythonInterpreter = new PythonInterpreter();
+	}
+
+	/**
+	 * When application undeploy we need clean up pythonInterpreter
+	 */
+	@Destroy
+	public void destroy() {
+		log.debug("Destroying pythonInterpreter component");
+		if (this.pythonInterpreter != null) {
+			this.pythonInterpreter.cleanup();
 		}
 	}
 
@@ -78,14 +94,13 @@ public class PythonService implements Serializable {
 			return null;
 		}
 
-		PythonInterpreter interpret = new PythonInterpreter();
         try {
-			interpret.execfile(scriptName);
+			this.pythonInterpreter.execfile(scriptName);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, interpret);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
 	}
 
 	public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
@@ -93,20 +108,19 @@ public class PythonService implements Serializable {
 			return null;
 		}
 
-		PythonInterpreter interpret = new PythonInterpreter();
         try {
-			interpret.execfile(scriptFile);
+			this.pythonInterpreter.execfile(scriptFile);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, interpret);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T loadPythonScript(String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs, PythonInterpreter interpret)
+	private <T> T loadPythonScript(String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs, PythonInterpreter interpreter)
 			throws PythonException {
-		PyObject scriptPythonTypeObject = interpret.get(scriptPythonType);
+		PyObject scriptPythonTypeObject = interpreter.get(scriptPythonType);
         if (scriptPythonTypeObject == null) {
         	return null;
         }

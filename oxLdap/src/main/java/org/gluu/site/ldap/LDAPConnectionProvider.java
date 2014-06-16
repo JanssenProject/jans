@@ -14,6 +14,7 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustAllTrustManager;
@@ -29,6 +30,7 @@ public class LDAPConnectionProvider {
 	private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
 
 	private LDAPConnectionPool connectionPool;
+	private ResultCode creationResultCode;
 	
 	private int supportedLDAPVersion = DEFAULT_SUPPORTED_LDAP_VERSION;
 
@@ -38,6 +40,9 @@ public class LDAPConnectionProvider {
 	public LDAPConnectionProvider(Properties props) {
 		try {
 			init(props);
+		} catch (LDAPException ex) {
+			creationResultCode = ex.getResultCode();
+			log.error("Failed to create connection pool", ex);
 		} catch (Exception ex) {
 			log.error("Failed to create connection pool", ex);
 		}
@@ -94,6 +99,7 @@ public class LDAPConnectionProvider {
 		}
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
+		this.creationResultCode = ResultCode.SUCCESS;
 	}
 
 	private int determineSupportedLdapVersion() {
@@ -196,6 +202,14 @@ public class LDAPConnectionProvider {
 		}
 
 		return isConnected;
+	}
+
+	public ResultCode getCreationResultCode() {
+		return creationResultCode;
+	}
+
+	public void setCreationResultCode(ResultCode creationResultCode) {
+		this.creationResultCode = creationResultCode;
 	}
 
 }

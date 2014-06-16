@@ -12,7 +12,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum GluuStatus implements LdapEnum {
 
-	ACTIVE("active", "Active"), INACTIVE("inactive", "Inactive");
+	ACTIVE("active", "Active"), INACTIVE("inactive", "Inactive"), EXPIRED("expired", "Expired"), REGISTER("register", "Register");
 
 	private String value;
 	private String displayName;

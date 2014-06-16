@@ -37,6 +37,14 @@ public class CacheService {
 		}
 	}
 
+	public void remove(String region, String key) {
+		if (cacheProvider == null) {
+			return;
+		}
+		
+		cacheProvider.remove(region, key);
+	}
+
 	public void removeAll(String name) {
 		if (cacheProvider != null) {
 			((CacheManager) cacheProvider.getDelegate()).getCache(name).removeAll();

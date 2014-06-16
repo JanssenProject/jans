@@ -3,9 +3,10 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxCore</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0.Final</version>
+    <version>1.1.0.Final</version>
     <name>oxCore</name>
     <url>http://ox.gluu.org</url>
+
     <scm>
         <developerConnection>scm:svn:file:///c:/sourcecontrol/gluu/openxdi_release_trunk/oxCore/tags/oxCore-0.1.5
         </developerConnection>
@@ -50,6 +51,7 @@
         <module>oxLdap</module>
         <module>oxLdap-annotations</module>
         <module>oxUtil</module>
+        <module>oxSaml</module>
         <module>oxService</module>
         <module>oxGwt</module>
     </modules>
@@ -57,7 +59,7 @@
     <dependencyManagement>
         <dependencies>
             <!-- Instruct Maven which versions to use -->
-            <dependency>
+        	<dependency>
                 <groupId>org.jboss.seam</groupId>
                 <artifactId>bom</artifactId>
                 <version>${seam.version}</version>
@@ -77,6 +79,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.5</version>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
@@ -247,19 +254,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
-    <!-- mvn dependency:analyze -->
-    <!--
-    [WARNING] Unused declared dependencies found:
-    [WARNING]    org.xdi:oxUtil:jar:0.1.2-SNAPSHOT:compile
-    [WARNING]    org.xdi:oxLdap-annotations:jar:0.1.2-SNAPSHOT:compile
-
-    http://www.sonatype.com/books/mvnex-book/reference/optimizing-sect-dependency-plugin.html
-    Be careful when removing any unused, declared dependencies unless you have very good test coverage,
-    or you might introduce a runtime error. A more sinister issue pops up with bytecode optimization.
-    For example, it is legal for a compiler to substitute the value of a constant and optimize away the reference.
-    Removing this dependency will cause the compile to fail, yet the tool shows it as unused.
-    Future versions of the Maven Dependency plugin will provide better techniques for detecting and/or ignoring
-    these types of issues.
-    -->
 </project>

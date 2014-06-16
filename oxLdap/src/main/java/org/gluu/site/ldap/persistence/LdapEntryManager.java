@@ -4,6 +4,7 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.*;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.util.StaticUtils;
+
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
@@ -263,7 +264,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
 		String[] currentLdapReturnAttributes = ldapReturnAttributes;
 		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-			currentLdapReturnAttributes = getLdapAttributes(propertiesAnnotations, false);
+			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
 		}
 
 		// Find entries
@@ -302,7 +303,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		checkEntryClass(entryClass, false);
 		String[] objectClasses = getTypeObjectClasses(entryClass);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-		String[] ldapReturnAttributes = getLdapAttributes(propertiesAnnotations, false);
+		String[] ldapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
 
 		return contains(baseDN, filter, objectClasses, ldapReturnAttributes);
 	}
@@ -382,6 +383,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				result.addAll(currentResult);
 				
 				entriesAttributes = new HashMap<String, List<AttributeData>>(100);
+				count = 0;
 			}
 		}
 		
@@ -862,6 +864,21 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 	public int getSupportedLDAPVersion() {
 		return this.ldapOperationService.getSupportedLDAPVersion();
+	}
+
+	/**
+	 * @param dnForPerson
+	 * @param class1
+	 * @param attribute
+	 */
+	public <T> void  removeAttributeFromEntries(String baseDN, Class<T> entryClass, String attributeName) {
+		try {
+			SearchResult searchResult = this.ldapOperationService.search(baseDN, null, 0, null, "dn");
+		} catch (LDAPSearchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }
