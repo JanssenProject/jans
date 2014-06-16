@@ -6,23 +6,23 @@ from default import DEFAULT
 
 info = DEFAULT.copy()
 
-info["provider"] = {"dynamic": "https://localhost"}
+info["provider"] = {"dynamic": "https://seed.gluu.org"}
 
 info["interaction"] = [
     {
         "matches": {
-            "url": "https://localhost/oxauth/login.seam"
+            "url": "https://seed.gluu.org/oxauth/login.seam"
         },
         "page-type": "login",
         "control": {
             "type": "form",
-            "set": {"loginForm:username": "test_user",
-                    "loginForm:password": "test"}
+            "set": {"loginForm:username": "mike",
+                    "loginForm:password": "secret"}
         }
     },
     {
         "matches": {
-            "url": "https://localhost/oxauth/authorize.seam"
+            "url": "https://seed.gluu.org/oxauth/authorize.seam"
         },
         "page-type": "user-consent",
         "control": {

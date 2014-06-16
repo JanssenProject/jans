@@ -14,7 +14,8 @@ import java.util.*;
  * Gives ability to use authorization grant in read-only mode.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/02/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
@@ -42,6 +43,16 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setAuthorizationCode(AuthorizationCode authorizationCode) {
+        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+    }
+
+    @Override
+    public String getNonce() {
+        return m_grant.getNonce();
+    }
+
+    @Override
+    public void setNonce(String nonce) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 

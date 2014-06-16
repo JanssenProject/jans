@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>1.0.0.Final</version>
+        <version>1.1.0.Final</version>
     </parent>
 
     <prerequisites>
@@ -18,21 +18,6 @@
     </prerequisites>
 
     <repositories>
-        <repository>
-            <id>repository.jboss.org</id>
-            <name>JBoss Repository</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-        </repository>
-        <repository>
-            <id>gluu</id>
-            <name>Gluu repository</name>
-            <url>http://ox.gluu.org/maven</url>
-        </repository>
-        <repository>
-            <id>bouncycastle</id>
-            <name>Bouncy Castle</name>
-            <url>http://repo2.maven.org/maven2/org/bouncycastle</url>
-        </repository>
         <repository>
             <id>shibboleth.internet2.edu</id>
             <name>Internet2</name>
@@ -58,23 +43,33 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -84,8 +79,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

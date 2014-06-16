@@ -1,0 +1,54 @@
+package org.xdi.oxauth.comp;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.jboss.seam.Component;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseComponentTest;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.util.StringHelper;
+
+/**
+ * @author Yuriy Movchan
+ * @version 0.1, 03/24/2014
+ */
+
+public class CleanUpClientTest extends BaseComponentTest {
+
+	@Override
+	public void beforeClass() {
+	}
+
+	@Override
+	public void afterClass() {
+	}
+
+	@Test
+	@Parameters(value = "usedClients")
+	public void cleanUpClient(String usedClients) {
+		Assert.assertNotNull(usedClients);
+		List<String> usedClientsList = Arrays.asList(StringHelper.split(usedClients, ",", true, false));
+		output("Used clients: " + usedClientsList);
+
+		final ClientService clientService = (ClientService) Component.getInstance(ClientService.class);
+		List<Client> clients = clientService.getAllClients(new String[] { "inum" });
+
+		Assert.assertNotNull(clients);
+		output("Found clients: " + clients.size());
+
+		int count = 0;
+		for (Client client : clients) {
+			String clientId = client.getClientId();
+			if (!usedClientsList.contains(clientId)) {
+				clientService.remove(client);
+				count++;
+			}
+		}
+
+		output("Removed clients: " + count);
+	}
+}

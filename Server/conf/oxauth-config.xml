@@ -253,6 +253,7 @@
     <federation-signing-kid>1</federation-signing-kid>
 
     <!-- Dynamic registration custom stuff -->
+    <dynamic-registration-scopes-param-enabled>true</dynamic-registration-scopes-param-enabled>
     <dynamic-registration-custom-object-class>oxAuthClientCustomAttributes</dynamic-registration-custom-object-class>
 
     <dynamic-registration-custom-attribute-supported>
@@ -264,7 +265,7 @@
     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
 
     <organization-inum>@!1111</organization-inum>
-    <oxID>https://localhost/oxid/service/gluu/inum</oxID>
+    <oxID>https://seed.gluu.org/oxid/service/gluu/inum</oxID>
 
     <dynamic-registration-enabled>true</dynamic-registration-enabled>
     <!-- Value in seconds or 0 if they do not expire -->

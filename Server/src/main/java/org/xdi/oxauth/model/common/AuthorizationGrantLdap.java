@@ -18,7 +18,8 @@ import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
@@ -52,8 +53,10 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
             final List<TokenLdap> grants = m_grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
+                final String nonce = getNonce();
                 final String scopes = getScopesAsString();
                 for (TokenLdap t : grants) {
+                    t.setNonce(nonce);
                     t.setScope(scopes);
                     t.setAuthLevel(getAuthLevel());
                     t.setAuthMode(getAuthMode());
@@ -184,6 +187,11 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
         final AuthorizationCode authorizationCode = getAuthorizationCode();
         if (authorizationCode != null) {
             result.setAuthorizationCode(authorizationCode.getCode());
+        }
+
+        final String nonce = getNonce();
+        if (nonce != null) {
+            result.setNonce(nonce);
         }
 
         final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();

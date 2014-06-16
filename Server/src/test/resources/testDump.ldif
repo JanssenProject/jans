@@ -1,0 +1,15 @@
+dn: inum=@!1111!0008!298D.FFFF,ou=clients,o=@!1111,o=gluu
+displayName: federation client test
+inum: @!1111!0008!298D.FFFF
+objectClass: oxAuthClient
+objectClass: top
+oxAuthAppType: web
+oxAuthClientSecret: ntIq/Jth0Rl/5JHXGUdMMyTDXIiolfWtFDmzv3toBLDpmqpHntq6AA==
+oxAuthFederationId: @!1111!0008!00F1!0001
+oxAuthFederationMetadataURI: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/federationmetadata
+oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthRedirectURI: https://client.example.com/cb?foo=bar
+oxAuthScope: inum=@!1111!0009!E4B4,ou=scopes,o=@!1111,o=gluu
+oxAuthScope: inum=@!1111!0009!F2D2,ou=scopes,o=@!1111,o=gluu
+oxAuthScope: inum=@!1111!0009!D2D2,ou=scopes,o=@!1111,o=gluu
+oxAuthScope: inum=@!1111!0009!A4C4,ou=scopes,o=@!1111,o=gluu

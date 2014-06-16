@@ -92,6 +92,7 @@ public class Configuration {
     private Boolean dynamicRegistrationEnabled;
     private int dynamicRegistrationExpirationTime;
     private Boolean trustedClientEnabled;
+    private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
 
     private Boolean federationEnabled;
@@ -485,6 +486,9 @@ public class Configuration {
     @XmlElementWrapper(name = "amr-values-supported")
     @XmlElement(name = "amr")
     public List<String> getAmrValuesSupported() {
+        if (amrValuesSupported == null) {
+            amrValuesSupported = new ArrayList<String>();
+        }
         return amrValuesSupported;
     }
 
@@ -922,6 +926,15 @@ public class Configuration {
 
     public void setTrustedClientEnabled(Boolean trustedClientEnabled) {
         this.trustedClientEnabled = trustedClientEnabled;
+    }
+
+    @XmlElement(name = "dynamic-registration-scopes-param-enabled")
+    public Boolean getDynamicRegistrationScopesParamEnabled() {
+        return dynamicRegistrationScopesParamEnabled;
+    }
+
+    public void setDynamicRegistrationScopesParamEnabled(Boolean dynamicRegistrationScopesParamEnabled) {
+        this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
     }
 
     @XmlElement(name = "dynamic-registration-custom-object-class")

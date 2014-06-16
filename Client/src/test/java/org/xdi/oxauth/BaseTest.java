@@ -12,7 +12,14 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
 import org.xdi.oxauth.client.*;
@@ -21,9 +28,12 @@ import org.xdi.oxauth.model.error.IErrorType;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.*;
 
@@ -186,6 +196,9 @@ public abstract class BaseTest {
     }
 
     public void startSelenium() {
+        //System.setProperty("webdriver.chrome.driver", "/home/javier/tmp/chromedriver");
+        //driver = new ChromeDriver();
+
         //driver = new FirefoxDriver();
         driver = new HtmlUnitDriver();
     }
@@ -230,7 +243,14 @@ public abstract class BaseTest {
 
             WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
 
+            final String previousURL = driver.getCurrentUrl();
             allowButton.click();
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(new ExpectedCondition<Boolean>() {
+                public Boolean apply(WebDriver d) {
+                    return (d.getCurrentUrl() != previousURL);
+                }
+            });
 
             authorizationResponseStr = driver.getCurrentUrl();
         }

@@ -17,6 +17,8 @@ public class BaseDnConfiguration {
     private String appliance;
     @XmlElement(name = "people")
     private String people;
+    @XmlElement(name = "groups")
+    private String groups;
     @XmlElement(name = "clients")
     private String clients;
     @XmlElement(name = "scopes")
@@ -128,7 +130,15 @@ public class BaseDnConfiguration {
         people = p_people;
     }
 
-    public String getScopes() {
+    public String getGroups() {
+		return groups;
+	}
+
+	public void setGroups(String groups) {
+		this.groups = groups;
+	}
+
+	public String getScopes() {
         return scopes;
     }
 

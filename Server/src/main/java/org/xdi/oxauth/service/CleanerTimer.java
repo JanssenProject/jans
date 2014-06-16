@@ -112,7 +112,7 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        List<Client> clientList = clientService.getClientsWithExpirationDate();
+        List<Client> clientList = clientService.getClientsWithExpirationDate(new String[] { "inum", "oxAuthClientSecretExpiresAt" });
 
         if (clientList != null && !clientList.isEmpty()) {
             for (Client client : clientList) {

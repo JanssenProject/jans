@@ -119,7 +119,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId1);
                 tokenRequest.setAuthPassword(clientSecret1);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-                tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
+                tokenRequest.addCustomParameter("mail", "mike@gluu.org");
                 tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
 
                 request.addParameters(tokenRequest.getParameters());
@@ -325,7 +325,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId3);
                 tokenRequest.setAuthPassword(clientSecret3);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-                tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
+                tokenRequest.addCustomParameter("mail", "mike@gluu.org");
                 tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
 
                 request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
@@ -489,7 +489,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                         responseTypes, clientId, scopes, redirectUri, null);
                 authorizationRequest.setState("af0ifjsldkj");
                 authorizationRequest.getPrompts().add(Prompt.NONE);
-                //authorizationRequest.addCustomParameter("mail", "test_user@gluu.org");
+                //authorizationRequest.addCustomParameter("mail", "mike@gluu.org");
                 //authorizationRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
                 authorizationRequest.addCustomParameter("uid", userId);
                 authorizationRequest.addCustomParameter("pwd", userSecret);

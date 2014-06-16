@@ -31,7 +31,8 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 /**
  * Functional tests for Authorize Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 09.20.2011
+ * @author Javier Rojas Blum
+ * @version 0.9, 05/28/2014
  */
 public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -245,6 +246,58 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test
+    public void requestAuthorizationCodeFail3(
+            final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+
+            @Override
+            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+                super.prepareRequest(request);
+
+                String clientId = "@!1111!0008!INVALID_VALUE";
+
+                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+                responseTypes.add(ResponseType.CODE);
+                List<String> scopes = new ArrayList<String>();
+                scopes.add("openid");
+                scopes.add("profile");
+                scopes.add("address");
+                scopes.add("email");
+
+                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                        responseTypes, clientId, scopes, redirectUri, null);
+                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.getPrompts().add(Prompt.NONE);
+                authorizationRequest.setAuthUsername(userId);
+                authorizationRequest.setAuthPassword(userSecret);
+
+                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                request.setQueryString(authorizationRequest.getQueryString());
+            }
+
+            @Override
+            protected void onResponse(EnhancedMockHttpServletResponse response) {
+                super.onResponse(response);
+                showResponse("requestAuthorizationCodeFail3", response);
+
+                assertEquals(response.getStatus(), 401, "Unexpected response code.");
+                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                try {
+                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    assertTrue(jsonObj.has("error"), "The error type is null");
+                    assertEquals(jsonObj.getString("error"), "unauthorized_client");
+                    assertTrue(jsonObj.has("error_description"), "The error description is null");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                }
+            }
+        }.run();
+    }
+
     @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
     @Test
     public void requestAuthorizationToken(
@@ -351,6 +404,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 try {
                     JSONObject jsonObj = new JSONObject(response.getContentAsString());
                     assertTrue(jsonObj.has("error"), "The error type is null");
+                    assertEquals(jsonObj.getString("error"), "invalid_request");
                     assertTrue(jsonObj.has("error_description"), "The error description is null");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -1485,9 +1539,9 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 if (response.getHeader("Location") != null) {
                     try {
                         URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getFragment(), "Fragment is null");
+                        assertNotNull(uri.getQuery(), "The query string is null");
 
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");

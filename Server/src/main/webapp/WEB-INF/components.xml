@@ -86,7 +86,6 @@
 
 	<cache:eh-cache-provider/>
 
-    <web:rewrite-filter view-mapping="/seam/resource/restv1/*"/>
     <component name="org.jboss.seam.web.authenticationFilter" class="org.xdi.oxauth.auth.AuthenticationFilter">
         <property name="regexUrlPattern">/seam/resource/restv1/oxauth/(authorize|token|check_session|userinfo)</property>
         <property name="realm">oxAuth</property>

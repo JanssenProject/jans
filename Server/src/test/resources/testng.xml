@@ -23,6 +23,13 @@
         </classes>
     </test>
 
+    <!-- Authorize with Response Mode test -->
+    <test name="Authorize with Response Mode test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeWithResponseModeEmbeddedTest"/>
+        </classes>
+    </test>
+
     <!-- Client Authentication Filter test (embedded) -->
     <test name="Client Authentication Filter test (embedded)" enabled="true">
         <classes>
@@ -265,6 +272,12 @@
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
         </classes>
     </test>
+    <test name="Remove unused clients test" enabled="true">
+        <parameter name="usedClients" value="@!1111!0008!FF81!2D39, @!1111!0008!0068.3E20, @!1111!0008!C2EB!75F1, @!1111!0008!2A19!9A70, @!1111!0008!7119!0560, @!1111!0008!45C0!BE6E, @!1111!0008!92C1!D277, @!1111!0008!0336!1008, @!1111!0008!A64C!475C, @!1111!0008!31FD!E7E7, @!1111!0008!2D7F!97C2, @!1111!0008!FF81!2D40"/>
+        <classes>
+            <class name="org.xdi.oxauth.comp.CleanUpClientTest"/>
+        </classes>
+    </test>
 
     <parameter name="authorizePath" value="/restv1/oxauth/authorize"/>
     <parameter name="introspectionPath" value="/restv1/introspection"/>
@@ -279,16 +292,16 @@
     <parameter name="federationMetadataPath" value="/restv1/oxauth/federationmetadata"/>
     <parameter name="federationPath" value="/restv1/oxauth/federation"/>
     <parameter name="idGenerationPath" value="/restv1/id"/>
-    <parameter name="userId" value="test_user"/>
-    <parameter name="userSecret" value="test"/>
+    <parameter name="userId" value="mike"/>
+    <parameter name="userSecret" value="secret"/>
     <parameter name="clientId" value="@!1111!0008!FF81!2D39"/>
-    <parameter name="clientSecret" value="11111111-1111-1111-1111-111111111111"/>
+    <parameter name="clientSecret" value="6213e9b9-c46d-4008-8af1-03f918a8ade4"/>
     <parameter name="redirectUri" value="https://client.example.com/cb?foo=bar"/>
     <parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2"/>
     <parameter name="postLogoutRedirectUri" value="https://client.example.com/pl"/>
-    <parameter name="ldapAdminPassword" value="test"/>
+    <parameter name="ldapAdminPassword" value="secret"/>
     <parameter name="audience" value="https://localhost:8443/seam/resource/restv1/oxauth/token"/>
-    <parameter name="sectorIdentifierUri" value="https://localhost/oxauth-client/test/resources/sector_identifier.js"/>
+    <parameter name="sectorIdentifierUri" value="https://seed.gluu.org/oxauth-client/test/resources/sector_identifier.js"/>
     <parameter name="federationMetadataId" value="@!1111!0008!00F1!0001"/>
     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
     <parameter name="federationRpRedirectUri" value="https://client.example.com/cb?foo=bar"/>
@@ -311,16 +324,16 @@
     <parameter name="umaRptStatusPath" value="/restv1/host/status"/>
     <parameter name="umaAmHost" value="localhost"/>
     <parameter name="umaHost" value="photoz.example.com"/>
-    <parameter name="umaUserId" value="test_user"/>
-    <parameter name="umaUserSecret" value="test"/>
+    <parameter name="umaUserId" value="mike"/>
+    <parameter name="umaUserSecret" value="secret"/>
     <parameter name="umaPatClientId" value="@!1111!0008!FF81!2D39"/>
-    <parameter name="umaPatClientSecret" value="11111111-1111-1111-1111-111111111111"/>
+    <parameter name="umaPatClientSecret" value="6213e9b9-c46d-4008-8af1-03f918a8ade4"/>
     <parameter name="umaAatClientId" value="@!1111!0008!0068.3E20"/>
-    <parameter name="umaAatClientSecret" value="11111111-1111-1111-1111-111111111111"/>
+    <parameter name="umaAatClientSecret" value="32c2fb17-409d-48a2-b793-a639c8ac6cb2"/>
     <parameter name="umaRedirectUri" value="https://client.example.com/cb?foo=bar"/>
 
     <!-- Client Resources -->
-    <parameter name="clientJwksUri" value="https://localhost/oxauth-client/test/resources/jwks.json"/>
+    <parameter name="clientJwksUri" value="https://seed.gluu.org/oxauth-client/test/resources/jwks.json"/>
     <!-- RS256 -->
     <parameter name="RS256_modulus"
                value="AJpGcIVu7fmQJLHXeAClhXaJD7SvuABjYiPcT9IbKFWGWj51GgD-CxtyrQGXT0ctGEEsXOzMZM40q-V7GR-5qkJ_OalVTTc_EeKAHao45bZPsPHLxvusNfrfpyhc6JjF2TQhoOqxbgMgQ9L6W9q9fSjgzx-tPlD0d3X0GZOEQ_NYGstZWRRBwHgsxA2IRYtwSH-v76yPpxF9poLIWdnBKtKfSr6UY7p1BrLmMm0DdMhjQLn6j4S_eB-p2WyBwObvsLqO6FdClpZFtGr82Km2uinpHvZ6KJ_MUEW1sijPPI3rIGbaUbLtQJwX5GVynAP5qU2qRVkcsrKt-GeNoz6QNLM"/>

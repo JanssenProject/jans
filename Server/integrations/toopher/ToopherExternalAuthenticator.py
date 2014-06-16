@@ -205,9 +205,9 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/login/toopher/tppair.xhtml"
+            return "/auth/toopher/tppair.xhtml"
         elif (step == 3):
-            return "/login/toopher/tpauthenticate.xhtml"
+            return "/auth/toopher/tpauthenticate.xhtml"
         return ""
 
     def isPassedDefaultAuthentication():

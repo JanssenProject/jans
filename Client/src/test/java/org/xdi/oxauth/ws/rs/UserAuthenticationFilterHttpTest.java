@@ -47,7 +47,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
+        tokenRequest.addCustomParameter("mail", "mike@gluu.org");
         tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
@@ -140,7 +140,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
+        tokenRequest.addCustomParameter("mail", "mike@gluu.org");
         tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
@@ -247,7 +247,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
         request.setState(state);
         request.getPrompts().add(Prompt.NONE);
-        request.addCustomParameter("mail", "test_user@gluu.org");
+        request.addCustomParameter("mail", "mike@gluu.org");
         request.addCustomParameter("inum", "@!1111!0000!D4E7");
         request.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 

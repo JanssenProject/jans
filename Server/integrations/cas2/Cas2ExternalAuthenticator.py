@@ -95,7 +95,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
 
             parametersMap = HashMap()
-            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin.seam")
+            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
             if (cas_renew_opt):
                 parametersMap.put("renew", "true")
             parametersMap.put("ticket", ticket)
@@ -193,6 +193,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 return False
 
             # Check if there is user which has cas2_user_uid
+            # Avoid mapping CAS2 account to more than one IDP account
             find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
             if (find_user_by_uid == None):
@@ -231,7 +232,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             parametersMap = HashMap()
-            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin.seam")
+            parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
             if (cas_renew_opt):
                 parametersMap.put("renew", "true")
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
@@ -266,8 +267,8 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/login/cas2/cas2login.xhtml"
-        return "/login/cas2/cas2postlogin.xhtml"
+            return "/auth/cas2/cas2login.xhtml"
+        return "/auth/cas2/cas2postlogin.xhtml"
 
     def parse_tag(self, str, tag):
         tag1_pos1 = str.find("<" + tag)

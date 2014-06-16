@@ -1,15 +1,16 @@
 package org.xdi.oxauth.model.ldap;
 
-import java.util.Date;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.util.Date;
+
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 @LdapEntry
@@ -42,6 +43,8 @@ public class TokenLdap {
     private String jwtRequest;
     @LdapAttribute(name = "oxAuthAuthorizationCode")
     private String authorizationCode;
+    @LdapAttribute(name = "oxAuthNonce")
+    private String nonce;
 
     @LdapAttribute(name = "oxAuthenticationLevel")
     private String authLevel;
@@ -66,6 +69,14 @@ public class TokenLdap {
 
     public void setAuthorizationCode(String p_authorizationCode) {
         authorizationCode = p_authorizationCode;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 
     public String getGrantId() {
@@ -166,23 +177,23 @@ public class TokenLdap {
         jwtRequest = p_jwtRequest;
     }
 
-	public String getAuthLevel() {
-		return authLevel;
-	}
+    public String getAuthLevel() {
+        return authLevel;
+    }
 
-	public void setAuthLevel(String authLevel) {
-		this.authLevel = authLevel;
-	}
+    public void setAuthLevel(String authLevel) {
+        this.authLevel = authLevel;
+    }
 
-	public String getAuthMode() {
-		return authMode;
-	}
+    public String getAuthMode() {
+        return authMode;
+    }
 
-	public void setAuthMode(String authMode) {
-		this.authMode = authMode;
-	}
+    public void setAuthMode(String authMode) {
+        this.authMode = authMode;
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

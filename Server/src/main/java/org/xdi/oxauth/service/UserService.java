@@ -125,6 +125,20 @@ public class UserService {
 		
 		return getUser(uid);
 	}
+    
+    public User addUser(User user) {
+        String peopleBaseDN = ConfigurationFactory.getBaseDn().getPeople();
+
+        String inum = inumService.generatePeopleInum();
+
+        user.setDn("inum=" + inum + "," + peopleBaseDN);
+        user.setAttribute("inum", inum);
+        user.setAttribute("gluuStatus",  GluuStatus.REGISTER.getValue());
+		ldapEntryManager.persist(user);
+		
+		return getUserByDn(user.getDn());
+	}
+
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
@@ -209,6 +223,17 @@ public class UserService {
 		}
 
 		return null;
+	}
+
+	public void setCustomAttribute(User user, String attributeName, String attributeValue) {
+		CustomAttribute customAttribute = getCustomAttribute(user, attributeName);
+		
+		if (customAttribute == null) {
+			customAttribute = new CustomAttribute(attributeName);
+			user.getCustomAttributes().add(customAttribute);
+		}
+		
+		customAttribute.setValue(attributeValue);
 	}
 
     // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.

@@ -3,6 +3,7 @@ package org.xdi.oxauth.model.common;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
@@ -33,6 +34,9 @@ public class SessionId implements Serializable {
     private Date authenticationTime;
     @LdapAttribute(name = "oxAuthPermissionGranted")
     private Boolean permissionGranted;
+    @LdapJsonObject
+    @LdapAttribute(name = "oxAuthPermissionGrantedMap")
+    private SessionIdAccessMap permissionGrantedMap;
 
     public SessionId() {
     }
@@ -77,12 +81,34 @@ public class SessionId implements Serializable {
         this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
     }
 
-    public Boolean isPermissionGranted() {
-        return permissionGranted == null ? false : permissionGranted;
+    public Boolean getPermissionGranted() {
+        return permissionGranted;
     }
 
     public void setPermissionGranted(Boolean permissionGranted) {
         this.permissionGranted = permissionGranted;
+    }
+
+    public SessionIdAccessMap getPermissionGrantedMap() {
+        return permissionGrantedMap;
+    }
+
+    public void setPermissionGrantedMap(SessionIdAccessMap permissionGrantedMap) {
+        this.permissionGrantedMap = permissionGrantedMap;
+    }
+
+    public Boolean isPermissionGrantedForClient(String clientId) {
+        if (permissionGrantedMap != null) {
+            return permissionGrantedMap.get(clientId);
+        }
+        return false;
+    }
+
+    public void addPermission(String clientId, Boolean granted) {
+        if (permissionGrantedMap == null) {
+            permissionGrantedMap = new SessionIdAccessMap();
+        }
+        permissionGrantedMap.put(clientId, granted);
     }
 
     @Override
@@ -102,13 +128,13 @@ public class SessionId implements Serializable {
         return id != null ? id.hashCode() : 0;
     }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
-				.append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime)
-				.append(", permissionGranted=").append(permissionGranted).append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
+                .append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime)
+                .append(", permissionGranted=").append(permissionGranted).append("]");
+        return builder.toString();
+    }
 
 }

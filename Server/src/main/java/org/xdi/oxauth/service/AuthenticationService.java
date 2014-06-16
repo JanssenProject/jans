@@ -2,13 +2,20 @@ package org.xdi.oxauth.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.hibernate.annotations.common.util.StringHelper;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
+import org.xdi.ldap.model.CustomEntry;
+import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeAction;
@@ -21,7 +28,6 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.faces.context.FacesContext;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -53,6 +59,9 @@ public class AuthenticationService {
     private GluuLdapConfiguration ldapAuthConfig;
 
     @In
+    private LdapEntryManager ldapEntryManager;
+
+    @In
     private LdapEntryManager ldapAuthEntryManager;
 
     @In
@@ -73,8 +82,17 @@ public class AuthenticationService {
         if (ldapAuthConfig == null) {
             User user = userService.getUser(userName);
             if (user != null) {
-                credentials.setUser(user);
-                return ldapAuthEntryManager.authenticate(user.getDn(), password);
+                if (!checkUserStatus(user)) {
+                	return false;
+                }
+
+                boolean authenticated = ldapAuthEntryManager.authenticate(user.getDn(), password);
+                if (authenticated) {
+                    credentials.setUser(user);
+                	updateLastLogonUserTime(user);
+                }
+
+                return authenticated;
             }
         } else {
             String primaryKey = "uid";
@@ -117,7 +135,13 @@ public class AuthenticationService {
 		                log.debug("Attempting to find userDN by local primary key: {0}", localPrimaryKey);
 		                User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
 		                if (localUser != null) {
+		                    if (!checkUserStatus(localUser)) {
+		                    	return false;
+		                    }
+
 		                    credentials.setUser(localUser);
+		                    updateLastLogonUserTime(localUser);
+
 		                    return true;
 		                }
 		            }
@@ -134,7 +158,14 @@ public class AuthenticationService {
         log.debug("Authenticating user with LDAP: username: {0}", userName);
         User user = userService.getUser(userName);
         if (user != null) {
+            if (!checkUserStatus(user)) {
+            	return false;
+            }
+
+            credentials.setUsername(user.getUserId());
             credentials.setUser(user);
+            updateLastLogonUserTime(user);
+
             return true;
         }
         
@@ -152,7 +183,7 @@ public class AuthenticationService {
 
         sampleUser.setCustomAttributes(customAttributes);
 
-        List<User> entries = ldapAuthEntryManager.findEntries(sampleUser);
+        List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
         log.debug("Found '{0}' entries", entries.size());
 
         if (entries.size() > 0) {
@@ -163,6 +194,31 @@ public class AuthenticationService {
             return null;
         }
     }
+
+	private boolean checkUserStatus(User user) {
+		CustomAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
+
+		if (GluuStatus.INACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
+		    log.warn("User '{0}' was disabled", user.getUserId());
+		    return false;
+		}
+		
+		return true;
+	}
+
+	private void updateLastLogonUserTime(User user) {
+		CustomEntry customEntry = new CustomEntry();
+		customEntry.setDn(user.getDn());
+
+		org.xdi.ldap.model.CustomAttribute customAttribute = new org.xdi.ldap.model.CustomAttribute("oxLastLogonTime", new Date());
+		customEntry.getCustomAttributes().add(customAttribute);
+
+		try {
+			ldapEntryManager.merge(customEntry);
+		} catch (EntryPersistenceException epe) {
+		    log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
+		}
+	}
 
     public String parametersAsString() throws UnsupportedEncodingException {
         final Map<String, String> parameterMap = getParametersMap(null);
@@ -252,7 +308,7 @@ public class AuthenticationService {
     public void configureEventUser(SessionId sessionId) {
         identity.addRole("user");
 
-        sessionIdService.updateSessionLastUsedDate(sessionId);
+        sessionIdService.updateSessionWithLastUsedDate(sessionId);
 
         Contexts.getEventContext().set("sessionUser", sessionId);
     }
@@ -263,10 +319,12 @@ public class AuthenticationService {
 
     @SuppressWarnings("unchecked")
 	public Map<String, String> restoreRequestParametersFromSession() {
+    	Context eventContext = Contexts.getEventContext();
     	Context sessionContext = Contexts.getSessionContext();
     	if (sessionContext.isSet(STORED_REQUEST_PARAMETERS)) {
     		Map<String, String> storedRequestParameters = (Map<String, String>) sessionContext.get(STORED_REQUEST_PARAMETERS);
     		sessionContext.remove(STORED_REQUEST_PARAMETERS);
+    		eventContext.set(STORED_REQUEST_PARAMETERS, storedRequestParameters);
 
     		return storedRequestParameters;
     	}

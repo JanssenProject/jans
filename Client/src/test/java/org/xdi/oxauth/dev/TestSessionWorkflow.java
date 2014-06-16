@@ -126,7 +126,7 @@ public class TestSessionWorkflow extends BaseTest {
             UserInfoClient userInfoClient2 = new UserInfoClient(userInfoEndpoint);
             UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken2);
 
-            Assert.assertTrue("userInfoResponse1.getStatus() is not 200", userInfoResponse1.getStatus() == 200);
+            Assert.assertTrue("userInfoResponse1.getStatus() is not 200", userInfoResponse2.getStatus() == 200);
             //        System.out.println(userInfoResponse2.getEntity());
         } finally {
             if (httpClient != null) {

@@ -57,6 +57,7 @@ public class RegisterRequest extends BaseRequest {
     private String initiateLoginUri;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
+    private List<String> scopes;
     private String federationId;
     private String federationUrl;
     private Map<String, String> customAttributes;
@@ -79,6 +80,7 @@ public class RegisterRequest extends BaseRequest {
         this.defaultAcrValues = new ArrayList<String>();
         this.postLogoutRedirectUris = new ArrayList<String>();
         this.requestUris = new ArrayList<String>();
+        this.scopes = new ArrayList<String>();
         this.customAttributes = new HashMap<String, String>();
     }
 
@@ -635,6 +637,14 @@ public class RegisterRequest extends BaseRequest {
         this.requestUris = requestUris;
     }
 
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<String> scopes) {
+        this.scopes = scopes;
+    }
+
     public String getFederationId() {
         return federationId;
     }
@@ -766,6 +776,9 @@ public class RegisterRequest extends BaseRequest {
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
         }
+        if (scopes != null && !scopes.isEmpty()) {
+            parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
+        }
         // Federation params
         if (!StringUtils.isBlank(federationUrl)) {
             parameters.put(FEDERATION_METADATA_URL.toString(), federationUrl);
@@ -844,10 +857,10 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        final List<String> postLogoutRedirectUris=new ArrayList<String>();
-        if (requestObject.has(POST_LOGOUT_REDIRECT_URIS.toString())){
+        final List<String> postLogoutRedirectUris = new ArrayList<String>();
+        if (requestObject.has(POST_LOGOUT_REDIRECT_URIS.toString())) {
             JSONArray postLogoutRedirectUrisJsonArray = requestObject.getJSONArray(POST_LOGOUT_REDIRECT_URIS.toString());
-            for(int i=0; i<postLogoutRedirectUrisJsonArray.length();i++){
+            for (int i = 0; i < postLogoutRedirectUrisJsonArray.length(); i++) {
                 postLogoutRedirectUris.add(postLogoutRedirectUrisJsonArray.getString(i));
             }
         }
@@ -860,6 +873,13 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> scopes = new ArrayList<String>();
+        if (requestObject.has(SCOPES.toString())) {
+            JSONArray scopesJsonArray = requestObject.getJSONArray(SCOPES.toString());
+            for (int i = 0; i < scopesJsonArray.length(); i++) {
+                scopes.add(scopesJsonArray.getString(i));
+            }
+        }
 
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
@@ -885,6 +905,7 @@ public class RegisterRequest extends BaseRequest {
         result.setUserInfoSignedResponseAlg(requestObject.has(USERINFO_SIGNED_RESPONSE_ALG.toString()) ?
                 SignatureAlgorithm.fromName(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
+        result.setScopes(scopes);
         result.setResponseTypes(responseTypes);
         result.setGrantTypes(grantTypes);
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
@@ -985,11 +1006,14 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(initiateLoginUri)) {
             parameters.put(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
         }
-        if (postLogoutRedirectUris!=null) {
+        if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
+        }
+        if (scopes != null && !scopes.isEmpty()) {
+            parameters.put(SCOPES.toString(), toJSONArray(scopes));
         }
         // Federation params
         if (!StringUtils.isBlank(federationUrl)) {

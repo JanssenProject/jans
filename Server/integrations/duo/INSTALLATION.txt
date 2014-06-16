@@ -1,0 +1,36 @@
+This installation process has 5 parts.
+
+1. Duo module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
+    - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
+    - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
+
+2. Copy required python libraries from ./lib folder to $CATALINA_HOME/conf/python folder.
+
+3. Prepare DUO creds file /etc/certs/duo_creds.json with ikey, akey, skey
+
+4. Confire new custom module in oxTrust:
+    - Log into oxTrust with administrative permissions.
+    - Open "Configuration"->"Manage Authentication" page.
+    - Click "Add custom authentication configuration" in "Manage Custom Authentication Methods" panel.
+    - Enter name = duo
+    - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
+    - Select usage type "Interactive".
+    - Add custom properties: duo_creds_file, duo_host and optinal audit_attribute, duo_group, audit_group, audit_group_email.
+    - Copy/paste script from DuoExternalAuthenticator.py.
+    - Activate it via "Enabled" checkbox.
+    - Click "Update" button at the bottom of this page.
+    - In panel "Default Authentication Method" select "duo" if you are planning to use it by default.
+    - Click "Update" button at the bottom of this page.
+    - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available custom authentication modules.
+
+5. This step is an optional. We need to define SMTP configuration if we are plaaning to use audit_group property. In order to set SMTP configuration
+   we need to do:
+    - Open "Configuration"->"Organization configuration" page.
+    - Scroll down to "SMTP Server Configuration" section.
+    - Fill SMTP configuration parameters.
+    - Click "Test Configuration" in order to verify SMTP configuration.
+    - Click "Update" button at the bottom of this page.
+    - Restart tomcat in order to instruct oxAuth to use new SMTP configuration.
+
+There are log messages in this custom authentication script. In order to debug this module we can use command like this:
+tail -f /opt/tomcat/logs/wrapper.log | grep Duo

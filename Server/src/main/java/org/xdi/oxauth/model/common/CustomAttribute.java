@@ -25,6 +25,10 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
     public CustomAttribute() {
     }
 
+    public CustomAttribute(String name) {
+        this.name = name;
+    }
+
     public CustomAttribute(String name, String value) {
         this.name = name;
         setValue(value);
@@ -34,7 +38,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         this.name = name;
         this.values = values;
     }
-
+    
     public String getValue() {
         if (this.values == null) {
             return null;

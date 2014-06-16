@@ -201,6 +201,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
                 }
+                if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {
+                    requestBody.put(SCOPES.toString(), new JSONArray(getRequest().getScopes()));
+                }
 
                 // Federation params
                 if (StringUtils.isNotBlank(getRequest().getFederationUrl())) {

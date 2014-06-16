@@ -24,6 +24,7 @@ import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.service.*;
@@ -31,6 +32,7 @@ import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.List;
@@ -328,25 +330,35 @@ public class Authenticator implements Serializable {
             return Constants.RESULT_FAILURE;
         }
         
-        if (this.authStep == 1) {
-        	externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorForWorkflow(AuthenticationScriptUsageType.INTERACTIVE, externalAuthenticatorConfiguration);
-            if (externalAuthenticatorConfiguration == null) {
-                return Constants.RESULT_FAILURE;
-            } else {
-            	String determinedAuthMode = externalAuthenticatorConfiguration.getName();
-            	if (!StringHelper.equalsIgnoreCase(currentAuthMode, determinedAuthMode)) {
-	            	// Redirect user to alternative login workflow
-	            	String redirectTo = "/login.xhtml";
-	                log.debug("Redirect to page: {0}. Force to use auth_mode: '{1}'", redirectTo, currentAuthMode);
-	
-	                Map<String, String> parametersMap = authenticationService.getParametersMap(null);
-	                parametersMap.put("auth_mode", determinedAuthMode);
-	                FacesManager.instance().redirect(redirectTo, (Map) parametersMap, false);
 
-	                return Constants.RESULT_SUCCESS;
-            	}
-            }
-        }
+		externalAuthenticatorConfiguration = externalAuthenticationService
+				.determineExternalAuthenticatorForWorkflow(
+						AuthenticationScriptUsageType.INTERACTIVE,
+						externalAuthenticatorConfiguration);
+		if (externalAuthenticatorConfiguration == null) {
+			return Constants.RESULT_FAILURE;
+		} else {
+			String determinedAuthMode = externalAuthenticatorConfiguration
+					.getName();
+			if (!StringHelper.equalsIgnoreCase(currentAuthMode,
+					determinedAuthMode)) {
+				// Redirect user to alternative login workflow
+				String redirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(
+                        externalAuthenticatorConfiguration, this.authStep);
+				log.debug(
+						"Redirect to page: {0}. Force to use auth_mode: '{1}'",
+						redirectTo, determinedAuthMode);
+
+				Map<String, String> parametersMap = authenticationService
+						.getParametersMap(null);
+				parametersMap.put("auth_mode", determinedAuthMode);
+				FacesManager.instance().redirect(redirectTo,
+						(Map) parametersMap, false);
+
+				return Constants.RESULT_SUCCESS;
+			}
+		}
+
 
         ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
         Boolean result = externalAuthenticationService.executeExternalAuthenticatorPrepareForStep(externalAuthenticatorConfiguration,
@@ -375,10 +387,13 @@ public class Authenticator implements Serializable {
     public void configureSessionClient(Context context) {
         identity.addRole("client");
 
+        Client client = clientService.getClient(credentials.getUsername());
         SessionClient sessionClient = new SessionClient();
-        sessionClient.setClient(clientService.getClient(credentials.getUsername()));
+        sessionClient.setClient(client);
 
         context.set("sessionClient", sessionClient);
+        
+        clientService.updatAccessTime(client, true);
     }
 
     public int getCurrentAuthenticationStep() {

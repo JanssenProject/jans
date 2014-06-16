@@ -266,7 +266,7 @@ public class AuthorizeAction {
         if (sessionUser != null) {
             sessionUser.setAuthenticationTime(new Date());
         }
-        sessionIdService.updateSessionLastUsedDate(sessionUser);
+        sessionIdService.updateSessionWithLastUsedDate(sessionUser);
 
         log.info("Attempting to redirect user. User: {0}", user);
 
@@ -579,8 +579,8 @@ public class AuthorizeAction {
     public void permissionGranted() {
         try {
             SessionId session = getSession();
-            session.setPermissionGranted(true);
-            sessionIdService.updateSessionLastUsedDate(session);
+            session.addPermission(clientId, true);
+            sessionIdService.updateSessionWithLastUsedDate(session);
 
             // OXAUTH-297 - set session_id cookie, secure=true
             SessionIdService.instance().createSessionIdCookie(sessionId);

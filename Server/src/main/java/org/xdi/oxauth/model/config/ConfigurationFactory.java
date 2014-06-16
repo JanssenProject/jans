@@ -158,7 +158,7 @@ public class ConfigurationFactory {
                 return true;
             }
         } catch (LdapMappingException e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             if (p_recoverFromFiles) {
                 LOG.info("Unable to find configuration in LDAP, try to create configuration entry in LDAP... ");
                 if (getLdapConfiguration().getBoolean("createLdapConfigurationEntryIfNotExist")) {
@@ -196,7 +196,7 @@ public class ConfigurationFactory {
             c.setIdGeneratorScript(INSTANCE.getIdGenScript());
             return c;
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
         return null;
     }
@@ -276,7 +276,7 @@ public class ConfigurationFactory {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(ERRORS_FILE_PATH), ErrorMessages.class);
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
         return null;
     }
@@ -285,7 +285,7 @@ public class ConfigurationFactory {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(STATIC_CONF_FILE_PATH), StaticConf.class);
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
         return null;
     }
@@ -294,7 +294,7 @@ public class ConfigurationFactory {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(WEB_KEYS_FILE_PATH), JSONWebKeySet.class);
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
         return null;
     }

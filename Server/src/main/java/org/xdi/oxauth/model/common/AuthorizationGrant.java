@@ -16,7 +16,8 @@ import java.util.*;
 /**
  * Base class for all the types of authorization grant.
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 public class AuthorizationGrant implements IAuthorizationGrant {
 
@@ -71,6 +72,16 @@ public class AuthorizationGrant implements IAuthorizationGrant {
     @Override
     public void setAuthorizationCode(AuthorizationCode authorizationCode) {
         grant.setAuthorizationCode(authorizationCode);
+    }
+
+    @Override
+    public String getNonce() {
+        return grant.getNonce();
+    }
+
+    @Override
+    public void setNonce(String nonce) {
+        grant.setNonce(nonce);
     }
 
     /**

@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>1.0.0.Final</version>
+        <version>1.1.0.Final</version>
     </parent>
 
     <prerequisites>
@@ -801,6 +801,27 @@
                     <filter>${project.basedir}/integrations/phpbridge/config-disabled.properties</filter>
                 </filters>
             </build>
+        </profile>
+
+        <profile>
+            <id>saml</id>
+            <activation>
+                <property>
+                    <name>!saml-disabled</name>
+                </property>
+            </activation>
+            <properties>
+            </properties>
+            <build>
+                <plugins>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>org.xdi</groupId>
+                    <artifactId>oxSaml</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
 
     </profiles>

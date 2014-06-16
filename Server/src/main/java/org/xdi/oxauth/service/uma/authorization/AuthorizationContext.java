@@ -46,6 +46,10 @@ public class AuthorizationContext {
         m_claims = p_claims;
     }
 
+    public Log getLog() {
+        return LOG;
+    }
+
     public HttpServletRequest getHttpRequest() {
         return m_httpRequest;
     }

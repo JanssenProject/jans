@@ -42,7 +42,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         Assert.assertEquals(createdDate, fromLdap1.getLastUsedAt());
 
         sleepSeconds(1);
-        m_service.updateSessionLastUsedDate(m_sessionId);
+        m_service.updateSessionWithLastUsedDate(m_sessionId);
 
         final SessionId fromLdap2 = m_service.getSessionByDN(m_sessionId.getDn());
         System.out.println("Updated date = " + fromLdap2.getLastUsedAt());
@@ -51,22 +51,24 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
     @Test
     public void testUpdateAttributes() {
+        final String clientId = "testClientId";
         final SessionId fromLdap1 = m_service.getSessionByDN(m_sessionId.getDn());
         final Date createdDate = m_sessionId.getLastUsedAt();
         assertEquals(createdDate, fromLdap1.getLastUsedAt());
         assertNull(fromLdap1.getAuthenticationTime());
-        assertFalse(fromLdap1.isPermissionGranted());
+        assertFalse(fromLdap1.isPermissionGrantedForClient(clientId));
 
         sleepSeconds(1);
         m_sessionId.setAuthenticationTime(new Date());
-        m_sessionId.setPermissionGranted(true);
-        m_service.updateSessionLastUsedDate(m_sessionId);
+        m_sessionId.addPermission(clientId, true);
+        m_service.updateSessionWithLastUsedDate(m_sessionId);
 
         final SessionId fromLdap2 = m_service.getSessionByDN(m_sessionId.getDn());
         assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
         assertNotNull(fromLdap2.getAuthenticationTime());
-        assertTrue(fromLdap2.isPermissionGranted());
+        assertTrue(fromLdap2.isPermissionGrantedForClient(clientId));
     }
+
 
     @Test
     public void testOldSessionsIdentification() {

@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.model.SmtpConfiguration;
 
 /**
  * Gluu Appliance
@@ -20,16 +22,28 @@ public class GluuAppliance extends InumEntry implements Serializable {
 
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String inum;
+
+	@LdapAttribute(name = "oxSmtpConfiguration")
+	@LdapJsonObject
+	private SmtpConfiguration smtpConfiguration;
 	
 	@LdapAttribute(name = "oxIDPAuthentication")
 	private List<String> oxIDPAuthentication;
-	
+
 	public String getInum() {
 		return inum;
 	}
 
 	public void setInum(String inum) {
 		this.inum = inum;
+	}
+
+	public SmtpConfiguration getSmtpConfiguration() {
+		return smtpConfiguration;
+	}
+
+	public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
+		this.smtpConfiguration = smtpConfiguration;
 	}
 
 	public List<String> getOxIDPAuthentication(){

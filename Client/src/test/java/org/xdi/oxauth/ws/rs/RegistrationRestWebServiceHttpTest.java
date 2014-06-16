@@ -1,5 +1,6 @@
 package org.xdi.oxauth.ws.rs;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -56,6 +57,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
+        registerRequest.setScopes(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
         registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setPolicyUri("http://www.gluu.org/policy");
@@ -75,6 +77,12 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getClaims().get(SCOPES.toString()));
+        JSONArray scopesJsonArray = new JSONArray(response.getClaims().get(SCOPES.toString()));
+        assertEquals(scopesJsonArray.get(0), "openid");
+        assertEquals(scopesJsonArray.get(1), "clientinfo");
+        assertEquals(scopesJsonArray.get(2), "profile");
+        assertEquals(scopesJsonArray.get(3), "email");
 
         clientId1 = response.getClientId();
         registrationAccessToken1 = response.getRegistrationAccessToken();

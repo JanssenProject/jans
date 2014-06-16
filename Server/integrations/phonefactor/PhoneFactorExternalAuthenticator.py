@@ -170,7 +170,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/login/phonefactor/pflogin.xhtml"
+            return "/auth/phonefactor/pflogin.xhtml"
         return ""
 
     def isPassedDefaultAuthentication(self):

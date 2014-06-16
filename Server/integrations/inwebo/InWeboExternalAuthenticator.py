@@ -161,9 +161,9 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/login/inwebo/iwlogin.xhtml"
+            return "/auth/inwebo/iwlogin.xhtml"
         if (step == 2):
-            return "/login/inwebo/iwauthenticate.xhtml"
+            return "/auth/inwebo/iwauthenticate.xhtml"
         else:
             return ""
 

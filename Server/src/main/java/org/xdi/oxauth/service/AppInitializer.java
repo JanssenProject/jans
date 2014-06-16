@@ -17,6 +17,7 @@ import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
@@ -29,15 +30,22 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.xdi.model.SimpleProperty;
+import org.xdi.model.SmtpConfiguration;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
+import org.xdi.service.MailService;
 import org.xdi.service.PythonService;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
+import org.xdi.util.security.StringEncrypter;
+import org.xdi.util.security.StringEncrypter.EncryptionException;
+
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Javier Rojas Blum
@@ -47,7 +55,7 @@ import org.xdi.util.security.PropertiesDecrypter;
  */
 @Scope(ScopeType.APPLICATION)
 @Name("appInitializer")
-@Startup()
+@Startup
 public class AppInitializer {
 
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
@@ -60,6 +68,9 @@ public class AppInitializer {
 
     @Logger
     private Log log;
+    
+    @In
+    private ApplianceService applianceService;
 
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
@@ -158,6 +169,27 @@ public class AppInitializer {
 		return ldapEntryManager;
 	}
 
+	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+	public SmtpConfiguration createSmtpConfiguration() {
+		GluuAppliance appliance = applianceService.getAppliance();
+		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();
+		
+		if (smtpConfiguration == null) {
+			return null;
+		}
+
+		String password = smtpConfiguration.getPassword();
+		if (StringHelper.isNotEmpty(password)) {
+			try {
+				smtpConfiguration.setPasswordDecrypted(StringEncrypter.defaultInstance().decrypt(password));
+			} catch (EncryptionException ex) {
+				log.error("Failed to decript SMTP user password", ex);
+			}
+		}
+		
+		return smtpConfiguration;
+	}
+
     private LdapConnectionService getAuthConnectionProvider() {
         return (LdapConnectionService) Contexts.getApplicationContext().get("authConnectionProvider");
     }
@@ -197,7 +229,11 @@ public class AppInitializer {
         Properties properties = (Properties) configuration.getProperties().clone();
         if (ldapAuthConfig != null) {
             properties.setProperty("servers", buildServersString(ldapAuthConfig.getServers()));
-    		properties.setProperty("bindDN", ldapAuthConfig.getBindDN());
+            
+            String bindDn = ldapAuthConfig.getBindDN();
+            if (StringHelper.isNotEmpty(bindDn)) {
+            	properties.setProperty("bindDN", ldapAuthConfig.getBindDN());
+            }
     		properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
     		properties.setProperty("useSSL", Boolean.toString(ldapAuthConfig.isUseSSL()));
         }
@@ -211,7 +247,12 @@ public class AppInitializer {
         bindProperties.remove("bindPassword");
 
         LdapConnectionService bindCentralConnectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(bindProperties));
-        Contexts.getApplicationContext().set(bindConnectionProviderComponentName, bindCentralConnectionProvider);
+		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindCentralConnectionProvider.getCreationResultCode())) {
+			log.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
+			bindCentralConnectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(properties));
+		}
+
+		Contexts.getApplicationContext().set(bindConnectionProviderComponentName, bindCentralConnectionProvider);
     }
 
 	private String buildServersString(List<SimpleProperty> servers) {

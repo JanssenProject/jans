@@ -1,5 +1,6 @@
 package org.xdi.oxauth.ws.rs;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -95,11 +96,12 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                 try {
                     super.prepareRequest(request);
 
-                    List<String> contacts = Arrays.asList("test_user@gluu.org", "javier@gluu.org");
+                    List<String> contacts = Arrays.asList("mike@gluu.org", "javier@gluu.org");
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setContacts(contacts);
+                    registerRequest.setScopes(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
                     registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
                     registerRequest.setClientUri("http://www.gluu.org/company/team");
                     registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
@@ -133,6 +135,13 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
                     // Registered Metadata
                     assertTrue(jsonObj.has(CLIENT_URI.toString()));
+                    assertTrue(jsonObj.has(SCOPES.toString()));
+
+                    JSONArray scopesJsonArray = jsonObj.getJSONArray(SCOPES.toString());
+                    assertEquals(scopesJsonArray.getString(0), "openid");
+                    assertEquals(scopesJsonArray.getString(1), "clientinfo");
+                    assertEquals(scopesJsonArray.getString(2), "profile");
+                    assertEquals(scopesJsonArray.getString(3), "email");
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
@@ -205,7 +214,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                     final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
 
-                    registerRequest.setContacts(Arrays.asList("test_user@gluu.org", contactEmailNewValue));
+                    registerRequest.setContacts(Arrays.asList("mike@gluu.org", contactEmailNewValue));
                     registerRequest.setLogoUri(logoUriNewValue);
                     registerRequest.setClientUri(clientUriNewValue);
 

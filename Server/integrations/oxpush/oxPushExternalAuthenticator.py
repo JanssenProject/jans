@@ -242,11 +242,11 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/login/oxpush/oxlogin.xhtml"
+            return "/auth/oxpush/oxlogin.xhtml"
         elif (step == 2):
-            return "/login/oxpush/oxpair.xhtml"
+            return "/auth/oxpush/oxpair.xhtml"
         elif (step == 3):
-            return "/login/oxpush/oxauthenticate.xhtml"
+            return "/auth/oxpush/oxauthenticate.xhtml"
         return ""
 
     def isPassedDefaultAuthentication():

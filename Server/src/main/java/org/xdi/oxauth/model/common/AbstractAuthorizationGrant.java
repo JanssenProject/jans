@@ -18,7 +18,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -37,6 +38,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private AccessToken longLivedAccessToken;
     private IdToken idToken;
     private AuthorizationCode authorizationCode;
+    private String nonce;
 
     private String authLevel;
     private String authMode;
@@ -84,6 +86,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.authorizationCode = authorizationCode;
     }
 
+    @Override
+    public String getNonce() {
+        return nonce;
+    }
+
+    @Override
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 
     /**
      * Returns a list with all the issued refresh tokens codes.

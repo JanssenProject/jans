@@ -1,5 +1,9 @@
 package org.xdi.oxauth.model.common;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
@@ -8,10 +12,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011
@@ -26,8 +26,10 @@ public class SimpleUser implements Serializable {
     private String dn;
     @LdapAttribute(name = "uid")
     private String userId;
+
     @LdapAttribute(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
+
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -58,7 +60,7 @@ public class SimpleUser implements Serializable {
         this.oxAuthPersistentJwt = oxAuthPersistentJwt;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
@@ -78,6 +80,20 @@ public class SimpleUser implements Serializable {
         }
 
         return attribute;
+    }
+
+    public List<String> getAttributeValues(String ldapAttribute) {
+        List<String> values = null;
+        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
+            for (CustomAttribute customAttribute : customAttributes) {
+                if (customAttribute.getName().equals(ldapAttribute)) {
+                	values = customAttribute.getValues();
+                    break;
+                }
+            }
+        }
+
+        return values;
     }
 
     public Object getAttribute(String userAttribute, boolean optional) throws InvalidClaimException {

@@ -11,6 +11,7 @@ public interface AuthorizeRequestParam {
     public static final String SCOPE = "scope";
     public static final String REDIRECT_URI = "redirect_uri";
     public static final String STATE = "state";
+    public static final String RESPONSE_MODE = "response_mode";
     public static final String NONCE = "nonce";
     public static final String DISPLAY = "display";
     public static final String PROMPT = "prompt";

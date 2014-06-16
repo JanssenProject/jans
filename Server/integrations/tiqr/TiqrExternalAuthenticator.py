@@ -92,7 +92,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/login/tiqr/tiqrlogin.php"
+            return "/auth/tiqr/tiqrlogin.php"
         return ""
 
     def isPassedDefaultAuthentication(self):

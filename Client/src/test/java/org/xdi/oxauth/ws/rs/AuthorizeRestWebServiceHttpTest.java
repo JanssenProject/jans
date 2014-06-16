@@ -4,6 +4,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
@@ -28,7 +29,8 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 /**
  * Functional tests for Authorize Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 10.19.2011
+ * @author Javier Rojas Blum
+ * @version 0.9, 05/28/2014
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
@@ -334,6 +336,35 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Test
+    public void requestAuthorizationCodeFail3(
+            final String userId, final String userSecret,
+            final String redirectUris, final String redirectUri) throws Exception {
+        showTitle("requestAuthorizationCodeFail3");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Request authorization with an invalid Client ID.
+        String clientId = "@!1111!0008!INVALID_VALUE";
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String state = "STATE_XYZ";
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertEquals(authorizationResponse.getStatus(), 401, "Unexpected response code: " + authorizationResponse.getStatus());
+        assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT);
+        assertNotNull(authorizationResponse.getErrorType(), "The error type is null");
+        assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})

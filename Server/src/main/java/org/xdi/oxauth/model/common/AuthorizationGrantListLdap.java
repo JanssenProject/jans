@@ -20,7 +20,8 @@ import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
@@ -161,6 +162,7 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
                 final User user = m_userService.getUser(tokenLdap.getUserId());
                 final Client client = m_clientService.getClient(extractClientIdFromTokenDn(tokenLdap.getDn()));
                 final Date authenticationTime = org.xdi.oxauth.model.util.StringUtils.parseSilently(tokenLdap.getAuthenticationTime());
+                final String nonce = tokenLdap.getNonce();
 
                 AuthorizationGrant result = null;
                 switch (grantType) {
@@ -185,6 +187,7 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
                 final String authLevel = tokenLdap.getAuthLevel();
                 final String authMode = tokenLdap.getAuthMode();
 
+                result.setNonce(nonce);
                 result.setTokenLdap(tokenLdap);
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);

@@ -1,26 +1,27 @@
 package org.xdi.oxauth.clientinfo.ws.rs;
 
+import java.util.Set;
+
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoParamsValidator;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services

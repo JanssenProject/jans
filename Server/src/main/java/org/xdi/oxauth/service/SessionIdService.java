@@ -3,7 +3,6 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
-
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -24,7 +23,6 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -169,19 +167,19 @@ public class SessionIdService {
     }
 
     public SessionId getSessionId(String sessionId) {
-    	if (StringHelper.isEmpty(sessionId)) {
-    		return null;
-    	}
+        if (StringHelper.isEmpty(sessionId)) {
+            return null;
+        }
 
-    	try {
+        try {
             log.trace("Try to get session by id: {0} ...", sessionId);
             final List<SessionId> entries = ldapEntryManager.findEntries(getBaseDn(), SessionId.class, Filter.create(String.format("uniqueIdentifier=%s", sessionId)));
             if (entries != null && !entries.isEmpty()) {
                 final SessionId entity = entries.get(0);
                 log.trace("Session dn: {0}", entity.getDn());
-                
+
                 if (isSessionValid(entity)) {
-                	return entity;
+                    return entity;
                 }
             }
         } catch (LDAPException e) {
@@ -190,7 +188,7 @@ public class SessionIdService {
             log.error(e.getMessage(), e);
         }
 
-    	log.trace("Failed to get session by id: {0}", sessionId);
+        log.trace("Failed to get session by id: {0}", sessionId);
         return null;
     }
 
@@ -203,13 +201,13 @@ public class SessionIdService {
             ldapEntryManager.remove(p_sessionId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            
+
             return false;
         }
         return true;
     }
 
-    public void updateSessionLastUsedDate(SessionId p_sessionId) {
+    public void updateSessionWithLastUsedDate(SessionId p_sessionId) {
         try {
             final Date newDate = new Date();
             p_sessionId.setLastUsedAt(newDate);
@@ -241,19 +239,19 @@ public class SessionIdService {
     }
 
     public boolean isSessionValid(SessionId sessionId) {
-    	if (sessionId == null) {
-    		return false;
-    	}
-    	
+        if (sessionId == null) {
+            return false;
+        }
+
         final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
         final long sessionInterval = TimeUnit.SECONDS.toMillis(interval);
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
-    	if (timeSinceLastAccess > sessionInterval) {
-    		return false;
-    	}
-    	
-    	return true;
+        if (timeSinceLastAccess > sessionInterval) {
+            return false;
+        }
+
+        return true;
     }
 
 }

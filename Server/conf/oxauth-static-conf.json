@@ -68,6 +68,7 @@
     "baseDn":{
         "appliance":"ou=appliances,o=gluu",
         "people":"ou=people,o=@!1111,o=gluu",
+        "groups":"ou=groups,o=@!1111,o=gluu",
         "clients":"ou=clients,o=@!1111,o=gluu",
         "scopes":"ou=scopes,o=@!1111,o=gluu",
         "attributes":"ou=attributes,o=@!1111,o=gluu",

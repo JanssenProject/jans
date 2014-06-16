@@ -3,10 +3,7 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.Parameters;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -29,6 +26,7 @@ public class AuthorizationRequest extends BaseRequest {
     private String redirectUri;
     private String state;
 
+    private ResponseMode responseMode;
     private String nonce;
     private Display display;
     private List<Prompt> prompts;
@@ -177,6 +175,14 @@ public class AuthorizationRequest extends BaseRequest {
      */
     public void setState(String state) {
         this.state = state;
+    }
+
+    public ResponseMode getResponseMode() {
+        return responseMode;
+    }
+
+    public void setResponseMode(ResponseMode responseMode) {
+        this.responseMode = responseMode;
     }
 
     /**
@@ -460,6 +466,10 @@ public class AuthorizationRequest extends BaseRequest {
             final String acrValuesAsString = getAcrValuesAsString();
             final String claimsAsString = getClaimsAsString();
 
+            if (responseMode != null) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.RESPONSE_MODE)
+                        .append("=").append(URLEncoder.encode(responseMode.toString(), Util.UTF8_STRING_ENCODING));
+            }
             if (StringUtils.isNotBlank(nonce)) {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.NONCE)
                         .append("=").append(URLEncoder.encode(nonce, Util.UTF8_STRING_ENCODING));
@@ -570,6 +580,9 @@ public class AuthorizationRequest extends BaseRequest {
         final String acrValuesAsString = getAcrValuesAsString();
         final String claimsAsString = getClaimsAsString();
 
+        if (responseMode != null) {
+            parameters.put(AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
+        }
         if (StringUtils.isNotBlank(nonce)) {
             parameters.put(AuthorizeRequestParam.NONCE, nonce);
         }

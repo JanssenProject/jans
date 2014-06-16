@@ -10,6 +10,7 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,6 +52,31 @@ public class ScopeService {
         return ldapEntryManager.findEntries(scopesBaseDN,
                 org.xdi.oxauth.model.common.Scope.class,
                 Filter.createPresenceFilter("inum"));
+    }
+
+    public List<String> getDefaultScopesDn() {
+        List<String> defaultScopes = new ArrayList<String>();
+
+        for (org.xdi.oxauth.model.common.Scope scope : getAllScopesList()) {
+            if (scope.getIsDefault()) {
+                defaultScopes.add(scope.getDn());
+            }
+        }
+
+        return defaultScopes;
+    }
+
+    public List<String> getScopesDn(List<String> scopeNames) {
+        List<String> scopes = new ArrayList<String>();
+
+        for (String scopeName : scopeNames) {
+            org.xdi.oxauth.model.common.Scope scope = getScopeByDisplayName(scopeName);
+            if (scope != null) {
+                scopes.add(scope.getDn());
+            }
+        }
+
+        return scopes;
     }
 
     /**

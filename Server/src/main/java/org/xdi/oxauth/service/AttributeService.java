@@ -1,13 +1,16 @@
 package org.xdi.oxauth.service;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import java.util.List;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.GluuAttribute;
+import org.xdi.model.GluuAttribute;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 
 /**
  * @author Javier Rojas Blum Date: 07.10.2012
@@ -15,13 +18,8 @@ import org.xdi.oxauth.model.common.GluuAttribute;
 @Scope(ScopeType.STATELESS)
 @Name("attributeService")
 @AutoCreate
-public class AttributeService {
+public class AttributeService extends org.xdi.service.AttributeService{
 
-    @In
-    LdapEntryManager ldapEntryManager;
-
-    @Logger
-    private Log log;
 
     /**
      * Get AttributeService instance
@@ -43,6 +41,13 @@ public class AttributeService {
      * @return GluuAttribute
      */
     public GluuAttribute getScopeByDn(String Dn) {
-        return ldapEntryManager.find(GluuAttribute.class, Dn);
+        return getLdapEntryManager().find(GluuAttribute.class, Dn);
     }
+
+    
+    public List<GluuAttribute> getAllAttributes(){
+    	return getAllAttributes(ConfigurationFactory.getBaseDn().getAttributes());
+    }
+
+
 }

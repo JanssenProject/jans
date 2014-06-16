@@ -1,5 +1,16 @@
 package org.xdi.oxauth.userinfo.ws.rs;
 
+import java.io.UnsupportedEncodingException;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -8,8 +19,13 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.DefaultScope;
+import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
@@ -42,16 +58,6 @@ import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.security.StringEncrypter;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.io.UnsupportedEncodingException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Provides interface for User Info REST web services

@@ -34,7 +34,8 @@ import java.util.List;
 /**
  * Provides interface for token REST web services
  *
- * @author Javier Rojas Blum Date: 09.21.2011
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 @Name("requestTokenRestWebService")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -88,6 +89,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (client == null) {
                     client = clientService.getClient(clientId);
                     sessionClient.setClient(client);
+                    clientService.updatAccessTime(client, false);
                 }
 
                 if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
@@ -114,7 +116,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         IdToken idToken = null;
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
-                            idToken = authorizationCodeGrant.createIdToken(null, null, accToken, null);
+                            String nonce = authorizationCodeGrant.getNonce();
+                            idToken = authorizationCodeGrant.createIdToken(nonce, null, accToken, null);
                         }
 
                         builder.entity(getJSonResponse(accToken,

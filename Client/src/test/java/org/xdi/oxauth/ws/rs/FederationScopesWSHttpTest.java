@@ -30,7 +30,7 @@ import static org.testng.Assert.assertNotNull;
  * objectClass: oxAuthFederationTrust
  * objectClass: top
  * oxAuthFederationId: @!1111!0008!00F1!0001
- * oxAuthFederationMetadataURI: https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata
+ * oxAuthFederationMetadataURI: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/federationmetadata
  * oxAuthFederationTrustStatus: active
  * oxAuthRedirectURI: https://client.example.com/cb?foo=bar
  * oxAuthReleasedScope: inum=@!1111!0009!BC01,ou=scopes,o=@!1111,o=gluu

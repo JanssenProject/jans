@@ -1,8 +1,17 @@
 package org.xdi.oxauth.model.registration;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
+import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -12,10 +21,6 @@ import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
 import org.xdi.util.security.StringEncrypter;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 01.12.2012
@@ -848,7 +853,7 @@ public class Client {
         return federationURI;
     }
 
-    public void setFederationURI(String p_federationURI) {
+	public void setFederationURI(String p_federationURI) {
         federationURI = p_federationURI;
     }
 

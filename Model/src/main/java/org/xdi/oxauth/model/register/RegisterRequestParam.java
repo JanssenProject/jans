@@ -163,6 +163,8 @@ public enum RegisterRequestParam {
      */
     REQUEST_URIS("request_uris"),
 
+    SCOPES("scopes"),
+
     // Federation Params
     FEDERATION_METADATA_URL("federation_metadata_url"),
     FEDERATION_METADATA_ID("federation_metadata_id");

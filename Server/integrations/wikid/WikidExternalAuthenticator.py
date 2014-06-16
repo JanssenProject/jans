@@ -105,7 +105,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/login/wikid/wikidlogin.xhtml"
+            return "/auth/wikid/wikidlogin.xhtml"
         return ""
 
     def logout(self, configurationAttributes, requestParameters):

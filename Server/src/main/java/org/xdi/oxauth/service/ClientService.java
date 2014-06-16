@@ -1,9 +1,13 @@
 package org.xdi.oxauth.service;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -14,6 +18,8 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.CustomEntry;
 import org.xdi.model.SimpleProperty;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.registration.Client;
@@ -28,6 +34,7 @@ import com.unboundid.ldap.sdk.Filter;
  * Provides operations with clients.
  *
  * @author Javier Rojas Blum Date: 10.24.2011
+ * @author Yuriy Movchan Date: 04/15/2014
  */
 @Scope(ScopeType.STATELESS)
 @Name("clientService")
@@ -61,6 +68,15 @@ public class ClientService {
         }
 
         return ServerUtil.instance(ClientService.class);
+    }
+
+    public void persist(Client client) {
+       ldapEntryManager.persist(client);
+    }
+
+    public void merge(Client client) {
+       ldapEntryManager.merge(client);
+       removeFromCache(client);
     }
 
     /**
@@ -103,7 +119,7 @@ public class ClientService {
     }
 
 	private String getClientDnByFilters(String clientId) {
-		String key = "client_id_" + StringHelper.toLowerCase(clientId);
+		String key = getClientIdCacheKey(clientId);
 		SimpleProperty simpleProperty = (SimpleProperty) cacheService.get(CACHE_CLIENT_FILTER_NAME, key);
 		if (simpleProperty == null) {
 			simpleProperty = new SimpleProperty(clientFilterService.processFilters(clientId));
@@ -138,7 +154,7 @@ public class ClientService {
      * @return Client
      */
     public Client getClientByDn(String dn) {
-		String key = "client_dn_" + StringHelper.toLowerCase(dn);
+		String key = getClientDnCacheKey(dn);
 		Client client = (Client) cacheService.get(CACHE_CLIENT_NAME, key);
 		if (client == null) {
 			client = ldapEntryManager.find(Client.class, dn);
@@ -150,19 +166,58 @@ public class ClientService {
 		return client;
     }
 
-    public List<Client> getClientsWithExpirationDate() {
+	public org.xdi.oxauth.model.common.CustomAttribute getCustomAttribute(Client client, String attributeName) {
+		for (org.xdi.oxauth.model.common.CustomAttribute customAttribute : client.getCustomAttributes()) {
+			if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
+				return customAttribute;
+			}
+		}
+
+		return null;
+	}
+
+	public void setCustomAttribute(Client client, String attributeName, String attributeValue) {
+		org.xdi.oxauth.model.common.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
+		
+		if (customAttribute == null) {
+			customAttribute = new org.xdi.oxauth.model.common.CustomAttribute(attributeName);
+			client.getCustomAttributes().add(customAttribute);
+		}
+		
+		customAttribute.setValue(attributeValue);
+	}
+
+    public List<Client> getAllClients(String[] returnAttributes) {
+        String baseDn = ConfigurationFactory.getBaseDn().getClients();
+
+        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, returnAttributes, null);
+
+		return result;
+	}
+
+    public List<Client> getClientsWithExpirationDate(String[] returnAttributes) {
         String baseDN = ConfigurationFactory.getBaseDn().getClients();
-        Filter filter = Filter.createPresenceFilter("oxAuthClientExpirationDate");
+        Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
 
         return ldapEntryManager.findEntries(baseDN, Client.class, filter);
     }
 
     public void remove(Client client) {
         if (client != null) {
-            ldapEntryManager.removeWithSubtree(client.getDn());
+        	removeFromCache(client);
+        	
+        	String clientDn = client.getDn();
+            ldapEntryManager.removeWithSubtree(clientDn);
         }
     }
 
+	private void removeFromCache(Client client) {
+		String clientId = client.getClientId();
+		String clientDn = client.getDn();
+
+		cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
+		cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+	}
 
     /**
 	 * Remove all clients from caches after receiving event
@@ -172,6 +227,38 @@ public class ClientService {
 		log.debug("Clearing up clients cache");
 		cacheService.removeAll(CACHE_CLIENT_NAME);
 		cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
+	}
+
+	public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
+		String clientDn = client.getDn();
+
+		CustomEntry customEntry = new CustomEntry();
+		customEntry.setDn(clientDn);
+
+        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+		CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
+		customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
+
+		if (isUpdateLogonTime) {
+			CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
+			customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
+		}
+
+		try {
+			ldapEntryManager.merge(customEntry);
+		} catch (EntryPersistenceException epe) {
+		    log.error("Failed to update oxLastLoginTime of client '{0}'", clientDn);
+		}
+		
+		removeFromCache(client);
+	}
+
+	private String getClientIdCacheKey(String clientId) {
+		return "client_id_" + StringHelper.toLowerCase(clientId);
+	}
+
+	private String getClientDnCacheKey(String dn) {
+		return "client_dn_" + StringHelper.toLowerCase(dn);
 	}
 
 }

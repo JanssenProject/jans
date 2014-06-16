@@ -144,6 +144,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 return False
 
             # Check if there is user which has oneid_user_uid
+            # Avoid mapping OneID account to more than one IDP account
             find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "oneid:" + oneid_user_uid)
 
             if (find_user_by_uid == None):
@@ -188,7 +189,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 return False
 
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
-            validation_page = request.getContextPath() + "/postlogin.seam?" + "request_uri=&" + authenticationService.parametersAsString()
+            validation_page = request.getContextPath() + "/postlogin?" + "request_uri=&" + authenticationService.parametersAsString()
             print "OneID prepare for step 1. validation_page: " + validation_page
 
             oneid_login_button = authn.draw_signin_button(validation_page, callback_attrs, True)
@@ -221,8 +222,8 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/login/oneid/oneidlogin.xhtml"
-        return "/login/oneid/oneidpostlogin.xhtml"
+            return "/auth/oneid/oneidlogin.xhtml"
+        return "/auth/oneid/oneidpostlogin.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):
         return True

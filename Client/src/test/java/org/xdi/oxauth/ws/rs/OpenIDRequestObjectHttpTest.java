@@ -213,7 +213,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.getPrompts().add(Prompt.NONE);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS384, clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("test_user")));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("mike")));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
 
@@ -249,7 +249,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.getPrompts().add(Prompt.NONE);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS512, clientSecret);
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("test_user")));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("mike")));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
 

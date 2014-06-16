@@ -41,7 +41,7 @@ public class FederationServiceTest extends BaseComponentTest {
         m_trust.setDn(pair.getSecond());
         m_trust.setDisplayName("Test trust1");
         m_trust.setFederationId("@!1111!0008!00F1!0001");
-        m_trust.setFederationMetadataUri("https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata");
+        m_trust.setFederationMetadataUri("https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/federationmetadata");
         m_trust.setRedirectUris(Arrays.asList(m_redirectUri));
         m_trust.setTrustStatus("inactive_by_checker");
         m_trust.setSkipAuthorization(true);

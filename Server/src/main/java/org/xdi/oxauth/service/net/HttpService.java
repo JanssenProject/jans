@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -100,21 +102,33 @@ public class HttpService implements Serializable {
 		return httpClient;
 	}
 	
-	public HttpResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
+	public HttpResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
         HttpPost httpPost = new HttpPost(uri);
         if (StringHelper.isNotEmpty(authData)) {
         	httpPost.setHeader("Authorization", "Basic " + authData);
         }
-		StringEntity stringEntity = new StringEntity(postData, contentType);
+        
+        if (headers != null) {
+        	for (Entry<String, String> headerEntry : headers.entrySet()) {
+            	httpPost.setHeader(headerEntry.getKey(), headerEntry.getValue());
+        	}
+        }
+
+        StringEntity stringEntity = new StringEntity(postData, contentType);
 		httpPost.setEntity(stringEntity);
 		
         try {
         	return httpClient.execute(httpPost);
 		} catch (IOException ex) {
 	    	log.error("Failed to execute post request", ex);
+		} finally {
+			httpPost.releaseConnection();
 		}
         
         return null;
+	}
+	public HttpResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
+        return executePost(httpClient, uri, authData, null, postData, contentType);
 	}
 
 	public String encodeBase64(String value) {
@@ -137,11 +151,28 @@ public class HttpService implements Serializable {
 		return null;
 	}
 
-	public HttpResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
-		HttpGet getMethod = new HttpGet(requestUri);
-		HttpResponse getMethodResponse = httpClient.execute(getMethod);
+	public HttpResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
+		HttpGet httpGet = new HttpGet(requestUri);
+        
+        if (headers != null) {
+        	for (Entry<String, String> headerEntry : headers.entrySet()) {
+        		httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
+        	}
+        }
 
-		return getMethodResponse;
+		try {
+			return httpClient.execute(httpGet);
+		} catch (IOException ex) {
+	    	log.error("Failed to execute get request", ex);
+		} finally {
+			httpGet.releaseConnection();
+		}
+
+		return null;
+	}
+
+	public HttpResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
+		return executeGet(httpClient, requestUri, null);
 	}
 
 	public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {

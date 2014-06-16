@@ -12,7 +12,8 @@ import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 08/14/2014
  */
 
 public interface IAuthorizationGrant {
@@ -24,6 +25,10 @@ public interface IAuthorizationGrant {
     public AuthorizationCode getAuthorizationCode();
 
     public void setAuthorizationCode(AuthorizationCode authorizationCode);
+
+    public String getNonce();
+
+    public void setNonce(String nonce);
 
     public AccessToken createAccessToken();
 

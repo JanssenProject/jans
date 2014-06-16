@@ -11,8 +11,11 @@ import org.xdi.oxauth.model.common.HasParamName;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +33,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     protected BaseResponse response;
     protected ClientRequest clientRequest = null;
     protected ClientResponse<String> clientResponse = null;
+    private final List<Cookie> cookies = new ArrayList<Cookie>();
 
     protected ClientExecutor executor = null;
 
@@ -217,6 +221,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         } else {
             this.clientRequest = new ClientRequest(getUrl(), this.executor);
         }
+        for (Cookie cookie : cookies) {
+            clientRequest.cookie(cookie);
+        }
     }
 
     public void closeConnection() {
@@ -233,4 +240,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     }
 
     public abstract String getHttpMethod();
+
+    public List<Cookie> getCookies() {
+        return cookies;
+    }
 }
