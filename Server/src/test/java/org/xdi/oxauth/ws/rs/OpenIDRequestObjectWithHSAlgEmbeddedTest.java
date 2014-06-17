@@ -125,7 +125,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                 authorizationRequest.setAuthPassword(userSecret);
 
                 JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret1);
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("mike")));
+                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("test_user")));
                 String authJwt = jwtAuthorizationRequest.getEncodedJwt();
                 authorizationRequest.setRequest(authJwt);
                 System.out.println("Request JWT: " + authJwt);

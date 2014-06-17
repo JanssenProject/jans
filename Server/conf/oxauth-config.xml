@@ -265,7 +265,7 @@
     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
 
     <organization-inum>@!1111</organization-inum>
-    <oxID>https://seed.gluu.org/oxid/service/gluu/inum</oxID>
+    <oxID>https://localhost/oxid/service/gluu/inum</oxID>
 
     <dynamic-registration-enabled>true</dynamic-registration-enabled>
     <!-- Value in seconds or 0 if they do not expire -->

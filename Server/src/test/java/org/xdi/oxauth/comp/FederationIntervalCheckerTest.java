@@ -55,7 +55,7 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
         m_invalidRedirectUrlTrust.setDn(pair2.getSecond());
         m_invalidRedirectUrlTrust.setDisplayName("Interval checker: invalid redirect uri");
         m_invalidRedirectUrlTrust.setFederationId("@!1111!0008!00F1!0001");
-        m_invalidRedirectUrlTrust.setFederationMetadataUri("https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/federationmetadata");
+        m_invalidRedirectUrlTrust.setFederationMetadataUri("https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata");
         m_invalidRedirectUrlTrust.setRedirectUris(Arrays.asList(m_redirectUri, "http://invalid.redirecturi.com"));
         m_invalidRedirectUrlTrust.setStatus(FederationTrustStatus.ACTIVE);
         m_invalidRedirectUrlTrust.setSkipAuthorization(true);

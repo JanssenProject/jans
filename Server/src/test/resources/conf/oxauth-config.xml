@@ -263,7 +263,7 @@
     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
 
     <organization-inum>@!1111</organization-inum>
-    <oxID>https://seed.gluu.org/oxid/service/gluu/inum</oxID>
+    <oxID>https://localhost/oxid/service/gluu/inum</oxID>
     <!--oxID>https://localhost:8443/oxid/service/gluu/inum</oxID-->
 
     <dynamic-registration-enabled>true</dynamic-registration-enabled>

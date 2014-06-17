@@ -26,7 +26,7 @@ import java.security.spec.InvalidKeySpecException;
 import static org.testng.Assert.assertTrue;
 
 /**
- * https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/jwk
+ * https://localhost/oxauth/seam/resource/restv1/oxauth/jwk
  * http://openid.net/specs/openid-connect-messages-1_0.html#sigs
  *
  * @author Yuriy Zabrovarnyy

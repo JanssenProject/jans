@@ -5,19 +5,19 @@ import json
 info = {
     "interaction": [{
         "matches": {
-            "url": "https://seed.gluu.org/oxauth/login.seam"
+            "url": "https://localhost/oxauth/login.seam"
         },
         "page-type": "login",
         "control": {
             "type": "form",
             "set": {
-                "loginForm:username": "mike",
-                "loginForm:password": "secret"
+                "loginForm:username": "test_user",
+                "loginForm:password": "test"
             }
         }
     }, {
         "matches": {
-            "url": "https://seed.gluu.org/oxauth/authorize.seam"
+            "url": "https://localhost/oxauth/authorize.seam"
         },
         "page-type": "user-consent",
         "control": {
@@ -30,7 +30,7 @@ info = {
             "oauth": "2.0",
             "openid": "3.0"
         },
-        "dynamic": "https://seed.gluu.org"
+        "dynamic": "https://localhost"
     },
     "features": {
         "registration": True,
@@ -39,11 +39,11 @@ info = {
         "key_export": True
     },
     "client": {
-        "redirect_uris": ["https://seed.gluu.org/oxauth-rp/home.seam?foo=bar"],
+        "redirect_uris": ["https://localhost/oxauth-rp/home.seam?foo=bar"],
         "contact": ["yuriy@gluu.com"],
         "application_type": "web",
         "application_name": "OIC test tool",
-        "key_export_url": "https://seed.gluu.org/oxauth-client/test/resources/jwks.json",
+        "key_export_url": "https://localhost/oxauth-client/test/resources/jwks.json",
         "keys": {
             "RSA": {
                 "key": "keys/pyoidc",

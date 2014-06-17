@@ -96,7 +96,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                 try {
                     super.prepareRequest(request);
 
-                    List<String> contacts = Arrays.asList("mike@gluu.org", "javier@gluu.org");
+                    List<String> contacts = Arrays.asList("test_user@gluu.org", "javier@gluu.org");
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -214,7 +214,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                     final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
 
-                    registerRequest.setContacts(Arrays.asList("mike@gluu.org", contactEmailNewValue));
+                    registerRequest.setContacts(Arrays.asList("test_user@gluu.org", contactEmailNewValue));
                     registerRequest.setLogoUri(logoUriNewValue);
                     registerRequest.setClientUri(clientUriNewValue);
 

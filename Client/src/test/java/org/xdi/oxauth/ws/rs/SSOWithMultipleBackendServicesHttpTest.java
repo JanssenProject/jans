@@ -221,7 +221,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 redirectUri,
                 null);
 
-        authorizationRequest1.addCustomParameter("mail", "mike@gluu.org");
+        authorizationRequest1.addCustomParameter("mail", "test_user@gluu.org");
         authorizationRequest1.addCustomParameter("inum", "@!1111!0000!D4E7");
         authorizationRequest1.getPrompts().add(Prompt.NONE);
         authorizationRequest1.setState("af0ifjsldkj");

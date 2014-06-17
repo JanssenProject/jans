@@ -1,4 +1,4 @@
-[ "https://seed.gluu.org/oxauth-rp/home.seam",
+[ "https://localhost/oxauth-rp/home.seam",
     "https://client.example.org/callback",
     "https://client.example.org/callback2",
     "https://client.other_company.example.net/callback",

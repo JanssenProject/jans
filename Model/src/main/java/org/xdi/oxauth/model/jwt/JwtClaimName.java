@@ -103,7 +103,7 @@ public final class JwtClaimName {
     public static final String MIDDLE_NAME = "middle_name";
     /**
      * Casual name of the End-User.
-     * For instance, a nickname value of Mike might be returned alongside a given_name value of Michael.
+     * For instance, a nickname value of test_user might be returned alongside a given_name value of Michael.
      */
     public static final String NICKNAME = "nickname";
     /**
