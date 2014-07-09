@@ -26,13 +26,20 @@ public class LDAPConnectionProvider {
 
 	private static final Logger log = Logger.getLogger(LDAPConnectionProvider.class);
 
-	public static final String bindPassword = "bindPassword";
 	private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
 
 	private LDAPConnectionPool connectionPool;
 	private ResultCode creationResultCode;
 	
 	private int supportedLDAPVersion = DEFAULT_SUPPORTED_LDAP_VERSION;
+
+	private String[] servers;
+	private String[] addresses;
+	private int[] ports;
+
+	private String bindDn;
+	private String bindPassword;
+	private boolean useSSL;
 
 	@SuppressWarnings("unused")
 	private LDAPConnectionProvider() {}
@@ -59,34 +66,38 @@ public class LDAPConnectionProvider {
 	 */
 	public void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
 		String serverProp = props.getProperty("servers");
-		String[] servers = serverProp.split(",");
-		String[] addresses = new String[servers.length];
-		int[] ports = new int[servers.length];
-		for (int i = 0; i < servers.length; i++) {
-			String str = servers[i];
-			addresses[i] = str.substring(0, str.indexOf(":")).trim();
-			ports[i] = Integer.parseInt(str.substring(str.indexOf(":") + 1, str.length()));
+		this.servers = serverProp.split(",");
+		this.addresses = new String[this.servers.length];
+		this.ports = new int[this.servers.length];
+		for (int i = 0; i < this.servers.length; i++) {
+			String str = this.servers[i];
+			this.addresses[i] = str.substring(0, str.indexOf(":")).trim();
+			this.ports[i] = Integer.parseInt(str.substring(str.indexOf(":") + 1, str.length()));
 		}
 
 		BindRequest bindRequest = null;
 		if (StringHelper.isEmpty(props.getProperty("bindDN"))) {
+			this.bindDn = null;
+			this.bindPassword = null;
 			bindRequest = new SimpleBindRequest();
 		} else {
-			bindRequest = new SimpleBindRequest(props.getProperty("bindDN"), props.getProperty(bindPassword));
+			this.bindDn = props.getProperty("bindDN");
+			this.bindPassword = props.getProperty("bindPassword");
+			bindRequest = new SimpleBindRequest(this.bindDn, this.bindPassword);
 		}
 
 		LDAPConnectionOptions connectionOptions = new LDAPConnectionOptions();
 		connectionOptions.setConnectTimeoutMillis(100 * 1000);
 		connectionOptions.setAutoReconnect(true);
 
-		boolean useSSL = Boolean.valueOf(props.getProperty("useSSL"));
+		this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
 
 		FailoverServerSet failoverSet;
-		if (useSSL) {
+		if (this.useSSL) {
 			SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
-			failoverSet = new FailoverServerSet(addresses, ports, sslUtil.createSSLSocketFactory(), connectionOptions);
+			failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(), connectionOptions);
 		} else {
-			failoverSet = new FailoverServerSet(addresses, ports, connectionOptions);
+			failoverSet = new FailoverServerSet(this.addresses, this.ports, connectionOptions);
 		}
 
 		connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, Integer.parseInt(props.getProperty("maxconnections")));
@@ -210,6 +221,30 @@ public class LDAPConnectionProvider {
 
 	public void setCreationResultCode(ResultCode creationResultCode) {
 		this.creationResultCode = creationResultCode;
+	}
+
+	public String[] getServers() {
+		return servers;
+	}
+
+	public String[] getAddresses() {
+		return addresses;
+	}
+
+	public int[] getPorts() {
+		return ports;
+	}
+
+	public String getBindDn() {
+		return bindDn;
+	}
+
+	public String getBindPassword() {
+		return bindPassword;
+	}
+
+	public boolean isUseSSL() {
+		return useSSL;
 	}
 
 }

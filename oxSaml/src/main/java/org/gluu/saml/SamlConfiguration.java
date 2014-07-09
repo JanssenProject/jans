@@ -1,4 +1,4 @@
-package org.xdi.saml;
+package org.gluu.saml;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

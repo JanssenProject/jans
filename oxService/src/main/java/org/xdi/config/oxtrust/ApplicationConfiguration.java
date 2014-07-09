@@ -2,13 +2,15 @@ package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
 
+import lombok.Data;
+
 /**
  * oxTrust configuration
  * 
  * @author Yuriy Movchan
  * @version 0.1, 05/15/2013
  */
-public final class ApplicationConfiguration implements Serializable {
+public final @Data class ApplicationConfiguration implements Serializable {
 	
 	private static final long serialVersionUID = -8991383390239617013L;
 
@@ -81,15 +83,9 @@ public final class ApplicationConfiguration implements Serializable {
 	private String idpLdapServer;
 	private String idpBindDn;
 	private String idpBindPassword;
+	private String idpUserFields;
 
 	private String gluuSpCert;
-
-	private String vdsLdapProtocol;
-	private String vdsBindDn;
-	private String vdsLdapServer;
-	private String vdsBindPassword;
-	private String vdsFilter;
-	private String vdsUserField;
 
 	private String mysqlUrl;
 	private String mysqlUser;
@@ -142,6 +138,8 @@ public final class ApplicationConfiguration implements Serializable {
 	private String umaRedirectUri;
 	private String umaResourceId;
 	private String umaScope;
+	private String cssLocation;
+	private String jsLocation;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -503,60 +501,20 @@ public final class ApplicationConfiguration implements Serializable {
 		this.idpBindPassword = idpBindPassword;
 	}
 
+	public String getIdpUserFields() {
+		return idpUserFields;
+	}
+
+	public void setIdpUserFields(String idpUserFields) {
+		this.idpUserFields = idpUserFields;
+	}
+
 	public String getGluuSpCert() {
 		return gluuSpCert;
 	}
 
 	public void setGluuSpCert(String gluuSpCert) {
 		this.gluuSpCert = gluuSpCert;
-	}
-
-	public String getVdsLdapProtocol() {
-		return vdsLdapProtocol;
-	}
-
-	public void setVdsLdapProtocol(String vdsLdapProtocol) {
-		this.vdsLdapProtocol = vdsLdapProtocol;
-	}
-
-	public String getVdsBindDn() {
-		return vdsBindDn;
-	}
-
-	public void setVdsBindDn(String vdsBindDn) {
-		this.vdsBindDn = vdsBindDn;
-	}
-
-	public String getVdsLdapServer() {
-		return vdsLdapServer;
-	}
-
-	public void setVdsLdapServer(String vdsLdapServer) {
-		this.vdsLdapServer = vdsLdapServer;
-	}
-
-	public String getVdsBindPassword() {
-		return vdsBindPassword;
-	}
-
-	public void setVdsBindPassword(String vdsBindPassword) {
-		this.vdsBindPassword = vdsBindPassword;
-	}
-
-	public String getVdsFilter() {
-		return vdsFilter;
-	}
-
-	public void setVdsFilter(String vdsFilter) {
-		this.vdsFilter = vdsFilter;
-	}
-
-	public String getVdsUserField() {
-		return vdsUserField;
-	}
-
-	public void setVdsUserField(String vdsUserField) {
-		this.vdsUserField = vdsUserField;
 	}
 
 	public String getMysqlUrl() {

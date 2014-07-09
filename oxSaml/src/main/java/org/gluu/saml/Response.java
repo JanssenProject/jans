@@ -1,4 +1,4 @@
-package org.xdi.saml;
+package org.gluu.saml;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

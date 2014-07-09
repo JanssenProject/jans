@@ -180,36 +180,16 @@ public final class ApplicationConfigurationFile {
 		return applicationConfiguration.getString("idp.bindPassword");
 	}
 
+	public String getIdpUserFields() {
+		return applicationConfiguration.getString("idp.user.fields");
+	}
+
 	public String getGluuSpCert() {
 		return applicationConfiguration.getString("gluuSP.securityCert");
 	}
 
 	public String getApplianceUrl() {
 		return applicationConfiguration.getString("appliance.url");
-	}
-
-	public String getVdsLdapProtocol() {
-		return "true".equalsIgnoreCase(applicationConfiguration.getString("vds.useSSL")) ? "ldaps" : "ldap";
-	}
-
-	public String getVdsBindDn() {
-		return applicationConfiguration.getString("vds.bindDN");
-	}
-
-	public String getVdsLdapServer() {
-		return applicationConfiguration.getString("vds.ldap.server");
-	}
-
-	public String getVdsBindPassword() {
-		return applicationConfiguration.getString("vds.bindPassword");
-	}
-
-	public String getVdsFilter() {
-		return applicationConfiguration.getString("vds.test.filter");
-	}
-
-	public String getVdsUserField() {
-		return applicationConfiguration.getString("vds.userField");
 	}
 
 	public String getMysqlUrl() {
@@ -375,5 +355,12 @@ public final class ApplicationConfigurationFile {
 	public String getUmaScope() {
 		return applicationConfiguration.getString("uma.scope");
 	}
-
+	
+	public String getCssLocation() {
+		return applicationConfiguration.getString("cssLocation");
+	}
+	
+	public String getJsLocation() {
+		return applicationConfiguration.getString("jsLocation");
+	}
 }

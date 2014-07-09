@@ -1,7 +1,6 @@
 package org.xdi.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -31,7 +30,22 @@ public @Data class GluuAttribute extends Entry implements Serializable {
 
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String inum;
-
+	
+	@LdapAttribute(name = "oxAttributeType")
+	private String type;
+	
+	@LdapAttribute
+	private String lifetime;
+	
+	@LdapAttribute(name = "oxSourceAttribute")
+	private String sourceAttribute;
+	
+	@LdapAttribute
+	private String salt;
+	
+	@LdapAttribute(name = "oxNameIdType")
+	private String nameIdType;	
+	
 	@NotNull
 	@Pattern(regexp = "^[a-zA-Z_]+$", message = "Name should contain only letters and underscores")
 	@Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
