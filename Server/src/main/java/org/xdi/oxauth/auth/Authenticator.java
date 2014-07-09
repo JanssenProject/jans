@@ -19,6 +19,7 @@ import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.SimplePrincipal;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.oxauth.model.ExternalAuthenticatorConfiguration;
+import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -35,6 +36,8 @@ import javax.faces.context.FacesContext;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -219,7 +222,7 @@ public class Authenticator implements Serializable {
                         }
 
                         if (this.authStep == countAuthenticationSteps) {
-                            authenticationService.configureEventUser();
+                            authenticationService.configureEventUser(interactive);
 
                             Principal principal = new SimplePrincipal(credentials.getUsername());
                             identity.acceptExternallyAuthenticatedPrincipal(principal);
@@ -239,7 +242,7 @@ public class Authenticator implements Serializable {
                         if (StringHelper.isNotEmpty(credentials.getUsername())) {
                             boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
                             if (authenticated) {
-                                authenticationService.configureEventUser();
+                                authenticationService.configureEventUser(interactive);
 
                                 // Redirect back to original page
                                 if (Events.exists()) {
@@ -270,7 +273,7 @@ public class Authenticator implements Serializable {
 
                             if (result) {
                                 authenticateExternallyWebService(credentials.getUsername());
-                                authenticationService.configureEventUser();
+                                authenticationService.configureEventUser(interactive);
 
                                 log.info("Authentication success for User: {0}", credentials.getUsername());
                                 return true;
@@ -282,7 +285,7 @@ public class Authenticator implements Serializable {
                         boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
                         if (authenticated) {
                             authenticateExternallyWebService(credentials.getUsername());
-                            authenticationService.configureEventUser();
+                            authenticationService.configureEventUser(interactive);
 
                             log.info("Authentication success for User: {0}", credentials.getUsername());
                             return true;
@@ -418,7 +421,7 @@ public class Authenticator implements Serializable {
                     final User user = getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());
-                        authenticationService.configureEventUser(sessionId);
+                        authenticationService.configureEventUser(sessionId, new ArrayList<Prompt>(Arrays.asList(Prompt.NONE)));
                         return true;
                     }
                 }

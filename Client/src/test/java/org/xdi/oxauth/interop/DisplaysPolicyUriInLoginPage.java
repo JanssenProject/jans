@@ -21,7 +21,7 @@ import static org.testng.Assert.*;
  *
  * @author Javier Rojas Blum Date: 08.16.2013
  */
-public class DisplaysPolicyUrlInLoginPage extends BaseTest {
+public class DisplaysPolicyUriInLoginPage extends BaseTest {
 
     @Parameters({"redirectUris", "redirectUri"})
     @Test

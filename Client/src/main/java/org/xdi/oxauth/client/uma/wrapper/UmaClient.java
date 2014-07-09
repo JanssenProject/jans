@@ -57,8 +57,6 @@ public class UmaClient {
         authorizeClient.setRequest(request);
         AuthorizationResponse response1 = authorizeClient.exec();
 
-        ClientUtils.showClient(authorizeClient);
-
         String scope = response1.getScope();
         String authorizationCode = response1.getCode();
 
@@ -76,7 +74,6 @@ public class UmaClient {
             TokenClient tokenClient1 = new TokenClient(tokenUrl);
             tokenClient1.setRequest(tokenRequest);
             TokenResponse response2 = tokenClient1.exec();
-            ClientUtils.showClient(authorizeClient);
 
             if (response2.getStatus() == 200) {
                 final String patToken = response2.getAccessToken();

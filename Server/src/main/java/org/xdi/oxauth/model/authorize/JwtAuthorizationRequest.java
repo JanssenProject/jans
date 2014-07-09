@@ -201,11 +201,15 @@ public class JwtAuthorizationRequest {
                                     prompts.addAll(Prompt.fromString(jsonPayload.getString("prompt"), " "));
                                 }
                             }
-                            if (jsonPayload.has("userinfo")) {
-                                userInfoMember = new UserInfoMember(jsonPayload.getJSONObject("userinfo"));
-                            }
-                            if (jsonPayload.has("id_token")) {
-                                idTokenMember = new IdTokenMember(jsonPayload.getJSONObject("id_token"));
+                            if (jsonPayload.has("claims")) {
+                                JSONObject claimsJsonObject = jsonPayload.getJSONObject("claims");
+
+                                if (claimsJsonObject.has("userinfo")) {
+                                    userInfoMember = new UserInfoMember(claimsJsonObject.getJSONObject("userinfo"));
+                                }
+                                if (claimsJsonObject.has("id_token")) {
+                                    idTokenMember = new IdTokenMember(claimsJsonObject.getJSONObject("id_token"));
+                                }
                             }
                         } else {
                             throw new InvalidJwtException("The JWT signature is not valid");
@@ -303,11 +307,15 @@ public class JwtAuthorizationRequest {
                 prompts.addAll(Prompt.fromString(jsonPayload.getString("prompt"), " "));
             }
         }
-        if (jsonPayload.has("userinfo")) {
-            userInfoMember = new UserInfoMember(jsonPayload.getJSONObject("userinfo"));
-        }
-        if (jsonPayload.has("id_token")) {
-            idTokenMember = new IdTokenMember(jsonPayload.getJSONObject("id_token"));
+        if (jsonPayload.has("claims")) {
+            JSONObject claimsJsonObject = jsonPayload.getJSONObject("claims");
+
+            if (claimsJsonObject.has("userinfo")) {
+                userInfoMember = new UserInfoMember(jsonPayload.getJSONObject("userinfo"));
+            }
+            if (claimsJsonObject.has("id_token")) {
+                idTokenMember = new IdTokenMember(jsonPayload.getJSONObject("id_token"));
+            }
         }
     }
 

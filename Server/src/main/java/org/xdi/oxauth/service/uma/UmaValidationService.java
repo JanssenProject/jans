@@ -196,8 +196,16 @@ public class UmaValidationService {
 
    		ResourceSet resourceSet;
    		try {
-            String resourceSetDn = resourceSetService.getDnForResourceSet(resourceSetId);
-   			resourceSet = resourceSetService.getResourceSetByDn(resourceSetDn);
+   			ResourceSet exampleResourceSet = new ResourceSet();
+   			exampleResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
+   			exampleResourceSet.setId(resourceSetId);
+            List<ResourceSet> resourceSets = resourceSetService.findResourceSets(exampleResourceSet);
+            if (resourceSets.size() != 1) {
+       			log.error("Resource set isn't registered or there are two resource set with same Id");
+       			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+       					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
+            }
+            resourceSet = resourceSets.get(0);
    		} catch (EntryPersistenceException ex) {
    			log.error("Resource set isn't registered");
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)

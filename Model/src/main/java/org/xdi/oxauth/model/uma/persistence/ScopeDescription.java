@@ -8,7 +8,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -45,8 +44,8 @@ public class ScopeDescription {
     private String url;
     @LdapAttribute(name = "oxType")
     private InternalExternal type;
-    @LdapAttribute(name = "oxAssociatedClient")
-    private List<String> clients;
+//    @LdapAttribute(name = "oxAssociatedClient")
+//    private List<String> clients;
 
     public ScopeDescription() {
     }
@@ -139,13 +138,13 @@ public class ScopeDescription {
         url = p_url;
     }
 
-    public List<String> getClients() {
-        return clients;
-    }
-
-    public void setClients(List<String> p_clients) {
-        clients = p_clients;
-    }
+//    public List<String> getClients() {
+//        return clients;
+//    }
+//
+//    public void setClients(List<String> p_clients) {
+//        clients = p_clients;
+//    }
 
     @Override
     public String toString() {
@@ -161,7 +160,6 @@ public class ScopeDescription {
         sb.append(", revision='").append(revision).append('\'');
         sb.append(", iconUrl='").append(iconUrl).append('\'');
         sb.append(", url='").append(url).append('\'');
-        sb.append(", clients=").append(clients);
         sb.append('}');
         return sb.toString();
     }

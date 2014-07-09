@@ -14,6 +14,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
@@ -23,6 +24,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -111,15 +113,19 @@ public class SessionIdService {
         httpResponse.addCookie(cookie);
     }
 
-    public String generateId(String p_userDn) {
-        final SessionId id = generateSessionId(p_userDn);
+    public String generateId(String p_userDn, List<Prompt> prompts) {
+        final SessionId id = generateSessionId(p_userDn, prompts);
         if (id != null) {
             return id.getId();
         }
         return "";
     }
 
-    public SessionId generateSessionId(String p_userDn) {
+    public SessionId generateSessionIdInteractive(String p_userDn) {
+        return generateSessionId(p_userDn, new ArrayList<Prompt>());
+    }
+
+    public SessionId generateSessionId(String p_userDn, Date authenticationDate, List<Prompt> prompts) {
         try {
             final String uuid = UUID.randomUUID().toString();
             final String dn = dn(uuid);
@@ -130,15 +136,21 @@ public class SessionIdService {
                 sessionId.setDn(dn);
                 sessionId.setLastUsedAt(new Date());
                 sessionId.setUserDn(p_userDn);
+                if (authenticationDate != null) {
+                    sessionId.setAuthenticationTime(authenticationDate);
+                }
 
+                final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
                 FacesContext facesContext = FacesContext.getCurrentInstance();
                 if (facesContext != null) {
                     Cookie cookie = new Cookie("opbs", uuid);
-                    cookie.setMaxAge(ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime());
+                    cookie.setMaxAge(unusedLifetime);
                     ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
                 }
 
-                ldapEntryManager.persist(sessionId);
+                if (unusedLifetime > 0 && isPersisted(prompts)) {
+                    ldapEntryManager.persist(sessionId);
+                }
                 log.trace("Generated new session, id = {0}", sessionId.getId());
                 return sessionId;
             }
@@ -146,6 +158,18 @@ public class SessionIdService {
             log.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    private static boolean isPersisted(List<Prompt> prompts) {
+        if (prompts != null && prompts.contains(Prompt.NONE)) {
+            final Boolean persistOnPromptNone = ConfigurationFactory.getConfiguration().getSessionIdPersistOnPromptNone();
+            return persistOnPromptNone != null && persistOnPromptNone;
+        }
+        return true;
+    }
+
+    public SessionId generateSessionId(String p_userDn, List<Prompt> prompts) {
+        return generateSessionId(p_userDn, null, prompts);
     }
 
     private static String dn(String p_id) {
@@ -208,7 +232,15 @@ public class SessionIdService {
     }
 
     public void updateSessionWithLastUsedDate(SessionId p_sessionId) {
+        updateSessionWithLastUsedDate(p_sessionId, new ArrayList<Prompt>());
+    }
+
+    public void updateSessionWithLastUsedDate(SessionId p_sessionId, List<Prompt> prompts) {
         try {
+            if (!isPersisted(prompts)) {
+                return;
+            }
+
             final Date newDate = new Date();
             p_sessionId.setLastUsedAt(newDate);
             ldapEntryManager.merge(p_sessionId);

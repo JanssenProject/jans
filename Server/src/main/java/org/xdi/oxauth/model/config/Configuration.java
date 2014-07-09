@@ -111,7 +111,12 @@ public class Configuration {
     private String applianceInum;
     private int sessionIdUnusedLifetime;
     private Boolean sessionIdEnabled;
+    private Boolean sessionIdPersistOnPromptNone;
     private int configurationUpdateInterval;
+    
+    private String cssLocation;
+    private String jsLocation;
+    private String imgLocation;
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
@@ -1065,6 +1070,15 @@ public class Configuration {
         sessionIdUnusedLifetime = p_sessionIdUnusedLifetime;
     }
 
+    @XmlElement(name = "session-id-persist-on-prompt-none")
+    public Boolean getSessionIdPersistOnPromptNone() {
+        return sessionIdPersistOnPromptNone;
+    }
+
+    public void setSessionIdPersistOnPromptNone(Boolean sessionIdPersistOnPromptNone) {
+        this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
+    }
+
     @XmlElement(name = "session-id-enabled")
     public Boolean getSessionIdEnabled() {
         return sessionIdEnabled;
@@ -1081,5 +1095,32 @@ public class Configuration {
 
     public void setConfigurationUpdateInterval(int p_configurationUpdateInterval) {
         configurationUpdateInterval = p_configurationUpdateInterval;
+    }
+    
+    @XmlElement(name = "jsLocation")
+    public String getJsLocation() {
+        return jsLocation;
+    }
+
+    public void setJsLocation(String jsLocation) {
+    	this.jsLocation = jsLocation;
+    }
+    
+    @XmlElement(name = "cssLocation")
+    public String getCssLocation() {
+        return cssLocation;
+    }
+
+    public void setCssLocation(String cssLocation) {
+    	this.cssLocation = cssLocation;
+    }
+    
+    @XmlElement(name = "imgLocation")
+    public String getImgLocation() {
+        return imgLocation;
+    }
+
+    public void setImgLocation(String imgLocation) {
+    	this.imgLocation = imgLocation;
     }
 }

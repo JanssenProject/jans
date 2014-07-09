@@ -19,30 +19,27 @@ public class UserInfoMember {
 
     public UserInfoMember(JSONObject jsonObject) throws JSONException {
         claims = new ArrayList<Claim>();
-        if (jsonObject.has("claims")) {
-            JSONObject claimsJsonObject = jsonObject.getJSONObject("claims");
 
-            for (Iterator<String> iterator = claimsJsonObject.keys(); iterator.hasNext(); ) {
-                String claimName = iterator.next();
-                ClaimValue claimValue = null;
+        for (Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
+            String claimName = iterator.next();
+            ClaimValue claimValue = null;
 
-                if (claimsJsonObject.isNull(claimName)) {
-                    claimValue = ClaimValue.createNull();
-                } else {
-                    JSONObject claimValueJsonObject = claimsJsonObject.getJSONObject(claimName);
-                    if (claimValueJsonObject.has("essential")) {
-                        boolean essential = claimValueJsonObject.getBoolean("essential");
-                        claimValue = ClaimValue.createEssential(essential);
-                    } else if (claimValueJsonObject.has("values")) {
-                        JSONArray claimValueJsonArray = claimValueJsonObject.getJSONArray("values");
-                        List<String> claimValueArr = Util.asList(claimValueJsonArray);
-                        claimValue = ClaimValue.createValueList(claimValueArr);
-                    }
+            if (jsonObject.isNull(claimName)) {
+                claimValue = ClaimValue.createNull();
+            } else {
+                JSONObject claimValueJsonObject = jsonObject.getJSONObject(claimName);
+                if (claimValueJsonObject.has("essential")) {
+                    boolean essential = claimValueJsonObject.getBoolean("essential");
+                    claimValue = ClaimValue.createEssential(essential);
+                } else if (claimValueJsonObject.has("values")) {
+                    JSONArray claimValueJsonArray = claimValueJsonObject.getJSONArray("values");
+                    List<String> claimValueArr = Util.asList(claimValueJsonArray);
+                    claimValue = ClaimValue.createValueList(claimValueArr);
                 }
-
-                Claim claim = new Claim(claimName, claimValue);
-                claims.add(claim);
             }
+
+            Claim claim = new Claim(claimName, claimValue);
+            claims.add(claim);
         }
 
         preferredLocales = new ArrayList<String>();

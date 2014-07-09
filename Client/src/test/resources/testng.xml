@@ -324,12 +324,12 @@
     </test>
     <test name="OC5:FeatureTest-Displays Policy in Login Page" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.DisplaysPolicyUrlInLoginPage"/>
+            <class name="org.xdi.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Enables Discovery" enabled="true">
+    <test name="OC5:FeatureTest-Support WebFinger Discovery" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.interop.EnablesDiscovery"/>
+            <class name="org.xdi.oxauth.interop.SupportWebFingerDiscovery"/>
         </classes>
     </test>
     <test name="OC5:FeatureTest-Enables Dynamic Registration" enabled="true">
@@ -385,6 +385,11 @@
     <test name="OC5:FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedVoluntaryClaims"/>
+        </classes>
+    </test>
+    <test name="OC5:FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.interop.PublishOpenIdConfigurationDiscoveryInformation"/>
         </classes>
     </test>
     <test name="OC5:FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
@@ -535,6 +540,11 @@
     <test name="OC5:FeatureTest-Support Request File" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportRequestFile"/>
+        </classes>
+    </test>
+    <test name="OC5:FeatureTest-Support Request Object Specifying sub Value" enabled="false">
+        <classes>
+            <class name="org.xdi.oxauth.interop.SupportRequestObjectSpecifyingSubValue"/>
         </classes>
     </test>
     <test name="OC5:FeatureTest-Support Requests Containing nonce" enabled="true">

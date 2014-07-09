@@ -18,7 +18,7 @@
 
             .login-panel-header {
                 background-color: #D4CFC7;
-                background-image: url("./img/panel_header_bg.png");
+                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
                 background-position: left top;
                 background-repeat: repeat-x;
                 border-style: solid;
@@ -132,6 +132,12 @@
                                                              action="#{authenticator.authenticate}"/>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="login-panel">
+                                 	<h:commandButton id="externalAuthButton"
+                                   		value="Use External Authentification"
+                                    	action="#{authenticator.authenticate}"/>
+									<s:link view="/auth/inboundSaml/redirectToSaml.xhtml" styleClass="addAttribute" value="Use External Authentification"  />
                                 </div>
                             </h:panelGroup>
                         </h:form>

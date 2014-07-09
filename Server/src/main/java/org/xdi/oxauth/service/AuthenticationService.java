@@ -20,6 +20,7 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeAction;
 import org.xdi.oxauth.model.common.CustomAttribute;
+import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
@@ -198,7 +199,7 @@ public class AuthenticationService {
 	private boolean checkUserStatus(User user) {
 		CustomAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
 
-		if (GluuStatus.INACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
+		if ((userStatus == null) || GluuStatus.INACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
 		    log.warn("User '{0}' was disabled", user.getUserId());
 		    return false;
 		}
@@ -291,24 +292,29 @@ public class AuthenticationService {
         }
     }
 
-    public void configureEventUser() {
+    public void configureEventUser(boolean interactive) {
         User user = credentials.getUser();
         if (user != null) {
-            configureEventUser(user);
+            configureEventUser(user, interactive);
         }
     }
 
-    public void configureEventUser(User user) {
-        SessionId sessionId = sessionIdService.generateSessionId(user.getDn());
+    public void configureEventUser(User user, boolean interactive) {
+        final List<Prompt> prompts = new ArrayList<Prompt>();
+        if (!interactive) {
+            prompts.add(Prompt.NONE);
+        }
+
+        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), prompts);
         sessionId.setAuthenticationTime(new Date());
 
-        configureEventUser(sessionId);
+        configureEventUser(sessionId, prompts);
     }
 
-    public void configureEventUser(SessionId sessionId) {
+    public void configureEventUser(SessionId sessionId, List<Prompt> prompts) {
         identity.addRole("user");
 
-        sessionIdService.updateSessionWithLastUsedDate(sessionId);
+        sessionIdService.updateSessionWithLastUsedDate(sessionId, prompts);
 
         Contexts.getEventContext().set("sessionUser", sessionId);
     }

@@ -9,7 +9,8 @@ import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.ldap.TokenLdap;
+import org.xdi.oxauth.model.ldap.*;
+import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
@@ -119,8 +120,12 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
     }
 
     @Override
-    public AuthorizationGrant getAuthorizationGrantByAccessToken(String tokenCode) {
-        return asGrant(m_grantServive.getGrantsByCode(tokenCode));
+    public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
+        final TokenLdap tokenLdap = m_grantServive.getGrantsByCode(accessToken);
+        if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+            return asGrant(tokenLdap);
+        }
+        return null;
     }
 
     @Override

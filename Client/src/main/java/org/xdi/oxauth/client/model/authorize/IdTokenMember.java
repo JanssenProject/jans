@@ -39,18 +39,14 @@ public class IdTokenMember {
         JSONObject obj = new JSONObject();
 
         if (claims != null && !claims.isEmpty()) {
-            JSONObject claimsObj = new JSONObject();
-
             for (Claim claim : claims) {
                 JSONObject claimValue = claim.getClaimValue().toJSONObject();
                 if (claimValue == null) {
-                    claimsObj.put(claim.getName(), JSONObject.NULL);
+                    obj.put(claim.getName(), JSONObject.NULL);
                 } else {
-                    claimsObj.put(claim.getName(), claimValue);
+                    obj.put(claim.getName(), claimValue);
                 }
             }
-
-            obj.put("claims", claimsObj);
         }
         if (maxAge != null) {
             obj.put("max_age", maxAge);

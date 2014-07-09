@@ -217,6 +217,7 @@
          Lifetime in seconds, 86400 seconds = 1 day  -->
     <session-id-unused-lifetime>86400</session-id-unused-lifetime>
     <session-id-enabled>true</session-id-enabled>
+    <session-id-persist-on-prompt-none>false</session-id-persist-on-prompt-none>
 
     <uma-add-scopes-automatically>false</uma-add-scopes-automatically>
     <uma-requester-permission-token-lifetime>600</uma-requester-permission-token-lifetime>

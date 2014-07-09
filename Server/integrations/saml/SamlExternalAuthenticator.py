@@ -9,7 +9,7 @@ from org.xdi.oxauth.service.net import HttpService
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
-from org.xdi.saml import SamlConfiguration, AuthRequest, Response
+from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays
 from java.util import HashMap
 from java.util import IdentityHashMap

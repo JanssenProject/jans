@@ -266,7 +266,7 @@ public class AuthorizeAction {
         if (sessionUser != null) {
             sessionUser.setAuthenticationTime(new Date());
         }
-        sessionIdService.updateSessionWithLastUsedDate(sessionUser);
+        sessionIdService.updateSessionWithLastUsedDate(sessionUser, Prompt.fromString(prompt, " "));
 
         log.info("Attempting to redirect user. User: {0}", user);
 
@@ -303,7 +303,7 @@ public class AuthorizeAction {
 
         if (!result.isEmpty()) {
             if (sessionUser == null || sessionUser.getId() == null) {
-                sessionUser = sessionIdService.generateSessionId(p_user.getDn());
+                sessionUser = sessionIdService.generateSessionIdInteractive(p_user.getDn());
             }
 
             result.put("session_id", sessionUser.getId());
@@ -580,7 +580,7 @@ public class AuthorizeAction {
         try {
             SessionId session = getSession();
             session.addPermission(clientId, true);
-            sessionIdService.updateSessionWithLastUsedDate(session);
+            sessionIdService.updateSessionWithLastUsedDate(session, Prompt.fromString(prompt, " "));
 
             // OXAUTH-297 - set session_id cookie, secure=true
             SessionIdService.instance().createSessionIdCookie(sessionId);

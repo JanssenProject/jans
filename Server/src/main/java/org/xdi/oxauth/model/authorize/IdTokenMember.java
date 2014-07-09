@@ -20,36 +20,32 @@ public class IdTokenMember {
 
     public IdTokenMember(JSONObject jsonObject) throws JSONException {
         claims = new ArrayList<Claim>();
-        if (jsonObject.has("claims")) {
-            JSONObject claimsJsonObject = jsonObject.getJSONObject("claims");
 
-            for (Iterator<String> iterator = claimsJsonObject.keys(); iterator.hasNext(); ) {
-                String claimName = iterator.next();
-                ClaimValue claimValue = null;
+        for (Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
+            String claimName = iterator.next();
+            ClaimValue claimValue = null;
 
-                if (claimsJsonObject.isNull(claimName)) {
-                    claimValue = ClaimValue.createNull();
-                } else {
-                    JSONObject claimValueJsonObject = claimsJsonObject.getJSONObject(claimName);
-                    if (claimValueJsonObject.has("essential")) {
-                        boolean essential = claimValueJsonObject.getBoolean("essential");
-                        claimValue = ClaimValue.createEssential(essential);
-                    } else if (claimValueJsonObject.has("values")) {
-                        JSONArray claimValueJsonArray = claimValueJsonObject.getJSONArray("values");
-                        List<String> claimValueArr = Util.asList(claimValueJsonArray);
-                        claimValue = ClaimValue.createValueList(claimValueArr);
-                    } else if (claimValueJsonObject.has("value")) {
-                        String value = claimValueJsonObject.getString("value");
-                        claimValue = ClaimValue.createSingleValue(value);
-                    }
+            if (claimName != null && claimName.equals("max_age") && jsonObject.has("max_age")) {
+                maxAge = jsonObject.getInt("max_age");
+            } else if (jsonObject.isNull(claimName)) {
+                claimValue = ClaimValue.createNull();
+            } else {
+                JSONObject claimValueJsonObject = jsonObject.getJSONObject(claimName);
+                if (claimValueJsonObject.has("essential")) {
+                    boolean essential = claimValueJsonObject.getBoolean("essential");
+                    claimValue = ClaimValue.createEssential(essential);
+                } else if (claimValueJsonObject.has("values")) {
+                    JSONArray claimValueJsonArray = claimValueJsonObject.getJSONArray("values");
+                    List<String> claimValueArr = Util.asList(claimValueJsonArray);
+                    claimValue = ClaimValue.createValueList(claimValueArr);
+                } else if (claimValueJsonObject.has("value")) {
+                    String value = claimValueJsonObject.getString("value");
+                    claimValue = ClaimValue.createSingleValue(value);
                 }
-
-                Claim claim = new Claim(claimName, claimValue);
-                claims.add(claim);
             }
-        }
-        if (jsonObject.has("max_age")) {
-            maxAge = jsonObject.getInt("max_age");
+
+            Claim claim = new Claim(claimName, claimValue);
+            claims.add(claim);
         }
     }
 

@@ -1,0 +1,49 @@
+package org.xdi.oxauth.service;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.web.ServletContexts;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.util.StringHelper;
+
+/**
+ * OxAuthConfigurationService
+ *
+ * @author Oleksiy Tataryn Date: 08.07.2014
+ */
+@Scope(ScopeType.STATELESS)
+@Name("oxAuthConfigurationService")
+@AutoCreate
+public class OxAuthConfigurationService {
+
+	public String getCssLocation(){
+		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getCssLocation())){
+			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			return contextPath + "/stylesheet";
+		}else{
+			return ConfigurationFactory.getConfiguration().getCssLocation();
+		}	
+	}
+	
+	public String getJsLocation(){
+		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getJsLocation())){
+			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			return contextPath + "/js";
+		}else{
+			return ConfigurationFactory.getConfiguration().getJsLocation();
+		}	
+	}
+	
+	public String getImgLocation(){
+		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getImgLocation())){
+			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			return contextPath + "/img";
+		}else{
+			return ConfigurationFactory.getConfiguration().getImgLocation();
+		}	
+	}
+	
+}
+

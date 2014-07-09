@@ -7,15 +7,16 @@ import org.xdi.oxauth.BaseTest;
 import static org.testng.Assert.assertTrue;
 
 /**
- * OC5:FeatureTest-Enables Discovery
+ * OC5:FeatureTest-Publish openid-configuration Discovery Information
  *
- * @author Javier Rojas Blum Date: 07.27.2013
+ * @author Javier Rojas Blum
+ * @version 0.9, 06/09/2014
  */
-public class EnablesDiscovery extends BaseTest {
+public class PublishOpenIdConfigurationDiscoveryInformation extends BaseTest {
 
     @Test
-    public void enablesDiscovery() {
-        showTitle("OC5:FeatureTest-Enables Discovery");
+    public void publishOpenIdConfigurationDiscoveryInformation() {
+        showTitle("OC5:FeatureTest-Publish openid-configuration Discovery Information");
 
         assertTrue(StringUtils.isNotBlank(authorizationEndpoint));
         assertTrue(StringUtils.isNotBlank(tokenEndpoint));

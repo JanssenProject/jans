@@ -4,6 +4,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.error.ErrorMessages;
@@ -22,6 +26,9 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  */
+@Scope(ScopeType.APPLICATION)
+@Name("configurationFactory")
+@AutoCreate
 public class ConfigurationFactory {
 
     private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
@@ -57,12 +64,6 @@ public class ConfigurationFactory {
                 return null;
             }
         }
-    }
-
-    /**
-     * Singleton.
-     */
-    private ConfigurationFactory() {
     }
 
     public static FileConfiguration getLdapConfiguration() {

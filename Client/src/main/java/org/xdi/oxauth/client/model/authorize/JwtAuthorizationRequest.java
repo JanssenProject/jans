@@ -598,11 +598,17 @@ public class JwtAuthorizationRequest {
                 obj.put("registration", registration);
             }
 
-            if (userInfoMember != null) {
-                obj.put("userinfo", userInfoMember.toJSONObject());
-            }
-            if (idTokenMember != null) {
-                obj.put("id_token", idTokenMember.toJSONObject());
+            if (userInfoMember != null || idTokenMember != null) {
+                JSONObject claimsObj = new JSONObject();
+
+                if (userInfoMember != null) {
+                    claimsObj.put("userinfo", userInfoMember.toJSONObject());
+                }
+                if (idTokenMember != null) {
+                    claimsObj.put("id_token", idTokenMember.toJSONObject());
+                }
+
+                obj.put("claims", claimsObj);
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

@@ -24,7 +24,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Override
     public void beforeClass() {
         m_service = SessionIdService.instance();
-        m_sessionId = m_service.generateSessionId("dummyDn");
+        m_sessionId = m_service.generateSessionIdInteractive("dummyDn");
     }
 
     @Override

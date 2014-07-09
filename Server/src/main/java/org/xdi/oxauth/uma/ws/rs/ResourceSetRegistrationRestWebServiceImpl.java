@@ -163,37 +163,38 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
 
             final String patToken = tokenService.getTokenFromAuthorizationParameter(authorization);
             final AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(patToken);
-            final String clientDn = authorizationGrant.getClientDn();
+            if (authorizationGrant != null) {
+                final String clientDn = authorizationGrant.getClientDn();
 
-            prepareResourceSetsBranch();
+                prepareResourceSetsBranch();
 
-            final List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
-                    .getResourceSetsByAssociatedClient(clientDn);
+                final List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
+                        .getResourceSetsByAssociatedClient(clientDn);
 
-            final List<String> result = new ArrayList<String>(ldapResourceSets.size());
-            for (org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet : ldapResourceSets) {
+                final List<String> result = new ArrayList<String>(ldapResourceSets.size());
+                for (org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet : ldapResourceSets) {
 
-                // if scope paremeter is not null then filter by it, otherwise just add to result
-                if (StringUtils.isNotBlank(p_scope)) {
-                    final List<String> scopeUrlsByDns = umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes());
-                    if (scopeUrlsByDns != null && scopeUrlsByDns.contains(p_scope)) {
+                    // if scope paremeter is not null then filter by it, otherwise just add to result
+                    if (StringUtils.isNotBlank(p_scope)) {
+                        final List<String> scopeUrlsByDns = umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes());
+                        if (scopeUrlsByDns != null && scopeUrlsByDns.contains(p_scope)) {
+                            result.add(ldapResourceSet.getId());
+                        }
+                    } else {
                         result.add(ldapResourceSet.getId());
                     }
-                } else {
-                    result.add(ldapResourceSet.getId());
                 }
-            }
 
-            return result;
+                return result;
+            }
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             }
-
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
+        throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
     public Response deleteResourceSet(String authorization, String rsver, String rsid) {

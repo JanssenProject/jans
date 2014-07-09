@@ -203,9 +203,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     return builder.build();
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateSessionId(user.getDn());
-                                    sessionUser.setAuthenticationTime(new Date());
-                                    sessionIdService.updateSessionWithLastUsedDate(sessionUser);
+                                    sessionUser = sessionIdService.generateSessionId(user.getDn(), new Date(), prompts);
                                 }
                             }
 
@@ -341,9 +339,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             String userDn = authenticationFilterService.processAuthenticationFilters(params);
                                             if (userDn != null) {
-                                                sessionUser = sessionIdService.generateSessionId(userDn);
-                                                sessionUser.setAuthenticationTime(new Date());
-                                                sessionIdService.updateSessionWithLastUsedDate(sessionUser);
+                                                sessionUser = sessionIdService.generateSessionId(userDn, new Date(), prompts);
                                                 user = userService.getUserByDn(sessionUser.getUserDn());
 
                                                 Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
@@ -507,7 +503,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                     //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
                                     if (sessionUser.getId() == null) {
-                                        final String newSessionId = sessionIdService.generateId(sessionUser.getUserDn());
+                                        final String newSessionId = sessionIdService.generateId(sessionUser.getUserDn(), prompts);
                                         sessionUser.setId(newSessionId);
                                         log.trace("newSessionId = {0}", newSessionId);
                                     }

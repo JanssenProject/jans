@@ -76,7 +76,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public AccessToken createAccessToken() {
         try {
             final AccessToken accessToken = super.createAccessToken();
-            persist(asToken(accessToken));
+        	if (accessToken.getExpiresIn() > 0) {
+        		persist(asToken(accessToken));
+        	}
             return accessToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
@@ -88,7 +90,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public AccessToken createLongLivedAccessToken() {
         try {
             final AccessToken accessToken = super.createLongLivedAccessToken();
-            persist(asToken(accessToken));
+        	if (accessToken.getExpiresIn() > 0) {
+        		persist(asToken(accessToken));
+        	}
             return accessToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
@@ -113,7 +117,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
                                  Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode, accessToken, claims);
-            persist(asToken(idToken));
+        	if (idToken.getExpiresIn() > 0) {
+        		persist(asToken(idToken));
+        	}
             return idToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
