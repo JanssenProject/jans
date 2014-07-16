@@ -18,13 +18,11 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 public class IntrospectionWsHttpTest extends BaseTest {
 
     @Test
-    @Parameters({"umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void test(final String umaUserId, final String umaUserSecret,
-                     final String umaAatClientId, final String umaAatClientSecret,
-                     final String umaRedirectUri) throws Exception {
+    @Parameters({"umaAatClientId", "umaAatClientSecret"})
+    public void test(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
 
-        final Token authorization = UmaClient.requestAat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
-        final Token tokenToIntrospect = UmaClient.requestPat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        final Token authorization = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
+        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
 
         final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint);
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Bearer " + authorization.getAccessToken(), tokenToIntrospect.getAccessToken());

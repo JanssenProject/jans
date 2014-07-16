@@ -36,16 +36,15 @@ public class IdGenWsHttpTest extends BaseTest {
     protected String m_umaAmHost;
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri", "umaAmHost"})
-    public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
-                     final String umaAatClientId, final String umaAatClientSecret,
-                     final String umaRedirectUri, String umaAmHost) throws Exception {
+    @Parameters({"umaMetaDataUrl", "umaAatClientId", "umaAatClientSecret", "umaAmHost"})
+    public void init(final String umaMetaDataUrl,
+                     final String umaAatClientId, final String umaAatClientSecret, String umaAmHost) throws Exception {
         m_metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
         UmaTestUtil.assert_(m_metadataConfiguration);
 
         m_umaAmHost = umaAmHost;
 
-        m_aat = UmaClient.requestAat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
 
         final RequesterPermissionTokenService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);

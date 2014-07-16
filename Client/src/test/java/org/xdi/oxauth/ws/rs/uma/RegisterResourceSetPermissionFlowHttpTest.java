@@ -39,7 +39,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     }
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
+    @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
                      final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
         if (this.metadataConfiguration == null) {
@@ -50,7 +50,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetFlowHttpTest.setAuthorizationEndpoint(authorizationEndpoint);
         this.umaRegisterResourceSetFlowHttpTest.setTokenEndpoint(tokenEndpoint);
-        this.umaRegisterResourceSetFlowHttpTest.init(umaMetaDataUrl, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        this.umaRegisterResourceSetFlowHttpTest.init(umaMetaDataUrl, umaPatClientId, umaPatClientSecret);
 
         this.umaRegisterResourceSetFlowHttpTest.testRegisterResourceSet();
     }

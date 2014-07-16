@@ -38,15 +38,14 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
     }
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret, final String umaAatClientId, final String umaAatClientSecret,
-                     final String umaRedirectUri) throws Exception {
+    @Parameters({"umaMetaDataUrl", "umaAatClientId", "umaAatClientSecret"})
+    public void init(final String umaMetaDataUrl, final String umaAatClientId, final String umaAatClientSecret) throws Exception {
         if (this.metadataConfiguration == null) {
             this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
             UmaTestUtil.assert_(this.metadataConfiguration);
         }
 
-        m_aat = UmaClient.requestAat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
     }
 

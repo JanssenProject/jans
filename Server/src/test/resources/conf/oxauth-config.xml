@@ -253,7 +253,10 @@
 
     <!-- Dynamic registration custom stuff -->
     <dynamic-registration-scopes-param-enabled>true</dynamic-registration-scopes-param-enabled>
-    <dynamic-registration-custom-object-class>oxAuthClientCustomAttributes</dynamic-registration-custom-object-class>
+
+    <!-- Client registration custom attributes. Custom attributes must be specified in custom object class -->
+    <dynamic-registration-custom-object-class></dynamic-registration-custom-object-class>
+    <!--<dynamic-registration-custom-object-class>oxAuthClientCustomAttributes</dynamic-registration-custom-object-class>-->
 
     <dynamic-registration-custom-attribute-supported>
         <dynamic-registration-custom-attribute>oxAuthTrustedClient</dynamic-registration-custom-attribute>

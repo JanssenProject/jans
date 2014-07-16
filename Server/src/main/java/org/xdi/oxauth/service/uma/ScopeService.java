@@ -31,6 +31,7 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 22/04/2013
  */
 @AutoCreate
@@ -134,7 +135,7 @@ public class ScopeService {
                     for (ScopeDescription scopeDescription : entries) {
                         final String internalScopeUrl = getInternalScopeUrl(scopeDescription);
                         if (internalScopeUrl.equals(scopeUrl) && !result.contains(internalScopeUrl)) {
-                            result.add(internalScopeUrl);
+                            result.add(scopeDescription.getDn());
                             notProcessedScopeUrls.remove(scopeUrl);
                         }
                     }

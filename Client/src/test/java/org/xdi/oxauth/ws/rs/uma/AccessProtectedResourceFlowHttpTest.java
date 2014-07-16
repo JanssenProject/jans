@@ -56,11 +56,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Host obtains PAT
      */
     @Test
-    @Parameters({"umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
-    public void testHostObtainPat(final String umaUserId, final String umaUserSecret, final String umaPatClientId,
-                                  final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void testHostObtainPat(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         showTitle("testHostObtainPat");
-        m_pat = UmaClient.requestPat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
         UmaTestUtil.assert_(m_pat);
 
         // Init UmaPatTokenAwareHttpTest test
@@ -85,12 +84,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Requester obtains AAT token
      */
     @Test(dependsOnMethods = {"testHostRegisterResourceSet"})
-    @Parameters({"umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void testRequesterObtainAat(final String umaUserId, final String umaUserSecret,
-                                       final String umaAatClientId, final String umaAatClientSecret,
-                                       final String umaRedirectUri) throws Exception {
+    @Parameters({"umaAatClientId", "umaAatClientSecret"})
+    public void testRequesterObtainAat(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
         showTitle("testRequesterObtainAat");
-        m_aat = UmaClient.requestAat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
 
         // Init UmaPatTokenAwareHttpTest test

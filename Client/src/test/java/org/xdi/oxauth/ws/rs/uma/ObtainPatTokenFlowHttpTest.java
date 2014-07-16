@@ -25,22 +25,20 @@ public class ObtainPatTokenFlowHttpTest extends BaseTest {
      * Test for the obtaining UMA PAT token
      */
     @Test
-    @Parameters({"umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
-    public void testObtainPatTokenFlow(final String umaUserId, final String umaUserSecret, final String umaPatClientId,
-                                       final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void testObtainPatTokenFlow(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         showTitle("testObtainPatTokenFlow");
 
-        m_pat = UmaClient.requestPat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
         UmaTestUtil.assert_(m_pat);
     }
 
     /**
      * Test for the obtaining UMA PAT token using refresh token
      */
-    @Test(dependsOnMethods = {"testObtainPatTokenFlow"})
-    @Parameters({"umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
-    public void testObtainPatTokenUsingRefreshTokenFlow(final String umaUserId, final String umaUserSecret, final String umaPatClientId, final String umaPatClientSecret,
-                                                        final String umaRedirectUri) throws Exception {
+    //@Test(dependsOnMethods = {"testObtainPatTokenFlow"})
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void testObtainPatTokenUsingRefreshTokenFlow(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         showTitle("testObtainPatTokenUsingRefreshTokenFlow");
 
         // Request new access token using the refresh token.

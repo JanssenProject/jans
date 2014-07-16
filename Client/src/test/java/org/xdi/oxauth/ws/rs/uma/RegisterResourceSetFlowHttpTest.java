@@ -38,15 +38,14 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
     }
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
-    public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
-                     final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
+    @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
+    public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadataConfiguration == null) {
             this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
             UmaTestUtil.assert_(this.metadataConfiguration);
         }
 
-        m_pat = UmaClient.requestPat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
         UmaTestUtil.assert_(m_pat);
     }
 

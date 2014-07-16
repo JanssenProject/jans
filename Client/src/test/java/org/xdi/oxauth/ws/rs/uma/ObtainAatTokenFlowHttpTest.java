@@ -25,22 +25,20 @@ public class ObtainAatTokenFlowHttpTest extends BaseTest {
      * Test for the obtaining UMA AAT token
      */
     @Test
-    @Parameters({"umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void testObtainAatTokenFlow(final String umaUserId, final String umaUserSecret, final String umaAatClientId,
-                                       final String umaAatClientSecret, final String umaRedirectUri) throws Exception {
+    @Parameters({"umaUserId", "umaAatClientSecret"})
+    public void testObtainAatTokenFlow(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
         showTitle("testObtainAatTokenFlow");
 
-        m_aat = UmaClient.requestAat(authorizationEndpoint, tokenEndpoint, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
     }
 
     /**
      * Test for the obtaining UMA AAT token using refresh token
      */
-    @Test(dependsOnMethods = {"testObtainAatTokenFlow"})
-    @Parameters({"umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void testObtainAatTokenUsingRefreshTokenFlow(final String umaUserId, final String umaUserSecret, final String umaAatClientId,
-                                                        final String umaAatClientSecret, final String umaRedirectUri) throws Exception {
+    //@Test(dependsOnMethods = {"testObtainAatTokenFlow"})
+    @Parameters({"umaAatClientId", "umaAatClientSecret"})
+    public void testObtainAatTokenUsingRefreshTokenFlow(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
         showTitle("testObtainAatTokenUsingRefreshTokenFlow");
 
         // Request new access token using the refresh token.

@@ -26,6 +26,7 @@ import java.util.List;
  * The endpoint is RPT introspection profile implementation defined by
  * http://docs.kantarainitiative.org/uma/draft-uma-core.html#uma-bearer-token-profile
  *
+ * @author Yuriy Movchan Date: 10/23/2012
  * @author Yuriy Zabrovarnyy
  */
 @Name("rptStatusRestWebService")
