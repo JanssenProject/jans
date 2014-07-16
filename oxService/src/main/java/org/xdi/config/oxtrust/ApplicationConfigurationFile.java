@@ -328,24 +328,12 @@ public final class ApplicationConfigurationFile {
 		return applicationConfiguration.getString("uma.issuer");
 	}
 
-	public String getUmaUserId() {
-		return applicationConfiguration.getString("uma.user_id");
-	}
-
-	public String getUmaUserPassword() {
-		return applicationConfiguration.getString("uma.user_password");
-	}
-
 	public String getUmaClientId() {
 		return applicationConfiguration.getString("uma.client_id");
 	}
 
 	public String getUmaClientPassword() {
 		return applicationConfiguration.getString("uma.client_password");
-	}
-	
-	public String getUmaRedirectUri() {
-		return applicationConfiguration.getString("uma.redirect_uri");
 	}
 
 	public String getUmaResourceId() {

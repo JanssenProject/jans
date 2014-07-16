@@ -131,13 +131,11 @@ public final @Data class ApplicationConfiguration implements Serializable {
 	private boolean ignoreValidation;
 
 	private String umaIssuer;
-	private String umaUserId;
-	private String umaUserPassword;
 	private String umaClientId;
 	private String umaClientPassword;
-	private String umaRedirectUri;
 	private String umaResourceId;
 	private String umaScope;
+
 	private String cssLocation;
 	private String jsLocation;
 
@@ -749,22 +747,6 @@ public final @Data class ApplicationConfiguration implements Serializable {
 		this.umaIssuer = umaIssuer;
 	}
 
-	public String getUmaUserId() {
-		return umaUserId;
-	}
-
-	public void setUmaUserId(String umaUserId) {
-		this.umaUserId = umaUserId;
-	}
-
-	public String getUmaUserPassword() {
-		return umaUserPassword;
-	}
-
-	public void setUmaUserPassword(String umaUserPassword) {
-		this.umaUserPassword = umaUserPassword;
-	}
-
 	public String getUmaClientId() {
 		return umaClientId;
 	}
@@ -779,14 +761,6 @@ public final @Data class ApplicationConfiguration implements Serializable {
 
 	public void setUmaClientPassword(String umaClientPassword) {
 		this.umaClientPassword = umaClientPassword;
-	}
-
-	public String getUmaRedirectUri() {
-		return umaRedirectUri;
-	}
-
-	public void setUmaRedirectUri(String umaRedirectUri) {
-		this.umaRedirectUri = umaRedirectUri;
 	}
 
 	public String getUmaResourceId() {
