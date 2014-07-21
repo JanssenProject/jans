@@ -89,6 +89,10 @@ public class UserService {
 
     public User getUser(String userId) {
         log.debug("Getting user information from LDAP: userId = {0}", userId);
+        
+        if (StringHelper.isEmpty(userId)) {
+        	return null;
+        }
 
         User user = new User();
         user.setDn(ConfigurationFactory.getBaseDn().getPeople());
