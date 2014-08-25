@@ -6,12 +6,11 @@
 	<artifactId>oxSaml</artifactId>
 	<name>oxSaml</name>
 	<packaging>jar</packaging>
-	<version>1.3.2.Final</version>
 
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxCore</artifactId>
-		<version>1.3.2.Final</version>
+		<version>1.4.1.Final</version>
 	</parent>
 
 	<prerequisites>
