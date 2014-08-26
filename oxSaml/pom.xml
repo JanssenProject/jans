@@ -6,6 +6,7 @@
 	<artifactId>oxSaml</artifactId>
 	<name>oxSaml</name>
 	<packaging>jar</packaging>
+	<version>1.4.1.Final</version>
 
 	<parent>
 		<groupId>org.xdi</groupId>
