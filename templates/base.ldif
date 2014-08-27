@@ -1,0 +1,16 @@
+dn: o=gluu
+objectclass: organization
+objectclass: top
+o: gluu
+
+dn: o=%(inumOrg)s,o=gluu
+objectclass: oxEntry
+objectclass: top
+objectclass: gluuOrganization
+o: %(inumOrg)s
+
+dn: ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: appliances
+
