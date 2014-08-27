@@ -4,7 +4,6 @@ objectclass: top
 o: gluu
 
 dn: o=%(inumOrg)s,o=gluu
-objectclass: oxEntry
 objectclass: top
 objectclass: gluuOrganization
 o: %(inumOrg)s
@@ -13,4 +12,56 @@ dn: ou=appliances,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: appliances
+
+dn: ou=people,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=groups,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
+
+dn: ou=clients,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=uma,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=configuration,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: oxAuthConfiguration
+
+dn: ou=session,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=federation,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=scopes,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=attributes,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=hosts,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=push,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=oxProx,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=links,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
 

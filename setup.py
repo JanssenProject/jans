@@ -60,6 +60,7 @@ class Setup():
         self.ldapBaseFolder = '/opt/OpenDJ-2.6.0'  # TODO I'd like this to be /opt/gluu-ldap
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
+        self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapPassFn = '%s/.pw' % self.outputFolder
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
 
@@ -285,8 +286,20 @@ class Setup():
         self.run([self.ldapSetupCommand, '--no-prompt',
                   '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
                   '--acceptLicense'])
-        # run dsconfig commands
-        # add proper indexes
+        config_changes = [['set-global-configuration-prop',  '--set', 'ds-cfg-single-structural-objectclass-behavior:accept'],
+                          ['set-global-configuration-prop',  '--set', 'ds-cfg-allow-zero-length-values:true'],
+                          ['set-global-configuration-prop', '--policy-name', 'Default Password Policy',
+                           '--set', 'allow-pre-encoded-passwords:true']]
+        for changes in config_changes:
+            self.run([self.ldapDsconfigCommand,
+                     '--trustAll', '--no-prompt',
+                     '--hostname',  self.hostname,
+                     '--port', '4444',
+                     '--bindDN', self.ldap_binddn,
+                     '--adminPasswordFile', self.ldapPassFn] + changes)
+        # add proper indexes -- define a datastructure in __init__ and
+        # iterate through it for dsconfig commands
+
 
     def import_ldif(self):
         # TODO Need to add support for multiple ldif files
