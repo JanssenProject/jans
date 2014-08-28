@@ -1,19 +1,19 @@
 #!/usr/bin/python
 
 # The MIT License (MIT)
-# 
+#
 # Copyright (c) 2014 Gluu
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -56,7 +56,7 @@ class Setup():
         self.ldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
-        
+
         self.outputFolder = './output'
         self.templateFolder = './templates'
         self.tomcatHome = '/opt/tomcat'
@@ -65,7 +65,7 @@ class Setup():
         self.gluuHome = '/opt/gluu'
         self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
         self.certGenerator = '%s/bin/certGenerator.sh' % self.gluuHome
-        
+
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
@@ -132,16 +132,16 @@ class Setup():
                          self.ldif_groups: False }
 
     def __repr__(self):
-        return 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n" \
-            + 'ip'.ljust(20) + self.ip.rjust(40) + "\n" \
-            + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n" \
-            + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n" \
-            + 'city'.ljust(20) + self.city.rjust(40) + "\n" \
-            + 'state'.ljust(20) + self.state.rjust(40) + "\n" \
-            + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" \
-            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" \
-            + 'inumOrg'.ljust(20) + self.inumOrg.rjust(40) + "\n" \
-            + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40)
+        return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n" 
+            + 'ip'.ljust(20) + self.ip.rjust(40) + "\n" 
+            + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n" 
+            + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n" 
+            + 'city'.ljust(20) + self.city.rjust(40) + "\n" 
+            + 'state'.ljust(20) + self.state.rjust(40) + "\n" 
+            + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" 
+            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" 
+            + 'inumOrg'.ljust(20) + self.inumOrg.rjust(40) + "\n" 
+            + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40))
 
     def logIt(self, s, errorLog=False):
         if errorLog:
@@ -220,12 +220,12 @@ class Setup():
         if not self.ldapPass:
             self.ldapPass = self.getPW()
         if not self.baseInum:
-            self.baseInum = '@!%s.%s.%s.%s' % tuple([self.getQuad()] * 4)
+            self.baseInum = '@!%s.%s.%s.%s' % tuple([self.getQuad() for i in xrange(4)])
         if not self.inumOrg:
-            twoQuads = '%s.%s' % tuple([self.getQuad()] * 2)
+            twoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.inumOrg = '%s!0001!%s' % (self.baseInum, twoQuads)
         if not self.inumAppliance:
-            twoQuads = '%s.%s' % tuple([self.getQuad()] * 2)
+            twoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.inumAppliance = '%s!0002!%s' % (self.baseInum, twoQuads)
         if not self.oxauth_client_id:
             self.oxauth_client_id = '%s!0008!%s' % (self.baseInum, twoQuads)
@@ -278,8 +278,8 @@ class Setup():
     def encode_passwords(self):
         cmd = "%s -f %s -s SSHA" % (self.ldapEncodePWCommand, self.ldapPassFn)
         self.encoded_ldap_pw = os.popen(cmd, 'r').read().strip()
-        cmd = "%s -f %s" % (self.oxEncodePWCommand, self.ldapPassFn)
-        self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read.strip()
+        cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
+        self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
         self.oxauthClient_pw = self.getPW()
         self.oxauthClient_encoded_pw(self.oxauthClient_pw)
 
@@ -366,7 +366,7 @@ if __name__ == '__main__':
         s.check_properties()
         print '\n%s\n' % `s`
         proceed = raw_input('Proceed with these values [Y|n] ').lower()
-        if (len(proceed) & (proceed[0] == 'y')):
+        if (len(proceed) and (proceed[0] == 'y')):
             if not os.path.exists(s.configFolder):
                 os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
