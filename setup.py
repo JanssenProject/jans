@@ -131,16 +131,16 @@ class Setup():
                          self.ldif_groups: False }
 
     def __repr__(self):
-        print 'hostname'.ljust(20) + self.hostname.rjust(40)
-        print 'ip'.ljust(20) + self.ip.rjust(40)
-        print 'orgName'.ljust(20) + self.orgName.rjust(40)
-        print 'countryCode'.ljust(20) + self.countryCode.rjust(40)
-        print 'city'.ljust(20) + self.city.rjust(40)
-        print 'state'.ljust(20) + self.state.rjust(40)
-        print 'jksPass'.ljust(20) + self.jksPass.rjust(40)
-        print 'ldapPass'.ljust(20) + self.ldapPass.rjust(40)
-        print 'inumOrg'.ljust(20) + self.inumOrg.rjust(40)
-        print 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40)
+        return 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n" \
+            + 'ip'.ljust(20) + self.ip.rjust(40) + "\n" \
+            + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n" \
+            + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n" \
+            + 'city'.ljust(20) + self.city.rjust(40) + "\n" \
+            + 'state'.ljust(20) + self.state.rjust(40) + "\n" \
+            + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" \
+            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" \
+            + 'inumOrg'.ljust(20) + self.inumOrg.rjust(40) + "\n" \
+            + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40)
 
     def logIt(self, s, errorLog=False):
         if errorLog:
