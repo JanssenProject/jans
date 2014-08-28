@@ -373,6 +373,7 @@ if __name__ == '__main__':
                 os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
                 os.makedirs(s.certFolder)
+            s.encode_passwords()
             s.save_properties()
             f = open(s.ldapPassFn)
             f.write(s.ldapPass)
@@ -382,7 +383,6 @@ if __name__ == '__main__':
     try:
         s.gen_certs()
         s.add_ldap_schema()
-        s.encode_passwords()
         s.render_templates()
         s.setup_ldap()
         s.import_ldif()
