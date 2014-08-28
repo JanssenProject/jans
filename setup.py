@@ -190,7 +190,7 @@ class Setup():
     def check_properties(self):
         while not self.hostname:
             testhost = raw_input('Hostname of this server: ').strip()
-            if len(testhost.split('.') < 3):
+            if len(testhost.split('.')) < 3:
                 self.hostname = testhost
             else:
                 print 'The hostname has to be at least three domain components. Try again\n'
@@ -204,7 +204,7 @@ class Setup():
             self.orgName = raw_input('Organization Name (for ceritificate)').strip()
         while not self.countryCode:
             testCode = raw_input('2 Character Country Code (for ceritificate)').strip()
-            if len(testCode == 2):
+            if len(testCode) == 2:
                 self.countryCode = testCode()
             else:
                 print 'Country code should only be two characters. Try again\n'
