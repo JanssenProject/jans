@@ -53,6 +53,7 @@ class Setup():
         self.inumAppliance = None
         self.inumOrgFN = None
         self.inumApplianceFN = None
+        self.ldapPass = None
 
         self.outputFolder = './output'
         self.templateFolder = './templates'
