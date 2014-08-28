@@ -81,7 +81,7 @@ class Setup():
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
-        self.oxEncodePWCommand = '%s/bin/encode' % self.gluuHome
+        self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuHome
 
         self.oxtrust_openid_client_id = None
         self.oxtrust_uma_client_id = None
@@ -258,7 +258,6 @@ class Setup():
             return
         self.run(['rm', '-frv', '%s/*java*' % self.certFolder])
         self.run([self.certGenerator,
-                  '-java',
                   '-u', self.hostname,
                   '-n', self.inumOrgFN,
                   '-o', self.orgName,
@@ -267,7 +266,6 @@ class Setup():
                   '-l', self.city])
         self.run([self.keystoreGenerator,
                   '-n', self.inumOrgFN,
-                  '-java',
                   '-u', self.hostname,
                   '-p', self.jksPass])
 
