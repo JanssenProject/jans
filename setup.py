@@ -225,7 +225,7 @@ class Setup():
             self.inumOrg = '%s!0001!%s' % (self.baseInum, twoQuads)
         if not self.inumAppliance:
             twoQuads = '%s.%s' % tuple([self.getQuad()] * 2)
-            self.inumOrg = '%s!0002!%s' % (self.baseInum, twoQuads)
+            self.inumAppliance = '%s!0002!%s' % (self.baseInum, twoQuads)
         if not self.oxauth_client_id:
             self.oxauth_client_id = '%s!0008!%s' % (self.baseInum, twoQuads)
         if not self.inumApplianceFN:
