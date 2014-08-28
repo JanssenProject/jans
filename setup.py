@@ -81,7 +81,7 @@ class Setup():
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
-        self.oxEncodePWCommand = '%s/ox-encrypt' % self.gluuHome
+        self.oxEncodePWCommand = '%s/bin/encode' % self.gluuHome
 
         self.oxtrust_openid_client_id = None
         self.oxtrust_uma_client_id = None
@@ -373,8 +373,6 @@ if __name__ == '__main__':
                 os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
                 os.makedirs(s.certFolder)
-            s.encode_passwords()
-            s.save_properties()
             f = open(s.ldapPassFn)
             f.write(s.ldapPass)
             f.close()
@@ -383,6 +381,7 @@ if __name__ == '__main__':
     try:
         s.gen_certs()
         s.add_ldap_schema()
+        s.encode_passwords()
         s.render_templates()
         s.setup_ldap()
         s.import_ldif()
