@@ -373,7 +373,7 @@ if __name__ == '__main__':
                 os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
                 os.makedirs(s.certFolder)
-            f = open(s.ldapPassFn)
+            f = open(s.ldapPassFn, w+)
             f.write(s.ldapPass)
             f.close()
             ok = True
