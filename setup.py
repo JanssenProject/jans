@@ -54,6 +54,15 @@ class Setup():
         self.inumOrgFN = None
         self.inumApplianceFN = None
 
+        self.outputFolder = './output'
+        self.templateFolder = './templates'
+        self.tomcatHome = '/opt/tomcat'
+        self.configFolder = '/etc/gluu/config'
+        self.certFolder = '/etc/certs'
+        self.gluuHome = '/opt/gluu'
+        self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
+        self.certGenerator = '%s/bin/certGenerator.sh' % self.gluuHome
+        
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
@@ -63,15 +72,6 @@ class Setup():
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapPassFn = '%s/.pw' % self.outputFolder
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
-
-        self.outputFolder = './output'
-        self.templateFolder = './templates'
-        self.tomcatHome = '/opt/tomcat'
-        self.configFolder = '/etc/gluu/config'
-        self.certFolder = '/etc/certs'
-        self.gluuHome = '/opt/gluu'
-        self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
-        self.certGenerator = '%s/bin/certGenerator.sh' % self.gluuHome
 
         self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-ldap
         self.apache_start_script = '/etc/init.d/apache2'
@@ -391,4 +391,3 @@ if __name__ == '__main__':
         s.logIt(traceback.format_exc(), True)
     finally:
         s.run(['rm', '-f', '/tmp/pw'])
-
