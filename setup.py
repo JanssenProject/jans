@@ -54,7 +54,8 @@ class Setup():
         self.inumOrgFN = None
         self.inumApplianceFN = None
         self.ldapPass = None
-
+        self.oxauth_client_id = None
+        
         self.outputFolder = './output'
         self.templateFolder = './templates'
         self.tomcatHome = '/opt/tomcat'
