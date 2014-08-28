@@ -235,7 +235,7 @@ class Setup():
 
     def save_properties(self):
         if not os.path.exists(self.outputFolder):
-            os.mkdir(self.outputFolder)
+            os.makedirs(self.outputFolder)
         p = Properties.Properties()
         p['hostname'] = self.hostname
         p['ip'] = self.ip
@@ -369,9 +369,9 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower()
         if (len(proceed) & (proceed[0] == 'y')):
             if not os.path.exists(s.configFolder):
-                os.mkdir(s.configFolder)
+                os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
-                os.mkdir(s.certFolder)
+                os.makedirs(s.certFolder)
             s.save_properties()
             f = open(s.ldapPassFn)
             f.write(s.ldapPass)
