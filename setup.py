@@ -190,12 +190,12 @@ class Setup():
     def check_properties(self):
         while not self.hostname:
             testhost = raw_input('Hostname of this server: ').strip()
-            if len(testhost.split('.')) < 3:
+            if len(testhost.split('.')) >= 3:
                 self.hostname = testhost
             else:
                 print 'The hostname has to be at least three domain components. Try again\n'
         while not self.ip:
-            testIP = raw_input('IP address of the server: ' % self.hostname).strip()
+            testIP = raw_input('IP address of the server %s : ' % self.hostname).strip()
             if self.isIP(testIP):
                 self.ip = testIP
             else:
