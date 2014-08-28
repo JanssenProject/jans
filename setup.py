@@ -55,6 +55,7 @@ class Setup():
         self.inumApplianceFN = None
         self.ldapPass = None
         self.oxauth_client_id = None
+        self.oxauthClient_pw = None
         
         self.outputFolder = './output'
         self.templateFolder = './templates'
