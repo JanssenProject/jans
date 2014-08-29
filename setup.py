@@ -281,7 +281,8 @@ class Setup():
         cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
         self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
         self.oxauthClient_pw = self.getPW()
-        self.oxauthClient_encoded_pw(self.oxauthClient_pw)
+        cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
+        self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
 
     def setup_ldap(self):
         self.run([self.ldapSetupCommand, '--no-prompt',
