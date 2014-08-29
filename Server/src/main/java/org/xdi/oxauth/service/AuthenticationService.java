@@ -1,9 +1,23 @@
 package org.xdi.oxauth.service;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -19,20 +33,17 @@ import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeAction;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdAttribute;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.faces.context.FacesContext;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.Map.Entry;
+import org.xdi.util.StringHelper;
 
 /**
  * Authentication service methods
@@ -45,6 +56,7 @@ import java.util.Map.Entry;
 public class AuthenticationService {
 
     private static final String STORED_REQUEST_PARAMETERS = "stored_request_parameters";
+    private static final String STORED_ORIGIN_HEADERS = "stored_origin_headers";
 
 	@Logger
     private Log log;
@@ -337,6 +349,32 @@ public class AuthenticationService {
     	
     	return null;
     }
+
+	public void storeRequestHeadersInSession(HttpServletRequest request) {
+		String originHeaders = request.getParameter(AuthorizeRequestParam.ORIGIN_HEADERS);
+		if (StringHelper.isEmpty(originHeaders)) {
+			return;
+		}
+
+        log.debug("Storing origin_headers: '{0}'", originHeaders);
+		Context sessionContext = Contexts.getSessionContext();
+		sessionContext.set(STORED_ORIGIN_HEADERS, originHeaders);
+		
+//		SessionIdAttribute sessionIdAttribute = new SessionIdAttribute();
+//		sessionIdAttribute.setName(STORED_ORIGIN_HEADERS);
+//		sessionIdAttribute.setValue(originHeaders);
+//		sessionIdService.addSessionAttribute(sessionIdService.getSessionIdFromCookies(request), sessionIdAttribute);
+	}
+
+	public String getRequestHeadersFromSession() {
+		Context sessionContext = Contexts.getSessionContext();
+		
+		if (sessionContext.isSet(STORED_ORIGIN_HEADERS)) {
+			return (String) sessionContext.get(STORED_ORIGIN_HEADERS);
+		}
+		
+		return null;
+	}
 
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);

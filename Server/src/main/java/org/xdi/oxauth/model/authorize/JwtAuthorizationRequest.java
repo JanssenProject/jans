@@ -311,10 +311,10 @@ public class JwtAuthorizationRequest {
             JSONObject claimsJsonObject = jsonPayload.getJSONObject("claims");
 
             if (claimsJsonObject.has("userinfo")) {
-                userInfoMember = new UserInfoMember(jsonPayload.getJSONObject("userinfo"));
+                userInfoMember = new UserInfoMember(claimsJsonObject.getJSONObject("userinfo"));
             }
             if (claimsJsonObject.has("id_token")) {
-                idTokenMember = new IdTokenMember(jsonPayload.getJSONObject("id_token"));
+                idTokenMember = new IdTokenMember(claimsJsonObject.getJSONObject("id_token"));
             }
         }
     }

@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -28,6 +29,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/uma/scopes/icons")
 @Name("umaScopeIconRestWebService")
+@Api(value= "/uma/scopes/icons", description = "UMA Scope Icon endpoint provides scope icon by scope id.")
 public class ScopeIconWS {
 
     @Logger

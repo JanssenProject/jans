@@ -1,5 +1,7 @@
 package org.xdi.oxauth.jwk.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -27,6 +29,7 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum Date: 11.15.2011
  */
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "JWK Endpoint provides list of JWK used by server. A JSON Web Key (JWK) is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].")
 public interface JwkRestWebService {
 
     /**

@@ -2,18 +2,14 @@ from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
-from org.xdi.oxauth.service import UserService
-from org.xdi.oxauth.service import ClientService
-from org.xdi.oxauth.service import AuthenticationService
+from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
-from java.util import Arrays
-from java.util import HashMap
-from java.util import IdentityHashMap
-from org.xdi.oxauth.model.common import User
+from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
+from org.xdi.oxauth.model.common import User, CustomAttribute
 
 import java
 
@@ -112,6 +108,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
         saml_map_user = False
         saml_enroll_user = False
+        saml_enroll_all_user_attr = False
         # Use saml_deployment_type only if there is no attributes mapping
         if (configurationAttributes.containsKey("saml_deployment_type")):
             saml_deployment_type = StringHelper.toLowerCase(configurationAttributes.get("saml_deployment_type").getValue2())
@@ -121,6 +118,38 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
             if (StringHelper.equalsIgnoreCase(saml_deployment_type, "enroll")):
                 saml_enroll_user = True
+
+            if (StringHelper.equalsIgnoreCase(saml_deployment_type, "enroll_all_attr")):
+                saml_enroll_all_user_attr = True
+
+        saml_allow_basic_login = False
+        if (configurationAttributes.containsKey("saml_allow_basic_login")):
+            saml_allow_basic_login = StringHelper.toBoolean(configurationAttributes.get("saml_allow_basic_login").getValue2(), False)
+
+        use_basic_auth = False
+        if (saml_allow_basic_login):
+            basic_auth = requestParameters.get("basic_auth")
+            if (ArrayHelper.isNotEmpty(basic_auth)):
+                use_basic_auth = StringHelper.toBoolean(basic_auth[0], False)
+
+        if ((step == 1) and saml_allow_basic_login and use_basic_auth):
+            print "Saml authenticate for step 1. Basic authentication"
+
+            context.set("saml_count_login_steps", 1)
+
+            credentials = Identity.instance().getCredentials()
+            user_name = credentials.getUsername()
+            user_password = credentials.getPassword()
+
+            logged_in = False
+            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+                userService = UserService.instance()
+                logged_in = userService.authenticate(user_name, user_password)
+
+            if (not logged_in):
+                return False
+
+            return True
 
         if (step == 1):
             print "Saml authenticate for step 1"
@@ -225,6 +254,45 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                     print "Saml authenticate for step 1. Attempting to add user", saml_user_uid, " with next attributes", newUser.getCustomAttributes()
 
                     find_user_by_uid = userService.addUser(newUser)
+                    print "Saml authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
+            elif (saml_enroll_all_user_attr):
+                print "Saml authenticate for step 1. Attempting to find user by oxExternalUid: saml:" + saml_user_uid
+
+                # Check if the is user with specified saml_user_uid
+                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
+
+                if (find_user_by_uid == None):
+                    print "Saml authenticate for step 1. Failed to find user"
+
+                    user = User()
+                    customAttributes = ArrayList()
+                    for key in attributes.keySet():
+                        ldapAttributes = attributeService.getAllAttributes()
+                        for ldapAttribute in ldapAttributes:
+                            saml2Uri = ldapAttribute.getSaml2Uri()
+                            if(saml2Uri == None):
+                                saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
+                            if(saml2Uri == key):
+                                attribute = CustomAttribute(ldapAttribute.getName())
+                                attribute.setValues(attributes.get(key))
+                                customAttributes.add(attribute)
+
+                    attribute = CustomAttribute("oxExternalUid")
+                    attribute.setValue("saml:" + saml_user_uid)
+                    customAttributes.add(attribute)
+                    user.setCustomAttributes(customAttributes)
+
+                    if(user.getAttribute("sn") == None):
+                        attribute = CustomAttribute("sn")
+                        attribute.setValue(saml_user_uid)
+                        customAttributes.add(attribute)
+
+                    if(user.getAttribute("cn") == None):
+                        attribute = CustomAttribute("cn")
+                        attribute.setValue(saml_user_uid)
+                        customAttributes.add(attribute)
+
+                    find_user_by_uid = userService.addUser(user)
                     print "Saml authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
@@ -370,7 +438,15 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/auth/saml/samllogin.xhtml"
+            saml_allow_basic_login = False
+            if (configurationAttributes.containsKey("saml_allow_basic_login")):
+                saml_allow_basic_login = StringHelper.toBoolean(configurationAttributes.get("saml_allow_basic_login").getValue2(), False)
+
+            if (saml_allow_basic_login):
+                return "/login.xhtml"
+            else:
+                return "/auth/saml/samllogin.xhtml"
+
         return "/auth/saml/samlpostlogin.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):

@@ -1,5 +1,7 @@
 package org.xdi.oxauth.token.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum Date: 09.21.2011
  */
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "Token Endpoint is used to obtain an Access Token, an ID Token, and optionally a Refresh Token. The RP (Client) sends a Token Request to the Token Endpoint to obtain a Token Response")
 public interface TokenRestWebService {
 
     @POST

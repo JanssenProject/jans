@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -53,6 +54,8 @@ public class ExternalAuthenticationService implements Serializable {
 
 	private static final long serialVersionUID = -1225880597520443390L;
 
+	public final static String AMR_METHOD_PREFIX = "https://schema.gluu.org/openid/amr/method/";
+
 	private final static String EVENT_TYPE = "ExternalAuthenticationTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
@@ -62,9 +65,9 @@ public class ExternalAuthenticationService implements Serializable {
 
 //	private transient ExternalAuthenticatorConfiguration defaultExternalAuthenticator;
 
-	private transient Map<String,  ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations;
-	private transient Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> externalAuthenticatorConfigurationsByUsageType;
-	private transient Map<AuthenticationScriptUsageType, ExternalAuthenticatorConfiguration> defaultExternalAuthenticators;
+	private Map<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations;
+	private Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> externalAuthenticatorConfigurationsByUsageType;
+	private Map<AuthenticationScriptUsageType, ExternalAuthenticatorConfiguration> defaultExternalAuthenticators;
 
 	@Logger
 	private Log log;
@@ -471,6 +474,36 @@ public class ExternalAuthenticationService implements Serializable {
         return externalAuthenticatorConfiguration;
 	}
 
+	public ExternalAuthenticatorConfiguration determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType usageType, List<String> amrValues) {
+		List<String> authModes = getAuthModesByAmrValues(amrValues);
+		if (authModes.size() > 0) {
+			for (String authMode : authModes) {
+				for (ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration : this.externalAuthenticatorConfigurationsByUsageType.get(usageType)) {
+					if (StringHelper.equalsIgnoreCase(authMode, externalAuthenticatorConfiguration.getName())) {
+						return externalAuthenticatorConfiguration;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private List<String> getAuthModesByAmrValues(List<String> amrValues) {
+		List<String> authModes = new ArrayList<String>();
+
+		for (String amrValue : amrValues) {
+			if (StringHelper.isNotEmpty(amrValue) && StringHelper.toLowerCase(amrValue).startsWith(AMR_METHOD_PREFIX)) {
+				String authMode = amrValue.substring(AMR_METHOD_PREFIX.length());
+				if (externalAuthenticatorConfigurations.containsKey(StringHelper.toLowerCase(authMode))) {
+					authModes.add(authMode);
+				}
+			}
+		}
+		
+		return authModes;
+	}
+
 	public ExternalAuthenticatorConfiguration determineExternalAuthenticatorForWorkflow(AuthenticationScriptUsageType usageType, ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
     	// Validate API version
         int apiVersion = executeExternalAuthenticatorGetApiVersion(externalAuthenticatorConfiguration);
@@ -516,13 +549,28 @@ public class ExternalAuthenticationService implements Serializable {
 	}
 
 	public ExternalAuthenticatorConfiguration getExternalAuthenticatorConfiguration(String name) {
-		for (ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration : this.externalAuthenticatorConfigurations.values()) {
-			if (StringHelper.equalsIgnoreCase(name, externalAuthenticatorConfiguration.getName())) {
-				return externalAuthenticatorConfiguration;
+		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
+			if (StringHelper.equalsIgnoreCase(name, externalAuthenticatorConfigurationEntry.getKey())) {
+				return externalAuthenticatorConfigurationEntry.getValue();
 			}
 		}
 		
 		return null;
+	}
+
+	public List<ExternalAuthenticatorConfiguration> getExternalAuthenticatorConfigurations() {
+		return new ArrayList<ExternalAuthenticatorConfiguration>(this.externalAuthenticatorConfigurations.values());
+	}
+
+	public  List<String> getAmrValuesList() {
+		List<String> amrValues = new ArrayList<String>();
+
+		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
+			String amrValue = AMR_METHOD_PREFIX + externalAuthenticatorConfigurationEntry.getKey();
+			amrValues.add(amrValue);
+		}
+		
+		return amrValues;
 	}
 
 	private boolean isValidateUsageType(AuthenticationScriptUsageType usageType, ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
@@ -555,5 +603,9 @@ public class ExternalAuthenticationService implements Serializable {
 		
 		return false;
 	}
+
+    public static ExternalAuthenticationService instance() {
+        return (ExternalAuthenticationService) Component.getInstance(ExternalAuthenticationService.class);
+    }
 
 }

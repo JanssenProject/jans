@@ -70,6 +70,7 @@
                             <input type="hidden" name="request" value="#{param.request}"/>
                             <input type="hidden" name="auth_mode" value="#{param.auth_mode}"/>
                             <input type="hidden" name="auth_level" value="#{param.auth_level}"/>
+                            <input type="hidden" name="basic_auth" value="true"/>
 
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
@@ -134,10 +135,12 @@
                                     </div>
                                 </div>
                                 <div class="login-panel">
-                                 	<h:commandButton id="externalAuthButton"
-                                   		value="Use External Authentification"
-                                    	action="#{authenticator.authenticate}"/>
-									<s:link view="/auth/inboundSaml/redirectToSaml.xhtml" styleClass="addAttribute" value="Use External Authentification"  />
+                                	<s:fragment rendered="#{saml_idp_auth_request_uri != Null}">
+                                		<a id="externalAuthButton"
+											href="#{saml_idp_auth_request_uri}">
+                                            <input type="button" value="Use External Authentification" />
+										</a>
+                                	</s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>

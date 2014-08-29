@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -124,6 +127,16 @@ public class ServerUtil {
             }
         }
         return p_str;
+    }
+
+    public static ScheduledExecutorService createExecutor() {
+        return Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+            public Thread newThread(Runnable p_r) {
+                Thread thread = new Thread(p_r);
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
     }
 
     public static ResourceSetPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {

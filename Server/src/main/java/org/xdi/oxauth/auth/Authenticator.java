@@ -348,6 +348,11 @@ public class Authenticator implements Serializable {
 				// Redirect user to alternative login workflow
 				String redirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(
                         externalAuthenticatorConfiguration, this.authStep);
+
+				if (StringHelper.isEmpty(redirectTo)) {
+					redirectTo = "/login.xhtml";
+				}
+
 				log.debug(
 						"Redirect to page: {0}. Force to use auth_mode: '{1}'",
 						redirectTo, determinedAuthMode);

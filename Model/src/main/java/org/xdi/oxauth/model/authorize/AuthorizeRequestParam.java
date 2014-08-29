@@ -21,8 +21,10 @@ public interface AuthorizeRequestParam {
     public static final String ID_TOKEN_HINT = "id_token_hint";
     public static final String LOGIN_HINT = "login_hint";
     public static final String ACR_VALUES = "acr_values";
+    public static final String AMR_VALUES = "amr_values";
     public static final String CLAIMS = "claims";
     public static final String REGISTRATION = "registration";
     public static final String REQUEST = "request";
     public static final String REQUEST_URI = "request_uri";
+    public static final String ORIGIN_HEADERS = "origin_headers";
 }

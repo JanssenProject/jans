@@ -14,7 +14,9 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.HttpMethod;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
@@ -57,7 +59,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
-        registerRequest.setScopes(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
+        registerRequest.setScopes(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
         registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setPolicyUri("http://www.gluu.org/policy");
@@ -79,10 +81,16 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getClaims().get(SCOPES.toString()));
         JSONArray scopesJsonArray = new JSONArray(response.getClaims().get(SCOPES.toString()));
-        assertEquals(scopesJsonArray.get(0), "openid");
-        assertEquals(scopesJsonArray.get(1), "clientinfo");
-        assertEquals(scopesJsonArray.get(2), "profile");
-        assertEquals(scopesJsonArray.get(3), "email");
+        List<String> scopes = new ArrayList<String>();
+        for (int i = 0; i < scopesJsonArray.length(); i++) {
+            scopes.add(scopesJsonArray.get(i).toString());
+        }
+        assertTrue(scopes.contains("openid"));
+        assertTrue(scopes.contains("address"));
+        assertTrue(scopes.contains("email"));
+        assertTrue(scopes.contains("profile"));
+        assertTrue(scopes.contains("phone"));
+        assertTrue(scopes.contains("clientinfo"));
 
         clientId1 = response.getClientId();
         registrationAccessToken1 = response.getRegistrationAccessToken();

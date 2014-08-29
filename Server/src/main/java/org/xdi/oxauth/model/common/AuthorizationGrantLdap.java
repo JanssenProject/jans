@@ -15,6 +15,9 @@ import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,6 +28,16 @@ import java.util.Map;
 public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     private static final Logger LOGGER = Logger.getLogger(AuthorizationGrantLdap.class);
+
+    private static final int THREADS_COUNT = 200;
+
+    private final ExecutorService executorService = Executors.newFixedThreadPool(THREADS_COUNT, new ThreadFactory() {
+        public Thread newThread(Runnable p_r) {
+            Thread thread = new Thread(p_r);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     private final GrantService m_grantService = GrantService.instance();
 
@@ -37,18 +50,20 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public String checkScopesPolicy(String scope) {
         final String result = super.checkScopesPolicy(scope);
         save();
-        // yuriyz: Check, maybe store scopes in asynchronous call to release thread faster
-//        Executors.newSingleThreadExecutor().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                save();
-//            }
-//        });
         return result;
     }
 
     @Override
     public void save() {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                saveImpl();
+            }
+        });
+    }
+
+    private void saveImpl() {
         String grantId = getGrantId();
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
             final List<TokenLdap> grants = m_grantService.getGrantsByGrantId(grantId);
@@ -114,12 +129,20 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode, accessToken, claims);
         	if (idToken.getExpiresIn() > 0) {
-        		persist(asToken(idToken));
+                final TokenLdap tokenLdap = asToken(idToken);
+                tokenLdap.setAuthLevel(authLevel);
+                tokenLdap.setAuthMode(authMode);
+                persist(tokenLdap);
         	}
+
+            // is it really neccessary to propagate to all tokens?
+            setAuthLevel(authLevel);
+            setAuthMode(authMode);
+            save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);

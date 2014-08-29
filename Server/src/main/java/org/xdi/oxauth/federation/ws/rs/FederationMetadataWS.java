@@ -1,5 +1,7 @@
 package org.xdi.oxauth.federation.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.SecurityContext;
  * @version 0.9, 11/09/2012
  */
 @Path("/oxauth")
+@Api(value="/oxauth", description = "Federation Metadata Endpoint provided metadata information about federation.")
 public interface FederationMetadataWS {
 
     @GET

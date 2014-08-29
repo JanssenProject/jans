@@ -37,7 +37,8 @@ public interface IAuthorizationGrant {
     public RefreshToken createRefreshToken();
 
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException;
+                                 Map<String, String> claims, String authLevel, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException;
 
     public RefreshToken getRefreshToken(String refreshTokenCode);
 
@@ -107,5 +108,8 @@ public interface IAuthorizationGrant {
 
     public void setAuthMode(String authMode);
 
+    /**
+     * Saves changes asynchronously
+     */
     public void save();
 }

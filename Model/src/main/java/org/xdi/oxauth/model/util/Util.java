@@ -100,4 +100,16 @@ public class Util {
         }
         return result;
     }
+
+    public static List<String> jsonArrayStringAsList(String jsonString) throws JSONException {
+        final List<String> result = new ArrayList<String>();
+        if (StringUtils.isNotBlank(jsonString)) {
+        	JSONArray jsonArray = new JSONArray(jsonString);
+        	
+        	return asList(jsonArray);
+        }
+
+        return result;
+    }
+
 }

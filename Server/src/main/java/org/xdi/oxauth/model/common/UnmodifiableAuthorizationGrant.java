@@ -73,7 +73,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+                                 Map<String, String> claims, String authMode, String authLevel) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 

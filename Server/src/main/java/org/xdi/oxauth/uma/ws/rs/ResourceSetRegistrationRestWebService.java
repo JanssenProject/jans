@@ -1,17 +1,10 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -30,6 +23,7 @@ import java.util.List;
  * Date: 10/03/2012
  */
 @Path("/host/rsrc/resource_set")
+@Api(value="/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public interface ResourceSetRegistrationRestWebService {
 	@PUT
 	@Path("{rsid}")

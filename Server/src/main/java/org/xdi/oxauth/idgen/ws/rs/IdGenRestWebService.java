@@ -1,5 +1,8 @@
 package org.xdi.oxauth.idgen.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -36,6 +39,7 @@ import java.util.List;
 
 @Name("idGenWS")
 @Path("/id")
+@Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {
 
     private static class UnauthorizedResponseHolder {
@@ -64,13 +68,30 @@ public class IdGenRestWebService {
     @GET
     @Path("/{prefix}/{type}/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response generateJsonInum(@PathParam("prefix") String prefix, @PathParam("type") String type, @HeaderParam("Authorization") String p_authorization) {
+    @ApiOperation(
+            value = "Generates ID for given prefix and type.",
+            notes = "Generates ID for given prefix and type. ",
+            response = Response.class,
+            responseContainer = "String"
+    )
+    public Response generateJsonInum(
+            @PathParam("prefix") @ApiParam(value="Prefix for id. E.g. if prefix is @!1111 and server will generate id: !0000 then ID returned by service would be: @!1111!0000", required = true)
+            String prefix,
+            @PathParam("type") @ApiParam(value="Type of id", required = true, allowableValues = "PEOPLE, ORGANIZATION, APPLIANCE, GROUP, SERVER, ATTRIBUTE, TRUST_RELATIONSHIP, CLIENTS")
+            String type,
+            @HeaderParam("Authorization") String p_authorization) {
         return generateId(prefix, type, p_authorization, MediaType.APPLICATION_JSON);
     }
 
     @GET
     @Path("/{prefix}/{type}/")
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(
+            value = "Generates ID for given prefix and type.",
+            notes = "Generates ID for given prefix and type. ",
+            response = Response.class,
+            responseContainer = "String"
+    )
     public Response generateTextInum(@PathParam("prefix") String prefix, @PathParam("type") String type, @HeaderParam("Authorization") String p_authorization) {
         return generateId(prefix, type, p_authorization, MediaType.TEXT_PLAIN);
     }
@@ -78,14 +99,36 @@ public class IdGenRestWebService {
     @GET
     @Path("/{prefix}/{type}/")
     @Produces(MediaType.TEXT_XML)
-    public Response generateXmlInum(@PathParam("prefix") String prefix, @PathParam("type") String type, @HeaderParam("Authorization") String p_authorization) {
+    @ApiOperation(
+            value = "Generates ID for given prefix and type.",
+            notes = "Generates ID for given prefix and type. ",
+            response = Response.class,
+            responseContainer = "String"
+    )
+    public Response generateXmlInum(
+            @PathParam("prefix") @ApiParam(value="Prefix for id. E.g. if prefix is @!1111 and server will generate id: !0000 then ID returned by service would be: @!1111!0000", required = true)
+            String prefix,
+            @PathParam("type") @ApiParam(value="Type of id", required = true, allowableValues = "PEOPLE, ORGANIZATION, APPLIANCE, GROUP, SERVER, ATTRIBUTE, TRUST_RELATIONSHIP, CLIENTS")
+            String type,
+            @HeaderParam("Authorization") String p_authorization) {
         return generateId(prefix, type, p_authorization, MediaType.TEXT_XML);
     }
 
     @GET
     @Path("/{prefix}/{type}/")
     @Produces(MediaType.TEXT_HTML)
-    public Response generateHtmlInum(@PathParam("prefix") String prefix, @PathParam("type") String type, @HeaderParam("Authorization") String p_authorization) {
+    @ApiOperation(
+            value = "Generates ID for given prefix and type.",
+            notes = "Generates ID for given prefix and type. ",
+            response = Response.class,
+            responseContainer = "String"
+    )
+    public Response generateHtmlInum(
+            @PathParam("prefix") @ApiParam(value="Prefix for id. E.g. if prefix is @!1111 and server will generate id: !0000 then ID returned by service would be: @!1111!0000", required = true)
+            String prefix,
+            @PathParam("type") @ApiParam(value="Type of id", required = true, allowableValues = "PEOPLE, ORGANIZATION, APPLIANCE, GROUP, SERVER, ATTRIBUTE, TRUST_RELATIONSHIP, CLIENTS")
+            String type,
+            @HeaderParam("Authorization") String p_authorization) {
         return generateId(prefix, type, p_authorization, MediaType.TEXT_HTML);
     }
 

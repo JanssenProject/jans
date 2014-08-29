@@ -7,6 +7,8 @@
     <action execute="#{identity.logout}"/>
     <action execute="#{logoutAction.redirect}"/>
 
+    <rewrite pattern="/logout" />
+
     <param name="id_token_hint"
            value="#{logoutAction.idTokenHint}"
            required="true"/>

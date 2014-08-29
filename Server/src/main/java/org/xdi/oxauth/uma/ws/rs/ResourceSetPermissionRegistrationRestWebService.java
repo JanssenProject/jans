@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -27,6 +28,9 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 10/11/2012
  */
 @Path("/host/rsrc_pr")
+@Api(value="/host/rsrc_pr", description = "The endpoint at which the host registers permissions that it anticipates a " +
+        " requester will shortly be asking for from the AM. This AM's endpoint is part " +
+        " of resource set registration API.")
 public interface ResourceSetPermissionRegistrationRestWebService {
 	@PUT
 	@Path("{host}")

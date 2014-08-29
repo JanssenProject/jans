@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
 import javax.ws.rs.HeaderParam;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 10/16/2012
  */
 @Path("/requester/rpt")
+@Api(value = "/requester/rpt", description = "The endpoint at which the requester asks the AM to issue an RPT")
 public interface RptRestWebService {
 
 	@POST

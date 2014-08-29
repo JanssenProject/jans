@@ -1,5 +1,8 @@
 package org.xdi.oxauth.model.common;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -7,9 +10,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,19 +24,29 @@ public class SessionId implements Serializable {
 
     @LdapDN
     private String dn;
+
     @LdapAttribute(name = "uniqueIdentifier")
     private String id;
+
     @LdapAttribute(name = "lastModifiedTime")
     private Date lastUsedAt;
+
     @LdapAttribute(name = "oxAuthUserDN")
     private String userDn;
+
     @LdapAttribute(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
+
     @LdapAttribute(name = "oxAuthPermissionGranted")
     private Boolean permissionGranted;
+
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
+    
+    @LdapJsonObject
+    @LdapAttribute(name = "oxAuthSessionAttribute")
+    private SessionIdAttribute[] sessionIdAttributes;
 
     public SessionId() {
     }
@@ -111,7 +121,15 @@ public class SessionId implements Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
-    @Override
+    public SessionIdAttribute[] getSessionIdAttributes() {
+		return sessionIdAttributes;
+	}
+
+	public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
+		this.sessionIdAttributes = sessionIdAttributes;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

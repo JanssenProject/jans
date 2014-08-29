@@ -117,7 +117,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
-                            idToken = authorizationCodeGrant.createIdToken(nonce, null, accToken, null);
+                            idToken = authorizationCodeGrant.createIdToken(nonce, null, accToken, null, authorizationCodeGrant.getAuthLevel(), authorizationCodeGrant.getAuthMode());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -155,7 +155,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         IdToken idToken = null;
                         if (authorizationGrant.getScopes().contains("openid")) {
-                            idToken = authorizationGrant.createIdToken(null, null, null, null);
+                            idToken = authorizationGrant.createIdToken(null, null, null, null, authorizationGrant.getAuthLevel(), authorizationGrant.getAuthMode());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -178,7 +178,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
-                        idToken = clientCredentialsGrant.createIdToken(null, null, null, null);
+                        idToken = clientCredentialsGrant.createIdToken(null, null, null, null, clientCredentialsGrant.getAuthLevel(), clientCredentialsGrant.getAuthMode());
                     }
 
                     builder.entity(getJSonResponse(accessToken,
@@ -214,7 +214,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
-                            idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(null, null, null, null);
+                            idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(null, null, null, null, resourceOwnerPasswordCredentialsGrant.getAuthLevel(), resourceOwnerPasswordCredentialsGrant.getAuthMode());
                         }
 
                         builder.entity(getJSonResponse(accessToken,

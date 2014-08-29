@@ -189,11 +189,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
 
-        String idToken = authorizationResponse.getIdToken();
+        String accessToken = authorizationResponse.getAccessToken();
 
         // 2. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(idToken);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 403, "Unexpected response code: " + userInfoResponse.getStatus());

@@ -119,15 +119,8 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
-        IdToken idToken = grant.createIdToken(nonce, authorizationCode, accessToken, claims);
-
-        idToken.setAuthLevel(getAuthLevel());
-        idToken.setAuthMode(getAuthMode());
-
-        grant.save(); // call save after object modification!!!
-
-        return idToken;
+                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+        return grant.createIdToken(nonce, authorizationCode, accessToken, claims, authLevel, authMode);
     }
 
     /**
@@ -368,6 +361,9 @@ public class AuthorizationGrant implements IAuthorizationGrant {
         grant.setAuthMode(authMode);
     }
 
+    /**
+     * Saves changes asynchronously
+     */
     @Override
     public void save() {
         grant.save();

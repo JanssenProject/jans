@@ -1,5 +1,7 @@
 package org.xdi.oxauth.register.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -21,6 +23,7 @@ import javax.ws.rs.core.SecurityContext;
  * @version 0.1, 01.11.2012
  */
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "The Client Registration Endpoint is an OAuth 2.0 Protected Resource through which a new Client registration can be requested. The OpenID Provider MAY require an Initial Access Token that is provisioned out-of-band (in a manner that is out of scope for this specification) to restrict registration requests to only authorized Clients or developers.")
 public interface RegisterRestWebService {
 
     /**

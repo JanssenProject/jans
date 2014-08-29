@@ -1,6 +1,5 @@
 package org.xdi.oxauth.model.common;
 
-import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
@@ -24,7 +23,7 @@ import java.util.Map;
 
 public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
 
-    private static final Logger LOGGER = Logger.getLogger(AuthorizationGrantInMemory.class);
+//    private static final Logger LOGGER = Logger.getLogger(AuthorizationGrantInMemory.class);
 
     private TokenIssuerObserver tokenIssuerObserver;
     private AuthorizationGrant parentRef;
@@ -114,7 +113,7 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         if (getIdToken() == null) {
             IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, claims);
             setIdToken(idToken);

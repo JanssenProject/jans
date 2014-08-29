@@ -38,6 +38,8 @@
             value="#{authorizeAction.loginHint}"/>
     <param name="acr_values"
            value="#{authorizeAction.acrValues}"/>
+    <param name="amr_values"
+           value="#{authorizeAction.amrValues}"/>
     <param name="request"
            value="#{authorizeAction.request}"/>
     <param name="request_uri"

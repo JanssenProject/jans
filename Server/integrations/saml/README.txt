@@ -35,7 +35,7 @@ This module has next properties:
    should map 'Persistent Id' to local user account. If this property has 'enroll' value Saml script should add new user to local LDAP
    with status 'register'. In order to map IDP attributes to local attributes it uses propertiessaml_idp_attributes_list and
    saml_local_attributes_list.
-   Allowed values: map/enroll
+   Allowed values: map/enroll/enroll_all_attr
    Example: enroll
 
 7) saml_validate_response - Specify if Saml script should valide Saml response signature. The path to IdP certificate should be specified in
@@ -70,3 +70,5 @@ This module has next properties:
     return True/False
 
     Saml scripts calls init method at initialization. And calls postLogin after user log in order to execute additional custom workflow.
+12) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
+   Example: false

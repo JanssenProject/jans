@@ -1,5 +1,7 @@
 package org.xdi.oxauth.clientinfo.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -12,6 +14,7 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum Date: 07.19.2012
  */
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.")
 public interface ClientInfoRestWebService {
 
     @GET

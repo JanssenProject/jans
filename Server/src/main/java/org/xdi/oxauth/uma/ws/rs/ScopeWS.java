@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/uma/scopes")
 @Name("umaScopeRestWebService")
+@Api(value="/uma/scopes", description = "UMA Scope Endpoint provides scope description (json document) by scope id.")
 public class ScopeWS {
 
     @Logger

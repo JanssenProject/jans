@@ -1,5 +1,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -20,6 +22,7 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum Date: 09.20.2011
  */
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
 public interface AuthorizeRestWebService {
 
     /**
@@ -53,6 +56,11 @@ public interface AuthorizeRestWebService {
      * @param acrValues        Requested Authentication Context Class Reference values. Space-separated string that
      *                         specifies the acr values that the Authorization Server is being requested to use for
      *                         processing this Authentication Request, with the values appearing in order of preference.
+     * @param amrValues        Requested Authentication Methods References. JSON array of strings that are identifiers
+     *                         for authentication methods used in the authentication. For instance, values might indicate
+     *                         that both password and OTP authentication methods were used. The definition of particular
+     *                         values to be used in the amr Claim is beyond the scope of this specification.The amr value
+     *                         is an array of case sensitive strings.
      * @param request          A JWT  encoded OpenID Request Object.
      * @param requestUri       An URL that points to an OpenID Request Object.
      * @param requestSessionId
@@ -127,6 +135,7 @@ public interface AuthorizeRestWebService {
             @QueryParam("id_token_hint") String idTokenHint,
             @QueryParam("login_hint") String loginHint,
             @QueryParam("acr_values") String acrValues,
+            @QueryParam("amr_values") String amrValues,
             @QueryParam("request") String request,
             @QueryParam("request_uri") String requestUri,
             @QueryParam("request_session_id") String requestSessionId,
@@ -134,6 +143,7 @@ public interface AuthorizeRestWebService {
             @QueryParam("access_token") String accessToken,
             @QueryParam("auth_level") String authLevel,
             @QueryParam("auth_mode") String authMode,
+            @QueryParam("origin_headers") String originHeaders,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 
@@ -155,6 +165,7 @@ public interface AuthorizeRestWebService {
             @FormParam("id_token_hint") String idTokenHint,
             @FormParam("login_hint") String loginHint,
             @FormParam("acr_values") String acrValues,
+            @FormParam("amr_values") String amrValues,
             @FormParam("request") String request,
             @FormParam("request_uri") String requestUri,
             @FormParam("request_session_id") String requestSessionId,
@@ -162,6 +173,7 @@ public interface AuthorizeRestWebService {
             @FormParam("access_token") String accessToken,
             @FormParam("auth_level") String authLevel,
             @FormParam("auth_mode") String authMode,
+            @FormParam("origin_headers") String originHeaders,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 }

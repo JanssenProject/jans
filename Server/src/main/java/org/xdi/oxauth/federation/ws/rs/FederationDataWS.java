@@ -1,5 +1,7 @@
 package org.xdi.oxauth.federation.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -18,6 +20,8 @@ import javax.ws.rs.core.SecurityContext;
  */
 
 @Path("/oxauth")
+@Api(value = "/oxauth", description = "Federation Endpoint provides ability to send JOIN (to federation) requests.")
+
 public interface FederationDataWS {
     @POST
     @Path("/federation")

@@ -1,5 +1,6 @@
 package org.xdi.oxauth.introspection.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -30,6 +31,10 @@ import javax.ws.rs.core.Response;
  */
 @Name("introspectionWS")
 @Path("/introspection")
+@Api(value= "/introspection", description = "The Introspection Endpoint is an OAuth 2 Endpoint that responds to " +
+        "   HTTP GET and HTTP POST requests from token holders.  The endpoint " +
+        "   takes a single parameter representing the token (and optionally " +
+        "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
     @Logger

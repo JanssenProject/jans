@@ -13,12 +13,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
@@ -28,12 +24,9 @@ import org.xdi.oxauth.model.error.IErrorType;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.*;
 
@@ -317,7 +310,7 @@ public abstract class BaseTest {
             assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
             assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
             assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-            assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
+            assertTrue(response.getAcrValuesSupported().size() == 0, "The acrValuesSupported is not empty");
             assertTrue(response.getAmrValuesSupported().size() > 0, "The amrValuesSupported is empty");
             assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
             assertTrue(response.getIdTokenSigningAlgValuesSupported().size() > 0, "The idTokenSigningAlgValuesSupported is empty");

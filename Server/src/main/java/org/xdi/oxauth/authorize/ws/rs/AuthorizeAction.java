@@ -1,6 +1,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -33,8 +34,10 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.util.StringHelper;
 
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -47,7 +50,7 @@ public class AuthorizeAction {
 
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_id", "request", "request_uri"));
+            "ui_locales", "id_token_hint", "login_hint", "acr_values", "amr_values", "session_id", "request", "request_uri"));
 
     @Logger
     private Log log;
@@ -110,6 +113,7 @@ public class AuthorizeAction {
     private String idTokenHint;
     private String loginHint;
     private String acrValues;
+    private String amrValues;
     private String request;
     private String requestUri;
 
@@ -151,16 +155,34 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
+        final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
         final SessionId session = getSession();
+        authenticationService.storeRequestHeadersInSession((HttpServletRequest) externalContext.getRequest());
 
         if (session == null || session.getUserDn() == null) {
-            Map<String, String> parameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+            Map<String, String> parameterMap = externalContext.getRequestParameterMap();
 
             String redirectTo = "/login.xhtml";
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-                ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
+            	
+            	List<String> amrValuesList = null;
+            	try {
+					amrValuesList = Util.jsonArrayStringAsList(amrValues);
+				} catch (JSONException ex) {
+					invalidRequest();
+					return;
+				}
+            	
+            	ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration;
+            	
+            	if ((amrValuesList != null) && !amrValuesList.isEmpty()) {
+                	externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, amrValuesList);
+            	} else {
+            		externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
+            	}
 
                 if (externalAuthenticatorConfiguration == null) {
                     log.error("Failed to get ExternalAuthenticatorConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}", 1, authMode, authLevel);
@@ -532,7 +554,15 @@ public class AuthorizeAction {
         this.acrValues = acrValues;
     }
 
-    /**
+	public String getAmrValues() {
+		return amrValues;
+	}
+
+	public void setAmrValues(String amrValues) {
+		this.amrValues = amrValues;
+	}
+
+	/**
      * Returns a JWT encoded OpenID Request Object.
      *
      * @return A JWT encoded OpenID Request Object.

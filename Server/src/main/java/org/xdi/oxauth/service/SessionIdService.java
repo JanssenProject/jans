@@ -1,8 +1,17 @@
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -16,23 +25,18 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdAttribute;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 20/12/2012
  */
 
@@ -71,6 +75,33 @@ public class SessionIdService {
             log.error(e.getMessage(), e);
         }
         return "";
+    }
+
+    public String getSessionIdFromOpbsCookie(HttpServletRequest request) {
+        try {
+            final Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("opbs") /*&& cookie.getSecure()*/) {
+                        log.trace("Found session_id cookie: {0}", cookie.getValue());
+                        return cookie.getValue();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
+    }
+
+    public String getSessionIdFromCookies(HttpServletRequest request) {
+    	String sessionId = getSessionIdFromOpbsCookie(request);
+    	
+    	if (StringHelper.isEmpty(sessionId)) {
+    		sessionId = getSessionIdFromCookie(request);
+    	}
+
+    	return sessionId;
     }
 
     public void createSessionIdCookie(String sessionId) {
@@ -196,18 +227,15 @@ public class SessionIdService {
         }
 
         try {
+        	final SessionId entity = getSessionByDN(dn(sessionId));
             log.trace("Try to get session by id: {0} ...", sessionId);
-            final List<SessionId> entries = ldapEntryManager.findEntries(getBaseDn(), SessionId.class, Filter.create(String.format("uniqueIdentifier=%s", sessionId)));
-            if (entries != null && !entries.isEmpty()) {
-                final SessionId entity = entries.get(0);
+            if (entity != null) {
                 log.trace("Session dn: {0}", entity.getDn());
 
                 if (isSessionValid(entity)) {
                     return entity;
                 }
             }
-        } catch (LDAPException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -236,17 +264,14 @@ public class SessionIdService {
     }
 
     public void updateSessionWithLastUsedDate(SessionId p_sessionId, List<Prompt> prompts) {
-        try {
             if (!isPersisted(prompts)) {
                 return;
             }
 
             final Date newDate = new Date();
-            p_sessionId.setLastUsedAt(newDate);
-            ldapEntryManager.merge(p_sessionId);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    		p_sessionId.setLastUsedAt(newDate);
+
+    		updateSession(p_sessionId);
     }
 
     public void cleanUpSessions() {
@@ -284,6 +309,38 @@ public class SessionIdService {
         }
 
         return true;
+    }
+
+	public boolean updateSession(SessionId p_sessionId) {
+		try {
+			ldapEntryManager.merge(p_sessionId);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			
+			return false;
+		}
+
+		return true;
+	}
+    
+    public void addSessionAttribute(String sessionId, SessionIdAttribute sessionIdAttribute) {
+    	if (StringHelper.isEmpty(sessionId)) {
+    		return;
+    	}
+
+    	SessionId entity = getSessionId(sessionId);
+
+    	SessionIdAttribute[] sessionIdAttributes = entity.getSessionIdAttributes();
+    	SessionIdAttribute[] newSessionIdAttributes;
+    	if (ArrayHelper.isEmpty(sessionIdAttributes)) {
+    		newSessionIdAttributes = new SessionIdAttribute[] {sessionIdAttribute};
+    	} else {
+    		newSessionIdAttributes = ArrayHelper.arrayMerge(sessionIdAttributes, new SessionIdAttribute[] { sessionIdAttribute }); 
+    	}
+
+    	entity.setSessionIdAttributes(newSessionIdAttributes);
+    	
+    	updateSession(entity);
     }
 
 }

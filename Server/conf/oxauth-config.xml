@@ -44,16 +44,13 @@
         <grant-type>urn:ietf:params:oauth:grant-type:jwt-bearer</grant-type>
     </grant-types-supported>
     <acr-values-supported>
-        <acr>http://example.com/authn/auth_mode/duo</acr>
-        <acr>http://example.com/authn/auth_level/10</acr>
-        <acr>http://example.com/authn/auth_mode/toopher</acr>
         <!--acr>urn:mace:incommon:iap:silver</acr-->
         <!--acr>urn:mace:incommon:iap:bronze</acr-->
     </acr-values-supported>
     <amr-values-supported>
-        <amr>duo</amr>
-        <amr>10</amr>
-        <amr>toopher</amr>
+        <amr>https://schema.gluu.org/openid/amr/method/duo</amr>
+        <amr>https://schema.gluu.org/openid/amr/level/10</amr>
+        <amr>https://schema.gluu.org/openid/amr/method/toopher</amr>
     </amr-values-supported>
     <subject-types-supported>
         <subject-type>public</subject-type>

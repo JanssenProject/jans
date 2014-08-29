@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.RptStatusRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -20,6 +21,8 @@ import javax.ws.rs.core.Response;
  *         Date: 10/23/2012
  */
 @Path("/host/status")
+@Api(value="/host/status", description = "The endpoint at which the host requests the status of an RPT presented to it by a requester." +
+        " The endpoint is RPT introspection profile implementation defined by UMA specification")
 public interface RptStatusRestWebService {
 
     @POST

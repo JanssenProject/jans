@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -13,11 +14,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 /**
- * The endpoint at which the requester asks for authorizationto have a new permission.
+ * The endpoint at which the requester asks for authorization to have a new permission.
  * 
  * @author Yuriy Movchan Date: 10/25/2012
  */
 @Path("/requester/perm")
+@Api(value="/requester/perm", description = "RPT authorization endpoint. RPT is authorized with new permission(s).")
 public interface RptPermissionAuthorizationRestWebService {
 
 	@POST

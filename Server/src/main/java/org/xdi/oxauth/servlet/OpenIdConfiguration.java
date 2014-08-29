@@ -49,6 +49,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.VALI
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -66,6 +67,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.oxauth.service.ScopeService;
 
 /**
@@ -140,8 +142,9 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
             }
 
+            ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService.instance();
             JSONArray amrValuesSupported = new JSONArray();
-            for (String amr : ConfigurationFactory.getConfiguration().getAmrValuesSupported()) {
+            for (String amr : externalAuthenticationService.getAmrValuesList() /*ConfigurationFactory.getConfiguration().getAmrValuesSupported() */) {
                 amrValuesSupported.put(amr);
             }
             if (amrValuesSupported.length() > 0) {
