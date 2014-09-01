@@ -57,7 +57,7 @@ class Setup():
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
 
-        self.outputFolder = './output'
+	self.outputFolder = os.getcwd() + '/output'
         self.templateFolder = './templates'
         self.tomcatHome = '/opt/tomcat'
         self.configFolder = '/etc/gluu/config'
@@ -77,7 +77,7 @@ class Setup():
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
 
         self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-ldap
-        self.apache_start_script = '/etc/init.d/apache2'
+        self.apache_start_script = '/etc/init.d/httpd'
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
@@ -99,16 +99,17 @@ class Setup():
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
         self.config_ldif = '/opt/OpenDJ-2.6.0/config/config.ldif'
         self.user_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/100-user.ldif'
-        self.apache2_idp_conf = 'etc/apache2/sites-available/idp.conf'
+	self.apache2_conf = '/etc/httpd/conf/httpd.conf'
+        self.apache2_idp_conf = '/etc/httpd/conf.d/idp.conf'
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
-        self.ldif_base = '%s/ldif-base.ldif' % self.templateFolder
-        self.ldif_appliance = '%s/ldif-appliance.ldif' % self.templateFolder
-        self.ldif_attributes = '%s/ldif-attributes.ldif' % self.templateFolder
-        self.ldif_scopes = '%s/ldif-scopes.ldif' % self.templateFolder
-        self.ldif_clients = '%s/ldif-clients.ldif' % self.templateFolder
-        self.ldif_people = '%s/ldif-people.ldif' % self.templateFolder
-        self.ldif_groups = '%s/ldif-groups.ldif' % self.templateFolder
+        self.ldif_base = '%s/base.ldif' % self.outputFolder
+        self.ldif_appliance = '%s/appliance.ldif' % self.templateFolder
+        self.ldif_attributes = '%s/attributes.ldif' % self.templateFolder
+        self.ldif_scopes = '%s/scopes.ldif' % self.templateFolder
+        self.ldif_clients = '%s/clients.ldif' % self.templateFolder
+        self.ldif_people = '%s/people.ldif' % self.templateFolder
+        self.ldif_groups = '%s/groups.ldif' % self.templateFolder
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
         self.ce_files = {self.oxauth_ldap_properties: True,
@@ -118,8 +119,10 @@ class Setup():
                          self.tomcat_server_xml: True,
                          self.tomcat_gluuTomcatWrapper: True,
                          self.tomcat_oxauth_static_conf_json: True,
+			 self.ldap_setup_properties: False,
                          self.config_ldif: True,
                          self.user_schema_ldif: True,
+			 self.apache2_conf: True,
                          self.apache2_idp_conf: True,
                          self.etc_hosts: True,
                          self.etc_hostname: True,
@@ -144,6 +147,7 @@ class Setup():
             + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40))
 
     def logIt(self, s, errorLog=False):
+	print s
         if errorLog:
             f = open(self.logError, 'a')
             f.write('\n%s : ' % time.strftime('%X %x %Z'))
@@ -179,7 +183,8 @@ class Setup():
     def load_properties(self, fn):
         p = Properties.Properties()
         p.load(open(fn))
-        self.hostname = p['hostname']
+        self.hostname = p['hostName']
+	print self.hostname
         self.ip = p['ip']
         self.orgName = p['orgName']
         self.countryCode = p['countryCode']
@@ -285,20 +290,20 @@ class Setup():
         self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
 
     def setup_ldap(self):
-        self.run([self.ldapSetupCommand, '--no-prompt',
+        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
                   '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
                   '--acceptLicense'])
-        config_changes = [['set-global-configuration-prop',  '--set', 'ds-cfg-single-structural-objectclass-behavior:accept'],
-                          ['set-global-configuration-prop',  '--set', 'ds-cfg-allow-zero-length-values:true'],
-                          ['set-global-configuration-prop', '--policy-name', 'Default Password Policy',
+        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
+                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
+                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
                            '--set', 'allow-pre-encoded-passwords:true']]
         for changes in config_changes:
             self.run([self.ldapDsconfigCommand,
                      '--trustAll', '--no-prompt',
-                     '--hostname',  self.hostname,
+                     '--hostname',  'localhost',
                      '--port', '4444',
                      '--bindDN', self.ldap_binddn,
-                     '--adminPasswordFile', self.ldapPassFn] + changes)
+                     '--bindPasswordFile', self.ldapPassFn] + changes)
         # add proper indexes -- define a datastructure in __init__ and
         # iterate through it for dsconfig commands
 
@@ -319,10 +324,11 @@ class Setup():
     def render_templates(self):
         for fullPath in self.ce_files.keys():
             fn = os.path.split(fullPath)[-1]
+            self.logIt(fn, True)
             f = open(os.path.join(self.templateFolder, fn))
             s = f.read()
             f.close()
-            newFn = open(os.path.join(self.outputFolder, fn))
+            newFn = open(os.path.join(self.outputFolder, fn), 'w+')
             newFn.write(s % self.__dict__)
             newFn.close()
 
@@ -343,15 +349,16 @@ class Setup():
         self.run([self.apache_start_script, 'restart'])
         startOk = 'Directory Server has started successfully'
         tailq = Queue.Queue(maxsize=10)  # buffer at most 100 lines
-        p = subprocess.Popen(['tail', '-f', '%s/logs/error' % self.ldapBaseFolder], stdout=subprocess.PIPE)
+        p = subprocess.Popen(['tail', '-f', '%s/logs/errors' % self.ldapBaseFolder], stdout=subprocess.PIPE)
         starttime = time.time()
         while 1:
             line = p.stdout.readline()
+	    self.logIt(line)
             tailq.put(line)
             if (time.time() - starttime > self.ldapStartTimeOut):
                 self.logIt('LDAP startup timed out. Tomcat not started.', True)
                 break
-            if line.index(startOk) > -1:
+            if line.find(startOk) > -1:
                 self.logIt(startOk)
                 self.run([self.tomcat_start_script, 'restart'])
                 break
@@ -363,6 +370,7 @@ if __name__ == '__main__':
         s = Setup()
         setup_properties = './setup.properties'
         if os.path.isfile(setup_properties):
+	    print 'properties found'
             s.load_properties(setup_properties)
         s.check_properties()
         print '\n%s\n' % `s`
@@ -386,7 +394,7 @@ if __name__ == '__main__':
         s.import_ldif()
         s.copy_output()
         s.change_ownership()
-        s.restart_services()
+        s.restart_all_services()
         s.save_properties()
     except:
         s.logIt(traceback.format_exc(), True)
