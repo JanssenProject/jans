@@ -143,7 +143,6 @@ objectclass: organizationalUnit
 ou: request
 
 # oxTrust Federation configuration data - LEVEL 4
-# should perhaps be under ou=oxTrust,inum=<appliance-inum>,ou=applications,o=gluu
 dn: ou=trust,ou=federation,o=%(inumOrg)s,o=gluu
 objectclass: top
 objectclass: organizationalUnit
