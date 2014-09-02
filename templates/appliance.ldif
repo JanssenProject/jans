@@ -1,0 +1,13 @@
+dn: inum%(inumAppliance)s,ou=appliances,o=gluu
+objectClass: top
+objectClass: gluuAppliance
+inum: %(inumAppliance)s
+gluuMaxLogSize: 200
+gluuWhitePagesEnabled: disabled
+gluuOrgProfileMgt: disabled
+gluuManageIdentityPermission: enabled
+gluuFederationHostingEnabled: disabled
+gluuVdsCacheRefreshEnabled: disabled
+oxClusterType: Disabled
+gluuScimEnabled: enabled
+oxTrustStoreConf: {"useJreCertificates":true}

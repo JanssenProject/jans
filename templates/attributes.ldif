@@ -1,0 +1,812 @@
+#########################
+# Gluu Person Attributes
+#########################
+
+dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:givenName
+gluuAttributeName: givenName
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!B4B0
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: First Name
+displayName: First Name
+
+dn: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:uid
+gluuAttributeName: uid
+gluuAttributePrivacyLevel: level3
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!42E0
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Organizational Username
+displayName: Username
+
+dn: inum=%(inumOrg)s!0005!D2E0,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:memberOf
+gluuAttributeName: memberOf
+gluuAttributePrivacyLevel: level3
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!D2E0
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: memberOf
+displayName: memberOf
+
+dn: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:timezone
+gluuAttributeName: timezone
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!A901
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Timezone
+displayName: Timezone
+
+dn: inum=%(inumOrg)s!0005!8A11,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:secretQuestion
+gluuAttributeName: secretQuestion
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!8A11
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Secret Question
+displayName: Secret Question
+
+dn: inum=%(inumOrg)s!0005!C703,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:secretAnswer
+gluuAttributeName: secretAnswer
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!C703
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Secret Answer
+displayName: Secret Answer
+
+dn: inum=%(inumOrg)s!0005!6493,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:preferredLanguage
+gluuAttributeName: preferredLanguage
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!6493
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeViewType: whitePages
+description: Preferred Language
+displayName: Preferred Language
+
+dn: inum=%(inumOrg)s!0005!5CA2,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:iname
+gluuAttributeName: iname
+gluuAttributePrivacyLevel: level3
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!5CA2
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: iname
+displayName: iname
+
+dn: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:mail
+gluuAttributeName: mail
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!CAE3
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Primary Email Address
+displayName: Email
+
+dn: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:sn
+gluuAttributeName: sn
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!0C85
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Last Name
+displayName: Last Name
+
+dn: inum=%(inumOrg)s!0005!BCA8,ou=attributes,o=%(inumOrg)s,o=gluu
+gluuAttributePrivacyLevel: level3
+inum: %(inumOrg)s!0005!BCA8
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+urn: urn:mace:shibboleth:1.0:nameIdentifier
+gluuAttributeName: transientId
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeType: string
+gluuStatus: active
+gluuSAML1URI: urn:mace:shibboleth:1.0:nameIdentifier
+description: TransientId
+displayName: TransientId
+
+dn: inum=%(inumOrg)s!0005!BCB8,ou=attributes,o=%(inumOrg)s,o=gluu
+gluuAttributePrivacyLevel: level3
+inum: %(inumOrg)s!0005!BCB8
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+urn: urn:mace:shibboleth:1.0:nameIdentifier
+gluuAttributeName: persistentId
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeType: string
+gluuStatus: active
+gluuSAML1URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+description: PersistentId
+displayName: PersistentId
+
+dn: inum=%(inumOrg)s!0005!BCE8,ou=attributes,o=%(inumOrg)s,o=gluu
+gluuAttributePrivacyLevel: level3
+inum: %(inumOrg)s!0005!BCE8
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuSAML2URI: urn:oid:2.5.4.6
+urn: urn:gluu:dir:attribute-def:c
+gluuAttributeName: c
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+objectClass: top
+objectClass: gluuAttribute
+gluuAttributeType: string
+gluuStatus: active
+gluuSAML1URI: urn:mace:dir:attribute-def:c
+description: Country
+displayName: Country
+
+dn: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:displayName
+gluuAttributeName: displayName
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!2B29
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Display Name
+displayName: Display Name
+
+dn: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:photo1
+gluuAttributeName: photo1
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!EC32
+inum: %(inumOrg)s!0005!EC3A
+gluuAttributeType: photo
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Photo
+displayName: Photo
+
+dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:inum
+gluuAttributeName: inum
+gluuAttributePrivacyLevel: level3
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!29DA
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: XRI i-number
+displayName: i-number
+
+dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:o
+gluuAttributeName: o
+gluuAttributePrivacyLevel: level3
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!D03E
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Organization i-number
+displayName: Organization i-number
+
+dn: inum=%(inumOrg)s!0005!AAEE,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:userPassword
+gluuAttributeName: userPassword
+gluuAttributePrivacyLevel: level5
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuPerson
+inum: %(inumOrg)s!0005!AAEE
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: User secret string
+displayName: Password
+
+############################
+# InetOrgPerson Attributes
+#############################
+
+dn: inum=%(inumOrg)s!0005!C001,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:title
+gluuAttributeName: title
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!C001
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Organizational Title
+displayName: Title
+
+dn: inum=%(inumOrg)s!0005!4502,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:carLicense
+gluuAttributeName: carLicense
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!4502
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Vehicle Licence Plate Number
+displayName: Licencse Plate
+
+dn: inum=%(inumOrg)s!0005!BD22,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
+gluuAttributeName: facsimileTelephoneNumber
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!BD22
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Fax Telephone Number
+displayName: Fax Number
+
+dn: inum=%(inumOrg)s!0005!08E2,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:departmentNumber
+gluuAttributeName: departmentNumber
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!08E2
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Organizational Department
+displayName: Department
+
+dn: inum=%(inumOrg)s!0005!3D44,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:employeeType
+gluuAttributeName: employeeType
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!3D44
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Employee Type
+displayName: Employee Type
+
+dn: inum=%(inumOrg)s!0005!D054,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:cn
+gluuAttributeName: cn
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!D054
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Name search keywords
+displayName: Name search keywords
+
+dn: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:mobile
+gluuAttributeName: mobile
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!6DA6
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Mobile Telephone Number
+displayName: Mobile Telephone Number
+
+dn: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:homePhone
+gluuAttributeName: homePhone
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!0C18
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Home Telephone Number
+displayName: Home Telephone Number
+
+dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:st
+gluuAttributeName: st
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!E6B8
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: State or Province
+displayName: State or Province
+
+dn: inum=%(inumOrg)s!0005!42D8,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:manager
+gluuAttributeName: manager
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!42D8
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Manager
+displayName: Manager
+
+dn: inum=%(inumOrg)s!0005!6609,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:street
+gluuAttributeName: street
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!6609
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Street
+displayName: Street
+
+dn: inum=%(inumOrg)s!0005!E999,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:postOfficeBox
+gluuAttributeName: postOfficeBox
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!E999
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Postal Box
+displayName: PO Box
+
+dn: inum=%(inumOrg)s!0005!D0C9,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:employeeNumber
+gluuAttributeName: employeeNumber
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!D0C9
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Employee Number
+displayName: Employee Number
+
+dn: inum=%(inumOrg)s!0005!894A,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
+gluuAttributeName: preferredDeliveryMethod
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!894A
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Preferred Delivery Method
+displayName: Preferred Delivery Method
+
+dn: inum=%(inumOrg)s!0005!570B,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:telephoneNumber
+gluuAttributeName: telephoneNumber
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!570B
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Work Telephone Number
+displayName: Work Telephone Number
+
+dn: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:roomNumber
+gluuAttributeName: roomNumber
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!D90B
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Room Number
+displayName: Room Number
+
+dn: inum=%(inumOrg)s!0005!AC0B,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:secretary
+gluuAttributeName: secretary
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!AC0B
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: admin
+description: Secretary
+displayName: Secretary
+
+dn: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:homePostalAddress
+gluuAttributeName: homePostalAddress
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!27DB
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Home Address
+displayName: Home Address
+
+dn: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:l
+gluuAttributeName: l
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!6EEB
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: City
+displayName: City
+
+dn: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:postalCode
+gluuAttributeName: postalCode
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!2A3D
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Postal or Zip Code
+displayName: Postal Code
+
+dn: inum=%(inumOrg)s!0005!48EE,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:description
+gluuAttributeName: description
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: inetOrgPerson
+inum: %(inumOrg)s!0005!48EE
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Description
+displayName: Description
+
+###############################
+# gluuBasicPersona Attributes
+###############################
+
+dn: inum=%(inumOrg)s!0005!C000,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:nickName
+gluuAttributeName: nickName
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!C000
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Short name preferred to given name
+displayName: Nick Name
+
+dn: inum=%(inumOrg)s!0005!7730,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:middleName
+gluuAttributeName: middleName
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!7730
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Middle Name
+displayName: Middle Name
+
+dn: inum=%(inumOrg)s!0005!4B69,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:organizationDepartment
+gluuAttributeName: organizationDepartment
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!4B69
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Organization Department
+displayName: Department
+
+dn: inum=%(inumOrg)s!0005!79A4,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:nameSuffix
+gluuAttributeName: nameSuffix
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!79A4
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Name Suffix (i.e. Sr., Jr., Esq.)
+displayName: Name Suffix
+
+dn: inum=%(inumOrg)s!0005!CBA4,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:neighborhood
+gluuAttributeName: neighborhood
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!CBA4
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Neighborhood
+displayName: Neighborhood
+
+dn: inum=%(inumOrg)s!0005!D845,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:gender
+gluuAttributeName: gender
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!D845
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Gender
+displayName: Gender
+
+dn: inum=%(inumOrg)s!0005!E755,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:mace:dir:attribute-def:postalAddress
+gluuAttributeName: postalAddress
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!E755
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: postalAddress
+displayName: postalAddress
+
+dn: inum=%(inumOrg)s!0005!6B2A,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:workPhone
+gluuAttributeName: workPhone
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!6B2A
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: Work Telephone Number
+displayName: Work Telephone Number
+
+dn: inum=%(inumOrg)s!0005!7A30,ou=attributes,o=%(inumOrg)s,o=gluu
+urn: urn:gluu:dir:attribute-def:owner
+gluuAttributeName: owner
+gluuAttributePrivacyLevel: level3
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeOrigin: gluuBasicPersona
+inum: %(inumOrg)s!0005!7A30
+gluuAttributeType: string
+objectClass: top
+objectClass: gluuAttribute
+gluuStatus: active
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+description: owner
+displayName: owner
+
