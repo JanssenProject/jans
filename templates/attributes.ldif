@@ -691,3 +691,198 @@ inum: %(inumOrg)s!0005!48EE
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:description
+
+#########################
+# eduPerson Attributes
+#########################
+
+dn: inum=%(inumOrg)s!0005!4E0C,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!4E0C
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonAffiliation
+gluuAttributeName: eduPersonAffiliation
+description: Specifies the person's relationship(s) to the institution
+ in broad categories such as student, faculty, staff, alum, etc.
+displayName: eduPersonAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.1
+
+dn: inum=%(inumOrg)s!0005!E7BC,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!E7BC
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonNickName
+gluuAttributeName: eduPersonNickName
+description: Person's nickname, or the informal name by which they are accustomed to be hailed.
+displayName: eduPersonNickName
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.2
+
+dn: inum=%(inumOrg)s!0005!6366,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!6366
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonOrgDN
+gluuAttributeName: eduPersonOrgDN
+description: The distinguished name (DN) of the directory entry
+ representing the institution with which the person is associated.
+displayName: eduPersonOrgDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.3
+
+dn: inum=%(inumOrg)s!0005!ED0D,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!ED0D
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonOrgUnitDN
+gluuAttributeName: eduPersonOrgUnitDN
+description: The distinguished name(s) (DN) of the directory entries
+ representing the person's Organizational Unit(s). May be multivalued,
+ as for example, in the case of a faculty member with appointments in
+ multiple departments or a person who is a student in one department
+ and an employee in another.
+displayName: eduPersonOrgUnitDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.4
+
+dn: inum=%(inumOrg)s!0005!91E7,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!91E7
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrimaryAffiliation
+gluuAttributeName: eduPersonPrimaryAffiliation
+description: Specifies the person's primary relationship to the
+ institution in broad categories such as student, faculty, staff,
+ alum, etc. (See controlled vocabulary).
+displayName: eduPersonPrimaryAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.5
+
+dn: inum=%(inumOrg)s!0005!096B,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!096B
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrincipalName
+gluuAttributeName: eduPersonPrincipalName
+description: A scoped identifier for a person. It should be
+ represented in the form "user@scope" where 'user' is a
+ name-based identifier for the person and where 'scope'
+ defines a local security domain. Each value of 'scope' defines
+ a namespace within which the assigned identifiers MUST be unique.
+ Given this rule, if two eduPersonPrincipalName (ePPN) values are
+ the same at a given point in time, they refer to the same person.
+displayName: eduPersonPrincipalName
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.6
+
+dn: inum=%(inumOrg)s!0005!BF03,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!BF03
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonEntitlement
+gluuAttributeName: eduPersonEntitlement
+description: URI (either URN or URL) that indicates a set of rights to specific resources.
+displayName: eduPersonEntitlement
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.7
+
+dn: inum=%(inumOrg)s!0005!0247,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!0247
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrimaryOrgUnitDN
+gluuAttributeName: eduPersonPrimaryOrgUnitDN
+description: The distinguished name (DN) of the directory entry representing
+ the person's primary Organizational Unit(s).
+displayName: eduPersonPrimaryOrgUnitDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.8
+
+dn: inum=%(inumOrg)s!0005!002A,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!002A
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonScopedAffiliation
+gluuAttributeName: eduPersonScopedAffiliation
+description: Specifies the person's affiliation within a particular security domain
+ in broad categories such as student, faculty, staff, alum, etc. The values consist
+ of a left and right component separated by an "@" sign. The left component is one of
+ the values from the eduPersonAffiliation controlled vocabulary.This right-hand side syntax
+ of eduPersonScopedAffiliation intentionally matches that used for the right-hand side
+ values for eduPersonPrincipalName since both identify a security domain. Multiple "@" signs
+ are not recommended, but in any case, the first occurrence of the "@" sign starting from the
+ left is to be taken as the delimiter between components. Thus, user identifier is to the left,
+ security domain to the right of the first "@". This parsing rule conforms to the POSIX "greedy"
+ disambiguation method in regular expression processing.
+displayName: eduPersonScopedAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.9
+
+dn: inum=%(inumOrg)s!0005!8FF3,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!8FF3
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonTargetedID
+gluuAttributeName: eduPersonTargetedID
+description: A persistent, non-reassigned, opaque identifier for a principal.
+displayName: eduPersonTargetedID
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.10
+
+dn: inum=%(inumOrg)s!0005!4B0F,ou=attributes,o=%(inumOrg)s,o=gluu
+inum: %(inumOrg)s!0005!4B0F
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonAssurance
+gluuAttributeName: eduPersonAssurance
+description: Set of URIs that assert compliance with specific standards
+ for identity assurance.
+displayName: eduPersonAssurance
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: urn:oid:1.3.6.1.4.1.5923.1.1.1.11
+
