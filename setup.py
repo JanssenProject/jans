@@ -57,7 +57,7 @@ class Setup():
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
 
-	self.outputFolder = os.getcwd() + '/output'
+        self.outputFolder = os.getcwd() + '/output'
         self.templateFolder = './templates'
         self.tomcatHome = '/opt/tomcat'
         self.configFolder = '/etc/gluu/config'
@@ -99,7 +99,7 @@ class Setup():
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
         self.config_ldif = '/opt/OpenDJ-2.6.0/config/config.ldif'
         self.user_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/100-user.ldif'
-	self.apache2_conf = '/etc/httpd/conf/httpd.conf'
+        self.apache2_conf = '/etc/httpd/conf/httpd.conf'
         self.apache2_idp_conf = '/etc/httpd/conf.d/idp.conf'
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
@@ -119,10 +119,9 @@ class Setup():
                          self.tomcat_server_xml: True,
                          self.tomcat_gluuTomcatWrapper: True,
                          self.tomcat_oxauth_static_conf_json: True,
-			 self.ldap_setup_properties: False,
-                         self.config_ldif: True,
+                         self.ldap_setup_properties: False,
                          self.user_schema_ldif: True,
-			 self.apache2_conf: True,
+                         self.apache2_conf: True,
                          self.apache2_idp_conf: True,
                          self.etc_hosts: True,
                          self.etc_hostname: True,
@@ -147,7 +146,7 @@ class Setup():
             + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40))
 
     def logIt(self, s, errorLog=False):
-	print s
+        print s
         if errorLog:
             f = open(self.logError, 'a')
             f.write('\n%s : ' % time.strftime('%X %x %Z'))
@@ -184,7 +183,7 @@ class Setup():
         p = Properties.Properties()
         p.load(open(fn))
         self.hostname = p['hostName']
-	print self.hostname
+        print self.hostname
         self.ip = p['ip']
         self.orgName = p['orgName']
         self.countryCode = p['countryCode']
@@ -240,8 +239,6 @@ class Setup():
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
     def save_properties(self):
-        if not os.path.exists(self.outputFolder):
-            os.makedirs(self.outputFolder)
         p = Properties.Properties()
         p['hostname'] = self.hostname
         p['ip'] = self.ip
@@ -353,7 +350,7 @@ class Setup():
         starttime = time.time()
         while 1:
             line = p.stdout.readline()
-	    self.logIt(line)
+            self.logIt(line)
             tailq.put(line)
             if (time.time() - starttime > self.ldapStartTimeOut):
                 self.logIt('LDAP startup timed out. Tomcat not started.', True)
@@ -370,12 +367,14 @@ if __name__ == '__main__':
         s = Setup()
         setup_properties = './setup.properties'
         if os.path.isfile(setup_properties):
-	    print 'properties found'
+            print 'properties found'
             s.load_properties(setup_properties)
         s.check_properties()
         print '\n%s\n' % `s`
         proceed = raw_input('Proceed with these values [Y|n] ').lower()
         if (len(proceed) and (proceed[0] == 'y')):
+            if not os.path.exists(s.outputFolder):
+                os.makedirs(s.outputFolder)
             if not os.path.exists(s.configFolder):
                 os.makedirs(s.configFolder)
             if not os.path.exists(s.certFolder):
