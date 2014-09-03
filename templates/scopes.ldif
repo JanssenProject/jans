@@ -2,12 +2,65 @@
 # OX Scopes Definition
 #########################
 
-dn: inum=%(inumOrg)s!0009!F0C4.3DC3,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthCustomScope
+dn: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top
-description: View your email address and user Id
+objectClass: oxAuthCustomScope
+displayName: openid
+inum: %(inumOrg)s!0009!F0C4
+description: The default identifier released by your OpenID Provider
 defaultScope: true
-displayName: oxTrust user info
-inum: %(inumOrg)s!0009!F0C4.3DC3
+oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0009!764C.2818,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: email
+inum: %(inumOrg)s!0009!764C
+description: Your email address
+defaultScope: false
+oxAuthClaim: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0009!4F94,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: address
+inum: %(inumOrg)s!0009!4F94
+description: Your physical address
+defaultScope: false
+oxAuthClaim: inum=%(inumOrg)s!0005!C8D5,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0009!D491,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: phone
+inum: %(inumOrg)s!0009!D491
+description: Your phone number
+defaultScope: false
+oxAuthClaim: inum=%(inumOrg)s!0005!570B,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: profile
+inum: %(inumOrg)s!0009!43F1
+defaultScope: false
+description: This scope value requests access to the End-User's default profile
+ information, including: name, family_name, given_name, middle_name, nickname,
+ preferred_username, profile, picture, website, gender, birthdate, zoneinfo, locale,
+ and updated_at.
+oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!5EC6,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!B52A,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!64A0,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!3B47,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!3692,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!98FC,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!36D9,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=%(inumOrg)s,o=gluu

@@ -3,12 +3,15 @@
 #########################
 
 dn: inum=%(inumOrg)s!0008!728D.34EC,ou=clients,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!F0C4.3DC3,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 displayName: gluu
+inum: %(inumOrg)s!!0008!728D.34EC
 oxAuthClientSecret: %(oxauthClient_encoded_pw)s
 oxAuthAppType: web
-inum: %(inumOrg)s!!0008!728D.34EC
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!764C.2818,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
 oxauthredirecturi: https://%(hostname)s/identity/scim/auth
 oxauthredirecturi: https://%(hostname)s/identity/authentication/authcode
+
