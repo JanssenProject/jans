@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.ScopeDescription;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+
+import org.xdi.oxauth.model.uma.ScopeDescription;
+import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * @author Yuriy Zabrovarnyy

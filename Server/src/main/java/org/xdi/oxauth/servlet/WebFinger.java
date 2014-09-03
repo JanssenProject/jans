@@ -1,20 +1,26 @@
 package org.xdi.oxauth.servlet;
 
+import static org.xdi.oxauth.model.discovery.WebFingerParam.HREF;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.LINKS;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.RESOURCE;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.SUBJECT;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import static org.xdi.oxauth.model.discovery.WebFingerParam.*;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

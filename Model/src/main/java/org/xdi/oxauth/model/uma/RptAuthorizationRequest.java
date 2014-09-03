@@ -1,14 +1,15 @@
 package org.xdi.oxauth.model.uma;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * Request for getting token status

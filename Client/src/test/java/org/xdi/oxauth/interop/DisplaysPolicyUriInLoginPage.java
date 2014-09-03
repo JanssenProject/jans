@@ -1,20 +1,26 @@
 package org.xdi.oxauth.interop;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * OC5:FeatureTest-Displays Policy in Login Page

@@ -206,7 +206,7 @@
     <op-policy-uri>http://ox.gluu.org/doku.php?id=oxauth:policy</op-policy-uri>
     <op-tos-uri>http://ox.gluu.org/doku.php?id=oxauth:tos</op-tos-uri>
 
-    <authorization-code-lifetime>600</authorization-code-lifetime>
+    <authorization-code-lifetime>${config.client.authorization-code-lifetime}</authorization-code-lifetime>
     <refresh-token-lifetime>14400</refresh-token-lifetime>
     <id-token-lifetime>3600</id-token-lifetime>
     <short-lived-access-token-lifetime>3600</short-lived-access-token-lifetime>
@@ -219,7 +219,7 @@
     <session-id-persist-on-prompt-none>false</session-id-persist-on-prompt-none>
 
     <uma-add-scopes-automatically>false</uma-add-scopes-automatically>
-    <uma-requester-permission-token-lifetime>3600</uma-requester-permission-token-lifetime>
+    <uma-requester-permission-token-lifetime>${config.uma.requester-permission-token-lifetime}</uma-requester-permission-token-lifetime>
     <uma-keep-client-during-resource-set-registration>true</uma-keep-client-during-resource-set-registration>
 
     <!-- Clean service interval in seconds -->
@@ -263,11 +263,11 @@
     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
 
     <organization-inum>@!1111</organization-inum>
-    <oxID>https://localhost/oxid/service/gluu/inum</oxID>
+    <oxID>https://${server.name}/oxid/service/gluu/inum</oxID>
 
     <dynamic-registration-enabled>true</dynamic-registration-enabled>
     <!-- Value in seconds or 0 if they do not expire -->
-    <dynamic-registration-expiration-time>86400</dynamic-registration-expiration-time>
+    <dynamic-registration-expiration-time>${config.client.dynamic-registration-expiration-time}</dynamic-registration-expiration-time>
 
     <trusted-client-enabled>true</trusted-client-enabled>
 

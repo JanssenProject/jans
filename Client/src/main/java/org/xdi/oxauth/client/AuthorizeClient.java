@@ -1,15 +1,20 @@
 package org.xdi.oxauth.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.*;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
+import org.xdi.oxauth.model.common.AuthorizationMethod;
+import org.xdi.oxauth.model.common.Display;
+import org.xdi.oxauth.model.common.Parameters;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
 
 /**
  * Encapsulates functionality to make authorization request calls to an

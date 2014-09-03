@@ -38,7 +38,6 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;

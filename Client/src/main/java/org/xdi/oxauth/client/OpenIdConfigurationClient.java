@@ -1,16 +1,59 @@
 package org.xdi.oxauth.client;
 
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.AMR_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CHECK_SESSION_IFRAME;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_LOCALES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIM_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLIENT_INFO_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.DISPLAY_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.END_SESSION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.FEDERATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.FEDERATION_METADATA_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.GRANT_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ISSUER;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.JWKS_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SCOPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SERVICE_DOCUMENTATION;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SUBJECT_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.VALIDATE_TOKEN_ENDPOINT;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.xdi.oxauth.model.util.Util;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.

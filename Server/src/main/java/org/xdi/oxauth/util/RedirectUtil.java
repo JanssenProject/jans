@@ -1,17 +1,18 @@
 package org.xdi.oxauth.util;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.net.MalformedURLException;
-import java.net.URI;
+
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 
 public class RedirectUtil {
 

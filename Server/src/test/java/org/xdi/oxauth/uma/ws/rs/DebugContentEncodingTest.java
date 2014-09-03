@@ -1,5 +1,13 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -19,13 +27,6 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 
 /**
  * ATTENTION : This test is for debug purpose ONLY. Do not use asserts here!!!

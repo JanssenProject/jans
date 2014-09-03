@@ -1,9 +1,9 @@
 package org.xdi.oxauth.client;
 
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.xdi.oxauth.model.common.AuthorizationMethod;
 
 /**
  * Represents a Client Info request to send to the authorization server.

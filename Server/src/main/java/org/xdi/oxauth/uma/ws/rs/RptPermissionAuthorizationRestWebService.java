@@ -1,9 +1,5 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
@@ -12,6 +8,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+
+import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.UmaConstants;
+
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.

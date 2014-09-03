@@ -1,12 +1,12 @@
 package org.xdi.oxauth.model.error;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * Base class for error responses.

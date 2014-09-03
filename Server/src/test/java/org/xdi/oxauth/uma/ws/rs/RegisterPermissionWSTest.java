@@ -1,5 +1,13 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -16,12 +24,6 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

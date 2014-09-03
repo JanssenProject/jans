@@ -1,14 +1,15 @@
 package org.xdi.oxauth.util;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.RDN;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * LDAP Utilities.

@@ -1,15 +1,21 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
-import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
+import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.RSASigner;
-
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012

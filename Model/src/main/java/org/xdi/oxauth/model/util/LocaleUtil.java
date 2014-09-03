@@ -1,9 +1,9 @@
 package org.xdi.oxauth.model.util;
 
-import org.apache.commons.lang.LocaleUtils;
-
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.commons.lang.LocaleUtils;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013

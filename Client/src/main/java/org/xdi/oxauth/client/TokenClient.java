@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client;
 
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.token.ClientAssertionType;
-
-import javax.ws.rs.HttpMethod;
 
 /**
  * Encapsulates functionality to make token request calls to an authorization

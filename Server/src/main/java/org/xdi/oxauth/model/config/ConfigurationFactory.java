@@ -1,5 +1,12 @@
 package org.xdi.oxauth.model.config;
 
+import java.io.File;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -16,12 +23,6 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

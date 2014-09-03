@@ -1,5 +1,12 @@
 package org.xdi.oxauth.model.token;
 
+import java.io.UnsupportedEncodingException;
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
@@ -30,13 +37,6 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.security.StringEncrypter;
-
-import java.io.UnsupportedEncodingException;
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained

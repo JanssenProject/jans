@@ -1,11 +1,11 @@
 package org.xdi.oxauth.service.uma;
 
+import java.util.Date;
+import java.util.UUID;
+
 import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.util.INumGenerator;
-
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy

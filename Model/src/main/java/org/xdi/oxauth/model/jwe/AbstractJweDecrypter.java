@@ -1,5 +1,7 @@
 package org.xdi.oxauth.model.jwe;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -10,8 +12,6 @@ import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  * @author Javier Rojas Blum Date: 12.04.2012

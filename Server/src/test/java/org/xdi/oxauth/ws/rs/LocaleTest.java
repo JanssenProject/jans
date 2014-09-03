@@ -1,15 +1,15 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.util.LocaleUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.model.util.LocaleUtil;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013

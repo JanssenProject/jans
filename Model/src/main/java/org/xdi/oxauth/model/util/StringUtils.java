@@ -1,13 +1,17 @@
 package org.xdi.oxauth.model.util;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 
 /**
  * @author Javier Rojas Blum Date: 08.10.2012

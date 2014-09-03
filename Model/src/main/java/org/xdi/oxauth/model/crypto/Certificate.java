@@ -1,5 +1,10 @@
 package org.xdi.oxauth.model.crypto;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.provider.JCERSAPublicKey;
 import org.bouncycastle.openssl.PEMWriter;
@@ -9,11 +14,6 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum Date: 10.22.2012

@@ -1,5 +1,7 @@
 package org.xdi.oxauth.service.uma;
 
+import java.util.Date;
+
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
@@ -8,11 +10,9 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
-
-import java.util.Date;
 
 /**
  * Holds resource set permission tokens and permissions

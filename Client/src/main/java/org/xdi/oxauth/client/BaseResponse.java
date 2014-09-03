@@ -1,8 +1,8 @@
 package org.xdi.oxauth.client;
 
-import org.jboss.resteasy.client.ClientResponse;
-
 import javax.ws.rs.core.MultivaluedMap;
+
+import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * @author Javier Rojas Blum Date: 01.31.2012

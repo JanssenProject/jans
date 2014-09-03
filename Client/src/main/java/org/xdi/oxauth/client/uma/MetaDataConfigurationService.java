@@ -1,10 +1,10 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+
+import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.

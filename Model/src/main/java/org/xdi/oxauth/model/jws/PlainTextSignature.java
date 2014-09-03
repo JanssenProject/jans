@@ -1,9 +1,9 @@
 package org.xdi.oxauth.model.jws;
 
+import java.security.SignatureException;
+
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.security.SignatureException;
 
 /**
  * @author Javier Rojas Blum Date: 11.12.2012

@@ -1,5 +1,13 @@
 package org.xdi.oxauth.model.common;
 
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -10,14 +18,6 @@ import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
-
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy

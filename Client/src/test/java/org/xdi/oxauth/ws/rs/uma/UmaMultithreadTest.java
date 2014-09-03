@@ -6,6 +6,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.client.uma.MetaDataConfigurationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
@@ -18,7 +19,14 @@ import org.xdi.oxauth.model.uma.MetadataConfiguration;
 
 public class UmaMultithreadTest {
 
-    private MetaDataConfigurationService service;
+	private String serverUri;
+
+	private MetaDataConfigurationService service;
+
+    @Parameters({"serverUri"})
+    public UmaMultithreadTest(String serverUri) {
+        this.serverUri = serverUri;
+    }
 
     @BeforeClass
     public void before() {
@@ -26,7 +34,7 @@ public class UmaMultithreadTest {
         final DefaultHttpClient defaultHttpClient = new DefaultHttpClient(connectoinManager);
         final ApacheHttpClient4Executor clientExecutor = new ApacheHttpClient4Executor(defaultHttpClient);
 
-        String url = "https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/uma-configuration";
+        String url = serverUri + "/oxauth/seam/resource/restv1/oxauth/uma-configuration";
 
         service = UmaClientFactory.instance().createMetaDataConfigurationService(url, clientExecutor);
     }

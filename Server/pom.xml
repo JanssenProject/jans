@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>1.4.1.Final</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
     <prerequisites>
@@ -19,6 +19,10 @@
 
     <build>
         <finalName>oxauth</finalName>
+
+        <filters>
+            <filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
+        </filters>
 
         <resources>
             <resource>
@@ -44,6 +48,7 @@
             </testResource>
             <testResource>
                 <directory>src/test/resources</directory>
+                <filtering>true</filtering>
             </testResource>
         </testResources>
 
@@ -104,7 +109,41 @@
                         </tagBase>
                     </configuration>
                 </plugin>
+                <!--
+                                        <plugin>
+                                            <groupId>org.apache.maven.plugins</groupId>
+                                            <artifactId>maven-antrun-plugin</artifactId>
+                                            <version>1.7</version>
+                                            <executions>
+                                                <execution>
+                                                    <id>prepare-configuration-files</id>
+                                                    <phase>pre-integration-test</phase>
+                                                    <configuration>
+                                                        <target>
+                                                            <filterset id="oxAuthFilterSet" begintoken="${"
+                                                                endtoken="}">
+                                                                <filtersfile
+                                                                    file="profiles/${cfg}/config-oxauth-test.properties" />
+                                                            </filterset>
 
+                                                            <property name="build.directory"
+                                                                value="${project.build.directory}/test-classes/conf" />
+
+                                                            <mkdir dir="${build.directory}" />
+                                                            <copy todir="${build.directory}" filtering="true" overwrite="true">
+                                                                <fileset dir="${basedir}/conf" />
+
+                                                                <filterset refid="oxAuthFilterSet" />
+                                                            </copy>
+                                                        </target>
+                                                    </configuration>
+                                                    <goals>
+                                                        <goal>run</goal>
+                                                    </goals>
+                                                </execution>
+                                            </executions>
+                                        </plugin>
+                -->
             </plugins>
         </pluginManagement>
 
@@ -178,11 +217,34 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-configuration-files</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/test-classes/conf</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/conf</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <filters>
+                                <filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -253,7 +315,8 @@
                 <!--<configuration>-->
                     <!--<apiSources>-->
                         <!--<apiSource>-->
-                            <!--<locations>org.xdi.oxauth.idgen.ws.rs.IdGenRestWebService;org.xdi.oxauth.uma.ws.rs;</locations>-->
+                            <!--<locations>org.xdi.oxauth.token.ws.rs;org.xdi.oxauth.uma.ws.rs;-->
+                            <!--</locations>-->
                             <!--<apiVersion>v1</apiVersion>-->
                             <!--<basePath>http://gluu.org</basePath>-->
                             <!--<outputTemplate>${basedir}/src/main/docs/mustache/markdown.mustache</outputTemplate>-->
@@ -274,6 +337,14 @@
                         <!--</goals>-->
                     <!--</execution>-->
                 <!--</executions>-->
+                <!--<dependencies>-->
+                    <!--<dependency>-->
+                        <!--<groupId>javax.servlet</groupId>-->
+                        <!--<artifactId>servlet-api</artifactId>-->
+                        <!--<version>2.3</version>-->
+                        <!--<scope>runtime</scope>-->
+                    <!--</dependency>-->
+                <!--</dependencies>-->
             <!--</plugin>-->
 
         </plugins>
@@ -584,12 +655,12 @@
             <artifactId>servlet-api</artifactId>
         </dependency>
         <dependency>
-        	<groupId>com.wordnik</groupId>
-        	<artifactId>swagger-jaxrs_2.10</artifactId>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.10</artifactId>
         </dependency>
         <dependency>
-        	<groupId>com.wordnik</groupId>
-        	<artifactId>swagger-servlet_2.9.1</artifactId>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-servlet_2.9.1</artifactId>
         </dependency>
     </dependencies>
 
@@ -634,9 +705,6 @@
         <profile>
             <id>generate-configuration</id>
             <activation>
-                <property>
-                    <name>cfg</name>
-                </property>
             </activation>
             <build>
                 <pluginManagement>

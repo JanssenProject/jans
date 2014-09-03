@@ -1,27 +1,39 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.AuthorizationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
 
 /**
  * @author Javier Rojas Blum Date: 07.25.2012
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "userInum", "userEmail"})
     @Test
-    public void requestAccessTokenCustomAuth1(final String redirectUris) throws Exception {
+    public void requestAccessTokenCustomAuth1(final String redirectUris, final String userInum, final String userEmail) throws Exception {
         showTitle("requestAccessTokenCustomAuth1");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -47,8 +59,8 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
-        tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
+        tokenRequest.addCustomParameter("mail", userEmail);
+        tokenRequest.addCustomParameter("inum", userInum);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -112,9 +124,9 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "userInum", "userEmail"})
     @Test
-    public void requestAccessTokenCustomAuth3(final String redirectUris) throws Exception {
+    public void requestAccessTokenCustomAuth3(final String redirectUris, final String userInum, final String userEmail) throws Exception {
         showTitle("requestAccessTokenCustomAuth3");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -140,8 +152,8 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
-        tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
+        tokenRequest.addCustomParameter("mail", userEmail);
+        tokenRequest.addCustomParameter("inum", userInum);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -206,9 +218,9 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail"})
     @Test
-    public void requestAccessTokenCustomAuth5(final String redirectUris, final String redirectUri) throws Exception {
+    public void requestAccessTokenCustomAuth5(final String redirectUris, final String redirectUri, final String userInum, final String userEmail) throws Exception {
         showTitle("requestAccessTokenCustomAuth5");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -247,8 +259,8 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
         request.setState(state);
         request.getPrompts().add(Prompt.NONE);
-        request.addCustomParameter("mail", "test_user@gluu.org");
-        request.addCustomParameter("inum", "@!1111!0000!D4E7");
+        request.addCustomParameter("mail", userEmail);
+        request.addCustomParameter("inum", userInum);
         request.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);

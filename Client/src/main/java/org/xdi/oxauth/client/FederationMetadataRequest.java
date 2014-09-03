@@ -1,9 +1,9 @@
 package org.xdi.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,9 +1,26 @@
 package org.xdi.oxauth.interop;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.JwkClient;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -13,12 +30,6 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * OC5:FeatureTest-Includes c hash in ID Token when Code Flow Used

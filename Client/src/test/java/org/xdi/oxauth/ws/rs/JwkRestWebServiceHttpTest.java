@@ -1,12 +1,14 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.JwkClient;
 import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
-
-import static org.testng.Assert.*;
 
 /**
  * Functional tests for JWK Web Services (HTTP)

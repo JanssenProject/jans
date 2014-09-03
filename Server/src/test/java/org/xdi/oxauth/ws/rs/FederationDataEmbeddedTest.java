@@ -1,5 +1,11 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
@@ -12,10 +18,6 @@ import org.xdi.oxauth.client.FederationDataResponse;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationRequest;
-
-import javax.ws.rs.core.MediaType;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

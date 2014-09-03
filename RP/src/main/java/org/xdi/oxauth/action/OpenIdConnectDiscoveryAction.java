@@ -1,18 +1,26 @@
 package org.xdi.oxauth.action;
 
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+
+import java.net.URISyntaxException;
+
 import org.apache.http.client.HttpClient;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.net.SslDefaultHttpClient;
 import org.xdi.net.TrustAllTrustManager;
-import org.xdi.oxauth.client.*;
-
-import java.net.URISyntaxException;
-
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import org.xdi.oxauth.client.OpenIdConfigurationClient;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2013

@@ -1,25 +1,26 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.RptStatusRequest;
 import org.xdi.oxauth.model.uma.RptStatusResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.

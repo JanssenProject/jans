@@ -1,5 +1,12 @@
 package org.xdi.oxauth.load;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -11,13 +18,6 @@ import org.xdi.oxauth.client.UserInfoResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.

@@ -1,5 +1,10 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.util.Arrays;
+
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -8,17 +13,26 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.UserInfoClient;
+import org.xdi.oxauth.client.UserInfoResponse;
 import org.xdi.oxauth.dev.HostnameVerifierType;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.AuthorizationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.util.Arrays;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * Functional tests for SSO with Multiple Backend Services (HTTP)
@@ -182,9 +196,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertNotNull(userInfoResponse2.getClaim(JwtClaimName.EMAIL), "Unexpected result: email not found");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "hostnameVerifier"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "hostnameVerifier"})
     @Test
-    public void sessionWorkFlow2(final String redirectUris, final String redirectUri, final String hostnameVerifier) throws Exception {
+    public void sessionWorkFlow2(final String redirectUris, final String redirectUri, final String userInum, final String userEmail, final String hostnameVerifier) throws Exception {
         showTitle("sessionWorkFlow2");
 
         // Register client
@@ -221,8 +235,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 redirectUri,
                 null);
 
-        authorizationRequest1.addCustomParameter("mail", "test_user@gluu.org");
-        authorizationRequest1.addCustomParameter("inum", "@!1111!0000!D4E7");
+        authorizationRequest1.addCustomParameter("mail", userEmail);
+        authorizationRequest1.addCustomParameter("inum", userInum);
         authorizationRequest1.getPrompts().add(Prompt.NONE);
         authorizationRequest1.setState("af0ifjsldkj");
         authorizationRequest1.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);

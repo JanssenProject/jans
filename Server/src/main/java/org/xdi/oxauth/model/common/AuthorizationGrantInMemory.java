@@ -1,5 +1,11 @@
 package org.xdi.oxauth.model.common;
 
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
@@ -8,12 +14,6 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.util.security.StringEncrypter;
-
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
 
 /**
  * Base class for all the types of authorization grant.

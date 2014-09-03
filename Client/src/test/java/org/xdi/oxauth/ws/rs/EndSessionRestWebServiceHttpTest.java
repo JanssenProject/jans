@@ -1,21 +1,29 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.EndSessionClient;
+import org.xdi.oxauth.client.EndSessionRequest;
+import org.xdi.oxauth.client.EndSessionResponse;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
 
 /**
  * Functional tests for End Session Web Services (HTTP)

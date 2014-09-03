@@ -1,9 +1,9 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.xdi.oxauth.client.RegisterResponse;
-
 import static org.testng.Assert.assertNotNull;
 import static org.xdi.oxauth.model.uma.TestUtil.assertNotBlank;
+
+import org.xdi.oxauth.client.RegisterResponse;
 
 /**
  * @author Yuriy Zabrovarnyy

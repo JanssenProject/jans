@@ -1,11 +1,13 @@
 package org.xdi.oxauth.model.uma;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

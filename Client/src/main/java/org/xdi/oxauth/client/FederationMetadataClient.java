@@ -1,5 +1,11 @@
 package org.xdi.oxauth.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -11,11 +17,6 @@ import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
 import org.xdi.oxauth.model.jwt.PureJwt;
 import org.xdi.oxauth.model.util.Util;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

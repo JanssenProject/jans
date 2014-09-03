@@ -1,5 +1,7 @@
 package org.xdi.oxauth.action;
 
+import java.util.List;
+
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -24,8 +26,6 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
-
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 02.20.2012

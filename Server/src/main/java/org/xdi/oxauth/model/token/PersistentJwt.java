@@ -1,5 +1,9 @@
 package org.xdi.oxauth.model.token;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -11,10 +15,6 @@ import org.xdi.oxauth.model.common.AuthorizationGrantType;
 import org.xdi.oxauth.model.common.IdToken;
 import org.xdi.oxauth.model.common.RefreshToken;
 import org.xdi.oxauth.model.util.Util;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 05.22.2012

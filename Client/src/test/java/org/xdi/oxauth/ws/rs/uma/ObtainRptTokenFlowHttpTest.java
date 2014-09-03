@@ -1,5 +1,10 @@
 package org.xdi.oxauth.ws.rs.uma;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -12,11 +17,6 @@ import org.xdi.oxauth.model.uma.MetadataConfiguration;
 import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import javax.ws.rs.core.Response;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 /**
  * Test cases for the obtaining UMA requester permission token flow (HTTP)

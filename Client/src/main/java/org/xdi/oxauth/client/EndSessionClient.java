@@ -1,16 +1,16 @@
 package org.xdi.oxauth.client;
 
+import java.util.Map;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import java.util.Map;
 
 /**
  * Encapsulates functionality to make end session request calls to an

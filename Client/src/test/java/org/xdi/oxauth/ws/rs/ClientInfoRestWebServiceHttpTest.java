@@ -1,18 +1,24 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.ClientInfoClient;
+import org.xdi.oxauth.client.ClientInfoResponse;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
 
 /**
  * Functional tests for Client Info Web Services (HTTP)

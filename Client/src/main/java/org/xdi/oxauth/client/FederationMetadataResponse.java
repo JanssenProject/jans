@@ -1,9 +1,9 @@
 package org.xdi.oxauth.client;
 
+import java.util.List;
+
 import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationMetadata;
-
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,12 +1,12 @@
 package org.xdi.oxauth.model.ldap;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapSchemaEntry;
-import org.xdi.ldap.model.BaseEntry;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapSchemaEntry;
+import org.xdi.ldap.model.BaseEntry;
 
 /**
  * Schema attribute

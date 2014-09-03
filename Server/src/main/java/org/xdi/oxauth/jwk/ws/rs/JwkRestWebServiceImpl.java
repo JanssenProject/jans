@@ -1,5 +1,20 @@
 package org.xdi.oxauth.jwk.ws.rs;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.ALGORITHM;
+import static org.xdi.oxauth.model.jwk.JWKParameter.CURVE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_TYPE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_USE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -8,11 +23,6 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * Provides interface for JWK REST web services

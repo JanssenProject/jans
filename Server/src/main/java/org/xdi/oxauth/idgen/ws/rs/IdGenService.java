@@ -1,6 +1,9 @@
 package org.xdi.oxauth.idgen.ws.rs;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
@@ -16,9 +19,6 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 
 /**
  * @author Yuriy Zabrovarnyy

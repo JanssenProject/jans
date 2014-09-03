@@ -1,15 +1,15 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+
+import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a

@@ -1,5 +1,15 @@
 package org.xdi.oxauth.client;
 
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
@@ -7,13 +17,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Represents a register response received from the authorization server.

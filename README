@@ -66,7 +66,7 @@ redirection-uri
 
 3. In your web app add a link to the following URL (extra line breaks are for display purposes only):
 
-http://localhost/oxauth/authorize.seam?
+http://localhost:8080/oxauth/authorize?
 response_type=code
 &client_id=<your-client-identifier>
 &redirect_uri=<your-redirection-uri>
@@ -86,7 +86,7 @@ CODE:
 AuthorizationRequest authorizationRequest = new AuthorizationRequest(ResponseType.CODE, clientId);
 authorizationRequest.setRedirectUri(redirecturi);
 authorizationRequest.setState(state);
-String queryString = "http://localhost/oxauth/authorize.seam?" + authorizationRequest.getQueryString();
+String queryString = "http://localhost:8080/oxauth/authorize?" + authorizationRequest.getQueryString();
 // Put the queryString in a link or redirect to it.
 
 4. In this step oxAuth will ask the user to login if it is not already logged in, and request its permission.
@@ -109,7 +109,7 @@ error=access_denied
 
 CODE:
 String credentials = clientIdentifier + ":" + clientSecret;
-String tokenUrl = "http://localhost/oxauth/seam/resource/restv1/oxauth/token";
+String tokenUrl = "http://localhost:8080/oxauth/seam/resource/restv1/oxauth/token";
 TokenClient tokenClient = new TokenClient(tokenUrl);
 TokenResponse response = tokenClient.execAuthorizationCode(authorizationCode, redirectUri, credentials);
 String accessToken = response.getAccessToken();
@@ -143,7 +143,7 @@ jwtToken.validateSignature(credentials));
 8. To validate your accessToken:
 
 CODE:
-validateUrl = "localhost/oxauth/seam/resource/restv1/oxauth/validate";
+validateUrl = "localhost:8080/oxauth/seam/resource/restv1/oxauth/validate";
 ValidateTokenClient validateTokenClient = new ValidateTokenClient(validateTokenUrl);
 ValidateTokenResponse response = validateTokenClient.execValidateToken(accessToken);
 
@@ -154,8 +154,8 @@ response.getExpiresIn(); // Value in seconds
 
 LOCALHOST TEST URL
 
-http://localhost:8080/oxauth/authorize.seam?response_type=code&redirect_uri=https%3A%2F%2Fclient.example.com%2Fcb%3ffoo%3dbar&state=xyz&client_id=@!1111!0008!FF81!2D39
-http://localhost/oxauth/authorize.seam?response_type=code&client_id=06fe985f-4111-41cf-a16d-434ff48f92a2.localhost&redirect_uri=http%3A%2F%2Flocalhost%2FoxServer&state=xyz
+http://localhost:8080/oxauth/authorize?response_type=code&redirect_uri=https%3A%2F%2Fclient.example.com%2Fcb%3ffoo%3dbar&state=xyz&client_id=@!1111!0008!FF81!2D39
+http://localhost:8080/oxauth/authorize.seam?response_type=code&client_id=06fe985f-4111-41cf-a16d-434ff48f92a2.localhost&redirect_uri=http%3A%2F%2Flocalhost%2FoxServer&state=xyz
 
 
 
@@ -195,38 +195,28 @@ $ ldapmodify --defaultAdd --port 1389 --bindDN 'cn=directory manager' --bindPass
 
 oxTrust
 client_id: @!1111!0008!C2EB!75F1
-client_secret: 11111111-1111-1111-1111-111111111111
 
 oxPlus
 client_id: @!1111!0008!2A19!9A70
-client_secret: 11111111-1111-1111-1111-111111111111
 
 oxServer
 client_id: @!1111!0008!7119!0560
-client_secret: 11111111-1111-1111-1111-111111111111
 
 Gluu IDP
 client_id: @!1111!0008!45C0!BE6E
-client_secret: 11111111-1111-1111-1111-111111111111
 
 Test
 client_id: @!1111!0008!FF81!2D39
-client_secret: 11111111-1111-1111-1111-111111111111
 
 oxModel
 client_id: @!1111!0008!92C1!D277
-client_secret: 11111111-1111-1111-1111-111111111111
 
 oxGraph
 client_id: @!1111!0008!0336!1008
-client_secret: 11111111-1111-1111-1111-111111111111
 
 oxTestTool
 client_id: @!1111!0008!A64C!475C
-client_secret: 11111111-1111-1111-1111-111111111111
 
 client_id: @!1111!0008!31FD!E7E7
-client_secret: 11111111-1111-1111-1111-111111111111
 
 client_id: @!1111!0008!2D7F!97C2
-client_secret: 11111111-1111-1111-1111-111111111111

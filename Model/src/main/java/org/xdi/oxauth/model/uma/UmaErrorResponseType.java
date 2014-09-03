@@ -1,9 +1,9 @@
 package org.xdi.oxauth.model.uma;
 
-import org.xdi.oxauth.model.error.IErrorType;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.xdi.oxauth.model.error.IErrorType;
 
 /**
  * Error codes for UMA error responses.

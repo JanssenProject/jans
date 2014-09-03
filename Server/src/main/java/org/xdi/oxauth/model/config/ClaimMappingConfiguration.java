@@ -1,8 +1,9 @@
 package org.xdi.oxauth.model.config;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 /**
  * ## Claims Mapping, the format is: <LDAP_VALUE>: <OIC_CLAIM>

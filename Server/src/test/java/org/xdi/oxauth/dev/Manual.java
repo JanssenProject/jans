@@ -1,5 +1,9 @@
 package org.xdi.oxauth.dev;
 
+import java.io.File;
+import java.util.Date;
+import java.util.Properties;
+
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -10,10 +14,6 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
-
-import java.io.File;
-import java.util.Date;
-import java.util.Properties;
 
 /**
  * Test for manual run. Used for development purpose ONLY. Must not be run in suite.

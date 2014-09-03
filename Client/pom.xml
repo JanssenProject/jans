@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>1.4.1.Final</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
     <prerequisites>
@@ -19,9 +19,14 @@
     <build>
         <finalName>oxauth-client</finalName>
 
+        <filters>
+            <filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
+        </filters>
+
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
+                <filtering>true</filtering>
             </testResource>
         </testResources>
 
@@ -149,4 +154,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>set-configuration-name</id>
+            <activation>
+                <property>
+                    <name>!cfg</name>
+                </property>
+            </activation>
+            <properties>
+                <cfg>default</cfg>
+            </properties>
+        </profile>
+    </profiles>
 </project>

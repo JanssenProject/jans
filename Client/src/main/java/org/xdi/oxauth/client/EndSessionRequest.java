@@ -1,11 +1,11 @@
 package org.xdi.oxauth.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * Represents an end session request to send to the authorization server.

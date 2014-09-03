@@ -1,12 +1,12 @@
 package org.xdi.oxauth.service.uma;
 
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 
 /**
  * @author Yuriy Movchan

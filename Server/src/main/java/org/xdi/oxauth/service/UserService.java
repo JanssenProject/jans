@@ -1,6 +1,8 @@
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
@@ -18,9 +20,7 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.util.StringHelper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with users.

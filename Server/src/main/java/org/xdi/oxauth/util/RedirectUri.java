@@ -1,10 +1,5 @@
 package org.xdi.oxauth.util;
 
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.util.Util;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -12,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 02.27.2014

@@ -1,5 +1,8 @@
 package org.xdi.oxauth.service.uma;
 
+import java.util.Date;
+import java.util.List;
+
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
@@ -12,9 +15,6 @@ import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * RPT manager component

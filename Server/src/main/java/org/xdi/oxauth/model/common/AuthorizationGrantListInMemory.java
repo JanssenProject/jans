@@ -1,17 +1,18 @@
 package org.xdi.oxauth.model.common;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-import org.xdi.oxauth.model.registration.Client;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.model.registration.Client;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 /**
  * @author Yuriy Zabrovarnyy

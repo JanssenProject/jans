@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.session;
 
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
 import org.xdi.oxauth.model.registration.Client;
-
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 /**
  * @author Javier Rojas Blum Date: 03.20.2012

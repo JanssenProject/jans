@@ -1,12 +1,12 @@
 package org.xdi.oxauth.model.crypto.signature;
 
+import java.math.BigInteger;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PrivateKey;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.math.BigInteger;
 
 /**
  * The Private Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)

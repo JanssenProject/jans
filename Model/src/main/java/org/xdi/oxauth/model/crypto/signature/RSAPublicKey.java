@@ -1,14 +1,17 @@
 package org.xdi.oxauth.model.crypto.signature;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import java.math.BigInteger;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.math.BigInteger;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * The Public Key for the RSA Algorithm

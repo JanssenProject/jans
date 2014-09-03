@@ -1,5 +1,7 @@
 package org.xdi.oxauth.service;
 
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
@@ -16,8 +18,6 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.util.StringHelper;
-
-import java.util.Map;
 
 /**
  * Provides operations with authentication filters

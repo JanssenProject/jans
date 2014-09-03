@@ -1,17 +1,18 @@
 package org.xdi.oxauth.model.jws;
 
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.oxauth.model.util.Util;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.StringUtils;
+import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 11.12.2012

@@ -1,5 +1,7 @@
 package org.xdi.oxauth.model.error;
 
+import java.util.List;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.ScopeType;
@@ -19,8 +21,6 @@ import org.xdi.oxauth.model.uma.UmaErrorResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.util.StringHelper;
-
-import java.util.List;
 
 /**
  * Provides an easy way to get Error responses based in an error response type

@@ -1,20 +1,25 @@
 package org.xdi.oxauth.ws.rs;
 
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.dev.HostnameVerifierType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.ClientInfoClient;
+import org.xdi.oxauth.client.ClientInfoRequest;
+import org.xdi.oxauth.client.ClientInfoResponse;
+import org.xdi.oxauth.dev.HostnameVerifierType;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
 
 /**
  * clientId=@!1111!0008!FF81!2D39
@@ -30,7 +35,7 @@ import static org.testng.Assert.assertNotNull;
  * objectClass: oxAuthFederationTrust
  * objectClass: top
  * oxAuthFederationId: @!1111!0008!00F1!0001
- * oxAuthFederationMetadataURI: https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata
+ * oxAuthFederationMetadataURI: https://localhost:8443/oxauth/seam/resource/restv1/oxauth/federationmetadata
  * oxAuthFederationTrustStatus: active
  * oxAuthRedirectURI: https://client.example.com/cb?foo=bar
  * oxAuthReleasedScope: inum=@!1111!0009!BC01,ou=scopes,o=@!1111,o=gluu

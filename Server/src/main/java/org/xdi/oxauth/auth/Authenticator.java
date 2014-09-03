@@ -1,5 +1,15 @@
 package org.xdi.oxauth.auth;
 
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -28,18 +38,12 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.ExternalAuthenticationService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Authenticator component

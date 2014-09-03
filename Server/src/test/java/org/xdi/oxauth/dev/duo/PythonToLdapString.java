@@ -1,17 +1,17 @@
 package org.xdi.oxauth.dev.duo;
 
-import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.model.config.CustomProperty;
-import org.xdi.oxauth.model.config.oxIDPAuthConf;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.model.config.CustomProperty;
+import org.xdi.oxauth.model.config.oxIDPAuthConf;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,5 +1,10 @@
 package org.xdi.oxauth.dev;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
@@ -7,11 +12,6 @@ import org.xdi.oxauth.model.uma.persistence.ProgrammingLanguage;
 import org.xdi.oxauth.model.uma.persistence.UmaPolicy;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.service.uma.PolicyService;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,5 +1,8 @@
 package org.xdi.oxauth.model.token;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -14,9 +17,6 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.security.StringEncrypter;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 04.13.2012

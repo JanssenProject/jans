@@ -1,6 +1,8 @@
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
@@ -16,8 +18,7 @@ import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
 import org.xdi.oxauth.util.LdapUtils;
 
-import java.util.Collections;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * @author Yuriy Zabrovarnyy

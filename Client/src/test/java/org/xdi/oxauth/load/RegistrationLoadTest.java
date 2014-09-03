@@ -1,5 +1,8 @@
 package org.xdi.oxauth.load;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -8,8 +11,6 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import static org.testng.Assert.*;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.

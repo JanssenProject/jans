@@ -1,5 +1,48 @@
 package org.xdi.oxauth.model.util;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
+import java.util.Set;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -21,24 +64,11 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.crypto.Certificate;
-import org.xdi.oxauth.model.crypto.signature.*;
-
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.HttpMethod;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
-import java.util.Set;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Javier Rojas Blum Date: 03.08.2012

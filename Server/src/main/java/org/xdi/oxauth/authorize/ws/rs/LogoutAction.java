@@ -9,7 +9,6 @@ import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
 import org.jboss.seam.log.Log;
-import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.oxauth.model.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;

@@ -1,5 +1,11 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.io.IOException;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -15,11 +21,6 @@ import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.IOException;
 
 /**
  * @author Yuriy Movchan Date: 10/16/2012

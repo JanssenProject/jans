@@ -1,9 +1,9 @@
 package org.xdi.oxauth.service.uma;
 
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-
 import java.util.Date;
+
+import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 
 /**
  * @author Yuriy Zabrovarnyy

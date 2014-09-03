@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.federation.FederationRequest;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.federation.FederationRequest;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,15 +1,18 @@
 package org.xdi.oxauth.model.common;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.RDN;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.ldap.*;
+import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Util;
@@ -17,7 +20,9 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.RDN;
 
 /**
  * @author Yuriy Zabrovarnyy

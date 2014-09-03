@@ -1,9 +1,6 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.VersionedResourceSet;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,7 +11,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import java.util.List;
+
+import org.xdi.oxauth.model.uma.ResourceSet;
+import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.VersionedResourceSet;
 
 /**
  * REST WS UMA resource set description API

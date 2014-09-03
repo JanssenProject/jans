@@ -1,9 +1,7 @@
 package org.xdi.oxauth.idgen.ws.rs;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.RDN;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
@@ -20,7 +18,10 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
 
-import java.util.List;
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.RDN;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.

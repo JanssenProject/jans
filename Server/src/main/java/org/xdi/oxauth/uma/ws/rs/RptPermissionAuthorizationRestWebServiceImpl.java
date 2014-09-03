@@ -1,5 +1,11 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -23,11 +29,6 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.List;
 
 /**
  * @author Yuriy Movchan

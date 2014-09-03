@@ -1,5 +1,13 @@
 package org.xdi.oxauth.federation.ws.rs;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -22,13 +30,6 @@ import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.FederationMetadataService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Provides implementation of Federation Metadata REST web services interface.

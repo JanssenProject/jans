@@ -1,5 +1,15 @@
 package org.xdi.oxauth.ws.rs.uma;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -8,14 +18,12 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.*;
+import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.ResourceSet;
+import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.VersionedResourceSet;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * Test cases for the registering UMA resource set description flow (HTTP)

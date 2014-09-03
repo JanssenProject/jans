@@ -1,5 +1,23 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -8,7 +26,11 @@ import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.QueryStringDecoder;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.ValidateTokenRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -17,16 +39,6 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import javax.ws.rs.core.MediaType;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Functional tests for the Use Authentication Filter (embedded)
@@ -103,9 +115,9 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath"})
+    @Parameters({"tokenPath", "userInum", "userEmail"})
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth1Step1")
-    public void requestAccessTokenCustomAuth1Step2(final String tokenPath) throws Exception {
+    public void requestAccessTokenCustomAuth1Step2(final String tokenPath, final String userInum, final String userEmail) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
@@ -119,8 +131,8 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId1);
                 tokenRequest.setAuthPassword(clientSecret1);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-                tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
-                tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
+                tokenRequest.addCustomParameter("mail", userEmail);
+                tokenRequest.addCustomParameter("inum", userInum);
 
                 request.addParameters(tokenRequest.getParameters());
             }
@@ -310,9 +322,9 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath"})
+    @Parameters({"tokenPath", "userInum", "userEmail"})
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth3Step1")
-    public void requestAccessTokenCustomAuth3Step2(final String tokenPath) throws Exception {
+    public void requestAccessTokenCustomAuth3Step2(final String tokenPath, final String userInum, final String userEmail) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
@@ -325,8 +337,8 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId3);
                 tokenRequest.setAuthPassword(clientSecret3);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-                tokenRequest.addCustomParameter("mail", "test_user@gluu.org");
-                tokenRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
+                tokenRequest.addCustomParameter("mail", userEmail);
+                tokenRequest.addCustomParameter("inum", userInum);
 
                 request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
                 request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -489,7 +501,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                         responseTypes, clientId, scopes, redirectUri, null);
                 authorizationRequest.setState("af0ifjsldkj");
                 authorizationRequest.getPrompts().add(Prompt.NONE);
-                //authorizationRequest.addCustomParameter("mail", "test_user@gluu.org");
+                //authorizationRequest.addCustomParameter("mail", "mike@gluu.org");
                 //authorizationRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
                 authorizationRequest.addCustomParameter("uid", userId);
                 authorizationRequest.addCustomParameter("pwd", userSecret);

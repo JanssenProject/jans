@@ -1,12 +1,13 @@
 package org.xdi.oxauth.model.config;
 
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
  * Custom Attributes

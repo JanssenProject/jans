@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client;
 
+import java.util.List;
+
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
-
-import java.util.List;
 
 /**
  * Represents a JSON Web Key (JWK) received from the authorization server.

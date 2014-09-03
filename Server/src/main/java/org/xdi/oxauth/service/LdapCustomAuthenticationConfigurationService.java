@@ -1,5 +1,9 @@
 package org.xdi.oxauth.service;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -15,10 +19,6 @@ import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.CustomProperty;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.util.StringHelper;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides service methods methods with LDAP configuration

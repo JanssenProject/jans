@@ -1,5 +1,10 @@
 package org.xdi.oxauth.service.uma.resourceserver;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -21,10 +26,6 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.uma.ws.rs.ResourceSetPermissionRegistrationRestWebServiceImpl;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
-
-import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

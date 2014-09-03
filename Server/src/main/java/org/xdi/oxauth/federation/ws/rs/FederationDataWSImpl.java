@@ -1,5 +1,11 @@
 package org.xdi.oxauth.federation.ws.rs;
 
+import java.util.Arrays;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -10,11 +16,6 @@ import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationRequest;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.FederationMetadataService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Arrays;
 
 /**
  * Provides implementation for Federation Data REST web service interface.

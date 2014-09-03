@@ -1,5 +1,14 @@
 package org.xdi.oxauth.client;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -9,14 +18,6 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.HasParamName;
 import org.xdi.oxauth.model.util.Util;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.

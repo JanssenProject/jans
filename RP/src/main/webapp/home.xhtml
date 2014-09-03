@@ -28,7 +28,7 @@
                 <h:panelGrid columns="3">
                     <h:outputLabel for="resource">Resource</h:outputLabel>
                     <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
-                    <h:outputText>eg: acct:test_user@localhost https://localhost https://localhost:8443</h:outputText>
+                    <h:outputText>eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443</h:outputText>
                     <h:outputLabel for="acceptUntrastedCertificate">Accept Untrasted Certificate</h:outputLabel>
                     <h:selectBooleanCheckbox id="acceptUntrastedCertificate"
                                              value="#{openIdConnectDiscoveryAction.acceptUntrastedCertificate}"/>
@@ -129,13 +129,13 @@
 <h:inputText id="registrationEndpoint"
              value="#{registrationAction.registrationEndpoint}"
              size="40"/>
-<h:outputText>eg: https://localhost/oxauth/seam/resource/restv1/oxauth/register</h:outputText>
+<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/register</h:outputText>
 
 <h:outputLabel for="redirectUris">Redirect URIs (space-separated)</h:outputLabel>
 <h:inputText id="redirectUris"
              value="#{registrationAction.redirectUris}"
              size="40"/>
-<h:outputText>eg: https://localhost/oxauth-rp/home.seam</h:outputText>
+<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
 
 <h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
 <h:selectManyListbox id="registrationResponseType"
@@ -215,13 +215,13 @@
 <h:inputText id="jwksUri"
              value="#{registrationAction.jwksUri}"
              size="40"/>
-<h:outputText>eg: https://localhost/oxauth-client/test/resources/jwks.json</h:outputText>
+<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/jwks.json</h:outputText>
 
 <h:outputLabel for="sectorIdentifierUri">Sector Identifier URI</h:outputLabel>
 <h:inputText id="sectorIdentifierUri"
              value="#{registrationAction.sectorIdentifierUri}"
              size="40"/>
-<h:outputText>eg: https://localhost/oxauth-client/test/resources/sector_identifier.js</h:outputText>
+<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/sector_identifier.js</h:outputText>
 
 <h:outputLabel for="subjectType">Subject Type</h:outputLabel>
 <h:selectOneMenu id="subjectType"
@@ -453,7 +453,7 @@
         <h:inputText id="authorizationEndpoint"
                      value="#{authorizationAction.authorizationEndpoint}"
                      size="40"/>
-        <h:outputText>eg: https://localhost/oxauth/seam/resource/restv1/oxauth/authorize</h:outputText>
+        <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize</h:outputText>
 
         <h:outputLabel for="responseType">Response Type</h:outputLabel>
         <h:selectManyListbox id="responseType"
@@ -485,7 +485,7 @@
         <h:inputText id="authorizationRedirectUri"
                      value="#{authorizationAction.redirectUri}"
                      size="40"/>
-        <h:outputText>eg: https://localhost/oxauth-rp/home.seam</h:outputText>
+        <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
 
         <h:outputLabel for="authorizationState">State</h:outputLabel>
         <h:inputText id="authorizationState"
@@ -723,7 +723,7 @@
                     <h:inputText id="tokenEndpoint"
                                  value="#{tokenAction.tokenEndpoint}"
                                  size="40"/>
-                    <h:outputText>eg: https://localhost/oxauth/seam/resource/restv1/oxauth/token</h:outputText>
+                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/token</h:outputText>
 
                     <h:outputLabel for="grantType">Grant Type</h:outputLabel>
                     <h:selectOneMenu id="grantType"
@@ -763,7 +763,7 @@
                     <h:inputText id="tokenRedirectUri"
                                  value="#{tokenAction.redirectUri}"
                                  size="40"/>
-                    <h:outputText>eg: https://localhost/oxauth-rp/home.seam</h:outputText>
+                    <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
 
                     <h:outputLabel for="username">Username</h:outputLabel>
                     <h:inputText id="username"
@@ -874,7 +874,7 @@
                     <h:inputText id="userInfoEndpoint"
                                  value="#{userInfoAction.userInfoEndpoint}"
                                  size="40"/>
-                    <h:outputText>eg: https://localhost/oxauth/seam/resource/restv1/oxauth/userinfo</h:outputText>
+                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/userinfo</h:outputText>
 
                     <h:outputLabel for="userInfoAccessToken">Access Token</h:outputLabel>
                     <h:inputText id="userInfoAccessToken"
@@ -947,7 +947,7 @@
                     <h:inputText id="endSessionEndpoint"
                                  value="#{endSessionAction.endSessionEndpoint}"
                                  size="40"/>
-                    <h:outputText>eg: https://localhost/oxauth/seam/resource/restv1/oxauth/end_session</h:outputText>
+                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/end_session</h:outputText>
 
                     <h:outputLabel for="endSessionIdTokenHint">ID Token Hint</h:outputLabel>
                     <h:inputText id="endSessionIdTokenHint"
@@ -959,7 +959,7 @@
                     <h:inputText id="endSessionPostLogoutRedirectUri"
                                  value="#{endSessionAction.postLogoutRedirectUri}"
                                  size="40"/>
-                    <h:outputText>eg: https://localhost/oxauth-rp/home.seam</h:outputText>
+                    <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
                 </h:panelGrid>
             </div>
         </s:div>

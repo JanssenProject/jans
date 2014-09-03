@@ -35,16 +35,14 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
-import org.xdi.service.MailService;
+import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.service.PythonService;
 import org.xdi.service.ldap.LdapConnectionService;
-import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
-import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 
 /**

@@ -1,11 +1,11 @@
 package org.xdi.oxauth.service.uma;
 
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-import org.xdi.util.INumGenerator;
-
 import java.util.Date;
 import java.util.UUID;
+
+import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.util.INumGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy

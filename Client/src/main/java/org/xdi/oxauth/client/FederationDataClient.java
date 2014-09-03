@@ -1,11 +1,11 @@
 package org.xdi.oxauth.client;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.federation.FederationRequest;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
 
 /**
  * @author Yuriy Zabrovarnyy

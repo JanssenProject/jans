@@ -1,5 +1,12 @@
 package org.xdi.oxauth.client;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -11,12 +18,6 @@ import org.xdi.oxauth.model.jws.JwsValidator;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.

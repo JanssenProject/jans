@@ -1,5 +1,45 @@
 package org.xdi.oxauth.client;
 
+import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_ID;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_URL;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -13,12 +53,6 @@ import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterRequestParam;
-
-import javax.ws.rs.core.MediaType;
-import java.util.*;
-
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
 
 /**
  * Represents a register request to send to the authorization server.

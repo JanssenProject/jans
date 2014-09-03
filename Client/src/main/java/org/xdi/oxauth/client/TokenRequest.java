@@ -1,5 +1,18 @@
 package org.xdi.oxauth.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -13,12 +26,6 @@ import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.token.ClientAssertionType;
-
-import javax.ws.rs.core.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.SignatureException;
-import java.util.*;
 
 /**
  * Represents a token request to send to the authorization server.

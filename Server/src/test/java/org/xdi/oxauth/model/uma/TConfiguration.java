@@ -1,15 +1,16 @@
 package org.xdi.oxauth.model.uma;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

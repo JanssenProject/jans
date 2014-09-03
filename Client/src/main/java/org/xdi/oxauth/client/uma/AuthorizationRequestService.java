@@ -1,14 +1,14 @@
 package org.xdi.oxauth.client.uma;
 
-import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+
+import org.jboss.resteasy.client.ClientResponse;
+import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the requester asks for authorizationto have a new permission.

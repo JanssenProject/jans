@@ -1,6 +1,12 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -13,12 +19,7 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * @author Yuriy Zabrovarnyy

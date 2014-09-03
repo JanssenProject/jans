@@ -1,5 +1,8 @@
 package org.xdi.oxauth.comp;
 
+import java.net.URLEncoder;
+import java.util.Arrays;
+
 import org.jboss.seam.contexts.Contexts;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
@@ -13,9 +16,6 @@ import org.xdi.oxauth.service.FederationCheckTimer;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import java.net.URLEncoder;
-import java.util.Arrays;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 05/11/2012
@@ -24,13 +24,15 @@ import java.util.Arrays;
 public class FederationIntervalCheckerTest extends BaseComponentTest {
 
     private String m_redirectUri;
+	private String serverUri;
 
     private FederationTrust m_invalidFederationUrlTrust;
     private FederationTrust m_invalidRedirectUrlTrust;
 
-    @Parameters(value = "redirectUri")
-    public FederationIntervalCheckerTest(String p_redirectUri) {
+    @Parameters({"redirectUri", "serverUri"})
+    public FederationIntervalCheckerTest(String p_redirectUri, String serverUri) {
         m_redirectUri = p_redirectUri;
+        this.serverUri = serverUri;
     }
 
     @Override
@@ -55,7 +57,7 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
         m_invalidRedirectUrlTrust.setDn(pair2.getSecond());
         m_invalidRedirectUrlTrust.setDisplayName("Interval checker: invalid redirect uri");
         m_invalidRedirectUrlTrust.setFederationId("@!1111!0008!00F1!0001");
-        m_invalidRedirectUrlTrust.setFederationMetadataUri("https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata");
+        m_invalidRedirectUrlTrust.setFederationMetadataUri(serverUri + "/oxauth/seam/resource/restv1/oxauth/federationmetadata");
         m_invalidRedirectUrlTrust.setRedirectUris(Arrays.asList(m_redirectUri, "http://invalid.redirecturi.com"));
         m_invalidRedirectUrlTrust.setStatus(FederationTrustStatus.ACTIVE);
         m_invalidRedirectUrlTrust.setSkipAuthorization(true);

@@ -1,5 +1,8 @@
 package org.xdi.oxauth.comp;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.testng.Assert;
@@ -13,9 +16,6 @@ import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.InumService;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 12/10/2012
@@ -24,11 +24,14 @@ import java.util.List;
 public class FederationServiceTest extends BaseComponentTest {
 
     private String m_redirectUri;
-    private FederationTrust m_trust;
+    private String serverUri;
 
-    @Parameters(value = "redirectUri")
-    public FederationServiceTest(String p_redirectUri) {
-        m_redirectUri = p_redirectUri;
+    private FederationTrust m_trust;
+	
+    @Parameters({"redirectUri", "serverUri"})
+    public FederationServiceTest(String p_redirectUri, String serverUri) {
+    	this.m_redirectUri = p_redirectUri;
+        this.serverUri = serverUri;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class FederationServiceTest extends BaseComponentTest {
         m_trust.setDn(pair.getSecond());
         m_trust.setDisplayName("Test trust1");
         m_trust.setFederationId("@!1111!0008!00F1!0001");
-        m_trust.setFederationMetadataUri("https://localhost/oxauth/seam/resource/restv1/oxauth/federationmetadata");
+        m_trust.setFederationMetadataUri(serverUri + "/oxauth/seam/resource/restv1/oxauth/federationmetadata");
         m_trust.setRedirectUris(Arrays.asList(m_redirectUri));
         m_trust.setTrustStatus("inactive_by_checker");
         m_trust.setSkipAuthorization(true);

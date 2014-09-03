@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
-import org.xdi.oxauth.model.uma.UmaConstants;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
+
+import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the requester asks the AM to issue an RPT relating to

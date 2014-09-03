@@ -1,14 +1,15 @@
 package org.xdi.oxauth.model.common;
 
-import com.unboundid.util.StaticUtils;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+
+import com.unboundid.util.StaticUtils;
 
 /**
  * @author Javier Rojas Date: 12.5.2011

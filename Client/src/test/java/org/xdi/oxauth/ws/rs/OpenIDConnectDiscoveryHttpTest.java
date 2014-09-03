@@ -1,13 +1,15 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
-
-import static org.testng.Assert.*;
 
 /**
  * Functional tests for SWD Web Services (HTTP)

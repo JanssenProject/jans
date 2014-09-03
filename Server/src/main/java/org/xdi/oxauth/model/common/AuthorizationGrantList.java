@@ -1,17 +1,21 @@
 package org.xdi.oxauth.model.common;
 
+import java.util.Date;
+import java.util.List;
+
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.UserService;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * Component to hold in memory authorization grant objects.

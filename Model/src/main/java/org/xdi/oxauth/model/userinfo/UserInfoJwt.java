@@ -1,18 +1,5 @@
 package org.xdi.oxauth.model.userinfo;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.crypto.signature.*;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
@@ -20,7 +7,29 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 11.03.2012

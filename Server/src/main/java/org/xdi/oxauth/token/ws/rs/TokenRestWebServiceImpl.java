@@ -1,5 +1,15 @@
 package org.xdi.oxauth.token.ws.rs;
 
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -7,7 +17,18 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCodeGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.ClientCredentialsGrant;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.IdToken;
+import org.xdi.oxauth.model.common.Mode;
+import org.xdi.oxauth.model.common.RefreshToken;
+import org.xdi.oxauth.model.common.ResourceOwnerPasswordCredentialsGrant;
+import org.xdi.oxauth.model.common.TokenType;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
@@ -18,18 +39,14 @@ import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AuthenticationFilterService;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.FederationDataService;
+import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Provides interface for token REST web services

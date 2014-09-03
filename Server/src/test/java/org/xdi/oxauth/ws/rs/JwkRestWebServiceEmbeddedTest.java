@@ -1,5 +1,13 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+
+import javax.ws.rs.core.MediaType;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -9,11 +17,6 @@ import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-
-import javax.ws.rs.core.MediaType;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 /**
  * Functional tests for JWK Web Services (embedded)
  *

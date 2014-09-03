@@ -1,5 +1,11 @@
 package org.xdi.oxauth.service.uma.authorization;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
@@ -18,14 +24,9 @@ import org.xdi.oxauth.model.uma.persistence.ProgrammingLanguage;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaPolicy;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.service.PythonService;
 import org.xdi.oxauth.service.uma.PolicyService;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.List;
+import org.xdi.service.PythonService;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,5 +1,8 @@
 package org.xdi.oxauth.comp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -8,9 +11,6 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author Yuriy Zabrovarnyy

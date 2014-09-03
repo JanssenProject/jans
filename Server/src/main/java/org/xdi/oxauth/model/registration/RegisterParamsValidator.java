@@ -1,5 +1,13 @@
 package org.xdi.oxauth.model.registration;
 
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -9,13 +17,6 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.Util;
-
-import javax.ws.rs.HttpMethod;
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.List;
 
 /**
  * Validates the parameters received for the register web service.

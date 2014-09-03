@@ -1,7 +1,11 @@
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -22,12 +26,8 @@ import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.MetaDataConfigurationRestWebServiceImpl;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Zabrovarnyy

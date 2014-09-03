@@ -1,5 +1,11 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.List;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -8,10 +14,6 @@ import org.xdi.oxauth.client.FederationMetadataRequest;
 import org.xdi.oxauth.client.FederationMetadataResponse;
 import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
-
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

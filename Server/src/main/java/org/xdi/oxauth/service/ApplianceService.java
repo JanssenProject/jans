@@ -1,5 +1,7 @@
 package org.xdi.oxauth.service;
 
+import java.util.List;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -12,8 +14,6 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.util.StringHelper;
-
-import java.util.List;
 
 /**
  * GluuAppliance service

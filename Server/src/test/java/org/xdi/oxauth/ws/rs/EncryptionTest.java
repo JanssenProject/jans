@@ -1,5 +1,10 @@
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
+
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -11,11 +16,6 @@ import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Javier Rojas Blum Date: 11.30.2012

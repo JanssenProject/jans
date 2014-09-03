@@ -1,13 +1,15 @@
 package org.xdi.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.RESOURCE;
+import static org.xdi.oxauth.model.util.StringUtils.addQueryStringParam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.*;
-import static org.xdi.oxauth.model.util.StringUtils.addQueryStringParam;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

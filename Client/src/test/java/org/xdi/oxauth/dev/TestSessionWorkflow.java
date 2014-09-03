@@ -1,6 +1,9 @@
 package org.xdi.oxauth.dev;
 
+import java.util.Arrays;
+
 import junit.framework.Assert;
+
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -9,11 +12,15 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.UserInfoClient;
+import org.xdi.oxauth.client.UserInfoResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-
-import java.util.Arrays;
 
 
 public class TestSessionWorkflow extends BaseTest {

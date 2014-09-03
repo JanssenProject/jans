@@ -1,5 +1,10 @@
 package org.xdi.oxauth.token.ws.rs;
 
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.annotations.In;
@@ -12,11 +17,6 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.token.ValidateTokenParamsValidator;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Provides interface for validate token REST web services

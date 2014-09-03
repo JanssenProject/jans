@@ -1,10 +1,10 @@
 package org.xdi.oxauth.interop;
 
+import static org.testng.Assert.assertTrue;
+
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-
-import static org.testng.Assert.assertTrue;
 
 /**
  * OC5:FeatureTest-UserInfo Endpoint

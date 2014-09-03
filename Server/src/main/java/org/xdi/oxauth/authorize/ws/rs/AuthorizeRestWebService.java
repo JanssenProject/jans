@@ -1,13 +1,20 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * <p>
@@ -120,60 +127,164 @@ public interface AuthorizeRestWebService {
     @GET
     @Path("/authorize")
     @Produces({MediaType.TEXT_PLAIN})
+    @ApiOperation(
+            value = "Performs authorization.",
+            notes = "Performs authorization.",
+            response = Response.class,
+            responseContainer = "JSON"
+    )
     Response requestAuthorizationGet(
-            @QueryParam("scope") String scope,
-            @QueryParam("response_type") String responseType,
-            @QueryParam("client_id") String clientId,
-            @QueryParam("redirect_uri") String redirectUri,
-            @QueryParam("state") String state,
-            @QueryParam("response_mode") String responseMode,
-            @QueryParam("nonce") String nonce,
-            @QueryParam("display") String display,
-            @QueryParam("prompt") String prompt,
-            @QueryParam("max_age") Integer maxAge,
-            @QueryParam("ui_locales") String uiLocales,
-            @QueryParam("id_token_hint") String idTokenHint,
-            @QueryParam("login_hint") String loginHint,
-            @QueryParam("acr_values") String acrValues,
-            @QueryParam("amr_values") String amrValues,
-            @QueryParam("request") String request,
-            @QueryParam("request_uri") String requestUri,
-            @QueryParam("request_session_id") String requestSessionId,
-            @QueryParam("session_id") String sessionId,
-            @QueryParam("access_token") String accessToken,
-            @QueryParam("auth_level") String authLevel,
-            @QueryParam("auth_mode") String authMode,
-            @QueryParam("origin_headers") String originHeaders,
+            @QueryParam("scope")
+            @ApiParam(value = "OpenID Connect requests MUST contain the openid scope value. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present. Scope values used that are not understood by an implementation SHOULD be ignored.", required = true)
+            String scope,
+            @QueryParam("response_type")
+            @ApiParam(value = "OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used. When using the Authorization Code Flow, this value is code. ", required = true)
+            String responseType,
+            @QueryParam("client_id")
+            @ApiParam(value = "OAuth 2.0 Client Identifier valid at the Authorization Server.", required = true)
+            String clientId,
+            @QueryParam("redirect_uri")
+            @ApiParam(value = "Redirection URI to which the response will be sent. This URI MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider", required = true)
+            String redirectUri,
+            @QueryParam("state")
+            @ApiParam(value = "Opaque value used to maintain state between the request and the callback. Typically, Cross-Site Request Forgery (CSRF, XSRF) mitigation is done by cryptographically binding the value of this parameter with a browser cookie. ", required = false)
+            String state,
+            @QueryParam("response_mode")
+            @ApiParam(value = "Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the Response Mode that would be requested is the default mode specified for the Response Type. ", required = false)
+            String responseMode,
+            @QueryParam("nonce")
+            @ApiParam(value = "String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authorization Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.", required = false)
+            String nonce,
+            @QueryParam("display")
+            @ApiParam(value = "ASCII string value that specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User. The defined values are: page, popup, touch, wap", required = false)
+            String display,
+            @QueryParam("prompt")
+            @ApiParam(value = "Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are: none, login, consent, select_account", required = false)
+            String prompt,
+            @QueryParam("max_age")
+            @ApiParam(value = "Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP. If the elapsed time is greater than this value, the OP MUST attempt to actively re-authenticate the End-User. (The max_age request parameter corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] max_auth_age request parameter.) When max_age is used, the ID Token returned MUST include an auth_time Claim Value. ", required = false)
+            Integer maxAge,
+            @QueryParam("ui_locales")
+            @ApiParam(value = "End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value \"fr-CA fr en\" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider. ", required = false)
+            String uiLocales,
+            @QueryParam("id_token_hint")
+            @ApiParam(value = "ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client. If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response; otherwise, it SHOULD return an error, such as login_required. When possible, an id_token_hint SHOULD be present when prompt=none is used and an invalid_request error MAY be returned if it is not; however, the server SHOULD respond successfully when possible, even if it is not present. The Authorization Server need not be listed as an audience of the ID Token when it is used as an id_token_hint value. ", required = false)
+            String idTokenHint,
+            @QueryParam("login_hint")
+            @ApiParam(value = "Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary). This hint can be used by an RP if it first asks the End-User for their e-mail address (or other identifier) and then wants to pass that value as a hint to the discovered authorization service. It is RECOMMENDED that the hint value match the value used for discovery. This value MAY also be a phone number in the format specified for the phone_number Claim. The use of this parameter is left to the OP's discretion. ", required = false)
+            String loginHint,
+            @QueryParam("acr_values")
+            @ApiParam(value = "Requested Authentication Context Class Reference values. Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference. The Authentication Context Class satisfied by the authentication performed is returned as the acr Claim Value, as specified in Section 2. The acr Claim is requested as a Voluntary Claim by this parameter. ", required = false)
+            String acrValues,
+            @QueryParam("amr_values")
+            @ApiParam(value = "AMR Values", required = false)
+            String amrValues,
+            @QueryParam("request")
+            @ApiParam(value = "This parameter enables OpenID Connect requests to be passed in a single, self-contained parameter and to be optionally signed and/or encrypted. The parameter value is a Request Object value, as specified in Section 6.1. It represents the request as a JWT whose Claims are the request parameters.", required = false)
+            String request,
+            @QueryParam("request_uri")
+            @ApiParam(value = "This parameter enables OpenID Connect requests to be passed by reference, rather than by value. The request_uri value is a URL using the https scheme referencing a resource containing a Request Object value, which is a JWT containing the request parameters. ", required = false)
+            String requestUri,
+            @QueryParam("request_session_id")
+            @ApiParam(value = "Request session id", required = false)
+            String requestSessionId,
+            @QueryParam("session_id")
+            @ApiParam(value = "Session id of this call", required = false)
+            String sessionId,
+            @QueryParam("access_token")
+            @ApiParam(value = "Access token", required = false)
+            String accessToken,
+            @QueryParam("auth_level")
+            @ApiParam(value = "The minimum authentication level of authentication plugin", required = false)
+            String authLevel,
+            @QueryParam("auth_mode")
+            @ApiParam(value = "The name of authentication plugin", required = false)
+            String authMode,
+            @QueryParam("origin_headers")
+            @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
+            String originHeaders,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 
     @POST
     @Path("/authorize")
     @Produces({MediaType.TEXT_PLAIN})
+    @ApiOperation(
+            value = "Performs authorization.",
+            notes = "Performs authorization.",
+            response = Response.class,
+            responseContainer = "JSON"
+    )
     Response requestAuthorizationPost(
-            @FormParam("scope") String scope,
-            @FormParam("response_type") String responseType,
-            @FormParam("client_id") String clientId,
-            @FormParam("redirect_uri") String redirectUri,
-            @FormParam("state") String state,
-            @QueryParam("response_mode") String responseMode,
-            @FormParam("nonce") String nonce,
-            @FormParam("display") String display,
-            @FormParam("prompt") String prompt,
-            @FormParam("max_age") Integer maxAge,
-            @FormParam("ui_locales") String uiLocales,
-            @FormParam("id_token_hint") String idTokenHint,
-            @FormParam("login_hint") String loginHint,
-            @FormParam("acr_values") String acrValues,
-            @FormParam("amr_values") String amrValues,
-            @FormParam("request") String request,
-            @FormParam("request_uri") String requestUri,
-            @FormParam("request_session_id") String requestSessionId,
-            @FormParam("session_id") String sessionId,
-            @FormParam("access_token") String accessToken,
-            @FormParam("auth_level") String authLevel,
-            @FormParam("auth_mode") String authMode,
-            @FormParam("origin_headers") String originHeaders,
+            @FormParam("scope")
+            @ApiParam(value = "OpenID Connect requests MUST contain the openid scope value. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present. Scope values used that are not understood by an implementation SHOULD be ignored.", required = true)
+            String scope,
+            @FormParam("response_type")
+            @ApiParam(value = "OAuth 2.0 Response Type value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used. When using the Authorization Code Flow, this value is code. ", required = true)
+            String responseType,
+            @FormParam("client_id")
+            @ApiParam(value = "OAuth 2.0 Client Identifier valid at the Authorization Server. ", required = true)
+            String clientId,
+            @FormParam("redirect_uri")
+            @ApiParam(value = "Redirection URI to which the response will be sent. This URI MUST exactly match one of the Redirection URI values for the Client pre-registered at the OpenID Provider", required = true)
+            String redirectUri,
+            @FormParam("state")
+            @ApiParam(value = "Opaque value used to maintain state between the request and the callback. Typically, Cross-Site Request Forgery (CSRF, XSRF) mitigation is done by cryptographically binding the value of this parameter with a browser cookie. ", required = false)
+            String state,
+            @QueryParam("response_mode")
+            @ApiParam(value = "Informs the Authorization Server of the mechanism to be used for returning parameters from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the Response Mode that would be requested is the default mode specified for the Response Type. ", required = false)
+            String responseMode,
+            @FormParam("nonce")
+            @ApiParam(value = "String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authorization Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.", required = false)
+            String nonce,
+            @FormParam("display")
+            @ApiParam(value = "ASCII string value that specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User. The defined values are: page, popup, touch, wap", required = false)
+            String display,
+            @FormParam("prompt")
+            @ApiParam(value = "Space delimited, case sensitive list of ASCII string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are: none, login, consent, select_account", required = false)
+            String prompt,
+            @FormParam("max_age")
+            @ApiParam(value = "Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the last time the End-User was actively authenticated by the OP. If the elapsed time is greater than this value, the OP MUST attempt to actively re-authenticate the End-User. (The max_age request parameter corresponds to the OpenID 2.0 PAPE [OpenID.PAPE] max_auth_age request parameter.) When max_age is used, the ID Token returned MUST include an auth_time Claim Value. ", required = false)
+            Integer maxAge,
+            @FormParam("ui_locales")
+            @ApiParam(value = "End-User's preferred languages and scripts for the user interface, represented as a space-separated list of BCP47 [RFC5646] language tag values, ordered by preference. For instance, the value \"fr-CA fr en\" represents a preference for French as spoken in Canada, then French (without a region designation), followed by English (without a region designation). An error SHOULD NOT result if some or all of the requested locales are not supported by the OpenID Provider. ", required = false)
+            String uiLocales,
+            @FormParam("id_token_hint")
+            @ApiParam(value = "ID Token previously issued by the Authorization Server being passed as a hint about the End-User's current or past authenticated session with the Client. If the End-User identified by the ID Token is logged in or is logged in by the request, then the Authorization Server returns a positive response; otherwise, it SHOULD return an error, such as login_required. When possible, an id_token_hint SHOULD be present when prompt=none is used and an invalid_request error MAY be returned if it is not; however, the server SHOULD respond successfully when possible, even if it is not present. The Authorization Server need not be listed as an audience of the ID Token when it is used as an id_token_hint value. ", required = false)
+            String idTokenHint,
+            @FormParam("login_hint")
+            @ApiParam(value = "Hint to the Authorization Server about the login identifier the End-User might use to log in (if necessary). This hint can be used by an RP if it first asks the End-User for their e-mail address (or other identifier) and then wants to pass that value as a hint to the discovered authorization service. It is RECOMMENDED that the hint value match the value used for discovery. This value MAY also be a phone number in the format specified for the phone_number Claim. The use of this parameter is left to the OP's discretion. ", required = false)
+            String loginHint,
+            @FormParam("acr_values")
+            @ApiParam(value = "Requested Authentication Context Class Reference values. Space-separated string that specifies the acr values that the Authorization Server is being requested to use for processing this Authentication Request, with the values appearing in order of preference. The Authentication Context Class satisfied by the authentication performed is returned as the acr Claim Value, as specified in Section 2. The acr Claim is requested as a Voluntary Claim by this parameter. ", required = false)
+            String acrValues,
+            @FormParam("amr_values")
+            @ApiParam(value = "AMR Values", required = false)
+            String amrValues,
+            @FormParam("request")
+            @ApiParam(value = "This parameter enables OpenID Connect requests to be passed in a single, self-contained parameter and to be optionally signed and/or encrypted. The parameter value is a Request Object value, as specified in Section 6.1. It represents the request as a JWT whose Claims are the request parameters.", required = false)
+            String request,
+            @FormParam("request_uri")
+            @ApiParam(value = "This parameter enables OpenID Connect requests to be passed by reference, rather than by value. The request_uri value is a URL using the https scheme referencing a resource containing a Request Object value, which is a JWT containing the request parameters. ", required = false)
+            String requestUri,
+            @FormParam("request_session_id")
+            @ApiParam(value = "Request session id", required = false)
+            String requestSessionId,
+            @FormParam("session_id")
+            @ApiParam(value = "Session id of this call", required = false)
+            String sessionId,
+            @FormParam("access_token")
+            @ApiParam(value = "Access token", required = false)
+            String accessToken,
+            @FormParam("auth_level")
+            @ApiParam(value = "The minimum authentication level of authentication plugin", required = false)
+            String authLevel,
+            @FormParam("auth_mode")
+            @ApiParam(value = "The name of authentication plugin", required = false)
+            String authMode,
+            @FormParam("origin_headers")
+            @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
+            String originHeaders,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 }

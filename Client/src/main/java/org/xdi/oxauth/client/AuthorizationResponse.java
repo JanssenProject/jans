@@ -1,5 +1,19 @@
 package org.xdi.oxauth.client;
 
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.CODE;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.ID_TOKEN;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SCOPE;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.STATE;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -8,14 +22,6 @@ import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.util.Util;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.

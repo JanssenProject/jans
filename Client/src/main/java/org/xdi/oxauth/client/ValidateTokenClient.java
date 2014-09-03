@@ -1,12 +1,12 @@
 package org.xdi.oxauth.client;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Encapsulates functionality to make validate token request calls to an authorization server via REST Services.

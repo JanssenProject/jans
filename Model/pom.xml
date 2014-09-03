@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>1.4.1.Final</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
 
     <prerequisites>
@@ -127,5 +127,13 @@
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
+
+        <!-- documentation -->
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.10</artifactId>
+            <version>1.3.7</version>
+        </dependency>
+
     </dependencies>
 </project>

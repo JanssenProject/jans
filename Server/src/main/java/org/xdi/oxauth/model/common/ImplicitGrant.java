@@ -1,8 +1,8 @@
 package org.xdi.oxauth.model.common;
 
-import org.xdi.oxauth.model.registration.Client;
-
 import java.util.Date;
+
+import org.xdi.oxauth.model.registration.Client;
 
 /**
  * <p>

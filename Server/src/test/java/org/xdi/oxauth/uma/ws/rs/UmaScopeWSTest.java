@@ -1,5 +1,9 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+
+import javax.ws.rs.core.Response;
+
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -10,10 +14,6 @@ import org.xdi.oxauth.model.uma.ScopeDescription;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
-
-import javax.ws.rs.core.Response;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy

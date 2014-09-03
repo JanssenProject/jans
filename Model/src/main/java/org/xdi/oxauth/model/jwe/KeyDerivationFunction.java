@@ -1,16 +1,16 @@
 package org.xdi.oxauth.model.jwe;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidParameterException;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.xdi.oxauth.model.exception.InvalidParameterException;
+import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 12.11.2012

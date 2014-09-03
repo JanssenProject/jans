@@ -1,9 +1,9 @@
 package org.xdi.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Provides functionality to parse query strings.

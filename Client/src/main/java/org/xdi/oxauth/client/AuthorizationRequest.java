@@ -1,17 +1,21 @@
 package org.xdi.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.util.Util;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.common.Display;
+import org.xdi.oxauth.model.common.Parameters;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.util.Util;
 
 /**
  * Represents an authorization request to send to the authorization server.

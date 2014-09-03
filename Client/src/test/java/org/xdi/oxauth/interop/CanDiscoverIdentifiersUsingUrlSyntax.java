@@ -1,9 +1,9 @@
 package org.xdi.oxauth.interop;
 
+import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.Test;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * OC5:FeatureTest-Can Discover Identifiers using URL Syntax

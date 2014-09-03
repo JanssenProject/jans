@@ -1,11 +1,12 @@
 package org.xdi.oxauth.model.common;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * @author Yuriy Zabrovarnyy

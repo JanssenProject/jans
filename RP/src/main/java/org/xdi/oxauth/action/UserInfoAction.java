@@ -1,7 +1,11 @@
 package org.xdi.oxauth.action;
 
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Factory;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoRequest;

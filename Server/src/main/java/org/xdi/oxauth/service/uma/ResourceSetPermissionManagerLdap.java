@@ -1,7 +1,8 @@
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import java.util.Date;
+import java.util.List;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -10,8 +11,8 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
 
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 
 /**
  * LDAP version of resource set permission manager.

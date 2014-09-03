@@ -1,7 +1,5 @@
 package org.xdi.oxauth.federation.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -11,6 +9,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * Provides interface for Federation Data REST web services.

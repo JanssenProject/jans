@@ -1,13 +1,20 @@
 package org.xdi.oxauth.model.jwt;
 
-import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.AUDIENCE;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.ISSUED_AT;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.ISSUER;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.JWT_ID;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.NOT_BEFORE;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.SUBJECT_IDENTIFIER;
+import static org.xdi.oxauth.model.jwt.JwtClaimName.TYPE;
 
 import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.xdi.oxauth.model.jwt.JwtClaimName.*;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
 
 /**
  * @author Javier Rojas Blum Date: 11.09.2012

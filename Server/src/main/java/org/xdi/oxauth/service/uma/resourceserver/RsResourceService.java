@@ -1,5 +1,9 @@
 package org.xdi.oxauth.service.uma.resourceserver;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -12,10 +16,6 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.uma.ResourceSetService;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.util.ServerUtil;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

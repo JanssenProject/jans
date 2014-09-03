@@ -1,5 +1,11 @@
 package org.xdi.oxauth.session.ws.rs;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -18,12 +24,6 @@ import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.util.StringHelper;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * @author Javier Rojas Blum Date: 12.15.2011

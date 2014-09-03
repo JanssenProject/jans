@@ -1,12 +1,12 @@
 package org.xdi.oxauth.util;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.log4j.Logger;
 
 /**
  * @author Yuriy Movchan

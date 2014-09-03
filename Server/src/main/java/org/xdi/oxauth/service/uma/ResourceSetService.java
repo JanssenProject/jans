@@ -1,6 +1,8 @@
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -16,8 +18,7 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 
-import java.util.Collections;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with resource set descriptions

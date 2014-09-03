@@ -1,5 +1,11 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -8,11 +14,6 @@ import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

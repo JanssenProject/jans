@@ -1,15 +1,5 @@
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-import org.xdi.ldap.model.LdapDummyEntry;
-import org.xdi.oxauth.model.config.BaseFilter;
-import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +9,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.LdapDummyEntry;
+import org.xdi.oxauth.model.config.BaseFilter;
+import org.xdi.util.ArrayHelper;
+import org.xdi.util.StringHelper;
+
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Movchan

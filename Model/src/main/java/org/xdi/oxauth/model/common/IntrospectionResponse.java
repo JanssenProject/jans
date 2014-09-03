@@ -1,10 +1,10 @@
 package org.xdi.oxauth.model.common;
 
+import java.util.Date;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
