@@ -18,7 +18,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!B4B0
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:givenName
+urn: urn:mace:dir:attribute-def:givenName
 description: Given name(s) or first name(s) of the End-User.
  Note that in some cultures, people can have multiple given names;
  all can be present, with the names being separated by space characters.
@@ -37,7 +37,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!42E0
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:uid
+urn: urn:mace:dir:attribute-def:uid
 description: A domain issued and managed identifier for the person.
  Subject - Identifier for the End-User at the Issuer.
 
@@ -212,7 +212,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!D2E0
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:memberOf
+urn: urn:gluu:dir:attribute-def:memberOf
 
 dn: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Time zone info
@@ -272,7 +272,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!8A11
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:secretQuestion
+urn: urn:gluu:dir:attribute-def:secretQuestion
 
 dn: inum=%(inumOrg)s!0005!C703,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Secret Answer
@@ -290,7 +290,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!C703
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:secretAnswer
+urn: urn:gluu:dir:attribute-def:secretAnswer
 
 dn: inum=%(inumOrg)s!0005!6493,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Preferred Language
@@ -309,7 +309,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!6493
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:preferredLanguage
+urn: urn:mace:dir:attribute-def:preferredLanguage
 
 dn: inum=%(inumOrg)s!0005!5CA2,ou=attributes,o=%(inumOrg)s,o=gluu
 description: iname
@@ -325,7 +325,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!5CA2
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:iname
+urn: urn:gluu:dir:attribute-def:iname
 
 dn: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Primary Email Address
@@ -343,7 +343,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!CAE3
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:mail
+urn: urn:mace:dir:attribute-def:mail
 
 dn: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Middle Name
@@ -403,7 +403,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!0C85
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:sn
+urn: urn:mace:dir:attribute-def:sn
 description: Surname(s) or last name(s) of the End-User. Note that in some
  cultures, people can have multiple family names or no family name; all can
  be present, with the names being separated by space characters.
@@ -460,13 +460,13 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: c
-gluuSAML1URI: urn:mace:dir:attribute-def:c
+gluuSAML1URI: urn:urn:mace:dir:attribute-def:c
 gluuSAML2URI: urn:oid:2.5.4.6
 gluuStatus: active
 inum: %(inumOrg)s!0005!BCE8
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:c
+urn: urn:gluu:dir:attribute-def:c
 
 dn: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Display Name
@@ -484,7 +484,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!2B29
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:displayName
+urn: urn:mace:dir:attribute-def:displayName
 description: End-User's full name in displayable form
  including all name parts, possibly including titles and
  suffixes, ordered according to the End-User's locale and preferences.
@@ -521,7 +521,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:inum
+urn: urn:gluu:dir:attribute-def:inum
 
 dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Organization i-number
@@ -536,7 +536,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!D03E
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:o
+urn: urn:mace:dir:attribute-def:o
 
 dn: inum=%(inumOrg)s!0005!AAEE,ou=attributes,o=%(inumOrg)s,o=gluu
 description: User secret string
@@ -554,7 +554,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!AAEE
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:userPassword
+urn: urn:gluu:dir:attribute-def:userPassword
 
 ############################
 # InetOrgPerson Attributes
@@ -575,7 +575,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!C001
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:title
+urn: urn:mace:dir:attribute-def:title
 
 dn: inum=%(inumOrg)s!0005!4502,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Vehicle Licence Plate Number
@@ -593,7 +593,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!4502
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:carLicense
+urn: urn:mace:dir:attribute-def:carLicense
 
 dn: inum=%(inumOrg)s!0005!BD22,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Fax Telephone Number
@@ -611,7 +611,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!BD22
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:facsimileTelephoneNumber
+urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
 
 dn: inum=%(inumOrg)s!0005!08E2,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Organizational Department
@@ -628,7 +628,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!08E2
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:departmentNumber
+urn: urn:mace:dir:attribute-def:departmentNumber
 
 dn: inum=%(inumOrg)s!0005!3D44,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Employee Type
@@ -644,7 +644,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!3D44
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:employeeType
+urn: urn:mace:dir:attribute-def:employeeType
 
 dn: inum=%(inumOrg)s!0005!D054,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Name search keywords
@@ -662,7 +662,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!D054
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:cn
+urn: urn:mace:dir:attribute-def:cn
 
 dn: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Mobile Telephone Number
@@ -680,7 +680,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!6DA6
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:mobile
+urn: urn:mace:dir:attribute-def:mobile
 
 dn: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Home Telephone Number
@@ -698,7 +698,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!0C18
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:homePhone
+urn: urn:mace:dir:attribute-def:homePhone
 
 dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
 description: State or Province
@@ -716,7 +716,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!E6B8
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:st
+urn: urn:mace:dir:attribute-def:st
 
 dn: inum=%(inumOrg)s!0005!42D8,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Manager
@@ -732,7 +732,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!42D8
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:manager
+urn: urn:mace:dir:attribute-def:manager
 
 dn: inum=%(inumOrg)s!0005!6609,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Street
@@ -750,7 +750,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!6609
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:street
+urn: urn:mace:dir:attribute-def:street
 
 dn: inum=%(inumOrg)s!0005!E999,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Postal Box
@@ -768,7 +768,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!E999
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:postOfficeBox
+urn: urn:mace:dir:attribute-def:postOfficeBox
 
 dn: inum=%(inumOrg)s!0005!D0C9,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Employee Number
@@ -784,7 +784,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!D0C9
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:employeeNumber
+urn: urn:mace:dir:attribute-def:employeeNumber
 
 dn: inum=%(inumOrg)s!0005!894A,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Preferred Delivery Method
@@ -800,7 +800,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!894A
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:preferredDeliveryMethod
+urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
 
 dn: inum=%(inumOrg)s!0005!570B,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Work Telephone Number
@@ -819,7 +819,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!570B
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:telephoneNumber
+urn: urn:mace:dir:attribute-def:telephoneNumber
 
 dn: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Room Number
@@ -837,7 +837,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!D90B
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:roomNumber
+urn: urn:mace:dir:attribute-def:roomNumber
 
 dn: inum=%(inumOrg)s!0005!AC0B,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Secretary
@@ -853,7 +853,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!AC0B
 objectClass: top
 objectClass: gluuAttribute
-urn: gluu:dir:attribute-def:secretary
+urn: urn:gluu:dir:attribute-def:secretary
 
 dn: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Home Address
@@ -871,7 +871,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!27DB
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:homePostalAddress
+urn: urn:mace:dir:attribute-def:homePostalAddress
 
 dn: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=%(inumOrg)s,o=gluu
 description: City
@@ -889,7 +889,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!6EEB
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:l
+urn: urn:mace:dir:attribute-def:l
 
 dn: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Postal or Zip Code
@@ -907,7 +907,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!2A3D
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:postalCode
+urn: urn:mace:dir:attribute-def:postalCode
 
 dn: inum=%(inumOrg)s!0005!48EE,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Description
@@ -925,7 +925,7 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!48EE
 objectClass: top
 objectClass: gluuAttribute
-urn: mace:dir:attribute-def:description
+urn: urn:mace:dir:attribute-def:description
 
 #########################
 # eduPerson Attributes
