@@ -1,0 +1,14 @@
+#########################
+# OX Clients Definition
+#########################
+
+dn: inum=%(inumOrg)s!0008!728D.34EC,ou=clients,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4.3DC3,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+displayName: gluu
+oxAuthClientSecret: %(oxauthClient_encoded_pw)s
+oxAuthAppType: web
+inum: %(inumOrg)s!!0008!728D.34EC
+oxauthredirecturi: https://%(hostname)s/identity/scim/auth
+oxauthredirecturi: https://%(hostname)s/identity/authentication/authcode

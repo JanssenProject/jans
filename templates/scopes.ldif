@@ -1,0 +1,13 @@
+#########################
+# OX Scopes Definition
+#########################
+
+dn: inum=%(inumOrg)s!0009!F0C4.3DC3,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthCustomScope
+objectClass: top
+description: View your email address and user Id
+defaultScope: true
+displayName: oxTrust user info
+inum: %(inumOrg)s!0009!F0C4.3DC3

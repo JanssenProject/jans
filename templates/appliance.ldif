@@ -11,3 +11,4 @@ gluuVdsCacheRefreshEnabled: disabled
 oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
+oxIDPAuthentication: {"type":"ldap","name":null,"level":0,"priority":1,"enabled":true,"version":0,"fields":[{"name":"ldapHost","values":["%(hostname)s"]},{"name":"ldapPort","values":["1636"]},{"name":"ldapBindDn","values":["%(ldap_binddn)s"]},{"name":"ldapBindPw","values":["%(encoded_ox_ldap_pw)s"]},{"name":"ldapUseSSL","values":["true"]}]}
