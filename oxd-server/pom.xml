@@ -126,6 +126,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.nicholaswilliams.java.licensing</groupId>
+            <artifactId>licensing-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxd-common</artifactId>
         </dependency>
