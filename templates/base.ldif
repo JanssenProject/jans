@@ -58,9 +58,17 @@ ou: oxTrust
 # Organization data - LEVEL 2
 ################################
 dn: o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: gluuOrganization
+objectClass: top
+objectClass: gluuOrganization
 o: %(inumOrg)s
+gluuThemeColor: 166309
+gluuManagerGroup: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+gluuOrgShortName: %(orgName)s
+gluuAddPersonCapability: enabled
+description: Welcome to oxTrust!
+displayName: %(orgName)s
+scimAuthMode: basic
+scimStatus: disabled
 
 ################################
 

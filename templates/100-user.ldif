@@ -5,10 +5,5 @@ objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema
 cn: schema
-objectClasses: ( %(inumOrgFN)s-oid NAME '%(inumOrgFN)s'
-  SUP top STRUCTURAL MUST objectClass X-ORIGIN 'gluu' )
 objectClasses: ( ox-%(inumOrgFN)s-oid NAME 'ox-%(inumOrgFN)s'
   SUP top STRUCTURAL MUST objectClass X-ORIGIN 'gluu' )
-objectClasses: ( oxCustomAttributes-oid NAME 'oxCustomAttributes' SUP top
-  STRUCTURAL MUST objectClass
-  X-ORIGIN 'ExampleOrg CE created objectclass' )

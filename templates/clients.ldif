@@ -14,4 +14,3 @@ oxAuthScope: inum=%(inumOrg)s!0009!764C.2818,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
 oxauthredirecturi: https://%(hostname)s/identity/scim/auth
 oxauthredirecturi: https://%(hostname)s/identity/authentication/authcode
-

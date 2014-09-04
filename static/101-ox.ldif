@@ -1622,36 +1622,35 @@ attributeTypes: ( profile-oid NAME 'profile'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( picture-oid NAME 'picture photo1'
-    DESC 'Profile picture URL of the person'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'Profile picture URL of the person'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( website-oid NAME 'website'
-    DESC 'Web page or blog URL of the person'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'Web page or blog URL of the person'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( emailVerified-oid NAME 'emailVerified'
-    DESC 'True if the e-mail address of the person has been verified; otherwise false'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'True if the e-mail address of the person has been verified; otherwise false'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( gender-oid NAME 'gender'
-    DESC 'Gender of the person either female or male'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'Gender of the person either female or male'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( birthdate-oid NAME 'birthdate'
-    DESC 'Birthday of the person, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'Birthday of the person, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( zoneinfo-oid NAME 'zoneinfo timezone'
   DESC 'time zone database representing the End-User's time zone. For example,
  Europe/Paris or America/Los_Angeles'
@@ -1660,11 +1659,11 @@ attributeTypes: ( zoneinfo-oid NAME 'zoneinfo timezone'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( locale-oid NAME 'locale oxTrustLocale'
-    DESC 'Locale of the person, represented as a BCP47 [RFC5646] language tag'
-    SUBSTR caseIgnoreSubstringsMatch
-    EQUALITY caseIgnoreMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-    X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+  DESC 'Locale of the person, represented as a BCP47 [RFC5646] language tag'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 attributeTypes: ( phoneNumberVerified-oid NAME 'phoneNumberVerified'
   DESC 'True if the phone number of the person has been verified, otherwise false'
   SUBSTR caseIgnoreSubstringsMatch
