@@ -1,4 +1,4 @@
-dn: inum%(inumAppliance)s,ou=appliances,o=gluu
+dn: inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: top
 objectClass: gluuAppliance
 inum: %(inumAppliance)s
