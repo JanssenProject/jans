@@ -41,6 +41,7 @@ class Setup():
         self.hostname = None
         self.ip = None
         self.orgName = None
+        self.orgShortName = None
         self.countryCode = None
         self.city = None
         self.state = None
