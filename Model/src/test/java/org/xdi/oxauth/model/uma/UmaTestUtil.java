@@ -55,10 +55,18 @@ public class UmaTestUtil {
         assertNotNull(p_configuration.getAuthorizationRequestEndpoint(), "Authorization request endpoint isn't correct");
     }
 
-    public static void assert_(Token p_token) {
+    public static void assert_(Token p_token, boolean assertAccessToken, boolean assertRefreshToken) {
         assertNotNull(p_token, "The token object is null");
-        assertNotNull(p_token.getAccessToken(), "The access token is null");
-        assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
+        if (assertAccessToken) {
+            assertNotNull(p_token.getAccessToken(), "The access token is null");
+        }
+        if (assertRefreshToken) {
+            assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
+        }
+    }
+
+    public static void assert_(Token p_token) {
+        assert_(p_token, true, true);
     }
 
     public static void assert_(ResourceSetStatus p_status) {
