@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/test/java/org/xdi/oxd/server
+END
+SetUpTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/test/java/org/xdi/oxd/server/SetUpTest.java
+END
+oxAuthDiscoveryTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/test/java/org/xdi/oxd/server/oxAuthDiscoveryTest.java
+END

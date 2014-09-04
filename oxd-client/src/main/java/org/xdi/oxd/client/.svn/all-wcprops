@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-client/src/main/java/org/xdi/oxd/client
+END
+TransportClient.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-client/src/main/java/org/xdi/oxd/client/TransportClient.java
+END
+CommandClient.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-client/src/main/java/org/xdi/oxd/client/CommandClient.java
+END

@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/repository/openxdi/!svn/ver/4505/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params
+END
+CheckIdTokenParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/CheckIdTokenParams.java
+END
+RegisterResourceParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/RegisterResourceParams.java
+END
+AuthorizeRptParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/AuthorizeRptParams.java
+END
+CheckAccessTokenParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/CheckAccessTokenParams.java
+END
+ObtainPatParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/ObtainPatParams.java
+END
+RegisterPermissionTicketParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 130
+/repository/openxdi/!svn/ver/4448/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/RegisterPermissionTicketParams.java
+END
+ObtainRptParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/ObtainRptParams.java
+END
+ObtainAatParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/ObtainAatParams.java
+END
+RegisterClientParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/repository/openxdi/!svn/ver/4505/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/RegisterClientParams.java
+END
+DiscoveryParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/DiscoveryParams.java
+END
+IParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/IParams.java
+END
+RptStatusParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/RptStatusParams.java
+END
+ClientReadParams.java
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/repository/openxdi/!svn/ver/4174/oxD/trunk/oxd-common/src/main/java/org/xdi/oxd/common/params/ClientReadParams.java
+END

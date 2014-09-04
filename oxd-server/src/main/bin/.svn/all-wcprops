@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/bin
+END
+oxd-download.sh
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/bin/oxd-download.sh
+END
+oxd-start-console.bat
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/bin/oxd-start-console.bat
+END
+oxd-start.bat
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/bin/oxd-start.bat
+END
+oxd-start.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/bin/oxd-start.sh
+END

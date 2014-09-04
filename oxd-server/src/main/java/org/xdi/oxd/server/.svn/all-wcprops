@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/repository/openxdi/!svn/ver/4506/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server
+END
+Processor.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/Processor.java
+END
+HttpService.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repository/openxdi/!svn/ver/4146/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/HttpService.java
+END
+Utils.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/Utils.java
+END
+Convertor.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/repository/openxdi/!svn/ver/4174/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/Convertor.java
+END
+Configuration.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/repository/openxdi/!svn/ver/4156/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/Configuration.java
+END
+SocketProcessor.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/SocketProcessor.java
+END
+DiscoveryService.java
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/repository/openxdi/!svn/ver/4150/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/DiscoveryService.java
+END
+ServerLauncher.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/ServerLauncher.java
+END
+SocketService.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/repository/openxdi/!svn/ver/3948/oxD/trunk/oxd-server/src/main/java/org/xdi/oxd/server/SocketService.java
+END
