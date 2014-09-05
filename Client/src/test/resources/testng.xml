@@ -176,7 +176,7 @@
     </test>
 
     <!-- Obtain UMA PAT token test -->
-    <test name="Obtain UMA PAT token test (HTTP)" enabled="true">
+    <test name="Obtain UMA PAT token test (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ObtainPatTokenFlowHttpTest"/>
         </classes>

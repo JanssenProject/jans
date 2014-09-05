@@ -36,7 +36,7 @@ public class ObtainPatTokenFlowHttpTest extends BaseTest {
         showTitle("testObtainPatTokenFlow");
 
         m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        UmaTestUtil.assert_(m_pat, true, false);
+        UmaTestUtil.assert_(m_pat);
     }
 
     /**
