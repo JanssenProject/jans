@@ -105,14 +105,22 @@ class Setup():
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
         self.ldif_base = '%s/base.ldif' % self.outputFolder
-        self.ldif_appliance = '%s/appliance.ldif' % self.templateFolder
-        self.ldif_attributes = '%s/attributes.ldif' % self.templateFolder
-        self.ldif_scopes = '%s/scopes.ldif' % self.templateFolder
-        self.ldif_clients = '%s/clients.ldif' % self.templateFolder
-        self.ldif_people = '%s/people.ldif' % self.templateFolder
-        self.ldif_groups = '%s/groups.ldif' % self.templateFolder
+        self.ldif_appliance = '%s/appliance.ldif' % self.outputFolder
+        self.ldif_attributes = '%s/attributes.ldif' % self.outputFolder
+        self.ldif_scopes = '%s/scopes.ldif' % self.outputFolder
+        self.ldif_clients = '%s/clients.ldif' % self.outputFolder
+        self.ldif_people = '%s/people.ldif' % self.outputFolder
+        self.ldif_groups = '%s/groups.ldif' % self.outputFolder
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
+        self.ldif_files = [self.ldif_base, 
+                         self.ldif_appliance,
+                         self.ldif_attributes,
+                         self.ldif_scopes,
+                         self.ldif_clients,
+                         self.ldif_people,
+                         self.ldif_groups]
+
         self.ce_files = {self.oxauth_ldap_properties: True,
                          self.oxauth_config_xml: True,
                          self.oxTrust_properties: True,
@@ -308,15 +316,18 @@ class Setup():
 
     def import_ldif(self):
         # TODO Need to add support for multiple ldif files
-        self.run([self.importLdifCommand,
-                  '--ldifFile', self.ldif_base,
+        for fullPath in self.ldif_files:
+            self.run([self.importLdifCommand,
+                  '--ldifFile', fullPath,
                   '--includeBranch', 'o=gluu',
                   '--backendID', 'userRoot',
                   '--hostname', 'localhost',
                   '--port', '4444',
                   '--bindDN', self.ldap_binddn,
                   '-j', self.ldapPassFn,
+                  '--append',
                   '--trustAll'])
+
 
     ### Change hostname in the relevant files
     def render_templates(self):
