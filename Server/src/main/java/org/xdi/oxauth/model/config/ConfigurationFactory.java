@@ -308,10 +308,13 @@ public class ConfigurationFactory {
     }
 
     private static String loadIdGenPythonScriptFromFile() {
-        try {
-            return FileUtils.readFileToString(new File(ID_GEN_SCRIPT_FILE_PATH), Util.UTF8_STRING_ENCODING);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+    	File genScript = new File(ID_GEN_SCRIPT_FILE_PATH);
+    	if(genScript.exists() && genScript.isFile()){
+	        try {
+	            return FileUtils.readFileToString(genScript, Util.UTF8_STRING_ENCODING);
+	        } catch (Exception e) {
+	            LOG.error(e.getMessage(), e);
+	        }
         }
         return null;
     }
