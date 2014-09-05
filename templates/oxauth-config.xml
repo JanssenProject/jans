@@ -44,7 +44,7 @@
         <grant-type>urn:ietf:params:oauth:grant-type:jwt-bearer</grant-type>
     </grant-types-supported>
 
-    <-- AMR enables an OpenID Connect client to request a specific method
+    <!-- AMR enables an OpenID Connect client to request a specific method
     of authentication -->
     <amr-values-supported>
         <!-- amr>basic</amr-->
@@ -279,6 +279,7 @@
     <trusted-client-enabled>true</trusted-client-enabled>
 
     <auth-filters-enabled>false</auth-filters-enabled>
+    <auth-filters>
         <auth-filter>
             <!--filter>(&amp;(associatedClient=*{0}*)(myPinCode={1}))</filter-->
             <filter>(&amp;(mail=*{0}*)(inum={1}))</filter>
