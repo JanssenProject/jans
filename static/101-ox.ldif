@@ -3,6 +3,7 @@
 #            oxTrustLocale changed to locale
 #            oxTrustnickname changed to nickName
 #            timezone changed to zoneinfo
+#            oxAssociatedClient changed to associatedClient
 # These attributes added as alternate NAME values, but
 # use is deprecated and they should be removed when its safe
 
@@ -11,22 +12,27 @@ objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema
 cn: schema
-attributeTypes: ( associatedClient-oid NAME 'associatedClient'
+attributeTypes: ( associatedClient-oid NAME 'oxAssociatedClient associatedClient'
+  DESC 'Used in UMA AS to associate a Resource Set with a Requesting Party. Also
+  used to associate a Person with an OpenID Connect client'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( associatedPerson-oid NAME 'associatedPerson' DESC 'associatedPerson'
+attributeTypes: ( associatedPerson-oid NAME 'associatedPerson'
+  DESC 'Used by an OpenID Connect Client to reference a person.'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( blowfishPassword-oid NAME 'blowfishPassword' DESC 'Blog Web URI'
+attributeTypes: ( blowfishPassword-oid NAME 'blowfishPassword'
+  DESC 'Blowfish crypted text'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( county-oid NAME 'county'
+  DESC 'ISO 3166-1 Alpha-2 Country Code'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -675,11 +681,6 @@ attributeTypes: ( organizationalOwner-oid NAME 'organizationalOwner' DESC 'OX or
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAmHost-oid NAME 'oxAmHost' DESC 'am host'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAssociatedClient-oid NAME 'oxAssociatedClient' DESC 'ox associated client'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
