@@ -26,33 +26,44 @@ from ldif import LDIFParser, LDIFWriter
 
 class SchemaParser(LDIFParser):
 
-    def __init__(self, input, output):
+    def __init__(self, input):
         LDIFParser.__init__(self, input)
-        objectclasses = {}
-        attributes = {}
+        self.objectclasses = {}
+        self.attributes = {}
 
+    def __repr__(self):
+        s = ''
+        oc_list = self.objectclasses.keys()
+        oc_list.sort()
+        for name in oc_list:
+            desc = self.objectclasses[name][0]
+            attrs = self.objectclasses[name][1]
+            s = s + "### Objectclass %s\n" % name
+            s  = s + " * __Description__ %s\n" % desc
+            for attr in attrs:
+                attrDesc = ''
+                if self.attributes.has_key(attr):
+                    attrDesc = self.attributes[attr]
+                s = s + " * __%s__ %s\n" % (attr, attrDesc)
+            s = s + "\n"
+        return s
 
     def handle(self, dn, entry):
-        print "# Schema"
         attributeTypes = entry['attributeTypes']
         objectclasses = entry['objectclasses']
 
-        print "## Attributes"
         for attr in attributeTypes:
             desc = self.getDESC(attr)
             name = self.getName(attr)
-            if desc != None:
-                print " * __%s__ %s" % (name, desc)
+            self.attributes[name] = desc
 
-        print "## Objectclasses "
         for oc in objectclasses:
+            name = self.getName(oc)
             desc = self.getDESC(oc)
             if not desc:
                 desc = ''
-            name = self.getName(oc)
-            print " * __%s__ %s" % (name, desc)
-            for attr in self.getMays(oc):
-                print "    * %s" % attr
+            mays = self.getMays(oc)
+            self.objectclasses[name] = (desc, mays)
 
     def getMays(self, oc):
         mays = oc.split('MAY')[1].split('(')[1].split(')')[0].split('$')
@@ -77,6 +88,6 @@ class SchemaParser(LDIFParser):
 if __name__ == '__main__':
     input_ldif = './static/opendj/101-ox.ldif'
     output_md = "./ldap-schema-table.md"
-    parser = SchemaParser(open(input_ldif, 'rb'), sys.stdout)
+    parser = SchemaParser(open(input_ldif, 'rb'))
     parser.parse()
-
+    print parser
