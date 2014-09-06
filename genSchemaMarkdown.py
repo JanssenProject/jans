@@ -54,11 +54,12 @@ class SchemaParser(LDIFParser):
 
         for attr in attributeTypes:
             desc = self.getDESC(attr)
-            name = self.getName(attr)
-            self.attributes[name] = desc
+            name_list = self.getName(attr)
+            for name in name_list:
+                self.attributes[name] = desc
 
         for oc in objectclasses:
-            name = self.getName(oc)
+            name = self.getName(oc)[0]  # Assumes OC has one name
             desc = self.getDESC(oc)
             if not desc:
                 desc = ''
@@ -78,12 +79,13 @@ class SchemaParser(LDIFParser):
         return desc
 
     def getName(self,s):
-        name = None
+        name_list = None
         try:
-            name = s.split('NAME')[1].split("'")[1]
+            name_string = s.split('NAME')[1].split("'")[1].strip()
+            name_list = name_string.split(" ")
         except:
             pass
-        return name
+        return name_list
 
 if __name__ == '__main__':
     input_ldif = './static/opendj/101-ox.ldif'
