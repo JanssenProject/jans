@@ -15,44 +15,6 @@ ou: appliances
 
 ######################################
 
-# SAML Trust Relationships - Level 3
-dn: ou=trustRelationships,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: trustRelationships
-
-######################################
-
-# SAML2 Federations - LEVEL 3
-# WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
-dn: ou=federations,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: federations
-
-######################################
-
-# Appliance Configuration Data  - LEVEL 3
-# Over-rides filesystem properties
-dn: ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: configuration
-
-# oxAuth static configuration data - LEVEL 4
-dn: ou=oxAuth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxAuth
-
-# oxTrust CONFIGURATION DATA - LEVEL 4
-dn: ou=oxTrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxTrust
-
 ################################
 ################################
 # Organization data - LEVEL 2

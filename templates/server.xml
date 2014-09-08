@@ -90,9 +90,9 @@
   <Connector port="8443" address="%(ip)s"
 	protocol="HTTP/1.1" scheme="https" secure="true"
 	clientAuth="false" sslProtocol="TLS" SSLEnabled="true"
-	keystoreFile="/etc/certs/%(inumOrgFN)s-java.jks"
-	keystoreType="JKS" keystorePass="5wf8hk5!"
-	truststoreFile="/etc/certs/%(inumOrgFN)s-java.jks"
+	keystoreFile="/etc/certs/%(inumOrgFN)s.jks"
+	keystoreType="JKS" keystorePass="%(jksPass)s"
+	truststoreFile="/etc/certs/%(inumOrgFN)s.jks"
 	truststorePass="%(jksPass)s" truststoreType="JKS"
 	truststoreAlgorithm="DelegateToApplication" />
 
@@ -102,7 +102,7 @@
 	scheme="https"
 	SSLEnabled="true"
 	clientAuth="true"
-	keystoreFile="/etc/certs/%(inumOrgFN)s-java.jks"
+	keystoreFile="/etc/certs/%(inumOrgFN)s.jks"
 	keystorePass="%(jksPass)s" />
 
     <!-- Define an AJP 1.3 Connector on port 8009 -->

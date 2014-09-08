@@ -12,3 +12,42 @@ oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
 oxIDPAuthentication: {"type":"ldap","name":null,"level":0,"priority":1,"enabled":true,"version":0,"fields":[{"name":"ldapHost","values":["%(hostname)s"]},{"name":"ldapPort","values":["1636"]},{"name":"ldapBindDn","values":["%(ldap_binddn)s"]},{"name":"ldapBindPw","values":["%(encoded_ox_ldap_pw)s"]},{"name":"ldapUseSSL","values":["true"]}]}
+
+# SAML Trust Relationships - Level 3
+dn: ou=trustRelationships,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: trustRelationships
+
+######################################
+
+# SAML2 Federations - LEVEL 3
+# WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
+dn: ou=federations,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: federations
+
+######################################
+
+# Appliance Configuration Data  - LEVEL 3
+# Over-rides filesystem properties
+dn: ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: configuration
+
+# oxAuth static configuration data - LEVEL 4
+dn: ou=oxAuth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+objectclass: oxAuthConfiguration
+ou: oxAuth
+
+# oxTrust CONFIGURATION DATA - LEVEL 4
+dn: ou=oxTrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+objectclass: oxAuthConfiguration
+ou: oxTrust
+
