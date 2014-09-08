@@ -1,0 +1,87 @@
+[
+
+	{
+		"attribute": "inum",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "uniqueIdentifier",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxID",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "lastModifiedTime",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "oxAuthExpiration",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "cn",
+		"type": "string",
+		"index": ["equality", "substring"]
+	},
+
+	{
+		"attribute": "entryUUID",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "givenName",
+		"type": "string",
+		"index": ["equality", "substring"]
+	},
+
+	{
+		"attribute": "mail",
+		"type": "string",
+		"index": ["equality", "substring"]
+	},
+
+	{
+		"attribute": "member",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "sn",
+		"type": "string",
+		"index": ["equality", "substring"]
+	},
+
+	{
+		"attribute": "telephoneNumber",
+		"type": "string",
+		"index": ["equality", "substring"]
+	},
+
+	{
+		"attribute": "uid",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "uniqueMember",
+		"type": "string",
+		"index": ["equality"]
+	}
+
+]

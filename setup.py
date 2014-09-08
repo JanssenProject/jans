@@ -35,6 +35,7 @@ import subprocess
 import time
 import traceback
 import uuid
+import json
 
 class Setup():
     def __init__(self):
@@ -62,6 +63,7 @@ class Setup():
         self.templateFolder = './templates'
         self.tomcatHome = '/opt/tomcat'
         self.configFolder = '/etc/gluu/config'
+        self.indexJson = './static/opendj/opendj_index.json'
         self.certFolder = '/etc/certs'
         self.gluuHome = '/opt/gluu'
         self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
@@ -203,6 +205,16 @@ class Setup():
         self.inumOrg = p['inumOrg']
         self.inumAppliance = p['inumAppliance']
 
+    def load_json(self, fn):
+        try:
+            f = open(fn)
+            return json.loads(f.read())
+        except:
+            self.logIt("Unable to read or parse json file from %s" % fn, True)
+        finally:
+            f.close()
+        return None
+
     def check_properties(self):
         while not self.hostname:
             testhost = raw_input('Hostname of this server: ').strip()
@@ -295,24 +307,6 @@ class Setup():
         cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
         self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
 
-    def setup_ldap(self):
-        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
-                  '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
-                  '--acceptLicense'])
-        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
-                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
-                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
-                           '--set', 'allow-pre-encoded-passwords:true']]
-        for changes in config_changes:
-            self.run([self.ldapDsconfigCommand,
-                     '--trustAll', '--no-prompt',
-                     '--hostname',  'localhost',
-                     '--port', '4444',
-                     '--bindDN', self.ldap_binddn,
-                     '--bindPasswordFile', self.ldapPassFn] + changes)
-        # add proper indexes -- define a datastructure in __init__ and
-        # iterate through it for dsconfig commands
-
 
     def import_ldif(self):
         # TODO Need to add support for multiple ldif files
@@ -328,6 +322,20 @@ class Setup():
                   '--append',
                   '--trustAll'])
 
+    def create_local_db_index(self, attributeName, indexType):
+        self.run([self.dspath, 'dsconfig create-local-db-index',
+                  '--backend-name', 'userRoot',
+                  '--type', 'generic',
+                  '--index-name', attributeName,
+                  '--set index-type:', indexType,
+                  '--set index-entry-limit:', '4000',
+                  '--hostName', 'localhost',
+                  '--port', '4444',
+                  '--bindDN', self.ldap_binddn,
+                  '-j', self.ldapPassFn,
+                  '--trustAll',
+                  '--noPropertiesFile',
+                  '--no-prompt'])
 
     ### Change hostname in the relevant files
     def render_templates(self):
@@ -371,6 +379,33 @@ class Setup():
                 self.logIt(startOk)
                 self.run([self.tomcat_start_script, 'restart'])
                 break
+
+    def setup_ldap(self):
+        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
+                  '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
+                  '--acceptLicense'])
+        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
+                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
+                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
+                           '--set', 'allow-pre-encoded-passwords:true']]
+        for changes in config_changes:
+            self.run([self.ldapDsconfigCommand,
+                      '--trustAll', '--no-prompt',
+                      '--hostname',  'localhost',
+                      '--port', '4444',
+                      '--bindDN', self.ldap_binddn,
+                      '--bindPasswordFile', self.ldapPassFn] + changes)
+
+        # Load indexing
+        index_json = self.load_json(self.indexJson)
+        if index_json:
+            for attrDict in index_json:
+                attr_name = attrDict['attribute']
+                index_types = attrDict['index']
+                for index_type in index_types:
+                    self.create_local_db_index(attr_name, index_type)
+        else:
+            self.logIt('NO indexes found %s' % self.indexJson, True)
 
 if __name__ == '__main__':
     ok = False
