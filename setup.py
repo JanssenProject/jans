@@ -323,7 +323,7 @@ class Setup():
                   '--trustAll'])
 
     def create_local_db_index(self, attributeName, indexType):
-        self.run([self.dspath, 'dsconfig create-local-db-index',
+        self.run([self.ldapDsconfigCommand, 'create-local-db-index',
                   '--backend-name', 'userRoot',
                   '--type', 'generic',
                   '--index-name', attributeName,
