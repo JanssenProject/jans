@@ -13,7 +13,7 @@ objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema
 cn: schema
-attributeTypes: ( associatedClient-oid NAME 'oxAssociatedClient associatedClient'
+attributeTypes: ( associatedClient-oid NAME ( 'oxAssociatedClient' 'associatedClient' )
   DESC 'Associate the dn of an OAuth2 client with a person or UMA Resource Set.'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -100,7 +100,7 @@ attributeTypes: ( gluuAppliancePollingInterval-oid NAME 'gluuAppliancePollingInt
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( gluuApplianceUpdateRequestList-oid
-  NAME 'gluuApplianceUpdateRequestList gluuApplianceUpdateReuestList'
+  NAME ( 'gluuApplianceUpdateRequestList' 'gluuApplianceUpdateReuestList' )
   DESC 'Used by the Gluu Server to request an update'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -350,8 +350,8 @@ attributeTypes: ( gluuLastUpdate-oid NAME 'gluuLastUpdate'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuLifeRay-oid NAME 'gluuLifeRay'
-  'TODO - remove'
+attributeTypes: ( gluuLifeRay-oid NAME ( 'gluuLifeRay'
+  'TODO-remove' )
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -1856,13 +1856,13 @@ attributeTypes: ( xri-oid NAME 'xri' DESC 'OX XRI address'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( middleName-oid NAME 'middleName oxTrustMiddleName'
+attributeTypes: ( middleName-oid NAME ( 'middleName' 'oxTrustMiddleName' )
   DESC 'Middle name(s)'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( nickname-oid NAME 'nickname oxTrustnickname'
+attributeTypes: ( nickname-oid NAME ( 'nickname' 'oxTrustnickname' )
   DESC 'Casual name of the End-User'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -1880,7 +1880,7 @@ attributeTypes: ( profile-oid NAME 'profile'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( picture-oid NAME 'picture photo1'
+attributeTypes: ( picture-oid NAME ( 'picture' 'photo1' )
   DESC 'Profile picture URL of the person'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -1910,14 +1910,13 @@ attributeTypes: ( birthdate-oid NAME 'birthdate'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( zoneinfo-oid NAME 'zoneinfo timezone'
-  DESC 'time zone database representing the End-User's time zone. For example,
- Europe/Paris or America/Los_Angeles'
+attributeTypes: ( zoneinfo-oid NAME ( 'zoneinfo' 'timezone' )
+  DESC 'time zone database representing the End-User's time zone. For example, Europe/Paris or America/Los_Angeles'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: ( locale-oid NAME 'locale oxTrustLocale'
+attributeTypes: ( locale-oid NAME ( 'locale' 'oxTrustLocale' )
   DESC 'Locale of the person, represented as a BCP47 [RFC5646] language tag'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -1929,24 +1928,24 @@ attributeTypes: ( phoneNumberVerified-oid NAME 'phoneNumberVerified'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: address-oid NAME 'address'
+attributeTypes: ( address-oid NAME 'address'
   DESC 'OpenID Connect formatted JSON object representing the address of the person'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-attributeTypes: updatedAt-oid NAME 'updatedAt'
+attributeTypes: ( updatedAt-oid NAME 'updatedAt'
   DESC 'Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
-objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY
+objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
   $ mail $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
   $ oxInviteCode $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail
-  $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $
+  $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue
   $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion
   $ oxTrustNameFormatted $ oxTrustPhoneValue
   $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType
@@ -1954,7 +1953,7 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
   $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture
   $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified
   $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion
-  $ seeAlso $ sn $  $ transientId $ uid $ userPassword )
+  $ seeAlso $ sn $ transientId $ uid $ userPassword )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuGroup-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus

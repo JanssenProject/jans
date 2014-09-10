@@ -61,6 +61,7 @@ class Setup():
 
         self.outputFolder = os.getcwd() + '/output'
         self.templateFolder = './templates'
+        self.staticFolder = './static/opendj'
         self.tomcatHome = '/opt/tomcat'
         self.configFolder = '/etc/gluu/config'
         self.indexJson = './static/opendj/opendj_index.json'
@@ -102,6 +103,9 @@ class Setup():
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
         self.config_ldif = '/opt/OpenDJ-2.6.0/config/config.ldif'
         self.user_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/100-user.ldif'
+        self.ox_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/101-ox.ldif'
+        self.custom_attributes_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/77-customAttributes.ldif'
+        self.eduperson_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/96-eduperson.ldif'
         self.apache2_conf = '/etc/httpd/conf/httpd.conf'
         self.apache2_idp_conf = '/etc/httpd/conf.d/idp.conf'
         self.etc_hosts = '/etc/hosts'
@@ -115,6 +119,11 @@ class Setup():
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
+
+        self.ce_static = [self.ox_schema_ldif,
+                        self.custom_attributes_schema_ldif,
+                        self.eduperson_schema_ldif]
+
         self.ldif_files = [self.ldif_base, 
                          self.ldif_appliance,
                          self.ldif_attributes,
@@ -307,6 +316,31 @@ class Setup():
         cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
         self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
 
+    def setup_ldap(self):
+        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
+                  '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
+                  '--acceptLicense'])
+        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
+                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
+                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
+                           '--set', 'allow-pre-encoded-passwords:true']]
+        for changes in config_changes:
+            self.run([self.ldapDsconfigCommand,
+                     '--trustAll', '--no-prompt',
+                     '--hostname',  'localhost',
+                     '--port', '4444',
+                     '--bindDN', self.ldap_binddn,
+                     '--bindPasswordFile', self.ldapPassFn] + changes)
+        # Load indexing
+        index_json = self.load_json(self.indexJson)
+        if index_json:
+            for attrDict in index_json:
+                attr_name = attrDict['attribute']
+                index_types = attrDict['index']
+                for index_type in index_types:
+                    self.create_local_db_index(attr_name, index_type)
+        else:
+            self.logIt('NO indexes found %s' % self.indexJson, True)
 
     def import_ldif(self):
         # TODO Need to add support for multiple ldif files
@@ -355,6 +389,11 @@ class Setup():
                 fn = os.path.split(fullPath)[-1]
                 shutil.copyfile(os.path.join(self.outputFolder, fn), fullPath)
 
+    def copy_static(self):
+        for fullPath in self.ce_static:
+            fn = os.path.split(fullPath)[-1]
+            shutil.copyfile(os.path.join(self.staticFolder, fn), fullPath)
+
     def change_ownership(self):
         self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
@@ -379,33 +418,6 @@ class Setup():
                 self.logIt(startOk)
                 self.run([self.tomcat_start_script, 'restart'])
                 break
-
-    def setup_ldap(self):
-        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
-                  '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
-                  '--acceptLicense'])
-        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
-                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
-                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
-                           '--set', 'allow-pre-encoded-passwords:true']]
-        for changes in config_changes:
-            self.run([self.ldapDsconfigCommand,
-                      '--trustAll', '--no-prompt',
-                      '--hostname',  'localhost',
-                      '--port', '4444',
-                      '--bindDN', self.ldap_binddn,
-                      '--bindPasswordFile', self.ldapPassFn] + changes)
-
-        # Load indexing
-        index_json = self.load_json(self.indexJson)
-        if index_json:
-            for attrDict in index_json:
-                attr_name = attrDict['attribute']
-                index_types = attrDict['index']
-                for index_type in index_types:
-                    self.create_local_db_index(attr_name, index_type)
-        else:
-            self.logIt('NO indexes found %s' % self.indexJson, True)
 
 if __name__ == '__main__':
     ok = False
@@ -439,6 +451,7 @@ if __name__ == '__main__':
         s.setup_ldap()
         s.import_ldif()
         s.copy_output()
+        s.copy_static()
         s.change_ownership()
         s.restart_all_services()
         s.save_properties()
