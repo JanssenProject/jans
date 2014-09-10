@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.xdi</groupId>
-    <artifactId>oxd-license-server</artifactId>
-    <packaging>war</packaging>
+    <artifactId>oxd-license-client</artifactId>
+    <packaging>jar</packaging>
     <version>1.0.2-SNAPSHOT</version>
-    <name>oxD License Server</name>
+    <name>oxD License Client</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
@@ -72,14 +72,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.nicholaswilliams.java.licensing</groupId>
-            <artifactId>licensing-licensor-base</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.xdi</groupId>
-            <artifactId>oxUtil</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
@@ -98,10 +90,6 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -148,26 +136,9 @@
             <artifactId>resteasy-jackson-provider</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-undertow</artifactId>
+        	<groupId>org.jboss.resteasy</groupId>
+        	<artifactId>resteasy-undertow</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.xdi</groupId>
-            <artifactId>oxd-license-client</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

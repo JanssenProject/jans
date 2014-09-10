@@ -17,6 +17,9 @@
         <slf4j.version>1.4.2</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
         <oxauth.version>1.0RC3-SNAPSHOT</oxauth.version>
+        <resteasy.version>3.0.8.Final</resteasy.version>
+        <licensing.version>1.1.0</licensing.version>
+        <guice.version>3.0</guice.version>
     </properties>
 
     <prerequisites>
@@ -29,6 +32,7 @@
         <module>oxd-server</module>
         <module>oxd-ping</module>
         <module>oxd-license-server</module>
+        <module>oxd-license-client</module>
     </modules>
 
     <repositories>
@@ -182,12 +186,60 @@
             <dependency><!-- Use this dependency in your licensed application -->
                 <groupId>net.nicholaswilliams.java.licensing</groupId>
                 <artifactId>licensing-core</artifactId>
-                <version>1.1.0</version>
+                <version>${licensing.version}</version>
             </dependency>
             <dependency><!-- Use this dependency in the application that you generate licenses with -->
                 <groupId>net.nicholaswilliams.java.licensing</groupId>
                 <artifactId>licensing-licensor-base</artifactId>
-                <version>1.1.0</version>
+                <version>${licensing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-client</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jackson-provider</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-undertow</artifactId>
+                <version>${resteasy.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-guice</artifactId>
+                <version>${resteasy.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.code.guice</groupId>
+                        <artifactId>guice</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-servlet</artifactId>
+                <version>${guice.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>oxd-license-client</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
