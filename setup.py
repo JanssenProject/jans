@@ -37,7 +37,7 @@ import traceback
 import uuid
 import json
 
-class Setup():
+class Setup(object):
     def __init__(self):
         self.hostname = None
         self.ip = None
@@ -419,43 +419,83 @@ class Setup():
                 self.run([self.tomcat_start_script, 'restart'])
                 break
 
-if __name__ == '__main__':
-    ok = False
-    s = None
-    while not ok:
-        s = Setup()
-        setup_properties = './setup.properties'
-        if os.path.isfile(setup_properties):
-            print 'properties found'
-            s.load_properties(setup_properties)
-        s.check_properties()
-        print '\n%s\n' % `s`
-        proceed = raw_input('Proceed with these values [Y|n] ').lower()
-        if (len(proceed) and (proceed[0] == 'y')):
-            if not os.path.exists(s.outputFolder):
-                os.makedirs(s.outputFolder)
-            if not os.path.exists(s.configFolder):
-                os.makedirs(s.configFolder)
-            if not os.path.exists(s.certFolder):
-                os.makedirs(s.certFolder)
-            f = open(s.ldapPassFn, 'w+')
-            f.write(s.ldapPass)
-            f.close()
-            ok = True
+    def getPrompt(self, prompt, defaultValue=None):
+        try:
+            if defaultValue:
+                s = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
+                if s == '':
+                    return defaultValue
+                else:
+                    return s
+            else:
+                input = False
+                while not input:
+                    s = raw_input("%s : " % prompt).strip()
+                    if s != '':
+                        input = True
+        except:
+            return None
 
-    try:
-        s.gen_certs()
-        s.add_ldap_schema()
-        s.encode_passwords()
-        s.render_templates()
-        s.setup_ldap()
-        s.import_ldif()
-        s.copy_output()
-        s.copy_static()
-        s.change_ownership()
-        s.restart_all_services()
-        s.save_properties()
-    except:
-        s.logIt(traceback.format_exc(), True)
-    finally:
-        s.run(['rm', '-f', '/tmp/pw'])
+    def writeLdapPW(self):
+        f = open(self.ldapPassFn, 'w+')
+        f.write(self.ldapPass)
+        f.close()
+
+
+    def deleteLdapPw(self):
+        os.remove(self.ldapPassFn)
+
+    def makeFolders(self):
+        if not os.path.exists(self.outputFolder):
+            os.makedirs(self.outputFolder)
+        if not os.path.exists(self.configFolder):
+            os.makedirs(self.configFolder)
+        if not os.path.exists(s.certFolder):
+            os.makedirs(self.certFolder)
+
+if __name__ == '__main__':
+    s = Setup()
+    setup_properties = './setup.properties'
+    if os.path.isfile(setup_properties):
+        print '\nProperties found!\n'
+        s.load_properties(setup_properties)
+    else:
+        s.ip = s.getPrompt("Enter IP Address",
+                           [(s.connect(('8.8.8.8', 80)),
+                             s.getsockname()[0],
+                             s.close()) for s in [socket.socket(socket.AF_INET,
+                                                     socket.SOCK_DGRAM)]][0][1])
+        s.hostName = s.getPrompt("Hostname", socket.gethostbyaddr(socket.gethostname())[0])
+        s.orgName = s.getPrompt("Enter Organization Name")
+        s.countryCode = s.getPrompt("Enter two-digit Country Code", "")
+        s.city = s.getPrompt("Enter your city or locality", "")
+        s.state = s.getPrompt("Eneter your state or province", "")
+        randomPW = s.getPW()
+        s.jksPass = s.getPrompt("Optional: enter a keystore password", randomPW)
+        s.ldapPass = s.getPrompt("Optional: enter password for LDAP superuser", randomPW)
+
+    # Validate Properties
+    s.check_properties()
+
+    # Show to person for approval
+    print '\n%s\n' % `s`
+    proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
+    if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
+        try:
+            s.makeFolders()
+            s.writeLdapPw()
+            s.gen_certs()
+            s.add_ldap_schema()
+            s.encode_passwords()
+            s.render_templates()
+            s.setup_ldap()
+            s.import_ldif()
+            s.copy_output()
+            s.copy_static()
+            s.change_ownership()
+            s.restart_all_services()
+            s.save_properties()
+        except:
+            s.logIt(traceback.format_exc(), True)
+        finally:
+            s.deleteLdapPw()
