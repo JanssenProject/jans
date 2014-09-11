@@ -161,9 +161,7 @@ class Setup(object):
             + 'city'.ljust(20) + self.city.rjust(40) + "\n" 
             + 'state'.ljust(20) + self.state.rjust(40) + "\n" 
             + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" 
-            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" 
-            + 'inumOrg'.ljust(20) + self.inumOrg.rjust(40) + "\n" 
-            + 'inumAppliance'.ljust(20) + self.inumAppliance.rjust(40))
+            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
 
     def logIt(self, s, errorLog=False):
         print s
@@ -454,48 +452,67 @@ class Setup(object):
             os.makedirs(self.certFolder)
 
 if __name__ == '__main__':
-    s = Setup()
+    installObject = Setup()
     setup_properties = './setup.properties'
     if os.path.isfile(setup_properties):
         print '\nProperties found!\n'
-        s.load_properties(setup_properties)
+        installObject.load_properties(setup_properties)
     else:
-        s.ip = s.getPrompt("Enter IP Address",
-                           [(s.connect(('8.8.8.8', 80)),
-                             s.getsockname()[0],
-                             s.close()) for s in [socket.socket(socket.AF_INET,
-                                                     socket.SOCK_DGRAM)]][0][1])
-        s.hostName = s.getPrompt("Hostname", socket.gethostbyaddr(socket.gethostname())[0])
-        s.orgName = s.getPrompt("Enter Organization Name")
-        s.countryCode = s.getPrompt("Enter two-digit Country Code", "")
-        s.city = s.getPrompt("Enter your city or locality", "")
-        s.state = s.getPrompt("Eneter your state or province", "")
-        randomPW = s.getPW()
-        s.jksPass = s.getPrompt("Optional: enter a keystore password", randomPW)
-        s.ldapPass = s.getPrompt("Optional: enter password for LDAP superuser", randomPW)
+        detectedIP = None
+        try:
+            installObject.logIt("No detected IP address", True)
+            detectedIP = [(s.connect(('8.8.8.8', 80)),
+                           s.getsockname()[0],
+                           s.close()) for s in [socket.socket(socket.AF_INET,
+                                                              socket.SOCK_DGRAM)]][0][1]
+        except:
+            pass
+        if detectedIP:
+            installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
+        else:
+            installObject.ip = installObject.getPrompt("Enter IP Address")
+
+        detectedHostname = None
+        try:
+            installObject.logIt("No detected hostname", True)
+            detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
+        except:
+            pass
+        if detectedHostname:
+            installObject.hostName = installObject.getPrompt("Enter IP Address", detectedHostname)
+        else:
+            installObject.hostName = installObject.getPrompt("Enter IP Address")
+
+        installObject.orgName = installObject.getPrompt("Enter Organization Name")
+        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code", "")
+        installObject.city = installObject.getPrompt("Enter your city or locality", "")
+        installObject.state = installObject.getPrompt("Eneter your state or province", "")
+        randomPW = installObject.getPW()
+        installObject.jksPass = installObject.getPrompt("Optional: enter a keystore password", randomPW)
+        installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
     # Validate Properties
-    s.check_properties()
+    installObject.check_properties()
 
-    # Show to person for approval
+    # Show to properties for approval
     print '\n%s\n' % `s`
     proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            s.makeFolders()
-            s.writeLdapPw()
-            s.gen_certs()
-            s.add_ldap_schema()
-            s.encode_passwords()
-            s.render_templates()
-            s.setup_ldap()
-            s.import_ldif()
-            s.copy_output()
-            s.copy_static()
-            s.change_ownership()
-            s.restart_all_services()
-            s.save_properties()
+            installObject.makeFolders()
+            installObject.writeLdapPw()
+            installObject.gen_certs()
+            installObject.add_ldap_schema()
+            installObject.encode_passwords()
+            installObject.render_templates()
+            installObject.setup_ldap()
+            installObject.import_ldif()
+            installObject.copy_output()
+            installObject.copy_static()
+            installObject.change_ownership()
+            installObject.restart_all_services()
+            installObject.save_properties()
         except:
-            s.logIt(traceback.format_exc(), True)
+            installObject.logIt(traceback.format_exc(), True)
         finally:
-            s.deleteLdapPw()
+            installObject.deleteLdapPw()
