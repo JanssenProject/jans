@@ -463,6 +463,8 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
         return passed_step1
 
     def loadCeritificate(self, saml_certificate_file):
+        saml_certificate = None
+
         # Load certificate from file
         f = open(saml_certificate_file, 'r')
         try:
