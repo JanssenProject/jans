@@ -94,58 +94,57 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
             if (StringHelper.equalsIgnoreCase(gplus_deployment_type, "enroll")):
                 gplus_enroll_user = True
 
-        gplus_allow_basic_login = False
-        if (configurationAttributes.containsKey("gplus_allow_basic_login")):
-            gplus_allow_basic_login = StringHelper.toBoolean(configurationAttributes.get("gplus_allow_basic_login").getValue2(), False)
-
-        use_basic_auth = False
-        if (gplus_allow_basic_login):
-            basic_auth = requestParameters.get("basic_auth")
-            if (ArrayHelper.isNotEmpty(basic_auth)):
-                use_basic_auth = StringHelper.toBoolean(basic_auth[0], False)
-
-        if ((step == 1) and gplus_allow_basic_login and use_basic_auth):
-            print "Google+ authenticate for step 1. Basic authentication"
-
-            context.set("gplus_count_login_steps", 1)
-
-            credentials = Identity.instance().getCredentials()
-            user_name = credentials.getUsername()
-            user_password = credentials.getPassword()
-
-            logged_in = False
-            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
-                logged_in = userService.authenticate(user_name, user_password)
-
-            if (not logged_in):
-                return False
-
-            return True
-
         if (step == 1):
             print "Google+ authenticate for step 1"
+ 
+            gplus_auth_access_token_array = requestParameters.get("gplus_auth_access_token")
+            gplus_auth_access_token = gplus_auth_access_token_array[0]
+ 
+            gplus_auth_id_token_array = requestParameters.get("gplus_auth_id_token")
+            gplus_auth_id_token = gplus_auth_id_token_array[0]
+
+            # Check if user uses basic method to log in
+            use_basic_auth = False
+            if (StringHelper.isEmptyString(gplus_auth_access_token) and StringHelper.isEmptyString(gplus_auth_id_token)):
+                use_basic_auth = True
+
+            # Use basic method to log in
+            if (use_basic_auth):
+                print "Google+ authenticate for step 1. Basic authentication"
+        
+                context.set("gplus_count_login_steps", 1)
+        
+                credentials = Identity.instance().getCredentials()
+                user_name = credentials.getUsername()
+                user_password = credentials.getPassword()
+        
+                logged_in = False
+                if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+                    userService = UserService.instance()
+                    logged_in = userService.authenticate(user_name, user_password)
+        
+                if (not logged_in):
+                    return False
+        
+                return True
+
+            # Use Google+ method to log in
+            if StringHelper.isEmptyString(gplus_auth_access_token):
+                print "Google+ authenticate for step 1. gplus_auth_access_token is empty"
+                return False
+
+            print "Google+ authenticate for step 1. gplus_response:", gplus_auth_access_token
+ 
+            if StringHelper.isEmptyString(gplus_auth_id_token):
+                print "Google+ authenticate for step 1. gplus_auth_id_token is empty"
+                return False
+
+            print "Google+ authenticate for step 1. gplus_response:", gplus_auth_id_token
 
             currentClientSecrets = self.getCurrentClientSecrets(self.clientSecrets, configurationAttributes, requestParameters)
             if (currentClientSecrets == None):
                 print "Google+ prepare for step 1. Client secrets configuration is invalid"
                 return False
- 
-            gplus_auth_access_token_array = requestParameters.get("gplus_auth_access_token")
-            if ArrayHelper.isEmpty(gplus_auth_access_token_array):
-                print "Google+ authenticate for step 1. gplus_auth_access_token is empty"
-                return False
-
-            gplus_auth_access_token = gplus_auth_access_token_array[0]
-            print "Google+ authenticate for step 1. gplus_response:", gplus_auth_access_token
- 
-            gplus_auth_id_token_array = requestParameters.get("gplus_auth_id_token")
-            if ArrayHelper.isEmpty(gplus_auth_id_token_array):
-                print "Google+ authenticate for step 1. gplus_auth_id_token is empty"
-                return False
-
-            gplus_auth_id_token = gplus_auth_id_token_array[0]
-            print "Google+ authenticate for step 1. gplus_response:", gplus_auth_id_token
             
             jwt = Jwt.parse(gplus_auth_id_token)
             # TODO: Validate ID Token Signature  
