@@ -1,3 +1,4 @@
 setup.properties
 *.log
 *.pyc
+setup.properties.last

@@ -33,13 +33,17 @@ import socket
 import string
 import subprocess
 import time
-import traceback
 import uuid
 import json
 import sys
 
 class Setup(object):
     def __init__(self):
+        self.setup_properties_fn = "./setup.properties"
+        self.log = './setup.log'
+        self.logError = './error.log'
+        self.savedProperties = "./setup.properties.last"
+
         self.hostname = None
         self.ip = None
         self.orgName = None
@@ -90,9 +94,6 @@ class Setup(object):
 
         self.oxtrust_openid_client_id = None
         self.oxtrust_uma_client_id = None
-
-        self.log = './setup.log'
-        self.logError = './error.log'
 
         # Stuff that gets rendered
         self.oxauth_ldap_properties = '/opt/tomcat/conf/oxauth-ldap.properties'
@@ -267,20 +268,23 @@ class Setup(object):
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
     def save_properties(self):
+        def getString(object):
+            if type(object) == type(""):
+                return object
+            else:
+                return ''
         p = Properties.Properties()
-        p['hostname'] = self.hostname
-        p['ip'] = self.ip
-        p['orgName'] = self.orgName
-        p['countryCode'] = self.countryCode
-        p['city'] = self.city
-        p['state'] = self.state
-        p['jksPass'] = self.jksPass
-        p['ldapPass'] = self.ldapPass
-        p['oxauth_client_id'] = self.oxauth_client_id
-        p['oxauthClient_pw'] = self.oxauthClient_pw
-        p['inumOrg'] = self.inumOrg
-        p['inumAppliance'] = self.inumAppliance
-        p.store(open('%s/setup.properties.last' % self.outputFolder, 'w'))
+        p['hostname'] = getString(self.hostname)
+        p['ip'] = getString(self.ip)
+        p['orgName'] = getString(self.orgName)
+        p['countryCode'] = getString(self.countryCode)
+        p['city'] = getString(self.city)
+        p['state'] = getString(self.state)
+        p['jksPass'] = getString(self.jksPass)
+        p['ldapPass'] = getString(self.ldapPass)
+        p['inumOrg'] = getString(self.inumOrg)
+        p['inumAppliance'] = getString(self.inumAppliance)
+        p.store(open(self.savedProperties, 'w'))
 
     ### Generate certificates and JKS to be used in tomcat and apache and Gluu-LDAP
     def gen_certs(self):
@@ -453,24 +457,13 @@ class Setup(object):
         if not os.path.exists(s.certFolder):
             os.makedirs(self.certFolder)
 
-if __name__ == '__main__':
-    print "\nInstalling Gluu Server\n"
-    installObject = Setup()
-    os.remove(installObject.log)
-    os.remove(installObject.logError)
-    installObject.logIt("Installing Gluu Server", True)
-    setup_properties = './setup.properties'
-    if os.path.isfile(setup_properties):
-        installObject.logIt('Properties found!\n')
-        installObject.load_properties(setup_properties)
-    else:
-        installObject.logIt("No properties found. Interactive setup commencing...")
+    def promptForProperties(self):
         detectedIP = None
         try:
             detectedIP = [(s.connect(('8.8.8.8', 80)),
                            s.getsockname()[0],
                            s.close()) for s in [socket.socket(socket.AF_INET,
-                                                socket.SOCK_DGRAM)]][0][1]
+                                                              socket.SOCK_DGRAM)]][0][1]
         except:
             installObject.logIt("No detected IP address", True)
         if detectedIP:
@@ -494,6 +487,19 @@ if __name__ == '__main__':
         randomPW = installObject.getPW()
         installObject.jksPass = installObject.getPrompt("Optional: enter a keystore password", randomPW)
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
+
+if __name__ == '__main__':
+    print "\nInstalling Gluu Server\n"
+    installObject = Setup()
+    os.remove(installObject.log)
+    os.remove(installObject.logError)
+    installObject.logIt("Installing Gluu Server", True)
+    if os.path.isfile(installObject.setup_properties_fn):
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
+        installObject.load_properties(installObject.setup_properties_fn)
+    else:
+        installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
+        installObject.promptForProperties()
 
     # Validate Properties
     installObject.check_properties()
@@ -521,3 +527,7 @@ if __name__ == '__main__':
             installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
         finally:
             installObject.deleteLdapPw()
+    else:
+        installObject.save_properties()
+        print "Properties saved to %s. Change filname to %s if you want to re-use" % \
+                         (installObject.savedProperties, installObject.setup_properties_fn)
