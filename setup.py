@@ -36,6 +36,7 @@ import time
 import traceback
 import uuid
 import json
+import sys
 
 class Setup(object):
     def __init__(self):
@@ -201,7 +202,6 @@ class Setup(object):
         p = Properties.Properties()
         p.load(open(fn))
         self.hostname = p['hostName']
-        print self.hostname
         self.ip = p['ip']
         self.orgName = p['orgName']
         self.countryCode = p['countryCode']
@@ -422,7 +422,7 @@ class Setup(object):
             if defaultValue:
                 s = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
                 if s == '':
-                    return defaultValue
+                   return defaultValue
                 else:
                     return s
             else:
@@ -431,6 +431,9 @@ class Setup(object):
                     s = raw_input("%s : " % prompt).strip()
                     if s != '':
                         input = True
+                        return s
+        except KeyboardInterrupt:
+            sys.exit()
         except:
             return None
 
@@ -438,7 +441,6 @@ class Setup(object):
         f = open(self.ldapPassFn, 'w+')
         f.write(self.ldapPass)
         f.close()
-
 
     def deleteLdapPw(self):
         os.remove(self.ldapPassFn)
@@ -452,41 +454,43 @@ class Setup(object):
             os.makedirs(self.certFolder)
 
 if __name__ == '__main__':
+    print "\nInstalling Gluu Server\n"
     installObject = Setup()
+    os.remove(installObject.log)
+    os.remove(installObject.logError)
+    installObject.logIt("Installing Gluu Server", True)
     setup_properties = './setup.properties'
     if os.path.isfile(setup_properties):
-        print '\nProperties found!\n'
+        installObject.logIt('Properties found!\n')
         installObject.load_properties(setup_properties)
     else:
+        installObject.logIt("No properties found. Interactive setup commencing...")
         detectedIP = None
         try:
-            installObject.logIt("No detected IP address", True)
             detectedIP = [(s.connect(('8.8.8.8', 80)),
                            s.getsockname()[0],
                            s.close()) for s in [socket.socket(socket.AF_INET,
-                                                              socket.SOCK_DGRAM)]][0][1]
+                                                socket.SOCK_DGRAM)]][0][1]
         except:
-            pass
+            installObject.logIt("No detected IP address", True)
         if detectedIP:
             installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
         else:
             installObject.ip = installObject.getPrompt("Enter IP Address")
-
         detectedHostname = None
         try:
-            installObject.logIt("No detected hostname", True)
             detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
         except:
-            pass
+            installObject.logIt("No detected hostname", True)
         if detectedHostname:
-            installObject.hostName = installObject.getPrompt("Enter IP Address", detectedHostname)
+            installObject.hostname = installObject.getPrompt("Enter hostname", detectedHostname)
         else:
-            installObject.hostName = installObject.getPrompt("Enter IP Address")
+            installObject.hostname = installObject.getPrompt("Enter hostname")
 
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
-        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code", "")
-        installObject.city = installObject.getPrompt("Enter your city or locality", "")
-        installObject.state = installObject.getPrompt("Eneter your state or province", "")
+        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
+        installObject.city = installObject.getPrompt("Enter your city or locality")
+        installObject.state = installObject.getPrompt("Enter your state or province")
         randomPW = installObject.getPW()
         installObject.jksPass = installObject.getPrompt("Optional: enter a keystore password", randomPW)
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
@@ -495,12 +499,12 @@ if __name__ == '__main__':
     installObject.check_properties()
 
     # Show to properties for approval
-    print '\n%s\n' % `s`
+    print '\n%s\n' % `installObject`
     proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.makeFolders()
-            installObject.writeLdapPw()
+            installObject.writeLdapPW()
             installObject.gen_certs()
             installObject.add_ldap_schema()
             installObject.encode_passwords()
@@ -513,6 +517,7 @@ if __name__ == '__main__':
             installObject.restart_all_services()
             installObject.save_properties()
         except:
-            installObject.logIt(traceback.format_exc(), True)
+            ex_type, ex, tb = sys.exc_info()
+            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
         finally:
             installObject.deleteLdapPw()
