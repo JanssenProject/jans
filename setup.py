@@ -489,8 +489,8 @@ class Setup(object):
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
 if __name__ == '__main__':
-    print "\nInstalling Gluu Server\n"
     installObject = Setup()
+    print "\nInstalling Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
     os.remove(installObject.log)
     os.remove(installObject.logError)
     installObject.logIt("Installing Gluu Server", True)
@@ -529,5 +529,5 @@ if __name__ == '__main__':
             installObject.deleteLdapPw()
     else:
         installObject.save_properties()
-        print "Properties saved to %s. Change filname to %s if you want to re-use" % \
+        print "Properties saved to %s. Change filename to %s if you want to re-use" % \
                          (installObject.savedProperties, installObject.setup_properties_fn)
