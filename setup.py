@@ -165,15 +165,15 @@ class Setup(object):
             + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" 
             + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
 
-    def logIt(self, s, errorLog=False):
-        print s
+    def logIt(self, msg, errorLog=False):
         if errorLog:
             f = open(self.logError, 'a')
             f.write('\n%s : ' % time.strftime('%X %x %Z'))
-            f.write(s)
+            f.write(msg)
+            f.close()
         f = open(self.log, 'a')
         f.write('\n%s : ' % time.strftime('%X %x %Z'))
-        f.write(s)
+        f.write(msg)
         f.close()
 
     # args = command + args, i.e. ['ls', '-ltr']
