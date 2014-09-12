@@ -491,8 +491,14 @@ class Setup(object):
 if __name__ == '__main__':
     installObject = Setup()
     print "\nInstalling Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
-    os.remove(installObject.log)
-    os.remove(installObject.logError)
+    try:
+        os.remove(installObject.log)
+    except:
+        pass
+    try:
+        os.remove(installObject.logError)
+    except:
+        pass
     installObject.logIt("Installing Gluu Server", True)
     if os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
