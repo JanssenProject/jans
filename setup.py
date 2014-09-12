@@ -473,7 +473,10 @@ class Setup(object):
         try:
             detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
         except:
-            installObject.logIt("No detected hostname", True)
+            try:
+                detectedHostname = os.popen("/bin/hostname").read().strip()
+            except:
+                installObject.logIt("No detected hostname", True)
         if detectedHostname:
             installObject.hostname = installObject.getPrompt("Enter hostname", detectedHostname)
         else:
