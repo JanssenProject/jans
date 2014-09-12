@@ -64,7 +64,7 @@ class Setup(object):
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
 
-        self.outputFolder = os.getcwd() + '/output'
+        self.outputFolder = './output'
         self.templateFolder = './templates'
         self.staticFolder = './static/opendj'
         self.tomcatHome = '/opt/tomcat'
@@ -517,12 +517,12 @@ if __name__ == '__main__':
     proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            installObject.makeFolders()
-            installObject.writeLdapPW()
-            installObject.gen_certs()
-            installObject.add_ldap_schema()
             installObject.encode_passwords()
             installObject.render_templates()
+            installObject.makeFolders()
+            installObject.gen_certs()
+            installObject.writeLdapPW()
+            installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()
             installObject.copy_output()
