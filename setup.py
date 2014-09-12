@@ -270,20 +270,16 @@ class Setup(object):
     def save_properties(self):
         def getString(object):
             if type(object) == type(""):
-                return object
+                return object.strip()
             else:
                 return ''
         p = Properties.Properties()
-        p['hostname'] = getString(self.hostname)
-        p['ip'] = getString(self.ip)
-        p['orgName'] = getString(self.orgName)
-        p['countryCode'] = getString(self.countryCode)
-        p['city'] = getString(self.city)
-        p['state'] = getString(self.state)
-        p['jksPass'] = getString(self.jksPass)
-        p['ldapPass'] = getString(self.ldapPass)
-        p['inumOrg'] = getString(self.inumOrg)
-        p['inumAppliance'] = getString(self.inumAppliance)
+        keys = self.__dict__.keys()
+        keys.sort()
+        for key in keys:
+            value = getString(self.__dict__[key])
+            if value != '':
+                p[key] = value
         p.store(open(self.savedProperties, 'w'))
 
     ### Generate certificates and JKS to be used in tomcat and apache and Gluu-LDAP
@@ -379,10 +375,10 @@ class Setup(object):
             fn = os.path.split(fullPath)[-1]
             self.logIt(fn, True)
             f = open(os.path.join(self.templateFolder, fn))
-            s = f.read()
+            template_text = f.read()
             f.close()
             newFn = open(os.path.join(self.outputFolder, fn), 'w+')
-            newFn.write(s % self.__dict__)
+            newFn.write(template_text % self.__dict__)
             newFn.close()
 
     def copy_output(self):
@@ -424,18 +420,18 @@ class Setup(object):
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
-                s = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
-                if s == '':
+                user_input = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
+                if user_input == '':
                    return defaultValue
                 else:
-                    return s
+                    return user_input
             else:
                 input = False
                 while not input:
-                    s = raw_input("%s : " % prompt).strip()
-                    if s != '':
+                    user_input = raw_input("%s : " % prompt).strip()
+                    if user_input != '':
                         input = True
-                        return s
+                        return user_input
         except KeyboardInterrupt:
             sys.exit()
         except:
@@ -447,7 +443,10 @@ class Setup(object):
         f.close()
 
     def deleteLdapPw(self):
-        os.remove(self.ldapPassFn)
+        try:
+            os.remove(self.ldapPassFn)
+        except:
+            self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
 
     def makeFolders(self):
         if not os.path.exists(self.outputFolder):
