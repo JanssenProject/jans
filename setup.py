@@ -504,12 +504,13 @@ class Setup(object):
     def promptForProperties(self):
         detectedIP = None
         try:
-            detectedIP = [(s.connect(('8.8.8.8', 80)),
-                           s.getsockname()[0],
-                           s.close()) for s in [socket.socket(socket.AF_INET,
-                                                              socket.SOCK_DGRAM)]][0][1]
+            testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
+                           testSocket.getsockname()[0],
+                           testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         except:
             installObject.logIt("No detected IP address", True)
+            self.logIt(traceback.format_exc(), True)
         if detectedIP:
             installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
         else:
@@ -522,6 +523,7 @@ class Setup(object):
                 detectedHostname = os.popen("/bin/hostname").read().strip()
             except:
                 installObject.logIt("No detected hostname", True)
+                self.logIt(traceback.format_exc(), True)
         if detectedHostname:
             installObject.hostname = installObject.getPrompt("Enter hostname", detectedHostname)
         else:
@@ -563,17 +565,17 @@ if __name__ == '__main__':
     if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.writeLdapPW()
-            installObject.encode_passwords()
+            #installObject.encode_passwords()
             installObject.render_templates()
-            installObject.makeFolders()
-            installObject.gen_certs()
-            installObject.add_ldap_schema()
-            installObject.setup_ldap()
-            installObject.import_ldif()
-            installObject.copy_output()
-            installObject.copy_static()
-            installObject.change_ownership()
-            installObject.restart_all_services()
+            #installObject.makeFolders()
+            #installObject.gen_certs()
+            #installObject.add_ldap_schema()
+            #installObject.setup_ldap()
+            #installObject.import_ldif()
+            #installObject.copy_output()
+            #installObject.copy_static()
+            #installObject.change_ownership()
+            #installObject.restart_all_services()
             installObject.save_properties()
         except:
             installObject.logIt("Error caught in main loop")
