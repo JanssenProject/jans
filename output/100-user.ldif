@@ -1,9 +1,0 @@
-# Temporary solution to add custom objectClass which we
-# use as origin for custom person attributes
-dn: cn=schema
-objectClass: top
-objectClass: ldapSubentry
-objectClass: subschema
-cn: schema
-objectClasses: ( ox-1D9D6AC27F6748CB0001F4609CCA-oid NAME 'ox-1D9D6AC27F6748CB0001F4609CCA'
-  SUP top STRUCTURAL MUST objectClass X-ORIGIN 'gluu' )
