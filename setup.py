@@ -36,6 +36,7 @@ import time
 import uuid
 import json
 import sys
+import traceback
 
 class Setup(object):
     def __init__(self):
@@ -60,7 +61,7 @@ class Setup(object):
         self.inumAppliance = None
         self.inumOrgFN = None
         self.inumApplianceFN = None
-        self.ldapPass = None
+        self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
 
@@ -79,13 +80,14 @@ class Setup(object):
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
-        self.ldapBaseFolder = '/opt/OpenDJ-2.6.0'  # TODO I'd like this to be /opt/gluu-opendj
+        self.ldapBaseFolder = '/opt/opendj'  # TODO I'd like this to be /opt/gluu-opendj
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapPassFn = '%s/.pw' % self.outputFolder
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/config/schema" % self.ldapBaseFolder
+        self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
         self.schemaFiles = ["static/%s/96-eduperson.ldif" % self.ldap_type,
                             "static/%s/101-ox.ldif" % self.ldap_type,
                             "static/%s/77-customAttributes.ldif" % self.ldap_type,
@@ -109,11 +111,7 @@ class Setup(object):
         self.tomcat_server_xml = '/opt/tomcat/conf/server.xml'
         self.tomcat_gluuTomcatWrapper = '/opt/tomcat/conf/gluuTomcatWrapper.conf'
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
-        self.config_ldif = '/opt/OpenDJ-2.6.0/config/config.ldif'
-        self.user_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/100-user.ldif'
-        self.ox_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/101-ox.ldif'
-        self.custom_attributes_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/77-customAttributes.ldif'
-        self.eduperson_schema_ldif = '/opt/OpenDJ-2.6.0/config/schema/96-eduperson.ldif'
+        self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '/etc/httpd/conf/httpd.conf'
         self.apache2_idp_conf = '/etc/httpd/conf.d/idp.conf'
         self.etc_hosts = '/etc/hosts'
@@ -129,53 +127,51 @@ class Setup(object):
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
         self.ldif_files = [self.ldif_base,
-                         self.ldif_appliance,
-                         self.ldif_attributes,
-                         self.ldif_scopes,
-                         self.ldif_clients,
-                         self.ldif_people,
-                         self.ldif_groups]
+                           self.ldif_appliance,
+                           self.ldif_attributes,
+                           self.ldif_scopes,
+                           self.ldif_clients,
+                           self.ldif_people,
+                           self.ldif_groups]
 
         self.ce_files = {self.oxauth_ldap_properties: True,
-                         self.oxauth_config_xml: True,
-                         self.oxTrust_properties: True,
-                         self.oxtrust_ldap_properties: True,
-                         self.tomcat_server_xml: True,
-                         self.tomcat_gluuTomcatWrapper: True,
-                         self.tomcat_oxauth_static_conf_json: True,
-                         self.ldap_setup_properties: False,
-                         self.user_schema_ldif: True,
-                         self.apache2_conf: True,
-                         self.apache2_idp_conf: True,
-                         self.etc_hosts: True,
-                         self.etc_hostname: True,
-                         self.ldif_base: False,
-                         self.ldif_appliance: False,
-                         self.ldif_attributes: False,
-                         self.ldif_scopes: False,
-                         self.ldif_clients: False,
-                         self.ldif_people: False,
-                         self.ldif_groups: False }
+                     self.oxauth_config_xml: True,
+                     self.oxTrust_properties: True,
+                     self.oxtrust_ldap_properties: True,
+                     self.tomcat_server_xml: True,
+                     self.tomcat_gluuTomcatWrapper: True,
+                     self.tomcat_oxauth_static_conf_json: True,
+                     self.ldap_setup_properties: False,
+                     self.org_custom_schema: False,
+                     self.apache2_conf: True,
+                     self.apache2_idp_conf: True,
+                     self.etc_hosts: True,
+                     self.etc_hostname: True,
+                     self.ldif_base: False,
+                     self.ldif_appliance: False,
+                     self.ldif_attributes: False,
+                     self.ldif_scopes: False,
+                     self.ldif_clients: False,
+                     self.ldif_people: False,
+                     self.ldif_groups: False }
 
     def __repr__(self):
-        return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n" 
-            + 'ip'.ljust(20) + self.ip.rjust(40) + "\n" 
-            + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n" 
-            + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n" 
-            + 'city'.ljust(20) + self.city.rjust(40) + "\n" 
-            + 'state'.ljust(20) + self.state.rjust(40) + "\n" 
-            + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n" 
-            + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
+        return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
+                 + 'ip'.ljust(20) + self.ip.rjust(40) + "\n"
+                 + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n"
+                 + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
+                 + 'city'.ljust(20) + self.city.rjust(40) + "\n"
+                 + 'state'.ljust(20) + self.state.rjust(40) + "\n"
+                 + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n"
+                 + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
             f = open(self.logError, 'a')
-            f.write('\n%s : ' % time.strftime('%X %x %Z'))
-            f.write(msg)
+            f.write('%s %s\n' % (time.strftime('%X %x'), msg))
             f.close()
         f = open(self.log, 'a')
-        f.write('\n%s : ' % time.strftime('%X %x %Z'))
-        f.write(msg)
+        f.write('%s %s\n' % (time.strftime('%X %x'), msg))
         f.close()
 
     # args = command + args, i.e. ['ls', '-ltr']
@@ -190,8 +186,7 @@ class Setup(object):
                 self.logIt(err, True)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
-            ex_type, ex, tb = sys.exc_info()
-            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
@@ -217,10 +212,10 @@ class Setup(object):
                     self.__dict__[prop] = p[prop]
                 except:
                     self.logIt("Error loading property %s" % prop)
+                    installObject.logIt(traceback.format_exc(), True)
         except:
             self.logIt("Error loading properties", True)
-            ex_type, ex, tb = sys.exc_info()
-            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
@@ -228,8 +223,7 @@ class Setup(object):
             return json.loads(open(fn))
         except:
             self.logIt("Unable to read or parse json file from %s" % fn, True)
-            ex_type, ex, tb = sys.exc_info()
-            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
         return None
 
     def check_properties(self):
@@ -295,8 +289,7 @@ class Setup(object):
             p.store(open(self.savedProperties, 'w'))
         except:
             self.logIt("Error saving properties", True)
-            ex_type, ex, tb = sys.exc_info()
-            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     ### Generate certificates and JKS to be used in tomcat and apache and Gluu-LDAP
     def gen_certs(self):
@@ -331,10 +324,6 @@ class Setup(object):
     def encode_passwords(self):
         self.logIt("Encoding passwords")
         try:
-            # First copy cleartext password
-            f = open(self.ldapPassFn, 'w')
-            f.write(self.ldapPass)
-            f.close()
             cmd = "%s -f %s -s SSHA" % (self.ldapEncodePWCommand, self.ldapPassFn)
             self.encoded_ldap_pw = os.popen(cmd, 'r').read().strip()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
@@ -344,8 +333,7 @@ class Setup(object):
             self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
         except:
             self.logIt("Error encoding passwords", True)
-            ex_type, ex, tb = sys.exc_info()
-            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     def setup_ldap(self):
         self.logIt("Setting up ldap")
@@ -359,11 +347,11 @@ class Setup(object):
                                '--set', 'allow-pre-encoded-passwords:true']]
             for changes in config_changes:
                 self.run([self.ldapDsconfigCommand,
-                         '--trustAll', '--no-prompt',
-                         '--hostname',  'localhost',
-                         '--port', '4444',
-                         '--bindDN', self.ldap_binddn,
-                         '--bindPasswordFile', self.ldapPassFn] + changes)
+                          '--trustAll', '--no-prompt',
+                          '--hostname',  'localhost',
+                          '--port', '4444',
+                          '--bindDN', self.ldap_binddn,
+                          '--bindPasswordFile', self.ldapPassFn] + changes)
             # Load indexing
             index_json = self.load_json(self.indexJson)
             if index_json:
@@ -376,25 +364,24 @@ class Setup(object):
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
             self.logIt("Error setting up LDAP", True)
-            ex_type, ex, tb = sys.exc_info()
-            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     def import_ldif(self):
         self.logIt("Importing LDIF data", True)
         for fullPath in self.ldif_files:
             self.run([self.importLdifCommand,
-                  '--ldifFile', fullPath,
-                  '--includeBranch', 'o=gluu',
-                  '--backendID', 'userRoot',
-                  '--hostname', 'localhost',
-                  '--port', '4444',
-                  '--bindDN', self.ldap_binddn,
-                  '-j', self.ldapPassFn,
-                  '--append',
-                  '--trustAll'])
+                      '--ldifFile', fullPath,
+                      '--includeBranch', 'o=gluu',
+                      '--backendID', 'userRoot',
+                      '--hostname', 'localhost',
+                      '--port', '4444',
+                      '--bindDN', self.ldap_binddn,
+                      '-j', self.ldapPassFn,
+                      '--append',
+                      '--trustAll'])
 
     def create_local_db_index(self, attributeName, indexType):
-        self.logIt("Creating DB index")
+        self.logIt("Creating %s index for attribute %s" % (indexType, attributeName))
         self.run([self.ldapDsconfigCommand, 'create-local-db-index',
                   '--backend-name', 'userRoot',
                   '--type', 'generic',
@@ -414,6 +401,7 @@ class Setup(object):
         self.logIt("Rendering templates")
         for fullPath in self.ce_files.keys():
             try:
+                self.logIt("Rendering template %s" % fullPath)
                 fn = os.path.split(fullPath)[-1]
                 f = open(os.path.join(self.templateFolder, fn))
                 template_text = f.read()
@@ -421,11 +409,9 @@ class Setup(object):
                 newFn = open(os.path.join(self.outputFolder, fn), 'w+')
                 newFn.write(template_text % self.__dict__)
                 newFn.close()
-                self.logIt("Wrote template %s" % fullPath)
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
-                ex_type, ex, tb = sys.exc_info()
-                installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+                self.logIt(traceback.format_exc(), True)
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
@@ -438,8 +424,7 @@ class Setup(object):
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
-                    ex_type, ex, tb = sys.exc_info()
-                    installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+                    self.logIt(traceback.format_exc(), True)
 
     def copy_static(self):
         self.logIt("Copying static files")
@@ -475,15 +460,14 @@ class Setup(object):
                     break
         except:
             self.logIt("Error restarting service", True)
-            ex_type, ex, tb = sys.exc_info()
-            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            self.logIt(traceback.format_exc(), True)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
                 user_input = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
                 if user_input == '':
-                   return defaultValue
+                    return defaultValue
                 else:
                     return user_input
             else:
@@ -514,7 +498,7 @@ class Setup(object):
             os.makedirs(self.outputFolder)
         if not os.path.exists(self.configFolder):
             os.makedirs(self.configFolder)
-        if not os.path.exists(s.certFolder):
+        if not os.path.exists(self.certFolder):
             os.makedirs(self.certFolder)
 
     def promptForProperties(self):
@@ -578,11 +562,11 @@ if __name__ == '__main__':
     proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
+            installObject.writeLdapPW()
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.makeFolders()
             installObject.gen_certs()
-            installObject.writeLdapPW()
             installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()
@@ -592,8 +576,8 @@ if __name__ == '__main__':
             installObject.restart_all_services()
             installObject.save_properties()
         except:
-            ex_type, ex, tb = sys.exc_info()
-            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
+            installObject.logIt("Error caught in main loop")
+            installObject.logIt(traceback.format_exc(), True)
         finally:
             installObject.deleteLdapPw()
     else:
