@@ -1,0 +1,16 @@
+#########################
+# OX Clients Definition
+#########################
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0008!C9BB.A80E,ou=clients,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+displayName: gluu
+inum: @!1D9D.6AC2.7F67.48CB!0008!C9BB.A80E
+oxAuthClientSecret: None
+oxAuthAppType: web
+oxAuthScope: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0009!F0C4,ou=scopes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+oxAuthScope: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0009!764C.2818,ou=scopes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+oxAuthScope: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0009!43F1,ou=scopes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+oxauthredirecturi: https://modena.austin.rr.com/identity/scim/auth
+oxauthredirecturi: https://modena.austin.rr.com/identity/authentication/authcode

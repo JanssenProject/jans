@@ -1,0 +1,1126 @@
+#########################
+# Gluu Person Attributes
+#########################
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B4B0,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: First Name
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: givenName
+gluuAttributeName: given_name
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: givenName
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B4B0
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:givenName
+description: Given name(s) or first name(s) of the End-User.
+ Note that in some cultures, people can have multiple given names;
+ all can be present, with the names being separated by space characters.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!42E0,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: Username
+gluuAttributeName: uid
+gluuAttributeName: sub
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: uid
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!42E0
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:uid
+description: A domain issued and managed identifier for the person.
+ Subject - Identifier for the End-User at the Issuer.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B52A,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Preferred Username
+gluuAttributeName: preferred_username
+gluuLdapAttributeName: preferredUsername
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B52A
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferred_username
+description: A domain issued and managed identifier for the person.
+ Subject - Identifier for the End-User at the Issuer.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!64A0,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Profile URL
+gluuAttributeName: profile
+gluuLdapAttributeName: profile
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!64A0
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile
+description: URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3B47,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Website URL
+gluuAttributeName: website
+gluuLdapAttributeName: website
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3B47
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/website
+description: URL of the End-User's Web page or blog.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8F88,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Email Verified
+gluuAttributeName: email_verified
+gluuLdapAttributeName: emailVerified
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8F88
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/email_verified
+description: True if the End-User's e-mail address has been verified; otherwise false
+
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B17A,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Phone Number Verified
+gluuAttributeName: phone_number_verified
+gluuLdapAttributeName: phoneNumberVerified
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!B17A
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/phone_number_verified
+description: True if the End-User's phone number has been verified; otherwise false
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C8D5,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: OpenID Connect JSON formatted address
+gluuAttributeName: address
+gluuLdapAttributeName: address
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C8D5
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
+description: End-User's preferred postal address. The value of the address member is a
+ JSON [RFC4627] structure containing some or all of the members defined in
+ OpenID Connect 1.0 Core Standard Section 5.1.1
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BE64,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Last Updated
+gluuAttributeName: updated_at
+gluuLdapAttributeName: updatedAt
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BE64
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
+description: Time the End-User's information was last updated. Its value is a
+ JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in
+ UTC until the date/time.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3692,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Gender, male or female
+gluuAttributeName: gender
+gluuLdapAttributeName: gender
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3692
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
+description: Gender of the person, either male or female
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!98FC,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Birthdate
+gluuAttributeName: birthdate
+gluuLdapAttributeName: birthdate
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!98FC
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate
+description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D2E0,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: memberOf
+displayName: memberOf
+gluuAttributeName: memberOf
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: memberOf
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D2E0
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:memberOf
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!A901,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: Time zone info
+gluuAttributeName: timezone
+gluuAttributeName: zoneinfo
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuLdapAttributeName: zoneinfo
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!A901
+objectClass: top
+objectClass: gluuAttribute
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zoneinfo
+description: String from time zone database representing the End-User's time zone. For example,
+ Europe/Paris or America/Los_Angeles.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!36D9,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Locale
+gluuAttributeName: locale
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuLdapAttributeName: zoneinfo
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!36D9
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/locale
+description: End-User's locale, represented as a BCP47 (RFC5646) language tag. This is typically an
+ ISO 639-1 Alpha-2 [ISO639‑1] language code in lowercase and an ISO 3166-1 Alpha-2
+ country code in uppercase, separated by a dash. For example, en-US or fr-CA. As a compatibility note,
+ some implementations have used an underscore as the separator rather than a dash, for example, en_US;
+ Relying Parties MAY choose to accept this locale syntax as well.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8A11,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Secret Question
+displayName: Secret Question
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: secretQuestion
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: secretQuestion
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8A11
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:secretQuestion
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C703,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Secret Answer
+displayName: Secret Answer
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: secretAnswer
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: secretAnswer
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C703
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:secretAnswer
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6493,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Preferred Language
+displayName: Preferred Language
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: preferredLanguage
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeViewType: whitePages
+gluuLdapAttributeName: preferredLanguage
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6493
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:preferredLanguage
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!5CA2,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: iname
+displayName: iname
+gluuAttributeName: iname
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: iname
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!5CA2
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:iname
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!CAE3,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Primary Email Address
+displayName: Email
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: mail
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: mail
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!CAE3
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:mail
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!A0E8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: Middle Name
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: middle_name
+gluuLdapAttributeName: middleName
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!A0E8
+objectClass: top
+objectClass: gluuAttribute
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/middle_username
+description: Middle name(s) of the End-User. Note that in some cultures,
+ people can have multiple middle names; all can be present, with the names
+ being separated by space characters. Also note that in some cultures,
+ middle names are not used.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!5EC6,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+displayName: Nickname
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: nickname
+gluuLdapAttributeName: middleName
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!5EC6
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nickname
+description: Casual name of the End-User that may or may not be the same as the given_name.
+ For instance, a nickname value of Mike might be returned alongside a given_name value 
+ of Michael.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0C85,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Last Name
+displayName: Last Name
+gluuLdapAttributeName: sn
+gluuAttributeName: sn
+gluuAttributeName: family_name
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0C85
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:sn
+description: Surname(s) or last name(s) of the End-User. Note that in some
+ cultures, people can have multiple family names or no family name; all can
+ be present, with the names being separated by space characters.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCA8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: TransientId
+displayName: TransientId
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: transientId
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: transientId
+gluuSAML1URI: urn:mace:shibboleth:1.0:nameIdentifier
+gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCA8
+objectClass: top
+objectClass: gluuAttribute
+urn: mace:shibboleth:1.0:nameIdentifier
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCB8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: PersistentId
+displayName: PersistentId
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: persistentId
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: persistentId
+gluuSAML1URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+gluuSAML2URI: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCB8
+objectClass: top
+objectClass: gluuAttribute
+urn: mace:shibboleth:1.0:nameIdentifier
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCE8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Country
+displayName: Country
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: c
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: c
+gluuSAML1URI: urn:urn:mace:dir:attribute-def:c
+gluuSAML2URI: urn:oid:2.5.4.6
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BCE8
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:c
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!2B29,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: Display Name
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: displayName
+gluuAttributeName: name
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: displayName
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!2B29
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:displayName
+description: End-User's full name in displayable form
+ including all name parts, possibly including titles and
+ suffixes, ordered according to the End-User's locale and preferences.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!EC3A,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!EC32
+description: URL of the End-User's profile picture
+displayName: Picture URL
+gluuAttributeName: picture
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: photo
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuLdapAttributeName: picture
+gluuStatus: active
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!29DA,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: XRI i-number
+displayName: i-number
+gluuAttributeName: inum
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: inum
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!29DA
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:inum
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D03E,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Organization i-number
+displayName: Organization i-number
+gluuAttributeName: o
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: o
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D03E
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:o
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!AAEE,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: User secret string
+displayName: Password
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: userPassword
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level5
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: userPassword
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!AAEE
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:userPassword
+
+############################
+# InetOrgPerson Attributes
+#############################
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C001,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Organizational Title
+displayName: Title
+gluuAttributeEditType: admin
+gluuAttributeName: title
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: title
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!C001
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:title
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4502,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Vehicle Licence Plate Number
+displayName: Licencse Plate
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: carLicense
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: carLicense
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4502
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:carLicense
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BD22,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Fax Telephone Number
+displayName: Fax Number
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: facsimileTelephoneNumber
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: facsimileTelephoneNumber
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BD22
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!08E2,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Organizational Department
+displayName: Department
+gluuAttributeEditType: admin
+gluuAttributeName: departmentNumber
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: departmentNumber
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!08E2
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:departmentNumber
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3D44,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Employee Type
+displayName: Employee Type
+gluuAttributeEditType: admin
+gluuAttributeName: employeeType
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: employeeType
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!3D44
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:employeeType
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D054,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Name search keywords
+displayName: Name search keywords
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: cn
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: cn
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D054
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:cn
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6DA6,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Mobile Telephone Number
+displayName: Mobile Telephone Number
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: mobile
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: mobile
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6DA6
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:mobile
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0C18,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Home Telephone Number
+displayName: Home Telephone Number
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: homePhone
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: homePhone
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0C18
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:homePhone
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E6B8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: State or Province
+displayName: State or Province
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: st
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: st
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E6B8
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:st
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!42D8,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Manager
+displayName: Manager
+gluuAttributeEditType: admin
+gluuAttributeName: manager
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: manager
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!42D8
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:manager
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6609,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Street
+displayName: Street
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: street
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: street
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6609
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:street
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E999,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Postal Box
+displayName: PO Box
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: postOfficeBox
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: postOfficeBox
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E999
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:postOfficeBox
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D0C9,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Employee Number
+displayName: Employee Number
+gluuAttributeEditType: admin
+gluuAttributeName: employeeNumber
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: employeeNumber
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D0C9
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:employeeNumber
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!894A,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Preferred Delivery Method
+displayName: Preferred Delivery Method
+gluuAttributeEditType: admin
+gluuAttributeName: preferredDeliveryMethod
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: preferredDeliveryMethod
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!894A
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:preferredDeliveryMethod
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!570B,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Work Telephone Number
+displayName: Work Telephone Number
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: telephoneNumber
+gluuAttributeName: phone_number
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: telephoneNumber
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!570B
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:telephoneNumber
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D90B,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Room Number
+displayName: Room Number
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: roomNumber
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: roomNumber
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!D90B
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:roomNumber
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!AC0B,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Secretary
+displayName: Secretary
+gluuAttributeEditType: admin
+gluuAttributeName: secretary
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuLdapAttributeName: secretary
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!AC0B
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:secretary
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!27DB,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Home Address
+displayName: Home Address
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: homePostalAddress
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: homePostalAddress
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!27DB
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:homePostalAddress
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6EEB,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: City
+displayName: City
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: l
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: l
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6EEB
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:l
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!2A3D,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Postal or Zip Code
+displayName: Postal Code
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: postalCode
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: postalCode
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!2A3D
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:postalCode
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!48EE,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+description: Description
+displayName: Description
+gluuAttributeEditType: user
+gluuAttributeEditType: admin
+gluuAttributeName: description
+gluuAttributeOrigin: inetOrgPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: description
+gluuStatus: active
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!48EE
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:description
+
+#########################
+# eduPerson Attributes
+#########################
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4E0C,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4E0C
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonAffiliation
+gluuAttributeName: eduPersonAffiliation
+description: Specifies the person's relationship(s) to the institution
+ in broad categories such as student, faculty, staff, alum, etc.
+displayName: eduPersonAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.1
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E7BC,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!E7BC
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonNickName
+gluuAttributeName: eduPersonNickName
+
+displayName: eduPersonNickName
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.2
+description: Person's nickname, or the informal name by which the End-User is accustomed
+ to be hailed. A casual name that may or may not be the same as the given_name. For instance,
+ a nickname value of Mike might be returned alongside a given_name value of Michael.
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6366,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!6366
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonOrgDN
+gluuAttributeName: eduPersonOrgDN
+description: The distinguished name (DN) of the directory entry
+ representing the institution with which the person is associated.
+displayName: eduPersonOrgDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.3
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!ED0D,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!ED0D
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonOrgUnitDN
+gluuAttributeName: eduPersonOrgUnitDN
+description: The distinguished name(s) (DN) of the directory entries
+ representing the person's Organizational Unit(s). May be multivalued,
+ as for example, in the case of a faculty member with appointments in
+ multiple departments or a person who is a student in one department
+ and an employee in another.
+displayName: eduPersonOrgUnitDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.4
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!91E7,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!91E7
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrimaryAffiliation
+gluuAttributeName: eduPersonPrimaryAffiliation
+description: Specifies the person's primary relationship to the
+ institution in broad categories such as student, faculty, staff,
+ alum, etc. (See controlled vocabulary).
+displayName: eduPersonPrimaryAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn:oid:1.3.6.1.4.1.5923.1.1.1.5
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!096B,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!096B
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrincipalName
+gluuAttributeName: eduPersonPrincipalName
+description: A scoped identifier for a person. It should be
+ represented in the form "user@scope" where 'user' is a
+ name-based identifier for the person and where 'scope'
+ defines a local security domain. Each value of 'scope' defines
+ a namespace within which the assigned identifiers MUST be unique.
+ Given this rule, if two eduPersonPrincipalName (ePPN) values are
+ the same at a given point in time, they refer to the same person.
+displayName: eduPersonPrincipalName
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.6
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BF03,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!BF03
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonEntitlement
+gluuAttributeName: eduPersonEntitlement
+description: URI (either URN or URL) that indicates a set of rights to specific resources.
+displayName: eduPersonEntitlement
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.7
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0247,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!0247
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonPrimaryOrgUnitDN
+gluuAttributeName: eduPersonPrimaryOrgUnitDN
+description: The distinguished name (DN) of the directory entry representing
+ the person's primary Organizational Unit(s).
+displayName: eduPersonPrimaryOrgUnitDN
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.8
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!002A,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!002A
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonScopedAffiliation
+gluuAttributeName: eduPersonScopedAffiliation
+description: Specifies the person's affiliation within a particular security domain
+ in broad categories such as student, faculty, staff, alum, etc. The values consist
+ of a left and right component separated by an "@" sign. The left component is one of
+ the values from the eduPersonAffiliation controlled vocabulary.This right-hand side syntax
+ of eduPersonScopedAffiliation intentionally matches that used for the right-hand side
+ values for eduPersonPrincipalName since both identify a security domain. Multiple "@" signs
+ are not recommended, but in any case, the first occurrence of the "@" sign starting from the
+ left is to be taken as the delimiter between components. Thus, user identifier is to the left,
+ security domain to the right of the first "@". This parsing rule conforms to the POSIX "greedy"
+ disambiguation method in regular expression processing.
+displayName: eduPersonScopedAffiliation
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.9
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8FF3,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!8FF3
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonTargetedID
+gluuAttributeName: eduPersonTargetedID
+description: A persistent, non-reassigned, opaque identifier for a principal.
+displayName: eduPersonTargetedID
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.10
+
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4B0F,ou=attributes,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0005!4B0F
+objectClass: top
+objectClass: gluuAttribute
+gluuLdapAttributeName: eduPersonAssurance
+gluuAttributeName: eduPersonAssurance
+description: Set of URIs that assert compliance with specific standards
+ for identity assurance.
+displayName: eduPersonAssurance
+gluuAttributeOrigin: eduPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+urn: oid:1.3.6.1.4.1.5923.1.1.1.11
+

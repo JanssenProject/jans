@@ -1,0 +1,12 @@
+dn: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0000!A8F2.DE1E.D7FB,ou=people,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+objectClass: top
+objectClass: gluuPerson
+objectClass: ox-1D9D6AC27F6748CB0001F4609CCA
+inum: @!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0000!A8F2.DE1E.D7FB
+uid: admin
+givenName: Admin
+sn: User
+userPassword: /opt/opendj/bin/encode-password
+gluuStatus: active
+memberOf: inum=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA!0003!60B7,ou=groups,o=@!1D9D.6AC2.7F67.48CB!0001!F460.9CCA,o=gluu
+displayName: Default Admin User
