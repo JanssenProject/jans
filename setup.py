@@ -75,17 +75,23 @@ class Setup(object):
         self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
         self.certGenerator = '%s/bin/certGenerator.sh' % self.gluuHome
 
+        self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
-        self.ldapBaseFolder = '/opt/OpenDJ-2.6.0'  # TODO I'd like this to be /opt/gluu-ldap
+        self.ldapBaseFolder = '/opt/OpenDJ-2.6.0'  # TODO I'd like this to be /opt/gluu-opendj
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapPassFn = '%s/.pw' % self.outputFolder
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
+        self.schemaFolder = "%s/config/schema" % self.ldapBaseFolder
+        self.schemaFiles = ["static/%s/96-eduperson.ldif" % self.ldap_type,
+                            "static/%s/101-ox.ldif" % self.ldap_type,
+                            "static/%s/77-customAttributes.ldif" % self.ldap_type,
+                            "template/100-user.ldif"]
 
-        self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-ldap
+        self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-opendj
         self.apache_start_script = '/etc/init.d/httpd'
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
@@ -122,11 +128,7 @@ class Setup(object):
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
-        self.ce_static = [self.ox_schema_ldif,
-                        self.custom_attributes_schema_ldif,
-                        self.eduperson_schema_ldif]
-
-        self.ldif_files = [self.ldif_base, 
+        self.ldif_files = [self.ldif_base,
                          self.ldif_appliance,
                          self.ldif_attributes,
                          self.ldif_scopes,
@@ -179,12 +181,17 @@ class Setup(object):
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args):
         self.logIt('Running: %s' % ' '.join(args))
-        p = subprocess.Popen(args, stdout=subprocess.PIPE)
-        output, err = p.communicate()
-        if output:
-            self.logIt(output)
-        if err:
-            self.logIt(err, True)
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE)
+            output, err = p.communicate()
+            if output:
+                self.logIt(output)
+            if err:
+                self.logIt(err, True)
+        except:
+            self.logIt("Error running command : %s" % " ".join(args), True)
+            ex_type, ex, tb = sys.exc_info()
+            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
@@ -200,30 +207,33 @@ class Setup(object):
         return ''.join(random.choice(chars) for _ in range(size))
 
     def load_properties(self, fn):
+        self.logIt('Loading Properties %s' % fn)
         p = Properties.Properties()
-        p.load(open(fn))
-        self.hostname = p['hostName']
-        self.ip = p['ip']
-        self.orgName = p['orgName']
-        self.countryCode = p['countryCode']
-        self.city = p['city']
-        self.state = p['state']
-        self.jksPass = p['jksPass']
-        self.ldapPass = p['ldapPass']
-        self.inumOrg = p['inumOrg']
-        self.inumAppliance = p['inumAppliance']
+        try:
+            p.load(open(fn))
+            properties_list = p.keys()
+            for prop in properties_list:
+                try:
+                    self.__dict__[prop] = p[prop]
+                except:
+                    self.logIt("Error loading property %s" % prop)
+        except:
+            self.logIt("Error loading properties", True)
+            ex_type, ex, tb = sys.exc_info()
+            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def load_json(self, fn):
+        self.logIt('Loading JSON from %s' % fn)
         try:
-            f = open(fn)
-            return json.loads(f.read())
+            return json.loads(open(fn))
         except:
             self.logIt("Unable to read or parse json file from %s" % fn, True)
-        finally:
-            f.close()
+            ex_type, ex, tb = sys.exc_info()
+            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
         return None
 
     def check_properties(self):
+        self.logIt('Checking properties')
         while not self.hostname:
             testhost = raw_input('Hostname of this server: ').strip()
             if len(testhost.split('.')) >= 3:
@@ -268,23 +278,32 @@ class Setup(object):
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
     def save_properties(self):
+        self.logIt('Saving properties to %s' % self.savedProperties)
         def getString(object):
             if type(object) == type(""):
                 return object.strip()
             else:
                 return ''
-        p = Properties.Properties()
-        keys = self.__dict__.keys()
-        keys.sort()
-        for key in keys:
-            value = getString(self.__dict__[key])
-            if value != '':
-                p[key] = value
-        p.store(open(self.savedProperties, 'w'))
+        try:
+            p = Properties.Properties()
+            keys = self.__dict__.keys()
+            keys.sort()
+            for key in keys:
+                value = getString(self.__dict__[key])
+                if value != '':
+                    p[key] = value
+            p.store(open(self.savedProperties, 'w'))
+        except:
+            self.logIt("Error saving properties", True)
+            ex_type, ex, tb = sys.exc_info()
+            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     ### Generate certificates and JKS to be used in tomcat and apache and Gluu-LDAP
     def gen_certs(self):
-        if os.path.isfile('%s/%s-java.crt' % (self.certFolder, self.inumOrgFN)):
+        self.logIt('Generating certificates')
+        java_kestore_path = '%s/%s-java.crt' % (self.certFolder, self.inumOrgFN)
+        if os.path.isfile(java_kestore_path):
+            self.logIt("Found %s" % java_kestore_path)
             return
         self.run(['rm', '-frv', '%s/*java*' % self.certFolder])
         self.run([self.certGenerator,
@@ -300,48 +319,68 @@ class Setup(object):
                   '-p', self.jksPass])
 
     def add_ldap_schema(self):
-        # copy ox schema to '%s/config/schema' % self.ldapBaseFolder
-        # copy custom schema file to '%s/config/schema' % self.ldapBaseFolder
-        # make sure schema files are owned by ldap:ldap
-        return
+        self.logIt('Coping schema to %s' % self.schemaFolder)
+        for schemaFile in self.schemaFiles:
+            try:
+                self.logIt(schemaFile, self.schemaFolder)
+                shutil.copy(schemaFile, self.schemaFolder)
+            except:
+                self.logIt("Error copying %s" % schemaFile, True)
+        self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
 
     def encode_passwords(self):
-        cmd = "%s -f %s -s SSHA" % (self.ldapEncodePWCommand, self.ldapPassFn)
-        self.encoded_ldap_pw = os.popen(cmd, 'r').read().strip()
-        cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
-        self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
-        self.oxauthClient_pw = self.getPW()
-        cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
-        self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
+        self.logIt("Encoding passwords")
+        try:
+            # First copy cleartext password
+            f = open(self.ldapPassFn, 'w')
+            f.write(self.ldapPass)
+            f.close()
+            cmd = "%s -f %s -s SSHA" % (self.ldapEncodePWCommand, self.ldapPassFn)
+            self.encoded_ldap_pw = os.popen(cmd, 'r').read().strip()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
+            self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
+            self.oxauthClient_pw = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
+            self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
+        except:
+            self.logIt("Error encoding passwords", True)
+            ex_type, ex, tb = sys.exc_info()
+            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def setup_ldap(self):
-        self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
-                  '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
-                  '--acceptLicense'])
-        config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
-                          ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
-                          ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
-                           '--set', 'allow-pre-encoded-passwords:true']]
-        for changes in config_changes:
-            self.run([self.ldapDsconfigCommand,
-                     '--trustAll', '--no-prompt',
-                     '--hostname',  'localhost',
-                     '--port', '4444',
-                     '--bindDN', self.ldap_binddn,
-                     '--bindPasswordFile', self.ldapPassFn] + changes)
-        # Load indexing
-        index_json = self.load_json(self.indexJson)
-        if index_json:
-            for attrDict in index_json:
-                attr_name = attrDict['attribute']
-                index_types = attrDict['index']
-                for index_type in index_types:
-                    self.create_local_db_index(attr_name, index_type)
-        else:
-            self.logIt('NO indexes found %s' % self.indexJson, True)
+        self.logIt("Setting up ldap")
+        try:
+            self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
+                      '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
+                      '--acceptLicense'])
+            config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
+                              ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
+                              ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
+                               '--set', 'allow-pre-encoded-passwords:true']]
+            for changes in config_changes:
+                self.run([self.ldapDsconfigCommand,
+                         '--trustAll', '--no-prompt',
+                         '--hostname',  'localhost',
+                         '--port', '4444',
+                         '--bindDN', self.ldap_binddn,
+                         '--bindPasswordFile', self.ldapPassFn] + changes)
+            # Load indexing
+            index_json = self.load_json(self.indexJson)
+            if index_json:
+                for attrDict in index_json:
+                    attr_name = attrDict['attribute']
+                    index_types = attrDict['index']
+                    for index_type in index_types:
+                        self.create_local_db_index(attr_name, index_type)
+            else:
+                self.logIt('NO indexes found %s' % self.indexJson, True)
+        except:
+            self.logIt("Error setting up LDAP", True)
+            ex_type, ex, tb = sys.exc_info()
+            self.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def import_ldif(self):
-        # TODO Need to add support for multiple ldif files
+        self.logIt("Importing LDIF data", True)
         for fullPath in self.ldif_files:
             self.run([self.importLdifCommand,
                   '--ldifFile', fullPath,
@@ -355,6 +394,7 @@ class Setup(object):
                   '--trustAll'])
 
     def create_local_db_index(self, attributeName, indexType):
+        self.logIt("Creating DB index")
         self.run([self.ldapDsconfigCommand, 'create-local-db-index',
                   '--backend-name', 'userRoot',
                   '--type', 'generic',
@@ -371,51 +411,72 @@ class Setup(object):
 
     ### Change hostname in the relevant files
     def render_templates(self):
+        self.logIt("Rendering templates")
         for fullPath in self.ce_files.keys():
-            fn = os.path.split(fullPath)[-1]
-            self.logIt(fn, True)
-            f = open(os.path.join(self.templateFolder, fn))
-            template_text = f.read()
-            f.close()
-            newFn = open(os.path.join(self.outputFolder, fn), 'w+')
-            newFn.write(template_text % self.__dict__)
-            newFn.close()
+            try:
+                fn = os.path.split(fullPath)[-1]
+                f = open(os.path.join(self.templateFolder, fn))
+                template_text = f.read()
+                f.close()
+                newFn = open(os.path.join(self.outputFolder, fn), 'w+')
+                newFn.write(template_text % self.__dict__)
+                newFn.close()
+                self.logIt("Wrote template %s" % fullPath)
+            except:
+                self.logIt("Error writing template %s" % fullPath, True)
+                ex_type, ex, tb = sys.exc_info()
+                installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def copy_output(self):
-        for fullPath in self.ce_files.keys():
-            if self.ce_files[fullPath]:
-                fn = os.path.split(fullPath)[-1]
-                shutil.copyfile(os.path.join(self.outputFolder, fn), fullPath)
+        self.logIt("Copying rendered templates to final destination")
+        for dest_fn in self.ce_files.keys():
+            if self.ce_files[dest_fn]:
+                fn = os.path.split(dest_fn)[-1]
+                output_fn = os.path.join(self.outputFolder, fn)
+                try:
+                    self.logIt("Copying %s to %s" % (output_fn, dest_fn))
+                    shutil.copyfile(output_fn, dest_fn)
+                except:
+                    self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
+                    ex_type, ex, tb = sys.exc_info()
+                    installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def copy_static(self):
-        for fullPath in self.ce_static:
-            fn = os.path.split(fullPath)[-1]
-            shutil.copyfile(os.path.join(self.staticFolder, fn), fullPath)
+        self.logIt("Copying static files")
+        # Placeholder to copy any files from the static folder
+        # LDAP schema is copied in the add_ldap_schema method
 
     def change_ownership(self):
+        self.logIt("Changing ownership")
         self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['chown', '-R', 'tomcat:tomcat', self.certFolder])
 
     # Restarts either just LDAP or all services. Waits for LDAP to start before starting tomcat
     def restart_all_services(self):
+        self.logIt("Restarting all services")
         self.run([self.ldap_start_script, 'restart'])
         self.run([self.apache_start_script, 'restart'])
-        startOk = 'Directory Server has started successfully'
-        tailq = Queue.Queue(maxsize=10)  # buffer at most 100 lines
-        p = subprocess.Popen(['tail', '-f', '%s/logs/errors' % self.ldapBaseFolder], stdout=subprocess.PIPE)
-        starttime = time.time()
-        while 1:
-            line = p.stdout.readline()
-            self.logIt(line)
-            tailq.put(line)
-            if (time.time() - starttime > self.ldapStartTimeOut):
-                self.logIt('LDAP startup timed out. Tomcat not started.', True)
-                break
-            if line.find(startOk) > -1:
-                self.logIt(startOk)
-                self.run([self.tomcat_start_script, 'restart'])
-                break
+        try:
+            startOk = 'Directory Server has started successfully'
+            tailq = Queue.Queue(maxsize=10)  # buffer at most 100 lines
+            p = subprocess.Popen(['tail', '-f', '%s/logs/errors' % self.ldapBaseFolder], stdout=subprocess.PIPE)
+            starttime = time.time()
+            while 1:
+                line = p.stdout.readline()
+                self.logIt(line)
+                tailq.put(line)
+                if (time.time() - starttime > self.ldapStartTimeOut):
+                    self.logIt('LDAP startup timed out. Tomcat not started.', True)
+                    break
+                if line.find(startOk) > -1:
+                    self.logIt(startOk)
+                    self.run([self.tomcat_start_script, 'restart'])
+                    break
+        except:
+            self.logIt("Error restarting service", True)
+            ex_type, ex, tb = sys.exc_info()
+            installObject.logIt('%s: %s\n%s' % (ex_type, ex, tb), True)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -492,7 +553,7 @@ class Setup(object):
 
 if __name__ == '__main__':
     installObject = Setup()
-    print "\nInstalling Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
+    print "Installing Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
     try:
         os.remove(installObject.log)
     except:
