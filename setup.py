@@ -52,7 +52,7 @@ class Setup(object):
         self.countryCode = None
         self.city = None
         self.state = None
-        self.jksPass = None
+        self.httpdKeyPass = None
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
         self.oxauthClient_encoded_pw = None
@@ -64,6 +64,7 @@ class Setup(object):
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
+        self.blowfish_passphrase = None
 
         self.outputFolder = './output'
         self.templateFolder = './templates'
@@ -73,8 +74,6 @@ class Setup(object):
         self.indexJson = './static/opendj/opendj_index.json'
         self.certFolder = '/etc/certs'
         self.gluuHome = '/opt/gluu'
-        self.keystoreGenerator = '%s/bin/keystoreGenerator.sh' % self.gluuHome
-        self.certGenerator = '%s/bin/certGenerator.sh' % self.gluuHome
 
         self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
@@ -91,7 +90,7 @@ class Setup(object):
         self.schemaFiles = ["static/%s/96-eduperson.ldif" % self.ldap_type,
                             "static/%s/101-ox.ldif" % self.ldap_type,
                             "static/%s/77-customAttributes.ldif" % self.ldap_type,
-                            "template/100-user.ldif"]
+                            "output/100-user.ldif"]
 
         self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-opendj
         self.apache_start_script = '/etc/init.d/httpd'
@@ -99,11 +98,14 @@ class Setup(object):
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuHome
+        self.keytoolCommand = '/usr/java/latest/bin/keytool'
+        self.opensslCommand = '/usr/bin/openssl'
 
         self.oxtrust_openid_client_id = None
         self.oxtrust_uma_client_id = None
 
-        # Stuff that gets rendered
+        # Stuff that gets rendered; filname is necessary. Full path should
+        # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '/opt/tomcat/conf/oxauth-ldap.properties'
         self.oxauth_config_xml = '/opt/tomcat/conf/oxauth-config.xml'
         self.oxTrust_properties = '/opt/tomcat/conf/oxTrust.properties'
@@ -113,7 +115,7 @@ class Setup(object):
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '/etc/httpd/conf/httpd.conf'
-        self.apache2_idp_conf = '/etc/httpd/conf.d/idp.conf'
+        self.apache2_ssl_conf = '/etc/httpd/conf.d/https_gluu.conf'
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
         self.ldif_base = '%s/base.ldif' % self.outputFolder
@@ -123,6 +125,8 @@ class Setup(object):
         self.ldif_clients = '%s/clients.ldif' % self.outputFolder
         self.ldif_people = '%s/people.ldif' % self.outputFolder
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
+        self.ldif_site = './static/cache-refresh/o_site.ldif'
+        self.encode_script = '%s/bin/encode.py' % self.gluuHome
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -132,7 +136,8 @@ class Setup(object):
                            self.ldif_scopes,
                            self.ldif_clients,
                            self.ldif_people,
-                           self.ldif_groups]
+                           self.ldif_groups,
+                           self.ldif_site]
 
         self.ce_files = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_xml: True,
@@ -144,7 +149,7 @@ class Setup(object):
                      self.ldap_setup_properties: False,
                      self.org_custom_schema: False,
                      self.apache2_conf: True,
-                     self.apache2_idp_conf: True,
+                     self.apache2_ssl_conf: True,
                      self.etc_hosts: True,
                      self.etc_hostname: True,
                      self.ldif_base: False,
@@ -153,7 +158,8 @@ class Setup(object):
                      self.ldif_scopes: False,
                      self.ldif_clients: False,
                      self.ldif_people: False,
-                     self.ldif_groups: False }
+                     self.ldif_groups: False,
+                     self.encode_script: True}
 
     def __repr__(self):
         return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
@@ -162,7 +168,7 @@ class Setup(object):
                  + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
                  + 'city'.ljust(20) + self.city.rjust(40) + "\n"
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
-                 + 'jksPass'.ljust(20) + self.jksPass.rjust(40) + "\n"
+                 + 'httpdKeyPass'.ljust(20) + self.httpdKeyPass.rjust(40) + "\n"
                  + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
 
     def logIt(self, msg, errorLog=False):
@@ -220,7 +226,10 @@ class Setup(object):
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
         try:
-            return json.loads(open(fn))
+            json_file = open(fn)
+            json_text = json_file.read()
+            json_file.close()
+            return json.loads(json_text)
         except:
             self.logIt("Unable to read or parse json file from %s" % fn, True)
             self.logIt(traceback.format_exc(), True)
@@ -252,10 +261,12 @@ class Setup(object):
             self.city = raw_input('City (for certificate)').strip()
         while not self.state:
             self.state = raw_input('State or Province (for certificate)').strip()
-        if not self.jksPass:
-            self.jksPass = self.getPW()
+        if not self.httpdKeyPass:
+            self.httpdKeyPass = self.getPW()
         if not self.ldapPass:
             self.ldapPass = self.getPW()
+        if not self.blowfish_passphrase:
+            self.blowfish_passphrase = self.getPW()
         if not self.baseInum:
             self.baseInum = '@!%s.%s.%s.%s' % tuple([self.getQuad() for i in xrange(4)])
         if not self.inumOrg:
@@ -291,25 +302,51 @@ class Setup(object):
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
 
-    ### Generate certificates and JKS to be used in tomcat and apache and Gluu-LDAP
-    def gen_certs(self):
+    def gen_https_crypto(self):
         self.logIt('Generating certificates')
-        java_kestore_path = '%s/%s-java.crt' % (self.certFolder, self.inumOrgFN)
-        if os.path.isfile(java_kestore_path):
-            self.logIt("Found %s" % java_kestore_path)
-            return
-        self.run(['rm', '-frv', '%s/*java*' % self.certFolder])
-        self.run([self.certGenerator,
-                  '-u', self.hostname,
-                  '-n', self.inumOrgFN,
-                  '-o', self.orgName,
-                  '-c', self.countryCode,
-                  '-s', self.state,
-                  '-l', self.city])
-        self.run([self.keystoreGenerator,
-                  '-n', self.inumOrgFN,
-                  '-u', self.hostname,
-                  '-p', self.jksPass])
+        httpd_key_with_password = '%s/%s-httpd.key.orig' % (self.certFolder, self.inumOrgFN)
+        httpd_key = '%s/%s-httpd.key' % (self.certFolder, self.inumOrgFN)
+        httpd_csr = '%s/%s-httpd.csr' % (self.certFolder, self.inumOrgFN)
+        httpd_public_certificate = '%s/%s-httpd.crt' % (self.certFolder, self.inumOrgFN)
+        self.run([self.opensslCommand,
+                  'genrsa', 
+                  '-des3', 
+                  '-out',
+                  httpd_key_with_password,
+                  '-passout',
+                  'pass:%s' % self.httpdKeyPass,
+                  '2048'
+                ])
+        self.run([self.opensslCommand,
+                  '-in',
+                  'httpd_key_with_password',
+                  '-passin',
+                  'pass:%s' % self.httpdKeyPass,
+                  '-out',
+                  httpd_key
+                  ])
+        self.run([self.opensslCommand,
+                  'req',
+                  '-new',
+                  '-key',
+                  httpd_key,
+                  '-out',
+                  httpd_csr,
+                  '-subj',
+                  '/CN=%s/O=%s/C=%s/ST=%s/L=%s' % (self.hostname, self.orgName, self.countryCode, self.state, self.city)
+                ])
+        self.run([self.opensslCommand,
+          'x509',
+          '-req',
+          '-days',
+          '365',
+          '-in',
+          'httpd_csr',
+          '-signkey',
+          'httpd_key',
+          '-out',
+          httpd_public_certificate
+          ])
 
     def add_ldap_schema(self):
         self.logIt('Coping schema to %s' % self.schemaFolder)
@@ -343,8 +380,9 @@ class Setup(object):
                       '--acceptLicense'])
             config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
-                              ['set-password-policy-prop', '--policy-name', 'Default Password Policy',
-                               '--set', 'allow-pre-encoded-passwords:true']]
+                              ['set-password-policy-prop', '--policy-name', 'Default Password Policy', '--set', 'allow-pre-encoded-passwords:true'],
+                              ['set-log-publisher-prop', '--publisher-name', 'File-Based Audit Logger', '--set', 'enabled:true'],
+                              ['create-backend', '--backend-name', 'site', '--set-base-dn:o=site', '--set', 'enabled:true']]
             for changes in config_changes:
                 self.run([self.ldapDsconfigCommand,
                           '--trustAll', '--no-prompt',
@@ -359,7 +397,7 @@ class Setup(object):
                     attr_name = attrDict['attribute']
                     index_types = attrDict['index']
                     for index_type in index_types:
-                        self.create_local_db_index(attr_name, index_type)
+                        self.create_local_db_index(attr_name, index_type, 'userRoot')
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
@@ -380,10 +418,10 @@ class Setup(object):
                       '--append',
                       '--trustAll'])
 
-    def create_local_db_index(self, attributeName, indexType):
+    def create_local_db_index(self, attributeName, indexType, db):
         self.logIt("Creating %s index for attribute %s" % (indexType, attributeName))
         self.run([self.ldapDsconfigCommand, 'create-local-db-index',
-                  '--backend-name', 'userRoot',
+                  '--backend-name', db,
                   '--type', 'generic',
                   '--index-name', attributeName,
                   '--set index-type:', indexType,
@@ -534,7 +572,7 @@ class Setup(object):
         installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.state = installObject.getPrompt("Enter your state or province")
         randomPW = installObject.getPW()
-        installObject.jksPass = installObject.getPrompt("Optional: enter a keystore password", randomPW)
+        installObject.httpdKeyPass = installObject.getPrompt("Optional: enter password for httpd private key", randomPW)
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
 if __name__ == '__main__':
@@ -568,7 +606,7 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.makeFolders()
-            installObject.gen_certs()
+            installObject.gen_https_crypto()
             installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()

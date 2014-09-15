@@ -1,0 +1,10 @@
+dn: o=site
+objectClass: top
+objectClass: organization
+o: site
+
+dn: ou=people,o=site
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
