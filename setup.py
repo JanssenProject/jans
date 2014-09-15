@@ -398,6 +398,7 @@ class Setup(object):
                     index_types = attrDict['index']
                     for index_type in index_types:
                         self.create_local_db_index(attr_name, index_type, 'userRoot')
+                self.create_local_db_index('inum', 'equality', 'inumDB')
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
