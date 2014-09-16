@@ -20,7 +20,7 @@ public class LicenseClientTest {
 
         final License generatedLicense = generateWS.generate();
 
-        Assert.assertTrue(generatedLicense != null && !Strings.isNullOrEmpty(generatedLicense.getLicense()));
-        System.out.println(generatedLicense.getLicense());
+        Assert.assertTrue(generatedLicense != null && !Strings.isNullOrEmpty(generatedLicense.getEncodedLicense()));
+        System.out.println(generatedLicense.getEncodedLicense());
     }
 }

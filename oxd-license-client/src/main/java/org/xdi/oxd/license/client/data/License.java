@@ -14,20 +14,20 @@ import java.io.Serializable;
 public class License implements Serializable {
 
     @JsonProperty(value = "license")
-    private String license;
+    private String encodedLicense;
 
     public License() {
     }
 
     public License(String license) {
-        this.license = license;
+        this.encodedLicense = license;
     }
 
-    public String getLicense() {
-        return license;
+    public String getEncodedLicense() {
+        return encodedLicense;
     }
 
-    public void setLicense(String license) {
-        this.license = license;
+    public void setEncodedLicense(String encodedLicense) {
+        this.encodedLicense = encodedLicense;
     }
 }
