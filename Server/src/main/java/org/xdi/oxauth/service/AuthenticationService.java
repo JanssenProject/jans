@@ -74,13 +74,13 @@ public class AuthenticationService {
 
     @In(required = false, value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
     // created by app initializer
-    private GluuLdapConfiguration ldapAuthConfig;
+    private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @In
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private LdapEntryManager ldapAuthEntryManager;
+    @In(required = true, value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    private List<LdapEntryManager> ldapAuthEntryManagers;
 
     @In
     private UserService userService;
@@ -97,23 +97,39 @@ public class AuthenticationService {
      */
     public boolean authenticate(String userName, String password) {
         log.debug("Authenticating user with LDAP: username: {0}", userName);
-        if (ldapAuthConfig == null) {
-            User user = userService.getUser(userName);
-            if (user != null) {
-                if (!checkUserStatus(user)) {
-                	return false;
-                }
-
-                boolean authenticated = ldapAuthEntryManager.authenticate(user.getDn(), password);
-                if (authenticated) {
-                    credentials.setUser(user);
-                	updateLastLogonUserTime(user);
-                }
-
-                return authenticated;
-            }
+        if (this.ldapAuthConfigs == null) {
+            return localAuthenticate(userName, password);
         } else {
-            String primaryKey = "uid";
+            return externalAuthenticate(userName, password);
+        }
+    }
+
+	private boolean localAuthenticate(String userName, String password) {
+		User user = userService.getUser(userName);
+		if (user != null) {
+		    if (!checkUserStatus(user)) {
+		    	return false;
+		    }
+
+		    // Use local LDAP server for user authentication
+		    boolean authenticated = ldapEntryManager.authenticate(user.getDn(), password);
+		    if (authenticated) {
+		        credentials.setUser(user);
+		    	updateLastLogonUserTime(user);
+		    }
+
+		    return authenticated;
+		}
+
+		return false;
+	}
+
+	private boolean externalAuthenticate(String keyValue, String password) {
+		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+			GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
+			LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+
+			String primaryKey = "uid";
             if (StringHelper.isNotEmpty(ldapAuthConfig.getPrimaryKey())) {
                 primaryKey = ldapAuthConfig.getPrimaryKey();
             }
@@ -123,13 +139,34 @@ public class AuthenticationService {
                 localPrimaryKey = ldapAuthConfig.getLocalPrimaryKey();
             }
 
-            return authenticate(userName, password, primaryKey, localPrimaryKey);
-        }
+            boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+			if (authenticated) {
+				return authenticated;
+			}
+		}
 
-        return false;
+		return false;
     }
 
     public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
+    	if (this.ldapAuthConfigs == null) {
+    		return authenticate(null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+    	}
+    	
+		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+			GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
+			LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+
+			boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+			if (authenticated) {
+				return authenticated;
+			}
+		}
+		
+		return false;
+    }
+
+    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
 		log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}'", primaryKey, keyValue);
 
 		List<SimpleProperty> baseDNs;
@@ -143,7 +180,7 @@ public class AuthenticationService {
 		    for (SimpleProperty baseDnProperty : baseDNs) {
 		        String baseDn = baseDnProperty.getValue();
 
-		        User user = getUserByAttribute(baseDn, primaryKey, keyValue);
+		        User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
 		        if (user != null) {
 		            String userDn = user.getDn();
 		            log.debug("Attempting to authenticate userDN: {0}", userDn);
@@ -190,7 +227,7 @@ public class AuthenticationService {
         return false;
     }
 
-    public User getUserByAttribute(String baseDn, String attributeName, String attributeValue) {
+    private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
         SimpleUser sampleUser = new SimpleUser();
