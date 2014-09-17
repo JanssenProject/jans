@@ -30,8 +30,8 @@ public class OperationsFacade {
 	public static final String userPassword = "userPassword";
 	public static final String objectClass = "objectClass";
 
-	private LDAPConnectionProvider connectionPool;
-	private LDAPConnectionProvider bindConnectionPool;
+	private LDAPConnectionProvider connectionProvider;
+	private LDAPConnectionProvider bindConnectionProvider;
 
 	private static final Logger log = Logger.getLogger(OperationsFacade.class);
 
@@ -45,24 +45,36 @@ public class OperationsFacade {
 	}
 
 	public OperationsFacade(LDAPConnectionProvider connectionProvider, LDAPConnectionProvider bindConnectionProvider) {
-		this.connectionPool = connectionProvider;
-		this.bindConnectionPool = bindConnectionProvider;
+		this.connectionProvider = connectionProvider;
+		this.bindConnectionProvider = bindConnectionProvider;
 	}
 
-	public LDAPConnectionPool getConnectionPool() {
-		return connectionPool.getConnectionPool();
+	public LDAPConnectionProvider getConnectionProvider() {
+		return connectionProvider;
 	}
 
 	public void setConnectionProvider(LDAPConnectionProvider connectionProvider) {
-		this.connectionPool = connectionProvider;
+		this.connectionProvider = connectionProvider;
+	}
+
+	public LDAPConnectionProvider getBindConnectionProvider() {
+		return bindConnectionProvider;
+	}
+
+	public void setBindConnectionProvider(LDAPConnectionProvider bindConnectionProvider) {
+		this.bindConnectionProvider = bindConnectionProvider;
+	}
+
+	public LDAPConnectionPool getConnectionPool() {
+		return connectionProvider.getConnectionPool();
 	}
 
 	public LDAPConnection getConnection() throws LDAPException {
-		return connectionPool.getConnection();
+		return connectionProvider.getConnection();
 	}
 
 	public void releaseConnection(LDAPConnection connection) {
-		connectionPool.releaseConnection(connection);
+		connectionProvider.releaseConnection(connection);
 	}
 
 	/**
@@ -95,7 +107,7 @@ public class OperationsFacade {
 	}
 
 	private boolean authenticateImpl(final String bindDn, final String password) throws LDAPException, ConnectionException {
-		if (this.bindConnectionPool == null) {
+		if (this.bindConnectionProvider == null) {
 			return authenticateConnectionPoolImpl(bindDn, password);
 		} else {
 			return authenticateBindConnectionPoolImpl(bindDn, password);
@@ -110,7 +122,7 @@ public class OperationsFacade {
 		}
 
 		boolean closeConnection = false;
-		LDAPConnection connection = connectionPool.getConnection();
+		LDAPConnection connection = connectionProvider.getConnection();
 		try {
 			closeConnection = true;
 			BindResult r = connection.bind(bindDn, password);
@@ -118,10 +130,10 @@ public class OperationsFacade {
 				loggedIn = true;
 			}
 		} finally {
-			connectionPool.releaseConnection(connection);
+			connectionProvider.releaseConnection(connection);
 			// We can't use connection which binded as ordinary user
 			if (closeConnection) {
-				connectionPool.closeDefunctConnection(connection);
+				connectionProvider.closeDefunctConnection(connection);
 			}
 		}
 
@@ -133,12 +145,12 @@ public class OperationsFacade {
 			return false;
 		}
 
-		LDAPConnection connection = bindConnectionPool.getConnection();
+		LDAPConnection connection = bindConnectionProvider.getConnection();
 		try {
 			BindResult r = connection.bind(bindDn, password);
 			return r.getResultCode() == ResultCode.SUCCESS;
 		} finally {
-			bindConnectionPool.releaseConnection(connection);
+			bindConnectionProvider.releaseConnection(connection);
 		}
 	}
 
@@ -387,7 +399,7 @@ public class OperationsFacade {
 	}
 
 	public int getSupportedLDAPVersion() {
-		return this.connectionPool.getSupportedLDAPVersion();
+		return this.connectionProvider.getSupportedLDAPVersion();
 	}
 
 }

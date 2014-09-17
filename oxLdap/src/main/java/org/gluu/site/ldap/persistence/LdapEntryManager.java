@@ -51,16 +51,16 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		subscribers = new LinkedList<DeleteNotifier>();
 	}
 
+	public OperationsFacade getLdapOperationService() {
+		return ldapOperationService;
+	}
+
 	public void addDeleteSubscriber(DeleteNotifier subscriber) {
 		subscribers.add(subscriber);
 	}
 
 	public void removerDeleteSubscriber(DeleteNotifier subscriber) {
 		subscribers.remove(subscriber);
-	}
-
-	public OperationsFacade getLdapOperationService() {
-		return ldapOperationService;
 	}
 
 	@Override
