@@ -15,7 +15,7 @@ import org.xdi.model.SimpleProperty;
  * @author Yuriy Movchan Date: 07.29.2011
  */
 @XmlRootElement
-@JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind" })
+@JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
 public class GluuLdapConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -7160480457430436511L;
@@ -31,6 +31,7 @@ public class GluuLdapConfiguration implements Serializable {
 	private String localPrimaryKey;
 	private boolean useAnonymousBind;
 	private boolean enabled;
+	private int version;
 
 	public GluuLdapConfiguration() {
 		this.servers = new ArrayList<SimpleProperty>();
@@ -139,6 +140,14 @@ public class GluuLdapConfiguration implements Serializable {
 		this.enabled = enabled;
 	}
 
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -146,7 +155,7 @@ public class GluuLdapConfiguration implements Serializable {
 				.append(bindPassword).append(", servers=").append(servers).append(", maxConnections=").append(maxConnections)
 				.append(", useSSL=").append(useSSL).append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
 				.append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=").append(useAnonymousBind)
-				.append(", enabled=").append(enabled).append("]");
+				.append(", enabled=").append(enabled).append(", version=").append(version).append("]");
 		return builder.toString();
 	}
 
