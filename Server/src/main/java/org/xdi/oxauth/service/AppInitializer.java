@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -43,6 +42,7 @@ import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.util.FileConfiguration;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.util.StringHelper;
@@ -54,9 +54,9 @@ import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Javier Rojas Blum
- * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version 0.1, 10.24.2011
+ * @author Yuriy Zabrovarnyy
+ * @version 0.1, 24/10/2011
  */
 @Scope(ScopeType.APPLICATION)
 @Name("appInitializer")
@@ -90,7 +90,7 @@ public class AppInitializer {
 	private long lastFinishedTime;
 
     @Create
-    public void createApplicationComponents() throws ConfigurationException {
+    public void createApplicationComponents() {
         createConnectionProvider();
         ConfigurationFactory.create();
 
@@ -199,6 +199,15 @@ public class AppInitializer {
 		return ldapAuthEntryManagers;
 	}
 
+	public LdapEntryManager createLdapAuthEntryManager(GluuLdapConfiguration ldapAuthConfig) {
+    	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
+
+    	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
+	    log.debug("Created custom authentication LdapEntryManager: {0}", ldapAuthEntryManager);
+	        
+		return ldapAuthEntryManager;
+	}
+
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
 	public SmtpConfiguration createSmtpConfiguration() {
 		GluuAppliance appliance = applianceService.getAppliance();
@@ -220,7 +229,7 @@ public class AppInitializer {
 		return smtpConfiguration;
 	}
 
-    private void createConnectionProvider() throws ConfigurationException {
+    private void createConnectionProvider() {
         this.ldapConfig =  ConfigurationFactory.getLdapConfiguration();
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
@@ -230,24 +239,30 @@ public class AppInitializer {
         this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
     }
 
-    private void createAuthConnectionProviders(List<GluuLdapConfiguration> ldapAuthConfigs) throws ConfigurationException {
+    private void createAuthConnectionProviders(List<GluuLdapConfiguration> ldapAuthConfigs) {
     	List<LdapConnectionService> tmpAuthConnectionProviders = new ArrayList<LdapConnectionService>();
     	List<LdapConnectionService> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionService>();
 
     	// Prepare connection providers per LDAP authentication configuration
         for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
-	        Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
-	        LdapConnectionService connectionProvider = createConnectionProvider(connectionProperties);
-	
-	        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
-	        LdapConnectionService bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+        	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
 
-	        tmpAuthConnectionProviders.add(connectionProvider);
-	        tmpAuthBindConnectionProviders.add(bindConnectionProvider);
+	        tmpAuthConnectionProviders.add(ldapConnectionProviders.getConnectionProvider());
+	        tmpAuthBindConnectionProviders.add(ldapConnectionProviders.getConnectionBindProvider());
     	}
 
         this.authConnectionProviders = tmpAuthConnectionProviders;
     	this.authBindConnectionProviders = tmpAuthBindConnectionProviders;
+    }
+
+    public LdapConnectionProviders createAuthConnectionProviders(GluuLdapConfiguration ldapAuthConfig) {
+        Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
+        LdapConnectionService connectionProvider = createConnectionProvider(connectionProperties);
+
+        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
+        LdapConnectionService bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+    	
+        return new LdapConnectionProviders(connectionProvider, bindConnectionProvider);
     }
 
 	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration ldapAuthConfig) {
@@ -259,10 +274,11 @@ public class AppInitializer {
 		    
 		    String bindDn = ldapAuthConfig.getBindDN();
 		    if (StringHelper.isNotEmpty(bindDn)) {
-		    	properties.setProperty("bindDN", ldapAuthConfig.getBindDN());
+		    	properties.setProperty("bindDN", bindDn);
+				properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
 		    }
-			properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
 			properties.setProperty("useSSL", Boolean.toString(ldapAuthConfig.isUseSSL()));
+			properties.setProperty("maxconnections", Integer.toString(ldapAuthConfig.getMaxConnections()));
 		}
 
 		return properties;
@@ -293,7 +309,7 @@ public class AppInitializer {
 		return bindConnectionProvider;
 	}
 
-	private String buildServersString(List<SimpleProperty> servers) {
+	private String buildServersString(List<?> servers) {
 		StringBuilder sb = new StringBuilder();
 
 		if (servers == null) {
@@ -301,14 +317,18 @@ public class AppInitializer {
 		}
 		
 		boolean first = true;
-		for (SimpleProperty server : servers) {
+		for (Object server : servers) {
 			if (first) {
 				first = false;
 			} else {
 				sb.append(",");
 			}
 
-			sb.append(server.getValue());
+			if (server instanceof SimpleProperty) {
+				sb.append(((SimpleProperty) server).getValue());
+			} else {
+				sb.append(server);
+			}
 		}
 
 		return sb.toString();
@@ -411,6 +431,29 @@ public class AppInitializer {
 		Object clazzObject = mapper.readValue(json, clazz);
 
 		return clazzObject;
+	}
+
+    public static AppInitializer instance() {
+        return ServerUtil.instance(AppInitializer.class);
+    }
+
+	private class LdapConnectionProviders {
+		private LdapConnectionService connectionProvider;
+		private LdapConnectionService connectionBindProvider;
+
+		public LdapConnectionProviders(LdapConnectionService connectionProvider, LdapConnectionService connectionBindProvider) {
+			this.connectionProvider = connectionProvider;
+			this.connectionBindProvider = connectionBindProvider;
+		}
+
+		public LdapConnectionService getConnectionProvider() {
+			return connectionProvider;
+		}
+
+		public LdapConnectionService getConnectionBindProvider() {
+			return connectionBindProvider;
+		}
+
 	}
 
 }
