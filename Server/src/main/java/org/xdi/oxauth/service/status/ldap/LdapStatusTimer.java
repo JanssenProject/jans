@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
@@ -69,8 +70,8 @@ public class LdapStatusTimer {
     }
 
     private void processInt() {
-    	LdapEntryManager ldapEntryManager = (LdapEntryManager) Contexts.getApplicationContext().get(AppInitializer.LDAP_ENTRY_MANAGER_NAME); 
-    	List<LdapEntryManager> ldapAuthEntryManagers = (List<LdapEntryManager>) Contexts.getApplicationContext().get(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME); 
+    	LdapEntryManager ldapEntryManager = (LdapEntryManager) Component.getInstance(AppInitializer.LDAP_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
+    	List<LdapEntryManager> ldapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
 
     	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
 
