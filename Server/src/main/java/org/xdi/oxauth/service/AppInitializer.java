@@ -191,7 +191,7 @@ public class AppInitializer {
 
 		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 			LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(this.authConnectionProviders.get(i), this.authBindConnectionProviders.get(i)));
-	        log.debug("Created {0}: {1}", LDAP_AUTH_ENTRY_MANAGER_NAME, ldapAuthEntryManager);
+	        log.debug("Created {0}#{1}: {2}", LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager);
 	        
 	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
 		}
