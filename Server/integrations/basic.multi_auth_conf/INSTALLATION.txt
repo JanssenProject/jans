@@ -1,0 +1,25 @@
+This installation process has 3 parts.
+
+1. This module module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
+    - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
+    - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
+
+2. Copy required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
+
+3. Confire new custom module in oxTrust:
+    - Log into oxTrust with administrative permissions.
+    - Open "Configuration"->"Manage Authentication" page.
+    - Click "Add custom authentication configuration" in "Manage Custom Authentication Methods" panel.
+    - Enter name = basic_multi_auth
+    - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
+    - Select usage type "Interactive".
+    - Add mandatory properties which specified in README.txt.
+    - Copy/paste script from BasicMultiAuthConfExternalAuthenticator.py.
+    - Activate it via "Enabled" checkbox.
+    - Click "Update" button at the bottom of this page.
+    - In panel "Default Authentication Method" select "basic_multi_auth" if you are planning to use it by default.
+    - Click "Update" button at the bottom of this page.
+    - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available custom authentication modules.
+
+There are log messages in this custom authentication script. In order to debug this module we can use command like this:
+tail -f /opt/tomcat/logs/wrapper.log | grep "Basic (multi auth conf)"

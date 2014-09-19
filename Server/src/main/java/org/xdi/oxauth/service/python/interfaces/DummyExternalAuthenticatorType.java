@@ -23,6 +23,10 @@ public class DummyExternalAuthenticatorType implements ExternalAuthenticatorType
 		return true;
 	}
 
+	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
+	}
+
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return true;
 	}
