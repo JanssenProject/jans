@@ -42,7 +42,7 @@ class Setup(object):
     def __init__(self):
         self.setup_properties_fn = "./setup.properties"
         self.log = './setup.log'
-        self.logError = './error.log'
+        self.logError = './setup_error.log'
         self.savedProperties = "./setup.properties.last"
 
         self.hostname = None
@@ -383,6 +383,7 @@ class Setup(object):
         ])
         # Import p12 to keystore
         self.run([self.keytoolCommand,
+                  '-importkeystore',
                   '-srckeystore',
                   '%s/%s.pkcs12' % (self.certFolder, suffix),
                   '-srcstorepass',
@@ -699,7 +700,7 @@ if __name__ == '__main__':
             installObject.copy_output()
             installObject.copy_static()
             installObject.change_ownership()
-            installObject.restart_all_services()
+            #installObject.restart_all_services()
             installObject.save_properties()
             installObject.setup_ldap_user()
         except:
