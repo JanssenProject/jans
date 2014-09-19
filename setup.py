@@ -44,6 +44,8 @@ class Setup(object):
         self.log = './setup.log'
         self.logError = './setup_error.log'
         self.savedProperties = "./setup.properties.last"
+        self.gluuOptFolder = "/opt/gluu"
+        self.gluuOptBinFolder = "/opt/gluu/bin"
 
         self.hostname = None
         self.ip = None
@@ -101,6 +103,7 @@ class Setup(object):
                             "static/%s/101-ox.ldif" % self.ldap_type,
                             "static/%s/77-customAttributes.ldif" % self.ldap_type,
                             "output/100-user.ldif"]
+        self.gluuBinFiles = ["static/scripts/logmanager.sh", "static/scripts/testBind.py"]
 
         self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-opendj
         self.apache_start_script = '/etc/init.d/httpd'
@@ -426,6 +429,7 @@ class Setup(object):
                 shutil.copy(schemaFile, self.schemaFolder)
             except:
                 self.logIt("Error copying %s" % schemaFile, True)
+                self.logIt(traceback.format_exc(), True)
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
 
     def encode_passwords(self):
@@ -504,11 +508,11 @@ class Setup(object):
                   '--backend-name', db,
                   '--type', 'generic',
                   '--index-name', attributeName,
-                  '--set index-type:', indexType,
-                  '--set index-entry-limit:', '4000',
+                  '--set index-type:%s' % indexType,
+                  '--set index-entry-limit:4000',
                   '--hostName', 'localhost',
                   '--port', '4444',
-                  '--bindDN', self.ldap_binddn,
+                  '--bindDN', '"%s"' % self.ldap_binddn,
                   '-j', self.ldapPassFn,
                   '--trustAll',
                   '--noPropertiesFile',
@@ -546,8 +550,13 @@ class Setup(object):
 
     def copy_static(self):
         self.logIt("Copying static files")
-        # Placeholder to copy any files from the static folder
-        # LDAP schema is copied in the add_ldap_schema method
+        for schema_file in self.gluuBinFiles:
+            try:
+                shutil.copyfile(file, self.gluuOptBinFolder)
+                self.logIt("Copied %s to %s" % (schema_file, self.schemaFolder))
+            except:
+                self.logIt("Error writing %s to %s" % (file, self.gluuOptBinFolder), True)
+                self.logIt(traceback.format_exc(), True)
 
     def change_ownership(self):
         self.logIt("Changing ownership")
@@ -612,8 +621,10 @@ class Setup(object):
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
 
     def makeFolders(self):
-        if not os.path.exists(self.outputFolder):
-            os.makedirs(self.outputFolder)
+        if not os.path.exists(self.gluuOptFolder):
+            os.makedirs(self.gluuOptFolder)
+        if not os.path.exists(self.gluuOptBinFolder):
+            os.makedirs(self.gluuOptBinFolder)
         if not os.path.exists(self.configFolder):
             os.makedirs(self.configFolder)
         if not os.path.exists(self.certFolder):
@@ -697,6 +708,7 @@ if __name__ == '__main__':
             installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()
+            installObject.deleteLdapPw()
             installObject.copy_output()
             installObject.copy_static()
             installObject.change_ownership()
@@ -706,8 +718,6 @@ if __name__ == '__main__':
         except:
             installObject.logIt("Error caught in main loop")
             installObject.logIt(traceback.format_exc(), True)
-        finally:
-            installObject.deleteLdapPw()
     else:
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
