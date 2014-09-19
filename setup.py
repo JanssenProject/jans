@@ -430,6 +430,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def add_ldap_schema(self):
+        self.logIt("Copying LDAP schema")
         for schemaFile in self.schemaFiles:
             self.copyFile(schemaFile, self.schemaFolder)
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
@@ -459,7 +460,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
-            os.system('/bin/su ldap -c %s' % self.ldapDsJavaPropCommand)
+            self.run(['/bin/su', 'ldap', '-c', self.ldapDsJavaPropCommand])
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
@@ -496,7 +497,6 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
-            self.logIt("Coping schema...")
             self.add_ldap_schema()
         except:
             self.logIt('Error adding ldap schema', True)
@@ -504,7 +504,6 @@ class Setup(object):
 
         try:
             self.run([self.ldap_start_script, 'restart'])
-            self.logIt("Restarting LDAP server")
             time.sleep(10) # Give the LDAP server some time to start
         except:
             self.logIt('Error restarting ldap server', True)
