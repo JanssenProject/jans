@@ -423,12 +423,8 @@ class Setup(object):
 
     def copyFile(self, inFile, destFolder):
         try:
-            cmd = "cp %s %s" % (inFile, destFolder)
-            resultCode = os.system(cmd)
-            if resultCode == 0:
-                self.logIt("Success: %s" % cmd)
-            else:
-                self.logIt("Error running command: %s" % cmd, True)
+            shutil.copy(inFile, destFolder)
+            self.logIt("Copied %s to %s" % (inFile, destFolder))
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
             self.logIt(traceback.format_exc(), True)
@@ -453,11 +449,26 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def setup_ldap(self):
-        self.logIt("Setting up ldap")
+        self.logIt("Coping schema")
         try:
+            os.mkdir("/opt/opendj/config")
+            os.mkdir("/opt/opendj/config/schema")
+            self.add_ldap_schema()
+        except:
+            self.logIt('Error adding ldap schema folder', True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Running LDAP setup command")
             self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
                       '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
                       '--acceptLicense'])
+        except:
+            self.logIt("Error running LDAP setup script", True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Making LDAP configuration changes")
             config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', 'Default Password Policy', '--set', 'allow-pre-encoded-passwords:true'],
@@ -470,6 +481,12 @@ class Setup(object):
                           '--port', '4444',
                           '--bindDN', self.ldap_binddn,
                           '--bindPasswordFile', self.ldapPassFn] + changes)
+        except:
+            self.logIt("Error executing config changes", True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Running LDAP index creation commands")
             # Load indexing
             index_json = self.load_json(self.indexJson)
             if index_json:
@@ -481,7 +498,12 @@ class Setup(object):
                 self.create_local_db_index('inum', 'equality', 'site')
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
+        except:
+            self.logIt("Error occured during LDAP indexing", True)
+            self.logIt(traceback.format_exc(), True)
 
+        try:
+            self.logIt("Creating init script")
             # Add opendj init script
             self.run([self.ldapDsCreateRcCommand,
                       '-f',
@@ -489,9 +511,8 @@ class Setup(object):
                      '-u',
                      'ldap'
             ])
-
         except:
-            self.logIt("Error setting up LDAP", True)
+            self.logIt("Error creating init script", True)
             self.logIt(traceback.format_exc(), True)
 
     def import_ldif(self):
@@ -514,8 +535,8 @@ class Setup(object):
                   '--backend-name', db,
                   '--type', 'generic',
                   '--index-name', attributeName,
-                  '--set index-type:%s' % indexType,
-                  '--set index-entry-limit:4000',
+                  '--set', 'index-type:%s' % indexType,
+                  '--set', 'index-entry-limit:4000',
                   '--hostName', 'localhost',
                   '--port', '4444',
                   '--bindDN', '"%s"' % self.ldap_binddn,
@@ -706,7 +727,6 @@ if __name__ == '__main__':
             installObject.render_templates()
             installObject.makeFolders()
             installObject.gen_crypto()
-            installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()
             installObject.deleteLdapPw()
