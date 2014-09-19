@@ -459,6 +459,12 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
+            os.system('/bin/su ldap -c %s' % self.ldapDsJavaPropCommand)
+        except:
+            self.logIt("Error running dsjavaproperties", True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
             self.logIt("Creating init script")
             # Add opendj init script
             self.run([self.ldapDsCreateRcCommand,
@@ -477,7 +483,7 @@ class Setup(object):
                               ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', 'Default Password Policy', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', 'File-Based Audit Logger', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set-base-dn:o=site', '--set', 'enabled:true']]
+                              ['create-backend', '--backend-name', 'site', '--set', '"-base-dn:o=site"', '--set', 'enabled:true']]
             for changes in config_changes:
                 self.run([self.ldapDsconfigCommand,
                           '--trustAll', '--no-prompt',
@@ -669,12 +675,6 @@ class Setup(object):
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
-    def setup_ldap_user(self):
-        self.logIt("Setting up variables for user OpenDJ environment variables ldap")
-        os.setgid(1389)
-        os.setuid(1389)
-        self.run(self.ldapDsJavaPropCommand)
-
 if __name__ == '__main__':
     installObject = Setup()
     print "Installing Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
@@ -716,7 +716,6 @@ if __name__ == '__main__':
             installObject.copy_static()
             installObject.change_ownership()
             installObject.save_properties()
-            installObject.setup_ldap_user()
         except:
             installObject.logIt("Error caught in main loop")
             installObject.logIt(traceback.format_exc(), True)
