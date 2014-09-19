@@ -449,15 +449,6 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def setup_ldap(self):
-        self.logIt("Coping schema")
-        try:
-            os.mkdir("/opt/opendj/config")
-            os.mkdir("/opt/opendj/config/schema")
-            self.add_ldap_schema()
-        except:
-            self.logIt('Error adding ldap schema folder', True)
-            self.logIt(traceback.format_exc(), True)
-
         try:
             self.logIt("Running LDAP setup command")
             self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
@@ -465,6 +456,19 @@ class Setup(object):
                       '--acceptLicense'])
         except:
             self.logIt("Error running LDAP setup script", True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Creating init script")
+            # Add opendj init script
+            self.run([self.ldapDsCreateRcCommand,
+                      '-f',
+                      '/etc/init.d/opendj',
+                      '-u',
+                      'ldap'
+            ])
+        except:
+            self.logIt("Error creating init script", True)
             self.logIt(traceback.format_exc(), True)
 
         try:
@@ -486,7 +490,23 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
+            self.logIt("Coping schema...")
+            self.add_ldap_schema()
+        except:
+            self.logIt('Error adding ldap schema', True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.run([self.ldap_start_script, 'restart'])
+            self.logIt("Restarting LDAP server")
+            time.sleep(10) # Give the LDAP server some time to start
+        except:
+            self.logIt('Error restarting ldap server', True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
             self.logIt("Running LDAP index creation commands")
+            # TODO it would be great to make sure the LDAP server was back up
             # Load indexing
             index_json = self.load_json(self.indexJson)
             if index_json:
@@ -500,19 +520,6 @@ class Setup(object):
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
             self.logIt("Error occured during LDAP indexing", True)
-            self.logIt(traceback.format_exc(), True)
-
-        try:
-            self.logIt("Creating init script")
-            # Add opendj init script
-            self.run([self.ldapDsCreateRcCommand,
-                      '-f',
-                     '/etc/init.d/opendj',
-                     '-u',
-                     'ldap'
-            ])
-        except:
-            self.logIt("Error creating init script", True)
             self.logIt(traceback.format_exc(), True)
 
     def import_ldif(self):
@@ -585,31 +592,6 @@ class Setup(object):
         self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['chown', '-R', 'tomcat:tomcat', self.certFolder])
-
-    # Restarts either just LDAP or all services. Waits for LDAP to start before starting tomcat
-    def restart_all_services(self):
-        self.logIt("Restarting all services")
-        self.run([self.ldap_start_script, 'restart'])
-        self.run([self.apache_start_script, 'restart'])
-        try:
-            startOk = 'Directory Server has started successfully'
-            tailq = Queue.Queue(maxsize=10)  # buffer at most 100 lines
-            p = subprocess.Popen(['tail', '-f', '%s/logs/errors' % self.ldapBaseFolder], stdout=subprocess.PIPE)
-            starttime = time.time()
-            while 1:
-                line = p.stdout.readline()
-                self.logIt(line)
-                tailq.put(line)
-                if (time.time() - starttime > self.ldapStartTimeOut):
-                    self.logIt('LDAP startup timed out. Tomcat not started.', True)
-                    break
-                if line.find(startOk) > -1:
-                    self.logIt(startOk)
-                    self.run([self.tomcat_start_script, 'restart'])
-                    break
-        except:
-            self.logIt("Error restarting service", True)
-            self.logIt(traceback.format_exc(), True)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -733,7 +715,6 @@ if __name__ == '__main__':
             installObject.copy_output()
             installObject.copy_static()
             installObject.change_ownership()
-            #installObject.restart_all_services()
             installObject.save_properties()
             installObject.setup_ldap_user()
         except:
