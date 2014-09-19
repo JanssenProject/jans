@@ -52,7 +52,7 @@ class Setup(object):
         self.countryCode = None
         self.city = None
         self.state = None
-        self.httpdKeyPass = None
+
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
         self.oxauthClient_encoded_pw = None
@@ -75,6 +75,14 @@ class Setup(object):
         self.certFolder = '/etc/certs'
         self.gluuHome = '/opt/gluu'
 
+        self.httpdKeyPass = None
+        self.httpdKeyFn = '%s/httpd.key' % self.certFolder
+        self.httpdCertFn = '%s/httpd.crt' % self.certFolder
+        self.shibJksPass = None
+        self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
+        self.tomcatJksPass = None
+        self.tomcatJksFn = '%s/tomcat.jks' % self.certFolder
+
         self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
@@ -83,6 +91,8 @@ class Setup(object):
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
+        self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
+        self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
         self.ldapPassFn = '%s/.pw' % self.outputFolder
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/config/schema" % self.ldapBaseFolder
@@ -168,7 +178,9 @@ class Setup(object):
                  + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
                  + 'city'.ljust(20) + self.city.rjust(40) + "\n"
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
+                 + 'tomcatJksPass'.ljust(20) + self.tomcatJksPass.rjust(40) + "\n"
                  + 'httpdKeyPass'.ljust(20) + self.httpdKeyPass.rjust(40) + "\n"
+                 + 'shibIdpPass'.ljust(20) + self.shibJksPass.rjust(40) + "\n"
                  + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
 
     def logIt(self, msg, errorLog=False):
@@ -263,8 +275,12 @@ class Setup(object):
             self.state = raw_input('State or Province (for certificate)').strip()
         if not self.httpdKeyPass:
             self.httpdKeyPass = self.getPW()
+        if not self.tomcatJksPass:
+            self.tomcatJksPass = self.getPW()
         if not self.ldapPass:
             self.ldapPass = self.getPW()
+        if not self.shibJksPass    :
+            self.shibJksPass     = self.getPW()
         if not self.blowfish_passphrase:
             self.blowfish_passphrase = self.getPW()
         if not self.baseInum:
@@ -302,51 +318,104 @@ class Setup(object):
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
 
-    def gen_https_crypto(self):
-        self.logIt('Generating certificates')
-        httpd_key_with_password = '%s/%s-httpd.key.orig' % (self.certFolder, self.inumOrgFN)
-        httpd_key = '%s/%s-httpd.key' % (self.certFolder, self.inumOrgFN)
-        httpd_csr = '%s/%s-httpd.csr' % (self.certFolder, self.inumOrgFN)
-        httpd_public_certificate = '%s/%s-httpd.crt' % (self.certFolder, self.inumOrgFN)
+    def gen_cert(self, suffix, password):
+        self.logIt('Generating Certificate for %s' % suffix)
+        key_with_password = '%s/%s.key.orig' % (self.certFolder, suffix)
+        key = '%s/%s.key' % (self.certFolder, suffix)
+        csr = '%s/%s.csr' % (self.certFolder, suffix)
+        public_certificate = '%s/%s.crt' % (self.certFolder, suffix)
         self.run([self.opensslCommand,
-                  'genrsa', 
-                  '-des3', 
+                  'genrsa',
+                  '-des3',
                   '-out',
-                  httpd_key_with_password,
+                  key_with_password,
                   '-passout',
-                  'pass:%s' % self.httpdKeyPass,
+                  'pass:%s' % password,
                   '2048'
-                ])
+        ])
         self.run([self.opensslCommand,
                   '-in',
-                  'httpd_key_with_password',
+                  key_with_password,
                   '-passin',
-                  'pass:%s' % self.httpdKeyPass,
+                  'pass:%s' % password,
                   '-out',
-                  httpd_key
-                  ])
+                  key
+        ])
         self.run([self.opensslCommand,
                   'req',
                   '-new',
                   '-key',
-                  httpd_key,
+                  key,
                   '-out',
-                  httpd_csr,
+                  csr,
                   '-subj',
                   '/CN=%s/O=%s/C=%s/ST=%s/L=%s' % (self.hostname, self.orgName, self.countryCode, self.state, self.city)
-                ])
+        ])
         self.run([self.opensslCommand,
-          'x509',
-          '-req',
-          '-days',
-          '365',
-          '-in',
-          'httpd_csr',
-          '-signkey',
-          'httpd_key',
-          '-out',
-          httpd_public_certificate
-          ])
+                  'x509',
+                  '-req',
+                  '-days',
+                  '365',
+                  '-in',
+                  csr,
+                  '-signkey',
+                  key,
+                  '-out',
+                  public_certificate
+        ])
+
+    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
+        self.logIt("Creating keystore %s" % suffix)
+        # Convert key to pkcs12
+        self.run([self.opensslCommand,
+                  'pkcs12',
+                  '-export',
+                  '-inkey',
+                  '%s/%s.key' % (self.certFolder, suffix),
+                  '-in',
+                  '%s/%s.crt' % (self.certFolder, suffix),
+                  '-out',
+                  '%s/%s.pkcs12' % (self.certFolder, suffix),
+                  '-name',
+                  self.hostname,
+                  '-passout',
+                  'pass:%s' % keystorePW
+        ])
+        # Import p12 to keystore
+        self.run([self.keytoolCommand,
+                  '-srckeystore',
+                  '%s/%s.pkcs12' % (self.certFolder, suffix),
+                  '-srcstorepass',
+                  keystorePW,
+                  '-srcstoretype',
+                  'PKCS12',
+                  '-destkeystore',
+                  keystoreFN,
+                  '-deststorepass',
+                  keystorePW,
+                  '-deststoretype',
+                  'JKS',
+                  '-keyalg',
+                  'RSA',
+                  '-noprompt'
+        ])
+
+    def gen_crypto(self):
+        self.logIt('Generating certificates and keystores')
+        self.gen_cert('http', self.httpdKeyPass)
+        self.gen_cert('tomcat', self.tomcatJksPass)
+        self.gen_cert('shibIDP', self.shibJksPass)
+        self.gen_keystore('tomcat',
+                          self.tomcatJksFn,
+                          self.tomcatJksPass,
+                          '%s/tomcat.key' % self.certFolder,
+                          '%s/tomcat.crt' % self.certFolder)
+        # Will be used soon...
+        self.gen_keystore('shibIDP',
+                          self.shibJksFn,
+                          self.shibJksPass,
+                          '%s/shibIDP.key' % self.certFolder,
+                          '%s/shibIDP.crt' % self.certFolder)
 
     def add_ldap_schema(self):
         self.logIt('Coping schema to %s' % self.schemaFolder)
@@ -398,9 +467,18 @@ class Setup(object):
                     index_types = attrDict['index']
                     for index_type in index_types:
                         self.create_local_db_index(attr_name, index_type, 'userRoot')
-                self.create_local_db_index('inum', 'equality', 'inumDB')
+                self.create_local_db_index('inum', 'equality', 'site')
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
+
+            # Add opendj init script
+            self.run([self.ldapDsCreateRcCommand,
+                      '-f',
+                     '/etc/init.d/opendj',
+                     '-u',
+                     'ldap'
+            ])
+
         except:
             self.logIt("Error setting up LDAP", True)
             self.logIt(traceback.format_exc(), True)
@@ -576,6 +654,12 @@ class Setup(object):
         installObject.httpdKeyPass = installObject.getPrompt("Optional: enter password for httpd private key", randomPW)
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
+    def setup_ldap_user(self):
+        self.logIt("Setting up variables for user OpenDJ environment variables ldap")
+        os.setgid(1389)
+        os.setuid(1389)
+        self.run(self.ldapDsJavaPropCommand)
+
 if __name__ == '__main__':
     installObject = Setup()
     print "Installing Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
@@ -607,7 +691,7 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.makeFolders()
-            installObject.gen_https_crypto()
+            installObject.gen_crypto()
             installObject.add_ldap_schema()
             installObject.setup_ldap()
             installObject.import_ldif()
@@ -616,6 +700,7 @@ if __name__ == '__main__':
             installObject.change_ownership()
             installObject.restart_all_services()
             installObject.save_properties()
+            installObject.setup_ldap_user()
         except:
             installObject.logIt("Error caught in main loop")
             installObject.logIt(traceback.format_exc(), True)
