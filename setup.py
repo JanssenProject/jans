@@ -421,15 +421,21 @@ class Setup(object):
                           '%s/shibIDP.key' % self.certFolder,
                           '%s/shibIDP.crt' % self.certFolder)
 
+    def copyFile(self, inFile, destFolder):
+        try:
+            cmd = "cp %s %s" % (inFile, destFolder)
+            resultCode = os.system(cmd)
+            if resultCode == 0:
+                self.logIt("Success: %s" % cmd)
+            else:
+                self.logIt("Error running command: %s" % cmd, True)
+        except:
+            self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
+            self.logIt(traceback.format_exc(), True)
+
     def add_ldap_schema(self):
-        self.logIt('Coping schema to %s' % self.schemaFolder)
         for schemaFile in self.schemaFiles:
-            try:
-                self.logIt(schemaFile, self.schemaFolder)
-                shutil.copy(schemaFile, self.schemaFolder)
-            except:
-                self.logIt("Error copying %s" % schemaFile, True)
-                self.logIt(traceback.format_exc(), True)
+            self.copyFile(schemaFile, self.schemaFolder)
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
 
     def encode_passwords(self):
@@ -551,12 +557,7 @@ class Setup(object):
     def copy_static(self):
         self.logIt("Copying static files")
         for schema_file in self.gluuBinFiles:
-            try:
-                shutil.copyfile(file, self.gluuOptBinFolder)
-                self.logIt("Copied %s to %s" % (schema_file, self.schemaFolder))
-            except:
-                self.logIt("Error writing %s to %s" % (file, self.gluuOptBinFolder), True)
-                self.logIt(traceback.format_exc(), True)
+            self.copyFile(schema_file, self.gluuOptBinFolder)
 
     def change_ownership(self):
         self.logIt("Changing ownership")
