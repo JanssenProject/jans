@@ -110,6 +110,8 @@ class Setup(object):
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuHome
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
         self.opensslCommand = '/usr/bin/openssl'
+        self.defaultTrustStoreFN = '/usr/java/latest/jre/lib/security/cacerts'
+        self.defaultTrustStorePW = 'changeit'
 
         self.oxtrust_openid_client_id = None
         self.oxtrust_uma_client_id = None
@@ -178,10 +180,7 @@ class Setup(object):
                  + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
                  + 'city'.ljust(20) + self.city.rjust(40) + "\n"
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
-                 + 'tomcatJksPass'.ljust(20) + self.tomcatJksPass.rjust(40) + "\n"
-                 + 'httpdKeyPass'.ljust(20) + self.httpdKeyPass.rjust(40) + "\n"
-                 + 'shibIdpPass'.ljust(20) + self.shibJksPass.rjust(40) + "\n"
-                 + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n" )
+                 + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n")
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
@@ -279,8 +278,8 @@ class Setup(object):
             self.tomcatJksPass = self.getPW()
         if not self.ldapPass:
             self.ldapPass = self.getPW()
-        if not self.shibJksPass    :
-            self.shibJksPass     = self.getPW()
+        if not self.shibJksPass:
+            self.shibJksPass = self.getPW()
         if not self.blowfish_passphrase:
             self.blowfish_passphrase = self.getPW()
         if not self.baseInum:
@@ -334,6 +333,7 @@ class Setup(object):
                   '2048'
         ])
         self.run([self.opensslCommand,
+                  'rsa',
                   '-in',
                   key_with_password,
                   '-passin',
@@ -651,7 +651,6 @@ class Setup(object):
         installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.state = installObject.getPrompt("Enter your state or province")
         randomPW = installObject.getPW()
-        installObject.httpdKeyPass = installObject.getPrompt("Optional: enter password for httpd private key", randomPW)
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
     def setup_ldap_user(self):
@@ -665,10 +664,12 @@ if __name__ == '__main__':
     print "Installing Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
     try:
         os.remove(installObject.log)
+        installObject.logIt('Removed %s' % installObject.log)
     except:
         pass
     try:
         os.remove(installObject.logError)
+        installObject.logIt('Removed %s' % installObject.logError)
     except:
         pass
     installObject.logIt("Installing Gluu Server", True)
