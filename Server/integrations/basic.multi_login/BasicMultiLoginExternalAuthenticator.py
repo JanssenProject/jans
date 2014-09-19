@@ -61,7 +61,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(key_value) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                authenticationService = AuthenticationService.instance()
 
                 i = 0;
                 count = len(self.login_attributes_list_array)

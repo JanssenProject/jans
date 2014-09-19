@@ -169,16 +169,21 @@ public class AuthenticationService {
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
 		log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}'", primaryKey, keyValue);
 
-		List<SimpleProperty> baseDNs;
+		List<?> baseDNs;
 		if (ldapAuthConfig == null) {
-			baseDNs = Arrays.asList(new SimpleProperty(userService.getDnForUser(null)));
+			baseDNs = Arrays.asList(userService.getDnForUser(null));
 		} else {
 			baseDNs = ldapAuthConfig.getBaseDNs();
 		}
 
 		if (baseDNs != null && !baseDNs.isEmpty()) {
-		    for (SimpleProperty baseDnProperty : baseDNs) {
-		        String baseDn = baseDnProperty.getValue();
+		    for (Object baseDnProperty : baseDNs) {
+		        String baseDn;
+		        if (baseDnProperty instanceof SimpleProperty) {
+		        	baseDn = ((SimpleProperty) baseDnProperty).getValue();
+		        } else {
+		        	baseDn = baseDnProperty.toString();
+		        }
 
 		        User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
 		        if (user != null) {
