@@ -509,7 +509,6 @@ class Setup(object):
             self.logIt("Error creating init script", True)
             self.logIt(traceback.format_exc(), True)
 
-
     def configure_opendj(self):
         try:
             self.logIt("Making LDAP configuration changes")
@@ -586,13 +585,13 @@ class Setup(object):
 
     def import_ldif(self):
         self.logIt("Importing LDIF data")
-        for fullPath in self.ldif_files:
-            ldifFn = '%s/ldif' % self.ldapBaseFolder
-            shutil.copy(fullPath, ldifFn)
+        for ldif_file_fn in self.ldif_files:
+            ldifFolder = '%s/ldif' % self.ldapBaseFolder
+            self.copyFile(ldif_file_fn, ldifFolder)
             importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.importLdifCommand,
                                   '--ldifFile',
-                                  ldifFn,
+                                  "%s/ldif/%s" % (self.baseInum, ldif_file_fn),
                                   '--includeBranch',
                                   'o=gluu',
                                   '--backendID',
@@ -674,9 +673,12 @@ class Setup(object):
             return None
 
     def writeLdapPW(self):
-        f = open(self.ldapPassFn, 'w')
-        f.write(self.ldapPass)
-        f.close()
+        try:
+            f = open(self.ldapPassFn, 'w')
+            f.write(self.ldapPass)
+            f.close()
+        except:
+            self.logIt("Error writing temporary LDAP password.")
 
     def deleteLdapPw(self):
         try:
@@ -684,16 +686,21 @@ class Setup(object):
             os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
+            self.logIt(traceback.format_exc(), True)
 
     def makeFolders(self):
-        if not os.path.exists(self.gluuOptFolder):
-            os.makedirs(self.gluuOptFolder)
-        if not os.path.exists(self.gluuOptBinFolder):
-            os.makedirs(self.gluuOptBinFolder)
-        if not os.path.exists(self.configFolder):
-            os.makedirs(self.configFolder)
-        if not os.path.exists(self.certFolder):
-            os.makedirs(self.certFolder)
+        try:
+            if not os.path.exists(self.gluuOptFolder):
+                os.makedirs(self.gluuOptFolder)
+            if not os.path.exists(self.gluuOptBinFolder):
+                os.makedirs(self.gluuOptBinFolder)
+            if not os.path.exists(self.configFolder):
+                os.makedirs(self.configFolder)
+            if not os.path.exists(self.certFolder):
+                os.makedirs(self.certFolder)
+        except:
+            self.logIt("Error making folders", True)
+            self.logIt(traceback.format_exc(), True)
 
     def promptForProperties(self):
         detectedIP = None
