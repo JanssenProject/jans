@@ -513,10 +513,10 @@ class Setup(object):
         try:
             self.logIt("Making LDAP configuration changes")
             config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
-                              ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
-                              ['set-password-policy-prop', '--policy-name', 'Default Password Policy', '--set', 'allow-pre-encoded-passwords:true'],
-                              ['set-log-publisher-prop', '--publisher-name', 'File-Based Audit Logger', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--set', 'enabled:true']]
+                              ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
+                              ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
+                              ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
+                              ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--type local-db', '--set', 'enabled:true']]
             for changes in config_changes:
                 dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                          self.ldapDsconfigCommand,
@@ -533,7 +533,7 @@ class Setup(object):
                 self.run(['/bin/su',
                          'ldap',
                          '-c',
-                         "'%s'" % dsconfigCmd])
+                         dsconfigCmd])
         except:
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
@@ -576,7 +576,7 @@ class Setup(object):
                         self.run(['/bin/su',
                           'ldap',
                           '-c',
-                          '%s' % indexCmd])
+                          indexCmd])
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
