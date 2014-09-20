@@ -523,7 +523,7 @@ class Setup(object):
                 self.run(['/bin/su',
                          'ldap',
                          '-c',
-                         dsconfigCmd])
+                         "'%s'" % dsconfigCmd])
         except:
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
@@ -549,9 +549,12 @@ class Setup(object):
     def import_ldif(self):
         self.logIt("Importing LDIF data")
         for fullPath in self.ldif_files:
-            self.run([self.importLdifCommand,
+            ldifFn = '%s/ldif' % self.ldapBaseFolder
+            shutil.copy(fullPath, ldifFn)
+            importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                      self.importLdifCommand,
                       '--ldifFile',
-                      fullPath,
+                      ldifFn,
                       '--includeBranch',
                       'o=gluu',
                       '--backendID',
@@ -566,6 +569,10 @@ class Setup(object):
                       self.ldapPassFn,
                       '--append',
                       '--trustAll'])
+            self.run(['/bin/su',
+                      'ldap',
+                      '-c',
+                      "'%s'" % importCmd])
 
     def create_local_db_index(self, attributeName, indexType, db):
         self.logIt("Creating %s index for attribute %s" % (indexType, attributeName))
