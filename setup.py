@@ -464,7 +464,7 @@ class Setup(object):
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      '%s' % setupCmd
+                      setupCmd
                     ])
         except:
             self.logIt("Error running LDAP setup script", True)
