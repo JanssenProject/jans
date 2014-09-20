@@ -95,7 +95,7 @@ class Setup(object):
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
         self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
-        self.ldapPassFn = '%s/.pw' % self.outputFolder
+        self.ldapPassFn = '/opt/opendj/.pw'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
@@ -519,7 +519,7 @@ class Setup(object):
 
         try:
             self.run([self.ldap_start_script, 'restart'])
-            
+
         except:
             self.logIt('Error restarting ldap server', True)
             self.logIt(traceback.format_exc(), True)
@@ -543,7 +543,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def import_ldif(self):
-        self.logIt("Importing LDIF data", True)
+        self.logIt("Importing LDIF data")
         for fullPath in self.ldif_files:
             self.run([self.importLdifCommand,
                       '--ldifFile', fullPath,
@@ -634,7 +634,7 @@ class Setup(object):
             return None
 
     def writeLdapPW(self):
-        f = open(self.ldapPassFn, 'w+')
+        f = open(self.ldapPassFn, 'w')
         f.write(self.ldapPass)
         f.close()
 
