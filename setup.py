@@ -524,7 +524,9 @@ class Setup(object):
 
         try:
             self.run([self.ldap_start_script, 'restart'])
-
+            wait_to_start = 30
+            print "\nSleeping %i seconds for OpenDJ Server Restart\n" % wait_to_start
+            time.sleep(wait_to_start)
         except:
             self.logIt('Error restarting ldap server', True)
             self.logIt(traceback.format_exc(), True)
@@ -551,27 +553,43 @@ class Setup(object):
         self.logIt("Importing LDIF data")
         for fullPath in self.ldif_files:
             self.run([self.importLdifCommand,
-                      '--ldifFile', fullPath,
-                      '--includeBranch', 'o=gluu',
-                      '--backendID', 'userRoot',
-                      '--hostname', 'localhost',
-                      '--port', '4444',
-                      '--bindDN', self.ldap_binddn,
-                      '-j', self.ldapPassFn,
+                      '--ldifFile',
+                      fullPath,
+                      '--includeBranch',
+                      'o=gluu',
+                      '--backendID',
+                      'userRoot',
+                      '--hostname',
+                      'localhost',
+                      '--port',
+                      '4444',
+                      '--bindDN',
+                      self.ldap_binddn,
+                      '-j',
+                      self.ldapPassFn,
                       '--append',
                       '--trustAll'])
 
     def create_local_db_index(self, attributeName, indexType, db):
         self.logIt("Creating %s index for attribute %s" % (indexType, attributeName))
-        self.run([self.ldapDsconfigCommand, 'create-local-db-index',
-                  '--backend-name', db,
-                  '--type', 'generic',
-                  '--index-name', attributeName,
-                  '--set', 'index-type:%s' % indexType,
-                  '--set', 'index-entry-limit:4000',
-                  '--hostName', 'localhost',
-                  '--port', '4444',
-                  '--bindDN', '"%s"' % self.ldap_binddn,
+        self.run([self.ldapDsconfigCommand,
+                  'create-local-db-index',
+                  '--backend-name',
+                  db,
+                  '--type',
+                  'generic',
+                  '--index-name',
+                  attributeName,
+                  '--set',
+                  'index-type:%s' % indexType,
+                  '--set',
+                  'index-entry-limit:4000',
+                  '--hostName',
+                  'localhost',
+                  '--port',
+                  '4444',
+                  '--bindDN',
+                  '"%s"' % self.ldap_binddn,
                   '-j', self.ldapPassFn,
                   '--trustAll',
                   '--noPropertiesFile',
