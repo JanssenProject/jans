@@ -455,8 +455,7 @@ class Setup(object):
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
         try:
-            self.logIt("Running LDAP setup command")
-            setupCmd = "cd /opt/opendj; " + " ".join([self.ldapSetupCommand,
+            setupCmd = "cd /opt/opendj ; " + " ".join([self.ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
                                       '--propertiesFilePath',
@@ -465,14 +464,19 @@ class Setup(object):
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      '"%s"' % setupCmd
+                      '%s' % setupCmd
                     ])
         except:
             self.logIt("Error running LDAP setup script", True)
             self.logIt(traceback.format_exc(), True)
 
         try:
-            self.run(['/bin/su', 'ldap', '-c', self.ldapDsJavaPropCommand])
+            dsjavaCmd = "cd /opt/opendj/bin ; %s" % self.ldapDsJavaPropCommand
+            self.run(['/bin/su',
+                      'ldap',
+                      '-c',
+                      dsjavaCmd
+            ])
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
