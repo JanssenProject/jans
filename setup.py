@@ -584,16 +584,18 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def import_ldif(self):
-        self.logIt("Importing LDIF data")
+        self.logIt("Importing userRoot LDIF data")
+        ldifFolder = '%s/ldif' % self.ldapBaseFolder
         for ldif_file_fn in self.ldif_files:
             ldifFolder = '%s/ldif' % self.ldapBaseFolder
             self.copyFile(ldif_file_fn, ldifFolder)
+            ldif_file_fullpath = "%s/ldif/%s" % (self.ldapBaseFolder,
+                                                 os.path.split(ldif_file_fn)[-1])
+            self.run(['/bin/chown', 'ldap:ldap', ldif_file_fullpath])
             importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.importLdifCommand,
                                   '--ldifFile',
-                                  "%s/ldif/%s" % (self.ldapBaseFolder, ldif_file_fn),
-                                  '--includeBranch',
-                                  'o=gluu',
+                                  ldif_file_fullpath,
                                   '--backendID',
                                   'userRoot',
                                   '--hostname',
@@ -610,6 +612,31 @@ class Setup(object):
                       'ldap',
                       '-c',
                       '%s' % importCmd])
+
+        self.logIt("Importing site LDIF")
+        self.copyFile("static/cache-refresh/o_site.ldif", ldifFolder)
+        site_ldif_fn = "%s/o_site.ldif" % ldifFolder
+        self.run(['/bin/chown', 'ldap:ldap', site_ldif_fn])
+        importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                              self.importLdifCommand,
+                              '--ldifFile',
+                              site_ldif_fn,
+                              '--backendID',
+                              'site',
+                              '--hostname',
+                              'localhost',
+                              '--port',
+                              '4444',
+                              '--bindDN',
+                              '"%s"' % self.ldap_binddn,
+                              '-j',
+                              self.ldapPassFn,
+                              '--append',
+                              '--trustAll'])
+        self.run(['/bin/su',
+                  'ldap',
+                  '-c',
+                  '%s' % importCmd])
 
     ### Change hostname in the relevant files
     def render_templates(self):
