@@ -405,21 +405,25 @@ class Setup(object):
         ])
 
     def gen_crypto(self):
-        self.logIt('Generating certificates and keystores')
-        self.gen_cert('http', self.httpdKeyPass)
-        self.gen_cert('tomcat', self.tomcatJksPass)
-        self.gen_cert('shibIDP', self.shibJksPass)
-        self.gen_keystore('tomcat',
-                          self.tomcatJksFn,
-                          self.tomcatJksPass,
-                          '%s/tomcat.key' % self.certFolder,
-                          '%s/tomcat.crt' % self.certFolder)
-        # Will be used soon...
-        self.gen_keystore('shibIDP',
-                          self.shibJksFn,
-                          self.shibJksPass,
-                          '%s/shibIDP.key' % self.certFolder,
-                          '%s/shibIDP.crt' % self.certFolder)
+        try:
+            self.logIt('Generating certificates and keystores')
+            self.gen_cert('http', self.httpdKeyPass)
+            self.gen_cert('tomcat', self.tomcatJksPass)
+            self.gen_cert('shibIDP', self.shibJksPass)
+            self.gen_keystore('tomcat',
+                              self.tomcatJksFn,
+                              self.tomcatJksPass,
+                              '%s/tomcat.key' % self.certFolder,
+                              '%s/tomcat.crt' % self.certFolder)
+            # Will be used soon...
+            self.gen_keystore('shibIDP',
+                              self.shibJksFn,
+                              self.shibJksPass,
+                              '%s/shibIDP.key' % self.certFolder,
+                              '%s/shibIDP.crt' % self.certFolder)
+        except:
+            self.logIt("Error generating cyrpto")
+            self.logIt(traceback.format_exc(), True)
 
     def copyFile(self, inFile, destFolder):
         try:
@@ -430,10 +434,14 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def add_ldap_schema(self):
-        self.logIt("Copying LDAP schema")
-        for schemaFile in self.schemaFiles:
-            self.copyFile(schemaFile, self.schemaFolder)
-        self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
+        try:
+            self.logIt("Copying LDAP schema")
+            for schemaFile in self.schemaFiles:
+                self.copyFile(schemaFile, self.schemaFolder)
+            self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
+        except:
+            self.logIt("Error adding schema")
+            self.logIt(traceback.format_exc(), True)
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -449,15 +457,15 @@ class Setup(object):
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
 
-    def setup_ldap(self):
-        # Add the extra scheam
+    def setup_opendj(self):
+        self.logIt("Running OpenDJ Setup")
         try:
             self.add_ldap_schema()
         except:
             self.logIt('Error adding ldap schema', True)
             self.logIt(traceback.format_exc(), True)
 
-        # Make sure user ldap owns it all
+        # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
@@ -501,6 +509,8 @@ class Setup(object):
             self.logIt("Error creating init script", True)
             self.logIt(traceback.format_exc(), True)
 
+
+    def configure_opendj(self):
         try:
             self.logIt("Making LDAP configuration changes")
             config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
@@ -509,7 +519,8 @@ class Setup(object):
                               ['set-log-publisher-prop', '--publisher-name', 'File-Based Audit Logger', '--set', 'enabled:true'],
                               ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--set', 'enabled:true']]
             for changes in config_changes:
-                dsconfigCmd = " ".join([self.ldapDsconfigCommand,
+                dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                                         self.ldapDsconfigCommand,
                                          '--trustAll',
                                          '--no-prompt',
                                          '--hostname',
@@ -528,18 +539,45 @@ class Setup(object):
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
 
+    def index_opendj(self):
         try:
             self.logIt("Running LDAP index creation commands")
-            # TODO it would be great to make sure the LDAP server was back up
-            # Load indexing
+            # This json file contains a mapping of the required indexes.
+            # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
             index_json = self.load_json(self.indexJson)
             if index_json:
                 for attrDict in index_json:
                     attr_name = attrDict['attribute']
                     index_types = attrDict['index']
                     for index_type in index_types:
-                        self.create_local_db_index(attr_name, index_type, 'userRoot')
-                self.create_local_db_index('inum', 'equality', 'site')
+                        self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
+                        indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                                            self.ldapDsconfigCommand,
+                                            'create-local-db-index',
+                                            '--backend-name',
+                                            'userRoot',
+                                            '--type',
+                                            'generic',
+                                            '--index-name',
+                                            attr_name,
+                                            '--set',
+                                            'index-type:%s' % index_type,
+                                            '--set',
+                                            'index-entry-limit:4000',
+                                            '--hostName',
+                                            'localhost',
+                                            '--port',
+                                            '4444',
+                                            '--bindDN',
+                                            '"%s"' % self.ldap_binddn,
+                                            '-j', self.ldapPassFn,
+                                            '--trustAll',
+                                            '--noPropertiesFile',
+                                            '--no-prompt'])
+                        self.run(['/bin/su',
+                          'ldap',
+                          '-c',
+                          '%s' % indexCmd])
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
@@ -552,52 +590,27 @@ class Setup(object):
             ldifFn = '%s/ldif' % self.ldapBaseFolder
             shutil.copy(fullPath, ldifFn)
             importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
-                      self.importLdifCommand,
-                      '--ldifFile',
-                      ldifFn,
-                      '--includeBranch',
-                      'o=gluu',
-                      '--backendID',
-                      'userRoot',
-                      '--hostname',
-                      'localhost',
-                      '--port',
-                      '4444',
-                      '--bindDN',
-                      '"%s"' % self.ldap_binddn,
-                      '-j',
-                      self.ldapPassFn,
-                      '--append',
-                      '--trustAll'])
+                                  self.importLdifCommand,
+                                  '--ldifFile',
+                                  ldifFn,
+                                  '--includeBranch',
+                                  'o=gluu',
+                                  '--backendID',
+                                  'userRoot',
+                                  '--hostname',
+                                  'localhost',
+                                  '--port',
+                                  '4444',
+                                  '--bindDN',
+                                  '"%s"' % self.ldap_binddn,
+                                  '-j',
+                                  self.ldapPassFn,
+                                  '--append',
+                                  '--trustAll'])
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      "'%s'" % importCmd])
-
-    def create_local_db_index(self, attributeName, indexType, db):
-        self.logIt("Creating %s index for attribute %s" % (indexType, attributeName))
-        self.run([self.ldapDsconfigCommand,
-                  'create-local-db-index',
-                  '--backend-name',
-                  db,
-                  '--type',
-                  'generic',
-                  '--index-name',
-                  attributeName,
-                  '--set',
-                  'index-type:%s' % indexType,
-                  '--set',
-                  'index-entry-limit:4000',
-                  '--hostName',
-                  'localhost',
-                  '--port',
-                  '4444',
-                  '--bindDN',
-                  '"%s"' % self.ldap_binddn,
-                  '-j', self.ldapPassFn,
-                  '--trustAll',
-                  '--noPropertiesFile',
-                  '--no-prompt'])
+                      '%s' % importCmd])
 
     ### Change hostname in the relevant files
     def render_templates(self):
@@ -751,7 +764,9 @@ if __name__ == '__main__':
             installObject.render_templates()
             installObject.makeFolders()
             installObject.gen_crypto()
-            installObject.setup_ldap()
+            installObject.setup_opendj()
+            installObject.configure_opendj()
+            installObject.index_opendj()
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.copy_output()
