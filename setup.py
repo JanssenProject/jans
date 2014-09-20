@@ -456,7 +456,7 @@ class Setup(object):
         self.change_ownership()
         try:
             self.logIt("Running LDAP setup command")
-            setupCmd = " ".join([self.ldapSetupCommand,
+            setupCmd = "cd /opt/opendj; " + " ".join([self.ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
                                       '--propertiesFilePath',
