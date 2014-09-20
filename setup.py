@@ -451,10 +451,11 @@ class Setup(object):
 
     def setup_ldap(self):
         # Make sure user ldap owns it all
+        setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
+        shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
         try:
             self.logIt("Running LDAP setup command")
-            setupPropsFN = os.path.join(self.outputFolder, 'opendj-setup.properties')
             setupCmd = " ".join([self.ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
@@ -641,6 +642,7 @@ class Setup(object):
     def deleteLdapPw(self):
         try:
             os.remove(self.ldapPassFn)
+            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
 
