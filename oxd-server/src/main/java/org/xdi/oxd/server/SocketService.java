@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Socket service.
@@ -52,6 +54,8 @@ public class SocketService {
         final Configuration c = Configuration.getInstance();
         final int port = c.getPort();
 
+        final ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads(), CoreUtils.daemonThreadFactory());
+
         try {
             final Boolean localhostOnly = c.getLocalhostOnly();
             if (localhostOnly == null || localhostOnly) {
@@ -67,7 +71,7 @@ public class SocketService {
                 try {
                     final Socket clientSocket = m_serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    CoreUtils.createExecutor().execute(new SocketProcessor(clientSocket));
+                    executorService.execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;
@@ -79,6 +83,10 @@ public class SocketService {
         } finally {
             IOUtils.closeQuietly(m_serverSocket);
         }
+    }
+
+    private int numberOfThreads() {
+        return 100;
     }
 
     public void setShutdown(boolean p_shutdown) {

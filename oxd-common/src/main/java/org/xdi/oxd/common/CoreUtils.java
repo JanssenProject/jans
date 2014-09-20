@@ -80,13 +80,17 @@ public class CoreUtils {
     }
 
     public static ScheduledExecutorService createExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+        return Executors.newSingleThreadScheduledExecutor(daemonThreadFactory());
+    }
+
+    public static ThreadFactory daemonThreadFactory() {
+        return new ThreadFactory() {
             public Thread newThread(Runnable p_r) {
                 Thread thread = new Thread(p_r);
                 thread.setDaemon(true);
                 return thread;
             }
-        });
+        };
     }
 
     public static void sleep(int i) {
