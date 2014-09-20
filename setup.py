@@ -511,7 +511,7 @@ class Setup(object):
                 self.run(['/bin/su',
                          'ldap',
                          '-c',
-                         '"%s"' % dsconfigCmd])
+                         dsconfigCmd])
         except:
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
