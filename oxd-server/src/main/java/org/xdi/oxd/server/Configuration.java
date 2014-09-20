@@ -123,6 +123,16 @@ public class Configuration {
     private Boolean trustAllCerts;
     @JsonProperty(value = "trust_store_path")
     private String keyStorePath;
+    @JsonProperty(value = "license_server_endpoint")
+    private String licenseServerEndpoint;
+
+    public String getLicenseServerEndpoint() {
+        return licenseServerEndpoint;
+    }
+
+    public void setLicenseServerEndpoint(String licenseServerEndpoint) {
+        this.licenseServerEndpoint = licenseServerEndpoint;
+    }
 
     public String getKeyStorePath() {
         return keyStorePath;

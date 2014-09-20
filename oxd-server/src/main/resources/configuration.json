@@ -6,5 +6,6 @@
     "register_client_response_types":"code id_token token",
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
-    "trust_store_path":""
+    "trust_store_path":"",
+    "license_server_endpoint":""
 }

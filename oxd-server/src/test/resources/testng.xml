@@ -14,6 +14,7 @@
     <parameter name="clientSecret" value="6213e9b9-c46d-4008-8af1-03f918a8ade4"/>
     <parameter name="amHost" value="seed.gluu.org"/>
     <parameter name="rsHost" value="photoz.example.com"/>
+    <parameter name="licenseServerEndpoint" value="https://seed.gluu.org/license-server"/>
 
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
