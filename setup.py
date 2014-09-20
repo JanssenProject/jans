@@ -97,7 +97,7 @@ class Setup(object):
         self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
         self.ldapPassFn = '/opt/opendj/.pw'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
-        self.schemaFolder = "%s/config/schema" % self.ldapBaseFolder
+        self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
         self.schemaFiles = ["static/%s/96-eduperson.ldif" % self.ldap_type,
                             "static/%s/101-ox.ldif" % self.ldap_type,
@@ -450,6 +450,13 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def setup_ldap(self):
+        # Add the extra scheam
+        try:
+            self.add_ldap_schema()
+        except:
+            self.logIt('Error adding ldap schema', True)
+            self.logIt(traceback.format_exc(), True)
+
         # Make sure user ldap owns it all
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
@@ -519,21 +526,6 @@ class Setup(object):
                          dsconfigCmd])
         except:
             self.logIt("Error executing config changes", True)
-            self.logIt(traceback.format_exc(), True)
-
-        try:
-            self.add_ldap_schema()
-        except:
-            self.logIt('Error adding ldap schema', True)
-            self.logIt(traceback.format_exc(), True)
-
-        try:
-            self.run([self.ldap_start_script, 'restart'])
-            wait_to_start = 30
-            print "\nSleeping %i seconds for OpenDJ Server Restart\n" % wait_to_start
-            time.sleep(wait_to_start)
-        except:
-            self.logIt('Error restarting ldap server', True)
             self.logIt(traceback.format_exc(), True)
 
         try:
