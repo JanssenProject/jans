@@ -503,11 +503,16 @@ class Setup(object):
                               ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--set', 'enabled:true']]
             for changes in config_changes:
                 dsconfigCmd = " ".join([self.ldapDsconfigCommand,
-                                         '--trustAll', '--no-prompt',
-                                         '--hostname',  'localhost',
-                                         '--port', '4444',
-                                         '--bindDN', self.ldap_binddn,
-                                         '--bindPasswordFile', self.ldapPassFn] + changes)
+                                         '--trustAll',
+                                         '--no-prompt',
+                                         '--hostname',
+                                         'localhost',
+                                         '--port',
+                                         '4444',
+                                         '--bindDN',
+                                         '"%s"' % self.ldap_binddn,
+                                         '--bindPasswordFile',
+                                         self.ldapPassFn] + changes)
                 self.run(['/bin/su',
                          'ldap',
                          '-c',
@@ -564,7 +569,7 @@ class Setup(object):
                       '--port',
                       '4444',
                       '--bindDN',
-                      self.ldap_binddn,
+                      '"%s"' % self.ldap_binddn,
                       '-j',
                       self.ldapPassFn,
                       '--append',
