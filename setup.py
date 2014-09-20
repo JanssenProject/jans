@@ -516,7 +516,7 @@ class Setup(object):
                               ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--type local-db', '--set', 'enabled:true']]
+                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type local-db', '--set', 'enabled:true']]
             for changes in config_changes:
                 dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                          self.ldapDsconfigCommand,
@@ -591,7 +591,7 @@ class Setup(object):
             importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.importLdifCommand,
                                   '--ldifFile',
-                                  "%s/ldif/%s" % (self.baseInum, ldif_file_fn),
+                                  "%s/ldif/%s" % (self.ldapBaseFolder, ldif_file_fn),
                                   '--includeBranch',
                                   'o=gluu',
                                   '--backendID',
