@@ -26,17 +26,17 @@
 import os
 import os.path
 import Properties
-import Queue
 import random
 import shutil
 import socket
 import string
-import subprocess
 import time
 import uuid
 import json
 import sys
 import traceback
+import subprocess
+import signal
 
 class Setup(object):
     def __init__(self):
@@ -89,7 +89,7 @@ class Setup(object):
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
-        self.ldapBaseFolder = '/opt/opendj'  # TODO I'd like this to be /opt/gluu-opendj
+        self.ldapBaseFolder = '/opt/opendj'
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
@@ -105,7 +105,7 @@ class Setup(object):
                             "output/100-user.ldif"]
         self.gluuBinFiles = ["static/scripts/logmanager.sh", "static/scripts/testBind.py"]
 
-        self.ldap_start_script = '/etc/init.d/opendj'  # TODO I'd like this to be /etc/init.d/gluu-opendj
+        self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
@@ -450,11 +450,22 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def setup_ldap(self):
+        # Make sure user ldap owns it all
+        self.change_ownership()
         try:
             self.logIt("Running LDAP setup command")
-            self.run([self.ldapSetupCommand, '--no-prompt', '--cli',
-                      '--propertiesFilePath', os.path.join(self.outputFolder, 'opendj-setup.properties'),
-                      '--acceptLicense'])
+            setupPropsFN = os.path.join(self.outputFolder, 'opendj-setup.properties')
+            setupCmd = " ".join([self.ldapSetupCommand,
+                                      '--no-prompt',
+                                      '--cli',
+                                      '--propertiesFilePath',
+                                      setupPropsFN,
+                                      '--acceptLicense'])
+            self.run(['/bin/su',
+                      'ldap',
+                      '-c',
+                      '"%s"' % setupCmd
+                    ])
         except:
             self.logIt("Error running LDAP setup script", True)
             self.logIt(traceback.format_exc(), True)
@@ -480,18 +491,22 @@ class Setup(object):
 
         try:
             self.logIt("Making LDAP configuration changes")
-            config_changes = [['set-global-configuration-prop',  '--set', 'single-structural-objectclass-behavior:accept'],
+            config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', 'Directory String',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', 'Default Password Policy', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', 'File-Based Audit Logger', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', '"-base-dn:o=site"', '--set', 'enabled:true']]
+                              ['create-backend', '--backend-name', 'site', '--set', '-base-dn:o=site', '--set', 'enabled:true']]
             for changes in config_changes:
-                self.run([self.ldapDsconfigCommand,
-                          '--trustAll', '--no-prompt',
-                          '--hostname',  'localhost',
-                          '--port', '4444',
-                          '--bindDN', self.ldap_binddn,
-                          '--bindPasswordFile', self.ldapPassFn] + changes)
+                dsconfigCmd = " ".join([self.ldapDsconfigCommand,
+                                         '--trustAll', '--no-prompt',
+                                         '--hostname',  'localhost',
+                                         '--port', '4444',
+                                         '--bindDN', self.ldap_binddn,
+                                         '--bindPasswordFile', self.ldapPassFn] + changes)
+                self.run(['/bin/su',
+                         'ldap',
+                         '-c',
+                         '"%s"' % dsconfigCmd])
         except:
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
@@ -504,7 +519,7 @@ class Setup(object):
 
         try:
             self.run([self.ldap_start_script, 'restart'])
-            time.sleep(10) # Give the LDAP server some time to start
+            
         except:
             self.logIt('Error restarting ldap server', True)
             self.logIt(traceback.format_exc(), True)
