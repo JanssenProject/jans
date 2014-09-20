@@ -22,12 +22,12 @@ public class LicenseSerializationUtilities {
     private LicenseSerializationUtilities() {
     }
 
-    protected static byte[] writeEncryptedPrivateKey(PrivateKey privateKey, char[] passphrase) {
+    public static byte[] writeEncryptedPrivateKey(PrivateKey privateKey, char[] passphrase) {
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
         return Encryptor.encryptRaw(pkcs8EncodedKeySpec.getEncoded(), passphrase);
     }
 
-    protected static byte[] writeEncryptedPublicKey(PublicKey publicKey, char[] passphrase) {
+    public static byte[] writeEncryptedPublicKey(PublicKey publicKey, char[] passphrase) {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey.getEncoded());
         return Encryptor.encryptRaw(x509EncodedKeySpec.getEncoded(), passphrase);
     }

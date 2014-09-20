@@ -125,6 +125,16 @@ public class Configuration {
     private String keyStorePath;
     @JsonProperty(value = "license_server_endpoint")
     private String licenseServerEndpoint;
+    @JsonProperty(value = "license_id")
+    private String licenseId;
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
+    }
 
     public String getLicenseServerEndpoint() {
         return licenseServerEndpoint;
