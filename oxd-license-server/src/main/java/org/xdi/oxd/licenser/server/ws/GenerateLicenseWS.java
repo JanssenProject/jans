@@ -1,5 +1,6 @@
 package org.xdi.oxd.licenser.server.ws;
 
+import com.google.inject.Inject;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
@@ -24,10 +25,12 @@ import java.security.spec.InvalidKeySpecException;
 @Path("/rest")
 public class GenerateLicenseWS {
 
+    @Inject
+    LicenseGenerator licenseGenerator;
+
     private License generateLicense() {
         try {
-            LicenseGenerator generator = new LicenseGenerator();
-            return generator.generate();
+            return licenseGenerator.generate();
         } catch (InvalidKeySpecException e) {
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         } catch (NoSuchAlgorithmException e) {
