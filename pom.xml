@@ -20,6 +20,7 @@
         <resteasy.version>3.0.8.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
+        <gwt.version>2.6.1</gwt.version>
     </properties>
 
     <prerequisites>
@@ -33,6 +34,8 @@
         <module>oxd-ping</module>
         <module>oxd-license-server</module>
         <module>oxd-license-client</module>
+        <module>oxd-license-dao</module>
+        <module>oxd-license-admin</module>
     </modules>
 
     <repositories>
@@ -61,6 +64,18 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+              <groupId>com.google.gwt</groupId>
+              <artifactId>gwt-user</artifactId>
+              <version>${gwt.version}</version>
+              <scope>provided</scope>
+            </dependency>
+            <dependency>
+              <groupId>com.google.gwt</groupId>
+              <artifactId>gwt-servlet</artifactId>
+              <version>${gwt.version}</version>
+              <scope>compile</scope>
+            </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxd-common</artifactId>
@@ -247,6 +262,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>gwt-maven-plugin</artifactId>
+                  <version>${gwt.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
