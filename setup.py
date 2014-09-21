@@ -66,7 +66,7 @@ class Setup(object):
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
-        self.blowfish_passphrase = None
+        self.encode_salt = None
 
         self.outputFolder = './output'
         self.templateFolder = './templates'
@@ -103,7 +103,8 @@ class Setup(object):
                             "static/%s/101-ox.ldif" % self.ldap_type,
                             "static/%s/77-customAttributes.ldif" % self.ldap_type,
                             "output/100-user.ldif"]
-        self.gluuScriptFiles = ["static/scripts/logmanager.sh", "static/scripts/testBind.py"]
+        self.gluuScriptFiles = ['static/scripts/logmanager.sh',
+                                'static/scripts/testBind.py']
         self.init_files = ['static/tomcat/tomcat', 'static/opendj/opendj']
 
         self.ldap_start_script = '/etc/init.d/opendj'
@@ -174,8 +175,7 @@ class Setup(object):
                      self.ldif_scopes: False,
                      self.ldif_clients: False,
                      self.ldif_people: False,
-                     self.ldif_groups: False,
-                     self.encode_script: True}
+                     self.ldif_groups: False}
 
     def __repr__(self):
         return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
@@ -284,8 +284,8 @@ class Setup(object):
             self.ldapPass = self.getPW()
         if not self.shibJksPass:
             self.shibJksPass = self.getPW()
-        if not self.blowfish_passphrase:
-            self.blowfish_passphrase = self.getPW()
+        if not self.encode_salt:
+            self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
             self.baseInum = '@!%s.%s.%s.%s' % tuple([self.getQuad() for i in xrange(4)])
         if not self.inumOrg:
@@ -660,6 +660,18 @@ class Setup(object):
         self.logIt("Copying script files")
         for script in self.gluuScriptFiles:
             self.copyFile(script, self.gluuOptBinFolder)
+        self.logIt("Rendering encode.py")
+        try:
+            f = open('%s/encode.py' % self.templateFolder)
+            encode_script = f.read()
+            f.close()
+            f = open("%s/encode.py" % self.gluuOptBinFolder, 'w')
+            f.write(encode_script % self.__dict__)
+            f.close()
+        except:
+            self.logIt("Error rendering encode script")
+            self.logIt(traceback.format_exc(), True)
+        self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
     def copy_init_files(self):
         for init_file in self.init_files:
@@ -854,10 +866,11 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (noPrompt or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
+            installObject.makeFolders()
             installObject.writeLdapPW()
+            installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.render_templates()
-            installObject.makeFolders()
             installObject.gen_crypto()
             installObject.setup_opendj()
             installObject.configure_opendj()
@@ -865,7 +878,6 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.copy_output()
-            installObject.copy_scripts()
             installObject.copy_init_files()
             installObject.change_ownership()
             installObject.start_tomcat()

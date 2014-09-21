@@ -4,7 +4,7 @@ import sys
 import base64
 from pyDes import *
 
-randstring = "%(blowfish_passphrase)s"
+randstring = "%(encode_salt)s"
 
 def obscure(s=""):
     cipher = triple_des(randstring)
