@@ -496,18 +496,10 @@ class Setup(object):
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
 
-        try:
-            self.logIt("Creating init script")
-            # Add opendj init script
-            self.run([self.ldapDsCreateRcCommand,
-                      '-f',
-                      '/etc/init.d/opendj',
-                      '-u',
-                      'ldap'
-            ])
-        except:
-            self.logIt("Error creating init script", True)
-            self.logIt(traceback.format_exc(), True)
+        # Copy init script
+        self.copyFile("static/opendj/opendj", "/etc/init.d")
+        self.run(["chmod", "755", "/etc/init.d/opendj"])
+        self.run(["/sbin/chkconfig", "opendj", "on"])
 
     def configure_opendj(self):
         try:
