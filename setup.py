@@ -41,8 +41,8 @@ import getopt
 class Setup(object):
     def __init__(self):
         self.setup_properties_fn = "./setup.properties"
-        self.log = './setup.log'
-        self.logError = './setup_error.log'
+        self.log = 'setup.log'
+        self.logError = 'setup_error.log'
         self.savedProperties = "./setup.properties.last"
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
@@ -672,6 +672,21 @@ class Setup(object):
                 self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                 self.logIt(traceback.format_exc(), True)
 
+    def start_tomcat(self):
+        try:
+            self.logIt("Attempting to start tomcat")
+            i = 0
+            wait_time = 5
+            print "Giving LDAP %i seconds to perform imports" % wait_time
+            while i < wait_time:
+                time.sleep(1)
+                print ".",
+                i = i + 1
+            os.system("/etc/init.d/tomcat start")
+        except:
+            self.logIt("Error starting tomcat")
+            self.logIt(traceback.format_exc(), True)
+
     def change_ownership(self):
         self.logIt("Changing ownership")
         self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
@@ -791,6 +806,7 @@ class Setup(object):
                     if os.path.isfile(arg):
                         setup_properties = arg
                         self.logIt("setup.properties specified as %s" % arg)
+                        print "Found setup properties %s\n" % arg
                     else:
                         print "\nOoops... %s file not found\n" % arg
                 except:
@@ -806,7 +822,7 @@ if __name__ == '__main__':
     noPrompt = False
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
-    print "\nInstalling Gluu Server...\nSee %s for setup log.\n See %s for error log.\n\n" % (installObject.log, installObject.logError)
+    print "\nInstalling Gluu Server...\nSee %s for setup log.\nSee %s for error log.\n\n" % (installObject.log, installObject.logError)
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -852,6 +868,7 @@ if __name__ == '__main__':
             installObject.copy_scripts()
             installObject.copy_init_files()
             installObject.change_ownership()
+            installObject.start_tomcat()
             installObject.save_properties()
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
