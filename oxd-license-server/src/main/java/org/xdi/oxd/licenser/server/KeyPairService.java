@@ -15,4 +15,17 @@ public class KeyPairService {
         RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
         return generator.generateKeyPair();
     }
+
+//    final PrivateKey privateKey = keyPair.getPrivate();
+//    final PublicKey publicKey = keyPair.getPublic();
+//
+//    KeyFactory fact = KeyFactory.getInstance("RSA");
+//    RSAPublicKeySpec pub = fact.getKeySpec(publicKey, RSAPublicKeySpec.class);
+//    RSAPrivateKeySpec priv = fact.getKeySpec(privateKey, RSAPrivateKeySpec.class);
+
+    //        final BigInteger publicModulus = pub.getModulus();
+    //        final BigInteger publicExponent = pub.getPublicExponent();
+    //
+    //        final BigInteger privateModulus = priv.getModulus();
+    //        final BigInteger privateExponent = priv.getPrivateExponent();
 }

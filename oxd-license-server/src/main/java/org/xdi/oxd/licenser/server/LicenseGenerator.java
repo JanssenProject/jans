@@ -7,18 +7,12 @@ import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.PasswordProvider;
 import net.nicholaswilliams.java.licensing.encryption.PrivateKeyDataProvider;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
-import net.nicholaswilliams.java.licensing.licensor.LicenseCreator;
-import net.nicholaswilliams.java.licensing.licensor.LicenseCreatorProperties;
-
 import javax.xml.bind.DatatypeConverter;
-import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 
 /**
@@ -31,39 +25,29 @@ public class LicenseGenerator {
     @Inject
     KeyPairService keyPairGenerator;
 
-    public org.xdi.oxd.license.client.data.License generate() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public org.xdi.oxd.license.client.data.License generate(LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyPair keyPair = keyPairGenerator.generate();
         final PrivateKey privateKey = keyPair.getPrivate();
         final PublicKey publicKey = keyPair.getPublic();
-
-        KeyFactory fact = KeyFactory.getInstance("RSA");
-        RSAPublicKeySpec pub = fact.getKeySpec(publicKey, RSAPublicKeySpec.class);
-        RSAPrivateKeySpec priv = fact.getKeySpec(privateKey, RSAPrivateKeySpec.class);
-
-        //        final BigInteger publicModulus = pub.getModulus();
-        //        final BigInteger publicExponent = pub.getPublicExponent();
-        //
-        //        final BigInteger privateModulus = priv.getModulus();
-        //        final BigInteger privateExponent = priv.getPrivateExponent();
 
         // init license creator
         final char[] privatePassword = "privatepassword".toCharArray();
         final char[] publicPassword = "publicpassword".toCharArray();
         final char[] licensePassword = "licensepassword".toCharArray();
 
-        LicenseCreatorProperties.setPrivateKeyDataProvider(new PrivateKeyDataProvider() {
+        PrivateKeyDataProvider privateKeyDataProvider =new PrivateKeyDataProvider() {
             @Override
             public byte[] getEncryptedPrivateKeyData() throws KeyNotFoundException {
                 return LicenseSerializationUtilities.writeEncryptedPrivateKey(privateKey, privatePassword);
             }
-        });
-        LicenseCreatorProperties.setPrivateKeyPasswordProvider(new PasswordProvider() {
+        };
+        PasswordProvider privatePasswordProvider= new PasswordProvider() {
             @Override
             public char[] getPassword() {
                 return privatePassword;
             }
-        });
-        LicenseCreator.getInstance();
+        };
+        LicenseCreator licenseCreator = new LicenseCreator(privateKeyDataProvider, privatePasswordProvider);
 
         // generate license
         License license = new License.Builder().
@@ -74,7 +58,7 @@ public class LicenseGenerator {
                 addFeature("FEATURE2", new Date().getTime() + 100).
                 build();
 
-        final SignedLicense signedLicense = LicenseCreator.getInstance().signLicense(license, licensePassword);
+        final SignedLicense signedLicense = licenseCreator.signLicense(license, licensePassword);
         final byte[] serializedLicense = new ObjectSerializer().writeObject(signedLicense);
 
         final String encodedLicense = DatatypeConverter.printBase64Binary(serializedLicense);

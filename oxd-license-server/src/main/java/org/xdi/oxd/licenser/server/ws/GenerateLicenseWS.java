@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
+import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -30,7 +31,9 @@ public class GenerateLicenseWS {
 
     private License generateLicense() {
         try {
-            return licenseGenerator.generate();
+            LicenseGeneratorInput input = new LicenseGeneratorInput();
+            // fetch by license_id todo !
+            return licenseGenerator.generate(input);
         } catch (InvalidKeySpecException e) {
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         } catch (NoSuchAlgorithmException e) {
