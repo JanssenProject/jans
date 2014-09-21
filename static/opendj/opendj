@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 # The MIT License (MIT)
 #
 # Copyright (c) 2014 Gluu
@@ -45,7 +45,7 @@ cmd = sys.argv[1]
 if cmd == "stop":
     run(['/bin/su', 'ldap', '-c', 'cd /opt/opendj/bin ; /opt/opendj/bin/stop-ds'])
 if cmd == "start":
-    run(['/bin/su', 'ldap', '-c', 'cd /opt/opendj/bin ; /opt/opendj/bin/start-ds' %opend_bin])
+    run(['/bin/su', 'ldap', '-c', 'cd /opt/opendj/bin ; /opt/opendj/bin/start-ds'])
 if cmd == "status":
     run(['/bin/su', 'ldap', '-c', 'cd /opt/opendj/bin ; /opt/opendj/bin/status'])
 if cmd == "restart":
