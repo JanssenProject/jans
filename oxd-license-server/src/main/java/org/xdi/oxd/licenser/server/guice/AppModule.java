@@ -1,7 +1,7 @@
 package org.xdi.oxd.licenser.server.guice;
 
 import com.google.inject.AbstractModule;
-import org.xdi.oxd.licenser.server.KeyGenerator;
+import org.xdi.oxd.licenser.server.KeyPairService;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.ws.GenerateLicenseWS;
 
@@ -14,7 +14,7 @@ public class AppModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(KeyGenerator.class);
+        bind(KeyPairService.class);
         bind(LicenseGenerator.class);
 
         // ws
