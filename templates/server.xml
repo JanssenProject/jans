@@ -53,7 +53,7 @@
   <Connector port="8443" address="%(ip)s"
 	protocol="HTTP/1.1" scheme="https" secure="true"
 	clientAuth="false" sslProtocol="TLS" SSLEnabled="true"
-	keystoreFile="$(tomcatJksFn)s"
+	keystoreFile="%(tomcatJksFn)s"
 	keystoreType="JKS" keystorePass="%(tomcatJksPass)s"
 	truststoreFile="/usr/java/latest/jre/lib/security/cacerts"
 	truststoreType="JKS" truststorePass="changeit"
