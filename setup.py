@@ -33,10 +33,10 @@ import string
 import time
 import uuid
 import json
-import sys
 import traceback
 import subprocess
-import signal
+import sys
+import getopt
 
 class Setup(object):
     def __init__(self):
@@ -103,7 +103,8 @@ class Setup(object):
                             "static/%s/101-ox.ldif" % self.ldap_type,
                             "static/%s/77-customAttributes.ldif" % self.ldap_type,
                             "output/100-user.ldif"]
-        self.gluuBinFiles = ["static/scripts/logmanager.sh", "static/scripts/testBind.py"]
+        self.gluuScriptFiles = ["static/scripts/logmanager.sh", "static/scripts/testBind.py"]
+        self.init_files = ['static/tomcat/tomcat', 'static/opendj/opendj']
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
@@ -154,7 +155,7 @@ class Setup(object):
                            self.ldif_groups,
                            self.ldif_site]
 
-        self.ce_files = {self.oxauth_ldap_properties: True,
+        self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_xml: True,
                      self.oxTrust_properties: True,
                      self.oxtrust_ldap_properties: True,
@@ -496,11 +497,6 @@ class Setup(object):
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
 
-        # Copy init script
-        self.copyFile("static/opendj/opendj", "/etc/init.d")
-        self.run(["chmod", "755", "/etc/init.d/opendj"])
-        self.run(["/sbin/chkconfig", "opendj", "on"])
-
     def configure_opendj(self):
         try:
             self.logIt("Making LDAP configuration changes")
@@ -633,7 +629,7 @@ class Setup(object):
     ### Change hostname in the relevant files
     def render_templates(self):
         self.logIt("Rendering templates")
-        for fullPath in self.ce_files.keys():
+        for fullPath in self.ce_templates.keys():
             try:
                 self.logIt("Rendering template %s" % fullPath)
                 fn = os.path.split(fullPath)[-1]
@@ -649,8 +645,8 @@ class Setup(object):
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
-        for dest_fn in self.ce_files.keys():
-            if self.ce_files[dest_fn]:
+        for dest_fn in self.ce_templates.keys():
+            if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
                 output_fn = os.path.join(self.outputFolder, fn)
                 try:
@@ -660,10 +656,21 @@ class Setup(object):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
 
-    def copy_static(self):
-        self.logIt("Copying static files")
-        for schema_file in self.gluuBinFiles:
-            self.copyFile(schema_file, self.gluuOptBinFolder)
+    def copy_scripts(self):
+        self.logIt("Copying script files")
+        for script in self.gluuScriptFiles:
+            self.copyFile(script, self.gluuOptBinFolder)
+
+    def copy_init_files(self):
+        for init_file in self.init_files:
+            try:
+                script_name = os.path.split(init_file)[-1]
+                self.copyFile(init_file, "/etc/init.d")
+                self.run(["chmod", "755", "/etc/init.d/%s" % script_name])
+                self.run(["/sbin/chkconfig", script_name, "on"])
+            except:
+                self.logIt("Error copying script file %s to /etc/init.d" % init_file)
+                self.logIt(traceback.format_exc(), True)
 
     def change_ownership(self):
         self.logIt("Changing ownership")
@@ -750,15 +757,56 @@ class Setup(object):
             installObject.hostname = installObject.getPrompt("Enter hostname")
 
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
-        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.state = installObject.getPrompt("Enter your state or province")
+        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
+    def print_help(self):
+        print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
+        print "oxAuth and oxTrust to start. If setup.properties is found in this folder, these"
+        print "properties will automatically be used instead of the interactive setup."
+        print "Options:"
+        print ""
+        print "    -h   Help"
+        print "    -f   specify setup.properties file"
+        print "    -n   No interactive prompt before install starts."
+
+    def getOpts(self, argv):
+        self.logIt("Parsing command line options")
+        setup_properties = None
+        noPrompt = False
+        try:
+            opts, args = getopt.getopt(argv, "hnf:")
+        except getopt.GetoptError:
+            self.print_help()
+            sys.exit(2)
+        for opt, arg in opts:
+            if opt == '-h':
+                self.print_help()
+                sys.exit()
+            elif opt == "-f":
+                try:
+                    if os.path.isfile(arg):
+                        setup_properties = arg
+                        self.logIt("setup.properties specified as %s" % arg)
+                    else:
+                        print "\nOoops... %s file not found\n" % arg
+                except:
+                    print "\nOoops... %s file not found\n" % arg
+            elif opt == "-n":
+                self.logIt("-n option specified. No interactive confirmation before proceeding.")
+                noPrompt = True
+        return setup_properties, noPrompt
+
 if __name__ == '__main__':
     installObject = Setup()
-    print "Installing Gluu Server\nSee %s for all logs, and %s for just errors," % (installObject.log, installObject.logError)
+    setup_properties = None
+    noPrompt = False
+    if len(sys.argv) > 1:
+        setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
+    print "\nInstalling Gluu Server...\nSee %s for setup log.\n See %s for error log.\n\n" % (installObject.log, installObject.logError)
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -770,7 +818,10 @@ if __name__ == '__main__':
     except:
         pass
     installObject.logIt("Installing Gluu Server", True)
-    if os.path.isfile(installObject.setup_properties_fn):
+    if setup_properties:
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
+        installObject.load_properties(installObject.setup_properties_fn)
+    elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
         installObject.load_properties(installObject.setup_properties_fn)
     else:
@@ -782,8 +833,10 @@ if __name__ == '__main__':
 
     # Show to properties for approval
     print '\n%s\n' % `installObject`
-    proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
-    if (not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
+    proceed = "NO"
+    if not noPrompt:
+        proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
+    if (noPrompt or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.writeLdapPW()
             installObject.encode_passwords()
@@ -796,11 +849,12 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.copy_output()
-            installObject.copy_static()
+            installObject.copy_scripts()
+            installObject.copy_init_files()
             installObject.change_ownership()
             installObject.save_properties()
         except:
-            installObject.logIt("Error caught in main loop")
+            installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
     else:
         installObject.save_properties()
