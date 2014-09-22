@@ -66,7 +66,7 @@ class Setup(object):
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
-        self.encode_salt = None
+        self.encode_salt = "123456789012345678901234"
 
         self.outputFolder = './output'
         self.templateFolder = './templates'
@@ -408,7 +408,7 @@ class Setup(object):
     def gen_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
-            self.gen_cert('http', self.httpdKeyPass)
+            self.gen_cert('httpd', self.httpdKeyPass)
             self.gen_cert('tomcat', self.tomcatJksPass)
             self.gen_cert('shibIDP', self.shibJksPass)
             self.gen_keystore('tomcat',

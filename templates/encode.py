@@ -4,15 +4,17 @@ import sys
 import base64
 from pyDes import *
 
-randstring = "%(encode_salt)s"
+key = "%(encode_salt)s"
 
-def obscure(s=""):
-    cipher = triple_des(randstring)
-    crypted = cipher.encrypt(s, padmode=PAD_PKCS5)
-    return base64.b64encode(crypted)
+def obscure(data=""):
+    engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
+    data = data.encode('ascii')
+    en_data = engine.encrypt(data)
+    return base64.b64encode(en_data)
 
 def unobscure(s=""):
-    cipher = triple_des(randstring)
+    engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
+    cipher = triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=PAD_PKCS5)
     return decrypted
 

@@ -24,6 +24,7 @@
 
     <!-- sets mode of the server. Possible values: memory, ldap-->
     <mode>ldap</mode>
+    <encode_salt>%(encode_salt)s</encode_salt>
 
     <!-- Configuration is updated from LDAP, interval in seconds, 3600seconds = 1hour -->
     <configuration-update-interval>3600</configuration-update-interval>
