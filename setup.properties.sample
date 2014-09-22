@@ -24,7 +24,7 @@
 ip=
 
 ### The hostname of the server
-hostName=
+hostname=
 
 ### This information is needed for self signed certificate
 orgName=
