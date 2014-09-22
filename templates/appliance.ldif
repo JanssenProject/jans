@@ -11,7 +11,8 @@ gluuVdsCacheRefreshEnabled: disabled
 oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
-oxIDPAuthentication: {"type": "auth",
+oxIDPAuthentication:
+  {"type": "auth",
   "name": null,
   "level": 0,
   "priority": 1,
@@ -26,9 +27,11 @@ oxIDPAuthentication: {"type": "auth",
             "baseDNs":[{"value":"o=gluu"}],
             "primaryKey": "uid",
             "useAnonymousBind": false,
-            "enabled": true
-           }
+            "enabled": true}
   }
+
+######################################
+
 # SAML Trust Relationships - Level 3
 dn: ou=trustRelationships,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectclass: top
