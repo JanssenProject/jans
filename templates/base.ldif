@@ -86,7 +86,7 @@ ou: session
 dn: ou=configuration,o=%(inumOrg)s,o=gluu
 objectclass: top
 objectclass: organizationalUnit
-ou: hosts
+ou: configuration
 
 ################################
 
