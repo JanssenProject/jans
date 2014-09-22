@@ -76,6 +76,8 @@ class Setup(object):
         self.indexJson = './static/opendj/opendj_index.json'
         self.certFolder = '/etc/certs'
         self.gluuHome = '/opt/gluu'
+        self.oxauth_error_json = 'static/oxauth/oxauth-errors.json'
+
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
@@ -655,6 +657,7 @@ class Setup(object):
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
+        self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
 
     def copy_scripts(self):
         self.logIt("Copying script files")
