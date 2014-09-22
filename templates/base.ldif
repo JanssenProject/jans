@@ -82,6 +82,14 @@ ou: session
 
 ################################
 
+# OX Configuration - LEVEL 3
+dn: ou=configuration,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: hosts
+
+################################
+
 # Oauth2 federation data - LEVEL 3
 dn: ou=federation,o=%(inumOrg)s,o=gluu
 objectclass: top
