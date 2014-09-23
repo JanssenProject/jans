@@ -204,6 +204,14 @@ ou: token
 
 ################################
 
+# oxLicense Data - LEVEL 3
+dn: ou=oxLicense,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: oxLicense
+
+################################
+
 # oxTrust links for Invitation code enrollment
 # should perhaps be under ou=oxTrust,inum=<appliance-inum>,ou=applications,o=gluu
 dn: ou=links,o=%(inumOrg)s,o=gluu
