@@ -6,7 +6,7 @@
         xmlns:a="urn:import:org.xdi.oxd.license.admin.client.ui"
         >
 
-    <g:DockLayoutPanel ui:field="rootPanel" addStyleNames="detailsView">
+    <g:DockLayoutPanel ui:field="rootPanel">
         <g:north size='56'>
             <g:HTMLPanel>
                 <h2>License Management</h2>

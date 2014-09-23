@@ -25,6 +25,4 @@
 
     <source path="client"/>
     <source path="shared"/>
-
-    <public path="css"/>
 </module>

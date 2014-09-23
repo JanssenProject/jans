@@ -5,7 +5,7 @@
         xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         >
 
-    <g:VerticalPanel ui:field="rootPanel">
+    <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel">
         <g:HTML><h3>Name:</h3></g:HTML>
         <g:HTML ui:field="nameField"/>
     </g:VerticalPanel>
