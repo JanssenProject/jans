@@ -5,24 +5,37 @@
 
 <web-app>
 
-    <!-- Task list Servlet -->
-    <servlet>
-        <servlet-name>adminServlet</servlet-name>
-        <servlet-class>org.xdi.oxd.license.admin.server.AdminServiceImpl</servlet-class>
-        <load-on-startup>1</load-on-startup>
-        <init-param>
-            <param-name>log4jLocation</param-name>
-            <param-value>WEB-INF/log4j.properties</param-value>
-        </init-param>
-        <init-param>
-            <param-name>configurationLocation</param-name>
-            <param-value>WEB-INF/configuration.json</param-value>
-        </init-param>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>adminServlet</servlet-name>
-        <url-pattern>/admin/adminService.rpc</url-pattern>
-    </servlet-mapping>
+    <!--<servlet>-->
+    <!--<servlet-name>adminServlet</servlet-name>-->
+    <!--<servlet-class>org.xdi.oxd.license.admin.server.AdminServiceImpl</servlet-class>-->
+    <!--<load-on-startup>1</load-on-startup>-->
+    <!--<init-param>-->
+    <!--<param-name>log4jLocation</param-name>-->
+    <!--<param-value>WEB-INF/log4j.properties</param-value>-->
+    <!--</init-param>-->
+    <!--<init-param>-->
+    <!--<param-name>configurationLocation</param-name>-->
+    <!--<param-value>WEB-INF/configuration.json</param-value>-->
+    <!--</init-param>-->
+    <!--</servlet>-->
+    <!--<servlet-mapping>-->
+    <!--<servlet-name>adminServlet</servlet-name>-->
+    <!--<url-pattern>/admin/adminService.rpc</url-pattern>-->
+    <!--</servlet-mapping>-->
+
+    <filter>
+        <filter-name>guiceFilter</filter-name>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>guiceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>org.xdi.oxd.license.admin.server.GuiceServletConfig</listener-class>
+    </listener>
 
     <welcome-file-list>
         <welcome-file>admin.html</welcome-file>

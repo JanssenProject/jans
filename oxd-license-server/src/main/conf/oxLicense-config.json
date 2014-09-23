@@ -1,0 +1,6 @@
+{
+    "base-dn":"ou=oxProx,o=@!1111,o=gluu",
+    "thread-number-paid-license":100,
+    "thread-number-premium-license":1000000
+
+}

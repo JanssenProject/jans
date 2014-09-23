@@ -11,28 +11,49 @@ import java.io.Serializable;
 
 public class Configuration implements Serializable {
 
+    @JsonProperty(value = "base-dn")
+    private String baseDn;
     @JsonProperty(value = "thread-number-paid-license")
-    private String threadNumberPaidLicense;
+    private Integer threadNumberPaidLicense;
     @JsonProperty(value = "thread-number-premium-license")
-    private String threadNumberPremiumLicense;
+    private Integer threadNumberPremiumLicense;
 
     public Configuration() {
     }
 
-    public String getThreadNumberPaidLicense() {
+    public String getBaseDn() {
+        return baseDn;
+    }
+
+    public void setBaseDn(String baseDn) {
+        this.baseDn = baseDn;
+    }
+
+    public Integer getThreadNumberPaidLicense() {
         return threadNumberPaidLicense;
     }
 
-    public void setThreadNumberPaidLicense(String threadNumberPaidLicense) {
+    public void setThreadNumberPaidLicense(Integer threadNumberPaidLicense) {
         this.threadNumberPaidLicense = threadNumberPaidLicense;
     }
 
-    public String getThreadNumberPremiumLicense() {
+    public Integer getThreadNumberPremiumLicense() {
         return threadNumberPremiumLicense;
     }
 
-    public void setThreadNumberPremiumLicense(String threadNumberPremiumLicense) {
+    public void setThreadNumberPremiumLicense(Integer threadNumberPremiumLicense) {
         this.threadNumberPremiumLicense = threadNumberPremiumLicense;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Configuration");
+        sb.append("{baseDn='").append(baseDn).append('\'');
+        sb.append(", threadNumberPaidLicense=").append(threadNumberPaidLicense);
+        sb.append(", threadNumberPremiumLicense=").append(threadNumberPremiumLicense);
+        sb.append('}');
+        return sb.toString();
     }
 }
 

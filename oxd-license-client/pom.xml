@@ -51,7 +51,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- skip client tests because right now we are using client tests on server side -->
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
