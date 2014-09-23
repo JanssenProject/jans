@@ -35,7 +35,6 @@
         <module>oxd-ping</module>
         <module>oxd-license-server</module>
         <module>oxd-license-client</module>
-        <module>oxd-license-dao</module>
         <module>oxd-license-admin</module>
     </modules>
 
@@ -221,19 +220,8 @@
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-client</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-jackson-provider</artifactId>
                 <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-undertow</artifactId>
-                <version>${resteasy.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
