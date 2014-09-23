@@ -1,0 +1,27 @@
+<module rename-to="admin">
+
+    <inherits name="com.google.gwt.logging.Logging"/>
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="com.google.gwt.i18n.CldrLocales"/>
+    <inherits name="com.google.gwt.i18n.I18N"/>
+
+    <set-property name="gwt.logging.logLevel" value="FINE"/>      
+    <set-property name="gwt.logging.enabled" value="TRUE"/>
+    <set-property name="gwt.logging.systemHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
+    <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.firebugHandler" value="DISABLED"/>
+
+    <set-property name="compiler.stackMode" value="emulated"/>       
+
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+      
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
+
+    <set-property name="locale" value="en"/>
+
+    <source path="client"/>
+    <source path="shared"/>
+
+    <public path="css"/>
+</module>

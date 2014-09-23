@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+    <!-- Task list Servlet -->
+    <servlet>
+        <servlet-name>adminServlet</servlet-name>
+        <servlet-class>org.xdi.oxd.license.admin.server.AdminServiceImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+        <init-param>
+            <param-name>log4jLocation</param-name>
+            <param-value>WEB-INF/log4j.properties</param-value>
+        </init-param>
+        <init-param>
+            <param-name>configurationLocation</param-name>
+            <param-value>WEB-INF/configuration.json</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>adminServlet</servlet-name>
+        <url-pattern>/admin/adminService.rpc</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>admin.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

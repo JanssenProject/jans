@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui='urn:ui:com.google.gwt.uibinder'
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
+
+  <g:DockLayoutPanel ui:field="rootPanel" addStyleNames="detailsView">
+      <g:north size='46'>
+          <g:HTMLPanel>Header</g:HTMLPanel>
+      </g:north>
+      <g:center>
+          <g:ScrollPanel width="100%">
+              <g:HorizontalPanel width="100%" ui:field="detailsViewPanel" addStyleNames="detailsViewPanel">
+
+              </g:HorizontalPanel>
+          </g:ScrollPanel>
+      </g:center>
+  </g:DockLayoutPanel>
+</ui:UiBinder>
