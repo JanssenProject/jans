@@ -2,6 +2,9 @@ package org.xdi.oxd.license.admin.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.xdi.oxd.license.admin.client.service.AdminService;
+import org.xdi.oxd.license.admin.shared.Customer;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -9,4 +12,13 @@ import org.xdi.oxd.license.admin.client.service.AdminService;
  */
 
 public class AdminServiceImpl extends RemoteServiceServlet implements AdminService {
+    @Override
+    public List<Customer> getCustomers() {
+        return null;
+    }
+
+    @Override
+    public void save(Customer customer) {
+
+    }
 }

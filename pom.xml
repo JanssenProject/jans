@@ -65,16 +65,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-              <groupId>com.google.gwt</groupId>
-              <artifactId>gwt-user</artifactId>
-              <version>${gwt.version}</version>
-              <scope>provided</scope>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
-              <groupId>com.google.gwt</groupId>
-              <artifactId>gwt-servlet</artifactId>
-              <version>${gwt.version}</version>
-              <scope>compile</scope>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
@@ -104,6 +104,11 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxUtil</artifactId>
+                <version>${oxCore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>oxLdap</artifactId>
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
@@ -263,23 +268,23 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>gwt-maven-plugin</artifactId>
-                  <version>${gwt.version}</version>
-                  <executions>
-                      <execution>
-                          <goals>
-                              <goal>compile</goal>
-                          </goals>
-                      </execution>
-                  </executions>
-                  <dependencies>
-                      <dependency>
-                          <groupId>com.google.gwt</groupId>
-                          <artifactId>gwt-dev</artifactId>
-                          <version>${gwt.version}</version>
-                      </dependency>
-                  </dependencies>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>${gwt.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.google.gwt</groupId>
+                            <artifactId>gwt-dev</artifactId>
+                            <version>${gwt.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

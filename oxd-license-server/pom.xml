@@ -18,6 +18,20 @@
     <build>
         <finalName>oxd-license-server</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/conf</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -78,6 +92,10 @@
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxUtil</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxLdap</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

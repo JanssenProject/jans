@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.client.service.AdminServiceAsync;
-import org.xdi.oxd.license.admin.client.ui.MainPanel;
+import org.xdi.oxd.license.admin.client.ui.MainPanelPresenter;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -22,7 +22,8 @@ public class Admin implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        RootLayoutPanel.get().add(new MainPanel());
+        MainPanelPresenter mainPanelPresenter = new MainPanelPresenter();
+        mainPanelPresenter.go(RootLayoutPanel.get());
     }
 
     public static AdminServiceAsync getService() {

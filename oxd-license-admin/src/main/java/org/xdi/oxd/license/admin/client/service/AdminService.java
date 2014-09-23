@@ -2,6 +2,9 @@ package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.xdi.oxd.license.admin.shared.Customer;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -10,4 +13,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("adminService.rpc")
 public interface AdminService extends RemoteService {
+    public List<Customer> getCustomers();
+
+    public void save(Customer customer);
 }

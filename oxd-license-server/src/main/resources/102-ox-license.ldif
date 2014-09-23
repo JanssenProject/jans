@@ -3,12 +3,61 @@ objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema
 cn: schema
+
+attributeTypes: ( oxLicenseConf-oid NAME 'oxLicenseConf - OX License Configuration as JSON document.'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+
+
 attributeTypes: ( licenseId-oid NAME 'licenseId - encrypted and signed data about customer'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-objectclasses: ( exchangeToken-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY
-  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
-  $ iname $ inum $ member $ o $ owner $ seeAlso )
+attributeTypes: ( oxPrivateKey-oid NAME 'oxPrivateKey'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxPublicKey-oid NAME 'oxPublicKey'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxClientPublicKey-oid NAME 'oxClientPublicKey'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxClientPrivateKey-oid NAME 'oxClientPrivateKey'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxPrivatePassword-oid NAME 'oxPrivatePassword'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxPublicPassword-oid NAME 'oxPublicPassword'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxLicensePassword-oid NAME 'oxLicensePassword'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
+
+
+objectclasses: ( oxLicenseConfiguration-oid NAME 'oxLicenseConfiguration' SUP top STRUCTURAL MUST objectclass MAY
+  ( oxLicenseConf  )
+  X-ORIGIN 'Gluu created objectclass' )
+
+objectclasses: ( oxLicenseCustomer-oid NAME 'oxLicenseCustomer' SUP top STRUCTURAL MUST objectclass MAY
+  ( licenseId $ oxLicensePassword $ oxPublicPassword $ oxPrivatePassword $ oxClientPrivateKey $ oxClientPublicKey
+  $ oxPublicKey $ oxPrivateKey )
   X-ORIGIN 'Gluu created objectclass' )
