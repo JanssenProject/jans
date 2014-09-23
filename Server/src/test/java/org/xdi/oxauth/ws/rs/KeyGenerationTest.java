@@ -10,7 +10,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.service.EncryptionService;
-import org.xdi.util.security.StringEncrypter;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012
@@ -20,9 +19,14 @@ public class KeyGenerationTest extends BaseTest {
     @Parameters({"ldapAdminPassword"})
     @Test
     public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
-        showTitle("TEST: encryptLdapPassword");
+    	new ComponentTest() {
+			@Override
+			protected void testComponents() throws Exception {
+		        showTitle("TEST: encryptLdapPassword");
 
-        String password = EncryptionService.instance().encrypt(ldapAdminPassword);
-        System.out.println("Encrypted LDAP Password: " + password);
+		        String password = EncryptionService.instance().encrypt(ldapAdminPassword);
+		        System.out.println("Encrypted LDAP Password: " + password);
+			}
+    	}.run();
     }
 }
