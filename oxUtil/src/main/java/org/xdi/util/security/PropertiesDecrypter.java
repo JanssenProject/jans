@@ -18,8 +18,14 @@ public class PropertiesDecrypter {
 
 	public static final String bindPassword = "bindPassword";
 
-	public static Properties decryptProperties(Properties properties, String encryptionKey) throws EncryptionException {
-		return decryptProperties(StringEncrypter.defaultInstance(), properties, encryptionKey);
+	public static Properties decryptProperties(Properties properties, String encryptionKey) {
+		try {
+			return decryptProperties(StringEncrypter.defaultInstance(), properties, encryptionKey);
+		} catch (EncryptionException ex) {
+			log.error(String.format("Failed to decript '%s' property", PropertiesDecrypter.bindPassword), ex);
+		}
+		
+		return properties;
 	}
 
 	public static Properties decryptProperties(StringEncrypter stringEncrypter, Properties properties) {
@@ -43,7 +49,7 @@ public class PropertiesDecrypter {
 			if (StringHelper.isEmpty(encryptionKey)) {
 				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(PropertiesDecrypter.bindPassword));
 			} else {
-				decryptedProperty = StringEncrypter.defaultInstance().decrypt(properties.getProperty(PropertiesDecrypter.bindPassword), encryptionKey);
+				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(PropertiesDecrypter.bindPassword), encryptionKey);
 			}
 			
 			clondedProperties.put(PropertiesDecrypter.bindPassword, decryptedProperty);
