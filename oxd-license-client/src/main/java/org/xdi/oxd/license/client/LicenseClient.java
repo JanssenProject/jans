@@ -1,8 +1,6 @@
 package org.xdi.oxd.license.client;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.ProxyFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,11 +17,7 @@ public class LicenseClient {
     }
 
     public static <T> T proxy(Class<T> clientInterface, String endpoint) {
-        ResteasyClient client = new ResteasyClientBuilder().build();
-        ResteasyWebTarget target = client.target(endpoint);
-
-        return target.proxy(clientInterface);
-
+        return ProxyFactory.create(clientInterface, endpoint);
     }
 
 }
