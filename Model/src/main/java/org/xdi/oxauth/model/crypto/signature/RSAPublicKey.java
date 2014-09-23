@@ -22,7 +22,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 /**
  * The Public Key for the RSA Algorithm
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version 0.9, 09/23/2014
  */
 public class RSAPublicKey extends PublicKey {
 
@@ -62,8 +63,8 @@ public class RSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put(MODULUS, JwtUtil.base64urlencode(modulus.toByteArray()));
-        jsonObject.put(EXPONENT, JwtUtil.base64urlencode(publicExponent.toByteArray()));
+        jsonObject.put("modulus", JwtUtil.base64urlencode(modulus.toByteArray()));
+        jsonObject.put("exponent", JwtUtil.base64urlencode(publicExponent.toByteArray()));
         jsonObject.put(X, JSONObject.NULL);
         jsonObject.put(Y, JSONObject.NULL);
 
