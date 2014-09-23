@@ -266,6 +266,20 @@
                   <groupId>org.codehaus.mojo</groupId>
                   <artifactId>gwt-maven-plugin</artifactId>
                   <version>${gwt.version}</version>
+                  <executions>
+                      <execution>
+                          <goals>
+                              <goal>compile</goal>
+                          </goals>
+                      </execution>
+                  </executions>
+                  <dependencies>
+                      <dependency>
+                          <groupId>com.google.gwt</groupId>
+                          <artifactId>gwt-dev</artifactId>
+                          <version>${gwt.version}</version>
+                      </dependency>
+                  </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

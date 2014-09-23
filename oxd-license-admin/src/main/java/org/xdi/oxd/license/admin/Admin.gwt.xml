@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <module rename-to="admin">
 
     <inherits name="com.google.gwt.logging.Logging"/>
@@ -18,7 +19,9 @@
       
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
 
-    <set-property name="locale" value="en"/>
+    <!--<set-property name="locale" value="en"/>-->
+
+    <entry-point class='org.xdi.oxd.license.admin.client.Admin'/>
 
     <source path="client"/>
     <source path="shared"/>

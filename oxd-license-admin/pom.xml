@@ -18,6 +18,35 @@
     <build>
         <finalName>oxd-license-admin</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.jpg</include>
+                    <include>**/*.gif</include>
+                    <include>**/*.png</include>
+                    <include>**/*.rpc</include>
+                    <include>**/*.js</include>
+                    <include>**/*.html</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.jpg</include>
+                    <include>**/*.gif</include>
+                    <include>**/*.png</include>
+                    <include>**/*.rpc</include>
+                    <include>**/*.js</include>
+                    <include>**/*.html</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -62,26 +91,52 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-idea-plugin</artifactId>
             </plugin>
             <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>gwt-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>license-admin</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <!--<configuration>-->
+                        <!--<extraJvmArgs>-Xmx4048M -Xss1024k</extraJvmArgs>-->
+                        <!--<logLevel>INFO</logLevel>-->
+                        <!--<compileReport>false</compileReport>-->
+                        <!--<modules>-->
+                        <!--<module>org.xdi.oxd.license.admin.Admin</module>-->
+                        <!--</modules>-->
+                        <!--</configuration>-->
+                    </execution>
+                </executions>
+
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-user</artifactId>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-servlet</artifactId>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -148,8 +203,8 @@
             <artifactId>resteasy-jackson-provider</artifactId>
         </dependency>
         <dependency>
-        	<groupId>org.jboss.resteasy</groupId>
-        	<artifactId>resteasy-undertow</artifactId>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-undertow</artifactId>
         </dependency>
     </dependencies>
 
