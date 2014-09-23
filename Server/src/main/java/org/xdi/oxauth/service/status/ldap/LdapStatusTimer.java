@@ -6,9 +6,12 @@
 
 package org.xdi.oxauth.service.status.ldap;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.gluu.site.ldap.LDAPConnectionProvider;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
@@ -20,6 +23,7 @@ import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.service.AppInitializer;
 
 /**
  * @author Yuriy Movchan
@@ -66,31 +70,38 @@ public class LdapStatusTimer {
     }
 
     private void processInt() {
-        logConnectionProviderStatistic("centralConnectionProvider", "bindCentralConnectionProvider");
-        logConnectionProviderStatistic("authConnectionProvider", "bindAuthConnectionProvider");
+    	LdapEntryManager ldapEntryManager = (LdapEntryManager) Component.getInstance(AppInitializer.LDAP_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
+    	List<LdapEntryManager> ldapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
+
+    	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
+
+    	for (int i = 0; i < ldapAuthEntryManagers.size(); i++) {
+			LdapEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
+			logConnectionProviderStatistic(ldapAuthEntryManager, "authConnectionProvider#" + i, "bindAuthConnectionProvider#" + "i");
+    	}
     }
 
-	public void logConnectionProviderStatistic(String connectionProvider, String bindConnectionProvider) {
-		LDAPConnectionProvider ldapConnectionProvider = (LDAPConnectionProvider) Contexts.getApplicationContext().get(connectionProvider);
-        LDAPConnectionProvider bindLdapConnectionProvider = (LDAPConnectionProvider) Contexts.getApplicationContext().get(bindConnectionProvider);
+	public void logConnectionProviderStatistic(LdapEntryManager ldapEntryManager, String connectionProviderName, String bindConnectionProviderName) {
+		LDAPConnectionProvider ldapConnectionProvider = ldapEntryManager.getLdapOperationService().getConnectionProvider();
+        LDAPConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getLdapOperationService().getBindConnectionProvider();
         
         if (ldapConnectionProvider == null) {
-        	log.error("{0} is empty", connectionProvider);
+        	log.error("{0} is empty", connectionProviderName);
         } else {
             if (ldapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", connectionProvider);
+            	log.error("{0} is empty", connectionProviderName);
             } else {
-            	log.debug("{0} statistics: {1}", connectionProvider, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.debug("{0} statistics: {1}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 
         if (bindLdapConnectionProvider == null) {
-        	log.error("{0} is empty", bindConnectionProvider);
+        	log.error("{0} is empty", bindConnectionProviderName);
         } else {
             if (bindLdapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", bindConnectionProvider);
+            	log.error("{0} is empty", bindConnectionProviderName);
             } else {
-            	log.debug("{0} statistics: {1}", bindConnectionProvider, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.debug("{0} statistics: {1}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 	}

@@ -21,6 +21,8 @@ public interface ExternalAuthenticatorType {
 
 	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes);
 
+	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes);
+
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
 	public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);

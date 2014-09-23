@@ -1,6 +1,6 @@
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 
@@ -61,14 +61,14 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(key_value) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                authenticationService = AuthenticationService.instance()
 
                 i = 0;
                 count = len(self.login_attributes_list_array)
                 while (i < count):
                     primary_key = self.login_attributes_list_array[i]
                     local_primary_key = self.local_login_attributes_list_array[i]
-                    logged_in = userService.authenticate(key_value, user_password, primary_key, local_primary_key)
+                    logged_in = authenticationService.authenticate(key_value, user_password, primary_key, local_primary_key)
                     if (logged_in):
                         return True
                     i += 1

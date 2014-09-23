@@ -8,12 +8,12 @@ package org.xdi.oxauth.service;
 
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -42,6 +42,7 @@ import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.util.FileConfiguration;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.util.StringHelper;
@@ -53,9 +54,9 @@ import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Javier Rojas Blum
- * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version 0.1, 10.24.2011
+ * @author Yuriy Zabrovarnyy
+ * @version 0.1, 24/10/2011
  */
 @Scope(ScopeType.APPLICATION)
 @Name("appInitializer")
@@ -76,18 +77,27 @@ public class AppInitializer {
     @In
     private ApplianceService applianceService;
 
+	private FileConfiguration ldapConfig;
+	private List<GluuLdapConfiguration> ldapAuthConfigs;
+
+	private LdapConnectionService connectionProvider;
+	private LdapConnectionService bindConnectionProvider;
+
+	private List<LdapConnectionService> authConnectionProviders;
+	private List<LdapConnectionService> authBindConnectionProviders;
+
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
 
     @Create
-    public void createApplicationComponents() throws ConfigurationException {
-        createConnectionProvider("centralLdapConfiguration", "centralConnectionProvider", "bindCentralConnectionProvider");
+    public void createApplicationComponents() {
+        createConnectionProvider();
         ConfigurationFactory.create();
 
-        GluuLdapConfiguration ldapAuthConfig = loadLdapAuthConfig((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
-        reloadConfigurationImpl(ldapAuthConfig);
+        List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
+        reloadConfigurationImpl(ldapAuthConfigs);
 
-        createAuthConnectionProvider(ldapAuthConfig, "authConnectionProvider", "bindAuthConnectionProvider");
+        createAuthConnectionProviders(ldapAuthConfigs);
         
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
@@ -123,19 +133,26 @@ public class AppInitializer {
 	}
 
 	private void reloadConfiguration() {
-		GluuLdapConfiguration newLdapAuthConfig = loadLdapAuthConfig((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
+		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
 
-		reloadConfigurationImpl(newLdapAuthConfig);
+		reloadConfigurationImpl(newLdapAuthConfigs);
 	}
 
-	private void reloadConfigurationImpl(GluuLdapConfiguration newLdapAuthConfig) {
+	private void reloadConfigurationImpl(List<GluuLdapConfiguration> currLdapAuthConfigs) {
+		List<GluuLdapConfiguration> newLdapAuthConfigs = null;
+		if (currLdapAuthConfigs.size() > 0) {
+			newLdapAuthConfigs = currLdapAuthConfigs;
+		}
+
+		this.ldapAuthConfigs = newLdapAuthConfigs;
+
 		Context applicationContext = Contexts.getApplicationContext();
-        if (newLdapAuthConfig == null) {
+        if (newLdapAuthConfigs == null) {
         	if (applicationContext.isSet(LDAP_AUTH_CONFIG_NAME)) {
         		applicationContext.remove(LDAP_AUTH_CONFIG_NAME);
         	}
         } else {
-        	applicationContext.set(LDAP_AUTH_CONFIG_NAME, newLdapAuthConfig);
+        	applicationContext.set(LDAP_AUTH_CONFIG_NAME, newLdapAuthConfigs);
         }
 	}
 
@@ -160,17 +177,35 @@ public class AppInitializer {
 
     @Factory(value = LDAP_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
     public LdapEntryManager createLdapEntryManager() {
-        LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(getConnectionProvider(), getBindConnectionProvider()));
+        LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
         log.debug("Created {0}: {1}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
         return ldapEntryManager;
     }
 
 	@Factory(value = LDAP_AUTH_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
-	public LdapEntryManager createLdapAuthEntryManager() {
-		LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(getAuthConnectionProvider(), getBindAuthConnectionProvider()));
-        log.debug("Created {0}: {1}", LDAP_AUTH_ENTRY_MANAGER_NAME, ldapEntryManager);
+	public List<LdapEntryManager> createLdapAuthEntryManager() {
+		List<LdapEntryManager> ldapAuthEntryManagers = new ArrayList<LdapEntryManager>();
+		if (this.ldapAuthConfigs == null) {
+			return ldapAuthEntryManagers;
+		}
 
-		return ldapEntryManager;
+		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+			LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(this.authConnectionProviders.get(i), this.authBindConnectionProviders.get(i)));
+	        log.debug("Created {0}#{1}: {2}", LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager);
+	        
+	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
+		}
+
+		return ldapAuthEntryManagers;
+	}
+
+	public LdapEntryManager createLdapAuthEntryManager(GluuLdapConfiguration ldapAuthConfig) {
+    	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
+
+    	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
+	    log.debug("Created custom authentication LdapEntryManager: {0}", ldapAuthEntryManager);
+	        
+		return ldapAuthEntryManager;
 	}
 
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
@@ -194,72 +229,87 @@ public class AppInitializer {
 		return smtpConfiguration;
 	}
 
-    private LdapConnectionService getAuthConnectionProvider() {
-        return (LdapConnectionService) Contexts.getApplicationContext().get("authConnectionProvider");
+    private void createConnectionProvider() {
+        this.ldapConfig =  ConfigurationFactory.getLdapConfiguration();
+
+        Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
+        this.connectionProvider = createConnectionProvider(connectionProperties);
+
+        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
+        this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
     }
 
-    private LdapConnectionService getBindAuthConnectionProvider() {
-        return (LdapConnectionService) Contexts.getApplicationContext().get("bindAuthConnectionProvider");
+    private void createAuthConnectionProviders(List<GluuLdapConfiguration> ldapAuthConfigs) {
+    	List<LdapConnectionService> tmpAuthConnectionProviders = new ArrayList<LdapConnectionService>();
+    	List<LdapConnectionService> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionService>();
+
+    	// Prepare connection providers per LDAP authentication configuration
+        for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
+        	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
+
+	        tmpAuthConnectionProviders.add(ldapConnectionProviders.getConnectionProvider());
+	        tmpAuthBindConnectionProviders.add(ldapConnectionProviders.getConnectionBindProvider());
+    	}
+
+        this.authConnectionProviders = tmpAuthConnectionProviders;
+    	this.authBindConnectionProviders = tmpAuthBindConnectionProviders;
     }
 
-    private LdapConnectionService getConnectionProvider() {
-        return (LdapConnectionService) Contexts.getApplicationContext().get("centralConnectionProvider");
+    public LdapConnectionProviders createAuthConnectionProviders(GluuLdapConfiguration ldapAuthConfig) {
+        Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
+        LdapConnectionService connectionProvider = createConnectionProvider(connectionProperties);
+
+        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
+        LdapConnectionService bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+    	
+        return new LdapConnectionProviders(connectionProvider, bindConnectionProvider);
     }
 
-    private LdapConnectionService getBindConnectionProvider() {
-        return (LdapConnectionService) Contexts.getApplicationContext().get("bindCentralConnectionProvider");
-    }
-
-    private void createConnectionProvider(String configurationComponentName, String connectionProviderComponentName,
-                                          String bindConnectionProviderComponentName) throws ConfigurationException {
+	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration ldapAuthConfig) {
         FileConfiguration configuration = ConfigurationFactory.getLdapConfiguration();
-        Contexts.getApplicationContext().set(configurationComponentName, configuration);
 
-        LdapConnectionService connectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(configuration.getProperties()));
-        Contexts.getApplicationContext().set(connectionProviderComponentName, connectionProvider);
-
-        // TODO: Use own properties with prefix specified in variable 'bindConfigurationComponentName'
-        Properties bindProperties = (Properties) configuration.getProperties().clone();
-        bindProperties.remove("bindDN");
-        bindProperties.remove("bindPassword");
-
-        LdapConnectionService bindCentralConnectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(bindProperties));
-        Contexts.getApplicationContext().set(bindConnectionProviderComponentName, bindCentralConnectionProvider);
-    }
-
-    private void createAuthConnectionProvider(GluuLdapConfiguration ldapAuthConfig, String connectionProviderComponentName,
-                                          String bindConnectionProviderComponentName) throws ConfigurationException {
-        FileConfiguration configuration = ConfigurationFactory.getLdapConfiguration();
-        Properties properties = (Properties) configuration.getProperties().clone();
-        if (ldapAuthConfig != null) {
-            properties.setProperty("servers", buildServersString(ldapAuthConfig.getServers()));
-            
-            String bindDn = ldapAuthConfig.getBindDN();
-            if (StringHelper.isNotEmpty(bindDn)) {
-            	properties.setProperty("bindDN", ldapAuthConfig.getBindDN());
-            }
-    		properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
-    		properties.setProperty("useSSL", Boolean.toString(ldapAuthConfig.isUseSSL()));
-        }
-
-        LdapConnectionService connectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(properties));
-        Contexts.getApplicationContext().set(connectionProviderComponentName, connectionProvider);
-
-        // TODO: Use own properties with prefix specified in variable 'bindConfigurationComponentName'
-        Properties bindProperties = (Properties) properties.clone();
-        bindProperties.remove("bindDN");
-        bindProperties.remove("bindPassword");
-
-        LdapConnectionService bindCentralConnectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(bindProperties));
-		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindCentralConnectionProvider.getCreationResultCode())) {
-			log.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
-			bindCentralConnectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(properties));
+		Properties properties = (Properties) configuration.getProperties().clone();
+		if (ldapAuthConfig != null) {
+		    properties.setProperty("servers", buildServersString(ldapAuthConfig.getServers()));
+		    
+		    String bindDn = ldapAuthConfig.getBindDN();
+		    if (StringHelper.isNotEmpty(bindDn)) {
+		    	properties.setProperty("bindDN", bindDn);
+				properties.setProperty("bindPassword", ldapAuthConfig.getBindPassword());
+		    }
+			properties.setProperty("useSSL", Boolean.toString(ldapAuthConfig.isUseSSL()));
+			properties.setProperty("maxconnections", Integer.toString(ldapAuthConfig.getMaxConnections()));
 		}
 
-		Contexts.getApplicationContext().set(bindConnectionProviderComponentName, bindCentralConnectionProvider);
-    }
+		return properties;
+	}
 
-	private String buildServersString(List<SimpleProperty> servers) {
+    private Properties prepareBindConnectionProperties(Properties connectionProperties) {
+		// TODO: Use own properties with prefix specified in variable 'bindConfigurationComponentName'
+		Properties bindProperties = (Properties) connectionProperties.clone();
+		bindProperties.remove("bindDN");
+		bindProperties.remove("bindPassword");
+
+		return bindProperties;
+	}
+
+	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
+		LdapConnectionService connectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(connectionProperties));
+
+		return connectionProvider;
+	}
+
+	private LdapConnectionService createBindConnectionProvider(Properties bindConnectionProperties, Properties connectionProperties) {
+		LdapConnectionService bindConnectionProvider = createConnectionProvider(bindConnectionProperties);
+		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindConnectionProvider.getCreationResultCode())) {
+			log.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
+			bindConnectionProvider = createConnectionProvider(connectionProperties);
+		}
+		
+		return bindConnectionProvider;
+	}
+
+	private String buildServersString(List<?> servers) {
 		StringBuilder sb = new StringBuilder();
 
 		if (servers == null) {
@@ -267,20 +317,24 @@ public class AppInitializer {
 		}
 		
 		boolean first = true;
-		for (SimpleProperty server : servers) {
+		for (Object server : servers) {
 			if (first) {
 				first = false;
 			} else {
 				sb.append(",");
 			}
 
-			sb.append(server.getValue());
+			if (server instanceof SimpleProperty) {
+				sb.append(((SimpleProperty) server).getValue());
+			} else {
+				sb.append(server);
+			}
 		}
 
 		return sb.toString();
 	}
 
-	public oxIDPAuthConf loadLdapIdpAuthConfig(LdapEntryManager localLdapEntryManager) {
+	public List<oxIDPAuthConf> loadLdapIdpAuthConfigs(LdapEntryManager localLdapEntryManager) {
 		String baseDn = ConfigurationFactory.getBaseDn().getAppliance();
 		String applianceInum = ConfigurationFactory.getConfiguration().getApplianceInum();
 		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
@@ -301,20 +355,20 @@ public class AppInitializer {
 			return null;
 		}
 
+		List<oxIDPAuthConf> configurations = new ArrayList<oxIDPAuthConf>();
 		for (String configurationJson : appliance.getOxIDPAuthentication()) {
-			oxIDPAuthConf configuration = null;
 
 			try {
-				configuration = (oxIDPAuthConf) jsonToObject(configurationJson, oxIDPAuthConf.class);
+				oxIDPAuthConf configuration = (oxIDPAuthConf) jsonToObject(configurationJson, oxIDPAuthConf.class);
 				if (configuration.getType().equalsIgnoreCase("ldap") || configuration.getType().equalsIgnoreCase("auth")) {
-					return configuration;
+					configurations.add(configuration);
 				}
 			} catch (Exception ex) {
 				log.error("Failed to create object by json: '{0}'", ex, configurationJson);
 			}
 		}
 
-		return null;
+		return configurations;
 	}
 
 	public GluuLdapConfiguration loadLdapAuthConfig(oxIDPAuthConf configuration) {
@@ -335,8 +389,22 @@ public class AppInitializer {
 		return null;
 	}
 
-	public GluuLdapConfiguration loadLdapAuthConfig(LdapEntryManager localLdapEntryManager) {
-		return (loadLdapAuthConfig(loadLdapIdpAuthConfig(localLdapEntryManager)));
+	public List<GluuLdapConfiguration> loadLdapAuthConfigs(LdapEntryManager localLdapEntryManager) {
+		List<GluuLdapConfiguration> ldapAuthConfigs = new ArrayList<GluuLdapConfiguration>();
+
+		List<oxIDPAuthConf> ldapIdpAuthConfigs = loadLdapIdpAuthConfigs(localLdapEntryManager);
+		if (ldapIdpAuthConfigs == null) {
+			return ldapAuthConfigs;
+		}
+
+		for (oxIDPAuthConf ldapIdpAuthConfig : ldapIdpAuthConfigs) {
+			GluuLdapConfiguration ldapAuthConfig = loadLdapAuthConfig(ldapIdpAuthConfig);
+			if (ldapAuthConfig != null) {
+				ldapAuthConfigs.add(ldapAuthConfig);
+			}
+		}
+		
+		return ldapAuthConfigs; 
 	}
 
 	@Deprecated
@@ -363,6 +431,29 @@ public class AppInitializer {
 		Object clazzObject = mapper.readValue(json, clazz);
 
 		return clazzObject;
+	}
+
+    public static AppInitializer instance() {
+        return ServerUtil.instance(AppInitializer.class);
+    }
+
+	private class LdapConnectionProviders {
+		private LdapConnectionService connectionProvider;
+		private LdapConnectionService connectionBindProvider;
+
+		public LdapConnectionProviders(LdapConnectionService connectionProvider, LdapConnectionService connectionBindProvider) {
+			this.connectionProvider = connectionProvider;
+			this.connectionBindProvider = connectionBindProvider;
+		}
+
+		public LdapConnectionService getConnectionProvider() {
+			return connectionProvider;
+		}
+
+		public LdapConnectionService getConnectionBindProvider() {
+			return connectionBindProvider;
+		}
+
 	}
 
 }
