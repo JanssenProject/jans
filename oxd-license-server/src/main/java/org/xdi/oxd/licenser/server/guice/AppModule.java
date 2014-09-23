@@ -3,6 +3,7 @@ package org.xdi.oxd.licenser.server.guice;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.apache.commons.io.IOUtils;
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -20,6 +21,8 @@ import org.xdi.util.Util;
 import org.xdi.util.properties.FileConfiguration;
 import org.xdi.util.security.PropertiesDecrypter;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -54,13 +57,21 @@ public class AppModule extends AbstractModule {
     @Provides
     @Singleton
     public JsonFileConfiguration provideJsonConfiguration() {
+        InputStream stream = null;
         try {
             LOG.info("Configuration file location: {}", getConfigFileLocation());
-            final InputStream stream = Configuration.class.getClassLoader().getResourceAsStream(getConfigFileLocation());
+            final File configFile = new File(getConfigFileLocation());
+            if (configFile.exists()) {
+                stream = new FileInputStream(configFile);
+            } else {
+                LOG.error("No configuration file. Fail to start! Location: " + getConfigFileLocation());
+            }
             return Util.createJsonMapper().readValue(stream, JsonFileConfiguration.class);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
+        } finally {
+            IOUtils.closeQuietly(stream);
         }
     }
 

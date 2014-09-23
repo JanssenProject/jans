@@ -7,7 +7,7 @@
         >
 
     <g:DockLayoutPanel ui:field="rootPanel" addStyleNames="detailsView">
-        <g:north size='46'>
+        <g:north size='56'>
             <g:HTMLPanel>
                 <h2>License Management</h2>
             </g:HTMLPanel>
@@ -23,7 +23,7 @@
         <g:center>
             <cellview:CellTable ui:field="table" width="100%"/>
         </g:center>
-        <g:east size="200">
+        <g:east size="400">
             <a:DetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>
