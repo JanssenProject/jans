@@ -204,8 +204,6 @@ public class StringEncrypter {
 			return StringEncrypter.bytes2String(ciphertext);
 		} catch (final Exception e) {
 			throw new EncryptionException(e);
-		} finally {
-			lock.unlock();
 		}
 	}
 	/**
