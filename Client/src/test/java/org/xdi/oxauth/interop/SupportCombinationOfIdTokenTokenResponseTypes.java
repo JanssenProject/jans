@@ -59,7 +59,6 @@ public class SupportCombinationOfIdTokenTokenResponseTypes extends BaseTest {
         assertNotNull(registerResponse.getClientIdIssuedAt());
 
         String clientId = registerResponse.getClientId();
-        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
 
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
