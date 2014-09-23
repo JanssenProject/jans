@@ -35,10 +35,12 @@ import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
+import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
+import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.util.FileConfiguration;
@@ -46,7 +48,6 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.util.StringHelper;
-import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
@@ -66,10 +67,10 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public  static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
+    public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
-    public  static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
-    public  static final String LDAP_AUTH_ENTRY_MANAGER_NAME = "ldapAuthEntryManager";
+    public static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
+    public static final String LDAP_AUTH_ENTRY_MANAGER_NAME = "ldapAuthEntryManager";
 
     @Logger
     private Log log;
@@ -91,7 +92,9 @@ public class AppInitializer {
 
     @Create
     public void createApplicationComponents() {
-        createConnectionProvider();
+    	createStringEncrypter();
+
+    	createConnectionProvider();
         ConfigurationFactory.create();
 
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
@@ -102,6 +105,24 @@ public class AppInitializer {
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
     }
+
+	private void createStringEncrypter() {
+		Configuration conf = ConfigurationFactory.loadConfFromFile();
+    	String encodeSalt = conf.getEncodeSalt();
+    	
+    	if (StringHelper.isEmpty(encodeSalt)) {
+    		throw new ConfigurationException("Encode salt isn't defined in oxauth-config.xml");
+    	}
+    	
+    	try {
+    		StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
+
+    		Context applicationContext = Contexts.getApplicationContext();
+			applicationContext.set("stringEncrypter", stringEncrypter);
+		} catch (EncryptionException ex) {
+    		throw new ConfigurationException("Failed to create StringEncrypter instance");
+		}
+	}
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
@@ -220,7 +241,8 @@ public class AppInitializer {
 		String password = smtpConfiguration.getPassword();
 		if (StringHelper.isNotEmpty(password)) {
 			try {
-				smtpConfiguration.setPasswordDecrypted(StringEncrypter.defaultInstance().decrypt(password));
+				EncryptionService securityService = EncryptionService.instance();
+				smtpConfiguration.setPasswordDecrypted(securityService.decrypt(password));
 			} catch (EncryptionException ex) {
 				log.error("Failed to decript SMTP user password", ex);
 			}
@@ -294,7 +316,8 @@ public class AppInitializer {
 	}
 
 	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
-		LdapConnectionService connectionProvider = new LdapConnectionService(PropertiesDecrypter.decryptProperties(connectionProperties));
+		EncryptionService securityService = EncryptionService.instance();
+		LdapConnectionService connectionProvider = new LdapConnectionService(securityService.decryptProperties(connectionProperties));
 
 		return connectionProvider;
 	}

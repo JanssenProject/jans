@@ -125,6 +125,8 @@ public class Configuration {
     private String jsLocation;
     private String imgLocation;
 
+    private String encodeSalt;
+
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
         return umaKeepClientDuringResourceSetRegistration;
@@ -1130,4 +1132,16 @@ public class Configuration {
     public void setImgLocation(String imgLocation) {
     	this.imgLocation = imgLocation;
     }
+
+    @XmlElement(name = "encode-salt")
+    @JsonIgnore
+	public String getEncodeSalt() {
+		return encodeSalt;
+	}
+
+	public void setEncodeSalt(String encodeSalt) {
+		this.encodeSalt = encodeSalt;
+	}
+    
+    
 }

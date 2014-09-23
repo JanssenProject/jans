@@ -41,7 +41,7 @@ public class Manual {
     @BeforeClass
     public void init() {
         final FileConfiguration fileConfiguration = new FileConfiguration(LDAP_FILE_PATH);
-        final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties());
+        final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties(), "passoword");
         final LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(props);
         MANAGER = new LdapEntryManager(new OperationsFacade(connectionProvider));
     }

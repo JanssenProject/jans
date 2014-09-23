@@ -266,7 +266,7 @@ public class ConfigurationFactory {
         }
     }
 
-    private static Configuration loadConfFromFile() {
+    public static Configuration loadConfFromFile() {
         try {
             final JAXBContext jc = JAXBContext.newInstance(Configuration.class);
             final Unmarshaller u = jc.createUnmarshaller();
