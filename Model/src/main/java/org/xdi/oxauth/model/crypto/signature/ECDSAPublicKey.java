@@ -22,7 +22,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 /**
  * The Public Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version 0.9, 09/23/2014
  */
 public class ECDSAPublicKey extends PublicKey {
 
@@ -73,8 +74,8 @@ public class ECDSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put(MODULUS, JSONObject.NULL);
-        jsonObject.put(EXPONENT, JSONObject.NULL);
+        jsonObject.put("modulus", JSONObject.NULL);
+        jsonObject.put("exponent", JSONObject.NULL);
         jsonObject.put(X, JwtUtil.base64urlencode(x.toByteArray()));
         jsonObject.put(Y, JwtUtil.base64urlencode(y.toByteArray()));
 
