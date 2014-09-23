@@ -40,6 +40,10 @@ public class EncryptionService {
         return stringEncrypter.decrypt(encryptedString);
     }
 
+	public String encrypt(String unencryptedString) throws EncryptionException {
+        return stringEncrypter.encrypt(unencryptedString);
+	}
+
 	public Properties decryptProperties(Properties connectionProperties) {
 		return PropertiesDecrypter.decryptProperties(stringEncrypter, connectionProperties);
 	}

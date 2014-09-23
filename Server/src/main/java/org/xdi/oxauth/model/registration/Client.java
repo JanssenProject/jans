@@ -24,6 +24,7 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
+import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
 import org.xdi.util.security.StringEncrypter;
@@ -209,7 +210,7 @@ public class Client {
      * @return The client secret.
      */
     public String getClientSecret() throws StringEncrypter.EncryptionException {
-        return StringEncrypter.defaultInstance().decrypt(encodedClientSecret);
+        return EncryptionService.instance().decrypt(encodedClientSecret);
     }
 
     /**
@@ -218,7 +219,7 @@ public class Client {
      * @param clientSecret The client secret.
      */
     public void setClientSecret(String clientSecret) throws StringEncrypter.EncryptionException {
-        encodedClientSecret = StringEncrypter.defaultInstance().encrypt(clientSecret);
+        encodedClientSecret = EncryptionService.instance().encrypt(clientSecret);
     }
 
     /**

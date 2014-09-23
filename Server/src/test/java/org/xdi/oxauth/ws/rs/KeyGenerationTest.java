@@ -9,6 +9,7 @@ package org.xdi.oxauth.ws.rs;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.util.security.StringEncrypter;
 
 /**
@@ -21,7 +22,7 @@ public class KeyGenerationTest extends BaseTest {
     public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
         showTitle("TEST: encryptLdapPassword");
 
-        String password = StringEncrypter.defaultInstance().encrypt(ldapAdminPassword);
+        String password = EncryptionService.instance().encrypt(ldapAdminPassword);
         System.out.println("Encrypted LDAP Password: " + password);
     }
 }
