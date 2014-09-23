@@ -1,5 +1,7 @@
 package org.xdi.util.security;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,25 +26,22 @@ public class StringEncrypter {
 
 	private static final Logger log = Logger.getLogger(StringEncrypter.class);
 	private final ReentrantLock lock = new ReentrantLock();
-	
-	private static String encodeSalt;
 
 	// lazy init via static holder
-    private static class Holder {
-        static final StringEncrypter instance = createInstance();
+	private static class Holder {
+		static final StringEncrypter instance = createInstance();
 
-        private static StringEncrypter createInstance() {
-            try {
-                return new StringEncrypter(StringEncrypter.DESEDE_ENCRYPTION_SCHEME);
-            } catch (EncryptionException e) {
-                log.error("Failed to create default StringEncrypter instance", e);
-                return null;
-            }
-        }
-    }
+		private static StringEncrypter createInstance() {
+			try {
+				return new StringEncrypter(StringEncrypter.DESEDE_ENCRYPTION_SCHEME);
+			} catch (EncryptionException e) {
+				log.error("Failed to create default StringEncrypter instance", e);
+				return null;
+			}
+		}
+	}
 
 	public static StringEncrypter defaultInstance() throws EncryptionException {
-		StringEncrypter.encodeSalt = encodeSalt;
 		return Holder.instance;
 	}
 
@@ -113,18 +112,31 @@ public class StringEncrypter {
 	 */
 	private SecretKeyFactory keyFactory;
 
+	/**
+	 * Key spec being used
+	 */
+	private KeySpec keySpec;
 
 	private Base64 base64 = new Base64();
 
 	/**
-	 * Constructor specifying encryption scheme, using default key
+	 * Constructor specifying scheme and key
 	 * 
 	 * @param encryptionScheme
 	 *            Encryption scheme to use
+	 * @param encryptionKey
+	 *            Encryption key to use
 	 * @throws EncryptionException
 	 */
 	public StringEncrypter(final String encryptionScheme) throws EncryptionException {
-		this(encryptionScheme, StringEncrypter.DEFAULT_ENCRYPTION_KEY);
+		try {
+			keyFactory = SecretKeyFactory.getInstance(encryptionScheme);
+			cipher = Cipher.getInstance(encryptionScheme);
+		} catch (final NoSuchAlgorithmException e) {
+			throw new EncryptionException(e);
+		} catch (final NoSuchPaddingException e) {
+			throw new EncryptionException(e);
+		}
 	}
 
 	/**
@@ -137,7 +149,6 @@ public class StringEncrypter {
 	 * @throws EncryptionException
 	 */
 	public StringEncrypter(final String encryptionScheme, final String encryptionKey) throws EncryptionException {
-
 		if (encryptionKey == null) {
 			throw new IllegalArgumentException("encryption key was null");
 		}
@@ -146,15 +157,60 @@ public class StringEncrypter {
 		}
 
 		try {
+			final byte[] keyAsBytes = encryptionKey.getBytes(StringEncrypter.UNICODE_FORMAT);
+
+			if (encryptionScheme.equalsIgnoreCase(StringEncrypter.DESEDE_ENCRYPTION_SCHEME)) {
+				keySpec = new DESedeKeySpec(keyAsBytes);
+			} else if (encryptionScheme.equalsIgnoreCase(StringEncrypter.DES_ENCRYPTION_SCHEME)) {
+				keySpec = new DESKeySpec(keyAsBytes);
+			} else {
+				throw new IllegalArgumentException("Encryption scheme not supported: " + encryptionScheme);
+			}
+
 			keyFactory = SecretKeyFactory.getInstance(encryptionScheme);
 			cipher = Cipher.getInstance(encryptionScheme);
-
+		} catch (final InvalidKeyException e) {
+			throw new EncryptionException(e);
+		} catch (final UnsupportedEncodingException e) {
+			throw new EncryptionException(e);
 		} catch (final NoSuchAlgorithmException e) {
 			throw new EncryptionException(e);
 		} catch (final NoSuchPaddingException e) {
 			throw new EncryptionException(e);
 		}
+	}
 
+	/**
+	 * Decrypt a string encrypted with this encrypter
+	 * 
+	 * @param encryptedString
+	 *            Encrypted string
+	 * @return Decrypted string
+	 * @throws EncryptionException
+	 */
+	public String decrypt(final String encryptedString) throws EncryptionException {
+		if (keySpec == null) {
+			throw new IllegalArgumentException("keySpec was null or empty");
+		}
+
+		if ((encryptedString == null) || (encryptedString.trim().length() <= 0)) {
+			throw new IllegalArgumentException("encrypted string was null or empty");
+		}
+
+		lock.lock();
+		try {
+			final SecretKey key = keyFactory.generateSecret(keySpec);
+			cipher.init(Cipher.DECRYPT_MODE, key);
+
+			final byte[] cleartext = base64.decode(encryptedString.getBytes(Util.UTF8));
+			final byte[] ciphertext = cipher.doFinal(cleartext);
+
+			return StringEncrypter.bytes2String(ciphertext);
+		} catch (final Exception e) {
+			throw new EncryptionException(e);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
@@ -205,6 +261,38 @@ public class StringEncrypter {
 	 * @return Encrypted string (using scheme and key specified at construction)
 	 * @throws EncryptionException
 	 */
+	public String encrypt(final String unencryptedString) throws EncryptionException {
+		if (keySpec == null) {
+			throw new IllegalArgumentException("keySpec was null or empty");
+		}
+
+		if ((unencryptedString == null) || (unencryptedString.trim().length() == 0)) {
+			throw new IllegalArgumentException("unencrypted string was null or empty");
+		}
+
+		lock.lock();
+		try {
+			final SecretKey key = keyFactory.generateSecret(keySpec);
+			cipher.init(Cipher.ENCRYPT_MODE, key);
+			final byte[] cleartext = unencryptedString.getBytes(StringEncrypter.UNICODE_FORMAT);
+			final byte[] ciphertext = cipher.doFinal(cleartext);
+
+			return new String(base64.encode(ciphertext), Util.UTF8);
+		} catch (final Exception e) {
+			throw new EncryptionException(e);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	/**
+	 * Encrypt a string
+	 * 
+	 * @param unencryptedString
+	 *            String to encrypt
+	 * @return Encrypted string (using scheme and key specified at construction)
+	 * @throws EncryptionException
+	 */
 	public String encrypt(final String unencryptedString, String encryptionKey) throws EncryptionException {
 		if ((unencryptedString == null) || (unencryptedString.trim().length() == 0)) {
 			throw new IllegalArgumentException("unencrypted string was null or empty");
@@ -222,12 +310,10 @@ public class StringEncrypter {
 			} else {
 				throw new IllegalArgumentException("Encryption scheme not supported: " + encryptionScheme);
 			}
-			
-			
+
 			final SecretKey key = keyFactory.generateSecret(keySpec);
 			cipher.init(Cipher.ENCRYPT_MODE, key);
-			final byte[] cleartext = unencryptedString
-					.getBytes(StringEncrypter.UNICODE_FORMAT);
+			final byte[] cleartext = unencryptedString.getBytes(StringEncrypter.UNICODE_FORMAT);
 			final byte[] ciphertext = cipher.doFinal(cleartext);
 
 			return new String(base64.encode(ciphertext), Util.UTF8);
