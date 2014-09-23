@@ -18,7 +18,7 @@ public class PropertiesDecrypter {
 
 	public static final String bindPassword = "bindPassword";
 
-	public static Properties decryptProperties(Properties properties) {
+	public static Properties decryptProperties(Properties properties, String encryptionKey) {
 		if (properties == null) {
 			return properties;
 		}
@@ -31,7 +31,7 @@ public class PropertiesDecrypter {
 		}
 
 		try {
-			clondedProperties.put(PropertiesDecrypter.bindPassword, StringEncrypter.defaultInstance().decrypt(properties.getProperty(PropertiesDecrypter.bindPassword)));
+			clondedProperties.put(PropertiesDecrypter.bindPassword, StringEncrypter.defaultInstance().decrypt(properties.getProperty(PropertiesDecrypter.bindPassword), encryptionKey));
 		} catch (EncryptionException ex) {
 			log.error(String.format("Failed to decript '%s' property", PropertiesDecrypter.bindPassword), ex);
 		}
@@ -39,7 +39,7 @@ public class PropertiesDecrypter {
 		return clondedProperties;
 	}
 
-	public static String decryptProperty(String encryptedValue, boolean returnSource) {
+	public static String decryptProperty(String encryptedValue, boolean returnSource, String encryptionKey) {
 		if (encryptedValue == null) {
 			return encryptedValue;
 		}
@@ -52,7 +52,7 @@ public class PropertiesDecrypter {
 		}
 
 		try {
-			resultValue = StringEncrypter.defaultInstance().decrypt(encryptedValue);
+			resultValue = StringEncrypter.defaultInstance().decrypt(encryptedValue, encryptionKey);
 		} catch (Exception ex) {
 			if (!returnSource) {
 				log.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));

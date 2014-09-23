@@ -351,4 +351,8 @@ public final class ApplicationConfigurationFile {
 	public String getJsLocation() {
 		return applicationConfiguration.getString("jsLocation");
 	}
+	
+	public String getEncodeSalt(){
+		return applicationConfiguration.getString("encode_salt");
+	}
 }

@@ -6,7 +6,6 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.FailoverServerSet;
