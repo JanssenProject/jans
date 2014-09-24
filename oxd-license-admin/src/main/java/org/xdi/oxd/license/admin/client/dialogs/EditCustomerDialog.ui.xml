@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui='urn:ui:com.google.gwt.uibinder'
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        >
+
+    <g:DialogBox ui:field="dialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog">
+        <g:VerticalPanel>
+            <g:HTMLPanel>
+                <h2><g:HTML ui:field="title"/></h2>
+            </g:HTMLPanel>
+            <g:HTML>
+                <h4>Name:</h4>
+            </g:HTML>
+            <g:TextBox ui:field="nameField"/>
+            <br/>
+            <g:Button ui:field="generateButton">Generate keys and passwords</g:Button>
+            <g:HTML>
+                <h4>Private key:</h4>
+            </g:HTML>
+            <g:HTML ui:field="privateKey"/>
+            <g:HTML>
+                <h4>Public key:</h4>
+            </g:HTML>
+            <g:HTML ui:field="publicKey"/>
+            <g:HorizontalPanel>
+                <g:Button ui:field="okButton">OK</g:Button>
+                <g:Button ui:field="closeButton">Close</g:Button>
+            </g:HorizontalPanel>
+        </g:VerticalPanel>
+    </g:DialogBox>
+</ui:UiBinder>
+

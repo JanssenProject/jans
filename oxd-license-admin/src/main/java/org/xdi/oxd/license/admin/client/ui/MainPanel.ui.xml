@@ -23,7 +23,7 @@
         <g:center>
             <cellview:CellTable ui:field="table" width="100%"/>
         </g:center>
-        <g:east size="400">
+        <g:east size="500">
             <a:DetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>

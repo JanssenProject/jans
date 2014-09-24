@@ -1,5 +1,6 @@
 package org.xdi.oxd.license.admin.server;
 
+import com.google.common.collect.Lists;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,7 +23,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 
     @Override
     public List<Customer> getCustomers() {
-        return null;
+        return Lists.newArrayList();
     }
 
     @Override
