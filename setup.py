@@ -703,7 +703,7 @@ class Setup(object):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
         self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
-        f = open("%s/conf/salt", 'w')
+        f = open("%s/conf/salt" % self.tomcatHome, 'w')
         f.write(self.encode_salt)
         f.close()
 
