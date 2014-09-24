@@ -46,7 +46,7 @@ class Setup(object):
         self.savedProperties = "./setup.properties.last"
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
-        self.tomat_user_home_lib = "/home/tomcat/lib"
+        self.tomcat_user_home_lib = "/home/tomcat/lib"
 
         self.hostname = None
         self.ip = None
@@ -415,23 +415,23 @@ class Setup(object):
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
         self.copyFile("static/oxauth/java.security", "/usr/java/latest/jre/lib/security")
-        self.copyFile("static/oxauth/lib/oxauth.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/bcprov-jdk16-1.46.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/commons-codec-1.5.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/commons-lang-2.6.jar", self.tomat_user_home_lib)
-        self.copyFile("static/oxauth/lib/log4j-1.2.14.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/oxauth.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/bcprov-jdk16-1.46.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-codec-1.5.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-lang-2.6.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/log4j-1.2.14.jar", self.tomcat_user_home_lib)
 
         self.change_ownership()
 
-        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.tomat_user_home_lib,
-                       '%s/commons-lang-2.6.jar' % self.tomat_user_home_lib,
-                       '%s/log4j-1.2.14.jar' % self.tomat_user_home_lib,
-                       '%s/commons-codec-1.5.jar' % self.tomat_user_home_lib,
-                       '%s/jettison-1.3.jar' % self.tomat_user_home_lib,
-                       '%s/oxauth-model.jar' % self.tomat_user_home_lib,
-                       '%s/oxauth.jar' % self.tomat_user_home_lib]
+        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.tomcat_user_home_lib,
+                       '%s/commons-lang-2.6.jar' % self.tomcat_user_home_lib,
+                       '%s/log4j-1.2.14.jar' % self.tomcat_user_home_lib,
+                       '%s/commons-codec-1.5.jar' % self.tomcat_user_home_lib,
+                       '%s/jettison-1.3.jar' % self.tomcat_user_home_lib,
+                       '%s/oxauth-model.jar' % self.tomcat_user_home_lib,
+                       '%s/oxauth.jar' % self.tomcat_user_home_lib]
 
         cmd = " ".join(["/usr/java/latest/bin/java",
                         "-cp",
@@ -809,8 +809,8 @@ class Setup(object):
                 os.makedirs(self.gluuOptFolder)
             if not os.path.exists(self.gluuOptBinFolder):
                 os.makedirs(self.gluuOptBinFolder)
-            if not os.path.exists(self.tomat_user_home_lib):
-                os.makedirs(self.tomat_user_home_lib)
+            if not os.path.exists(self.tomcat_user_home_lib):
+                os.makedirs(self.tomcat_user_home_lib)
             if not os.path.exists(self.configFolder):
                 os.makedirs(self.configFolder)
             if not os.path.exists(self.certFolder):
