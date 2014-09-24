@@ -204,7 +204,7 @@ class Setup(object):
     def run(self, args):
         self.logIt('Running: %s' % ' '.join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
             if output:
                 self.logIt(output)
