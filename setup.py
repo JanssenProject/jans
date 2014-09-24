@@ -420,10 +420,11 @@ class Setup(object):
                        '%s/log4j-1.2.14.jar' % self.oxauth_lib,
                        '%s/commons-codec-1.5.jar' % self.oxauth_lib,
                        '%s/jettison-1.3.jar' % self.gluuOptBinLibFolder,
-                       '%s/oxauth-model.jar' % self.gluuOptBinLibFolder]
+                       '%s/oxauth-model.jar' % self.gluuOptBinLibFolder,
+                       '%s/oxauth.jar' % self.gluuOptBinLibFolder]
         args = ["/usr/java/latest/bin/java",
                 "-cp",
-                "%s/oxauth.jar:%s" % (self.gluuOptBinLibFolder, ":".join(requiredJars)),
+                ":".join(requiredJars),
                 "org.xdi.oxauth.util.KeyGenerator"]
         self.logIt("Runnning: %s" % " ".join(args))
         try:
