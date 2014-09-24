@@ -888,7 +888,8 @@ if __name__ == '__main__':
     noPrompt = False
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
-    print "\nInstalling Gluu Server...\nSee %s for setup log.\nSee %s for error log.\n\n" % (installObject.log, installObject.logError)
+    print "\nInstalling Gluu Server...\nFor more info see:\n  %s  \n  %s.\n" % (installObject.log, installObject.logError)
+    print "Password contained in %s. Remove or Encyrpt post installation. \n\n" % (installObject.log, installObject.logError)
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
