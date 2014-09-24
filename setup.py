@@ -432,7 +432,6 @@ class Setup(object):
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
-            self.change_ownership()
             if err:
                 self.logIt(err, True)
             if output:
@@ -441,6 +440,7 @@ class Setup(object):
                 f.write(output)
                 f.close()
                 self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
+            self.change_ownership()
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
