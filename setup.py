@@ -428,7 +428,7 @@ class Setup(object):
                 "org.xdi.oxauth.util.KeyGenerator"]
         self.logIt("Runnning: %s" % " ".join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
             self.change_ownership()
             if err:
