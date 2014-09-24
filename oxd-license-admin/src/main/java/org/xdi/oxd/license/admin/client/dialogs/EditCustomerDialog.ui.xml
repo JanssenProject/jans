@@ -4,7 +4,7 @@
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
         >
 
-    <g:DialogBox ui:field="dialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog">
+    <g:DialogBox ui:field="dialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog" width="700px">
         <g:VerticalPanel>
             <g:HTMLPanel>
                 <h2><g:HTML ui:field="title"/></h2>

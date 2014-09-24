@@ -43,7 +43,7 @@ public class EditCustomerDialog implements IsWidget {
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                dialog.hide(true);
+                dialog.hide();
             }
         });
         okButton.addClickHandler(new ClickHandler() {
@@ -58,6 +58,7 @@ public class EditCustomerDialog implements IsWidget {
         Admin.getService().create(new Customer(), new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
+                dialog.hide();
                 EditCustomerDialog.this.onSuccess();
             }
         });
