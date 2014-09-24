@@ -16,4 +16,6 @@ public interface AdminService extends RemoteService {
     public List<Customer> getCustomers();
 
     public void save(Customer customer);
+
+    public void create(Customer customer);
 }

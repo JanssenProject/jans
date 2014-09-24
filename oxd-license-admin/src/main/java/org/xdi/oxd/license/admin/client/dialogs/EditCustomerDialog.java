@@ -11,6 +11,9 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import org.xdi.oxd.license.admin.client.Admin;
+import org.xdi.oxd.license.admin.client.SuccessCallback;
+import org.xdi.oxd.license.admin.shared.Customer;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,6 +46,25 @@ public class EditCustomerDialog implements IsWidget {
                 dialog.hide(true);
             }
         });
+        okButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                onOkClick();
+            }
+        });
+    }
+
+    private void onOkClick() {
+        Admin.getService().create(new Customer(), new SuccessCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                EditCustomerDialog.this.onSuccess();
+            }
+        });
+    }
+
+    public void onSuccess() {
+
     }
 
     public void setTitle(String title) {

@@ -13,7 +13,9 @@
                 <h4>Name:</h4>
             </g:HTML>
             <g:TextBox ui:field="nameField"/>
-            <br/>
+            <g:HTMLPanel>
+                <br/>
+            </g:HTMLPanel>
             <g:Button ui:field="generateButton">Generate keys and passwords</g:Button>
             <g:HTML>
                 <h4>Private key:</h4>

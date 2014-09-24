@@ -9,4 +9,6 @@ public interface AdminServiceAsync {
     void getCustomers(AsyncCallback<List<Customer>> async);
 
     void save(Customer customer, AsyncCallback<Void> async);
+
+    void create(Customer customer, AsyncCallback<Void> async);
 }

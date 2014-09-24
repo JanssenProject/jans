@@ -5,7 +5,8 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.i18n.CldrLocales"/>
     <inherits name="com.google.gwt.i18n.I18N"/>
-    <inherits name='com.google.gwt.user.theme.dark.Dark'/>
+    <!--<inherits name='com.google.gwt.user.theme.dark.Dark'/>-->
+    <inherits name='com.google.gwt.user.theme.chrome.Chrome'/>
 
     <set-property name="gwt.logging.logLevel" value="FINE"/>      
     <set-property name="gwt.logging.enabled" value="TRUE"/>
