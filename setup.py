@@ -435,7 +435,7 @@ class Setup(object):
             self.change_ownership()
             if err:
                 self.logIt(err, True)
-            else:
+            if output:
                 openid_key_json_fn = "%s/conf/oxauth-web-keys.json" % self.tomcatHome
                 f = open(openid_key_json_fn, 'w')
                 f.write(output)
@@ -737,7 +737,7 @@ class Setup(object):
             self.logIt("Attempting to start tomcat")
             i = 0
             wait_time = 5
-            print "Giving LDAP %i seconds to perform imports" % wait_time
+            print "\n\nGiving LDAP %i seconds to perform imports" % wait_time
             while i < wait_time:
                 time.sleep(1)
                 print ".",
