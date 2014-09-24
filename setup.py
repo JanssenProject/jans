@@ -418,11 +418,17 @@ class Setup(object):
         self.copyFile("static/oxauth/lib/oxauth.jar", self.tomat_user_home_lib)
         self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomat_user_home_lib)
         self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/bcprov-jdk16-1.46.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-codec-1.5.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-lang-2.6.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/log4j-1.2.14.jar", self.tomat_user_home_lib)
 
-        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.oxauth_lib,
-                       '%s/commons-lang-2.6.jar' % self.oxauth_lib,
-                       '%s/log4j-1.2.14.jar' % self.oxauth_lib,
-                       '%s/commons-codec-1.5.jar' % self.oxauth_lib,
+        self.change_ownership()
+
+        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.tomat_user_home_lib,
+                       '%s/commons-lang-2.6.jar' % self.tomat_user_home_lib,
+                       '%s/log4j-1.2.14.jar' % self.tomat_user_home_lib,
+                       '%s/commons-codec-1.5.jar' % self.tomat_user_home_lib,
                        '%s/jettison-1.3.jar' % self.tomat_user_home_lib,
                        '%s/oxauth-model.jar' % self.tomat_user_home_lib,
                        '%s/oxauth.jar' % self.tomat_user_home_lib]
@@ -445,7 +451,6 @@ class Setup(object):
                 f.write(output)
                 f.close()
                 self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
-            self.change_ownership()
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
