@@ -46,6 +46,7 @@ class Setup(object):
         self.savedProperties = "./setup.properties.last"
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
+        self.gluuOptBinLibFolder = "/opt/gluu/bin/lib"
 
         self.hostname = None
         self.ip = None
@@ -77,13 +78,15 @@ class Setup(object):
         self.certFolder = '/etc/certs'
         self.gluuHome = '/opt/gluu'
         self.oxauth_error_json = 'static/oxauth/oxauth-errors.json'
-
+        self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
         self.httpdCertFn = '%s/httpd.crt' % self.certFolder
         self.shibJksPass = None
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
+        self.asimbaJksPass = None
+        self.asimbaJksFn = '%s/shibIDP.jks' % self.certFolder
         self.tomcatJksPass = None
         self.tomcatJksFn = '%s/tomcat.jks' % self.certFolder
 
@@ -286,6 +289,8 @@ class Setup(object):
             self.ldapPass = self.getPW()
         if not self.shibJksPass:
             self.shibJksPass = self.getPW()
+        if not self.asimbaJksPass:
+            self.asimbaJksPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -407,23 +412,60 @@ class Setup(object):
                   '-noprompt'
         ])
 
+    def gen_openid_keys(self):
+        self.copyFile("static/oxauth/java.security", "/usr/java/latest/jre/lib/security")
+        self.copyFile("static/oxauth/oxauth.jar", self.gluuOptBinFolder)
+        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.oxauth_lib,
+                       '%s/commons-lang-2.6.jar' % self.oxauth_lib,
+                       '%s/log4j-1.2.14.jar' % self.oxauth_lib,
+                       '%s/commons-codec-1.5.jar' % self.oxauth_lib,
+                       '%s/jettison-1.3.jar' % self.gluuOptBinLibFolder,
+                       '%s/oxauth-model.jar' % self.gluuOptBinLibFolder]
+        args = ["/usr/java/latest/java",
+                "-cp",
+                "%s/oxauth.jar:%s" % (self.gluuOptBinLibFolder, ":".join(requiredJars)),
+                "org.xdi.oxauth.util.KeyGenerator"]
+        self.logIt("Runnning: %s" % " ".join(args))
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE)
+            output, err = p.communicate()
+            self.change_ownership()
+            if err:
+                self.logIt(err, True)
+            else:
+                openid_key_json_fn = "%s/conf/oxauth-web-keys.json" % self.tomcatHome
+                f = open(openid_key_json_fn, 'w')
+                f.write(output)
+                f.close()
+                self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
+        except:
+            self.logIt("Error running command : %s" % " ".join(args), True)
+            self.logIt(traceback.format_exc(), True)
+
     def gen_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
             self.gen_cert('httpd', self.httpdKeyPass)
             self.gen_cert('tomcat', self.tomcatJksPass)
             self.gen_cert('shibIDP', self.shibJksPass)
+            self.gen_cert('asmiba', self.shibJksPass)
             self.gen_keystore('tomcat',
                               self.tomcatJksFn,
                               self.tomcatJksPass,
                               '%s/tomcat.key' % self.certFolder,
                               '%s/tomcat.crt' % self.certFolder)
-            # Will be used soon...
+            # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
                               self.shibJksPass,
                               '%s/shibIDP.key' % self.certFolder,
                               '%s/shibIDP.crt' % self.certFolder)
+            self.gen_keystore('asimba',
+                              self.asimbaJksFn,
+                              self.asimbaJksPass,
+                              '%s/asimba.key' % self.certFolder,
+                              '%s/asimba.crt' % self.certFolder)
+            self.gen_openid_keys()
         except:
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
@@ -750,6 +792,8 @@ class Setup(object):
                 os.makedirs(self.gluuOptFolder)
             if not os.path.exists(self.gluuOptBinFolder):
                 os.makedirs(self.gluuOptBinFolder)
+            if not os.path.exists(self.gluuOptBinLibFolder):
+                os.makedirs(self.gluuOptBinLibFolder)
             if not os.path.exists(self.configFolder):
                 os.makedirs(self.configFolder)
             if not os.path.exists(self.certFolder):

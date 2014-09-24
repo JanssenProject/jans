@@ -1,0 +1,85 @@
+security.provider.1=org.bouncycastle.jce.provider.BouncyCastleProvider
+security.provider.2=sun.security.provider.Sun
+security.provider.3=sun.security.rsa.SunRsaSign
+security.provider.4=sun.security.ec.SunEC
+security.provider.5=com.sun.net.ssl.internal.ssl.Provider
+security.provider.6=com.sun.crypto.provider.SunJCE
+security.provider.7=sun.security.jgss.SunProvider
+security.provider.8=com.sun.security.sasl.Provider
+security.provider.9=org.jcp.xml.dsig.internal.dom.XMLDSigRI
+security.provider.10=sun.security.smartcardio.SunPCSC
+securerandom.source=file:/dev/urandom
+login.configuration.provider=com.sun.security.auth.login.ConfigFile
+policy.provider=sun.security.provider.PolicyFile
+policy.url.1=file:${java.home}/lib/security/java.policy
+policy.url.2=file:${user.home}/.java.policy
+policy.expandProperties=true
+policy.allowSystemProperty=true
+policy.ignoreIdentityScope=false
+keystore.type=jks
+package.access=sun.,\
+               com.sun.xml.internal.,\
+               com.sun.imageio.,\
+               com.sun.istack.internal.,\
+               com.sun.jmx.,\
+               com.sun.naming.internal.,\
+               com.sun.proxy.,\
+               com.sun.corba.se.,\
+               com.sun.script.,\
+               com.sun.org.apache.bcel.internal.,\
+               com.sun.org.apache.regexp.internal.,\
+               com.sun.org.apache.xerces.internal.,\
+               com.sun.org.apache.xpath.internal.,\
+               com.sun.org.apache.xalan.internal.extensions.,\
+               com.sun.org.apache.xalan.internal.lib.,\
+               com.sun.org.apache.xalan.internal.res.,\
+               com.sun.org.apache.xalan.internal.templates.,\
+               com.sun.org.apache.xalan.internal.utils.,\
+               com.sun.org.apache.xalan.internal.xslt.,\
+               com.sun.org.apache.xalan.internal.xsltc.cmdline.,\
+               com.sun.org.apache.xalan.internal.xsltc.compiler.,\
+               com.sun.org.apache.xalan.internal.xsltc.trax.,\
+               com.sun.org.apache.xalan.internal.xsltc.util.,\
+               com.sun.org.apache.xml.internal.res.,\
+               com.sun.org.apache.xml.internal.serializer.utils.,\
+               com.sun.org.apache.xml.internal.utils.,\
+               com.sun.org.apache.xml.internal.security.,\
+               com.sun.org.glassfish.,\
+               org.jcp.xml.dsig.internal.,\
+               oracle.jrockit.jfr.
+package.definition=sun.,\
+                   com.sun.xml.internal.,\
+                   com.sun.imageio.,\
+                   com.sun.istack.internal.,\
+                   com.sun.jmx.,\
+                   com.sun.naming.internal.,\
+                   com.sun.proxy.,\
+                   com.sun.corba.se.,\
+                   com.sun.script.,\
+                   com.sun.org.apache.bcel.internal.,\
+                   com.sun.org.apache.regexp.internal.,\
+                   com.sun.org.apache.xerces.internal.,\
+                   com.sun.org.apache.xpath.internal.,\
+                   com.sun.org.apache.xalan.internal.extensions.,\
+                   com.sun.org.apache.xalan.internal.lib.,\
+                   com.sun.org.apache.xalan.internal.res.,\
+                   com.sun.org.apache.xalan.internal.templates.,\
+                   com.sun.org.apache.xalan.internal.utils.,\
+                   com.sun.org.apache.xalan.internal.xslt.,\
+                   com.sun.org.apache.xalan.internal.xsltc.cmdline.,\
+                   com.sun.org.apache.xalan.internal.xsltc.compiler.,\
+                   com.sun.org.apache.xalan.internal.xsltc.trax.,\
+                   com.sun.org.apache.xalan.internal.xsltc.util.,\
+                   com.sun.org.apache.xml.internal.res.,\
+                   com.sun.org.apache.xml.internal.serializer.utils.,\
+                   com.sun.org.apache.xml.internal.utils.,\
+                   com.sun.org.apache.xml.internal.security.,\
+                   com.sun.org.glassfish.,\
+                   org.jcp.xml.dsig.internal.,\
+                   oracle.jrockit.jfr.
+security.overridePropertiesFile=true
+ssl.KeyManagerFactory.algorithm=SunX509
+ssl.TrustManagerFactory.algorithm=PKIX
+networkaddress.cache.negative.ttl=10
+krb5.kdc.bad.policy = tryLast
+jdk.certpath.disabledAlgorithms=MD2, RSA keySize < 1024
