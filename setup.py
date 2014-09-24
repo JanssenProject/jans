@@ -448,7 +448,7 @@ class Setup(object):
             self.gen_cert('httpd', self.httpdKeyPass)
             self.gen_cert('tomcat', self.tomcatJksPass)
             self.gen_cert('shibIDP', self.shibJksPass)
-            self.gen_cert('asmiba', self.shibJksPass)
+            self.gen_cert('asimba', self.shibJksPass)
             self.gen_keystore('tomcat',
                               self.tomcatJksFn,
                               self.tomcatJksPass,
