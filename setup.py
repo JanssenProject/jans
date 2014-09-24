@@ -86,7 +86,7 @@ class Setup(object):
         self.shibJksPass = None
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
         self.asimbaJksPass = None
-        self.asimbaJksFn = '%s/shibIDP.jks' % self.certFolder
+        self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
         self.tomcatJksPass = None
         self.tomcatJksFn = '%s/tomcat.jks' % self.certFolder
 
@@ -421,7 +421,7 @@ class Setup(object):
                        '%s/commons-codec-1.5.jar' % self.oxauth_lib,
                        '%s/jettison-1.3.jar' % self.gluuOptBinLibFolder,
                        '%s/oxauth-model.jar' % self.gluuOptBinLibFolder]
-        args = ["/usr/java/latest/java",
+        args = ["/usr/java/latest/bin/java",
                 "-cp",
                 "%s/oxauth.jar:%s" % (self.gluuOptBinLibFolder, ":".join(requiredJars)),
                 "org.xdi.oxauth.util.KeyGenerator"]
@@ -448,7 +448,7 @@ class Setup(object):
             self.gen_cert('httpd', self.httpdKeyPass)
             self.gen_cert('tomcat', self.tomcatJksPass)
             self.gen_cert('shibIDP', self.shibJksPass)
-            self.gen_cert('asimba', self.shibJksPass)
+            self.gen_cert('asimba', self.asimbaJksPass)
             self.gen_keystore('tomcat',
                               self.tomcatJksFn,
                               self.tomcatJksPass,
