@@ -417,6 +417,7 @@ class Setup(object):
         self.copyFile("static/oxauth/lib/oxauth.jar", self.gluuOptBinLibFolder)
         self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.gluuOptBinLibFolder)
         self.copyFile("static/oxauth/lib/oxauth-model.jar", self.gluuOptBinLibFolder)
+
         requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.oxauth_lib,
                        '%s/commons-lang-2.6.jar' % self.oxauth_lib,
                        '%s/log4j-1.2.14.jar' % self.oxauth_lib,
@@ -424,10 +425,13 @@ class Setup(object):
                        '%s/jettison-1.3.jar' % self.gluuOptBinLibFolder,
                        '%s/oxauth-model.jar' % self.gluuOptBinLibFolder,
                        '%s/oxauth.jar' % self.gluuOptBinLibFolder]
-        args = ["/usr/java/latest/bin/java",
-                "-cp",
-                ":".join(requiredJars),
-                "org.xdi.oxauth.util.KeyGenerator"]
+
+        cmd = " ".join(["/usr/java/latest/bin/java",
+                        "-cp",
+                        ":".join(requiredJars),
+                        "org.xdi.oxauth.util.KeyGenerator"])
+        args = ["/bin/su", "ldap", "-c", cmd]
+
         self.logIt("Runnning: %s" % " ".join(args))
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -527,8 +531,7 @@ class Setup(object):
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      setupCmd
-                    ])
+                      setupCmd])
         except:
             self.logIt("Error running LDAP setup script", True)
             self.logIt(traceback.format_exc(), True)
@@ -889,7 +892,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
     print "\nInstalling Gluu Server...\nFor more info see:\n  %s  \n  %s.\n" % (installObject.log, installObject.logError)
-    print "Password contained in %s. Remove or Encyrpt post installation. \n\n" % (installObject.log, installObject.logError)
+    print "Password contained in %s. Remove or Encyrpt post installation. \n\n" % self.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
