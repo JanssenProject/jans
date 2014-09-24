@@ -100,7 +100,7 @@ class Setup(object):
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
         self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
-        self.ldapPassFn = '/opt/opendj/.pw'
+        self.ldapPassFn = '/home/ldap/.pw'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
@@ -781,6 +781,7 @@ class Setup(object):
             f = open(self.ldapPassFn, 'w')
             f.write(self.ldapPass)
             f.close()
+            self.run(["/bin/chown", 'gluu:gluu', self.ldapPassFn)
         except:
             self.logIt("Error writing temporary LDAP password.")
 
