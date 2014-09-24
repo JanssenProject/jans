@@ -415,8 +415,8 @@ class Setup(object):
     def gen_openid_keys(self):
         self.copyFile("static/oxauth/java.security", "/usr/java/latest/jre/lib/security")
         self.copyFile("static/oxauth/lib/oxauth.jar", self.gluuOptBinLibFolder)
-        self.copyFile("static/oxauth/lib/jettison-1.3", self.gluuOptBinLibFolder)
-        self.copyFile("static/oxauth/lib/oxauth-model", self.gluuOptBinLibFolder)
+        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.gluuOptBinLibFolder)
+        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.gluuOptBinLibFolder)
         requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.oxauth_lib,
                        '%s/commons-lang-2.6.jar' % self.oxauth_lib,
                        '%s/log4j-1.2.14.jar' % self.oxauth_lib,
