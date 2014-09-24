@@ -46,7 +46,7 @@ class Setup(object):
         self.savedProperties = "./setup.properties.last"
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
-        self.gluuOptBinLibFolder = "/opt/gluu/bin/lib"
+        self.tomat_user_home_lib = "/home/tomcat/lib"
 
         self.hostname = None
         self.ip = None
@@ -413,24 +413,25 @@ class Setup(object):
         ])
 
     def gen_openid_keys(self):
+        self.logIt("Generating oxAuth OpenID Connect keys")
         self.copyFile("static/oxauth/java.security", "/usr/java/latest/jre/lib/security")
-        self.copyFile("static/oxauth/lib/oxauth.jar", self.gluuOptBinLibFolder)
-        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.gluuOptBinLibFolder)
-        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.gluuOptBinLibFolder)
+        self.copyFile("static/oxauth/lib/oxauth.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomat_user_home_lib)
+        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomat_user_home_lib)
 
         requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.oxauth_lib,
                        '%s/commons-lang-2.6.jar' % self.oxauth_lib,
                        '%s/log4j-1.2.14.jar' % self.oxauth_lib,
                        '%s/commons-codec-1.5.jar' % self.oxauth_lib,
-                       '%s/jettison-1.3.jar' % self.gluuOptBinLibFolder,
-                       '%s/oxauth-model.jar' % self.gluuOptBinLibFolder,
-                       '%s/oxauth.jar' % self.gluuOptBinLibFolder]
+                       '%s/jettison-1.3.jar' % self.tomat_user_home_lib,
+                       '%s/oxauth-model.jar' % self.tomat_user_home_lib,
+                       '%s/oxauth.jar' % self.tomat_user_home_lib]
 
         cmd = " ".join(["/usr/java/latest/bin/java",
                         "-cp",
                         ":".join(requiredJars),
                         "org.xdi.oxauth.util.KeyGenerator"])
-        args = ["/bin/su", "ldap", "-c", cmd]
+        args = ["/bin/su", "tomcat", "-c", cmd]
 
         self.logIt("Runnning: %s" % " ".join(args))
         try:
@@ -758,6 +759,7 @@ class Setup(object):
         self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
         self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['chown', '-R', 'tomcat:tomcat', self.certFolder])
+        self.run(['chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -802,8 +804,8 @@ class Setup(object):
                 os.makedirs(self.gluuOptFolder)
             if not os.path.exists(self.gluuOptBinFolder):
                 os.makedirs(self.gluuOptBinFolder)
-            if not os.path.exists(self.gluuOptBinLibFolder):
-                os.makedirs(self.gluuOptBinLibFolder)
+            if not os.path.exists(self.tomat_user_home_lib):
+                os.makedirs(self.tomat_user_home_lib)
             if not os.path.exists(self.configFolder):
                 os.makedirs(self.configFolder)
             if not os.path.exists(self.certFolder):
@@ -892,7 +894,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    print "Password contained in %s. Remove or encrypt post installation. \n\n" % installObject.savedProperties
+    print "All passwords contained in %s. Remove or encrypt post installation. \n\n" % installObject.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -943,6 +945,7 @@ if __name__ == '__main__':
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
+        print "\n\n Gluu Server installation successful! Point your broswer to https://%s\n\n" % installObject.hostname
     else:
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
