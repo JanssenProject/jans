@@ -308,6 +308,4 @@
     
     <imgLocation>/${config.oxauth.contextPath}/img</imgLocation>
 
-    <encode-salt>${config.oxauth.salt}</encode-salt>
-
 </configuration>
