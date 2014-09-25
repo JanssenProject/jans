@@ -107,8 +107,7 @@ public class AppInitializer {
     }
 
 	private void createStringEncrypter() {
-		Configuration conf = ConfigurationFactory.loadConfFromFile();
-    	String encodeSalt = conf.getEncodeSalt();
+		String encodeSalt = ConfigurationFactory.loadCryptoConfigurationSalt();
     	
     	if (StringHelper.isEmpty(encodeSalt)) {
     		throw new ConfigurationException("Encode salt isn't defined in oxauth-config.xml");
