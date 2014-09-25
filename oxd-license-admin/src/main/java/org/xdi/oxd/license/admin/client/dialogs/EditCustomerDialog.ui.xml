@@ -7,7 +7,9 @@
     <g:DialogBox ui:field="dialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog" width="700px">
         <g:VerticalPanel>
             <g:HTMLPanel>
-                <h2><g:HTML ui:field="title"/></h2>
+                <h2>
+                    <g:HTML ui:field="title"/>
+                </h2>
             </g:HTMLPanel>
             <g:HTML>
                 <h4>Name:</h4>
@@ -25,6 +27,19 @@
                 <h4>Public key:</h4>
             </g:HTML>
             <g:HTML ui:field="publicKey"/>
+            <g:HTML>
+                <h4>Private password:</h4>
+            </g:HTML>
+            <g:HTML ui:field="privatePassword"/>
+            <g:HTML>
+                <h4>Public password:</h4>
+            </g:HTML>
+            <g:HTML ui:field="publicPassword"/>
+            <g:HTML>
+                <h4>License password:</h4>
+            </g:HTML>
+            <g:HTML ui:field="licensePassword"/>
+
             <g:HTML ui:field="errorMessage" visible="false"/>
             <g:HorizontalPanel>
                 <g:Button ui:field="okButton">OK</g:Button>

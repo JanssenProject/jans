@@ -1,5 +1,6 @@
 package org.xdi.oxd.licenser.server.persistence;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -54,9 +55,16 @@ public class CustomerService {
 
     public void save(LdapCustomer ldapCustomer) {
         try {
+            setDnIfEmpty(ldapCustomer);
             ldapEntryManager.persist(ldapCustomer);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private void setDnIfEmpty(LdapCustomer ldapCustomer) {
+        if (Strings.isNullOrEmpty(ldapCustomer.getDn())) {
+            ldapCustomer.setDn(String.format("customerId=%s,%s", ldapCustomer.getId(), conf.getCustomerBaseDn()));
         }
     }
 

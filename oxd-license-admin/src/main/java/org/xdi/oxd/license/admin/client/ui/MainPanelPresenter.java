@@ -33,19 +33,28 @@ public class MainPanelPresenter implements Presenter {
         container.add(view);
 
         view.getTable().setEmptyTableWidget(new Label("No data"));
-        Admin.getService().getCustomers(new SuccessCallback<List<Customer>>() {
-            @Override
-            public void onSuccess(List<Customer> result) {
-                view.getTable().setRowData(result);
-            }
-        });
+        loadCustomers();
 
         view.getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EditCustomerDialog dialog = new EditCustomerDialog();
+                EditCustomerDialog dialog = new EditCustomerDialog() {
+                    @Override
+                    public void onSuccess() {
+                        loadCustomers();
+                    }
+                };
                 dialog.setTitle("Create customer");
                 dialog.show();
+            }
+        });
+    }
+
+    private void loadCustomers() {
+        Admin.getService().getCustomers(new SuccessCallback<List<Customer>>() {
+            @Override
+            public void onSuccess(List<Customer> result) {
+                view.getTable().setRowData(result);
             }
         });
     }

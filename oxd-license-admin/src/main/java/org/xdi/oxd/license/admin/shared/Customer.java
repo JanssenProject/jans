@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 public class Customer implements Serializable {
 
+    private String dn;
     private String id;
     private String name;
     private String privateKey;
@@ -16,16 +17,43 @@ public class Customer implements Serializable {
     private String privatePassword;
     private String publicPassword;
     private String licensePassword;
+    private String clientPrivateKey;
+    private String clientPublicKey;
 
     public Customer() {
+    }
+
+    public String getDn() {
+        return dn;
+    }
+
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public String getId() {
         return id;
     }
 
-    public Customer setId(String id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public String getClientPrivateKey() {
+        return clientPrivateKey;
+    }
+
+    public Customer setClientPrivateKey(String clientPrivateKey) {
+        this.clientPrivateKey = clientPrivateKey;
+        return this;
+    }
+
+    public String getClientPublicKey() {
+        return clientPublicKey;
+    }
+
+    public Customer setClientPublicKey(String clientPublicKey) {
+        this.clientPublicKey = clientPublicKey;
         return this;
     }
 

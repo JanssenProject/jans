@@ -16,6 +16,8 @@ public class LdapCustomer {
 
     @LdapDN
     private String dn;
+    @LdapAttribute(name = "customerId")
+    private String id;
     @LdapAttribute(name = "licenseId")
     private String licenseId;
     @LdapAttribute(name = "oxLicensePassword")
@@ -35,6 +37,14 @@ public class LdapCustomer {
     private String publicKey;
     @LdapAttribute(name = "oxPrivateKey")
     private String privateKey;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getDn() {
         return dn;

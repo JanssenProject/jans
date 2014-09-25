@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
 import org.xdi.oxd.license.admin.shared.Customer;
+import org.xdi.oxd.license.admin.shared.GeneratedKeys;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -39,6 +40,20 @@ public class EditCustomerDialog implements IsWidget {
     Button okButton;
     @UiField
     HTML errorMessage;
+    @UiField
+    HTML privateKey;
+    @UiField
+    HTML publicKey;
+    @UiField
+    Button generateButton;
+    @UiField
+    HTML licensePassword;
+    @UiField
+    HTML publicPassword;
+    @UiField
+    HTML privatePassword;
+
+    private GeneratedKeys generatedKeys;
 
     public EditCustomerDialog() {
         uiBinder.createAndBindUi(this);
@@ -56,22 +71,55 @@ public class EditCustomerDialog implements IsWidget {
                 }
             }
         });
+        generateButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                generateKeys();
+            }
+        });
+    }
+
+    private void generateKeys() {
+        Admin.getService().generateKeys(new SuccessCallback<GeneratedKeys>() {
+            @Override
+            public void onSuccess(GeneratedKeys result) {
+                generatedKeys = result;
+                privateKey.setText(result.getPrivateKey());
+                publicKey.setText(result.getPublicKey());
+                privatePassword.setText(result.getPrivatePassword());
+                publicPassword.setText(result.getPublicPassword());
+                licensePassword.setText(result.getLicensePassword());
+            }
+        });
     }
 
     private boolean validate() {
         errorMessage.setVisible(false);
 
         if (Admin.isEmpty(nameField.getValue())) {
-            errorMessage.setVisible(true);
-            errorMessage.setHTML("<span style='color:red;'>Name is blank.</span>");
+            showError("Name is blank.");
+            return false;
+        }
+        if (Admin.isEmpty(privateKey.getText())) {
+            showError("Private key and passwords are not generated. Please hit generate button.");
             return false;
         }
         return true;
     }
 
+    private void showError(String message) {
+        errorMessage.setVisible(true);
+        errorMessage.setHTML("<span style='color:red;'>" + message + "</span>");
+    }
+
     private void onOkClick() {
         final Customer customer = new Customer();
         customer.setName(nameField.getValue());
+        customer.setLicensePassword(generatedKeys.getLicensePassword());
+        customer.setPrivatePassword(generatedKeys.getPrivatePassword());
+        customer.setPublicPassword(generatedKeys.getPublicPassword());
+        customer.setPublicKey(generatedKeys.getPublicKey());
+        customer.setPrivateKey(generatedKeys.getPrivateKey());
         Admin.getService().create(customer, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
