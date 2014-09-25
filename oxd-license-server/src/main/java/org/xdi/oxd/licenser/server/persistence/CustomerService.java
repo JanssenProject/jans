@@ -29,7 +29,7 @@ public class CustomerService {
     public List<LdapCustomer> getAllCustomers() {
         try {
 //                   final Filter filter = Filter.create("&(inum=*)");
-            final Filter filter = Filter.create("*");
+            final Filter filter = Filter.create("&(customerId=*)");
             return ldapEntryManager.findEntries(conf.getBaseDn(), LdapCustomer.class, filter);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
