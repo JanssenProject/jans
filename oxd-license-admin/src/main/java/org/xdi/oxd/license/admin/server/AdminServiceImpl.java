@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.GeneratedKeys;
+import org.xdi.oxd.license.admin.shared.License;
 import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 import org.xdi.oxd.licenser.server.persistence.CustomerService;
 
@@ -75,6 +76,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         LdapCustomer customer = new LdapCustomer();
         customer.setDn(c.getDn());
         customer.setId(c.getId());
+        customer.setName(c.getName());
         customer.setLicensePassword(c.getLicensePassword());
         customer.setPrivatePassword(c.getPrivatePassword());
         customer.setPublicPassword(c.getPublicPassword());
@@ -82,13 +84,25 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setPublicKey(c.getPublicKey());
         customer.setClientPrivateKey(c.getClientPrivateKey());
         customer.setClientPublicKey(c.getClientPublicKey());
+        customer.setLicenses(toLicenseList(c.getLicenses()));
         return customer;
+    }
+
+    private static List<String> toLicenseList(List<License> licenses) {
+        List<String> result = Lists.newArrayList(); // todo
+        return result;
+    }
+
+    private static List<License> toLicenses(List<String> licenses) {
+        List<License> result = Lists.newArrayList();    // todo
+        return result;
     }
 
     private static Customer asCustomer(LdapCustomer c) {
         Customer customer = new Customer();
         customer.setDn(c.getDn());
         customer.setId(c.getId());
+        customer.setName(c.getName());
         customer.setLicensePassword(c.getLicensePassword());
         customer.setPrivatePassword(c.getPrivatePassword());
         customer.setPublicPassword(c.getPublicPassword());
@@ -96,6 +110,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setPublicKey(c.getPublicKey());
         customer.setClientPrivateKey(c.getClientPrivateKey());
         customer.setClientPublicKey(c.getClientPublicKey());
+        customer.setLicenses(toLicenses(c.getLicenses()));
         return customer;
     }
 

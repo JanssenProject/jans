@@ -2,11 +2,33 @@
 <ui:UiBinder
         xmlns:ui='urn:ui:com.google.gwt.uibinder'
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
-        xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         >
 
     <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel">
-        <g:HTML><h3>Name:</h3></g:HTML>
+        <g:HTML>
+            <h3>Name:</h3>
+        </g:HTML>
         <g:HTML ui:field="nameField"/>
+        <g:HTML>
+            <h3>Private key:</h3>
+        </g:HTML>
+        <g:HTML ui:field="privateKey"/>
+        <g:HTML>
+            <h3>Public key:</h3>
+        </g:HTML>
+        <g:HTML ui:field="publicKey"/>
+        <g:HTML>
+            <h3>Client private key:</h3>
+        </g:HTML>
+        <g:HTML ui:field="clientPrivateKey"/>
+        <g:HTML>
+            <h3>Client public key:</h3>
+        </g:HTML>
+        <g:HTML ui:field="clientPublicKey"/>
+        <g:HTML>
+            <h3>Private password:</h3>
+        </g:HTML>
+        <g:HTML ui:field="privatePassword"/>
+
     </g:VerticalPanel>
 </ui:UiBinder>

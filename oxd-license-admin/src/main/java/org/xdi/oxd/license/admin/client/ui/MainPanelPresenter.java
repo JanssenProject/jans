@@ -4,6 +4,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.Presenter;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
@@ -11,7 +13,6 @@ import org.xdi.oxd.license.admin.client.dialogs.EditCustomerDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,9 +21,11 @@ import java.util.logging.Logger;
 
 public class MainPanelPresenter implements Presenter {
 
-    private static final Logger LOGGER = Logger.getLogger(MainPanelPresenter.class.getName());
+//    private static final Logger LOGGER = Logger.getLogger(MainPanelPresenter.class.getName());
 
     private final MainPanel view = new MainPanel();
+    private final SingleSelectionModel<Customer> selectionModel = new SingleSelectionModel<Customer>();
+    private final DetailsPresenter detailsPresenter = new DetailsPresenter(view.getDetailsPanel());
 
     public MainPanelPresenter() {
     }
@@ -33,6 +36,7 @@ public class MainPanelPresenter implements Presenter {
         container.add(view);
 
         view.getTable().setEmptyTableWidget(new Label("No data"));
+        view.getTable().setSelectionModel(selectionModel);
         loadCustomers();
 
         view.getAddButton().addClickHandler(new ClickHandler() {
@@ -52,6 +56,12 @@ public class MainPanelPresenter implements Presenter {
             @Override
             public void onClick(ClickEvent event) {
                 loadCustomers();
+            }
+        });
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                detailsPresenter.show(selectionModel.getSelectedObject());
             }
         });
     }

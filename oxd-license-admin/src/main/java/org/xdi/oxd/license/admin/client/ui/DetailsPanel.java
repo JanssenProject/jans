@@ -1,15 +1,12 @@
 package org.xdi.oxd.license.admin.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.xdi.oxd.license.admin.shared.Customer;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,6 +24,16 @@ public class DetailsPanel implements IsWidget {
     HTML nameField;
     @UiField
     VerticalPanel rootPanel;
+    @UiField
+    HTML privatePassword;
+    @UiField
+    HTML clientPublicKey;
+    @UiField
+    HTML clientPrivateKey;
+    @UiField
+    HTML publicKey;
+    @UiField
+    HTML privateKey;
 
     public DetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -37,11 +44,27 @@ public class DetailsPanel implements IsWidget {
         return rootPanel;
     }
 
-    public void show(Customer customer) {
-        nameField.setHTML(asHtml(customer.getName()));
+    public HTML getNameField() {
+        return nameField;
     }
 
-    private static SafeHtml asHtml(String str) {
-        return SafeHtmlUtils.fromString(str != null ? str : "");
+    public HTML getClientPrivateKey() {
+        return clientPrivateKey;
+    }
+
+    public HTML getClientPublicKey() {
+        return clientPublicKey;
+    }
+
+    public HTML getPrivateKey() {
+        return privateKey;
+    }
+
+    public HTML getPrivatePassword() {
+        return privatePassword;
+    }
+
+    public HTML getPublicKey() {
+        return publicKey;
     }
 }

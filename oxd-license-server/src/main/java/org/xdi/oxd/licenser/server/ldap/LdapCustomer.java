@@ -5,6 +5,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 23/09/2014
@@ -26,17 +28,30 @@ public class LdapCustomer {
     private String publicPassword;
     @LdapAttribute(name = "oxPrivatePassword")
     private String privatePassword;
-
     @LdapAttribute(name = "oxClientPrivateKey")
     private String clientPrivateKey;
-
     @LdapAttribute(name = "oxClientPublicKey")
     private String clientPublicKey;
-
     @LdapAttribute(name = "oxPublicKey")
     private String publicKey;
     @LdapAttribute(name = "oxPrivateKey")
     private String privateKey;
+    @LdapAttribute(name = "oxName")
+    private String name;
+    @LdapAttribute(name = "oxLicense")
+    private List<String> licenses;
+
+    public List<String> getLicenses() {
+        return licenses;
+    }
+
+    public void setLicenses(List<String> licenses) {
+        this.licenses = licenses;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getId() {
         return id;
@@ -133,5 +148,9 @@ public class LdapCustomer {
         sb.append(", privateKey='").append(privateKey).append('\'');
         sb.append('}');
         return sb.toString();
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -1,6 +1,7 @@
 package org.xdi.oxd.license.admin.shared;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,6 +20,15 @@ public class Customer implements Serializable {
     private String licensePassword;
     private String clientPrivateKey;
     private String clientPublicKey;
+    private List<License> licenses;
+
+    public List<License> getLicenses() {
+        return licenses;
+    }
+
+    public void setLicenses(List<License> licenses) {
+        this.licenses = licenses;
+    }
 
     public Customer() {
     }
