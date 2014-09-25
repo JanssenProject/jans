@@ -3,10 +3,13 @@ package org.xdi.oxd.license.admin.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.xdi.oxd.license.admin.shared.License;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,9 +37,23 @@ public class DetailsPanel implements IsWidget {
     HTML publicKey;
     @UiField
     HTML privateKey;
+    @UiField
+    CellTable<License> licenseTable;
+    @UiField
+    Button removeLicense;
+    @UiField
+    Button addLicense;
 
     public DetailsPanel() {
         uiBinder.createAndBindUi(this);
+    }
+
+    public Button getAddLicense() {
+        return addLicense;
+    }
+
+    public Button getRemoveLicense() {
+        return removeLicense;
     }
 
     @Override
@@ -66,5 +83,9 @@ public class DetailsPanel implements IsWidget {
 
     public HTML getPublicKey() {
         return publicKey;
+    }
+
+    public CellTable<License> getLicenseTable() {
+        return licenseTable;
     }
 }

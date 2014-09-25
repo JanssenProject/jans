@@ -68,6 +68,12 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
                 setLicensePassword(randomPassword());
     }
 
+    @Override
+    public License addLicense(Customer customer, License license) {
+        // todo
+        return license;
+    }
+
     private String randomPassword() {
         return RandomStringUtils.randomAlphanumeric(20);
     }

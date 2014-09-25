@@ -1,8 +1,13 @@
 package org.xdi.oxd.license.admin.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.TextColumn;
+import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
+import org.xdi.oxd.license.admin.shared.License;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -13,11 +18,34 @@ public class DetailsPresenter {
 
     private final DetailsPanel view;
 
+    private Customer customer;
+
     public DetailsPresenter(DetailsPanel view) {
         this.view = view;
+        view.getLicenseTable().addColumn(new TextColumn<License>() {
+            @Override
+            public String getValue(License license) {
+                return license.getType().name();
+            }
+        }, "Type");
+        view.getLicenseTable().addColumn(new TextColumn<License>() {
+            @Override
+            public String getValue(License license) {
+                return Integer.toString(license.getNumberOfThreads());
+            }
+        }, "oxD Threads");
+        view.getAddLicense().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                AddLicenseDialog dialog = new AddLicenseDialog(customer);
+                dialog.show();
+            }
+        });
     }
 
     public void show(Customer customer) {
+        this.customer = customer;
+
         view.getNameField().setHTML(asHtml(customer.getName()));
         view.getPublicKey().setHTML(asHtml(customer.getPublicKey()));
         view.getPrivateKey().setHTML(asHtml(customer.getPrivateKey()));

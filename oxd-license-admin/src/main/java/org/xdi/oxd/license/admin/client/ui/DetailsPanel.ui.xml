@@ -2,6 +2,7 @@
 <ui:UiBinder
         xmlns:ui='urn:ui:com.google.gwt.uibinder'
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         >
 
     <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel">
@@ -29,6 +30,10 @@
             <h3>Private password:</h3>
         </g:HTML>
         <g:HTML ui:field="privatePassword"/>
-
+        <g:HorizontalPanel>
+            <g:Button ui:field="addLicense">Add License</g:Button>
+            <g:Button ui:field="removeLicense">Remove License</g:Button>
+        </g:HorizontalPanel>
+        <cellview:CellTable ui:field="licenseTable" width="100%"/>
     </g:VerticalPanel>
 </ui:UiBinder>

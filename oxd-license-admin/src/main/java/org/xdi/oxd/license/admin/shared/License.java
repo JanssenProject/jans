@@ -10,6 +10,15 @@ import java.io.Serializable;
 public class License implements Serializable {
 
     private LicenseType type;
+    private int numberOfThreads;
+
+    public License() {
+    }
+
+    public License(int numberOfThreads, LicenseType type) {
+        this.numberOfThreads = numberOfThreads;
+        this.type = type;
+    }
 
     public LicenseType getType() {
         return type;
@@ -17,5 +26,13 @@ public class License implements Serializable {
 
     public void setType(LicenseType type) {
         this.type = type;
+    }
+
+    public int getNumberOfThreads() {
+        return numberOfThreads;
+    }
+
+    public void setNumberOfThreads(int numberOfThreads) {
+        this.numberOfThreads = numberOfThreads;
     }
 }
