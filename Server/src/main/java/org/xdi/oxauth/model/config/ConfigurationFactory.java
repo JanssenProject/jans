@@ -23,6 +23,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
@@ -52,6 +53,8 @@ public class ConfigurationFactory {
     public static final String STATIC_CONF_FILE_PATH = DIR + "oxauth-static-conf.json";
     public static final String WEB_KEYS_FILE_PATH = DIR + "oxauth-web-keys.json";
     public static final String ID_GEN_SCRIPT_FILE_PATH = DIR + "oxauth-id-gen.py";
+
+    public static final String CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE = DIR + "salt";
 
     private static final ConfigurationFactory INSTANCE = new ConfigurationFactory();
 
@@ -315,6 +318,30 @@ public class ConfigurationFactory {
         }
         return null;
     }
+
+	private static FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
+		try {
+			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
+		} catch (Exception ex) {
+			if (isMandatory) {
+				LOG.error("Failed to load configuration from {0}", ex, fileName);
+				throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
+			}
+		}
+
+		return null;
+	}
+	
+	public static String loadCryptoConfigurationSalt() {
+		try {
+			FileConfiguration cryptoConfiguration = createFileConfiguration(CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, true);
+			
+			return cryptoConfiguration.getString("encodeSalt");
+		} catch (Exception ex) {
+			LOG.error("Failed to load configuration from {0}", ex, CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE);
+			throw new ConfigurationException("Failed to load configuration from " + CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, ex);
+		}
+	}
 
     public Configuration getConf() {
         return m_conf;
