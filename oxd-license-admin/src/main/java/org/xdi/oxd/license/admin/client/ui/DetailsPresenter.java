@@ -9,6 +9,9 @@ import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.License;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 25/09/2014
@@ -37,7 +40,7 @@ public class DetailsPresenter {
         view.getAddLicense().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                AddLicenseDialog dialog = new AddLicenseDialog(customer);
+                AddLicenseDialog dialog = new AddLicenseDialog(DetailsPresenter.this);
                 dialog.show();
             }
         });
@@ -52,10 +55,20 @@ public class DetailsPresenter {
         view.getClientPublicKey().setHTML(asHtml(customer.getClientPublicKey()));
         view.getClientPrivateKey().setHTML(asHtml(customer.getClientPrivateKey()));
         view.getPrivatePassword().setHTML(asHtml(customer.getPrivatePassword()));
+        reloadLicenseTable();
     }
 
     private static SafeHtml asHtml(String str) {
         return SafeHtmlUtils.fromString(str != null ? str : "");
     }
 
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void reloadLicenseTable() {
+        final List<License> licenses = customer.getLicenses() != null ? customer.getLicenses() : new ArrayList<License>();
+        view.getLicenseTable().setRowData(licenses);
+        view.getLicenseTable().setRowCount(licenses.size());
+    }
 }

@@ -1,6 +1,7 @@
 package org.xdi.oxd.license.admin.shared;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class Customer implements Serializable {
     private String licensePassword;
     private String clientPrivateKey;
     private String clientPublicKey;
-    private List<License> licenses;
+    private List<License> licenses = new ArrayList<License>();
 
     public List<License> getLicenses() {
         return licenses;

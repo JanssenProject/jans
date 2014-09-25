@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
-import org.xdi.oxd.license.admin.shared.Customer;
+import org.xdi.oxd.license.admin.client.ui.DetailsPresenter;
 import org.xdi.oxd.license.admin.shared.License;
 import org.xdi.oxd.license.admin.shared.LicenseType;
 
@@ -30,7 +30,7 @@ public class AddLicenseDialog implements IsWidget {
     interface MyUiBinder extends UiBinder<DialogBox, AddLicenseDialog> {
     }
 
-    private final Customer customer;
+    private final DetailsPresenter detailsPresenter;
 
     @UiField
     DialogBox dialog;
@@ -45,9 +45,9 @@ public class AddLicenseDialog implements IsWidget {
     @UiField
     HTML errorMessage;
 
-    public AddLicenseDialog(Customer customer) {
+    public AddLicenseDialog(DetailsPresenter detailsPresenter) {
         uiBinder.createAndBindUi(this);
-        this.customer = customer;
+        this.detailsPresenter = detailsPresenter;
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -72,7 +72,7 @@ public class AddLicenseDialog implements IsWidget {
             return;
         }
         license.setType(LicenseType.valueOf(type.getValue(type.getSelectedIndex())));
-        Admin.getService().addLicense(customer, license, new AsyncCallback<License>() {
+        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<License>() {
             @Override
             public void onFailure(Throwable caught) {
                 showError("Failed to add license.");
@@ -80,7 +80,8 @@ public class AddLicenseDialog implements IsWidget {
 
             @Override
             public void onSuccess(License result) {
-                customer.getLicenses().add(result);
+                detailsPresenter.getCustomer().getLicenses().add(result);
+                detailsPresenter.reloadLicenseTable();
                 dialog.hide();
             }
         });
