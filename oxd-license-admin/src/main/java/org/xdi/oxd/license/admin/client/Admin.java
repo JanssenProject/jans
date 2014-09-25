@@ -33,4 +33,8 @@ public class Admin implements EntryPoint {
     public static EventBus getEventBus() {
         return EVENT_BUS;
     }
+
+    public static boolean isEmpty(String str) {
+        return str == null || str.trim().equals("");
+    }
 }

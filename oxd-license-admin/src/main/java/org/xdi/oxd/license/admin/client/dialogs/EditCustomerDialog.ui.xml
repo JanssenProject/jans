@@ -25,6 +25,7 @@
                 <h4>Public key:</h4>
             </g:HTML>
             <g:HTML ui:field="publicKey"/>
+            <g:HTML ui:field="errorMessage" visible="false"/>
             <g:HorizontalPanel>
                 <g:Button ui:field="okButton">OK</g:Button>
                 <g:Button ui:field="closeButton">Close</g:Button>

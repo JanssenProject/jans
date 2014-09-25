@@ -37,6 +37,8 @@ public class EditCustomerDialog implements IsWidget {
     Button closeButton;
     @UiField
     Button okButton;
+    @UiField
+    HTML errorMessage;
 
     public EditCustomerDialog() {
         uiBinder.createAndBindUi(this);
@@ -49,13 +51,28 @@ public class EditCustomerDialog implements IsWidget {
         okButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                onOkClick();
+                if (validate()) {
+                    onOkClick();
+                }
             }
         });
     }
 
+    private boolean validate() {
+        errorMessage.setVisible(false);
+
+        if (Admin.isEmpty(nameField.getValue())) {
+            errorMessage.setVisible(true);
+            errorMessage.setHTML("<span style='color:red;'>Name is blank.</span>");
+            return false;
+        }
+        return true;
+    }
+
     private void onOkClick() {
-        Admin.getService().create(new Customer(), new SuccessCallback<Void>() {
+        final Customer customer = new Customer();
+        customer.setName(nameField.getValue());
+        Admin.getService().create(customer, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 dialog.hide();
