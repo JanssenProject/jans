@@ -55,18 +55,3 @@ dn: ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: configuration
-
-# oxAuth static configuration data - LEVEL 4
-dn: ou=oxAuth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxAuth
-
-# oxTrust CONFIGURATION DATA - LEVEL 4
-dn: ou=oxTrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxTrust
-
