@@ -11,9 +11,29 @@ public class GeneratedKeys implements Serializable {
 
     private String privateKey;
     private String publicKey;
+    private String clientPrivateKey;
+    private String clientPublicKey;
     private String privatePassword;
     private String publicPassword;
     private String licensePassword;
+
+    public String getClientPrivateKey() {
+        return clientPrivateKey;
+    }
+
+    public GeneratedKeys setClientPrivateKey(String clientPrivateKey) {
+        this.clientPrivateKey = clientPrivateKey;
+        return this;
+    }
+
+    public String getClientPublicKey() {
+        return clientPublicKey;
+    }
+
+    public GeneratedKeys setClientPublicKey(String clientPublicKey) {
+        this.clientPublicKey = clientPublicKey;
+        return this;
+    }
 
     public String getLicensePassword() {
         return licensePassword;

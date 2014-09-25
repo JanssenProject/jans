@@ -3,5 +3,4 @@
     "customer-base-dn":"ou=customer,ou=oxLicense,o=@!1111,o=gluu",
     "thread-number-paid-license":100,
     "thread-number-premium-license":1000000
-
 }

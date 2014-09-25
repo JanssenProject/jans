@@ -120,6 +120,8 @@ public class EditCustomerDialog implements IsWidget {
         customer.setPublicPassword(generatedKeys.getPublicPassword());
         customer.setPublicKey(generatedKeys.getPublicKey());
         customer.setPrivateKey(generatedKeys.getPrivateKey());
+        customer.setClientPrivateKey(generatedKeys.getClientPrivateKey());
+        customer.setClientPublicKey(generatedKeys.getClientPublicKey());
         Admin.getService().create(customer, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {

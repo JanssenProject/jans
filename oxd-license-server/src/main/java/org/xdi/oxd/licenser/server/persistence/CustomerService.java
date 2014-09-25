@@ -11,6 +11,7 @@ import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -64,7 +65,8 @@ public class CustomerService {
 
     private void setDnIfEmpty(LdapCustomer ldapCustomer) {
         if (Strings.isNullOrEmpty(ldapCustomer.getDn())) {
-            ldapCustomer.setDn(String.format("customerId=%s,%s", ldapCustomer.getId(), conf.getCustomerBaseDn()));
+            String id = Strings.isNullOrEmpty(ldapCustomer.getId()) ? UUID.randomUUID().toString() : ldapCustomer.getId();
+            ldapCustomer.setDn(String.format("customerId=%s,%s", id, conf.getCustomerBaseDn()));
         }
     }
 
