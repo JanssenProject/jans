@@ -15,7 +15,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.ui.DetailsPresenter;
-import org.xdi.oxd.license.admin.shared.License;
+import org.xdi.oxd.license.admin.shared.CustomerLicense;
+import org.xdi.oxd.license.admin.shared.CustomerLicense;
 import org.xdi.oxd.license.admin.shared.LicenseType;
 
 /**
@@ -63,7 +64,7 @@ public class AddLicenseDialog implements IsWidget {
     }
 
     private void onAddLicense() {
-        final License license = new License();
+        final CustomerLicense license = new CustomerLicense();
 
         try {
             license.setNumberOfThreads(Integer.parseInt(threads.getValue()));
@@ -72,14 +73,14 @@ public class AddLicenseDialog implements IsWidget {
             return;
         }
         license.setType(LicenseType.valueOf(type.getValue(type.getSelectedIndex())));
-        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<License>() {
+        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<CustomerLicense>() {
             @Override
             public void onFailure(Throwable caught) {
                 showError("Failed to add license.");
             }
 
             @Override
-            public void onSuccess(License result) {
+            public void onSuccess(CustomerLicense result) {
                 detailsPresenter.getCustomer().getLicenses().add(result);
                 detailsPresenter.reloadLicenseTable();
                 dialog.hide();

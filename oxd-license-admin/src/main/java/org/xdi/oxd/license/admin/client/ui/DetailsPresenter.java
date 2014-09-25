@@ -1,5 +1,6 @@
 package org.xdi.oxd.license.admin.client.ui;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -9,7 +10,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.License;
+import org.xdi.oxd.license.admin.shared.CustomerLicense;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,23 +25,12 @@ public class DetailsPresenter {
     private final DetailsPanel view;
 
     private Customer customer;
-    private SingleSelectionModel<License> selectionModel = new SingleSelectionModel<License>();
+    private SingleSelectionModel<CustomerLicense> selectionModel = new SingleSelectionModel<CustomerLicense>();
 
     public DetailsPresenter(DetailsPanel view) {
         this.view = view;
-        view.getLicenseTable().setSelectionModel(selectionModel);
-        view.getLicenseTable().addColumn(new TextColumn<License>() {
-            @Override
-            public String getValue(License license) {
-                return license.getType().name();
-            }
-        }, "Type");
-        view.getLicenseTable().addColumn(new TextColumn<License>() {
-            @Override
-            public String getValue(License license) {
-                return Integer.toString(license.getNumberOfThreads());
-            }
-        }, "oxD Threads");
+        configureLicenseTable(view);
+
         view.getAddLicense().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -56,6 +46,25 @@ public class DetailsPresenter {
         });
     }
 
+    private void configureLicenseTable(DetailsPanel view) {
+        view.getLicenseTable().setSelectionModel(selectionModel);
+        view.getLicenseTable().addColumn(new TextColumn<CustomerLicense>() {
+            @Override
+            public String getValue(CustomerLicense license) {
+                return license.getType().name();
+            }
+        }, "Type");
+        view.getLicenseTable().addColumn(new TextColumn<CustomerLicense>() {
+            @Override
+            public String getValue(CustomerLicense license) {
+                return Integer.toString(license.getNumberOfThreads());
+            }
+        }, "oxD Threads");
+
+        view.getLicenseTable().setColumnWidth(0, 70, Style.Unit.PX);
+        view.getLicenseTable().setColumnWidth(1, 200, Style.Unit.PX);
+    }
+
     public void show(Customer customer) {
         this.customer = customer;
 
@@ -66,11 +75,17 @@ public class DetailsPresenter {
         view.getClientPublicKey().setHTML(asHtml(customer.getClientPublicKey()));
         view.getClientPrivateKey().setHTML(asHtml(customer.getClientPrivateKey()));
         view.getPrivatePassword().setHTML(asHtml(customer.getPrivatePassword()));
+        view.getPublicPassword().setHTML(asHtml(customer.getPublicPassword()));
+        view.getLicensePassword().setHTML(asHtml(customer.getLicensePassword()));
         reloadLicenseTable();
     }
 
     private static SafeHtml asHtml(String str) {
-        return SafeHtmlUtils.fromString(str != null ? str : "");
+        String s = str != null ? str : "";
+        if (s.length() > 40) {
+            s = s.substring(0, 40) + "...";
+        }
+        return SafeHtmlUtils.fromString(s);
     }
 
     public Customer getCustomer() {
@@ -78,7 +93,7 @@ public class DetailsPresenter {
     }
 
     public void reloadLicenseTable() {
-        final List<License> licenses = customer.getLicenses() != null ? customer.getLicenses() : new ArrayList<License>();
+        final List<CustomerLicense> licenses = customer.getLicenses() != null ? customer.getLicenses() : new ArrayList<CustomerLicense>();
         view.getLicenseTable().setRowData(licenses);
         view.getLicenseTable().setRowCount(licenses.size());
     }

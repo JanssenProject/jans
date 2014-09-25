@@ -7,15 +7,15 @@ import java.io.Serializable;
  * @version 0.9, 25/09/2014
  */
 
-public class License implements Serializable {
+public class CustomerLicense implements Serializable {
 
     private LicenseType type;
     private int numberOfThreads;
 
-    public License() {
+    public CustomerLicense() {
     }
 
-    public License(int numberOfThreads, LicenseType type) {
+    public CustomerLicense(int numberOfThreads, LicenseType type) {
         this.numberOfThreads = numberOfThreads;
         this.type = type;
     }

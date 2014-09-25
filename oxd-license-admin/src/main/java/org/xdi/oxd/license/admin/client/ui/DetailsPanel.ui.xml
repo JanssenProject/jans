@@ -5,11 +5,29 @@
         xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         >
 
-    <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel">
+    <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel" width="490px">
         <g:HTML>
             <h3>Name:</h3>
         </g:HTML>
+        <g:HorizontalPanel>
+            <g:Button ui:field="addLicense" enabled="false">Add License</g:Button>
+            <g:Button ui:field="removeLicense" enabled="false">Remove License</g:Button>
+        </g:HorizontalPanel>
+        <cellview:CellTable ui:field="licenseTable" width="100%"/>
+        <g:HTML><br/><br/><br/></g:HTML>
         <g:HTML ui:field="nameField"/>
+        <g:HTML>
+            <h3>Private password:</h3>
+        </g:HTML>
+        <g:HTML ui:field="privatePassword"/>
+        <g:HTML>
+            <h3>Public password:</h3>
+        </g:HTML>
+        <g:HTML ui:field="publicPassword"/>
+        <g:HTML>
+            <h3>License password:</h3>
+        </g:HTML>
+        <g:HTML ui:field="licensePassword"/>
         <g:HTML>
             <h3>Private key:</h3>
         </g:HTML>
@@ -26,14 +44,5 @@
             <h3>Client public key:</h3>
         </g:HTML>
         <g:HTML ui:field="clientPublicKey"/>
-        <g:HTML>
-            <h3>Private password:</h3>
-        </g:HTML>
-        <g:HTML ui:field="privatePassword"/>
-        <g:HorizontalPanel>
-            <g:Button ui:field="addLicense" enabled="false">Add License</g:Button>
-            <g:Button ui:field="removeLicense" enabled="false">Remove License</g:Button>
-        </g:HorizontalPanel>
-        <cellview:CellTable ui:field="licenseTable" width="100%"/>
     </g:VerticalPanel>
 </ui:UiBinder>

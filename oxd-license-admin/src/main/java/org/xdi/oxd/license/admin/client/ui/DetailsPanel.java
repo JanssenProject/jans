@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.xdi.oxd.license.admin.shared.License;
+import org.xdi.oxd.license.admin.shared.CustomerLicense;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,11 +38,15 @@ public class DetailsPanel implements IsWidget {
     @UiField
     HTML privateKey;
     @UiField
-    CellTable<License> licenseTable;
+    CellTable<CustomerLicense> licenseTable;
     @UiField
     Button removeLicense;
     @UiField
     Button addLicense;
+    @UiField
+    HTML licensePassword;
+    @UiField
+    HTML publicPassword;
 
     public DetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -54,6 +58,14 @@ public class DetailsPanel implements IsWidget {
 
     public Button getRemoveLicense() {
         return removeLicense;
+    }
+
+    public HTML getLicensePassword() {
+        return licensePassword;
+    }
+
+    public HTML getPublicPassword() {
+        return publicPassword;
     }
 
     @Override
@@ -85,7 +97,7 @@ public class DetailsPanel implements IsWidget {
         return publicKey;
     }
 
-    public CellTable<License> getLicenseTable() {
+    public CellTable<CustomerLicense> getLicenseTable() {
         return licenseTable;
     }
 }

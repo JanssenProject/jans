@@ -38,6 +38,10 @@ public class CustomerService {
         return Collections.emptyList();
     }
 
+    public LdapCustomer get(String dn) {
+        return ldapEntryManager.find(LdapCustomer.class, dn);
+    }
+
     public LdapCustomer getCustomersByLicenseId(String licenseId) {
         try {
 //                   final Filter filter = Filter.create("&(inum=*)");
@@ -52,6 +56,14 @@ public class CustomerService {
             LOG.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    public void merge(LdapCustomer ldapCustomer) {
+        try {
+            ldapEntryManager.merge(ldapCustomer);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public void save(LdapCustomer ldapCustomer) {

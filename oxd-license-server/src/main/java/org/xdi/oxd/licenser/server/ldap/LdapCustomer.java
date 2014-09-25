@@ -5,6 +5,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +43,9 @@ public class LdapCustomer {
     private List<String> licenses;
 
     public List<String> getLicenses() {
+        if (licenses == null) {
+            licenses = new ArrayList<String>();
+        }
         return licenses;
     }
 

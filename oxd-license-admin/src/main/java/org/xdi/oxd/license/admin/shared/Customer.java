@@ -21,13 +21,13 @@ public class Customer implements Serializable {
     private String licensePassword;
     private String clientPrivateKey;
     private String clientPublicKey;
-    private List<License> licenses = new ArrayList<License>();
+    private List<CustomerLicense> licenses = new ArrayList<CustomerLicense>();
 
-    public List<License> getLicenses() {
+    public List<CustomerLicense> getLicenses() {
         return licenses;
     }
 
-    public void setLicenses(List<License> licenses) {
+    public void setLicenses(List<CustomerLicense> licenses) {
         this.licenses = licenses;
     }
 
