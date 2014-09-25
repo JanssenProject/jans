@@ -322,6 +322,8 @@ public class ConfigurationFactory {
 	private static FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
 		try {
 			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
+			
+			return fileConfiguration;
 		} catch (Exception ex) {
 			if (isMandatory) {
 				LOG.error("Failed to load configuration from {0}", ex, fileName);
