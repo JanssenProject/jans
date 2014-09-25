@@ -37,6 +37,8 @@ public class MainPanel implements IsWidget {
     DetailsPanel detailsPanel;
     @UiField
     Button editButton;
+    @UiField
+    Button refreshButton;
 
     public MainPanel() {
         uiBinder.createAndBindUi(this);
@@ -61,6 +63,10 @@ public class MainPanel implements IsWidget {
 
     public Button getRemoveButton() {
         return removeButton;
+    }
+
+    public Button getRefreshButton() {
+        return refreshButton;
     }
 
     public CellTable<Customer> getTable() {

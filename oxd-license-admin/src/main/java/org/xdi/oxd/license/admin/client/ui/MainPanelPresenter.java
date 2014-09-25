@@ -48,6 +48,12 @@ public class MainPanelPresenter implements Presenter {
                 dialog.show();
             }
         });
+        view.getRefreshButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadCustomers();
+            }
+        });
     }
 
     private void loadCustomers() {
@@ -55,6 +61,7 @@ public class MainPanelPresenter implements Presenter {
             @Override
             public void onSuccess(List<Customer> result) {
                 view.getTable().setRowData(result);
+                view.getTable().setRowCount(result.size());
             }
         });
     }

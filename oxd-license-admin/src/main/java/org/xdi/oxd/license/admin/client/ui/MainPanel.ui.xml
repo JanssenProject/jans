@@ -17,6 +17,7 @@
                 <g:Button ui:field="addButton">Add</g:Button>
                 <g:Button ui:field="editButton">Edit</g:Button>
                 <g:Button ui:field="removeButton">Remove</g:Button>
+                <g:Button ui:field="refreshButton">Refresh</g:Button>
             </g:FlowPanel>
         </g:north>
 
