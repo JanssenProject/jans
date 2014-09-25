@@ -31,8 +31,8 @@
         </g:HTML>
         <g:HTML ui:field="privatePassword"/>
         <g:HorizontalPanel>
-            <g:Button ui:field="addLicense">Add License</g:Button>
-            <g:Button ui:field="removeLicense">Remove License</g:Button>
+            <g:Button ui:field="addLicense" enabled="false">Add License</g:Button>
+            <g:Button ui:field="removeLicense" enabled="false">Remove License</g:Button>
         </g:HorizontalPanel>
         <cellview:CellTable ui:field="licenseTable" width="100%"/>
     </g:VerticalPanel>

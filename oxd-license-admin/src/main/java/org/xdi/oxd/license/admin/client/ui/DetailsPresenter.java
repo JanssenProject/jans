@@ -5,6 +5,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.License;
@@ -22,9 +24,11 @@ public class DetailsPresenter {
     private final DetailsPanel view;
 
     private Customer customer;
+    private SingleSelectionModel<License> selectionModel = new SingleSelectionModel<License>();
 
     public DetailsPresenter(DetailsPanel view) {
         this.view = view;
+        view.getLicenseTable().setSelectionModel(selectionModel);
         view.getLicenseTable().addColumn(new TextColumn<License>() {
             @Override
             public String getValue(License license) {
@@ -44,11 +48,18 @@ public class DetailsPresenter {
                 dialog.show();
             }
         });
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                DetailsPresenter.this.view.getRemoveLicense().setEnabled(selectionModel.getSelectedObject() != null);
+            }
+        });
     }
 
     public void show(Customer customer) {
         this.customer = customer;
 
+        view.getAddLicense().setEnabled(true);
         view.getNameField().setHTML(asHtml(customer.getName()));
         view.getPublicKey().setHTML(asHtml(customer.getPublicKey()));
         view.getPrivateKey().setHTML(asHtml(customer.getPrivateKey()));
