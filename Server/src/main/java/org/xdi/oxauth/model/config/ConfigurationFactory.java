@@ -169,7 +169,7 @@ public class ConfigurationFactory {
                 return true;
             }
         } catch (LdapMappingException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn(e.getMessage());
             if (p_recoverFromFiles) {
                 LOG.info("Unable to find configuration in LDAP, try to create configuration entry in LDAP... ");
                 if (getLdapConfiguration().getBoolean("createLdapConfigurationEntryIfNotExist")) {
