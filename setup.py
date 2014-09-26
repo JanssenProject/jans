@@ -450,6 +450,8 @@ class Setup(object):
                 f = open(openid_key_json_fn, 'w')
                 f.write(output)
                 f.close()
+                self.run("/bin/chown", 'tomcat:tomcat', openid_key_json_fn)
+                self.run("/bin/chmod", '700', openid_key_json_fn)
                 self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
@@ -761,10 +763,12 @@ class Setup(object):
 
     def change_ownership(self):
         self.logIt("Changing ownership")
-        self.run(['chown', '-R', 'tomcat:tomcat', self.tomcatHome])
-        self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
-        self.run(['chown', '-R', 'tomcat:tomcat', self.certFolder])
-        self.run(['chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcatHome])
+        self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
+        self.run(['/bin/chmod', '-R', '700', self.certFolder])
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
