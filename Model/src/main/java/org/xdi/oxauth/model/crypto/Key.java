@@ -96,7 +96,7 @@ public class Key<E extends  PrivateKey, F extends PublicKey> implements JSONable
 
         jsonObject.put("keyType", getKeyType());
         jsonObject.put("use", getUse());
-        jsonObject.put("Algorithm", getAlgorithm());
+        jsonObject.put("algorithm", getAlgorithm());
         jsonObject.put("keyId", getKeyId());
         jsonObject.put("curve", getCurve());
         jsonObject.put("privateKey", getPrivateKey().toJSONObject());
