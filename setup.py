@@ -328,7 +328,7 @@ class Setup(object):
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
 
-    def gen_cert(self, suffix, password):
+    def gen_cert(self, suffix, password, user='root'):
         self.logIt('Generating Certificate for %s' % suffix)
         key_with_password = '%s/%s.key.orig' % (self.certFolder, suffix)
         key = '%s/%s.key' % (self.certFolder, suffix)
@@ -374,19 +374,24 @@ class Setup(object):
                   '-out',
                   public_certificate
         ])
+        self.run(["/bin/chown", '%s:%s' % (user, user), key_with_password])
+        self.run(["/bin/chmod", '700', key_with_password])
+        self.run(["/bin/chown", '%s:%s' % (user, user), key])
+        self.run(["/bin/chmod", '700', key])
 
-    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
+    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, user='root'):
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
+        pkcs_fn = '%s/%s.pkcs12' % (self.certFolder, suffix)
         self.run([self.opensslCommand,
                   'pkcs12',
                   '-export',
                   '-inkey',
-                  '%s/%s.key' % (self.certFolder, suffix),
+                  inKey,
                   '-in',
-                  '%s/%s.crt' % (self.certFolder, suffix),
+                  inCert,
                   '-out',
-                  '%s/%s.pkcs12' % (self.certFolder, suffix),
+                  pkcs_fn,
                   '-name',
                   self.hostname,
                   '-passout',
@@ -411,6 +416,10 @@ class Setup(object):
                   'RSA',
                   '-noprompt'
         ])
+        self.run(["/bin/chown", '%s:%s' % (user, user), pkcs_fn])
+        self.run(["/bin/chmod", '700', pkcs_fn])
+        self.run(["/bin/chown", '%s:%s' % (user, user), keystoreFN])
+        self.run(["/bin/chmod", '700', keystoreFN])
 
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
@@ -450,8 +459,8 @@ class Setup(object):
                 f = open(openid_key_json_fn, 'w')
                 f.write(output)
                 f.close()
-                self.run("/bin/chown", 'tomcat:tomcat', openid_key_json_fn)
-                self.run("/bin/chmod", '700', openid_key_json_fn)
+                self.run(["/bin/chown", 'tomcat:tomcat', openid_key_json_fn])
+                self.run(["/bin/chmod", '700', openid_key_json_fn])
                 self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
@@ -460,26 +469,29 @@ class Setup(object):
     def gen_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
-            self.gen_cert('httpd', self.httpdKeyPass)
-            self.gen_cert('tomcat', self.tomcatJksPass)
-            self.gen_cert('shibIDP', self.shibJksPass)
-            self.gen_cert('asimba', self.asimbaJksPass)
+            self.gen_cert('httpd', self.httpdKeyPass, 'apache')
+            self.gen_cert('tomcat', self.tomcatJksPass, 'tomcat')
+            self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
+            self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
             self.gen_keystore('tomcat',
                               self.tomcatJksFn,
                               self.tomcatJksPass,
                               '%s/tomcat.key' % self.certFolder,
-                              '%s/tomcat.crt' % self.certFolder)
+                              '%s/tomcat.crt' % self.certFolder,
+                              'tomcat')
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
                               self.shibJksPass,
                               '%s/shibIDP.key' % self.certFolder,
-                              '%s/shibIDP.crt' % self.certFolder)
+                              '%s/shibIDP.crt' % self.certFolder,
+                              'tomcat')
             self.gen_keystore('asimba',
                               self.asimbaJksFn,
                               self.asimbaJksPass,
                               '%s/asimba.key' % self.certFolder,
-                              '%s/asimba.crt' % self.certFolder)
+                              '%s/asimba.crt' % self.certFolder,
+                              'tomcat')
             self.gen_openid_keys()
         except:
             self.logIt("Error generating cyrpto")
@@ -767,8 +779,6 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
-        self.run(['/bin/chmod', '-R', '700', self.certFolder])
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
