@@ -423,7 +423,7 @@ class Setup(object):
 
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
-        self.copyFile("static/oxauth/java.security", "/usr/java/latest/jre/lib/security")
+        self.copyFile("static/oxauth/java.security", "/usr/java/latest/lib/security")
         self.copyFile("static/oxauth/lib/oxauth.jar", self.tomcat_user_home_lib)
         self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomcat_user_home_lib)
         self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomcat_user_home_lib)
