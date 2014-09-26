@@ -120,7 +120,7 @@ class Setup(object):
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuHome
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
         self.opensslCommand = '/usr/bin/openssl'
-        self.defaultTrustStoreFN = '/usr/java/latest/jre/lib/security/cacerts'
+        self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStorePW = 'changeit'
 
         self.oxtrust_openid_client_id = None

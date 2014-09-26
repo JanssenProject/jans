@@ -55,7 +55,7 @@
 	clientAuth="false" sslProtocol="TLS" SSLEnabled="true"
 	keystoreFile="%(tomcatJksFn)s"
 	keystoreType="JKS" keystorePass="%(tomcatJksPass)s"
-	truststoreFile="/usr/java/latest/jre/lib/security/cacerts"
+	truststoreFile="/usr/java/latest/lib/security/cacerts"
 	truststoreType="JKS" truststorePass="changeit"
 	truststoreAlgorithm="DelegateToApplication" />
 
