@@ -55,6 +55,7 @@ class Setup(object):
         self.countryCode = None
         self.city = None
         self.state = None
+        self.admin_email = None
 
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
@@ -281,6 +282,13 @@ class Setup(object):
             self.city = raw_input('City (for certificate)').strip()
         while not self.state:
             self.state = raw_input('State or Province (for certificate)').strip()
+        if not self.admin_email:
+            tld = None
+            try:
+                tld = ".".join(self.hostname.split(".")[-2:])
+            except:
+                tld = self.hostname
+            self.admin_email = "support@%s" % tld
         if not self.httpdKeyPass:
             self.httpdKeyPass = self.getPW()
         if not self.tomcatJksPass:
@@ -715,6 +723,7 @@ class Setup(object):
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
+        self.run(['/sbin/service', 'httpd', 'stop'])
         for dest_fn in self.ce_templates.keys():
             if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
@@ -729,6 +738,7 @@ class Setup(object):
         f = open("%s/conf/salt" % self.tomcatHome, 'w')
         f.write(self.encode_salt)
         f.close()
+        self.run(['/sbin/service', 'httpd', 'start'])
 
     def copy_scripts(self):
         self.logIt("Copying script files")
@@ -865,6 +875,7 @@ class Setup(object):
         installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.state = installObject.getPrompt("Enter your state or province")
         installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
+        installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
 
