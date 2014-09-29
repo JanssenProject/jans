@@ -1,13 +1,11 @@
 package org.xdi.oxd.licenser.server;
 
 import net.nicholaswilliams.java.licensing.License;
-import net.nicholaswilliams.java.licensing.ObjectSerializer;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.PasswordProvider;
 import net.nicholaswilliams.java.licensing.encryption.PrivateKeyDataProvider;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
 
-import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
@@ -43,10 +41,7 @@ public class LicenseGenerator {
                 build();
 
         final SignedLicense signedLicense = licenseCreator.signLicense(license, input.getLicensePassword().toCharArray());
-        final byte[] serializedLicense = new ObjectSerializer().writeObject(signedLicense);
-
-        final String encodedLicense = DatatypeConverter.printBase64Binary(serializedLicense);
-        return new org.xdi.oxd.license.client.data.License(encodedLicense);
+        return new org.xdi.oxd.license.client.data.License(LicenseSerializationUtilities.serialize(signedLicense));
     }
 
 

@@ -1,5 +1,8 @@
 package org.xdi.oxd.licenser.server;
 
+import com.google.common.io.BaseEncoding;
+import net.nicholaswilliams.java.licensing.ObjectSerializer;
+import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.Encryptor;
 import net.nicholaswilliams.java.licensing.encryption.KeyFileUtilities;
 import net.nicholaswilliams.java.licensing.exception.AlgorithmNotSupportedException;
@@ -54,6 +57,16 @@ public class LicenseSerializationUtilities {
         } catch (InvalidKeySpecException e) {
             throw new InappropriateKeySpecificationException(e);
         }
+    }
+
+    public static String serialize(SignedLicense signedLicense) {
+        final byte[] serializedLicense = new ObjectSerializer().writeObject(signedLicense);
+        return BaseEncoding.base64().encode(serializedLicense);
+    }
+
+    public static SignedLicense deserialize(String signedLicense) {
+        final byte[] decoded = BaseEncoding.base64().decode(signedLicense);
+        return new ObjectSerializer().readObject(SignedLicense.class, decoded);
     }
 
 }

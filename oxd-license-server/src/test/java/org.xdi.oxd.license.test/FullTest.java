@@ -77,6 +77,7 @@ public class FullTest {
                 withHolder("Customer Name").
                 withGoodBeforeDate(new Date().getTime() + 100).
                 addFeature("GluuFeature").
+                addFeature("4").
                 addFeature("FEATURE2", new Date().getTime() + 100).
                 build();
 

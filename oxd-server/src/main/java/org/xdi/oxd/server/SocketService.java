@@ -86,7 +86,7 @@ public class SocketService {
     }
 
     private int numberOfThreads() {
-        return 100;
+        return 1;
     }
 
     public void setShutdown(boolean p_shutdown) {

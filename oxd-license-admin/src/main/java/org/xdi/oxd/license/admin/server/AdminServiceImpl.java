@@ -21,6 +21,7 @@ import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 import org.xdi.oxd.licenser.server.persistence.CustomerService;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -94,6 +95,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
             LicenseGenerator licenseGenerator = new LicenseGenerator();
             final License generatedLicense = licenseGenerator.generate(input);
             final LdapCustomer refreshedCustomer = customerService.get(customer.getDn());
+            refreshedCustomer.setLicenses(refreshedCustomer.getLicenses() != null ? new ArrayList<String>(refreshedCustomer.getLicenses()) : new ArrayList<String>());
             refreshedCustomer.getLicenses().add(generatedLicense.getEncodedLicense());
             customerService.merge(refreshedCustomer);
 
@@ -131,6 +133,11 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 
     private static List<CustomerLicense> toLicenses(List<String> licenses) {
         List<CustomerLicense> result = Lists.newArrayList();    // todo
+//        for (String license : licenses) {
+//            final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(license);
+//            final byte[] licenseContent = signedLicense.getLicenseContent();
+//
+//        }
         return result;
     }
 
