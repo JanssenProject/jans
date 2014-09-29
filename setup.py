@@ -82,7 +82,6 @@ class Setup(object):
         self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
 
         self.httpdKeyPass = None
-        self.tomcatJksPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
         self.httpdCertFn = '%s/httpd.crt' % self.certFolder
         self.shibJksPass = None
@@ -290,8 +289,6 @@ class Setup(object):
             self.admin_email = "support@%s" % tld
         if not self.httpdKeyPass:
             self.httpdKeyPass = self.getPW()
-        if not self.tomcatJksPass:
-            self.tomcatJksPass = self.getPW()
         if not self.ldapPass:
             self.ldapPass = self.getPW()
         if not self.shibJksPass:
