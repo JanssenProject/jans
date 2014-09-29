@@ -82,6 +82,7 @@ class Setup(object):
         self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
 
         self.httpdKeyPass = None
+        self.tomcatJksPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
         self.httpdCertFn = '%s/httpd.crt' % self.certFolder
         self.shibJksPass = None
