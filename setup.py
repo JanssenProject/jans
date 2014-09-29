@@ -866,7 +866,7 @@ class Setup(object):
         installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
         randomPW = installObject.getPW()
-        installObject.ldapPass = installObject.getPrompt("Optional: enter password for LDAP superuser", randomPW)
+        installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
     def print_help(self):
         print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
@@ -913,7 +913,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    print "All passwords contained in %s. Remove or encrypt post installation. \n\n" % installObject.savedProperties
+    print """**
+** All passwords contained in %s.\n
+** Remove or encrypt post installation!!!\n
+**\n\n""" % installObject.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
