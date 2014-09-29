@@ -116,6 +116,7 @@ public class FullTest {
         });
         LicenseManager manager = LicenseManager.getInstance();
 
+        manager.decryptAndVerifyLicense(signedLicense);   // DECRYPT signed license
         manager.validateLicense(license);
         System.out.println("License is valid!");
 
