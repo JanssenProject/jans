@@ -88,8 +88,6 @@ class Setup(object):
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
         self.asimbaJksPass = None
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
-        self.tomcatJksPass = None
-        self.tomcatJksFn = '%s/tomcat.jks' % self.certFolder
 
         self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
@@ -478,15 +476,8 @@ class Setup(object):
         try:
             self.logIt('Generating certificates and keystores')
             self.gen_cert('httpd', self.httpdKeyPass, 'apache')
-            self.gen_cert('tomcat', self.tomcatJksPass, 'tomcat')
             self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
-            self.gen_keystore('tomcat',
-                              self.tomcatJksFn,
-                              self.tomcatJksPass,
-                              '%s/tomcat.key' % self.certFolder,
-                              '%s/tomcat.crt' % self.certFolder,
-                              'tomcat')
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
