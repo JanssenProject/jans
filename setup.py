@@ -725,7 +725,7 @@ class Setup(object):
                     self.logIt(traceback.format_exc(), True)
         self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
         f = open("%s/conf/salt" % self.tomcatHome, 'w')
-        f.write(self.encode_salt)
+        f.write('encodeSalt = %s' % self.encode_salt)
         f.close()
         self.run(['/sbin/service', 'httpd', 'start'])
 
