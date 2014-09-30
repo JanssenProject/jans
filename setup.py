@@ -136,7 +136,7 @@ class Setup(object):
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
-        self.tomcat_server_xml = %s/conf/server.xml" % self.tomcatHome
+        self.tomcat_server_xml = "%s/conf/server.xml" % self.tomcatHome
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '/etc/httpd/conf/httpd.conf'
         self.apache2_ssl_conf = '/etc/httpd/conf.d/https_gluu.conf'
@@ -480,11 +480,8 @@ class Setup(object):
         try:
             self.logIt('Generating certificates and keystores')
             self.gen_cert('httpd', self.httpdKeyPass, 'apache')
-            print "self.httpdKeyPass %s" % self.httpdKeyPass
             self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
-            print "self.shibJksPass %s" % self.shibJksPass
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
-            print "self.asimbaJksPass %s" % self.asimbaJksPass
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
