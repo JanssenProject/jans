@@ -227,8 +227,11 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
         httpService = HttpService.instance();
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
-        cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
+
+        cas_extra_opts = None
+        if (configurationAttributes.containsKey("cas_extra_opts")):
+            cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
 
         if (step == 1):
             print "CAS2 prepare for step 1"
@@ -243,7 +246,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 parametersMap.put("renew", "true")
             cas_service_request_uri = authenticationService.parametersAsString(parametersMap)
             cas_service_request_uri = cas_host + "/login?" + cas_service_request_uri
-            if StringHelper.isNotEmpty(cas_extra_opts):
+            if cas_extra_opts != None:
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
             print "CAS2 prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
