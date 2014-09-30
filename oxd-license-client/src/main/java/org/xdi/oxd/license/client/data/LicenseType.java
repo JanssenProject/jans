@@ -1,4 +1,4 @@
-package org.xdi.oxd.license.admin.shared;
+package org.xdi.oxd.license.client.data;
 
 /**
  * @author Yuriy Zabrovarnyy

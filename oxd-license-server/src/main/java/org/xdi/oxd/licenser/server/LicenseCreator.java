@@ -1,7 +1,6 @@
 package org.xdi.oxd.licenser.server;
 
 import net.nicholaswilliams.java.licensing.DataSignatureManager;
-import net.nicholaswilliams.java.licensing.License;
 import net.nicholaswilliams.java.licensing.ObjectSerializer;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.Encryptor;
@@ -13,6 +12,7 @@ import net.nicholaswilliams.java.licensing.exception.InappropriateKeyException;
 import net.nicholaswilliams.java.licensing.exception.InappropriateKeySpecificationException;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
 import net.nicholaswilliams.java.licensing.exception.ObjectSerializationException;
+import org.xdi.oxd.license.client.lib.ALicense;
 
 import java.security.PrivateKey;
 import java.util.Arrays;
@@ -35,19 +35,19 @@ public class LicenseCreator {
         this.privateKeyPasswordProvider = privateKeyPasswordProvider;
     }
 
-    public final SignedLicense signLicense(License license, char[] licensePassword)
+    public final SignedLicense signLicense(ALicense license, char[] licensePassword)
             throws AlgorithmNotSupportedException, KeyNotFoundException, InappropriateKeySpecificationException,
             InappropriateKeyException {
-        PrivateKey key;
-        {
-            char[] password = this.privateKeyPasswordProvider.getPassword();
-            byte[] keyData = this.privateKeyDataProvider.getEncryptedPrivateKeyData();
 
-            key = KeyFileUtilities.readEncryptedPrivateKey(keyData, password);
 
-            Arrays.fill(password, '\u0000');
-            Arrays.fill(keyData, (byte) 0);
-        }
+        char[] password = this.privateKeyPasswordProvider.getPassword();
+        byte[] keyData = this.privateKeyDataProvider.getEncryptedPrivateKeyData();
+
+        PrivateKey key = KeyFileUtilities.readEncryptedPrivateKey(keyData, password);
+
+        Arrays.fill(password, '\u0000');
+        Arrays.fill(keyData, (byte) 0);
+
 
         byte[] encrypted = Encryptor.encryptRaw(license.serialize(), licensePassword);
 
@@ -62,21 +62,21 @@ public class LicenseCreator {
     }
 
 
-    public final SignedLicense signLicense(License license)
+    public final SignedLicense signLicense(ALicense license)
             throws AlgorithmNotSupportedException, KeyNotFoundException, InappropriateKeySpecificationException,
             InappropriateKeyException {
         return this.signLicense(license, this.privateKeyPasswordProvider.getPassword());
     }
 
 
-    public final byte[] signAndSerializeLicense(License license, char[] licensePassword)
+    public final byte[] signAndSerializeLicense(ALicense license, char[] licensePassword)
             throws AlgorithmNotSupportedException, KeyNotFoundException, InappropriateKeySpecificationException,
             InappropriateKeyException, ObjectSerializationException {
         return new ObjectSerializer().writeObject(this.signLicense(license, licensePassword));
     }
 
 
-    public final byte[] signAndSerializeLicense(License license)
+    public final byte[] signAndSerializeLicense(ALicense license)
             throws AlgorithmNotSupportedException, KeyNotFoundException, InappropriateKeySpecificationException,
             InappropriateKeyException, ObjectSerializationException {
         return new ObjectSerializer().writeObject(this.signLicense(license));

@@ -250,7 +250,6 @@
                 <artifactId>guice-servlet</artifactId>
                 <version>${guice.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxd-license-client</artifactId>

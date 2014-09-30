@@ -1,5 +1,7 @@
 package org.xdi.oxd.license.admin.shared;
 
+import org.xdi.oxd.license.client.data.LicenseType;
+
 import java.io.Serializable;
 
 /**

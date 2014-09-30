@@ -74,6 +74,10 @@
     </build>
 
     <dependencies>
+        <dependency><!-- Use this dependency in your licensed application -->
+            <groupId>net.nicholaswilliams.java.licensing</groupId>
+            <artifactId>licensing-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

@@ -1,13 +1,14 @@
 package org.xdi.oxd.licenser.server;
 
-import net.nicholaswilliams.java.licensing.License;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.PasswordProvider;
 import net.nicholaswilliams.java.licensing.encryption.PrivateKeyDataProvider;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
+import org.xdi.oxd.license.client.lib.ALicense;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -16,14 +17,14 @@ import java.security.spec.InvalidKeySpecException;
 
 public class LicenseGenerator {
 
-    public org.xdi.oxd.license.client.data.License generate(final LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        PrivateKeyDataProvider privateKeyDataProvider =new PrivateKeyDataProvider() {
+    public SignedLicense generateSignedLicense(final LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PrivateKeyDataProvider privateKeyDataProvider = new PrivateKeyDataProvider() {
             @Override
             public byte[] getEncryptedPrivateKeyData() throws KeyNotFoundException {
                 return input.getPrivateKey();
             }
         };
-        PasswordProvider privatePasswordProvider= new PasswordProvider() {
+        PasswordProvider privatePasswordProvider = new PasswordProvider() {
             @Override
             public char[] getPassword() {
                 return input.getPrivatePassword().toCharArray();
@@ -32,15 +33,19 @@ public class LicenseGenerator {
         LicenseCreator licenseCreator = new LicenseCreator(privateKeyDataProvider, privatePasswordProvider);
 
         // generate license
-        License license = new License.Builder().
+        ALicense license = new ALicense.Builder().
                 withProductKey("Gluu").
                 withNumberOfLicenses(input.getThreadsCount()).
                 withHolder(input.getCustomerName()).
-                withGoodBeforeDate(input.getExpiredAt().getTime()).
+                withGoodBeforeDate(input.getExpiredAt().getTime() + TimeUnit.DAYS.toMillis(1)).
                 addFeature(input.getLicenseType()).
                 build();
 
-        final SignedLicense signedLicense = licenseCreator.signLicense(license, input.getLicensePassword().toCharArray());
+        return licenseCreator.signLicense(license, input.getLicensePassword().toCharArray());
+    }
+
+    public org.xdi.oxd.license.client.data.License generate(final LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        final SignedLicense signedLicense = generateSignedLicense(input);
         return new org.xdi.oxd.license.client.data.License(LicenseSerializationUtilities.serialize(signedLicense));
     }
 

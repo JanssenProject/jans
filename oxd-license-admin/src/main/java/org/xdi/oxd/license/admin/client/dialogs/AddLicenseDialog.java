@@ -16,8 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.ui.DetailsPresenter;
 import org.xdi.oxd.license.admin.shared.CustomerLicense;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
-import org.xdi.oxd.license.admin.shared.LicenseType;
+import org.xdi.oxd.license.client.data.LicenseType;
 
 /**
  * @author Yuriy Zabrovarnyy

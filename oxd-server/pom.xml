@@ -130,8 +130,8 @@
             <artifactId>resteasy-jaxrs</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.nicholaswilliams.java.licensing</groupId>
-            <artifactId>licensing-core</artifactId>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxd-license-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
