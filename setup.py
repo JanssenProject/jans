@@ -131,9 +131,11 @@ class Setup(object):
         self.oxauth_config_xml = '/opt/tomcat/conf/oxauth-config.xml'
         self.oxTrust_properties = '/opt/tomcat/conf/oxTrust.properties'
         self.oxtrust_ldap_properties = '/opt/tomcat/conf/oxTrustLdap.properties'
-        self.tomcat_server_xml = '/opt/tomcat/conf/server.xml'
         self.tomcat_gluuTomcatWrapper = '/opt/tomcat/conf/gluuTomcatWrapper.conf'
         self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
+        self.tomcat_log_folder = "%s/logs" % self.tomcatHome
+        self.tomcat_max_ram = None    # in MB
+        self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '/etc/httpd/conf/httpd.conf'
         self.apache2_ssl_conf = '/etc/httpd/conf.d/https_gluu.conf'
@@ -164,9 +166,9 @@ class Setup(object):
                      self.oxauth_config_xml: True,
                      self.oxTrust_properties: True,
                      self.oxtrust_ldap_properties: True,
-                     self.tomcat_server_xml: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.tomcat_oxauth_static_conf_json: True,
+                     self.oxTrust_log_rotation_configuration: True,
                      self.ldap_setup_properties: False,
                      self.org_custom_schema: False,
                      self.apache2_conf: True,
@@ -779,6 +781,11 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
 
+    def copy_static(self):
+        self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
+        self.copyFile("static/tomcat/server.xml", "%s/conf" % self.tomcatHome)
+
+
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
@@ -865,6 +872,7 @@ class Setup(object):
         installObject.state = installObject.getPrompt("Enter your state or province")
         installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
+        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '2')
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
@@ -961,6 +969,7 @@ if __name__ == '__main__':
             installObject.deleteLdapPw()
             installObject.copy_output()
             installObject.copy_init_files()
+            installObject.copy_static()
             installObject.change_ownership()
             installObject.start_tomcat()
             installObject.save_properties()
