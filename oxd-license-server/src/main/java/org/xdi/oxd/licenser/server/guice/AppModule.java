@@ -16,6 +16,7 @@ import org.xdi.oxd.licenser.server.conf.Configuration;
 import org.xdi.oxd.licenser.server.conf.ConfigurationFactory;
 import org.xdi.oxd.licenser.server.conf.JsonFileConfiguration;
 import org.xdi.oxd.licenser.server.ldap.Conf;
+import org.xdi.oxd.licenser.server.ldap.LdapStructureChecker;
 import org.xdi.oxd.licenser.server.ws.GenerateLicenseWS;
 import org.xdi.util.Util;
 import org.xdi.util.properties.FileConfiguration;
@@ -86,7 +87,9 @@ public class AppModule extends AbstractModule {
         try {
             final Conf conf = ldapManager.find(Conf.class, dn);
             if (conf != null) {
-                return Util.createJsonMapper().readValue(conf.getConf(), Configuration.class);
+                final Configuration configuration = Util.createJsonMapper().readValue(conf.getConf(), Configuration.class);
+                new LdapStructureChecker(ldapManager, configuration).checkLdapStructure();
+                return configuration;
             }
         } catch (LdapMappingException e) {
             LOG.trace(e.getMessage(), e);
@@ -102,6 +105,7 @@ public class AppModule extends AbstractModule {
                     } catch (Exception ex) {
                         LOG.error(e.getMessage(), ex);
                     }
+                    new LdapStructureChecker(ldapManager, jsonFileConfiguration).checkLdapStructure();
                     return jsonFileConfiguration;
                 }
             }

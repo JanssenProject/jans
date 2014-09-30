@@ -17,18 +17,8 @@ public class Configuration implements Serializable {
     private Integer threadNumberPaidLicense;
     @JsonProperty(value = "thread-number-premium-license")
     private Integer threadNumberPremiumLicense;
-    @JsonProperty(value = "customer-base-dn")
-    private String customerBaseDn;
 
     public Configuration() {
-    }
-
-    public String getCustomerBaseDn() {
-        return customerBaseDn;
-    }
-
-    public void setCustomerBaseDn(String customerBaseDn) {
-        this.customerBaseDn = customerBaseDn;
     }
 
     public String getBaseDn() {

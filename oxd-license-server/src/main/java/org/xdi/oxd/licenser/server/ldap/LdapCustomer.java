@@ -5,8 +5,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 23/09/2014
@@ -21,7 +19,7 @@ public class LdapCustomer {
     @LdapAttribute(name = "customerId")
     private String id;
     @LdapAttribute(name = "licenseId")
-    private String licenseId;
+    private String licenseIdDN;
     @LdapAttribute(name = "oxLicensePassword")
     private String licensePassword;
     @LdapAttribute(name = "oxPublicPassword")
@@ -38,16 +36,6 @@ public class LdapCustomer {
     private String privateKey;
     @LdapAttribute(name = "oxName")
     private String name;
-    @LdapAttribute(name = "oxLicense")
-    private List<String> licenses;
-
-    public List<String> getLicenses() {
-        return licenses;
-    }
-
-    public void setLicenses(List<String> licenses) {
-        this.licenses = licenses;
-    }
 
     public void setName(String name) {
         this.name = name;
@@ -85,12 +73,12 @@ public class LdapCustomer {
         this.clientPublicKey = clientPublicKey;
     }
 
-    public String getLicenseId() {
-        return licenseId;
+    public String getLicenseIdDN() {
+        return licenseIdDN;
     }
 
-    public void setLicenseId(String licenseId) {
-        this.licenseId = licenseId;
+    public void setLicenseIdDN(String licenseIdDN) {
+        this.licenseIdDN = licenseIdDN;
     }
 
     public String getLicensePassword() {
@@ -139,7 +127,7 @@ public class LdapCustomer {
         sb.append("LdapCustomer");
         sb.append("{clientPrivateKey='").append(clientPrivateKey).append('\'');
         sb.append(", dn='").append(dn).append('\'');
-        sb.append(", licenseId='").append(licenseId).append('\'');
+        sb.append(", licenseIdDN='").append(licenseIdDN).append('\'');
         sb.append(", licensePassword='").append(licensePassword).append('\'');
         sb.append(", publicPassword='").append(publicPassword).append('\'');
         sb.append(", privatePassword='").append(privatePassword).append('\'');

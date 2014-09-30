@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.licenser.server.conf.Configuration;
 import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
+import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,8 @@ public class CustomerService {
     LdapEntryManager ldapEntryManager;
     @Inject
     Configuration conf;
+    @Inject
+    LdapStructure ldapStructure;
 
     public List<LdapCustomer> getAllCustomers() {
         try {
@@ -78,7 +81,7 @@ public class CustomerService {
     private void setDnIfEmpty(LdapCustomer ldapCustomer) {
         if (Strings.isNullOrEmpty(ldapCustomer.getDn())) {
             String id = Strings.isNullOrEmpty(ldapCustomer.getId()) ? UUID.randomUUID().toString() : ldapCustomer.getId();
-            ldapCustomer.setDn(String.format("customerId=%s,%s", id, conf.getCustomerBaseDn()));
+            ldapCustomer.setDn(String.format("customerId=%s,%s", id, ldapStructure.getCustomerBaseDn()));
         }
     }
 

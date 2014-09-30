@@ -6,5 +6,5 @@ package org.xdi.oxd.license.client.data;
  */
 
 public enum LicenseType {
-    FREE, PAID, PREMIUM
+    FREE, SHAREWARE, PAID, PREMIUM
 }
