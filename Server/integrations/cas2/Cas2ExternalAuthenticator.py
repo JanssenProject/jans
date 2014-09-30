@@ -29,6 +29,12 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         print "CAS2 Rest API authenticate isValidAuthenticationMethod"
+
+        if (not (configurationAttributes.containsKey("cas_validation_uri") and
+            configurationAttributes.containsKey("cas_validation_pattern") and
+            configurationAttributes.containsKey("cas_validation_timeout"))):
+            return True
+
         cas_validation_uri = configurationAttributes.get("cas_validation_uri").getValue2()
         cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
         cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
