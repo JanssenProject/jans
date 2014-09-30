@@ -316,7 +316,7 @@ class Setup(object):
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
-    def save_properties(self):
+    def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
         def getString(object):
             if type(object) == type(""):
@@ -874,7 +874,7 @@ class Setup(object):
         installObject.state = installObject.getPrompt("Enter your state or province")
         installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
-        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '2')
+        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1024')
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
