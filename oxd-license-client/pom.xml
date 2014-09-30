@@ -18,7 +18,58 @@
     <build>
         <finalName>oxd-license-server</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xsd</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.png</include>
+                    <include>**/*.jpg</include>
+                    <include>**/*.gif</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <!--<configuration>-->
+                        <!--<extraJvmArgs>-Xmx4048M -Xss1024k</extraJvmArgs>-->
+                        <!--<logLevel>INFO</logLevel>-->
+                        <!--<compileReport>false</compileReport>-->
+                        <!--<modules>-->
+                        <!--<module>org.xdi.oxd.license.admin.Admin</module>-->
+                        <!--</modules>-->
+                        <!--</configuration>-->
+                    </execution>
+                </executions>
+                <configuration>
+                    <compileSourcesArtifacts>
+                        <artifact>org.codehaus.mojo:oxd-license-client</artifact>
+                    </compileSourcesArtifacts>
+                </configuration>
+
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

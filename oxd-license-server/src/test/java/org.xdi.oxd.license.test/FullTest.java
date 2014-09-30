@@ -8,7 +8,7 @@ import net.nicholaswilliams.java.licensing.encryption.PublicKeyDataProvider;
 import net.nicholaswilliams.java.licensing.encryption.RSAKeyPairGenerator;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
 import org.testng.annotations.Test;
-import org.xdi.oxd.license.client.data.LicenseType;
+import org.xdi.oxd.license.client.js.LicenseType;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.licenser.server.LicenseGenerator;

@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.ui.DetailsPresenter;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
-import org.xdi.oxd.license.client.data.LicenseType;
+import org.xdi.oxd.license.admin.shared.LicenseMetadata;
+import org.xdi.oxd.license.client.js.LicenseType;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,7 +63,7 @@ public class AddLicenseDialog implements IsWidget {
     }
 
     private void onAddLicense() {
-        final CustomerLicense license = new CustomerLicense();
+        final LicenseMetadata license = new LicenseMetadata();
 
         try {
             license.setNumberOfThreads(Integer.parseInt(threads.getValue()));
@@ -72,15 +72,15 @@ public class AddLicenseDialog implements IsWidget {
             return;
         }
         license.setType(LicenseType.valueOf(type.getValue(type.getSelectedIndex())));
-        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<CustomerLicense>() {
+        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<LicenseMetadata>() {
             @Override
             public void onFailure(Throwable caught) {
                 showError("Failed to add license.");
             }
 
             @Override
-            public void onSuccess(CustomerLicense result) {
-                detailsPresenter.getCustomer().getLicenses().add(result);
+            public void onSuccess(LicenseMetadata result) {
+//                detailsPresenter.getCustomer().getLicenseIds().add(result); // todo
                 detailsPresenter.reloadLicenseTable();
                 dialog.hide();
             }

@@ -21,14 +21,14 @@ public class Customer implements Serializable {
     private String licensePassword;
     private String clientPrivateKey;
     private String clientPublicKey;
-    private List<CustomerLicense> licenses = new ArrayList<CustomerLicense>();
+    private List<CustomerLicenseId> licenseIds = new ArrayList<CustomerLicenseId>();
 
-    public List<CustomerLicense> getLicenses() {
-        return licenses;
+    public List<CustomerLicenseId> getLicenseIds() {
+        return licenseIds;
     }
 
-    public void setLicenses(List<CustomerLicense> licenses) {
-        this.licenses = licenses;
+    public void setLicenseIds(List<CustomerLicenseId> licenseIds) {
+        this.licenseIds = licenseIds;
     }
 
     public Customer() {

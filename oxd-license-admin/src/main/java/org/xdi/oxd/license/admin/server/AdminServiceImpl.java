@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
+import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.admin.shared.GeneratedKeys;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
@@ -21,7 +21,6 @@ import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 import org.xdi.oxd.licenser.server.persistence.CustomerService;
 
 import java.security.KeyPair;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public CustomerLicense addLicense(Customer customer, CustomerLicense license) {
+    public LicenseMetadata addLicense(Customer customer, LicenseMetadata license) {
         try {
             LicenseGeneratorInput input = new LicenseGeneratorInput();
             input.setCustomerName(customer.getName());
@@ -95,8 +94,10 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
             LicenseGenerator licenseGenerator = new LicenseGenerator();
             final License generatedLicense = licenseGenerator.generate(input);
             final LdapCustomer refreshedCustomer = customerService.get(customer.getDn());
-            refreshedCustomer.setLicenses(refreshedCustomer.getLicenses() != null ? new ArrayList<String>(refreshedCustomer.getLicenses()) : new ArrayList<String>());
-            refreshedCustomer.getLicenses().add(generatedLicense.getEncodedLicense());
+
+            // todo
+//            refreshedCustomer.setLicenses(refreshedCustomer.getLicenses() != null ? new ArrayList<String>(refreshedCustomer.getLicenses()) : new ArrayList<String>());
+//            refreshedCustomer.getLicenses().add(generatedLicense.getEncodedLicense());
             customerService.merge(refreshedCustomer);
 
             return license;
@@ -122,17 +123,20 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setPublicKey(c.getPublicKey());
         customer.setClientPrivateKey(c.getClientPrivateKey());
         customer.setClientPublicKey(c.getClientPublicKey());
-        customer.setLicenses(toLicenseList(c.getLicenses()));
+
+        // todo
+//        customer.setLicenses(toLicenseList(c.getLicenses()));
+
         return customer;
     }
 
-    private static List<String> toLicenseList(List<CustomerLicense> licenses) {
+    private static List<String> toLicenseList(List<LicenseMetadata> licenses) {
         List<String> result = Lists.newArrayList(); // todo
         return result;
     }
 
-    private static List<CustomerLicense> toLicenses(List<String> licenses) {
-        List<CustomerLicense> result = Lists.newArrayList();    // todo
+    private static List<LicenseMetadata> toLicenses(List<String> licenses) {
+        List<LicenseMetadata> result = Lists.newArrayList();    // todo
 //        for (String license : licenses) {
 //            final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(license);
 //            final byte[] licenseContent = signedLicense.getLicenseContent();
@@ -153,7 +157,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setPublicKey(c.getPublicKey());
         customer.setClientPrivateKey(c.getClientPrivateKey());
         customer.setClientPublicKey(c.getClientPublicKey());
-        customer.setLicenses(toLicenses(c.getLicenses()));
+//        customer.setLicenseIds(toLicenses(c.getLicenses()));
         return customer;
     }
 

@@ -10,10 +10,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,7 +22,7 @@ public class DetailsPresenter {
     private final DetailsPanel view;
 
     private Customer customer;
-    private SingleSelectionModel<CustomerLicense> selectionModel = new SingleSelectionModel<CustomerLicense>();
+    private SingleSelectionModel<LicenseMetadata> selectionModel = new SingleSelectionModel<LicenseMetadata>();
 
     public DetailsPresenter(DetailsPanel view) {
         this.view = view;
@@ -48,15 +45,15 @@ public class DetailsPresenter {
 
     private void configureLicenseTable(DetailsPanel view) {
         view.getLicenseTable().setSelectionModel(selectionModel);
-        view.getLicenseTable().addColumn(new TextColumn<CustomerLicense>() {
+        view.getLicenseTable().addColumn(new TextColumn<LicenseMetadata>() {
             @Override
-            public String getValue(CustomerLicense license) {
+            public String getValue(LicenseMetadata license) {
                 return license.getType().name();
             }
         }, "Type");
-        view.getLicenseTable().addColumn(new TextColumn<CustomerLicense>() {
+        view.getLicenseTable().addColumn(new TextColumn<LicenseMetadata>() {
             @Override
-            public String getValue(CustomerLicense license) {
+            public String getValue(LicenseMetadata license) {
                 return Integer.toString(license.getNumberOfThreads());
             }
         }, "oxD Threads");
@@ -93,8 +90,9 @@ public class DetailsPresenter {
     }
 
     public void reloadLicenseTable() {
-        final List<CustomerLicense> licenses = customer.getLicenses() != null ? customer.getLicenses() : new ArrayList<CustomerLicense>();
-        view.getLicenseTable().setRowData(licenses);
-        view.getLicenseTable().setRowCount(licenses.size());
+        // todo
+//        final List<LicenseMetadata> licenses = customer.getLicenseIds() != null ? customer.getLicenseIds() : new ArrayList<LicenseMetadata>();
+//        view.getLicenseTable().setRowData(licenses);
+//        view.getLicenseTable().setRowCount(licenses.size());
     }
 }

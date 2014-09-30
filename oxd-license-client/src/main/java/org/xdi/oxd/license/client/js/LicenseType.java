@@ -1,4 +1,4 @@
-package org.xdi.oxd.license.client.data;
+package org.xdi.oxd.license.client.js;
 
 /**
  * @author Yuriy Zabrovarnyy

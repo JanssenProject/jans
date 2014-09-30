@@ -2,9 +2,8 @@ package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
+import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.admin.shared.GeneratedKeys;
-import org.xdi.oxd.license.admin.shared.CustomerLicense;
 
 import java.util.List;
 
@@ -17,5 +16,5 @@ public interface AdminServiceAsync {
 
     void generateKeys(AsyncCallback<GeneratedKeys> async);
 
-    void addLicense(Customer customer, CustomerLicense license, AsyncCallback<CustomerLicense> async);
+    void addLicense(Customer customer, LicenseMetadata license, AsyncCallback<LicenseMetadata> async);
 }
