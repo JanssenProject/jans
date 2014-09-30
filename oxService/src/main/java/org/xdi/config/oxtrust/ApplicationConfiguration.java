@@ -139,5 +139,4 @@ public final @Data class ApplicationConfiguration implements Serializable {
 	private String cssLocation;
 	private String jsLocation;
 
-	private String encodeSalt;
 }
