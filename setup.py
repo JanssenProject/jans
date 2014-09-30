@@ -316,7 +316,7 @@ class Setup(object):
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
-    def save_properties(self):
+    def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
         def getString(object):
             if type(object) == type(""):
