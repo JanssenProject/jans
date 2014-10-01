@@ -37,6 +37,7 @@ import traceback
 import subprocess
 import sys
 import getopt
+import hashlib
 
 class Setup(object):
     def __init__(self):
@@ -520,11 +521,18 @@ class Setup(object):
             self.logIt("Error adding schema")
             self.logIt(traceback.format_exc(), True)
 
+    def ldap_encode(self, password):
+        salt = os.urandom(4)
+        sha = hashlib.sha1(password)
+        sha.update(salt)
+        b64encoded = '{0}{1}'.format(sha.digest(), salt).encode('base64').strip()
+        encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
+        return encrypted_password
+
     def encode_passwords(self):
         self.logIt("Encoding passwords")
         try:
-            cmd = "%s -f %s -s SSHA" % (self.ldapEncodePWCommand, self.ldapPassFn)
-            self.encoded_ldap_pw = os.popen(cmd, 'r').read().strip()
+            self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
             cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
             self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
             self.oxauthClient_pw = self.getPW()
@@ -994,3 +1002,4 @@ if __name__ == '__main__':
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
                          (installObject.savedProperties, installObject.setup_properties_fn)
+
