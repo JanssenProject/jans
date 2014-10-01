@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui='urn:ui:com.google.gwt.uibinder'
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
+        xmlns:a="urn:import:org.xdi.oxd.license.admin.client.ui"
+        >
+
+    <g:DockLayoutPanel ui:field="rootPanel">
+        <g:north size='46'>
+            <g:FlowPanel>
+                <g:Button ui:field="addButton">Add</g:Button>
+                <g:Button ui:field="editButton">Edit</g:Button>
+                <g:Button ui:field="removeButton">Remove</g:Button>
+                <g:Button ui:field="refreshButton">Refresh</g:Button>
+            </g:FlowPanel>
+        </g:north>
+
+        <g:center>
+            <cellview:CellTable ui:field="table" width="100%"/>
+        </g:center>
+        <g:east size="500">
+            <a:DetailsPanel ui:field="detailsPanel"/>
+        </g:east>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

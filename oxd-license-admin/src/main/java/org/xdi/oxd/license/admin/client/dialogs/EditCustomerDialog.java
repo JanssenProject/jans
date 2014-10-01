@@ -115,13 +115,15 @@ public class EditCustomerDialog implements IsWidget {
     private void onOkClick() {
         final Customer customer = new Customer();
         customer.setName(nameField.getValue());
-        customer.setLicensePassword(generatedKeys.getLicensePassword());
-        customer.setPrivatePassword(generatedKeys.getPrivatePassword());
-        customer.setPublicPassword(generatedKeys.getPublicPassword());
-        customer.setPublicKey(generatedKeys.getPublicKey());
-        customer.setPrivateKey(generatedKeys.getPrivateKey());
-        customer.setClientPrivateKey(generatedKeys.getClientPrivateKey());
-        customer.setClientPublicKey(generatedKeys.getClientPublicKey());
+
+        // todo
+//        customer.setLicensePassword(generatedKeys.getLicensePassword());
+//        customer.setPrivatePassword(generatedKeys.getPrivatePassword());
+//        customer.setPublicPassword(generatedKeys.getPublicPassword());
+//        customer.setPublicKey(generatedKeys.getPublicKey());
+//        customer.setLicenseCryptDn(generatedKeys.getPrivateKey());
+//        customer.setClientPrivateKey(generatedKeys.getClientPrivateKey());
+//        customer.setClientPublicKey(generatedKeys.getClientPublicKey());
         Admin.getService().create(customer, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {

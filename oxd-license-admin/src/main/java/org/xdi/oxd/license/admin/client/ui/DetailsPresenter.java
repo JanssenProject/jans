@@ -67,13 +67,15 @@ public class DetailsPresenter {
 
         view.getAddLicense().setEnabled(true);
         view.getNameField().setHTML(asHtml(customer.getName()));
-        view.getPublicKey().setHTML(asHtml(customer.getPublicKey()));
-        view.getPrivateKey().setHTML(asHtml(customer.getPrivateKey()));
-        view.getClientPublicKey().setHTML(asHtml(customer.getClientPublicKey()));
-        view.getClientPrivateKey().setHTML(asHtml(customer.getClientPrivateKey()));
-        view.getPrivatePassword().setHTML(asHtml(customer.getPrivatePassword()));
-        view.getPublicPassword().setHTML(asHtml(customer.getPublicPassword()));
-        view.getLicensePassword().setHTML(asHtml(customer.getLicensePassword()));
+        view.getPrivateKey().setHTML(asHtml(customer.getLicenseCryptDn()));
+
+        // todo
+//        view.getPublicKey().setHTML(asHtml(customer.getPublicKey()));
+//        view.getClientPublicKey().setHTML(asHtml(customer.getClientPublicKey()));
+//        view.getClientPrivateKey().setHTML(asHtml(customer.getClientPrivateKey()));
+//        view.getPrivatePassword().setHTML(asHtml(customer.getPrivatePassword()));
+//        view.getPublicPassword().setHTML(asHtml(customer.getPublicPassword()));
+//        view.getLicensePassword().setHTML(asHtml(customer.getLicensePassword()));
         reloadLicenseTable();
     }
 

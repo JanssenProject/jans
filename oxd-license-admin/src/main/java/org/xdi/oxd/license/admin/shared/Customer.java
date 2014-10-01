@@ -14,13 +14,7 @@ public class Customer implements Serializable {
     private String dn;
     private String id;
     private String name;
-    private String privateKey;
-    private String publicKey;
-    private String privatePassword;
-    private String publicPassword;
-    private String licensePassword;
-    private String clientPrivateKey;
-    private String clientPublicKey;
+    private String licenseCryptDn;
     private List<CustomerLicenseId> licenseIds = new ArrayList<CustomerLicenseId>();
 
     public List<CustomerLicenseId> getLicenseIds() {
@@ -50,33 +44,6 @@ public class Customer implements Serializable {
         this.id = id;
     }
 
-    public String getClientPrivateKey() {
-        return clientPrivateKey;
-    }
-
-    public Customer setClientPrivateKey(String clientPrivateKey) {
-        this.clientPrivateKey = clientPrivateKey;
-        return this;
-    }
-
-    public String getClientPublicKey() {
-        return clientPublicKey;
-    }
-
-    public Customer setClientPublicKey(String clientPublicKey) {
-        this.clientPublicKey = clientPublicKey;
-        return this;
-    }
-
-    public String getLicensePassword() {
-        return licensePassword;
-    }
-
-    public Customer setLicensePassword(String licensePassword) {
-        this.licensePassword = licensePassword;
-        return this;
-    }
-
     public String getName() {
         return name;
     }
@@ -86,39 +53,12 @@ public class Customer implements Serializable {
         return this;
     }
 
-    public String getPrivateKey() {
-        return privateKey;
+    public String getLicenseCryptDn() {
+        return licenseCryptDn;
     }
 
-    public Customer setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-        return this;
-    }
-
-    public String getPrivatePassword() {
-        return privatePassword;
-    }
-
-    public Customer setPrivatePassword(String privatePassword) {
-        this.privatePassword = privatePassword;
-        return this;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public Customer setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-        return this;
-    }
-
-    public String getPublicPassword() {
-        return publicPassword;
-    }
-
-    public Customer setPublicPassword(String publicPassword) {
-        this.publicPassword = publicPassword;
+    public Customer setLicenseCryptDn(String licenseCryptDn) {
+        this.licenseCryptDn = licenseCryptDn;
         return this;
     }
 }

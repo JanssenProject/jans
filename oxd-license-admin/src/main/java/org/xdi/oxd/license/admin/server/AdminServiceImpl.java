@@ -11,8 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
+import org.xdi.oxd.license.admin.shared.CustomerLicenseId;
 import org.xdi.oxd.license.admin.shared.GeneratedKeys;
+import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
@@ -72,9 +73,9 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         return new GeneratedKeys().
                 setPrivateKey(BaseEncoding.base64().encode(privateKeyBytes)).
                 setPublicKey(BaseEncoding.base64().encode(publicKeyBytes)).
-                        setPrivatePassword(privatePassword).
-                        setPublicPassword(publicPassword).
-                        setLicensePassword(randomPassword());
+                setPrivatePassword(privatePassword).
+                setPublicPassword(publicPassword).
+                setLicensePassword(randomPassword());
     }
 
     @Override
@@ -82,11 +83,11 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         try {
             LicenseGeneratorInput input = new LicenseGeneratorInput();
             input.setCustomerName(customer.getName());
-            input.setPrivateKey(BaseEncoding.base64().decode(customer.getPrivateKey()));
-            input.setPublicKey(BaseEncoding.base64().decode(customer.getPublicKey()));
-            input.setLicensePassword(customer.getLicensePassword());
-            input.setPrivatePassword(customer.getPrivatePassword());
-            input.setPublicPassword(customer.getPublicPassword());
+            input.setPrivateKey(BaseEncoding.base64().decode(customer.getLicenseCryptDn()));
+//            input.setPublicKey(BaseEncoding.base64().decode(customer.getPublicKey()));
+//            input.setLicensePassword(customer.getLicensePassword());
+//            input.setPrivatePassword(customer.getPrivatePassword());
+//            input.setPublicPassword(customer.getPublicPassword());
             input.setThreadsCount(license.getNumberOfThreads());
             input.setLicenseType(license.getType().name());
             input.setExpiredAt(new Date()); // todo !!!
@@ -116,18 +117,18 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setDn(c.getDn());
         customer.setId(c.getId());
         customer.setName(c.getName());
-        customer.setLicensePassword(c.getLicensePassword());
-        customer.setPrivatePassword(c.getPrivatePassword());
-        customer.setPublicPassword(c.getPublicPassword());
-        customer.setPrivateKey(c.getPrivateKey());
-        customer.setPublicKey(c.getPublicKey());
-        customer.setClientPrivateKey(c.getClientPrivateKey());
-        customer.setClientPublicKey(c.getClientPublicKey());
+        customer.setLicenseCryptDN(c.getLicenseCryptDn());
+        customer.setLicenseIdDN(toLicenseIdDNs(c.getLicenseIds()));
 
         // todo
 //        customer.setLicenses(toLicenseList(c.getLicenses()));
 
         return customer;
+    }
+
+    private static List<String> toLicenseIdDNs(List<CustomerLicenseId> licenseIds) {
+        List<String> result = Lists.newArrayList(); // todo
+        return result;
     }
 
     private static List<String> toLicenseList(List<LicenseMetadata> licenses) {
@@ -150,15 +151,15 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         customer.setDn(c.getDn());
         customer.setId(c.getId());
         customer.setName(c.getName());
-        customer.setLicensePassword(c.getLicensePassword());
-        customer.setPrivatePassword(c.getPrivatePassword());
-        customer.setPublicPassword(c.getPublicPassword());
-        customer.setPrivateKey(c.getPrivateKey());
-        customer.setPublicKey(c.getPublicKey());
-        customer.setClientPrivateKey(c.getClientPrivateKey());
-        customer.setClientPublicKey(c.getClientPublicKey());
-//        customer.setLicenseIds(toLicenses(c.getLicenses()));
+        customer.setLicenseCryptDn(c.getLicenseCryptDN());
+        customer.setLicenseIds(toLicenseIds(c.getLicenseIdDN()));
         return customer;
+    }
+
+    private static List<CustomerLicenseId> toLicenseIds(List<String> licenseIdDN) {
+        List<CustomerLicenseId> result = Lists.newArrayList();
+        // todo
+        return result;
     }
 
 

@@ -2,7 +2,6 @@
 <ui:UiBinder
         xmlns:ui='urn:ui:com.google.gwt.uibinder'
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
-        xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         xmlns:a="urn:import:org.xdi.oxd.license.admin.client.ui"
         >
 
@@ -12,20 +11,29 @@
                 <h2>License Management</h2>
             </g:HTMLPanel>
         </g:north>
-        <g:north size='46'>
-            <g:FlowPanel>
-                <g:Button ui:field="addButton">Add</g:Button>
-                <g:Button ui:field="editButton">Edit</g:Button>
-                <g:Button ui:field="removeButton">Remove</g:Button>
-                <g:Button ui:field="refreshButton">Refresh</g:Button>
-            </g:FlowPanel>
-        </g:north>
-
         <g:center>
-            <cellview:CellTable ui:field="table" width="100%"/>
+            <g:TabLayoutPanel barHeight="3" barUnit="EM">
+                <g:tab>
+                    <g:header size='7'>
+                        <b>Customer</b>
+                    </g:header>
+                    <g:HTMLPanel>
+                        <a:CustomerTab/>
+                    </g:HTMLPanel>
+                </g:tab>
+                <g:tab>
+                    <g:header size='7'>
+                        <b>License Crypt</b>
+                    </g:header>
+                    <g:Label>License Crypt</g:Label>
+                </g:tab>
+                <g:tab>
+                    <g:header size='7'>
+                        <b>License Exchange Id</b>
+                    </g:header>
+                    <g:Label>License Exchange Id</g:Label>
+                </g:tab>
+            </g:TabLayoutPanel>
         </g:center>
-        <g:east size="500">
-            <a:DetailsPanel ui:field="detailsPanel"/>
-        </g:east>
     </g:DockLayoutPanel>
 </ui:UiBinder>
