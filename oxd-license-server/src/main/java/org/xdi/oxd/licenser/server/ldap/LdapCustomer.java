@@ -5,6 +5,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 23/09/2014
@@ -19,23 +21,19 @@ public class LdapCustomer {
     @LdapAttribute(name = "customerId")
     private String id;
     @LdapAttribute(name = "licenseId")
-    private String licenseIdDN;
-    @LdapAttribute(name = "oxLicensePassword")
-    private String licensePassword;
-    @LdapAttribute(name = "oxPublicPassword")
-    private String publicPassword;
-    @LdapAttribute(name = "oxPrivatePassword")
-    private String privatePassword;
-    @LdapAttribute(name = "oxClientPrivateKey")
-    private String clientPrivateKey;
-    @LdapAttribute(name = "oxClientPublicKey")
-    private String clientPublicKey;
-    @LdapAttribute(name = "oxPublicKey")
-    private String publicKey;
-    @LdapAttribute(name = "oxPrivateKey")
-    private String privateKey;
+    private List<String> licenseIdDN;
     @LdapAttribute(name = "oxName")
     private String name;
+    @LdapAttribute(name = "oxLicenseCrypt")
+    private String licenseCryptDN;
+
+    public String getLicenseCryptDN() {
+        return licenseCryptDN;
+    }
+
+    public void setLicenseCryptDN(String licenseCryptDN) {
+        this.licenseCryptDN = licenseCryptDN;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -57,83 +55,22 @@ public class LdapCustomer {
         dn = p_dn;
     }
 
-    public String getClientPrivateKey() {
-        return clientPrivateKey;
-    }
 
-    public void setClientPrivateKey(String clientPrivateKey) {
-        this.clientPrivateKey = clientPrivateKey;
-    }
-
-    public String getClientPublicKey() {
-        return clientPublicKey;
-    }
-
-    public void setClientPublicKey(String clientPublicKey) {
-        this.clientPublicKey = clientPublicKey;
-    }
-
-    public String getLicenseIdDN() {
+    public List<String> getLicenseIdDN() {
         return licenseIdDN;
     }
 
-    public void setLicenseIdDN(String licenseIdDN) {
+    public void setLicenseIdDN(List<String> licenseIdDN) {
         this.licenseIdDN = licenseIdDN;
-    }
-
-    public String getLicensePassword() {
-        return licensePassword;
-    }
-
-    public void setLicensePassword(String licensePassword) {
-        this.licensePassword = licensePassword;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public String getPrivatePassword() {
-        return privatePassword;
-    }
-
-    public void setPrivatePassword(String privatePassword) {
-        this.privatePassword = privatePassword;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPublicPassword() {
-        return publicPassword;
-    }
-
-    public void setPublicPassword(String publicPassword) {
-        this.publicPassword = publicPassword;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("LdapCustomer");
-        sb.append("{clientPrivateKey='").append(clientPrivateKey).append('\'');
+        sb.append("{licenseCryptDN='").append(licenseCryptDN).append('\'');
         sb.append(", dn='").append(dn).append('\'');
         sb.append(", licenseIdDN='").append(licenseIdDN).append('\'');
-        sb.append(", licensePassword='").append(licensePassword).append('\'');
-        sb.append(", publicPassword='").append(publicPassword).append('\'');
-        sb.append(", privatePassword='").append(privatePassword).append('\'');
-        sb.append(", clientPublicKey='").append(clientPublicKey).append('\'');
-        sb.append(", publicKey='").append(publicKey).append('\'');
-        sb.append(", privateKey='").append(privateKey).append('\'');
         sb.append('}');
         return sb.toString();
     }

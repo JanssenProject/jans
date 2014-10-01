@@ -1,4 +1,4 @@
-package org.xdi.oxd.licenser.server.persistence;
+package org.xdi.oxd.licenser.server.service;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;

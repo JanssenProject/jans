@@ -24,6 +24,16 @@ public class LdapLicenseId {
     private String metadata;
     @LdapAttribute(name = "oxLicense")
     private List<String> licenses;
+    @LdapAttribute(name = "oxLicenseCrypt")
+    private String licenseCryptDN;
+
+    public String getLicenseCryptDN() {
+        return licenseCryptDN;
+    }
+
+    public void setLicenseCryptDN(String licenseCryptDN) {
+        this.licenseCryptDN = licenseCryptDN;
+    }
 
     public String getDn() {
         return dn;

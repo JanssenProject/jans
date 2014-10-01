@@ -18,7 +18,7 @@ import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
-import org.xdi.oxd.licenser.server.persistence.CustomerService;
+import org.xdi.oxd.licenser.server.service.CustomerService;
 
 import java.security.KeyPair;
 import java.util.Date;
