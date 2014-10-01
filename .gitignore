@@ -3,3 +3,5 @@ setup.properties
 *.pyc
 setup.properties.last
 output/
+/.project
+/.pydevproject
