@@ -480,8 +480,8 @@ public class ExternalAuthenticationService implements Serializable {
         return externalAuthenticatorConfiguration;
 	}
 
-	public ExternalAuthenticatorConfiguration determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType usageType, List<String> amrValues) {
-		List<String> authModes = getAuthModesByAmrValues(amrValues);
+	public ExternalAuthenticatorConfiguration determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType usageType, List<String> acrValues) {
+		List<String> authModes = getAuthModesByAcrValues(acrValues);
 		if (authModes.size() > 0) {
 			for (String authMode : authModes) {
 				for (ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration : this.externalAuthenticatorConfigurationsByUsageType.get(usageType)) {
@@ -495,12 +495,12 @@ public class ExternalAuthenticationService implements Serializable {
 		return null;
 	}
 
-	private List<String> getAuthModesByAmrValues(List<String> amrValues) {
+	private List<String> getAuthModesByAcrValues(List<String> acrValues) {
 		List<String> authModes = new ArrayList<String>();
 
-		for (String amrValue : amrValues) {
-			if (StringHelper.isNotEmpty(amrValue) && StringHelper.toLowerCase(amrValue).startsWith(ACR_METHOD_PREFIX)) {
-				String authMode = amrValue.substring(ACR_METHOD_PREFIX.length());
+		for (String acrValue : acrValues) {
+			if (StringHelper.isNotEmpty(acrValue) && StringHelper.toLowerCase(acrValue).startsWith(ACR_METHOD_PREFIX)) {
+				String authMode = acrValue.substring(ACR_METHOD_PREFIX.length());
 				if (externalAuthenticatorConfigurations.containsKey(StringHelper.toLowerCase(authMode))) {
 					authModes.add(authMode);
 				}

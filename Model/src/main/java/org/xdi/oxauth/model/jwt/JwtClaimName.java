@@ -44,9 +44,8 @@ public final class JwtClaimName {
     public static final String TYPE = "typ";
     /**
      * Authentication Methods References.
-     * JSON array of strings that are identifiers for authentication methods used in the authentication.
      */
-    public static final String AUTHENTICATION_METHOD_REFERENCES = "amr"; // ID Token
+    public static final String AUTHENTICATION_METHOD_REFERENCES = "acr"; // ID Token
 
     // ID Token
     /**

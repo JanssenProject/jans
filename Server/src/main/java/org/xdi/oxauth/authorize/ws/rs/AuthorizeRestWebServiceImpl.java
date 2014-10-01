@@ -192,12 +192,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
         List<String> scopes = Util.splittedStringAsList(scope, " ");
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
-        List<String> amrValues = null;
-		try {
-			amrValues = Util.jsonArrayStringAsList(amrValuesStr);
-		} catch (JSONException ex) {
-            log.error(ex.getMessage(), ex);
-		}
+        List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
 
 		ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
@@ -661,8 +656,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(acrValuesStr)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ACR_VALUES, acrValuesStr);
         }
-        if ((amrValues != null) && !amrValues.isEmpty()) {
-            String amrValuesStr = toJSONArray(amrValues).toString();
+        String amrValuesStr = implode(amrValues, " ");
+        if (StringUtils.isNotBlank(amrValuesStr)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AMR_VALUES, amrValuesStr);
         }
         if (StringUtils.isNotBlank(request)) {

@@ -101,7 +101,7 @@ public class Authenticator implements Serializable {
     private String authMode;
 
     @RequestParameter(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES)
-    private String authAmr;
+    private String authAcr;
 
     /**
      * Tries to authenticate an user, returns <code>true</code> if the
@@ -141,7 +141,7 @@ public class Authenticator implements Serializable {
     	Map<String, String> restoredRequestParametersFromSession = authenticationService.restoreRequestParametersFromSession();
         initCustomAuthenticatorVariables(restoredRequestParametersFromSession);
 
-        setAuthModeFromAmr();
+        setAuthModeFromAcr();
 
         if (interactive && (this.authStep == null)) {
             return authenticationFailed();
@@ -320,12 +320,12 @@ public class Authenticator implements Serializable {
         this.authStep = StringHelper.toInteger(requestParameters.get("auth_step"), null);
         this.authLevel = requestParameters.get("auth_level");
         this.authMode = requestParameters.get("auth_mode");
-        this.authAmr = requestParameters.get(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
+        this.authAcr = requestParameters.get(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
 
     }
 
     public String prepareAuthenticationForStep() {
-        setAuthModeFromAmr();
+    	setAuthModeFromAcr();
 
         if (this.authMode == null) {
     		return Constants.RESULT_SUCCESS;
@@ -467,9 +467,9 @@ public class Authenticator implements Serializable {
         return null;
     }
 
-	private void setAuthModeFromAmr() {
-		if (StringHelper.isNotEmpty(this.authAmr)) {
-    		this.authMode = this.authAmr;
+	private void setAuthModeFromAcr() {
+		if (StringHelper.isNotEmpty(this.authAcr)) {
+    		this.authMode = this.authAcr;
     	}
 	}
 

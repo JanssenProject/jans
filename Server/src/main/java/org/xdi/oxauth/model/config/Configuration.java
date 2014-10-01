@@ -498,9 +498,6 @@ public class Configuration {
     @XmlElementWrapper(name = "amr-values-supported")
     @XmlElement(name = "amr")
     public List<String> getAmrValuesSupported() {
-        if (amrValuesSupported == null) {
-            amrValuesSupported = new ArrayList<String>();
-        }
         return amrValuesSupported;
     }
 

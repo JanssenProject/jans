@@ -66,6 +66,7 @@ import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
+ * @author Yuriy Movchan Date: 10/01/2014
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -191,9 +192,9 @@ public class AuthorizeAction {
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
             	
-            	List<String> amrValuesList = null;
+            	List<String> acrValuesList = null;
             	try {
-					amrValuesList = Util.jsonArrayStringAsList(amrValues);
+					acrValuesList = Util.jsonArrayStringAsList(this.acrValues);
 				} catch (JSONException ex) {
 					invalidRequest();
 					return;
@@ -201,8 +202,8 @@ public class AuthorizeAction {
             	
             	ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration;
             	
-            	if ((amrValuesList != null) && !amrValuesList.isEmpty()) {
-                	externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, amrValuesList);
+            	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
+                	externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
             	} else {
             		externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
             	}
