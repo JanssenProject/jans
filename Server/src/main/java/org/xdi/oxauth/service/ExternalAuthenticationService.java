@@ -60,7 +60,7 @@ public class ExternalAuthenticationService implements Serializable {
 
 	private static final long serialVersionUID = -1225880597520443390L;
 
-	public final static String AMR_METHOD_PREFIX = "https://schema.gluu.org/openid/amr/method/";
+	public final static String ACR_METHOD_PREFIX = "https://schema.gluu.org/openid/acr/method/";
 
 	private final static String EVENT_TYPE = "ExternalAuthenticationTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
@@ -499,8 +499,8 @@ public class ExternalAuthenticationService implements Serializable {
 		List<String> authModes = new ArrayList<String>();
 
 		for (String amrValue : amrValues) {
-			if (StringHelper.isNotEmpty(amrValue) && StringHelper.toLowerCase(amrValue).startsWith(AMR_METHOD_PREFIX)) {
-				String authMode = amrValue.substring(AMR_METHOD_PREFIX.length());
+			if (StringHelper.isNotEmpty(amrValue) && StringHelper.toLowerCase(amrValue).startsWith(ACR_METHOD_PREFIX)) {
+				String authMode = amrValue.substring(ACR_METHOD_PREFIX.length());
 				if (externalAuthenticatorConfigurations.containsKey(StringHelper.toLowerCase(authMode))) {
 					authModes.add(authMode);
 				}
@@ -568,15 +568,15 @@ public class ExternalAuthenticationService implements Serializable {
 		return new ArrayList<ExternalAuthenticatorConfiguration>(this.externalAuthenticatorConfigurations.values());
 	}
 
-	public  List<String> getAmrValuesList() {
-		List<String> amrValues = new ArrayList<String>();
+	public  List<String> getAcrValuesList() {
+		List<String> acrValues = new ArrayList<String>();
 
 		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
-			String amrValue = AMR_METHOD_PREFIX + externalAuthenticatorConfigurationEntry.getKey();
-			amrValues.add(amrValue);
+			String acrValue = ACR_METHOD_PREFIX + externalAuthenticatorConfigurationEntry.getKey();
+			acrValues.add(acrValue);
 		}
 		
-		return amrValues;
+		return acrValues;
 	}
 
 	private boolean isValidateUsageType(AuthenticationScriptUsageType usageType, ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {

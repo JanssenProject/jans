@@ -140,16 +140,16 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray acrValuesSupported = new JSONArray();
-            for (String acr : ConfigurationFactory.getConfiguration().getAcrValuesSupported()) {
+            ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService.instance();
+            for (String acr : externalAuthenticationService.getAcrValuesList() /*ConfigurationFactory.getConfiguration().getAcrValuesSupported() */) {
                 acrValuesSupported.put(acr);
             }
             if (acrValuesSupported.length() > 0) {
                 jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
             }
 
-            ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService.instance();
             JSONArray amrValuesSupported = new JSONArray();
-            for (String amr : externalAuthenticationService.getAmrValuesList() /*ConfigurationFactory.getConfiguration().getAmrValuesSupported() */) {
+            for (String amr : ConfigurationFactory.getConfiguration().getAmrValuesSupported()) {
                 amrValuesSupported.put(amr);
             }
             if (amrValuesSupported.length() > 0) {
