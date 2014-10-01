@@ -6,7 +6,7 @@ inum: %(inumOrg)s!0000!A8F2.DE1E.D7FB
 uid: admin
 givenName: Admin
 sn: User
-userPassword:: %(encoded_ldap_pw)s
+userPassword:%(encoded_ldap_pw)s
 gluuStatus: active
 memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 displayName: Default Admin User
