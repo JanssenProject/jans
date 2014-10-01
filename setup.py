@@ -387,6 +387,8 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), key])
         self.run(["/bin/chmod", '700', key])
 
+        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, "-file", public_certificate, "-keystore", "/usr/java/latest/lib/security/cacerts", "-storepass", "changeit", "-noprompt"])
+
     def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, user='root'):
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
