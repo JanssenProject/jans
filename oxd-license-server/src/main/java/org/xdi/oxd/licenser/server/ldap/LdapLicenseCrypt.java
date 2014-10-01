@@ -26,6 +26,16 @@ public class LdapLicenseCrypt {
     private String publicKey;
     @LdapAttribute(name = "oxPrivateKey")
     private String privateKey;
+    @LdapAttribute(name = "oxName")
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getDn() {
         return dn;
