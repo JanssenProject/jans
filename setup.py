@@ -47,6 +47,8 @@ class Setup(object):
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
         self.tomcat_user_home_lib = "/home/tomcat/lib"
+        self.oxPhotosFolder = "/var/ox/photos"
+        self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
 
         self.hostname = None
         self.ip = None
@@ -784,6 +786,8 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxPhotosFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxTrustRemovedFolder])
 
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
@@ -839,6 +843,11 @@ class Setup(object):
                 os.makedirs(self.configFolder)
             if not os.path.exists(self.certFolder):
                 os.makedirs(self.certFolder)
+            if not os.path.exists(self.oxPhotosFolder):
+                os.makedirs(self.oxPhotosFolder)
+            if not os.path.exists(self.oxTrustRemovedFolder):
+                os.makedirs(self.oxTrustRemovedFolder)
+
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
