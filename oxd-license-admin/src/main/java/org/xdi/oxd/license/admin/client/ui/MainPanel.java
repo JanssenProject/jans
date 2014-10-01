@@ -23,6 +23,8 @@ public class MainPanel implements IsWidget {
 
     @UiField
     DockLayoutPanel rootPanel;
+    @UiField
+    CustomerTab customerTab;
 
     public MainPanel() {
         uiBinder.createAndBindUi(this);
@@ -37,4 +39,7 @@ public class MainPanel implements IsWidget {
         return rootPanel;
     }
 
+    public CustomerTab getCustomerTab() {
+        return customerTab;
+    }
 }

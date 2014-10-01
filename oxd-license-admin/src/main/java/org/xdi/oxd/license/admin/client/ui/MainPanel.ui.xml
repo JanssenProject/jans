@@ -18,7 +18,7 @@
                         <b>Customer</b>
                     </g:header>
                     <g:HTMLPanel>
-                        <a:CustomerTab/>
+                        <a:CustomerTab ui:field="customerTab"/>
                     </g:HTMLPanel>
                 </g:tab>
                 <g:tab>
