@@ -104,15 +104,17 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
     def destroy(self, authConfiguration):
         print "Basic (multi auth conf) destroy"
-
+        
+        result = True
         for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
             ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
             ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
 
-            result = ldapEntryManager.destroy()
-            print "Basic (multi auth conf) destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + result 
+            ldapEntryManagerResult = ldapEntryManager.destroy()
+            result &= ldapEntryManagerResult
+            print "Basic (multi auth conf) destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + ldapEntryManagerResult 
 
-        return True
+        return result
 
     def getApiVersion(self):
         return 4
