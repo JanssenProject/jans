@@ -402,7 +402,7 @@ public class OperationsFacade {
 		return this.connectionProvider.getSupportedLDAPVersion();
 	}
 
-	public void destory() {
+	public void destroy() {
         try {
         	connectionProvider.closeConnectionPool();
         } catch (Exception ex) {
