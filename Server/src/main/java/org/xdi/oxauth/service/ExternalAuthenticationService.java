@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -117,6 +118,17 @@ public class ExternalAuthenticationService implements Serializable {
 			this.lastFinishedTime = System.currentTimeMillis();
 		}
 	}
+	
+	@Destroy
+	public void destroy() {
+		if (this.externalAuthenticatorConfigurations == null) {
+			return;
+		}
+
+		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
+			destoryExternalAuthenticator(externalAuthenticatorConfigurationEntry);
+		}
+	}
 
 	private void reload() {
 		List<CustomAuthenticationConfiguration> currentCustomAuthenticationConfigurations = ldapCustomAuthenticationConfigurationService.getCustomAuthenticationConfigurations();
@@ -178,11 +190,24 @@ public class ExternalAuthenticationService implements Serializable {
 			String prevSupportedName = externalAuthenticatorConfigurationEntry.getKey();
 
 			if (!newSupportedNames.contains(prevSupportedName)) {
+				destoryExternalAuthenticator(externalAuthenticatorConfigurationEntry);
 				it.remove();
 			}
 		}
 
 		return newExternalAuthenticatorConfigurations;
+	}
+
+	private boolean destoryExternalAuthenticator(Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry) {
+		String externalAuthenticatorName = externalAuthenticatorConfigurationEntry.getKey();
+		ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticatorConfigurationEntry.getValue();
+
+		boolean result = executeExternalAuthenticatorDestroy(externalAuthenticatorConfiguration);
+		if (!result) {
+			log.error("Failed to destory authenticator '{0}' correctly", externalAuthenticatorName);
+		}
+		
+		return result;
 	}
 
 	public Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> groupExternalAuthenticatorConfigurationsByUsageType(Map<String,  ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations) {
@@ -361,6 +386,24 @@ public class ExternalAuthenticationService implements Serializable {
 		}
 		
 		return -1;
+	}
+
+	public boolean executeExternalAuthenticatorDestroy(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
+    	// Validate API version
+        int apiVersion = executeExternalAuthenticatorGetApiVersion(externalAuthenticatorConfiguration);
+        if (apiVersion > 3) {
+			try {
+				log.debug("Executing python 'destroy' authenticator method");
+				ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+				Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
+				return externalAuthenticator.destroy(configurationAttributes);
+			} catch (Exception ex) {
+				log.error(ex.getMessage(), ex);
+			}
+			return false;
+        }
+
+        return true;
 	}
 
 	public ExternalAuthenticatorType createExternalAuthenticatorFromFile() {
