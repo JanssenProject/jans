@@ -48,6 +48,7 @@ class Setup(object):
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
         self.tomcat_user_home_lib = "/home/tomcat/lib"
+        self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
 
@@ -794,8 +795,7 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxPhotosFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxTrustRemovedFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
