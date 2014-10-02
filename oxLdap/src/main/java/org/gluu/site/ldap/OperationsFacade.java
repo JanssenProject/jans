@@ -402,11 +402,14 @@ public class OperationsFacade {
 		return this.connectionProvider.getSupportedLDAPVersion();
 	}
 
-	public void destroy() {
-        try {
+	public boolean destroy() {
+		boolean result = true;
+
+		try {
         	connectionProvider.closeConnectionPool();
         } catch (Exception ex) {
         	log.error("Failed to close connection pool correctly");
+        	result = false;
         }
 		
 		if (bindConnectionProvider != null) { 
@@ -414,8 +417,11 @@ public class OperationsFacade {
 	        	bindConnectionProvider.closeConnectionPool();
 	        } catch (Exception ex) {
 	        	log.error("Failed to close bind connection pool correctly");
+	        	result = false;
 	        }
 		}
+		
+		return result;
 	}
 
 }

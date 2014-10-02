@@ -51,8 +51,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		subscribers = new LinkedList<DeleteNotifier>();
 	}
 
-	public void destroy() {
-		this.ldapOperationService.destroy();
+	public boolean destroy() {
+		boolean destroyResult = this.ldapOperationService.destroy();
+		
+		return destroyResult;
 	}
 
 	public OperationsFacade getLdapOperationService() {
