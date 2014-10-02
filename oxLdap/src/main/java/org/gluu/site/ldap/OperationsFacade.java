@@ -402,4 +402,20 @@ public class OperationsFacade {
 		return this.connectionProvider.getSupportedLDAPVersion();
 	}
 
+	public void destory() {
+        try {
+        	connectionProvider.closeConnectionPool();
+        } catch (Exception ex) {
+        	log.error("Failed to close connection pool correctly");
+        }
+		
+		if (bindConnectionProvider != null) { 
+	        try {
+	        	bindConnectionProvider.closeConnectionPool();
+	        } catch (Exception ex) {
+	        	log.error("Failed to close bind connection pool correctly");
+	        }
+		}
+	}
+
 }
