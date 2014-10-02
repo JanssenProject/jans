@@ -8,11 +8,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
+import org.xdi.oxd.license.admin.client.framework.Framework;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.GeneratedKeys;
 
@@ -21,19 +22,17 @@ import org.xdi.oxd.license.admin.shared.GeneratedKeys;
  * @version 0.9, 24/09/2014
  */
 
-public class EditCustomerDialog implements IsWidget {
+public class EditCustomerDialog {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<DialogBox, EditCustomerDialog> {
+    interface MyUiBinder extends UiBinder<Widget, EditCustomerDialog> {
     }
 
-    @UiField
-    DialogBox dialog;
+    private final DialogBox dialog;
+
     @UiField
     TextBox nameField;
-    @UiField
-    HTML title;
     @UiField
     Button closeButton;
     @UiField
@@ -52,11 +51,17 @@ public class EditCustomerDialog implements IsWidget {
     HTML publicPassword;
     @UiField
     HTML privatePassword;
+    @UiField
+    VerticalPanel dialogContent;
 
     private GeneratedKeys generatedKeys;
 
     public EditCustomerDialog() {
         uiBinder.createAndBindUi(this);
+
+        dialog = Framework.createDialogBox("Add Customer");
+        dialog.setWidget(dialogContent);
+
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -138,17 +143,13 @@ public class EditCustomerDialog implements IsWidget {
     }
 
     public void setTitle(String title) {
-        this.title.setHTML(title);
+        dialog.setText(title);
+        dialog.setTitle(title);
     }
 
     public void show() {
         dialog.center();
         dialog.show();
-    }
-
-    @Override
-    public Widget asWidget() {
-        return dialog;
     }
 
 }

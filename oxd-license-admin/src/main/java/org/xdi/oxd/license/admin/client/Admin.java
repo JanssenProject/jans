@@ -4,6 +4,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.client.service.AdminServiceAsync;
@@ -37,4 +38,5 @@ public class Admin implements EntryPoint {
     public static boolean isEmpty(String str) {
         return str == null || str.trim().equals("");
     }
+
 }

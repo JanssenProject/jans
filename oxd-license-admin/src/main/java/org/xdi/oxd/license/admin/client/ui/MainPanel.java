@@ -18,7 +18,7 @@ public class MainPanel implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<DockLayoutPanel, MainPanel> {
+    interface MyUiBinder extends UiBinder<Widget, MainPanel> {
     }
 
     @UiField

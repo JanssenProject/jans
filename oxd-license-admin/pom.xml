@@ -141,11 +141,6 @@
             <version>${project.version}</version>
             <classifier>classes</classifier>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.xdi</groupId>-->
-            <!--<artifactId>oxd-license-server</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>

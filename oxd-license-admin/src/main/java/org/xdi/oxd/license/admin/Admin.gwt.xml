@@ -6,7 +6,9 @@
     <inherits name="com.google.gwt.i18n.CldrLocales"/>
     <inherits name="com.google.gwt.i18n.I18N"/>
     <!--<inherits name='com.google.gwt.user.theme.dark.Dark'/>-->
-    <inherits name='com.google.gwt.user.theme.chrome.Chrome'/>
+    <!--<inherits name='com.google.gwt.user.theme.chrome.Chrome'/>-->
+    <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+    <inherits name='com.google.gwt.user.theme.standard.StandardResources'/>
 
     <inherits name="org.xdi.oxd.license.client.LicenseClient"/>
 

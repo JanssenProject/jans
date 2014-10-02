@@ -4,13 +4,13 @@
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
         >
 
-    <g:DialogBox ui:field="dialog" glassEnabled="true" animationEnabled="true" addStyleNames="dialog" width="700px">
+    <g:DialogBox ui:field="dialog" glassEnabled="true" text="Add License" animationEnabled="true" addStyleNames="dialog" width="700px">
         <g:VerticalPanel>
-            <g:HTMLPanel>
-                <h2>
-                    <g:HTML>Add License</g:HTML>
-                </h2>
-            </g:HTMLPanel>
+            <!--<g:HTMLPanel>-->
+                <!--<h2>-->
+                    <!--<g:HTML>Add License</g:HTML>-->
+                <!--</h2>-->
+            <!--</g:HTMLPanel>-->
             <g:HorizontalPanel>
                 <g:Label text="Type:"/>
                 <g:ListBox ui:field="type">

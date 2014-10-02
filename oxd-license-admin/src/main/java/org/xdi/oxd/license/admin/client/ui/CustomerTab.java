@@ -20,7 +20,7 @@ public class CustomerTab implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<DockLayoutPanel, CustomerTab> {
+    interface MyUiBinder extends UiBinder<Widget, CustomerTab> {
     }
 
     @UiField

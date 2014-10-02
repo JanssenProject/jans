@@ -27,7 +27,7 @@ public class AddLicenseDialog implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<DialogBox, AddLicenseDialog> {
+    interface MyUiBinder extends UiBinder<Widget, AddLicenseDialog> {
     }
 
     private final DetailsPresenter detailsPresenter;

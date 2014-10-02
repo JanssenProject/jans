@@ -20,7 +20,7 @@ public class DetailsPanel implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<VerticalPanel, DetailsPanel> {
+    interface MyUiBinder extends UiBinder<Widget, DetailsPanel> {
     }
 
     @UiField
