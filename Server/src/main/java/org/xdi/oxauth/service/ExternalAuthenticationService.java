@@ -118,15 +118,18 @@ public class ExternalAuthenticationService implements Serializable {
 			this.lastFinishedTime = System.currentTimeMillis();
 		}
 	}
-	
-	@Destroy
+
+	// Commented out due to bug in SEAM
+	//@Destroy
 	public void destroy() {
+		log.debug("Destroying external authentication methods");
 		if (this.externalAuthenticatorConfigurations == null) {
 			return;
 		}
 
+		// Destroy authentication methods
 		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
-			destoryExternalAuthenticator(externalAuthenticatorConfigurationEntry);
+			destroyExternalAuthenticator(externalAuthenticatorConfigurationEntry.getValue());
 		}
 	}
 
@@ -180,6 +183,11 @@ public class ExternalAuthenticationService implements Serializable {
 
 				// Store configuration and authenticator
 				newExternalAuthenticatorConfigurations.put(newSupportedName, newExternalAuthenticatorConfiguration);
+				
+				// Destroy old version properly
+				if (prevExternalAuthenticatorConfiguration != null) {
+					destroyExternalAuthenticator(prevExternalAuthenticatorConfiguration);
+				}
 			}
 		}
 
@@ -190,7 +198,8 @@ public class ExternalAuthenticationService implements Serializable {
 			String prevSupportedName = externalAuthenticatorConfigurationEntry.getKey();
 
 			if (!newSupportedNames.contains(prevSupportedName)) {
-				destoryExternalAuthenticator(externalAuthenticatorConfigurationEntry);
+				// Destroy old authentication method
+				destroyExternalAuthenticator(externalAuthenticatorConfigurationEntry.getValue());
 				it.remove();
 			}
 		}
@@ -198,13 +207,12 @@ public class ExternalAuthenticationService implements Serializable {
 		return newExternalAuthenticatorConfigurations;
 	}
 
-	private boolean destoryExternalAuthenticator(Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry) {
-		String externalAuthenticatorName = externalAuthenticatorConfigurationEntry.getKey();
-		ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticatorConfigurationEntry.getValue();
+	private boolean destroyExternalAuthenticator(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
+		String externalAuthenticatorName = externalAuthenticatorConfiguration.getName();
 
 		boolean result = executeExternalAuthenticatorDestroy(externalAuthenticatorConfiguration);
 		if (!result) {
-			log.error("Failed to destory authenticator '{0}' correctly", externalAuthenticatorName);
+			log.error("Failed to destroy authenticator '{0}' correctly", externalAuthenticatorName);
 		}
 		
 		return result;
