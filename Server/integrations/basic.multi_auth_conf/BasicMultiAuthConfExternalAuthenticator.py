@@ -110,9 +110,9 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
             ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
             ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
 
-            ldapEntryManagerResult = ldapEntryManager.destroy()
-            result &= ldapEntryManagerResult
-            print "Basic (multi auth conf) destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + ldapEntryManagerResult 
+            destoryResult = ldapEntryManager.destroy()
+            result = result and destoryResult
+            print "Basic (multi auth conf) destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + str(destoryResult) 
 
         return result
 

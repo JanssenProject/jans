@@ -170,6 +170,11 @@ public class ExternalAuthenticationService implements Serializable {
 
 			ExternalAuthenticatorConfiguration prevExternalAuthenticatorConfiguration = newExternalAuthenticatorConfigurations.get(newSupportedName);
 			if ((prevExternalAuthenticatorConfiguration == null) || (prevExternalAuthenticatorConfiguration.getCustomAuthenticationConfiguration().getVersion() != newCustomAuthenticationConfiguration.getVersion())) {
+				// Destroy old version properly before creating new one
+				if (prevExternalAuthenticatorConfiguration != null) {
+					destroyExternalAuthenticator(prevExternalAuthenticatorConfiguration);
+				}
+
 				// Prepare configuration attributes
 				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
 				for (SimpleCustomProperty simpleCustomProperty : newCustomAuthenticationConfiguration.getCustomAuthenticationAttributes()) {
@@ -183,11 +188,6 @@ public class ExternalAuthenticationService implements Serializable {
 
 				// Store configuration and authenticator
 				newExternalAuthenticatorConfigurations.put(newSupportedName, newExternalAuthenticatorConfiguration);
-				
-				// Destroy old version properly
-				if (prevExternalAuthenticatorConfiguration != null) {
-					destroyExternalAuthenticator(prevExternalAuthenticatorConfiguration);
-				}
 			}
 		}
 
