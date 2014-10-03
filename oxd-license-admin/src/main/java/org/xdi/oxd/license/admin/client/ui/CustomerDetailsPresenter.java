@@ -1,5 +1,6 @@
 package org.xdi.oxd.license.admin.client.ui;
 
+import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 
 /**
@@ -20,10 +21,12 @@ public class CustomerDetailsPresenter {
             clear();
         }
 
+        view.getNameField().setHTML(Admin.asHtml(entity.getName()));
+
         // todo
     }
 
     private void clear() {
-        // todo
+        view.getNameField().setHTML("");
     }
 }

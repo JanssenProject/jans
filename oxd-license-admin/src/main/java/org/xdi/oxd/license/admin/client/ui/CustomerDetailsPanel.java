@@ -41,4 +41,20 @@ public class CustomerDetailsPanel implements IsWidget {
     public Widget asWidget() {
         return rootPanel;
     }
+
+    public Button getAddLicenseId() {
+        return addLicenseId;
+    }
+
+    public CellTable getLicenseIdTable() {
+        return licenseIdTable;
+    }
+
+    public HTML getNameField() {
+        return nameField;
+    }
+
+    public Button getRemoveLicenseId() {
+        return removeLicenseId;
+    }
 }
