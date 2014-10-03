@@ -5,7 +5,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -13,7 +12,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.ui.LicenseCryptDetailsPresenter;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LicenseType;
@@ -72,19 +70,19 @@ public class AddLicenseDialog implements IsWidget {
             return;
         }
         license.setType(LicenseType.valueOf(type.getValue(type.getSelectedIndex())));
-        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<LicenseMetadata>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                showError("Failed to add license.");
-            }
-
-            @Override
-            public void onSuccess(LicenseMetadata result) {
-//                detailsPresenter.getCustomer().getLicenseIds().add(result); // todo
-                detailsPresenter.reloadLicenseTable();
-                dialog.hide();
-            }
-        });
+//        Admin.getService().addLicense(detailsPresenter.getCustomer(), license, new AsyncCallback<LicenseMetadata>() {
+//            @Override
+//            public void onFailure(Throwable caught) {
+//                showError("Failed to add license.");
+//            }
+//
+//            @Override
+//            public void onSuccess(LicenseMetadata result) {
+////                detailsPresenter.getCustomer().getLicenseIds().add(result); // todo
+//                detailsPresenter.reloadLicenseTable();
+//                dialog.hide();
+//            }
+//        });
     }
 
     private void showError(String message) {
