@@ -95,6 +95,7 @@ public class AddLicenseCryptDialog {
                 licenseCrypt = result;
                 licenseCrypt.setName(nameField.getValue());
                 updateUI(result);
+                validate();
             }
         });
     }

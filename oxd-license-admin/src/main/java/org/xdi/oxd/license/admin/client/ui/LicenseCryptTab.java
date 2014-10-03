@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -39,6 +40,12 @@ public class LicenseCryptTab implements IsWidget {
 
     public LicenseCryptTab() {
         uiBinder.createAndBindUi(this);
+        table.addColumn(new TextColumn<LdapLicenseCrypt>() {
+            @Override
+            public String getValue(LdapLicenseCrypt object) {
+                return object.getName();
+            }
+        }, "Name");
     }
 
     public Button getAddButton() {
