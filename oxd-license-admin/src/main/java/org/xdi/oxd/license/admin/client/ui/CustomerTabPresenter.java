@@ -21,11 +21,11 @@ public class CustomerTabPresenter {
 
     private final CustomerTab view;
     private final SingleSelectionModel<Customer> selectionModel = new SingleSelectionModel<Customer>();
-    private final DetailsPresenter detailsPresenter;
+    private final LicenseCryptDetailsPresenter detailsPresenter;
 
     public CustomerTabPresenter(CustomerTab view) {
         this.view = view;
-        this.detailsPresenter = new DetailsPresenter(view.getDetailsPanel());
+        this.detailsPresenter = new LicenseCryptDetailsPresenter(view.getDetailsPanel());
 
         view.getAddButton().addClickHandler(new ClickHandler() {
             @Override

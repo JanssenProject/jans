@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
-import org.xdi.oxd.license.admin.client.ui.DetailsPresenter;
+import org.xdi.oxd.license.admin.client.ui.LicenseCryptDetailsPresenter;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LicenseType;
 
@@ -30,7 +30,7 @@ public class AddLicenseDialog implements IsWidget {
     interface MyUiBinder extends UiBinder<Widget, AddLicenseDialog> {
     }
 
-    private final DetailsPresenter detailsPresenter;
+    private final LicenseCryptDetailsPresenter detailsPresenter;
 
     @UiField
     DialogBox dialog;
@@ -45,7 +45,7 @@ public class AddLicenseDialog implements IsWidget {
     @UiField
     HTML errorMessage;
 
-    public AddLicenseDialog(DetailsPresenter detailsPresenter) {
+    public AddLicenseDialog(LicenseCryptDetailsPresenter detailsPresenter) {
         uiBinder.createAndBindUi(this);
         this.detailsPresenter = detailsPresenter;
         closeButton.addClickHandler(new ClickHandler() {

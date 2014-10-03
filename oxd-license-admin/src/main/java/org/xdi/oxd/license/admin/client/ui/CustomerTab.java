@@ -32,7 +32,7 @@ public class CustomerTab implements IsWidget {
     @UiField
     Button addButton;
     @UiField
-    DetailsPanel detailsPanel;
+    LicenseCryptDetailsPanel detailsPanel;
     @UiField
     Button editButton;
     @UiField
@@ -69,7 +69,7 @@ public class CustomerTab implements IsWidget {
         return rootPanel;
     }
 
-    public DetailsPanel getDetailsPanel() {
+    public LicenseCryptDetailsPanel getDetailsPanel() {
         return detailsPanel;
     }
 

@@ -16,11 +16,11 @@ import org.xdi.oxd.license.admin.shared.LicenseMetadata;
  * @version 0.9, 23/09/2014
  */
 
-public class DetailsPanel implements IsWidget {
+public class LicenseCryptDetailsPanel implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<Widget, DetailsPanel> {
+    interface MyUiBinder extends UiBinder<Widget, LicenseCryptDetailsPanel> {
     }
 
     @UiField
@@ -48,7 +48,7 @@ public class DetailsPanel implements IsWidget {
     @UiField
     HTML publicPassword;
 
-    public DetailsPanel() {
+    public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
     }
 

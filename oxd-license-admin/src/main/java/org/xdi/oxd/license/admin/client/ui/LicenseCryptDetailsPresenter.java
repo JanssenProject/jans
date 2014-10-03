@@ -17,33 +17,33 @@ import org.xdi.oxd.license.admin.shared.LicenseMetadata;
  * @version 0.9, 25/09/2014
  */
 
-public class DetailsPresenter {
+public class LicenseCryptDetailsPresenter {
 
-    private final DetailsPanel view;
+    private final LicenseCryptDetailsPanel view;
 
     private Customer customer;
     private SingleSelectionModel<LicenseMetadata> selectionModel = new SingleSelectionModel<LicenseMetadata>();
 
-    public DetailsPresenter(DetailsPanel view) {
+    public LicenseCryptDetailsPresenter(LicenseCryptDetailsPanel view) {
         this.view = view;
         configureLicenseTable(view);
 
         view.getAddLicense().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                AddLicenseDialog dialog = new AddLicenseDialog(DetailsPresenter.this);
+                AddLicenseDialog dialog = new AddLicenseDialog(LicenseCryptDetailsPresenter.this);
                 dialog.show();
             }
         });
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                DetailsPresenter.this.view.getRemoveLicense().setEnabled(selectionModel.getSelectedObject() != null);
+                LicenseCryptDetailsPresenter.this.view.getRemoveLicense().setEnabled(selectionModel.getSelectedObject() != null);
             }
         });
     }
 
-    private void configureLicenseTable(DetailsPanel view) {
+    private void configureLicenseTable(LicenseCryptDetailsPanel view) {
         view.getLicenseTable().setSelectionModel(selectionModel);
         view.getLicenseTable().addColumn(new TextColumn<LicenseMetadata>() {
             @Override
