@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.licenser.server.conf.Configuration;
 
+import java.util.Arrays;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 30/09/2014
@@ -31,15 +33,15 @@ public class LdapStructureChecker {
         licenseIdBaseDn.setDn(ldapStructure.getLicenseIdBaseDn());
         licenseIdBaseDn.setOu(ldapStructure.getLicenseIdOu());
 
-        if (!ldapEntryManager.contains(customerBaseDn)) {
-            ldapEntryManager.persist(customerBaseDn);
-            LOG.info("Created: " + customerBaseDn.getDn());
-        }
+        LdapOu licenseCryptBaseDn = new LdapOu();
+        licenseCryptBaseDn.setDn(ldapStructure.getLicenseCryptBaseDn());
+        licenseCryptBaseDn.setOu(ldapStructure.getLicenseCryptOu());
 
-        if (!ldapEntryManager.contains(licenseIdBaseDn)) {
-            ldapEntryManager.persist(licenseIdBaseDn);
-            LOG.info("Created: " + licenseIdBaseDn.getDn());
+        for (LdapOu ldapOu : Arrays.asList(customerBaseDn, licenseIdBaseDn, licenseCryptBaseDn)) {
+            if (!ldapEntryManager.contains(ldapOu)) {
+                ldapEntryManager.persist(ldapOu);
+                LOG.info("Created: " + ldapOu.getDn());
+            }
         }
     }
-
 }

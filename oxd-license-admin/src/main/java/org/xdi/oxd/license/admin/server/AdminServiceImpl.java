@@ -20,6 +20,7 @@ import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 import org.xdi.oxd.licenser.server.service.CustomerService;
+import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 
 import java.security.KeyPair;
 import java.util.Date;
@@ -37,12 +38,14 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 
     @Inject
     CustomerService customerService;
+    @Inject
+    LicenseCryptService licenseCryptService;
 
     @Override
     public List<Customer> getCustomers() {
         List<Customer> result = Lists.newArrayList();
         try {
-            for (LdapCustomer ldapCustomer : customerService.getAllCustomers()) {
+            for (LdapCustomer ldapCustomer : customerService.getAll()) {
                 result.add(asCustomer(ldapCustomer));
             }
         } catch (Exception e) {

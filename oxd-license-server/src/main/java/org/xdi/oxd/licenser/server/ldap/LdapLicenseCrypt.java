@@ -12,6 +12,8 @@ public class LdapLicenseCrypt {
 
     @LdapDN
     private String dn;
+    @LdapAttribute(name = "uniqueIdentifier")
+    private String id;
     @LdapAttribute(name = "oxLicensePassword")
     private String licensePassword;
     @LdapAttribute(name = "oxPublicPassword")
@@ -28,6 +30,14 @@ public class LdapLicenseCrypt {
     private String privateKey;
     @LdapAttribute(name = "oxName")
     private String name;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

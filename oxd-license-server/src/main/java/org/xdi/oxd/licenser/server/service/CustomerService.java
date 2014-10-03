@@ -30,11 +30,10 @@ public class CustomerService {
     @Inject
     LdapStructure ldapStructure;
 
-    public List<LdapCustomer> getAllCustomers() {
+    public List<LdapCustomer> getAll() {
         try {
-//                   final Filter filter = Filter.create("&(inum=*)");
             final Filter filter = Filter.create("&(customerId=*)");
-            return ldapEntryManager.findEntries(conf.getBaseDn(), LdapCustomer.class, filter);
+            return ldapEntryManager.findEntries(ldapStructure.getCustomerBaseDn(), LdapCustomer.class, filter);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -49,7 +48,7 @@ public class CustomerService {
         try {
 //                   final Filter filter = Filter.create("&(inum=*)");
             final Filter filter = Filter.create(String.format("&(licenseId=%s)", licenseId));
-            final List<LdapCustomer> entries = ldapEntryManager.findEntries(conf.getBaseDn(), LdapCustomer.class, filter);
+            final List<LdapCustomer> entries = ldapEntryManager.findEntries(ldapStructure.getCustomerBaseDn(), LdapCustomer.class, filter);
             if (!entries.isEmpty()) {
                 return entries.get(0);
             } else {
@@ -61,27 +60,27 @@ public class CustomerService {
         return null;
     }
 
-    public void merge(LdapCustomer ldapCustomer) {
+    public void merge(LdapCustomer entity) {
         try {
-            ldapEntryManager.merge(ldapCustomer);
+            ldapEntryManager.merge(entity);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    public void save(LdapCustomer ldapCustomer) {
+    public void save(LdapCustomer entity) {
         try {
-            setDnIfEmpty(ldapCustomer);
-            ldapEntryManager.persist(ldapCustomer);
+            setDnIfEmpty(entity);
+            ldapEntryManager.persist(entity);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void setDnIfEmpty(LdapCustomer ldapCustomer) {
-        if (Strings.isNullOrEmpty(ldapCustomer.getDn())) {
-            String id = Strings.isNullOrEmpty(ldapCustomer.getId()) ? UUID.randomUUID().toString() : ldapCustomer.getId();
-            ldapCustomer.setDn(String.format("customerId=%s,%s", id, ldapStructure.getCustomerBaseDn()));
+    private void setDnIfEmpty(LdapCustomer entity) {
+        if (Strings.isNullOrEmpty(entity.getDn())) {
+            String id = Strings.isNullOrEmpty(entity.getId()) ? UUID.randomUUID().toString() : entity.getId();
+            entity.setDn(String.format("customerId=%s,%s", id, ldapStructure.getCustomerBaseDn()));
         }
     }
 

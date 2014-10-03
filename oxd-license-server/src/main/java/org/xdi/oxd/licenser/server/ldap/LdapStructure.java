@@ -36,6 +36,14 @@ public class LdapStructure {
         return "licenseId";
     }
 
+    public String getLicenseCryptOu() {
+        return "licenseCrypt";
+    }
+
+    public String getLicenseCryptBaseDn() {
+        return ou(getLicenseCryptOu()) + conf.getBaseDn();
+    }
+
     public String getLicenseIdBaseDn() {
         return ou(getLicenseIdOu()) + conf.getBaseDn();
     }
