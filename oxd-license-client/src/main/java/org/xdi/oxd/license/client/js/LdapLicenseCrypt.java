@@ -2,6 +2,8 @@ package org.xdi.oxd.license.client.js;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 import java.io.Serializable;
 
@@ -10,6 +12,8 @@ import java.io.Serializable;
  * @version 0.9, 01/10/2014
  */
 
+@LdapEntry
+@LdapObjectClass(values = {"top", "oxLicenseCrypt"})
 public class LdapLicenseCrypt implements Serializable {
 
     @LdapDN
