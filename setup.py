@@ -196,7 +196,7 @@ class Setup(object):
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
                  + 'support email'.ljust(20) + self.admin_email.rjust(40) + "\n"
                  + 'tomcat max ram'.ljust(20) + self.tomcat_max_ram.rjust(40) + "\n"
-                 + 'ldapPass'.ljust(20) + self.ldapPass.rjust(40) + "\n")
+                 + 'Admin Pass'.ljust(20) + self.ldapPass.rjust(40) + "\n")
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
