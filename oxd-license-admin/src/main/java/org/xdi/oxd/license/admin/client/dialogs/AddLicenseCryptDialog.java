@@ -129,6 +129,7 @@ public class AddLicenseCryptDialog {
     }
 
     private void save() {
+        licenseCrypt.setName(nameField.getValue());
         Admin.getService().save(licenseCrypt, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {

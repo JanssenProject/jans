@@ -15,6 +15,15 @@ public class CustomerDetailsPresenter {
         this.view = detailsPanel;
     }
 
-    public void show(LdapCustomer selectedObject) {
+    public void show(LdapCustomer entity) {
+        if (entity == null) {
+            clear();
+        }
+
+        // todo
+    }
+
+    private void clear() {
+        // todo
     }
 }

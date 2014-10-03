@@ -20,6 +20,9 @@ public class LicenseCryptDetailsPresenter {
 
     public void show(LdapLicenseCrypt licenseCrypt) {
         this.licenseCrypt = licenseCrypt;
+        if (licenseCrypt == null) {
+            clear();
+        }
 
         view.getNameField().setHTML(Admin.asHtml(licenseCrypt.getName()));
         view.getPrivateKey().setHTML(Admin.asHtml(licenseCrypt.getPrivateKey()));
@@ -29,6 +32,17 @@ public class LicenseCryptDetailsPresenter {
         view.getPrivatePassword().setHTML(Admin.asHtml(licenseCrypt.getPrivatePassword()));
         view.getPublicPassword().setHTML(Admin.asHtml(licenseCrypt.getPublicPassword()));
         view.getLicensePassword().setHTML(Admin.asHtml(licenseCrypt.getLicensePassword()));
+    }
+
+    private void clear() {
+        view.getNameField().setHTML("");
+        view.getPrivateKey().setHTML("");
+        view.getPublicKey().setHTML("");
+        view.getClientPublicKey().setHTML("");
+        view.getClientPrivateKey().setHTML("");
+        view.getPrivatePassword().setHTML("");
+        view.getPublicPassword().setHTML("");
+        view.getLicensePassword().setHTML("");
     }
 
 }
