@@ -16,7 +16,7 @@ import org.xdi.oxd.licenser.server.conf.Configuration;
 import org.xdi.oxd.licenser.server.conf.ConfigurationFactory;
 import org.xdi.oxd.licenser.server.conf.JsonFileConfiguration;
 import org.xdi.oxd.licenser.server.ldap.Conf;
-import org.xdi.oxd.licenser.server.ldap.LdapStructureChecker;
+import org.xdi.oxd.licenser.server.service.LdapStructureChecker;
 import org.xdi.oxd.licenser.server.ws.GenerateLicenseWS;
 import org.xdi.util.Util;
 import org.xdi.util.properties.FileConfiguration;

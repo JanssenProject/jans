@@ -6,8 +6,8 @@ import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.licenser.server.conf.Configuration;
-import org.xdi.oxd.licenser.server.ldap.LdapLicenseCrypt;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
 import java.util.Collections;
@@ -66,6 +66,14 @@ public class LicenseCryptService {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             String id = Strings.isNullOrEmpty(entity.getId()) ? UUID.randomUUID().toString() : entity.getId();
             entity.setDn(String.format("uniqueIdentifier=%s,%s", id, ldapStructure.getLicenseCryptBaseDn()));
+        }
+    }
+
+    public void remove(LdapLicenseCrypt entity) {
+        try {
+            ldapEntryManager.remove(entity);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 }

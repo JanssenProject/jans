@@ -14,49 +14,47 @@ import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
 import org.xdi.oxd.license.admin.client.framework.Framework;
-import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.GeneratedKeys;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 24/09/2014
+ * @version 0.9, 03/10/2014
  */
 
-public class EditCustomerDialog {
+public class AddLicenseCryptDialog {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<Widget, EditCustomerDialog> {
+    interface MyUiBinder extends UiBinder<Widget, AddLicenseCryptDialog> {
     }
 
-    private final DialogBox dialog;
-
+    @UiField
+    VerticalPanel dialogContent;
     @UiField
     TextBox nameField;
     @UiField
-    Button closeButton;
-    @UiField
-    Button okButton;
-    @UiField
-    HTML errorMessage;
+    Button generateButton;
     @UiField
     HTML privateKey;
     @UiField
     HTML publicKey;
     @UiField
-    Button generateButton;
-    @UiField
-    HTML licensePassword;
+    HTML privatePassword;
     @UiField
     HTML publicPassword;
     @UiField
-    HTML privatePassword;
+    HTML licensePassword;
     @UiField
-    VerticalPanel dialogContent;
+    HTML errorMessage;
+    @UiField
+    Button okButton;
+    @UiField
+    Button closeButton;
 
-    private GeneratedKeys generatedKeys;
+    private final DialogBox dialog;
+    private LdapLicenseCrypt licenseCrypt;
 
-    public EditCustomerDialog() {
+    public AddLicenseCryptDialog(LdapLicenseCrypt licenseCrypt) {
         uiBinder.createAndBindUi(this);
 
         dialog = Framework.createDialogBox("Add Customer");
@@ -72,30 +70,42 @@ public class EditCustomerDialog {
             @Override
             public void onClick(ClickEvent event) {
                 if (validate()) {
-                    onOkClick();
+                    save();
                 }
             }
         });
         generateButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                generateKeys();
+                generateLicenseCrypt();
+            }
+        });
+
+        generateButton.setEnabled(licenseCrypt == null);
+        this.licenseCrypt = licenseCrypt;
+        if (licenseCrypt != null) {
+            updateUI(licenseCrypt);
+        }
+    }
+
+    private void generateLicenseCrypt() {
+        Admin.getService().generate(new SuccessCallback<LdapLicenseCrypt>() {
+            @Override
+            public void onSuccess(LdapLicenseCrypt result) {
+                licenseCrypt = result;
+                licenseCrypt.setName(nameField.getValue());
+                updateUI(result);
             }
         });
     }
 
-    private void generateKeys() {
-        Admin.getService().generateKeys(new SuccessCallback<GeneratedKeys>() {
-            @Override
-            public void onSuccess(GeneratedKeys result) {
-                generatedKeys = result;
-                privateKey.setText(result.getPrivateKey());
-                publicKey.setText(result.getPublicKey());
-                privatePassword.setText(result.getPrivatePassword());
-                publicPassword.setText(result.getPublicPassword());
-                licensePassword.setText(result.getLicensePassword());
-            }
-        });
+    private void updateUI(LdapLicenseCrypt result) {
+        nameField.setValue(result.getName());
+        privateKey.setText(result.getPrivateKey());
+        publicKey.setText(result.getPublicKey());
+        privatePassword.setText(result.getPrivatePassword());
+        publicPassword.setText(result.getPublicPassword());
+        licensePassword.setText(result.getLicensePassword());
     }
 
     private boolean validate() {
@@ -117,29 +127,17 @@ public class EditCustomerDialog {
         errorMessage.setHTML("<span style='color:red;'>" + message + "</span>");
     }
 
-    private void onOkClick() {
-        final Customer customer = new Customer();
-        customer.setName(nameField.getValue());
-
-        // todo
-//        customer.setLicensePassword(generatedKeys.getLicensePassword());
-//        customer.setPrivatePassword(generatedKeys.getPrivatePassword());
-//        customer.setPublicPassword(generatedKeys.getPublicPassword());
-//        customer.setPublicKey(generatedKeys.getPublicKey());
-//        customer.setLicenseCryptDn(generatedKeys.getPrivateKey());
-//        customer.setClientPrivateKey(generatedKeys.getClientPrivateKey());
-//        customer.setClientPublicKey(generatedKeys.getClientPublicKey());
-        Admin.getService().create(customer, new SuccessCallback<Void>() {
+    private void save() {
+        Admin.getService().save(licenseCrypt, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 dialog.hide();
-                EditCustomerDialog.this.onSuccess();
+                AddLicenseCryptDialog.this.onSuccess();
             }
         });
     }
 
     public void onSuccess() {
-
     }
 
     public void setTitle(String title) {

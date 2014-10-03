@@ -113,6 +113,11 @@
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>oxLdap-annotations</artifactId>
+                <version>${oxCore.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
                 <version>${jackson.version}</version>

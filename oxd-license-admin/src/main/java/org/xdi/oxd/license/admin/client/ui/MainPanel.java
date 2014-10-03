@@ -25,6 +25,8 @@ public class MainPanel implements IsWidget {
     DockLayoutPanel rootPanel;
     @UiField
     CustomerTab customerTab;
+    @UiField
+    LicenseCryptTab licenseCryptTab;
 
     public MainPanel() {
         uiBinder.createAndBindUi(this);
@@ -33,6 +35,10 @@ public class MainPanel implements IsWidget {
     @Override
     public Widget asWidget() {
         return rootPanel;
+    }
+
+    public LicenseCryptTab getLicenseCryptTab() {
+        return licenseCryptTab;
     }
 
     public DockLayoutPanel getRootPanel() {

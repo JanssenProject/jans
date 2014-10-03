@@ -9,12 +9,6 @@
         <g:HTML>
             <h3>Name:</h3>
         </g:HTML>
-        <g:HorizontalPanel>
-            <g:Button ui:field="addLicense" enabled="false">Add License</g:Button>
-            <g:Button ui:field="removeLicense" enabled="false">Remove License</g:Button>
-        </g:HorizontalPanel>
-        <cellview:CellTable ui:field="licenseTable" width="100%"/>
-        <g:HTML><br/><br/><br/></g:HTML>
         <g:HTML ui:field="nameField"/>
         <g:HTML>
             <h3>Private password:</h3>

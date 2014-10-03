@@ -20,7 +20,7 @@
             <cellview:CellTable ui:field="table" width="100%"/>
         </g:center>
         <g:east size="500">
-            <a:LicenseCryptDetailsPanel ui:field="detailsPanel"/>
+            <a:CustomerDetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>
 </ui:UiBinder>

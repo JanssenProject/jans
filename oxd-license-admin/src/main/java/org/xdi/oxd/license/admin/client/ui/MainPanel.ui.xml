@@ -17,21 +17,19 @@
                     <g:header size='7'>
                         <b>Customer</b>
                     </g:header>
-                    <g:HTMLPanel>
-                        <a:CustomerTab ui:field="customerTab"/>
-                    </g:HTMLPanel>
+                    <a:CustomerTab ui:field="customerTab"/>
                 </g:tab>
                 <g:tab>
                     <g:header size='7'>
                         <b>License Crypt</b>
                     </g:header>
-                    <g:Label>License Crypt</g:Label>
+                    <a:LicenseCryptTab ui:field="licenseCryptTab"/>
                 </g:tab>
                 <g:tab>
                     <g:header size='7'>
-                        <b>License Exchange Id</b>
+                        <b>License Id</b>
                     </g:header>
-                    <g:Label>License Exchange Id</g:Label>
+                    <g:Label>License Id</g:Label>
                 </g:tab>
             </g:TabLayoutPanel>
         </g:center>

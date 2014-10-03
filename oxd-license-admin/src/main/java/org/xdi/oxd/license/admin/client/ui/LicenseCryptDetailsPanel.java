@@ -3,13 +3,10 @@ package org.xdi.oxd.license.admin.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,6 +16,8 @@ import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 public class LicenseCryptDetailsPanel implements IsWidget {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+
+
 
     interface MyUiBinder extends UiBinder<Widget, LicenseCryptDetailsPanel> {
     }
@@ -38,26 +37,12 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     @UiField
     HTML privateKey;
     @UiField
-    CellTable<LicenseMetadata> licenseTable;
-    @UiField
-    Button removeLicense;
-    @UiField
-    Button addLicense;
-    @UiField
     HTML licensePassword;
     @UiField
     HTML publicPassword;
 
     public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
-    }
-
-    public Button getAddLicense() {
-        return addLicense;
-    }
-
-    public Button getRemoveLicense() {
-        return removeLicense;
     }
 
     public HTML getLicensePassword() {
@@ -95,9 +80,5 @@ public class LicenseCryptDetailsPanel implements IsWidget {
 
     public HTML getPublicKey() {
         return publicKey;
-    }
-
-    public CellTable<LicenseMetadata> getLicenseTable() {
-        return licenseTable;
     }
 }

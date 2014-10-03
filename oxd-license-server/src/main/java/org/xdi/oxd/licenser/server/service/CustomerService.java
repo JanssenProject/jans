@@ -7,7 +7,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.licenser.server.conf.Configuration;
-import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
+import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
 import java.util.Collections;
@@ -41,7 +41,20 @@ public class CustomerService {
     }
 
     public LdapCustomer get(String dn) {
-        return ldapEntryManager.find(LdapCustomer.class, dn);
+        try {
+            return ldapEntryManager.find(LdapCustomer.class, dn);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public void remove(LdapCustomer entity) {
+        try {
+            ldapEntryManager.remove(entity);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public LdapCustomer getCustomersByLicenseId(String licenseId) {

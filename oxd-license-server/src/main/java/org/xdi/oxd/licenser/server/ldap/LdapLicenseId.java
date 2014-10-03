@@ -5,6 +5,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
 
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxLicenseId"})
-public class LdapLicenseId {
+public class LdapLicenseId implements Serializable {
 
     @LdapDN
     private String dn;

@@ -1,14 +1,16 @@
-package org.xdi.oxd.licenser.server.ldap;
+package org.xdi.oxd.license.client.js;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
+
+import java.io.Serializable;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 01/10/2014
  */
 
-public class LdapLicenseCrypt {
+public class LdapLicenseCrypt implements Serializable {
 
     @LdapDN
     private String dn;
@@ -35,80 +37,90 @@ public class LdapLicenseCrypt {
         return id;
     }
 
-    public void setId(String id) {
+    public LdapLicenseCrypt setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public LdapLicenseCrypt setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String dn) {
+    public LdapLicenseCrypt setDn(String dn) {
         this.dn = dn;
+        return this;
     }
 
     public String getClientPrivateKey() {
         return clientPrivateKey;
     }
 
-    public void setClientPrivateKey(String clientPrivateKey) {
+    public LdapLicenseCrypt setClientPrivateKey(String clientPrivateKey) {
         this.clientPrivateKey = clientPrivateKey;
+        return this;
     }
 
     public String getClientPublicKey() {
         return clientPublicKey;
     }
 
-    public void setClientPublicKey(String clientPublicKey) {
+    public LdapLicenseCrypt setClientPublicKey(String clientPublicKey) {
         this.clientPublicKey = clientPublicKey;
+        return this;
     }
 
     public String getLicensePassword() {
         return licensePassword;
     }
 
-    public void setLicensePassword(String licensePassword) {
+    public LdapLicenseCrypt setLicensePassword(String licensePassword) {
         this.licensePassword = licensePassword;
+        return this;
     }
 
     public String getPrivateKey() {
         return privateKey;
     }
 
-    public void setPrivateKey(String privateKey) {
+    public LdapLicenseCrypt setPrivateKey(String privateKey) {
         this.privateKey = privateKey;
+        return this;
     }
 
     public String getPrivatePassword() {
         return privatePassword;
     }
 
-    public void setPrivatePassword(String privatePassword) {
+    public LdapLicenseCrypt setPrivatePassword(String privatePassword) {
         this.privatePassword = privatePassword;
+        return this;
     }
 
     public String getPublicKey() {
         return publicKey;
     }
 
-    public void setPublicKey(String publicKey) {
+    public LdapLicenseCrypt setPublicKey(String publicKey) {
         this.publicKey = publicKey;
+        return this;
     }
 
     public String getPublicPassword() {
         return publicPassword;
     }
 
-    public void setPublicPassword(String publicPassword) {
+    public LdapLicenseCrypt setPublicPassword(String publicPassword) {
         this.publicPassword = publicPassword;
+        return this;
     }
 
 }

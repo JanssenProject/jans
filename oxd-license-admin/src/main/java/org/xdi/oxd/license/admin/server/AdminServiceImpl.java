@@ -2,6 +2,7 @@ package org.xdi.oxd.license.admin.server;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
+import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,14 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.CustomerLicenseId;
-import org.xdi.oxd.license.admin.shared.GeneratedKeys;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.data.License;
+import org.xdi.oxd.license.client.js.LdapCustomer;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
-import org.xdi.oxd.licenser.server.ldap.LdapCustomer;
 import org.xdi.oxd.licenser.server.service.CustomerService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 
@@ -42,30 +42,21 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     LicenseCryptService licenseCryptService;
 
     @Override
-    public List<Customer> getCustomers() {
-        List<Customer> result = Lists.newArrayList();
-        try {
-            for (LdapCustomer ldapCustomer : customerService.getAll()) {
-                result.add(asCustomer(ldapCustomer));
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+    public List<LdapCustomer> getAllCustomers() {
+        return customerService.getAll();
+    }
+
+    @Override
+    public void save(LdapCustomer entity) {
+        if (Strings.isNullOrEmpty(entity.getDn())) {
+            customerService.save(entity);
+        } else {
+            customerService.merge(entity);
         }
-        return result;
     }
 
     @Override
-    public void save(Customer customer) {
-        customerService.save(asLdapCustomer(customer));
-    }
-
-    @Override
-    public void create(Customer customer) {
-        customerService.save(asLdapCustomer(customer));
-    }
-
-    @Override
-    public GeneratedKeys generateKeys() {
+    public LdapLicenseCrypt generate() {
         RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
         KeyPair keyPair = generator.generateKeyPair();
 
@@ -73,7 +64,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         final String publicPassword = randomPassword();
         final byte[] privateKeyBytes = LicenseSerializationUtilities.writeEncryptedPrivateKey(keyPair.getPrivate(), privatePassword.toCharArray());
         final byte[] publicKeyBytes = LicenseSerializationUtilities.writeEncryptedPublicKey(keyPair.getPublic(), publicPassword.toCharArray());
-        return new GeneratedKeys().
+        return new LdapLicenseCrypt().
                 setPrivateKey(BaseEncoding.base64().encode(privateKeyBytes)).
                 setPublicKey(BaseEncoding.base64().encode(publicKeyBytes)).
                 setPrivatePassword(privatePassword).
@@ -111,58 +102,37 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         }
     }
 
+    @Override
+    public void save(LdapLicenseCrypt entity) {
+        if (Strings.isNullOrEmpty(entity.getDn())) {
+            licenseCryptService.save(entity);
+        } else {
+            licenseCryptService.merge(entity);
+        }
+    }
+
+    @Override
+    public void remove(LdapCustomer entity) {
+        customerService.remove(entity);
+    }
+
+    @Override
+    public void remove(LdapLicenseCrypt entity) {
+        licenseCryptService.remove(entity);
+    }
+
+    @Override
+    public List<LdapLicenseCrypt> getAllLicenseCrypts() {
+        try {
+            return licenseCryptService.getAll();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return Lists.newArrayList();
+        }
+    }
+
     private String randomPassword() {
         return RandomStringUtils.randomAlphanumeric(20);
-    }
-
-    private static LdapCustomer asLdapCustomer(Customer c) {
-        LdapCustomer customer = new LdapCustomer();
-        customer.setDn(c.getDn());
-        customer.setId(c.getId());
-        customer.setName(c.getName());
-        customer.setLicenseCryptDN(c.getLicenseCryptDn());
-        customer.setLicenseIdDN(toLicenseIdDNs(c.getLicenseIds()));
-
-        // todo
-//        customer.setLicenses(toLicenseList(c.getLicenses()));
-
-        return customer;
-    }
-
-    private static List<String> toLicenseIdDNs(List<CustomerLicenseId> licenseIds) {
-        List<String> result = Lists.newArrayList(); // todo
-        return result;
-    }
-
-    private static List<String> toLicenseList(List<LicenseMetadata> licenses) {
-        List<String> result = Lists.newArrayList(); // todo
-        return result;
-    }
-
-    private static List<LicenseMetadata> toLicenses(List<String> licenses) {
-        List<LicenseMetadata> result = Lists.newArrayList();    // todo
-//        for (String license : licenses) {
-//            final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(license);
-//            final byte[] licenseContent = signedLicense.getLicenseContent();
-//
-//        }
-        return result;
-    }
-
-    private static Customer asCustomer(LdapCustomer c) {
-        Customer customer = new Customer();
-        customer.setDn(c.getDn());
-        customer.setId(c.getId());
-        customer.setName(c.getName());
-        customer.setLicenseCryptDn(c.getLicenseCryptDN());
-        customer.setLicenseIds(toLicenseIds(c.getLicenseIdDN()));
-        return customer;
-    }
-
-    private static List<CustomerLicenseId> toLicenseIds(List<String> licenseIdDN) {
-        List<CustomerLicenseId> result = Lists.newArrayList();
-        // todo
-        return result;
     }
 
 

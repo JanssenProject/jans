@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import org.xdi.oxd.license.admin.shared.Customer;
+import org.xdi.oxd.license.client.js.LdapCustomer;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -26,13 +26,13 @@ public class CustomerTab implements IsWidget {
     @UiField
     DockLayoutPanel rootPanel;
     @UiField
-    CellTable<Customer> table;
+    CellTable<LdapCustomer> table;
     @UiField
     Button removeButton;
     @UiField
     Button addButton;
     @UiField
-    LicenseCryptDetailsPanel detailsPanel;
+    CustomerDetailsPanel detailsPanel;
     @UiField
     Button editButton;
     @UiField
@@ -41,9 +41,9 @@ public class CustomerTab implements IsWidget {
     public CustomerTab() {
         uiBinder.createAndBindUi(this);
         // init table
-        table.addColumn(new TextColumn<Customer>() {
+        table.addColumn(new TextColumn<LdapCustomer>() {
             @Override
-            public String getValue(Customer object) {
+            public String getValue(LdapCustomer object) {
                 return object.getName();
             }
         }, "Name");
@@ -61,7 +61,7 @@ public class CustomerTab implements IsWidget {
         return refreshButton;
     }
 
-    public CellTable<Customer> getTable() {
+    public CellTable<LdapCustomer> getTable() {
         return table;
     }
 
@@ -69,7 +69,7 @@ public class CustomerTab implements IsWidget {
         return rootPanel;
     }
 
-    public LicenseCryptDetailsPanel getDetailsPanel() {
+    public CustomerDetailsPanel getDetailsPanel() {
         return detailsPanel;
     }
 

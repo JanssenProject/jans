@@ -23,5 +23,6 @@ public class MainPanelPresenter implements Presenter {
         container.add(view);
 
         new CustomerTabPresenter(view.getCustomerTab());
+        new LicenseCryptTabPresenter(view.getLicenseCryptTab());
     }
 }

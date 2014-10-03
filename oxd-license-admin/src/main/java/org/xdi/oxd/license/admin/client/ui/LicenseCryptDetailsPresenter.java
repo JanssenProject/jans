@@ -1,16 +1,7 @@
 package org.xdi.oxd.license.admin.client.ui;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
-import org.xdi.oxd.license.admin.client.dialogs.AddLicenseDialog;
-import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
+import org.xdi.oxd.license.admin.client.Admin;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,80 +12,23 @@ public class LicenseCryptDetailsPresenter {
 
     private final LicenseCryptDetailsPanel view;
 
-    private Customer customer;
-    private SingleSelectionModel<LicenseMetadata> selectionModel = new SingleSelectionModel<LicenseMetadata>();
+    private LdapLicenseCrypt licenseCrypt;
 
     public LicenseCryptDetailsPresenter(LicenseCryptDetailsPanel view) {
         this.view = view;
-        configureLicenseTable(view);
-
-        view.getAddLicense().addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                AddLicenseDialog dialog = new AddLicenseDialog(LicenseCryptDetailsPresenter.this);
-                dialog.show();
-            }
-        });
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                LicenseCryptDetailsPresenter.this.view.getRemoveLicense().setEnabled(selectionModel.getSelectedObject() != null);
-            }
-        });
     }
 
-    private void configureLicenseTable(LicenseCryptDetailsPanel view) {
-        view.getLicenseTable().setSelectionModel(selectionModel);
-        view.getLicenseTable().addColumn(new TextColumn<LicenseMetadata>() {
-            @Override
-            public String getValue(LicenseMetadata license) {
-                return license.getType().name();
-            }
-        }, "Type");
-        view.getLicenseTable().addColumn(new TextColumn<LicenseMetadata>() {
-            @Override
-            public String getValue(LicenseMetadata license) {
-                return Integer.toString(license.getNumberOfThreads());
-            }
-        }, "oxD Threads");
+    public void show(LdapLicenseCrypt licenseCrypt) {
+        this.licenseCrypt = licenseCrypt;
 
-        view.getLicenseTable().setColumnWidth(0, 70, Style.Unit.PX);
-        view.getLicenseTable().setColumnWidth(1, 200, Style.Unit.PX);
+        view.getNameField().setHTML(Admin.asHtml(licenseCrypt.getName()));
+        view.getPrivateKey().setHTML(Admin.asHtml(licenseCrypt.getPrivateKey()));
+        view.getPublicKey().setHTML(Admin.asHtml(licenseCrypt.getPublicKey()));
+        view.getClientPublicKey().setHTML(Admin.asHtml(licenseCrypt.getClientPublicKey()));
+        view.getClientPrivateKey().setHTML(Admin.asHtml(licenseCrypt.getClientPrivateKey()));
+        view.getPrivatePassword().setHTML(Admin.asHtml(licenseCrypt.getPrivatePassword()));
+        view.getPublicPassword().setHTML(Admin.asHtml(licenseCrypt.getPublicPassword()));
+        view.getLicensePassword().setHTML(Admin.asHtml(licenseCrypt.getLicensePassword()));
     }
 
-    public void show(Customer customer) {
-        this.customer = customer;
-
-        view.getAddLicense().setEnabled(true);
-        view.getNameField().setHTML(asHtml(customer.getName()));
-        view.getPrivateKey().setHTML(asHtml(customer.getLicenseCryptDn()));
-
-        // todo
-//        view.getPublicKey().setHTML(asHtml(customer.getPublicKey()));
-//        view.getClientPublicKey().setHTML(asHtml(customer.getClientPublicKey()));
-//        view.getClientPrivateKey().setHTML(asHtml(customer.getClientPrivateKey()));
-//        view.getPrivatePassword().setHTML(asHtml(customer.getPrivatePassword()));
-//        view.getPublicPassword().setHTML(asHtml(customer.getPublicPassword()));
-//        view.getLicensePassword().setHTML(asHtml(customer.getLicensePassword()));
-        reloadLicenseTable();
-    }
-
-    private static SafeHtml asHtml(String str) {
-        String s = str != null ? str : "";
-        if (s.length() > 40) {
-            s = s.substring(0, 40) + "...";
-        }
-        return SafeHtmlUtils.fromString(s);
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void reloadLicenseTable() {
-        // todo
-//        final List<LicenseMetadata> licenses = customer.getLicenseIds() != null ? customer.getLicenseIds() : new ArrayList<LicenseMetadata>();
-//        view.getLicenseTable().setRowData(licenses);
-//        view.getLicenseTable().setRowCount(licenses.size());
-    }
 }

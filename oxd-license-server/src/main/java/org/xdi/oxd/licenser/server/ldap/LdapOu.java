@@ -5,6 +5,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.io.Serializable;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 30/09/2014
@@ -12,7 +14,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 @LdapEntry
 @LdapObjectClass(values = {"top", "organizationalUnit"})
-public class LdapOu {
+public class LdapOu implements Serializable {
 
     @LdapDN
     private String dn;

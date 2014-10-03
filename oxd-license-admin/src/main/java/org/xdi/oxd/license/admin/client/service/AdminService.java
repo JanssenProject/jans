@@ -4,7 +4,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
-import org.xdi.oxd.license.admin.shared.GeneratedKeys;
+import org.xdi.oxd.license.client.js.LdapCustomer;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 
 import java.util.List;
 
@@ -16,13 +17,21 @@ import java.util.List;
 @RemoteServiceRelativePath("adminService.rpc")
 public interface AdminService extends RemoteService {
 
-    public List<Customer> getCustomers();
+    public List<LdapCustomer> getAllCustomers();
 
-    public void save(Customer customer);
+    public List<LdapLicenseCrypt> getAllLicenseCrypts();
 
-    public void create(Customer customer);
+    public void save(LdapCustomer entity);
 
-    public GeneratedKeys generateKeys();
+    public void save(LdapLicenseCrypt entity);
+
+    public void remove(LdapCustomer entity);
+
+    public void remove(LdapLicenseCrypt entity);
+
+    public LdapLicenseCrypt generate();
 
     public LicenseMetadata addLicense(Customer customer, LicenseMetadata license);
+
+
 }

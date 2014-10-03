@@ -7,8 +7,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
-import org.xdi.oxd.license.admin.client.dialogs.EditCustomerDialog;
-import org.xdi.oxd.license.admin.shared.Customer;
+import org.xdi.oxd.license.admin.client.dialogs.AddCustomerDialog;
+import org.xdi.oxd.license.client.js.LdapCustomer;
 
 import java.util.List;
 
@@ -20,17 +20,17 @@ import java.util.List;
 public class CustomerTabPresenter {
 
     private final CustomerTab view;
-    private final SingleSelectionModel<Customer> selectionModel = new SingleSelectionModel<Customer>();
-    private final LicenseCryptDetailsPresenter detailsPresenter;
+    private final SingleSelectionModel<LdapCustomer> selectionModel = new SingleSelectionModel<LdapCustomer>();
+    private final CustomerDetailsPresenter detailsPresenter;
 
     public CustomerTabPresenter(CustomerTab view) {
         this.view = view;
-        this.detailsPresenter = new LicenseCryptDetailsPresenter(view.getDetailsPanel());
+        this.detailsPresenter = new CustomerDetailsPresenter(view.getDetailsPanel());
 
         view.getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EditCustomerDialog dialog = new EditCustomerDialog() {
+                AddCustomerDialog dialog = new AddCustomerDialog() {
                     @Override
                     public void onSuccess() {
                         loadCustomers();
@@ -61,9 +61,9 @@ public class CustomerTabPresenter {
     }
 
     private void loadCustomers() {
-        Admin.getService().getCustomers(new SuccessCallback<List<Customer>>() {
+        Admin.getService().getAllCustomers(new SuccessCallback<List<LdapCustomer>>() {
             @Override
-            public void onSuccess(List<Customer> result) {
+            public void onSuccess(List<LdapCustomer> result) {
                 view.getTable().setRowData(result);
                 view.getTable().setRowCount(result.size());
             }
