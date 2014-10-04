@@ -65,6 +65,7 @@ public class LicenseCryptService {
     private void setDnIfEmpty(LdapLicenseCrypt entity) {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             String id = Strings.isNullOrEmpty(entity.getId()) ? UUID.randomUUID().toString() : entity.getId();
+            entity.setId(id);
             entity.setDn(String.format("uniqueIdentifier=%s,%s", id, ldapStructure.getLicenseCryptBaseDn()));
         }
     }

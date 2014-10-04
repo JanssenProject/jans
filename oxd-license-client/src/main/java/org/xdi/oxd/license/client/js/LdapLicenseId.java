@@ -1,4 +1,4 @@
-package org.xdi.oxd.licenser.server.ldap;
+package org.xdi.oxd.license.client.js;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;

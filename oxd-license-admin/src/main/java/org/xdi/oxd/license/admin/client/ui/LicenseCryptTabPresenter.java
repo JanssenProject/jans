@@ -62,6 +62,7 @@ public class LicenseCryptTabPresenter {
                 loadTableData();
             }
         });
+
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

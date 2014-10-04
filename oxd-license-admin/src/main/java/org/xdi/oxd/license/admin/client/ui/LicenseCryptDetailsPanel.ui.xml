@@ -11,6 +11,10 @@
         </g:HTML>
         <g:HTML ui:field="nameField"/>
         <g:HTML>
+            <h3>License Id count:</h3>
+        </g:HTML>
+        <g:HTML ui:field="licenseIdCount"/>
+        <g:HTML>
             <h3>Private password:</h3>
         </g:HTML>
         <g:HTML ui:field="privatePassword"/>
@@ -31,12 +35,9 @@
         </g:HTML>
         <g:HTML ui:field="publicKey"/>
         <g:HTML>
-            <h3>Client private key:</h3>
+            <br/>
         </g:HTML>
-        <g:HTML ui:field="clientPrivateKey"/>
-        <g:HTML>
-            <h3>Client public key:</h3>
-        </g:HTML>
-        <g:HTML ui:field="clientPublicKey"/>
+        <g:Button ui:field="generateLicenseIdButton">Generate License Ids</g:Button>
+        <cellview:CellTable ui:field="licenseIds"/>
     </g:VerticalPanel>
 </ui:UiBinder>

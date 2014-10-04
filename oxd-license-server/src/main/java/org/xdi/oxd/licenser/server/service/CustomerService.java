@@ -93,6 +93,7 @@ public class CustomerService {
     private void setDnIfEmpty(LdapCustomer entity) {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             String id = Strings.isNullOrEmpty(entity.getId()) ? UUID.randomUUID().toString() : entity.getId();
+            entity.setId(id);
             entity.setDn(String.format("customerId=%s,%s", id, ldapStructure.getCustomerBaseDn()));
         }
     }

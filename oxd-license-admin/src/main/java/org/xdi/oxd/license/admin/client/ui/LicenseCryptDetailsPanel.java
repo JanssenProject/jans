@@ -3,10 +3,15 @@ package org.xdi.oxd.license.admin.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.xdi.oxd.license.client.js.LdapLicenseId;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,7 +23,6 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
 
-
     interface MyUiBinder extends UiBinder<Widget, LicenseCryptDetailsPanel> {
     }
 
@@ -28,10 +32,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     VerticalPanel rootPanel;
     @UiField
     HTML privatePassword;
-    @UiField
-    HTML clientPublicKey;
-    @UiField
-    HTML clientPrivateKey;
+    //    @UiField
+    HTML clientPublicKey = new HTML();
+    //    @UiField
+    HTML clientPrivateKey = new HTML();
     @UiField
     HTML publicKey;
     @UiField
@@ -40,9 +44,27 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     HTML licensePassword;
     @UiField
     HTML publicPassword;
+    @UiField
+    Button generateLicenseIdButton;
+    @UiField
+    HTML licenseIdCount;
+    @UiField
+    CellTable<LdapLicenseId> licenseIds;
 
     public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
+        licenseIds.setEmptyTableWidget(new Label("No data"));
+        licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
+            @Override
+            public String getValue(LdapLicenseId object) {
+                return object.getLicenseId();
+            }
+        }, "License Id");
+
+    }
+
+    public CellTable<LdapLicenseId> getLicenseIds() {
+        return licenseIds;
     }
 
     public HTML getLicensePassword() {
@@ -51,6 +73,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
 
     public HTML getPublicPassword() {
         return publicPassword;
+    }
+
+    public HTML getLicenseIdCount() {
+        return licenseIdCount;
     }
 
     @Override
@@ -72,6 +98,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
 
     public HTML getPrivateKey() {
         return privateKey;
+    }
+
+    public Button getGenerateLicenseIdButton() {
+        return generateLicenseIdButton;
     }
 
     public HTML getPrivatePassword() {

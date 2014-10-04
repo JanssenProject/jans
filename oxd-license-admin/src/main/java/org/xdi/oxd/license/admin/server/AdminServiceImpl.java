@@ -16,13 +16,16 @@ import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
+import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.service.CustomerService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
+import org.xdi.oxd.licenser.server.service.LicenseIdService;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,6 +43,8 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     CustomerService customerService;
     @Inject
     LicenseCryptService licenseCryptService;
+    @Inject
+    LicenseIdService licenseIdService;
 
     @Override
     public List<LdapCustomer> getAllCustomers() {
@@ -73,6 +78,18 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
+    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt) {
+        List<LdapLicenseId> result = new ArrayList<LdapLicenseId>();
+        for (int i = 0; i < count; i++) {
+            final LdapLicenseId entity = licenseIdService.generate();
+            entity.setLicenseCryptDN(licenseCrypt.getDn());
+            licenseIdService.save(entity);
+            result.add(entity);
+        }
+        return result;
+    }
+
+    @Override
     public LicenseMetadata addLicense(Customer customer, LicenseMetadata license) {
         try {
             LicenseGeneratorInput input = new LicenseGeneratorInput();
@@ -100,6 +117,11 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
             LOG.error(e.getMessage(), e);
             throw new RuntimeException("Failed to generate license", e);
         }
+    }
+
+    @Override
+    public List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt) {
+        return licenseIdService.getByCryptDn(licenseCrypt.getDn());
     }
 
     @Override

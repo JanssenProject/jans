@@ -19,6 +19,7 @@ public class CustomerDetailsPresenter {
     public void show(LdapCustomer entity) {
         if (entity == null) {
             clear();
+            return;
         }
 
         view.getNameField().setHTML(Admin.asHtml(entity.getName()));

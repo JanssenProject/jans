@@ -6,7 +6,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.client.service.AdminServiceAsync;
@@ -47,6 +46,15 @@ public class Admin implements EntryPoint {
 
     public static boolean isEmpty(String str) {
         return str == null || str.trim().equals("");
+    }
+
+    public static Integer parse(String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
 }

@@ -6,6 +6,7 @@ import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
+import org.xdi.oxd.license.client.js.LdapLicenseId;
 
 import java.util.List;
 
@@ -31,7 +32,9 @@ public interface AdminService extends RemoteService {
 
     public LdapLicenseCrypt generate();
 
+    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt);
+
     public LicenseMetadata addLicense(Customer customer, LicenseMetadata license);
 
-
+    List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt);
 }
