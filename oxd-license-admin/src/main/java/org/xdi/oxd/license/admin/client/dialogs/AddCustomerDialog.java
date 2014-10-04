@@ -45,11 +45,15 @@ public class AddCustomerDialog {
     Button selectCryptButton;
     @UiField
     HTML crypt;
+    @UiField
+    HTML cryptChangeWarning;
 
+    LdapCustomer customer;
     LdapLicenseCrypt licenseCrypt;
 
-    public AddCustomerDialog() {
+    public AddCustomerDialog(LdapCustomer ldapCustomer) {
         uiBinder.createAndBindUi(this);
+        this.customer = ldapCustomer;
 
         dialog = Framework.createDialogBox("Add Customer");
         dialog.setWidget(dialogContent);
@@ -64,10 +68,19 @@ public class AddCustomerDialog {
             @Override
             public void onClick(ClickEvent event) {
                 if (validate()) {
+                    if (AddCustomerDialog.this.customer == null) {
+                        AddCustomerDialog.this.customer = new LdapCustomer();
+
+
+                    }
                     onOkClick();
                 }
             }
         });
+
+        if (ldapCustomer == null) {
+            cryptChangeWarning.setVisible(true);
+        }
 
         selectCryptButton.addClickHandler(new ClickHandler() {
             @Override
@@ -104,7 +117,6 @@ public class AddCustomerDialog {
     }
 
     private void onOkClick() {
-        final LdapCustomer customer = new LdapCustomer();
         customer.setName(nameField.getValue());
         customer.setLicenseCryptDN(licenseCrypt.getDn());
 

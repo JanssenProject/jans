@@ -13,6 +13,9 @@
             <h4>Crypt:</h4>
         </g:HTML>
         <g:HorizontalPanel>
+            <g:HTML ui:field="cryptChangeWarning" visible="false">
+                <span style="color:red;">Warning: On crypt change all dependent license ids as well as licenses are not associated with this customer anymore. </span>
+            </g:HTML>
             <g:HTML ui:field="crypt"/>
             <g:Button ui:field="selectCryptButton">Select Crypt</g:Button>
         </g:HorizontalPanel>

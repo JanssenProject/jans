@@ -30,7 +30,7 @@ public class CustomerTabPresenter {
         view.getAddButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                AddCustomerDialog dialog = new AddCustomerDialog() {
+                AddCustomerDialog dialog = new AddCustomerDialog(null) {
                     @Override
                     public void onSuccess() {
                         loadCustomers();
@@ -38,6 +38,25 @@ public class CustomerTabPresenter {
                 };
                 dialog.setTitle("Create customer");
                 dialog.show();
+            }
+        });
+        view.getEditButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                AddCustomerDialog dialog = new AddCustomerDialog(selectionModel.getSelectedObject()) {
+                    @Override
+                    public void onSuccess() {
+                        loadCustomers();
+                    }
+                };
+                dialog.setTitle("Edit customer");
+                dialog.show();
+            }
+        });
+        view.getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                onRemove();
             }
         });
         view.getRefreshButton().addClickHandler(new ClickHandler() {
@@ -49,6 +68,8 @@ public class CustomerTabPresenter {
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
+                CustomerTabPresenter.this.view.getEditButton().setEnabled(selectionModel.getSelectedObject() != null);
+                CustomerTabPresenter.this.view.getRemoveButton().setEnabled(selectionModel.getSelectedObject() != null);
                 detailsPresenter.show(selectionModel.getSelectedObject());
             }
         });
@@ -58,6 +79,15 @@ public class CustomerTabPresenter {
 
         loadCustomers();
 
+    }
+
+    private void onRemove() {
+        Admin.getService().remove(selectionModel.getSelectedObject(), new SuccessCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                loadCustomers();
+            }
+        });
     }
 
     private void loadCustomers() {

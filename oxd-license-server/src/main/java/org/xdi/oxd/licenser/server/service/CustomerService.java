@@ -32,7 +32,7 @@ public class CustomerService {
 
     public List<LdapCustomer> getAll() {
         try {
-            final Filter filter = Filter.create("&(customerId=*)");
+            final Filter filter = Filter.create("&(uniqueIdentifier=*)");
             return ldapEntryManager.findEntries(ldapStructure.getCustomerBaseDn(), LdapCustomer.class, filter);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -57,22 +57,6 @@ public class CustomerService {
         }
     }
 
-    public LdapCustomer getCustomersByLicenseId(String licenseId) {
-        try {
-//                   final Filter filter = Filter.create("&(inum=*)");
-            final Filter filter = Filter.create(String.format("&(licenseId=%s)", licenseId));
-            final List<LdapCustomer> entries = ldapEntryManager.findEntries(ldapStructure.getCustomerBaseDn(), LdapCustomer.class, filter);
-            if (!entries.isEmpty()) {
-                return entries.get(0);
-            } else {
-                LOG.error("There no customer object with licenseId:" + licenseId);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     public void merge(LdapCustomer entity) {
         try {
             ldapEntryManager.merge(entity);
@@ -94,7 +78,7 @@ public class CustomerService {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             String id = Strings.isNullOrEmpty(entity.getId()) ? UUID.randomUUID().toString() : entity.getId();
             entity.setId(id);
-            entity.setDn(String.format("customerId=%s,%s", id, ldapStructure.getCustomerBaseDn()));
+            entity.setDn(String.format("uniqueIdentifier=%s,%s", id, ldapStructure.getCustomerBaseDn()));
         }
     }
 

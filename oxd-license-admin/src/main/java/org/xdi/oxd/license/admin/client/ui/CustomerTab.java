@@ -49,6 +49,10 @@ public class CustomerTab implements IsWidget {
         }, "Name");
     }
 
+    public Button getEditButton() {
+        return editButton;
+    }
+
     public Button getAddButton() {
         return addButton;
     }
