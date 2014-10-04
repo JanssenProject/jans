@@ -68,8 +68,7 @@ public class CustomerTabPresenter {
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                CustomerTabPresenter.this.view.getEditButton().setEnabled(selectionModel.getSelectedObject() != null);
-                CustomerTabPresenter.this.view.getRemoveButton().setEnabled(selectionModel.getSelectedObject() != null);
+                setButtonsState();
                 detailsPresenter.show(selectionModel.getSelectedObject());
             }
         });
@@ -78,7 +77,13 @@ public class CustomerTabPresenter {
         view.getTable().setSelectionModel(selectionModel);
 
         loadCustomers();
+        setButtonsState();
 
+    }
+
+    private void setButtonsState() {
+        this.view.getEditButton().setEnabled(selectionModel.getSelectedObject() != null);
+        this.view.getRemoveButton().setEnabled(selectionModel.getSelectedObject() != null);
     }
 
     private void onRemove() {

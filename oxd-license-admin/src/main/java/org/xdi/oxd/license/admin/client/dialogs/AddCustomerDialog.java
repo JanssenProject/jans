@@ -78,7 +78,7 @@ public class AddCustomerDialog {
             }
         });
 
-        if (ldapCustomer == null) {
+        if (ldapCustomer != null) {
             cryptChangeWarning.setVisible(true);
         }
 
