@@ -25,7 +25,7 @@ public class CustomerDetailsPresenter {
         }
 
         view.getNameField().setHTML(Admin.asHtml(entity.getName()));
-        Admin.getService().getLicenseCrypt(entity.getDn(), new SuccessCallback<LdapLicenseCrypt>() {
+        Admin.getService().getLicenseCrypt(entity.getLicenseCryptDN(), new SuccessCallback<LdapLicenseCrypt>() {
             @Override
             public void onSuccess(LdapLicenseCrypt result) {
                 view.getCryptNameField().setHTML(Admin.asHtml(result.getName()));
