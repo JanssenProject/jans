@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -52,10 +53,17 @@ public class SelectCryptDialog {
     public SelectCryptDialog() {
         uiBinder.createAndBindUi(this);
 
-        dialog = Framework.createDialogBox("Add Customer");
+        dialog = Framework.createDialogBox("Select crypt");
         dialog.setWidget(dialogContent);
+
         table.setEmptyTableWidget(new Label("No data"));
         table.setSelectionModel(selectionModel);
+        table.addColumn(new TextColumn<LdapLicenseCrypt>() {
+            @Override
+            public String getValue(LdapLicenseCrypt object) {
+                return object.getName();
+            }
+        }, "Name");
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override

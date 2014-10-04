@@ -18,7 +18,7 @@ public class LdapCustomer implements Serializable {
 
     @LdapDN
     private String dn;
-    @LdapAttribute(name = "customerId")
+    @LdapAttribute(name = "uniqueIdentifier")
     private String id;
     @LdapAttribute(name = "oxName")
     private String name;
