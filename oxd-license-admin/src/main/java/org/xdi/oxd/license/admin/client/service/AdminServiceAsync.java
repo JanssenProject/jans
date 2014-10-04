@@ -29,4 +29,6 @@ public interface AdminServiceAsync {
     void generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, AsyncCallback<List<LdapLicenseId>> async);
 
     void loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt, AsyncCallback<List<LdapLicenseId>> async);
+
+    void getLicenseCrypt(String dn, AsyncCallback<LdapLicenseCrypt> async);
 }

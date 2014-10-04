@@ -125,6 +125,11 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
+    public LdapLicenseCrypt getLicenseCrypt(String dn) {
+        return licenseCryptService.get(dn);
+    }
+
+    @Override
     public void save(LdapLicenseCrypt entity) {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             licenseCryptService.save(entity);

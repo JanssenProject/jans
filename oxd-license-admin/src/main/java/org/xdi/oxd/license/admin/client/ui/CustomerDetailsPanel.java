@@ -3,8 +3,6 @@ package org.xdi.oxd.license.admin.client.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -27,11 +25,7 @@ public class CustomerDetailsPanel implements IsWidget {
     @UiField
     HTML nameField;
     @UiField
-    Button addLicenseId;
-    @UiField
-    Button removeLicenseId;
-    @UiField
-    CellTable licenseIdTable;
+    HTML cryptNameField;
 
     public CustomerDetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -42,19 +36,11 @@ public class CustomerDetailsPanel implements IsWidget {
         return rootPanel;
     }
 
-    public Button getAddLicenseId() {
-        return addLicenseId;
-    }
-
-    public CellTable getLicenseIdTable() {
-        return licenseIdTable;
+    public HTML getCryptNameField() {
+        return cryptNameField;
     }
 
     public HTML getNameField() {
         return nameField;
-    }
-
-    public Button getRemoveLicenseId() {
-        return removeLicenseId;
     }
 }

@@ -37,4 +37,6 @@ public interface AdminService extends RemoteService {
     public LicenseMetadata addLicense(Customer customer, LicenseMetadata license);
 
     List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt);
+
+    public LdapLicenseCrypt getLicenseCrypt(String dn);
 }

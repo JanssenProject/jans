@@ -1,7 +1,9 @@
 package org.xdi.oxd.license.admin.client.ui;
 
 import org.xdi.oxd.license.admin.client.Admin;
+import org.xdi.oxd.license.admin.client.SuccessCallback;
 import org.xdi.oxd.license.client.js.LdapCustomer;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,11 +25,16 @@ public class CustomerDetailsPresenter {
         }
 
         view.getNameField().setHTML(Admin.asHtml(entity.getName()));
-
-        // todo
+        Admin.getService().getLicenseCrypt(entity.getDn(), new SuccessCallback<LdapLicenseCrypt>() {
+            @Override
+            public void onSuccess(LdapLicenseCrypt result) {
+                view.getCryptNameField().setHTML(Admin.asHtml(result.getName()));
+            }
+        });
     }
 
     private void clear() {
         view.getNameField().setHTML("");
+        view.getCryptNameField().setHTML("");
     }
 }
