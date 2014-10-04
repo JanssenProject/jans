@@ -16,7 +16,7 @@
         </g:HTMLPanel>
         <g:HTML ui:field="errorMessage" visible="false"/>
         <g:HorizontalPanel>
-            <g:Button ui:field="okButton" enabled="false">OK</g:Button>
+            <g:Button ui:field="okButton">OK</g:Button>
             <g:Button ui:field="closeButton">Close</g:Button>
         </g:HorizontalPanel>
     </g:VerticalPanel>

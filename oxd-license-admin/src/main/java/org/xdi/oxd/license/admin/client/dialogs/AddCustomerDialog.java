@@ -17,8 +17,6 @@ import org.xdi.oxd.license.admin.client.framework.Framework;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 
-import java.util.ArrayList;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 24/09/2014
@@ -109,7 +107,6 @@ public class AddCustomerDialog {
         final LdapCustomer customer = new LdapCustomer();
         customer.setName(nameField.getValue());
         customer.setLicenseCryptDN(licenseCrypt.getDn());
-        customer.setLicenseIdDN(new ArrayList<String>());
 
         Admin.getService().save(customer, new SuccessCallback<Void>() {
             @Override

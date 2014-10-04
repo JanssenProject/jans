@@ -79,5 +79,5 @@ objectclasses: ( oxLicenseCrypt-oid NAME 'oxLicenseCrypt' SUP top STRUCTURAL MUS
       $ oxPublicKey $ oxPrivateKey )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxLicenseCustomer-oid NAME 'oxLicenseCustomer' SUP top STRUCTURAL MUST objectclass MAY
-  ( uniqueIdentifier $ licenseId $ oxName $ oxLicenseCrypt )
+  ( uniqueIdentifier $ oxName $ oxLicenseCrypt )
   X-ORIGIN 'Gluu created objectclass' )
