@@ -50,6 +50,8 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     HTML licenseIdCount;
     @UiField
     CellTable<LdapLicenseId> licenseIds;
+    @UiField
+    Button removeButton;
 
     public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -100,6 +102,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
             }
         }, "Multi-server");
 
+    }
+
+    public Button getRemoveButton() {
+        return removeButton;
     }
 
     public CellTable<LdapLicenseId> getLicenseIds() {

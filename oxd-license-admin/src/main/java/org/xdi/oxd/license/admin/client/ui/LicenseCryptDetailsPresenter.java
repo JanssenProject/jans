@@ -2,6 +2,8 @@ package org.xdi.oxd.license.admin.client.ui;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
 import org.xdi.oxd.license.admin.client.dialogs.LicenseIdMetadataDialog;
@@ -19,6 +21,8 @@ import java.util.List;
 
 public class LicenseCryptDetailsPresenter {
 
+    private final MultiSelectionModel<LdapLicenseId> selectionModel = new MultiSelectionModel<LdapLicenseId>();
+
     private final LicenseCryptDetailsPanel view;
 
     private LdapLicenseCrypt licenseCrypt;
@@ -29,6 +33,25 @@ public class LicenseCryptDetailsPresenter {
             @Override
             public void onClick(ClickEvent event) {
                 generateLicenseIds();
+            }
+        });
+        this.view.getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Admin.getService().remove(selectionModel.getSelectedSet(), new SuccessCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        LicenseCryptDetailsPresenter.this.loadLicenseIds();
+                    }
+                });
+            }
+        });
+        view.getLicenseIds().setSelectionModel(selectionModel);
+
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                LicenseCryptDetailsPresenter.this.view.getRemoveButton().setEnabled(!selectionModel.getSelectedSet().isEmpty());
             }
         });
     }

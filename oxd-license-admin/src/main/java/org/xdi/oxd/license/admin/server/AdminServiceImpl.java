@@ -24,6 +24,7 @@ import org.xdi.oxd.licenser.server.service.LicenseIdService;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -142,6 +143,13 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     @Override
     public void remove(LdapLicenseCrypt entity) {
         licenseCryptService.remove(entity);
+    }
+
+    @Override
+    public void remove(Set<LdapLicenseId> entities) {
+        for (LdapLicenseId entry : entities) {
+            licenseIdService.remove(entry);
+        }
     }
 
     @Override
