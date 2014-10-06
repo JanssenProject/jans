@@ -129,4 +129,12 @@ public class LicenseIdService {
         setDnIfEmpty(id);
         return id;
     }
+
+    public LdapLicenseId generate(String cryptDN, LicenseMetadata metadata) {
+        final LdapLicenseId entity = generate();
+        entity.setLicenseCryptDN(cryptDN);
+        entity.setMetadata(Jackson.asJsonSilently(metadata));
+        entity.setMetadataAsObject(metadata);
+        return entity;
+    }
 }

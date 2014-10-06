@@ -1,27 +1,21 @@
 package org.xdi.oxd.license.admin.server;
 
 import com.google.common.collect.Lists;
-import com.google.common.io.BaseEncoding;
 import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.nicholaswilliams.java.licensing.encryption.RSAKeyPairGenerator;
-import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
-import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.service.CustomerService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
 
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -59,28 +53,14 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
 
     @Override
     public LdapLicenseCrypt generate() {
-        RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
-        KeyPair keyPair = generator.generateKeyPair();
-
-        final String privatePassword = randomPassword();
-        final String publicPassword = randomPassword();
-        final byte[] privateKeyBytes = LicenseSerializationUtilities.writeEncryptedPrivateKey(keyPair.getPrivate(), privatePassword.toCharArray());
-        final byte[] publicKeyBytes = LicenseSerializationUtilities.writeEncryptedPublicKey(keyPair.getPublic(), publicPassword.toCharArray());
-        return new LdapLicenseCrypt().
-                setPrivateKey(BaseEncoding.base64().encode(privateKeyBytes)).
-                setPublicKey(BaseEncoding.base64().encode(publicKeyBytes)).
-                setPrivatePassword(privatePassword).
-                setPublicPassword(publicPassword).
-                setLicensePassword(randomPassword());
+        return licenseCryptService.generate();
     }
 
     @Override
     public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, LicenseMetadata metadata) {
         List<LdapLicenseId> result = new ArrayList<LdapLicenseId>();
         for (int i = 0; i < count; i++) {
-            final LdapLicenseId entity = licenseIdService.generate();
-            entity.setLicenseCryptDN(licenseCrypt.getDn());
-            entity.setMetadata(Jackson.asJsonSilently(metadata));
+            final LdapLicenseId entity = licenseIdService.generate(licenseCrypt.getDn(), metadata);
             licenseIdService.save(entity);
             result.add(entity);
         }
@@ -160,10 +140,6 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
             LOG.error(e.getMessage(), e);
             return Lists.newArrayList();
         }
-    }
-
-    private String randomPassword() {
-        return RandomStringUtils.randomAlphanumeric(20);
     }
 
 

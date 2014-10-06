@@ -53,4 +53,15 @@ public class LicenseMetadata implements Serializable {
         this.threadsCount = threadsCount;
         return this;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("LicenseMetadata");
+        sb.append("{licenseType=").append(licenseType);
+        sb.append(", threadsCount=").append(threadsCount);
+        sb.append(", multiServer=").append(multiServer);
+        sb.append('}');
+        return sb.toString();
+    }
 }

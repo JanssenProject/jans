@@ -1,4 +1,4 @@
-package org.xdi.oxd.licenser.server;
+package org.xdi.oxd.license.client.lib;
 
 import com.google.common.io.BaseEncoding;
 import net.nicholaswilliams.java.licensing.ObjectSerializer;

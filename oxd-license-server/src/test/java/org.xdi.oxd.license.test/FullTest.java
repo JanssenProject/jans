@@ -8,12 +8,11 @@ import net.nicholaswilliams.java.licensing.encryption.PublicKeyDataProvider;
 import net.nicholaswilliams.java.licensing.encryption.RSAKeyPairGenerator;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
 import org.testng.annotations.Test;
-import org.xdi.oxd.license.client.js.LicenseType;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
-import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
+import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.KeyFactory;
@@ -23,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -65,9 +65,7 @@ public class FullTest {
         input.setLicensePassword(licensePassword);
         input.setPrivatePassword(privatePassword);
         input.setPublicPassword(publicPassword);
-        input.setThreadsCount(5);
-        input.setLicenseType(LicenseType.FREE.name());
-        input.setExpiredAt(new Date()); // todo !!!
+        input.setExpiredAt(new Date(new Date().getTime() + TimeUnit.DAYS.toMillis(1)) );
 
         LicenseGenerator licenseGenerator = new LicenseGenerator();
         final SignedLicense signedLicenseObject = licenseGenerator.generateSignedLicense(input);

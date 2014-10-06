@@ -1,15 +1,20 @@
 package org.xdi.oxd.licenser.server.service;
 
 import com.google.common.base.Strings;
+import com.google.common.io.BaseEncoding;
 import com.google.inject.Inject;
 import com.unboundid.ldap.sdk.Filter;
+import net.nicholaswilliams.java.licensing.encryption.RSAKeyPairGenerator;
+import org.apache.commons.lang.RandomStringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
+import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.conf.Configuration;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
+import java.security.KeyPair;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +34,26 @@ public class LicenseCryptService {
     Configuration conf;
     @Inject
     LdapStructure ldapStructure;
+
+    public LdapLicenseCrypt generate() {
+        RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
+        KeyPair keyPair = generator.generateKeyPair();
+
+        final String privatePassword = randomPassword();
+        final String publicPassword = randomPassword();
+        final byte[] privateKeyBytes = LicenseSerializationUtilities.writeEncryptedPrivateKey(keyPair.getPrivate(), privatePassword.toCharArray());
+        final byte[] publicKeyBytes = LicenseSerializationUtilities.writeEncryptedPublicKey(keyPair.getPublic(), publicPassword.toCharArray());
+        return new LdapLicenseCrypt().
+                setPrivateKey(BaseEncoding.base64().encode(privateKeyBytes)).
+                setPublicKey(BaseEncoding.base64().encode(publicKeyBytes)).
+                setPrivatePassword(privatePassword).
+                setPublicPassword(publicPassword).
+                setLicensePassword(randomPassword());
+    }
+
+    public String randomPassword() {
+        return RandomStringUtils.randomAlphanumeric(20);
+    }
 
     public List<LdapLicenseCrypt> getAll() {
         try {

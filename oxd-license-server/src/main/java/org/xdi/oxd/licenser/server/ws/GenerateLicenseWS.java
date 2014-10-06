@@ -45,7 +45,7 @@ public class GenerateLicenseWS {
     @Inject
     LicenseCryptService licenseCryptService;
 
-    private License generateLicense(String licenseIdStr) {
+    public License generateLicense(String licenseIdStr) {
         try {
             LdapLicenseId licenseId = getLicenseId(licenseIdStr);
             LdapLicenseCrypt licenseCrypt = getLicenseCrypt(licenseId.getLicenseCryptDN(), licenseIdStr);

@@ -17,6 +17,7 @@ package org.xdi.oxd.license.client.lib;
  * limitations under the License.
  */
 
+import com.google.common.io.BaseEncoding;
 import net.nicholaswilliams.java.licensing.*;
 import net.nicholaswilliams.java.licensing.encryption.Encryptor;
 import net.nicholaswilliams.java.licensing.encryption.KeyFileUtilities;
@@ -57,6 +58,31 @@ public final class ALicenseManager {
     private final int cacheTimeInMilliseconds;
 
     private final Hashtable<Object, LicenseCacheEntry> licenseCache = new Hashtable<Object, LicenseCacheEntry>();
+
+    public ALicenseManager(final String publicKey, final String publicPassword, final SignedLicense signedLicense, final String licensePassword) {
+        this(new PublicKeyDataProvider() {
+                 @Override
+                 public byte[] getEncryptedPublicKeyData() throws KeyNotFoundException {
+                     return BaseEncoding.base64().decode(publicKey);
+                 }
+             }, new PasswordProvider() {
+                 @Override
+                 public char[] getPassword() {
+                     return publicPassword.toCharArray();
+                 }
+             }, new LicenseProvider() {
+                 @Override
+                 public SignedLicense getLicense(Object context) {
+                     return signedLicense;
+                 }
+             }, new PasswordProvider() {
+                 @Override
+                 public char[] getPassword() {
+                     return licensePassword.toCharArray();
+                 }
+             }
+        );
+    }
 
     public ALicenseManager(PublicKeyDataProvider publicKeyDataProvider, PasswordProvider publicKeyPasswordProvider,
                            LicenseProvider licenseProvider, PasswordProvider licensePasswordProvider) {

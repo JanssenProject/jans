@@ -5,6 +5,7 @@ import net.nicholaswilliams.java.licensing.encryption.PasswordProvider;
 import net.nicholaswilliams.java.licensing.encryption.PrivateKeyDataProvider;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
 import org.xdi.oxd.license.client.lib.ALicense;
+import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
