@@ -8,7 +8,6 @@ import org.xdi.oxd.license.client.lib.ALicense;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,11 +33,9 @@ public class LicenseGenerator {
 
         // generate license
         ALicense license = new ALicense.Builder().
-                withProductKey("Gluu").
-                withNumberOfLicenses(input.getThreadsCount()).
-                withHolder(input.getCustomerName()).
-                withGoodBeforeDate(input.getExpiredAt().getTime() + TimeUnit.DAYS.toMillis(1)).
-                addFeature(input.getLicenseType()).
+                withSubject(input.getMetadata()).
+                withHolder("Gluu").
+                withGoodBeforeDate(input.getExpiredAt().getTime()).
                 build();
 
         return licenseCreator.signLicense(license, input.getLicensePassword().toCharArray());

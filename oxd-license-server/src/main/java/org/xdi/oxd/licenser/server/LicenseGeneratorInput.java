@@ -1,5 +1,8 @@
 package org.xdi.oxd.licenser.server;
 
+import com.google.common.io.BaseEncoding;
+import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
+
 import java.util.Date;
 
 /**
@@ -16,8 +19,16 @@ public class LicenseGeneratorInput {
     private String privatePassword;
     private String publicPassword;
     private String licensePassword;
-    private int threadsCount;
-    private String licenseType;
+    private String metadata;
+
+    public LicenseGeneratorInput setCrypt(LdapLicenseCrypt crypt) {
+        setLicensePassword(crypt.getLicensePassword());
+        setPrivatePassword(crypt.getPrivatePassword());
+        setPublicPassword(crypt.getPublicPassword());
+        setPrivateKey(BaseEncoding.base64().decode(crypt.getPrivateKey()));
+        setPublicKey(BaseEncoding.base64().decode(crypt.getPublicKey()));
+        return this;
+    }
 
     public Date getExpiredAt() {
         return expiredAt;
@@ -25,14 +36,6 @@ public class LicenseGeneratorInput {
 
     public void setExpiredAt(Date expiredAt) {
         this.expiredAt = expiredAt;
-    }
-
-    public String getLicenseType() {
-        return licenseType;
-    }
-
-    public void setLicenseType(String licenseType) {
-        this.licenseType = licenseType;
     }
 
     public String getCustomerName() {
@@ -83,11 +86,11 @@ public class LicenseGeneratorInput {
         this.publicPassword = publicPassword;
     }
 
-    public int getThreadsCount() {
-        return threadsCount;
+    public String getMetadata() {
+        return metadata;
     }
 
-    public void setThreadsCount(int threadsCount) {
-        this.threadsCount = threadsCount;
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 }

@@ -78,6 +78,10 @@ public class LicenseIdService {
         return ldapEntryManager.find(LdapLicenseId.class, dn);
     }
 
+    public LdapLicenseId getById(String licenseId) {
+        return ldapEntryManager.find(LdapLicenseId.class, dn(licenseId));
+    }
+
 
     public void merge(LdapLicenseId entity) {
         try {
@@ -100,8 +104,12 @@ public class LicenseIdService {
         if (Strings.isNullOrEmpty(entity.getDn())) {
             String id = Strings.isNullOrEmpty(entity.getLicenseId()) ? generateLicenseId() : entity.getLicenseId();
             entity.setLicenseId(id);
-            entity.setDn(String.format("licenseId=%s,%s", id, ldapStructure.getLicenseIdBaseDn()));
+            entity.setDn(dn(id));
         }
+    }
+
+    public String dn(String licenseId) {
+        return String.format("licenseId=%s,%s", licenseId, ldapStructure.getLicenseIdBaseDn());
     }
 
     public void remove(LdapLicenseId entity) {
