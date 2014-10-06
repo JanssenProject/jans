@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.shared.Customer;
 import org.xdi.oxd.license.admin.shared.LicenseMetadata;
+import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
@@ -78,11 +79,12 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt) {
+    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, LicenseMetadata metadata) {
         List<LdapLicenseId> result = new ArrayList<LdapLicenseId>();
         for (int i = 0; i < count; i++) {
             final LdapLicenseId entity = licenseIdService.generate();
             entity.setLicenseCryptDN(licenseCrypt.getDn());
+            entity.setMetadata(Jackson.asJsonSilently(metadata));
             licenseIdService.save(entity);
             result.add(entity);
         }

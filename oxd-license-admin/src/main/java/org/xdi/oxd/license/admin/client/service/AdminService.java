@@ -2,11 +2,10 @@ package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 
 import java.util.List;
 
@@ -32,9 +31,7 @@ public interface AdminService extends RemoteService {
 
     public LdapLicenseCrypt generate();
 
-    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt);
-
-    public LicenseMetadata addLicense(Customer customer, LicenseMetadata license);
+    public List<LdapLicenseId> generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, LicenseMetadata metadata);
 
     List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt);
 

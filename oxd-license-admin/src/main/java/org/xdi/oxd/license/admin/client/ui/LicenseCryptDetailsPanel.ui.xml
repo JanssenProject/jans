@@ -37,7 +37,7 @@
         <g:HTML>
             <br/>
         </g:HTML>
-        <g:Button ui:field="generateLicenseIdButton">Generate License Ids</g:Button>
+        <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
         <cellview:CellTable ui:field="licenseIds"/>
     </g:VerticalPanel>
 </ui:UiBinder>

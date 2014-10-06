@@ -4,9 +4,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
-import org.xdi.oxd.license.admin.client.dialogs.InputNumberDialog;
+import org.xdi.oxd.license.admin.client.dialogs.LicenseIdMetadataDialog;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class LicenseCryptDetailsPresenter {
 
     public void show(LdapLicenseCrypt licenseCrypt) {
         this.licenseCrypt = licenseCrypt;
+        this.view.getGenerateLicenseIdButton().setEnabled(licenseCrypt != null);
         if (licenseCrypt == null) {
             clear();
             return;
@@ -68,17 +70,17 @@ public class LicenseCryptDetailsPresenter {
 
 
     private void generateLicenseIds() {
-        InputNumberDialog inputNumberDialog = new InputNumberDialog() {
+        LicenseIdMetadataDialog inputNumberDialog = new LicenseIdMetadataDialog() {
             @Override
             public void onOk() {
-                generateLicenseIdsImpl(numberOfLicenses());
+                generateLicenseIdsImpl(numberOfLicenses(), licenseMetadata());
             }
         };
         inputNumberDialog.show();
     }
 
-    private void generateLicenseIdsImpl(int licenseIdsCount) {
-        Admin.getService().generateLicenseIds(licenseIdsCount, licenseCrypt, new SuccessCallback<List<LdapLicenseId>>() {
+    private void generateLicenseIdsImpl(int licenseIdsCount, LicenseMetadata metadata) {
+        Admin.getService().generateLicenseIds(licenseIdsCount, licenseCrypt, metadata, new SuccessCallback<List<LdapLicenseId>>() {
             @Override
             public void onSuccess(List<LdapLicenseId> result) {
                 loadLicenseIds();

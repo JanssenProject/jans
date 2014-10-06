@@ -2,10 +2,10 @@ package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 
 import java.util.List;
 
@@ -18,15 +18,13 @@ public interface AdminServiceAsync {
 
     void generate(AsyncCallback<LdapLicenseCrypt> async);
 
-    void addLicense(Customer customer, LicenseMetadata license, AsyncCallback<LicenseMetadata> async);
-
     void getAllLicenseCrypts(AsyncCallback<List<LdapLicenseCrypt>> async);
 
     void remove(LdapCustomer entity, AsyncCallback<Void> async);
 
     void remove(LdapLicenseCrypt entity, AsyncCallback<Void> async);
 
-    void generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, AsyncCallback<List<LdapLicenseId>> async);
+    void generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, LicenseMetadata metadata, AsyncCallback<List<LdapLicenseId>> async);
 
     void loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt, AsyncCallback<List<LdapLicenseId>> async);
 
