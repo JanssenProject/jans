@@ -7,7 +7,7 @@
         >
 
     <g:DockLayoutPanel ui:field="rootPanel" unit="PCT">
-        <g:north size='10'>
+        <g:north size='5'>
             <g:FlowPanel>
                 <g:Button ui:field="addButton">Add</g:Button>
                 <g:Button ui:field="editButton">Edit</g:Button>
@@ -17,9 +17,12 @@
         </g:north>
 
         <g:center>
-            <cellview:CellTable ui:field="table" width="100%"/>
+            <g:HTMLPanel>
+                <h2>Select License ID</h2>
+                <cellview:CellTable ui:field="table" width="100%"/>
+            </g:HTMLPanel>
         </g:center>
-        <g:east size="50">
+        <g:east size="70">
             <a:LicenseCryptDetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>

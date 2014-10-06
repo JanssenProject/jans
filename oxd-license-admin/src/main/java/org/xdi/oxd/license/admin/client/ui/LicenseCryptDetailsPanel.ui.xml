@@ -6,11 +6,12 @@
         >
 
     <g:HorizontalPanel ui:field="rootPanel" addStyleNames="detailsPanel" width="100%">
-        <g:VerticalPanel width="50%">
+        <g:VerticalPanel width="100%">
+            <g:HTML><h2>License ID Details</h2></g:HTML>
             <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
             <cellview:CellTable ui:field="licenseIds"/>
         </g:VerticalPanel>
-        <g:VerticalPanel width="50%">
+        <g:VerticalPanel width="200px">
             <g:HTML>
                 <h3>Name:</h3>
             </g:HTML>
