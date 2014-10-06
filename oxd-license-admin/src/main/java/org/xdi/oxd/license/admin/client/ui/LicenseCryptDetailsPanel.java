@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,6 +61,36 @@ public class LicenseCryptDetailsPanel implements IsWidget {
                 return object.getLicenseId();
             }
         }, "License Id");
+        licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
+            @Override
+            public String getValue(LdapLicenseId object) {
+                final LicenseMetadata m = object.getMetadataAsObject();
+                if (m != null && m.getLicenseType() != null) {
+                    return m.getLicenseType().getValue();
+                }
+                return "";
+            }
+        }, "Type");
+        licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
+            @Override
+            public String getValue(LdapLicenseId object) {
+                final LicenseMetadata m = object.getMetadataAsObject();
+                if (m != null) {
+                    return Integer.toString(m.getThreadsCount());
+                }
+                return "";
+            }
+        }, "Threads count");
+        licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
+            @Override
+            public String getValue(LdapLicenseId object) {
+                final LicenseMetadata m = object.getMetadataAsObject();
+                if (m != null) {
+                    return Boolean.toString(m.isMultiServer());
+                }
+                return "";
+            }
+        }, "Multi-server");
 
     }
 

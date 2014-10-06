@@ -6,7 +6,9 @@ import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.licenser.server.conf.Configuration;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
@@ -33,7 +35,9 @@ public class LicenseIdService {
     public List<LdapLicenseId> getAll() {
         try {
             final Filter filter = Filter.create("&(licenseId=*)");
-            return ldapEntryManager.findEntries(ldapStructure.getLicenseIdBaseDn(), LdapLicenseId.class, filter);
+            final List<LdapLicenseId> entries = ldapEntryManager.findEntries(ldapStructure.getLicenseIdBaseDn(), LdapLicenseId.class, filter);
+            patchList(entries);
+            return entries;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -43,11 +47,31 @@ public class LicenseIdService {
     public List<LdapLicenseId> getByCryptDn(String cryptDn) {
         try {
             final Filter filter = Filter.create(String.format("&(oxLicenseCrypt=%s)", cryptDn));
-            return ldapEntryManager.findEntries(ldapStructure.getLicenseIdBaseDn(), LdapLicenseId.class, filter);
+            final List<LdapLicenseId> entries = ldapEntryManager.findEntries(ldapStructure.getLicenseIdBaseDn(), LdapLicenseId.class, filter);
+            patchList(entries);
+            return entries;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
         return Collections.emptyList();
+    }
+
+    private void patchList(List<LdapLicenseId> entries) {
+        if (entries != null) {
+            for (LdapLicenseId entry : entries) {
+                patchEntry(entry);
+            }
+        }
+    }
+
+    private void patchEntry(LdapLicenseId entry) {
+        try {
+            if (!Strings.isNullOrEmpty(entry.getMetadata())) {
+                entry.setMetadataAsObject(Jackson.createJsonMapper().readValue(entry.getMetadata(), LicenseMetadata.class));
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public LdapLicenseId get(String dn) {

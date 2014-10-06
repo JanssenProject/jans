@@ -28,6 +28,16 @@ public class LdapLicenseId implements Serializable {
     @LdapAttribute(name = "oxLicenseCrypt")
     private String licenseCryptDN;
 
+    private LicenseMetadata metadataAsObject;
+
+    public LicenseMetadata getMetadataAsObject() {
+        return metadataAsObject;
+    }
+
+    public void setMetadataAsObject(LicenseMetadata metadataAsObject) {
+        this.metadataAsObject = metadataAsObject;
+    }
+
     public String getLicenseCryptDN() {
         return licenseCryptDN;
     }

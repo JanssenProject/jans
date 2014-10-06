@@ -9,16 +9,18 @@
         <g:HTML>
             <h3>Number of license ids:</h3>
         </g:HTML>
+        <g:TextBox ui:field="numberOfLicenseIds"/>
+
         <g:HTML>
             <h3>Type:</h3>
         </g:HTML>
         <g:ListBox ui:field="licenseType"/>
 
-        <g:TextBox ui:field="numberOfLicenseIds"/>
         <g:HTML>
             <h3>Threads count:</h3>
         </g:HTML>
         <g:TextBox ui:field="threadsCount"/>
+
         <g:HTML>
             <h3>Multi-server (not supported yet):</h3>
         </g:HTML>
@@ -28,6 +30,7 @@
             <br/>
         </g:HTMLPanel>
         <g:HTML ui:field="errorMessage" visible="false"/>
+
         <g:HorizontalPanel>
             <g:Button ui:field="okButton">OK</g:Button>
             <g:Button ui:field="closeButton">Close</g:Button>

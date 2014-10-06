@@ -19,7 +19,7 @@
         <g:center>
             <cellview:CellTable ui:field="table" width="100%"/>
         </g:center>
-        <g:east size="500">
+        <g:east size="700">
             <a:LicenseCryptDetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>
