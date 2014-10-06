@@ -11,15 +11,11 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
-import org.xdi.oxd.license.admin.shared.Customer;
-import org.xdi.oxd.license.admin.shared.LicenseMetadata;
 import org.xdi.oxd.license.client.Jackson;
-import org.xdi.oxd.license.client.data.License;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
-import org.xdi.oxd.licenser.server.LicenseGenerator;
-import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.licenser.server.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.service.CustomerService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
@@ -27,7 +23,6 @@ import org.xdi.oxd.licenser.server.service.LicenseIdService;
 
 import java.security.KeyPair;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,35 +86,34 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
         return result;
     }
 
-    @Override
-    public LicenseMetadata addLicense(Customer customer, LicenseMetadata license) {
-        try {
-            LicenseGeneratorInput input = new LicenseGeneratorInput();
-            input.setCustomerName(customer.getName());
-            input.setPrivateKey(BaseEncoding.base64().decode(customer.getLicenseCryptDn()));
-//            input.setPublicKey(BaseEncoding.base64().decode(customer.getPublicKey()));
-//            input.setLicensePassword(customer.getLicensePassword());
-//            input.setPrivatePassword(customer.getPrivatePassword());
-//            input.setPublicPassword(customer.getPublicPassword());
-            input.setThreadsCount(license.getNumberOfThreads());
-            input.setLicenseType(license.getType().name());
-            input.setExpiredAt(new Date()); // todo !!!
-
-            LicenseGenerator licenseGenerator = new LicenseGenerator();
-            final License generatedLicense = licenseGenerator.generate(input);
-            final LdapCustomer refreshedCustomer = customerService.get(customer.getDn());
-
-            // todo
-//            refreshedCustomer.setLicenses(refreshedCustomer.getLicenses() != null ? new ArrayList<String>(refreshedCustomer.getLicenses()) : new ArrayList<String>());
-//            refreshedCustomer.getLicenses().add(generatedLicense.getEncodedLicense());
-            customerService.merge(refreshedCustomer);
-
-            return license;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new RuntimeException("Failed to generate license", e);
-        }
-    }
+//    public LicenseMetadata addLicense(Customer customer, LicenseMetadata license) {
+//        try {
+//            LicenseGeneratorInput input = new LicenseGeneratorInput();
+//            input.setCustomerName(customer.getName());
+//            input.setPrivateKey(BaseEncoding.base64().decode(customer.getLicenseCryptDn()));
+////            input.setPublicKey(BaseEncoding.base64().decode(customer.getPublicKey()));
+////            input.setLicensePassword(customer.getLicensePassword());
+////            input.setPrivatePassword(customer.getPrivatePassword());
+////            input.setPublicPassword(customer.getPublicPassword());
+//           /* input.setThreadsCount(license.getNumberOfThreads());
+//            input.setLicenseType(license.getType().name());*/
+//            input.setExpiredAt(new Date());
+//
+//            LicenseGenerator licenseGenerator = new LicenseGenerator();
+//            final License generatedLicense = licenseGenerator.generate(input);
+//            final LdapCustomer refreshedCustomer = customerService.get(customer.getDn());
+//
+//
+////            refreshedCustomer.setLicenses(refreshedCustomer.getLicenses() != null ? new ArrayList<String>(refreshedCustomer.getLicenses()) : new ArrayList<String>());
+////            refreshedCustomer.getLicenses().add(generatedLicense.getEncodedLicense());
+//            customerService.merge(refreshedCustomer);
+//
+//            return license;
+//        } catch (Exception e) {
+//            LOG.error(e.getMessage(), e);
+//            throw new RuntimeException("Failed to generate license", e);
+//        }
+//    }
 
     @Override
     public List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt) {
