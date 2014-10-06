@@ -6,8 +6,8 @@
         xmlns:a="urn:import:org.xdi.oxd.license.admin.client.ui"
         >
 
-    <g:DockLayoutPanel ui:field="rootPanel">
-        <g:north size='46'>
+    <g:DockLayoutPanel ui:field="rootPanel" unit="PCT">
+        <g:north size='10'>
             <g:FlowPanel>
                 <g:Button ui:field="addButton">Add</g:Button>
                 <g:Button ui:field="editButton">Edit</g:Button>
@@ -19,7 +19,7 @@
         <g:center>
             <cellview:CellTable ui:field="table" width="100%"/>
         </g:center>
-        <g:east size="700">
+        <g:east size="50">
             <a:LicenseCryptDetailsPanel ui:field="detailsPanel"/>
         </g:east>
     </g:DockLayoutPanel>

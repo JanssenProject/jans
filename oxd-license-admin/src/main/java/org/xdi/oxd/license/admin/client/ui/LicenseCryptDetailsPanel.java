@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
@@ -30,7 +29,7 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     @UiField
     HTML nameField;
     @UiField
-    VerticalPanel rootPanel;
+    Widget rootPanel;
     @UiField
     HTML privatePassword;
     //    @UiField
@@ -71,6 +70,15 @@ public class LicenseCryptDetailsPanel implements IsWidget {
                 return "";
             }
         }, "Type");
+        licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
+            @Override
+            public String getValue(LdapLicenseId object) {
+                if (object.getLicensesIssuedCount() != null) {
+                    return Integer.toString(object.getLicensesIssuedCount());
+                }
+                return "0";
+            }
+        }, "Licenses issued");
         licenseIds.addColumn(new TextColumn<LdapLicenseId>() {
             @Override
             public String getValue(LdapLicenseId object) {

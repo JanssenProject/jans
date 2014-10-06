@@ -27,11 +27,21 @@ public class LdapLicenseId implements Serializable {
     private List<String> licenses;
     @LdapAttribute(name = "oxLicenseCrypt")
     private String licenseCryptDN;
+    @LdapAttribute(name = "oxLicensesIssuedCount")
+    private Integer licensesIssuedCount = 0;
 
     private LicenseMetadata metadataAsObject;
 
     public LicenseMetadata getMetadataAsObject() {
         return metadataAsObject;
+    }
+
+    public Integer getLicensesIssuedCount() {
+        return licensesIssuedCount;
+    }
+
+    public void setLicensesIssuedCount(Integer licensesIssuedCount) {
+        this.licensesIssuedCount = licensesIssuedCount;
     }
 
     public void setMetadataAsObject(LicenseMetadata metadataAsObject) {

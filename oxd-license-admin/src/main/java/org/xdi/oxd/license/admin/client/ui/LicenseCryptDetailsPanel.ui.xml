@@ -5,39 +5,40 @@
         xmlns:cellview="urn:import:com.google.gwt.user.cellview.client"
         >
 
-    <g:VerticalPanel ui:field="rootPanel" addStyleNames="detailsPanel" width="490px">
-        <g:HTML>
-            <h3>Name:</h3>
-        </g:HTML>
-        <g:HTML ui:field="nameField"/>
-        <g:HTML>
-            <h3>License Id count:</h3>
-        </g:HTML>
-        <g:HTML ui:field="licenseIdCount"/>
-        <g:HTML>
-            <h3>Private password:</h3>
-        </g:HTML>
-        <g:HTML ui:field="privatePassword"/>
-        <g:HTML>
-            <h3>Public password:</h3>
-        </g:HTML>
-        <g:HTML ui:field="publicPassword"/>
-        <g:HTML>
-            <h3>License password:</h3>
-        </g:HTML>
-        <g:HTML ui:field="licensePassword"/>
-        <g:HTML>
-            <h3>Private key:</h3>
-        </g:HTML>
-        <g:HTML ui:field="privateKey"/>
-        <g:HTML>
-            <h3>Public key:</h3>
-        </g:HTML>
-        <g:HTML ui:field="publicKey"/>
-        <g:HTML>
-            <br/>
-        </g:HTML>
-        <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
-        <cellview:CellTable ui:field="licenseIds"/>
-    </g:VerticalPanel>
+    <g:HorizontalPanel ui:field="rootPanel" addStyleNames="detailsPanel" width="100%">
+        <g:VerticalPanel width="50%">
+            <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
+            <cellview:CellTable ui:field="licenseIds"/>
+        </g:VerticalPanel>
+        <g:VerticalPanel width="50%">
+            <g:HTML>
+                <h3>Name:</h3>
+            </g:HTML>
+            <g:HTML ui:field="nameField"/>
+            <g:HTML>
+                <h3>License Id count:</h3>
+            </g:HTML>
+            <g:HTML ui:field="licenseIdCount"/>
+            <g:HTML>
+                <h3>Private password:</h3>
+            </g:HTML>
+            <g:HTML ui:field="privatePassword"/>
+            <g:HTML>
+                <h3>Public password:</h3>
+            </g:HTML>
+            <g:HTML ui:field="publicPassword"/>
+            <g:HTML>
+                <h3>License password:</h3>
+            </g:HTML>
+            <g:HTML ui:field="licensePassword"/>
+            <g:HTML>
+                <h3>Private key:</h3>
+            </g:HTML>
+            <g:HTML ui:field="privateKey"/>
+            <g:HTML>
+                <h3>Public key:</h3>
+            </g:HTML>
+            <g:HTML ui:field="publicKey"/>
+        </g:VerticalPanel>
+    </g:HorizontalPanel>
 </ui:UiBinder>
