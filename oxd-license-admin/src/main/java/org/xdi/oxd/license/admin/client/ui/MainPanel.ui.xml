@@ -25,12 +25,6 @@
                     </g:header>
                     <a:LicenseCryptTab ui:field="licenseCryptTab"/>
                 </g:tab>
-                <g:tab>
-                    <g:header size='7'>
-                        <b>License Id</b>
-                    </g:header>
-                    <g:Label>License Id</g:Label>
-                </g:tab>
             </g:TabLayoutPanel>
         </g:center>
     </g:DockLayoutPanel>
