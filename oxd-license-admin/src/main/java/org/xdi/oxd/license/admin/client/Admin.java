@@ -11,12 +11,16 @@ import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.client.service.AdminServiceAsync;
 import org.xdi.oxd.license.admin.client.ui.MainPanelPresenter;
 
+import java.util.logging.Logger;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 23/09/2014
  */
 
 public class Admin implements EntryPoint {
+
+    private static final Logger LOGGER = Logger.getLogger(Admin.class.getName());
 
     private static final EventBus EVENT_BUS = new SimpleEventBus();
 
@@ -32,6 +36,7 @@ public class Admin implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        LOGGER.info("started to load module...");
         MainPanelPresenter mainPanelPresenter = new MainPanelPresenter();
         mainPanelPresenter.go(RootLayoutPanel.get());
     }
