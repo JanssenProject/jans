@@ -133,7 +133,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
         // Call REST Service and handle response
         try {
             if (getRequest().getAuthorizationMethod() == null
-                   /* || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD */
+                    || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
                     || getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
                 clientResponse = clientRequest.post(String.class);
             } else {  //AuthorizationMethod.URL_QUERY_PARAMETER
