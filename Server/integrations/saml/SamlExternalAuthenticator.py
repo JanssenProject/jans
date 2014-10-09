@@ -255,6 +255,22 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
                     find_user_by_uid = userService.addUser(newUser)
                     print "Saml authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
+
+                found_user_name = find_user_by_uid.getUserId()
+                print "Saml authenticate for step 1. found_user_name:", found_user_name
+
+                user_authenticated = authenticationService.authenticate(found_user_name)
+                if (user_authenticated == False):
+                    print "Saml authenticate for step 1. Failed to authenticate user"
+                    return False
+
+                print "Saml authenticate for step 1. Setting count steps to 1"
+                context.set("saml_count_login_steps", 1)
+
+                post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
+                print "Saml authenticate for step 1. post_login_result:", post_login_result
+
+                return post_login_result
             elif (saml_enroll_all_user_attr):
                 print "Saml authenticate for step 1. Attempting to find user by oxExternalUid: saml:" + saml_user_uid
 
