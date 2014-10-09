@@ -3,13 +3,13 @@ from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
-from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.model.common import User, CustomAttribute
 from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
 from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
+from org.xdi.oxauth.service import EncryptionService
 
 import java
 
@@ -81,11 +81,10 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
         authenticationService = AuthenticationService.instance()
         userService = UserService.instance()
 
-        stringEncrypter = StringEncrypter.defaultInstance()
+        encryptionService = EncryptionService.instance()
 
         mapUserDeployment = False
         enrollUserDeployment = False
-        # Use gplus_deployment_type only if there is no attributes mapping
         if (configurationAttributes.containsKey("gplus_deployment_type")):
             deploymentType = StringHelper.toLowerCase(configurationAttributes.get("gplus_deployment_type").getValue2())
             
@@ -151,17 +150,17 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 # Use mapping to local IDP user
                 print "Google+ authenticate for step 1. Attempting to find user by oxExternalUid: gplus:", gplusUserUid
 
-                # Check if the is user with specified gplusUserUid
-                userByUid = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
+                # Check if there is user with specified gplusUserUid
+                foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
 
-                if (userByUid == None):
+                if (foundUser == None):
                     print "Google+ authenticate for step 1. Failed to find user"
                     print "Google+ authenticate for step 1. Setting count steps to 2"
                     context.set("gplus_count_login_steps", 2)
-                    context.set("gplus_user_uid", stringEncrypter.encrypt(gplusUserUid))
+                    context.set("gplus_user_uid", encryptionService.encrypt(gplusUserUid))
                     return True
 
-                foundUserName = userByUid.getUserId()
+                foundUserName = foundUser.getUserId()
                 print "Google+ authenticate for step 1. foundUserName:", foundUserName
                 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
@@ -172,7 +171,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 print "Google+ authenticate for step 1. Setting count steps to 1"
                 context.set("gplus_count_login_steps", 1)
 
-                postLoginResult = self.extensionPostLogin(configurationAttributes, userByUid)
+                postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ authenticate for step 1. postLoginResult:", postLoginResult
 
                 return postLoginResult
@@ -180,10 +179,10 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 # Use auto enrollment to local IDP
                 print "Google+ authenticate for step 1. Attempting to find user by oxExternalUid: gplus:", gplusUserUid
  
-                # Check if the is user with specified gplusUserUid
-                userByUid = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
+                # Check if there is user with specified gplusUserUid
+                foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
  
-                if (userByUid == None):
+                if (foundUser == None):
                     # Auto user enrollemnt
                     print "Google+ authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
@@ -224,10 +223,10 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                     newUser.setAttribute("oxExternalUid", "gplus:" + gplusUserUid)
                     print "Google+ authenticate for step 1. Attempting to add user", gplusUserUid, " with next attributes", newUser.getCustomAttributes()
  
-                    userByUid = userService.addUser(newUser)
-                    print "Google+ authenticate for step 1. Added new user with UID", userByUid.getUserId()
+                    foundUser = userService.addUser(newUser)
+                    print "Google+ authenticate for step 1. Added new user with UID", foundUser.getUserId()
 
-                foundUserName = userByUid.getUserId()
+                foundUserName = foundUser.getUserId()
                 print "Google+ authenticate for step 1. foundUserName:", foundUserName
 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
@@ -238,7 +237,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 print "Google+ authenticate for step 1. Setting count steps to 1"
                 context.set("gplus_count_login_steps", 1)
 
-                postLoginResult = self.extensionPostLogin(configurationAttributes, userByUid)
+                postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ authenticate for step 1. postLoginResult:", postLoginResult
 
                 return postLoginResult
@@ -246,12 +245,12 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 # Check if the is user with specified gplusUserUid
                 print "Google+ authenticate for step 1. Attempting to find user by uid:", gplusUserUid
 
-                userByUid = userService.getUser(gplusUserUid)
-                if (userByUid == None):
+                foundUser = userService.getUser(gplusUserUid)
+                if (foundUser == None):
                     print "Google+ authenticate for step 1. Failed to find user"
                     return False
 
-                foundUserName = userByUid.getUserId()
+                foundUserName = foundUser.getUserId()
                 print "Google+ authenticate for step 1. foundUserName:", foundUserName
 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
@@ -262,7 +261,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 print "Google+ authenticate for step 1. Setting count steps to 1"
                 context.set("gplus_count_login_steps", 1)
 
-                postLoginResult = self.extensionPostLogin(configurationAttributes, userByUid)
+                postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ authenticate for step 1. postLoginResult:", postLoginResult
 
                 return postLoginResult
@@ -274,7 +273,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 print "Google+ authenticate for step 2. gplus_user_uid is empty"
                 return False
 
-            gplusUserUid = stringEncrypter.decrypt(gplusUserUidArray[0])
+            gplusUserUid = encryptionService.decrypt(gplusUserUidArray[0])
             passedStep1 = StringHelper.isNotEmptyString(gplusUserUid)
             if (not passedStep1):
                 return False
@@ -292,25 +291,25 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
 
             # Check if there is user which has gplusUserUid
             # Avoid mapping Google account to more than one IDP account
-            userByUid = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
+            foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
 
-            if (userByUid == None):
+            if (foundUser == None):
                 # Add gplusUserUid to user one id UIDs
-                userByUid = userService.addUserAttribute(userName, "oxExternalUid", "gplus:" + gplusUserUid)
-                if (userByUid == None):
+                foundUser = userService.addUserAttribute(userName, "oxExternalUid", "gplus:" + gplusUserUid)
+                if (foundUser == None):
                     print "Google+ authenticate for step 2. Failed to update current user"
                     return False
 
-                postLoginResult = self.extensionPostLogin(configurationAttributes, userByUid)
+                postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ authenticate for step 2. postLoginResult:", postLoginResult
 
                 return postLoginResult
             else:
-                foundUserName = userByUid.getUserId()
+                foundUserName = foundUser.getUserId()
                 print "Google+ authenticate for step 2. foundUserName:", foundUserName
     
                 if StringHelper.equals(userName, foundUserName):
-                    postLoginResult = self.extensionPostLogin(configurationAttributes, userByUid)
+                    postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                     print "Google+ authenticate for step 2. postLoginResult:", postLoginResult
     
                     return postLoginResult
@@ -364,8 +363,11 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
+    def destroy(self, authConfiguration):
+        print "Google+ destroy"
+
     def getApiVersion(self):
-        return 3
+        return 4
 
     def isPassedStep1():
         credentials = Identity.instance().getCredentials()
