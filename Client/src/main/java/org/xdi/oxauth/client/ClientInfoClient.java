@@ -116,9 +116,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
         clientRequest.setHttpMethod(getHttpMethod());
 
         if (getRequest().getAuthorizationMethod() == null
-                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
-                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD_GET
-                ) {
+                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
             if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
                 clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
             }

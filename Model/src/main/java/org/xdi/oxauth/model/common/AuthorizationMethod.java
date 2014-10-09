@@ -19,13 +19,6 @@ public enum AuthorizationMethod {
      */
     AUTHORIZATION_REQUEST_HEADER_FIELD,
     /**
-     * When sending the access token in the "Authorization" request header
-     * field defined by HTTP/1.1, Part 7 [I-D.ietf-httpbis-p7-auth], the
-     * client uses the "Bearer" authentication scheme to transmit the access
-     * token. Use get HTTP method to send request.
-     */
-    AUTHORIZATION_REQUEST_HEADER_FIELD_GET,
-    /**
      * When sending the access token in the HTTP request entity-body, the
      * client adds the access token to the request body using the
      * "access_token" parameter.  The client MUST NOT use this method unless
