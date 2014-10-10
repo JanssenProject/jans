@@ -51,6 +51,8 @@ class Setup(object):
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os_types_index = 0
 
         self.hostname = None
         self.ip = None
@@ -114,6 +116,8 @@ class Setup(object):
         self.gluuScriptFiles = ['static/scripts/logmanager.sh',
                                 'static/scripts/testBind.py']
         self.init_files = ['static/tomcat/tomcat', 'static/opendj/opendj']
+        self.redhat_services = ['tomcat', 'opendj', 'httpd']
+        self.debian_services = ['tomcat', 'opendj', 'apache2']
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
@@ -763,16 +767,21 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
-    def copy_init_files(self):
+    def setup_service_restart(self):
         for init_file in self.init_files:
             try:
                 script_name = os.path.split(init_file)[-1]
                 self.copyFile(init_file, "/etc/init.d")
                 self.run(["chmod", "755", "/etc/init.d/%s" % script_name])
-                self.run(["/sbin/chkconfig", script_name, "on"])
             except:
                 self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                 self.logIt(traceback.format_exc(), True)
+        if self.os_types_index < 3:
+            for service in self.redhat_services:
+                self.run(["/sbin/chkconfig", service, "on"])
+        else:
+            for service in self.debian_services:
+                self.run(["/usr/sbin/update-rc.d", service, "defaults"])
 
     def start_tomcat(self):
         try:
@@ -888,6 +897,23 @@ class Setup(object):
         else:
             installObject.hostname = installObject.getPrompt("Enter hostname")
 
+        # Get the OS type
+        i = 1
+        print ""
+        for os_name in self.os_types:
+            print "%i   %s" % (i + 1, os_name)
+            i = i + 1
+        found = False
+        while not found:
+            try:
+                selectedOS = int(raw_input("Please select the number of your operating system [%i]: "
+                                       % self.os_types_index + 1)) - 1
+                if (int(selectedOS) >= 0) & (int(selectedOS) < len(self.os_types)):
+                    self.os_types_index = selectedOS
+                    found = True
+            except:
+                self.logIt("Error getting prompt for OS type.")
+
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
         installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.state = installObject.getPrompt("Enter your state or province")
@@ -989,12 +1015,11 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.copy_output()
-            installObject.copy_init_files()
+            installObject.setup_service_restart()
             installObject.copy_static()
             installObject.change_ownership()
             installObject.start_tomcat()
             installObject.save_properties()
-            installObject.run(['/sbin/chkconfig', 'httpd', 'on'])
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
