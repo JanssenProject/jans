@@ -836,7 +836,7 @@ class Setup(object):
             f = open(self.ldapPassFn, 'w')
             f.write(self.ldapPass)
             f.close()
-            self.run(["/bin/chown", 'gluu:gluu', self.ldapPassFn])
+            self.run(["/bin/chown", 'ldap:ldap', self.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
 
