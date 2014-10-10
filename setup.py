@@ -994,6 +994,7 @@ if __name__ == '__main__':
             installObject.change_ownership()
             installObject.start_tomcat()
             installObject.save_properties()
+            installObject.run(['/sbin/chkconfig', 'httpd', 'on'])
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
