@@ -914,10 +914,26 @@ class Setup(object):
             except:
                 self.logIt("Error getting prompt for OS type.")
 
+        # Get the state or province
+        long_enough = False
+        while not long_enough:
+            installObject.state = installObject.getPrompt("Enter your state or province")
+            if len(installObject.state) > 2:
+                print "State or province must not be longer than two characters"
+            else:
+                long_enough = True
+
+        # Get the Country
+        long_enough = False
+        while not long_enough:
+            installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
+            if len(installObject.countryCode) > 2:
+                print "Country must not be longer than two characters"
+            else:
+                long_enough = True
+
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
         installObject.city = installObject.getPrompt("Enter your city or locality")
-        installObject.state = installObject.getPrompt("Enter your state or province")
-        installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
         installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1024')
         randomPW = installObject.getPW()
