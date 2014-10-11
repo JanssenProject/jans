@@ -12,8 +12,7 @@ oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
-oxIDPAuthentication:
-  {"type": "auth",
+oxIDPAuthentication: {"type": "auth",
   "name": null,
   "level": 0,
   "priority": 1,
