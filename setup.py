@@ -51,8 +51,9 @@ class Setup(object):
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
-        self.os_types_index = 0
+        self.os_type = None
 
         self.hostname = None
         self.ip = None
@@ -869,6 +870,28 @@ class Setup(object):
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
 
+    def choose_from_list(self, list_of_choices, default_choice_index, choice_name):
+        return_value = None
+        choice_map = {}
+        chosen_index = 0
+        print "\nSelect the number for the %s from the following list:" % choice_name
+        for choice in list_of_choices:
+            choice_map[chosen_index] = choice
+            chosen_index += 1
+            print "  [%i]   %s" % (chosen_index, choice)
+        while not return_value:
+            choice_number = self.getPrompt("Please select a number listed above [%s]" %
+                                           default_choice_index + 1, default_choice_index + 1)
+            try:
+                choice_number = int(choice_number) - 1
+                if (choice_number > 0) & (choice_number < len(list_of_choices)):
+                    return_value = choice_map[choice_number - 1]
+                else:
+                    print '"%s" is not a valid choice' % choice_number
+            except:
+                print 'Cannot conver "%s" to a number' % choice_number
+        return return_value
+
     def promptForProperties(self):
         detectedIP = None
         try:
@@ -898,38 +921,26 @@ class Setup(object):
             installObject.hostname = installObject.getPrompt("Enter hostname")
 
         # Get the OS type
-        i = 1
-        print ""
-        for os_name in self.os_types:
-            print "%i   %s" % (i + 1, os_name)
-            i = i + 1
-        found = False
-        while not found:
-            try:
-                selectedOS = int(raw_input("Please select the number of your operating system [%i]: "
-                                       % self.os_types_index + 1)) - 1
-                if (int(selectedOS) >= 0) & (int(selectedOS) < len(self.os_types)):
-                    self.os_types_index = selectedOS
-                    found = True
-            except:
-                self.logIt("Error getting prompt for OS type.")
+        installObject.os_type = installObject.choose_from_list(installObject.os_types, 0, "Operating System")
 
-        # Get the state or province
+        # Get the state or province Code
         long_enough = False
         while not long_enough:
-            installObject.state = installObject.getPrompt("Enter your state or province")
-            if len(installObject.state) > 2:
-                print "State or province must not be longer than two characters"
+            state = installObject.getPrompt("Enter your state or province two letter code")
+            if len(state) != 2:
+                print "State or province code must be two characters"
             else:
+                installObject.state = state
                 long_enough = True
 
-        # Get the Country
+        # Get the Country Code
         long_enough = False
         while not long_enough:
-            installObject.countryCode = installObject.getPrompt("Enter two-digit Country Code")
-            if len(installObject.countryCode) > 2:
-                print "Country must not be longer than two characters"
+            countryCode = installObject.getPrompt("Enter two letter Country Code")
+            if len(countryCode) != 2:
+                print "Country code must be two characters"
             else:
+                installObject.countryCode = countryCode
                 long_enough = True
 
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
