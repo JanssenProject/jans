@@ -196,6 +196,7 @@ class Setup(object):
         return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
                  + 'ip'.ljust(20) + self.ip.rjust(40) + "\n"
                  + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n"
+                 + 'os'.ljust(20) + self.os_type(40) + "\n"
                  + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
                  + 'city'.ljust(20) + self.city.rjust(40) + "\n"
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
@@ -923,7 +924,8 @@ class Setup(object):
         # Get the OS type
         installObject.os_type = installObject.choose_from_list(installObject.os_types, "Operating System")
 
-        # Get the state or province Code
+        # Get city and state|province code
+        installObject.city = installObject.getPrompt("Enter your city or locality")
         long_enough = False
         while not long_enough:
             state = installObject.getPrompt("Enter your state or province two letter code")
@@ -944,7 +946,6 @@ class Setup(object):
                 long_enough = True
 
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
-        installObject.city = installObject.getPrompt("Enter your city or locality")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
         installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1024')
         randomPW = installObject.getPW()
