@@ -196,10 +196,10 @@ class Setup(object):
         return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
                  + 'ip'.ljust(20) + self.ip.rjust(40) + "\n"
                  + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n"
-                 + 'os'.ljust(20) + self.os_type(40) + "\n"
-                 + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
+                 + 'os'.ljust(20) + self.os_type.rjust(40) + "\n"
                  + 'city'.ljust(20) + self.city.rjust(40) + "\n"
                  + 'state'.ljust(20) + self.state.rjust(40) + "\n"
+                 + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
                  + 'support email'.ljust(20) + self.admin_email.rjust(40) + "\n"
                  + 'tomcat max ram'.ljust(20) + self.tomcat_max_ram.rjust(40) + "\n"
                  + 'Admin Pass'.ljust(20) + self.ldapPass.rjust(40) + "\n")
@@ -1012,8 +1012,8 @@ if __name__ == '__main__':
         pass
     installObject.logIt("Installing Gluu Server", True)
     if setup_properties:
-        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
-        installObject.load_properties(installObject.setup_properties_fn)
+        installObject.logIt('%s Properties found!\n' % setup_properties)
+        installObject.load_properties(setup_properties)
     elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
         installObject.load_properties(installObject.setup_properties_fn)
