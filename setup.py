@@ -870,7 +870,7 @@ class Setup(object):
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
 
-    def choose_from_list(self, list_of_choices, default_choice_index, choice_name):
+    def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
         return_value = None
         choice_map = {}
         chosen_index = 0
@@ -880,16 +880,15 @@ class Setup(object):
             chosen_index += 1
             print "  [%i]   %s" % (chosen_index, choice)
         while not return_value:
-            choice_number = self.getPrompt("Please select a number listed above [%s]" %
-                                           default_choice_index + 1, default_choice_index + 1)
+            choice_number = self.getPrompt("Please select a number listed above", str(default_choice_index + 1))
             try:
                 choice_number = int(choice_number) - 1
                 if (choice_number > 0) & (choice_number < len(list_of_choices)):
                     return_value = choice_map[choice_number - 1]
                 else:
-                    print '"%s" is not a valid choice' % choice_number
+                    print '"%i" is not a valid choice' % int(choice_number) + 1
             except:
-                print 'Cannot conver "%s" to a number' % choice_number
+                print 'Cannot convert "%s" to a number' % choice_number
         return return_value
 
     def promptForProperties(self):
@@ -921,7 +920,7 @@ class Setup(object):
             installObject.hostname = installObject.getPrompt("Enter hostname")
 
         # Get the OS type
-        installObject.os_type = installObject.choose_from_list(installObject.os_types, 0, "Operating System")
+        installObject.os_type = installObject.choose_from_list(installObject.os_types, "Operating System")
 
         # Get the state or province Code
         long_enough = False
