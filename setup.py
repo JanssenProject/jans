@@ -883,12 +883,13 @@ class Setup(object):
             choice_number = self.getPrompt("Please select a number listed above", str(default_choice_index + 1))
             try:
                 choice_number = int(choice_number) - 1
-                if (choice_number > 0) & (choice_number < len(list_of_choices)):
-                    return_value = choice_map[choice_number - 1]
+                if (choice_number >= 0) & (choice_number < len(list_of_choices)):
+                    return_value = choice_map[choice_number]
                 else:
-                    print '"%i" is not a valid choice' % int(choice_number) + 1
+                    print '"%i" is not a valid choice' % (choice_number + 1)
             except:
                 print 'Cannot convert "%s" to a number' % choice_number
+                self.logIt(traceback.format_exc(), True)
         return return_value
 
     def promptForProperties(self):
