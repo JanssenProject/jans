@@ -768,7 +768,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
-    def setup_service_restart(self):
+    def setup_init_scripts(self):
         for init_file in self.init_files:
             try:
                 script_name = os.path.split(init_file)[-1]
@@ -777,10 +777,10 @@ class Setup(object):
             except:
                 self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                 self.logIt(traceback.format_exc(), True)
-        if self.os_types_index < 3:
+        if self.os_type in ['centos', 'redhat', 'fedora']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        else:
+        elif self.os_types in ['ubuntu', 'debian']:
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, "defaults"])
 
@@ -1042,7 +1042,7 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.copy_output()
-            installObject.setup_service_restart()
+            installObject.setup_init_scripts()
             installObject.copy_static()
             installObject.change_ownership()
             installObject.start_tomcat()
