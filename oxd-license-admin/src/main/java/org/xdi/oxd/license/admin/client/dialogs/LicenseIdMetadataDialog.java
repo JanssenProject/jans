@@ -80,6 +80,13 @@ public class LicenseIdMetadataDialog {
 
     }
 
+//    private void setThreadsCount() {
+//        final LicenseType type = licenseType();
+//        if (type != null) {
+//            this.threadsCount.setValue(Integer.toString(type.getThreadsCount()));
+//        }
+//    }
+
     private void setEditMode() {
         if (!isEditMode) {
             return;

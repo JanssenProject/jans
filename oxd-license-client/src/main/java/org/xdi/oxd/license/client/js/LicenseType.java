@@ -6,15 +6,21 @@ package org.xdi.oxd.license.client.js;
  */
 
 public enum LicenseType {
-    FREE("Free"),
-    SHAREWARE("Shareware"),
-    PAID("Paid"),
-    PREMIUM("Premium");
+    FREE("Free", 1),
+    SHAREWARE("Shareware", 1),
+    PAID("Paid", 100),
+    PREMIUM("Premium", Integer.MAX_VALUE);
 
     private final String value;
+    private final int threadsCount;
 
-    private LicenseType(String value) {
+    private LicenseType(String value, int threadsCount) {
         this.value = value;
+        this.threadsCount = threadsCount;
+    }
+
+    public int getThreadsCount() {
+        return threadsCount;
     }
 
     public String getValue() {

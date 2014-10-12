@@ -93,9 +93,10 @@ public class GenerateLicenseWS {
     }
 
     private Date licenseExpirationDate(LdapLicenseId licenseId) {
-
         if (licenseId != null && licenseId.getMetadataAsObject() != null && licenseId.getMetadataAsObject().getLicenseType() != null) {
             switch (licenseId.getMetadataAsObject().getLicenseType()) {
+                case FREE:
+                case PAID:
                 case PREMIUM:
                     return new Date(Long.MAX_VALUE); // unlimited
                 case SHAREWARE:
