@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.admin.client.service.AdminService;
+import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
@@ -104,6 +105,20 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     @Override
     public LdapLicenseCrypt getLicenseCrypt(String dn) {
         return licenseCryptService.get(dn);
+    }
+
+    @Override
+    public void save(LdapLicenseId entity) {
+        final LicenseMetadata metadataAsObject = entity.getMetadataAsObject();
+        if (metadataAsObject != null) {
+            entity.setMetadata(Jackson.asJsonSilently(metadataAsObject));
+        }
+
+        if (Strings.isNullOrEmpty(entity.getDn())) {
+            licenseIdService.save(entity);
+        } else {
+            licenseIdService.merge(entity);
+        }
     }
 
     @Override

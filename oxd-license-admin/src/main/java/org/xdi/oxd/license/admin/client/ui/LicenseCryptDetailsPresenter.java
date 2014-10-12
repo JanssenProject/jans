@@ -46,14 +46,41 @@ public class LicenseCryptDetailsPresenter {
                 });
             }
         });
+        this.view.getEditButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                onEdit();
+            }
+        });
         view.getLicenseIds().setSelectionModel(selectionModel);
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                LicenseCryptDetailsPresenter.this.view.getRemoveButton().setEnabled(!selectionModel.getSelectedSet().isEmpty());
+                setButtonsState();
             }
         });
+        setButtonsState();
+    }
+
+    private void onEdit() {
+        LicenseIdMetadataDialog dialog = new LicenseIdMetadataDialog(selectionModel.getSelectedSet().iterator().next()) {
+            @Override
+            public void onOk() {
+                Admin.getService().save(getLicenseId(), new SuccessCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        loadLicenseIds();
+                    }
+                });
+            }
+        };
+        dialog.show();
+    }
+
+    private void setButtonsState() {
+        this.view.getRemoveButton().setEnabled(!selectionModel.getSelectedSet().isEmpty());
+        this.view.getRemoveButton().setEnabled(selectionModel.getSelectedSet().size() == 1);
     }
 
     public void show(LdapLicenseCrypt licenseCrypt) {
@@ -93,7 +120,7 @@ public class LicenseCryptDetailsPresenter {
 
 
     private void generateLicenseIds() {
-        LicenseIdMetadataDialog inputNumberDialog = new LicenseIdMetadataDialog() {
+        LicenseIdMetadataDialog inputNumberDialog = new LicenseIdMetadataDialog(null) {
             @Override
             public void onOk() {
                 generateLicenseIdsImpl(numberOfLicenses(), licenseMetadata());

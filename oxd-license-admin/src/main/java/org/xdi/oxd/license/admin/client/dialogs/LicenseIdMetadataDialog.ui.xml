@@ -6,7 +6,7 @@
 
     <g:VerticalPanel ui:field="dialogContent" width="200px">
 
-        <g:HTML>
+        <g:HTML ui:field="numberOfLicenseIdsLabel">
             <h3>Number of license ids:</h3>
         </g:HTML>
         <g:TextBox ui:field="numberOfLicenseIds"/>

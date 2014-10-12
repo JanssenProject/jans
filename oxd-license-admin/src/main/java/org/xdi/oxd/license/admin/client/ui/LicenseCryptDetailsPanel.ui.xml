@@ -10,6 +10,7 @@
             <g:HTML><h2>License ID Details</h2></g:HTML>
             <g:FlowPanel>
                 <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
+                <g:Button ui:field="editButton" enabled="false">Edit (Auto-update)</g:Button>
                 <g:Button ui:field="removeButton" enabled="false">Remove</g:Button>
             </g:FlowPanel>
             <cellview:CellTable ui:field="licenseIds"/>

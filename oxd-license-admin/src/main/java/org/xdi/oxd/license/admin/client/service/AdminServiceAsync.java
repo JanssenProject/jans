@@ -16,6 +16,8 @@ public interface AdminServiceAsync {
 
     void save(LdapLicenseCrypt customer, AsyncCallback<Void> async);
 
+    void save(LdapLicenseId entity, AsyncCallback<Void> async);
+
     void generate(AsyncCallback<LdapLicenseCrypt> async);
 
     void getAllLicenseCrypts(AsyncCallback<List<LdapLicenseCrypt>> async);

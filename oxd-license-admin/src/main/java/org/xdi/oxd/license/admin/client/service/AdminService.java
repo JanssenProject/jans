@@ -39,4 +39,6 @@ public interface AdminService extends RemoteService {
     List<LdapLicenseId> loadLicenseIdsByCrypt(LdapLicenseCrypt licenseCrypt);
 
     public LdapLicenseCrypt getLicenseCrypt(String dn);
+
+    void save(LdapLicenseId entity);
 }

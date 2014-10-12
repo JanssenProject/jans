@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.framework.Framework;
+import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LicenseType;
 
@@ -40,9 +41,17 @@ public class LicenseIdMetadataDialog {
     ListBox licenseType;
     @UiField
     CheckBox multiServer;
+    @UiField
+    HTML numberOfLicenseIdsLabel;
 
-    public LicenseIdMetadataDialog() {
+    private final LdapLicenseId licenseId;
+    private final boolean isEditMode;
+
+    public LicenseIdMetadataDialog(LdapLicenseId licenseId) {
         uiBinder.createAndBindUi(this);
+
+        this.licenseId = licenseId;
+        this.isEditMode = licenseId != null;
 
         dialog = Framework.createDialogBox("License Id configuration");
         dialog.setWidget(dialogContent);
@@ -67,6 +76,32 @@ public class LicenseIdMetadataDialog {
             licenseType.addItem(type.getValue(), type.getValue());
         }
 
+        setEditMode();
+
+    }
+
+    private void setEditMode() {
+        if (!isEditMode) {
+            return;
+        }
+
+        numberOfLicenseIds.setVisible(false);
+        numberOfLicenseIdsLabel.setVisible(false);
+
+        final LicenseMetadata metadataAsObject = licenseId.getMetadataAsObject();
+        if (metadataAsObject != null) {
+            threadsCount.setValue(Integer.toString(metadataAsObject.getThreadsCount()));
+            multiServer.setValue(metadataAsObject.isMultiServer());
+
+            // select license type
+            for (int i = 0; i < licenseType.getItemCount(); i++) {
+                if (licenseType.getValue(i).equalsIgnoreCase(metadataAsObject.getLicenseType().getValue())) {
+                    licenseType.setSelectedIndex(i);
+                    break;
+                }
+            }
+
+        }
     }
 
     private void showError(String message) {
@@ -131,5 +166,13 @@ public class LicenseIdMetadataDialog {
     public void show() {
         dialog.center();
         dialog.show();
+    }
+
+    public LdapLicenseId getLicenseId() {
+        if (isEditMode) {
+            licenseId.setForceLicenseUpdate(true);
+            licenseId.setMetadataAsObject(licenseMetadata());
+        }
+        return licenseId;
     }
 }
