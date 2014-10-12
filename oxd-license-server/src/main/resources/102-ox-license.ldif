@@ -73,11 +73,16 @@ attributeTypes: ( oxLicensesIssuedCount-oid NAME 'oxLicensesIssuedCount'
     EQUALITY caseIgnoreMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
     X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( forceLicenseUpdate-oid NAME 'forceLicenseUpdate'
+    SUBSTR caseIgnoreSubstringsMatch
+    EQUALITY caseIgnoreMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( oxLicenseConfiguration-oid NAME 'oxLicenseConfiguration' SUP top STRUCTURAL MUST objectclass MAY
   ( oxLicenseConf $ ou )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxLicenseId-oid NAME 'oxLicenseId' SUP top STRUCTURAL MUST objectclass MAY
-  ( licenseId $ oxLicenseMetadata $ oxLicense $ oxLicenseCrypt $ oxLicensesIssuedCount )
+  ( licenseId $ oxLicenseMetadata $ oxLicense $ oxLicenseCrypt $ oxLicensesIssuedCount $ forceLicenseUpdate)
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxLicenseCrypt-oid NAME 'oxLicenseCrypt' SUP top STRUCTURAL MUST objectclass MAY
   ( uniqueIdentifier $ oxName $ oxLicensePassword $ oxPublicPassword $ oxPrivatePassword $ oxClientPrivateKey $ oxClientPublicKey
