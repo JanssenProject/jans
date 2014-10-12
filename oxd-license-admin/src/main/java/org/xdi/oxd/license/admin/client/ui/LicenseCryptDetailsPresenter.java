@@ -105,7 +105,7 @@ public class LicenseCryptDetailsPresenter {
 
         view.getNameField().setHTML(Admin.asHtml(licenseCrypt.getName()));
         view.getPrivateKey().setHTML(Admin.asHtml(licenseCrypt.getPrivateKey()));
-        view.getPublicKey().setHTML(Admin.asHtml(licenseCrypt.getPublicKey()));
+        view.getPublicKey().setHTML(Admin.asFullHtml(licenseCrypt.getPublicKey()));
         view.getClientPublicKey().setHTML(Admin.asHtml(licenseCrypt.getClientPublicKey()));
         view.getClientPrivateKey().setHTML(Admin.asHtml(licenseCrypt.getClientPrivateKey()));
         view.getPrivatePassword().setHTML(Admin.asHtml(licenseCrypt.getPrivatePassword()));
@@ -150,7 +150,7 @@ public class LicenseCryptDetailsPresenter {
 
     private void loadLicenseIds() {
 
-        if (licenseCrypt != null) {
+        if (licenseCrypt == null) {
             return;
         }
 
