@@ -10,16 +10,18 @@ import java.io.Serializable;
  * @version 0.9, 07/09/2014
  */
 
-@JsonPropertyOrder({ "license"})
-public class License implements Serializable {
+@JsonPropertyOrder({"licenseResponse"})
+public class LicenseResponse implements Serializable {
+
+    public static final LicenseResponse EMPTY = new LicenseResponse();
 
     @JsonProperty(value = "license")
     private String encodedLicense;
 
-    public License() {
+    public LicenseResponse() {
     }
 
-    public License(String license) {
+    public LicenseResponse(String license) {
         this.encodedLicense = license;
     }
 

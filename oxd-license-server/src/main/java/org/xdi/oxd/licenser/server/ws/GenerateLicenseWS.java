@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.Jackson;
-import org.xdi.oxd.license.client.data.License;
+import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
@@ -45,9 +45,15 @@ public class GenerateLicenseWS {
     @Inject
     LicenseCryptService licenseCryptService;
 
-    public License generateLicense(String licenseIdStr) {
+    public LicenseResponse generateLicense(String licenseIdStr) {
         try {
             LdapLicenseId licenseId = getLicenseId(licenseIdStr);
+
+            if (licenseId.getLicensesIssuedCount() > 0 && !licenseId.getForceLicenseUpdate()) {
+                LOG.debug("License was already issued and there is no update");
+                return LicenseResponse.EMPTY;
+            }
+
             LdapLicenseCrypt licenseCrypt = getLicenseCrypt(licenseId.getLicenseCryptDN(), licenseIdStr);
 
             LicenseGeneratorInput input = new LicenseGeneratorInput();
@@ -55,12 +61,21 @@ public class GenerateLicenseWS {
             input.setCrypt(licenseCrypt);
             input.setMetadata(licenseId.getMetadata());
 
-            return licenseGenerator.generate(input);
+            final LicenseResponse licenseResponse = licenseGenerator.generate(input);
+            updateLicenseId(licenseId);
+            return licenseResponse;
         } catch (InvalidKeySpecException e) {
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         } catch (NoSuchAlgorithmException e) {
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void updateLicenseId(LdapLicenseId licenseId) {
+        int licensesIssuedCount = licenseId.getLicensesIssuedCount() + 1;
+        licenseId.setLicensesIssuedCount(licensesIssuedCount);
+        licenseId.setForceLicenseUpdate(false);
+        licenseIdService.merge(licenseId);
     }
 
     private LdapLicenseCrypt getLicenseCrypt(String licenseCryptDN, String licenseId) {

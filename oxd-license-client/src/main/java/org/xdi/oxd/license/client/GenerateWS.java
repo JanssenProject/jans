@@ -1,6 +1,6 @@
 package org.xdi.oxd.license.client;
 
-import org.xdi.oxd.license.client.data.License;
+import org.xdi.oxd.license.client.data.LicenseResponse;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,5 +18,5 @@ public interface GenerateWS {
     @GET
     @Path("/generate")
     @Produces(MediaType.APPLICATION_JSON)
-    License generate();
+    LicenseResponse generate();
 }

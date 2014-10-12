@@ -4,6 +4,7 @@ import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.encryption.PasswordProvider;
 import net.nicholaswilliams.java.licensing.encryption.PrivateKeyDataProvider;
 import net.nicholaswilliams.java.licensing.exception.KeyNotFoundException;
+import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 
@@ -42,9 +43,9 @@ public class LicenseGenerator {
         return licenseCreator.signLicense(license, input.getLicensePassword().toCharArray());
     }
 
-    public org.xdi.oxd.license.client.data.License generate(final LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public LicenseResponse generate(final LicenseGeneratorInput input) throws NoSuchAlgorithmException, InvalidKeySpecException {
         final SignedLicense signedLicense = generateSignedLicense(input);
-        return new org.xdi.oxd.license.client.data.License(LicenseSerializationUtilities.serialize(signedLicense));
+        return new LicenseResponse(LicenseSerializationUtilities.serialize(signedLicense));
     }
 
 

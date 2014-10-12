@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import org.xdi.oxd.license.client.Jackson;
-import org.xdi.oxd.license.client.data.License;
+import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
@@ -54,7 +54,7 @@ public class LicenseGeneratorTest {
 
     @Test
     public void generateLicense() throws IOException {
-        final License license = generateLicenseWS.generateLicense(licenseId.getLicenseId());
+        final LicenseResponse license = generateLicenseWS.generateLicense(licenseId.getLicenseId());
         Assert.assertTrue(license != null && license.getEncodedLicense() != null);
         System.out.println("Generated license: " + license.getEncodedLicense());
 
