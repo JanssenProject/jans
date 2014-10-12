@@ -222,6 +222,8 @@ public class Configuration {
         sb.append(", registerClientAppType='").append(registerClientAppType).append('\'');
         sb.append(", registerClientResponesType='").append(registerClientResponesType).append('\'');
         sb.append(", localhostOnly=").append(localhostOnly);
+        sb.append(", licenseServerEndpoint=").append(licenseServerEndpoint);
+        sb.append(", licenseId=").append(licenseId);
         sb.append('}');
         return sb.toString();
     }

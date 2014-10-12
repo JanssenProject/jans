@@ -54,7 +54,8 @@ public class SocketService {
         final Configuration c = Configuration.getInstance();
         final int port = c.getPort();
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads(), CoreUtils.daemonThreadFactory());
+        final LicenseService licenseService = new LicenseService(c);
+        final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.numberOfThreads(), CoreUtils.daemonThreadFactory());
 
         try {
             final Boolean localhostOnly = c.getLocalhostOnly();
@@ -71,7 +72,7 @@ public class SocketService {
                 try {
                     final Socket clientSocket = m_serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    executorService.execute(new SocketProcessor(clientSocket));
+                    executorService.execute(new SocketProcessor(clientSocket, licenseService));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;
@@ -83,10 +84,6 @@ public class SocketService {
         } finally {
             IOUtils.closeQuietly(m_serverSocket);
         }
-    }
-
-    private int numberOfThreads() {
-        return 1;
     }
 
     public void setShutdown(boolean p_shutdown) {

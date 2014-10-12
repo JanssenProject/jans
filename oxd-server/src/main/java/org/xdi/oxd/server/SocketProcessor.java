@@ -26,11 +26,13 @@ public class SocketProcessor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SocketProcessor.class);
 
-    private final Socket m_socket;
+    private final Socket socket;
+    private final LicenseService licenseService;
     private final Processor m_processor = new Processor();
 
-    public SocketProcessor(Socket p_socket) {
-        m_socket = p_socket;
+    public SocketProcessor(Socket socket, LicenseService licenseService) {
+        this.socket = socket;
+        this.licenseService = licenseService;
     }
 
     @Override
@@ -38,8 +40,8 @@ public class SocketProcessor implements Runnable {
         PrintWriter out = null;
         BufferedReader in = null;
         try {
-            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(m_socket.getOutputStream(), CoreUtils.UTF8)), true);
-            in = new BufferedReader(new InputStreamReader(m_socket.getInputStream(), CoreUtils.UTF8));
+            out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), CoreUtils.UTF8)), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream(), CoreUtils.UTF8));
 
             String leftString = "";
             while (true) {
@@ -73,7 +75,7 @@ public class SocketProcessor implements Runnable {
         } finally {
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(in);
-            IOUtils.closeQuietly(m_socket);
+            IOUtils.closeQuietly(socket);
         }
     }
 
