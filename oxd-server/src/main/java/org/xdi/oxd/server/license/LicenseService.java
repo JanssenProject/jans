@@ -38,8 +38,8 @@ public class LicenseService {
     private final Configuration conf;
     private final LicenseUpdateService updateService;
 
-    private boolean licenseChanged= false;
-    private String encodedLicense = "";
+    private boolean licenseChanged = false;
+    private String encodedLicense = null;
     private int threadsCount = 1;
     private LicenseType licenseType = LicenseType.FREE;
     private boolean isMultiServer = false;
@@ -55,6 +55,7 @@ public class LicenseService {
     }
 
     private boolean validate() {
+        LOG.debug("licenseChanged: " + licenseChanged);
         try {
             final LicenseFile licenseFile = loadLicenseFile();
             if (licenseFile == null || Strings.isNullOrEmpty(licenseFile.getEncodedLicense())) {
@@ -63,7 +64,12 @@ public class LicenseService {
             }
 
             // state
-            licenseChanged = encodedLicense != null && !licenseFile.getEncodedLicense().equals(encodedLicense);
+            if (!licenseChanged) {
+                licenseChanged = encodedLicense != null && !licenseFile.getEncodedLicense().equals(encodedLicense);
+                if (licenseChanged) {
+                   LOG.debug("License was changed!");
+                }
+            }
             encodedLicense = licenseFile.getEncodedLicense();
 
             // validation
@@ -87,6 +93,7 @@ public class LicenseService {
             LOG.error(e.getMessage(), e);
         }
 
+        LOG.debug("Unable to validate license, defaults to FREE license.");
         reset();
         return false;
     }
@@ -95,6 +102,7 @@ public class LicenseService {
         threadsCount = 1;
         licenseType = LicenseType.FREE;
         isMultiServer = false;
+        licenseChanged = false;
     }
 
     private void schedulePeriodicValidation() {
