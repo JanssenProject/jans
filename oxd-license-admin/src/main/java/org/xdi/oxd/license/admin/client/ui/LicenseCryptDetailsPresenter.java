@@ -38,12 +38,7 @@ public class LicenseCryptDetailsPresenter {
         this.view.getRemoveButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Admin.getService().remove(selectionModel.getSelectedSet(), new SuccessCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        LicenseCryptDetailsPresenter.this.loadLicenseIds();
-                    }
-                });
+                onRemove();
             }
         });
         this.view.getEditButton().addClickHandler(new ClickHandler() {
@@ -61,6 +56,15 @@ public class LicenseCryptDetailsPresenter {
             }
         });
         setButtonsState();
+    }
+
+    private void onRemove() {
+        Admin.getService().remove(selectionModel.getSelectedSet(), new SuccessCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                LicenseCryptDetailsPresenter.this.clear();
+            }
+        });
     }
 
     private void onEdit() {
