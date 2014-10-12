@@ -89,6 +89,7 @@ public class LicenseCryptTabPresenter {
             @Override
             public void onSuccess(Void result) {
                 loadTableData();
+                LicenseCryptTabPresenter.this.detailsPresenter.clear();
             }
         });
     }

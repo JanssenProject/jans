@@ -62,7 +62,7 @@ public class LicenseCryptDetailsPresenter {
         Admin.getService().remove(selectionModel.getSelectedSet(), new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                LicenseCryptDetailsPresenter.this.clear();
+                LicenseCryptDetailsPresenter.this.loadLicenseIds();
             }
         });
     }
@@ -108,7 +108,7 @@ public class LicenseCryptDetailsPresenter {
         view.getLicenseIdCount().setHTML("0");
     }
 
-    private void clear() {
+    public void clear() {
         view.getNameField().setHTML("");
         view.getPrivateKey().setHTML("");
         view.getPublicKey().setHTML("");
