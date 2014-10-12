@@ -47,6 +47,12 @@ public class LicenseCryptDetailsPresenter {
                 onEdit();
             }
         });
+        this.view.getRefreshButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                loadLicenseIds();
+            }
+        });
         view.getLicenseIds().setSelectionModel(selectionModel);
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

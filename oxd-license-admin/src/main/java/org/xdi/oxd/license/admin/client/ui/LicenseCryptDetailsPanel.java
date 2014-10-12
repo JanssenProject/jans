@@ -54,6 +54,8 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     Button removeButton;
     @UiField
     Button editButton;
+    @UiField
+    Button refreshButton;
 
     public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -120,6 +122,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
 
     public HTML getLicensePassword() {
         return licensePassword;
+    }
+
+    public Button getRefreshButton() {
+        return refreshButton;
     }
 
     public HTML getPublicPassword() {

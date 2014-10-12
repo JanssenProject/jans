@@ -62,6 +62,9 @@ public class LicenseUpdateService {
                     LOG.trace("License file updated successfully.");
                     return;
                 }
+            } else {
+                LOG.trace("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+                return;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

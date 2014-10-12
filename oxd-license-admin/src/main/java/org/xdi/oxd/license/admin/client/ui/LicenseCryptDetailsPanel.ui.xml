@@ -7,11 +7,14 @@
 
     <g:HorizontalPanel ui:field="rootPanel" addStyleNames="detailsPanel" width="100%">
         <g:VerticalPanel width="100%">
-            <g:HTML><h2>License ID Details</h2></g:HTML>
+            <g:HTML>
+                <h2>License ID Details</h2>
+            </g:HTML>
             <g:FlowPanel>
                 <g:Button ui:field="generateLicenseIdButton" enabled="false">Generate License Ids</g:Button>
                 <g:Button ui:field="editButton" enabled="false">Edit (Auto-update)</g:Button>
                 <g:Button ui:field="removeButton" enabled="false">Remove</g:Button>
+                <g:Button ui:field="refreshButton">Refresh</g:Button>
             </g:FlowPanel>
             <cellview:CellTable ui:field="licenseIds"/>
         </g:VerticalPanel>
@@ -39,11 +42,11 @@
             <g:HTML>
                 <h3>Private key:</h3>
             </g:HTML>
-            <g:HTML ui:field="privateKey"/>
+            <g:HTML ui:field="privateKey" wordWrap="true"/>
             <g:HTML>
                 <h3>Public key:</h3>
             </g:HTML>
-            <g:HTML ui:field="publicKey"/>
+            <g:HTML ui:field="publicKey" wordWrap="true"/>
         </g:VerticalPanel>
     </g:HorizontalPanel>
 </ui:UiBinder>
