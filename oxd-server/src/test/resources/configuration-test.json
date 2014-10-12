@@ -1,0 +1,12 @@
+{
+    "port":8099,
+    "localhost_only":true,
+    "time_out_in_seconds":0,
+    "register_client_app_type":"web",
+    "register_client_response_types":"code id_token token",
+    "use_client_authentication_for_pat":true,
+    "trust_all_certs":true,
+    "trust_store_path":"",
+    "license_server_endpoint":"http://localhost:8090/rest/generate",
+    "license_id":"dd55c4d2-76ce-4f65-ac9a-e8c41b2b711b"
+}

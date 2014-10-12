@@ -1,5 +1,6 @@
 package org.xdi.oxd.licenser.server.ws;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +95,7 @@ public class GenerateLicenseWS {
     private Date licenseExpirationDate(LdapLicenseId licenseId) {
 
         if (licenseId != null && licenseId.getMetadataAsObject() != null && licenseId.getMetadataAsObject().getLicenseType() != null) {
-            switch(licenseId.getMetadataAsObject().getLicenseType()) {
+            switch (licenseId.getMetadataAsObject().getLicenseType()) {
                 case PREMIUM:
                     return new Date(Long.MAX_VALUE); // unlimited
                 case SHAREWARE:
@@ -107,9 +108,11 @@ public class GenerateLicenseWS {
 
     private LdapLicenseId getLicenseId(String licenseId) {
         try {
-            final LdapLicenseId byId = licenseIdService.getById(licenseId);
-            if (byId != null) {
-                return byId;
+            if (!Strings.isNullOrEmpty(licenseId)) {
+                final LdapLicenseId byId = licenseIdService.getById(licenseId);
+                if (byId != null) {
+                    return byId;
+                }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
