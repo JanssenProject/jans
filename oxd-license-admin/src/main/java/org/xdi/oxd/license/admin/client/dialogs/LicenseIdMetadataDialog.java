@@ -116,7 +116,7 @@ public class LicenseIdMetadataDialog {
         final Integer threadsCount = threadsCount();
         final LicenseType licenseType = licenseType();
 
-        if (numberOfLicenses == null || numberOfLicenses <= 0) {
+        if ((numberOfLicenses == null || numberOfLicenses <= 0) && !isEditMode) {
             showError("Unable to parse number of licenses. Please enter integer more then zero.");
             return false;
         }

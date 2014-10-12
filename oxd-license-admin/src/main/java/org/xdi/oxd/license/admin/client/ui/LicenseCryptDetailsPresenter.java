@@ -84,7 +84,7 @@ public class LicenseCryptDetailsPresenter {
 
     private void setButtonsState() {
         this.view.getRemoveButton().setEnabled(!selectionModel.getSelectedSet().isEmpty());
-        this.view.getRemoveButton().setEnabled(selectionModel.getSelectedSet().size() == 1);
+        this.view.getEditButton().setEnabled(selectionModel.getSelectedSet().size() == 1);
     }
 
     public void show(LdapLicenseCrypt licenseCrypt) {
