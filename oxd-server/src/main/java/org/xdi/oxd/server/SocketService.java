@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,7 +56,7 @@ public class SocketService {
         final int port = c.getPort();
 
         final LicenseService licenseService = new LicenseService(c);
-        final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.numberOfThreads(), CoreUtils.daemonThreadFactory());
+        final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.getThreadsCount(), CoreUtils.daemonThreadFactory());
 
         try {
             final Boolean localhostOnly = c.getLocalhostOnly();

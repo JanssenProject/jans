@@ -127,9 +127,49 @@ public class Configuration {
     private String licenseServerEndpoint;
     @JsonProperty(value = "license_id")
     private String licenseId;
+    @JsonProperty(value = "public_key")
+    private String publicKey;
+    @JsonProperty(value = "public_password")
+    private String publicPassword;
+    @JsonProperty(value = "license_password")
+    private String licensePassword;
+    @JsonProperty(value = "license_check_period_in_hours")
+    private Integer licenseCheckPeriodInHours = 24;
+
+    public Integer getLicenseCheckPeriodInHours() {
+        return licenseCheckPeriodInHours;
+    }
+
+    public void setLicenseCheckPeriodInHours(Integer licenseCheckPeriodInHours) {
+        this.licenseCheckPeriodInHours = licenseCheckPeriodInHours;
+    }
 
     public String getLicenseId() {
         return licenseId;
+    }
+
+    public String getLicensePassword() {
+        return licensePassword;
+    }
+
+    public void setLicensePassword(String licensePassword) {
+        this.licensePassword = licensePassword;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getPublicPassword() {
+        return publicPassword;
+    }
+
+    public void setPublicPassword(String publicPassword) {
+        this.publicPassword = publicPassword;
     }
 
     public void setLicenseId(String licenseId) {

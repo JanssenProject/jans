@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ReadResult;
+import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
