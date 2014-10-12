@@ -149,6 +149,11 @@ public class LicenseCryptDetailsPresenter {
     }
 
     private void loadLicenseIds() {
+
+        if (licenseCrypt != null) {
+            return;
+        }
+
         Admin.getService().loadLicenseIdsByCrypt(licenseCrypt, new SuccessCallback<List<LdapLicenseId>>() {
             @Override
             public void onSuccess(List<LdapLicenseId> result) {

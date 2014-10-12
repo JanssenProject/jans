@@ -42,11 +42,11 @@
             <g:HTML>
                 <h3>Private key:</h3>
             </g:HTML>
-            <g:HTML ui:field="privateKey" wordWrap="true"/>
+            <g:HTML ui:field="privateKey"/>
             <g:HTML>
                 <h3>Public key:</h3>
             </g:HTML>
-            <g:HTML ui:field="publicKey" wordWrap="true"/>
+            <g:HTML ui:field="publicKey"/>
         </g:VerticalPanel>
     </g:HorizontalPanel>
 </ui:UiBinder>

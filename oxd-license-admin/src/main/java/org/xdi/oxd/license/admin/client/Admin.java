@@ -28,9 +28,9 @@ public class Admin implements EntryPoint {
 
     public static SafeHtml asHtml(String str) {
         String s = str != null ? str : "";
-//        if (s.length() > 40) {
-//            s = s.substring(0, 40) + "...";
-//        }
+        if (s.length() > 40) {
+            s = s.substring(0, 40) + "...";
+        }
         return SafeHtmlUtils.fromString(s);
     }
 
