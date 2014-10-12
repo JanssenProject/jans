@@ -33,13 +33,13 @@ public class LicenseUpdateService {
     public void start() {
         if (hasLicenseConfig()) {
             updateLicenseFromServer();
-            schedulePinger();
+            scheduleUpdatePinger();
         } else {
             LOG.error("Failed to start LicenseUpdateService. Configuration licenseId or licenseServerEndpoint is empty.");
         }
     }
 
-    private void schedulePinger() {
+    private void scheduleUpdatePinger() {
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override

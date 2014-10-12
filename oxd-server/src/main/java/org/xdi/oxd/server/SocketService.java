@@ -71,6 +71,14 @@ public class SocketService {
             LOG.info("Server socket is bound to port: {}, with timeout: {} seconds. Start listening for notifications.", port, c.getTimeOutInSeconds());
             while (!m_shutdown) {
                 try {
+                    if (licenseService.isLicenseChanged()) {
+                        LOG.info("License was changed. Restart oxd server to enforce new license!");
+                        shutdownNow();
+                        m_shutdown = false;
+                        LOG.info("Starting...");
+                        listenSocket();
+                    }
+
                     final Socket clientSocket = m_serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
                     executorService.execute(new SocketProcessor(clientSocket, licenseService));

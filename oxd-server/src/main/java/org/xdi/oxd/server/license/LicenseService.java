@@ -1,9 +1,11 @@
 package org.xdi.oxd.server.license;
 
+import com.google.common.base.Strings;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.license.client.js.LicenseType;
@@ -16,6 +18,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,7 +38,8 @@ public class LicenseService {
     private final Configuration conf;
     private final LicenseUpdateService updateService;
 
-    private final LicenseFile licenseFile;
+    private boolean licenseChanged= false;
+    private String encodedLicense = "";
     private int threadsCount = 1;
     private LicenseType licenseType = LicenseType.FREE;
     private boolean isMultiServer = false;
@@ -43,14 +49,24 @@ public class LicenseService {
         this.updateService = new LicenseUpdateService(conf);
         this.updateService.start();
 
-        this.licenseFile = loadLicenseFile();
-        if (licenseFile != null) {
-            validate();
+        if (validate()) {
+            schedulePeriodicValidation();
         }
     }
 
-    private void validate() {
+    private boolean validate() {
         try {
+            final LicenseFile licenseFile = loadLicenseFile();
+            if (licenseFile == null || Strings.isNullOrEmpty(licenseFile.getEncodedLicense())) {
+                reset();
+                return false;
+            }
+
+            // state
+            licenseChanged = encodedLicense != null && !licenseFile.getEncodedLicense().equals(encodedLicense);
+            encodedLicense = licenseFile.getEncodedLicense();
+
+            // validation
             final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(licenseFile.getEncodedLicense());
             ALicenseManager manager = new ALicenseManager(conf.getPublicKey(), conf.getPublicPassword(), signedLicense, conf.getLicensePassword());
 
@@ -66,9 +82,29 @@ public class LicenseService {
             threadsCount = metadata.getThreadsCount();
             licenseType = metadata.getLicenseType();
             isMultiServer = metadata.isMultiServer();
+            return true;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
+
+        reset();
+        return false;
+    }
+
+    private void reset() {
+        threadsCount = 1;
+        licenseType = LicenseType.FREE;
+        isMultiServer = false;
+    }
+
+    private void schedulePeriodicValidation() {
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
+        executorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                validate();
+            }
+        }, 1, 24, TimeUnit.HOURS);
     }
 
     private LicenseFile loadLicenseFile() {
@@ -97,6 +133,9 @@ public class LicenseService {
         return file;
     }
 
+    public boolean isLicenseChanged() {
+        return licenseChanged;
+    }
 
     public int getThreadsCount() {
         return threadsCount;
