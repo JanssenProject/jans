@@ -7,8 +7,8 @@ import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -30,7 +30,7 @@ public interface AdminService extends RemoteService {
 
     public void remove(LdapLicenseCrypt entity);
 
-    public void remove(Set<LdapLicenseId> entities);
+    public void remove(Collection<LdapLicenseId> entities);
 
     public LdapLicenseCrypt generate();
 

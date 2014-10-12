@@ -57,7 +57,7 @@ public class AddLicenseCryptDialog {
     public AddLicenseCryptDialog(LdapLicenseCrypt licenseCrypt) {
         uiBinder.createAndBindUi(this);
 
-        dialog = Framework.createDialogBox("Add Customer");
+        dialog = Framework.createDialogBox("Add Crypt");
         dialog.setWidget(dialogContent);
 
         closeButton.addClickHandler(new ClickHandler() {

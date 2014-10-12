@@ -6,8 +6,8 @@ import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public interface AdminServiceAsync {
     void getAllCustomers(AsyncCallback<List<LdapCustomer>> async);
@@ -30,5 +30,5 @@ public interface AdminServiceAsync {
 
     void getLicenseCrypt(String dn, AsyncCallback<LdapLicenseCrypt> async);
 
-    void remove(Set<LdapLicenseId> entities, AsyncCallback<Void> async);
+    void remove(Collection<LdapLicenseId> entities, AsyncCallback<Void> async);
 }
