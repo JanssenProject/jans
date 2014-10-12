@@ -28,7 +28,7 @@ public class LicenseService {
 
     public static final String LICENSE_FILE_NAME = ".oxd-license";
 
-    public static final String LICENSE_FILE_PATH = System.getProperty("user.home") + LICENSE_FILE_NAME;
+    public static final String LICENSE_FILE_PATH = /*System.getProperty("user.home") +*/ LICENSE_FILE_NAME;
 
     private final Configuration conf;
     private final LicenseUpdateService updateService;

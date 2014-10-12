@@ -7,7 +7,7 @@
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
-    "license_server_endpoint":"http://localhost:8090/rest/generate",
+    "license_server_endpoint":"http://localhost:8090",
     "license_id":"dd55c4d2-76ce-4f65-ac9a-e8c41b2b711b",
     "license_check_period_in_hours": 24,
     "public_key":"sjkjrPa+k49KVhnleIguxWYjfhrlbPJsJ1qLejuzBqKR1cV7FhPKugDSxICO4t+xq8FTpZQagoKJXWxI/nTj7mC1rY8p9matoQ41mCZ7S18yqW2qNMjcOXz7cQ+bXIsWXFwZt6+vo9NX9HG4oRSZaxHCx+GaWNKUVJsR0GVxQ/kBVOU7lnXvpjva4JaZNTeWt2PRug8WEUKFHeyfumR3m4/dfCfQdVKlXHec2viflJENW4zAh/aljkSqFISceZBqdWhQ0nivXfnQUE6PkBGMZz4iLXEI/8yMWeNs4HDF6vdZQuQeSCIoPVKGW0h3nNZT5chZZITsSLitWHBgv55DYugepbL5UOoOZTGeH92KNsaGnbZZEG1htslljRKNDvPTLjH+jBXz8u3LSDDupjcTuQ==",
