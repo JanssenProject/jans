@@ -8,7 +8,7 @@ oxAuth -> User Agent: Show login form with Google+ widget
 
 User Agent -> Google Server: Log into Google account
 
-Google Server -> User Agent: Return OAuth2 code, id_token, etc..
+Google Server -> User Agent: Returns OAuth2 code, id_token, etc..
 
 User Agent -> oxAuth: Send OAuth2 code to Google+ oxAuth external authenticator
 
@@ -36,6 +36,4 @@ oxAuth -> oxTrust: Allow access to resource
 
 oxTrust -> oxTrust: Show user registration form
 
-oxTrust -> user Agent: Allow access to resource
-
-
+oxTrust -> User Agent: Allow access to resource
