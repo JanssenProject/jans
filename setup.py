@@ -146,8 +146,8 @@ class Setup(object):
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
-        self.apache2_conf = '/etc/httpd/conf/httpd.conf'
-        self.apache2_ssl_conf = '/etc/httpd/conf.d/https_gluu.conf'
+        self.apache2_conf = '%s/httpd.conf' % self.outputFolder
+        self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
         self.ldif_base = '%s/base.ldif' % self.outputFolder
@@ -180,8 +180,8 @@ class Setup(object):
                      self.oxTrust_log_rotation_configuration: True,
                      self.ldap_setup_properties: False,
                      self.org_custom_schema: False,
-                     self.apache2_conf: True,
-                     self.apache2_ssl_conf: True,
+                     self.apache2_conf: False,
+                     self.apache2_ssl_conf: False,
                      self.etc_hosts: True,
                      self.etc_hostname: True,
                      self.ldif_base: False,
@@ -510,6 +510,13 @@ class Setup(object):
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
 
+    def configure_httpd(self):
+        if self.os_type in ['centos', 'redhat', 'fedora']:
+            self.copyFile(self.apache2_conf, "/etc/httpd/conf/httpd.conf")
+            self.copyFile(self.apache2_ssl_conf, "/etc/httpd/conf.d/https_gluu.conf")
+        if self.os_type in ['debian', 'ubuntu']:
+            self.copyFile(self.apache2_ssl_conf, "/etc/httpd/conf.d/https_gluu")
+
     def copyFile(self, inFile, destFolder):
         try:
             shutil.copy(inFile, destFolder)
@@ -785,20 +792,28 @@ class Setup(object):
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, "defaults"])
 
-    def start_tomcat(self):
+    def start_services(self):
+        # Apache HTTPD
+        if self.os_type in ['redhat', 'centos', 'fedora']:
+            self.run('/usr/sbin/service', 'httpd', 'start')
+        elif self.os_type in ['debian', 'ubuntu']:
+            self.run('/usr/sbin/service', 'apache2', 'start')
+
+        # Apache Tomcat
         try:
-            self.logIt("Attempting to start tomcat")
+            # Giving LDAP a few seconds to load the data...
             i = 0
             wait_time = 5
-            print "\n\nGiving LDAP %i seconds to perform imports" % wait_time
             while i < wait_time:
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            os.system("/etc/init.d/tomcat start")
+            self.run('/usr/sbin/service', 'tomcat', 'start')
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
+
+        #
 
     def change_ownership(self):
         self.logIt("Changing ownership")
@@ -1037,6 +1052,7 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.gen_crypto()
+            installObject.configure_httpd()
             installObject.setup_opendj()
             installObject.configure_opendj()
             installObject.index_opendj()
@@ -1046,7 +1062,7 @@ if __name__ == '__main__':
             installObject.setup_init_scripts()
             installObject.copy_static()
             installObject.change_ownership()
-            installObject.start_tomcat()
+            installObject.start_services()
             installObject.save_properties()
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
