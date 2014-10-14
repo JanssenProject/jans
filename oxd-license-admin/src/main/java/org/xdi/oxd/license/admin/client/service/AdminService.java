@@ -18,6 +18,8 @@ import java.util.List;
 @RemoteServiceRelativePath("adminService.rpc")
 public interface AdminService extends RemoteService {
 
+    public void ping();
+
     public List<LdapCustomer> getAllCustomers();
 
     public List<LdapLicenseCrypt> getAllLicenseCrypts();

@@ -33,4 +33,6 @@ public interface AdminServiceAsync {
     void getLicenseCrypt(String dn, AsyncCallback<LdapLicenseCrypt> async);
 
     void remove(Collection<LdapLicenseId> entities, AsyncCallback<Void> async);
+
+    void ping(AsyncCallback<Void> async);
 }
