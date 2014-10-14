@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.license.client.js.LicenseType;
+import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
 
@@ -26,6 +29,12 @@ public class Processor {
      */
     private static final Logger LOG = LoggerFactory.getLogger(Processor.class);
 
+    private final LicenseService licenseService;
+
+    public Processor(LicenseService licenseService) {
+        this.licenseService = licenseService;
+    }
+
     /**
      * Processed command.
      *
@@ -37,6 +46,7 @@ public class Processor {
         try {
             if (StringUtils.isNotBlank(p_command)) {
                 final Command command = CoreUtils.createJsonMapper().readValue(p_command, Command.class);
+                enforceLicenseRestrictions(command);
                 final CommandResponse response = process(command);
                 if (response != null) {
                     final String json = CoreUtils.asJson(response);
@@ -56,6 +66,27 @@ public class Processor {
         }
         LOG.trace("No command or it's corrupted. Stop handling commands for this client.");
         return CommandResponse.INTERNAL_ERROR_RESPONSE_AS_STRING;
+    }
+
+    private void enforceLicenseRestrictions(Command command) {
+        if (licenseService.getLicenseType() == LicenseType.FREE) {
+            final CommandType commandType = command.getCommandType();
+            switch (commandType) {
+                case CHECK_ID_TOKEN:
+                case RPT_STATUS:
+                    forceWait(500);
+                    break;
+            }
+        }
+
+    }
+
+    private void forceWait(int milliseconds) {
+        try {
+            Thread.currentThread().wait(milliseconds);
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public CommandResponse process(Command p_command) {

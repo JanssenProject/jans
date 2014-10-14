@@ -28,12 +28,11 @@ public class SocketProcessor implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(SocketProcessor.class);
 
     private final Socket socket;
-    private final LicenseService licenseService;
-    private final Processor m_processor = new Processor();
+    private final Processor processor;
 
     public SocketProcessor(Socket socket, LicenseService licenseService) {
         this.socket = socket;
-        this.licenseService = licenseService;
+        this.processor = new Processor(licenseService);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class SocketProcessor implements Runnable {
 
                 leftString = readResult.getLeftString();
 
-                final String response = m_processor.process(readResult.getCommand());
+                final String response = processor.process(readResult.getCommand());
                 if (StringUtils.isBlank(response)) {
                     break;
                 }
