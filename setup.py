@@ -214,7 +214,7 @@ class Setup(object):
         f.close()
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, *args):
+    def run(self, args):
         self.logIt('Running: %s' % ' '.join(args))
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -795,9 +795,9 @@ class Setup(object):
     def start_services(self):
         # Apache HTTPD
         if self.os_type in ['redhat', 'centos', 'fedora']:
-            self.run('/usr/sbin/service', 'httpd', 'start')
+            self.run(['/usr/sbin/service', 'httpd', 'start'])
         elif self.os_type in ['debian', 'ubuntu']:
-            self.run('/usr/sbin/service', 'apache2', 'start')
+            self.run(['/usr/sbin/service', 'apache2', 'start'])
 
         # Apache Tomcat
         try:
@@ -808,7 +808,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            self.run('/usr/sbin/service', 'tomcat', 'start')
+            self.run(['/usr/sbin/service', 'tomcat', 'start'])
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
