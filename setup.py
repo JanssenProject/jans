@@ -512,10 +512,12 @@ class Setup(object):
 
     def configure_httpd(self):
         if self.os_type in ['centos', 'redhat', 'fedora']:
-            self.copyFile(self.apache2_conf, "/etc/httpd/conf/httpd.conf")
-            self.copyFile(self.apache2_ssl_conf, "/etc/httpd/conf.d/https_gluu.conf")
+            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
-            self.copyFile(self.apache2_ssl_conf, "/etc/httpd/conf.d/https_gluu")
+            self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
+            self.run(['ln', '-s', '/etc/apache2/sites-available/https_gluu.conf',
+                      '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def copyFile(self, inFile, destFolder):
         try:
