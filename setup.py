@@ -52,6 +52,10 @@ class Setup(object):
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
 
+        self.oxtrust_war = 'http://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
+        self.oxauth_war = 'http://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
+        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
+
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
 
@@ -817,8 +821,6 @@ class Setup(object):
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
 
-        #
-
     def change_ownership(self):
         self.logIt("Changing ownership")
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcatHome])
@@ -829,7 +831,6 @@ class Setup(object):
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
         self.copyFile("static/tomcat/server.xml", "%s/conf" % self.tomcatHome)
-
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -910,6 +911,20 @@ class Setup(object):
                 print 'Cannot convert "%s" to a number' % choice_number
                 self.logIt(traceback.format_exc(), True)
         return return_value
+
+    def download_latest(self):
+        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "Yes")[0].lower()
+        if download_wars == 'y':
+            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
+        download_setup = self.getPrompt("Download latest Gluu Server setup files (requires exit)", "No")[0].lower()
+        if download_setup == 'y':
+            self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
+            self.run(['/bin/rm', '-rf', '/install'])
+            self.run(['/usr/bin/unzip', '/tmp/master.zip', '-d', '/tmp'])
+            self.run(['/bin/mv', '/tmp/community-edition-setup-master', '-d', '/install'])
+            print "\n\n ** Downloaded fresh setup file. Exiting... re-run /install/setup.py **\n\n"
+            sys.exit()
 
     def promptForProperties(self):
         detectedIP = None
@@ -1014,10 +1029,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    print """**
-** All passwords contained in %s.\n
-** Remove or encrypt post installation!!!\n
-**\n\n""" % installObject.savedProperties
+    print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -1028,7 +1040,12 @@ if __name__ == '__main__':
         installObject.logIt('Removed %s' % installObject.logError)
     except:
         pass
+
     installObject.logIt("Installing Gluu Server", True)
+
+    if not noPrompt:
+        installObject.download_latest()
+
     if setup_properties:
         installObject.logIt('%s Properties found!\n' % setup_properties)
         installObject.load_properties(setup_properties)
