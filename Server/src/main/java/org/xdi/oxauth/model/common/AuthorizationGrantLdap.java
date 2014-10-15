@@ -37,13 +37,13 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     private static final int THREADS_COUNT = 200;
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(THREADS_COUNT, new ThreadFactory() {
-        public Thread newThread(Runnable p_r) {
-            Thread thread = new Thread(p_r);
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
+//    private final ExecutorService executorService = Executors.newFixedThreadPool(THREADS_COUNT, new ThreadFactory() {
+//        public Thread newThread(Runnable p_r) {
+//            Thread thread = new Thread(p_r);
+//            thread.setDaemon(true);
+//            return thread;
+//        }
+//    });
 
     private final GrantService m_grantService = GrantService.instance();
 
@@ -61,12 +61,13 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     @Override
     public void save() {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
+// http://ox.gluu.org/jira/browse/OXAUTH-322?focusedCommentId=11620#comment-11620
+//        executorService.execute(new Runnable() {
+//            @Override
+//            public void run() {
                 saveImpl();
-            }
-        });
+//            }
+//        });
     }
 
     private void saveImpl() {
