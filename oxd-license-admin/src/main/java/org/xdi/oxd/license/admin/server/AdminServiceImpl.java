@@ -39,11 +39,6 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     LicenseIdService licenseIdService;
 
     @Override
-    public void ping() {
-
-    }
-
-    @Override
     public List<LdapCustomer> getAllCustomers() {
         return customerService.getAll();
     }
@@ -154,7 +149,7 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public List<LdapLicenseCrypt> getAllLicenseCrypts() {
+    public List<LdapLicenseCrypt> getAllLicenseCryptObjects() {
         try {
             return licenseCryptService.getAll();
         } catch (Exception e) {

@@ -101,7 +101,7 @@ public class SelectCryptDialog {
     }
 
     private void loadTableData() {
-        Admin.getService().getAllLicenseCrypts(new SuccessCallback<List<LdapLicenseCrypt>>() {
+        Admin.getService().getAllLicenseCryptObjects(new SuccessCallback<List<LdapLicenseCrypt>>() {
             @Override
             public void onSuccess(List<LdapLicenseCrypt> result) {
                 table.setRowData(result);

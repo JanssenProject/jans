@@ -20,7 +20,7 @@ public interface AdminServiceAsync {
 
     void generate(AsyncCallback<LdapLicenseCrypt> async);
 
-    void getAllLicenseCrypts(AsyncCallback<List<LdapLicenseCrypt>> async);
+    void getAllLicenseCryptObjects(AsyncCallback<List<LdapLicenseCrypt>> async);
 
     void remove(LdapCustomer entity, AsyncCallback<Void> async);
 
@@ -34,5 +34,4 @@ public interface AdminServiceAsync {
 
     void remove(Collection<LdapLicenseId> entities, AsyncCallback<Void> async);
 
-    void ping(AsyncCallback<Void> async);
 }
