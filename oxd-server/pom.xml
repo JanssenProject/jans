@@ -5,14 +5,14 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd-server</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>oxD Server</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.3-SNAPSHOT</version>
     </parent>
 
     <build>
