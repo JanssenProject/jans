@@ -45,13 +45,14 @@ public class ConfigurationFactory {
             System.getProperty("catalina.home") :
             System.getProperty("jboss.home.dir");
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
+    private static final String CERTS_DIR = "/etc/certs/";
 
     private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
     public static final String ERRORS_FILE_PATH = DIR + "oxauth-errors.json";
     public static final String STATIC_CONF_FILE_PATH = DIR + "oxauth-static-conf.json";
-    public static final String WEB_KEYS_FILE_PATH = DIR + "oxauth-web-keys.json";
+    public static final String WEB_KEYS_FILE_PATH = CERTS_DIR + "oxauth-web-keys.json";
     public static final String ID_GEN_SCRIPT_FILE_PATH = DIR + "oxauth-id-gen.py";
 
     public static final String CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE = DIR + "salt";
@@ -319,31 +320,31 @@ public class ConfigurationFactory {
         return null;
     }
 
-	private static FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
-		try {
-			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-			
-			return fileConfiguration;
-		} catch (Exception ex) {
-			if (isMandatory) {
-				LOG.error("Failed to load configuration from {0}", ex, fileName);
-				throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
-			}
-		}
+    private static FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
+        try {
+            FileConfiguration fileConfiguration = new FileConfiguration(fileName);
 
-		return null;
-	}
-	
-	public static String loadCryptoConfigurationSalt() {
-		try {
-			FileConfiguration cryptoConfiguration = createFileConfiguration(CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, true);
-			
-			return cryptoConfiguration.getString("encodeSalt");
-		} catch (Exception ex) {
-			LOG.error("Failed to load configuration from {0}", ex, CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE);
-			throw new ConfigurationException("Failed to load configuration from " + CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, ex);
-		}
-	}
+            return fileConfiguration;
+        } catch (Exception ex) {
+            if (isMandatory) {
+                LOG.error("Failed to load configuration from {0}", ex, fileName);
+                throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
+            }
+        }
+
+        return null;
+    }
+
+    public static String loadCryptoConfigurationSalt() {
+        try {
+            FileConfiguration cryptoConfiguration = createFileConfiguration(CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, true);
+
+            return cryptoConfiguration.getString("encodeSalt");
+        } catch (Exception ex) {
+            LOG.error("Failed to load configuration from {0}", ex, CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE);
+            throw new ConfigurationException("Failed to load configuration from " + CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE, ex);
+        }
+    }
 
     public Configuration getConf() {
         return m_conf;
