@@ -9,6 +9,7 @@ package org.xdi.oxauth.comp;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
@@ -50,7 +51,11 @@ public class CleanUpClientTest extends BaseComponentTest {
 		for (Client client : clients) {
 			String clientId = client.getClientId();
 			if (!usedClientsList.contains(clientId)) {
-				clientService.remove(client);
+				try {
+					clientService.remove(client);
+				} catch (EntryPersistenceException ex) {
+					output("Failed to remove client: " + ex.getMessage());
+				}
 				count++;
 			}
 		}
