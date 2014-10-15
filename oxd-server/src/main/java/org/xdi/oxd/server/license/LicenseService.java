@@ -98,7 +98,7 @@ public class LicenseService {
         return false;
     }
 
-    private void reset() {
+    public void reset() {
         threadsCount = 1;
         licenseType = LicenseType.FREE;
         isMultiServer = false;

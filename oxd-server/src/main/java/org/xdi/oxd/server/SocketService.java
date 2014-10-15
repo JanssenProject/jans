@@ -72,6 +72,7 @@ public class SocketService {
             while (!m_shutdown) {
                 try {
                     if (licenseService.isLicenseChanged()) {
+                        licenseService.reset();
                         LOG.info("License was changed. Restart oxd server to enforce new license!");
                         shutdownNow();
                         m_shutdown = false;
