@@ -506,6 +506,8 @@ class Setup(object):
                               '%s/asimba.crt' % self.certFolder,
                               'tomcat')
             self.gen_openid_keys()
+            self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
+            self.run(['/bin/chmod', '-R', '400', self.certFolder])
         except:
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
@@ -821,7 +823,6 @@ class Setup(object):
         self.logIt("Changing ownership")
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcatHome])
         self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
