@@ -69,21 +69,24 @@ public class Processor {
     }
 
     private void enforceLicenseRestrictions(Command command) {
-        if (licenseService.getLicenseType() == LicenseType.FREE) {
-            final CommandType commandType = command.getCommandType();
-            switch (commandType) {
-                case CHECK_ID_TOKEN:
-                case RPT_STATUS:
-                    forceWait(500);
-                    break;
+        try {
+            if (licenseService.getLicenseType() == LicenseType.FREE) {
+                final CommandType commandType = command.getCommandType();
+                switch (commandType) {
+                    case CHECK_ID_TOKEN:
+                    case RPT_STATUS:
+                        forceWait(500);
+                        break;
+                }
             }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
-
     }
 
     private void forceWait(int milliseconds) {
         try {
-            Thread.currentThread().wait(milliseconds);
+            Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
