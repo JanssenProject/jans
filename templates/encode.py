@@ -4,7 +4,7 @@ import sys
 import base64
 from pyDes import *
 
-saltFn = "%(tomcatHome)s/salt"
+saltFn = "%(tomcatHome)s/conf/salt"
 f = open(saltFn)
 key = f.read()
 f.close()
