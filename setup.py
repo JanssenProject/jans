@@ -1082,7 +1082,7 @@ if __name__ == '__main__':
     if (noPrompt or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.makeFolders()
-            installObject.makeSalt()
+            installObject.make_salt()
             installObject.downloadWarFiles()
             installObject.writeLdapPW()
             installObject.copy_scripts()
