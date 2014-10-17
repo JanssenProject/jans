@@ -6,8 +6,10 @@ from pyDes import *
 
 saltFn = "%(tomcatHome)s/conf/salt"
 f = open(saltFn)
-key = f.read()
+salt_property = f.read()
 f.close()
+
+key = salt_property.split("=")[1].strip()
 
 def obscure(data=""):
     engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
