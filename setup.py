@@ -752,7 +752,7 @@ class Setup(object):
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
-        self.run(['/sbin/service', 'httpd', 'stop'])
+        self.run(['/usr/sbin/service', 'httpd', 'stop'])
         for dest_fn in self.ce_templates.keys():
             if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
@@ -764,7 +764,7 @@ class Setup(object):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
         self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
-        self.run(['/sbin/service', 'httpd', 'start'])
+        self.run(['/usr/sbin/service', 'httpd', 'start'])
 
     def copy_scripts(self):
         self.logIt("Copying script files")
