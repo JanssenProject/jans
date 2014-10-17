@@ -1005,7 +1005,7 @@ class Setup(object):
         if self.downloadWars == True:
             print "Downloading latest oxauth... "
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
-            print "Downloading latests oxTrust"
+            print "Downloading latest oxTrust"
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
             print "Finished downloading latest war files"
 
