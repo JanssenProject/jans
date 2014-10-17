@@ -51,6 +51,7 @@ class Setup(object):
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+        self.downloadWars = False
 
         self.oxtrust_war = 'http://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
         self.oxauth_war = 'http://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
@@ -197,16 +198,17 @@ class Setup(object):
                      self.ldif_groups: False}
 
     def __repr__(self):
-        return ( 'hostname'.ljust(20) + self.hostname.rjust(40) + "\n"
-                 + 'ip'.ljust(20) + self.ip.rjust(40) + "\n"
-                 + 'orgName'.ljust(20) + self.orgName.rjust(40) + "\n"
-                 + 'os'.ljust(20) + self.os_type.rjust(40) + "\n"
-                 + 'city'.ljust(20) + self.city.rjust(40) + "\n"
-                 + 'state'.ljust(20) + self.state.rjust(40) + "\n"
-                 + 'countryCode'.ljust(20) + self.countryCode.rjust(40) + "\n"
-                 + 'support email'.ljust(20) + self.admin_email.rjust(40) + "\n"
-                 + 'tomcat max ram'.ljust(20) + self.tomcat_max_ram.rjust(40) + "\n"
-                 + 'Admin Pass'.ljust(20) + self.ldapPass.rjust(40) + "\n")
+        return ( 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
+                 + 'ip'.ljust(30) + self.ip.rjust(35) + "\n"
+                 + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n"
+                 + 'os'.ljust(30) + self.os_type.rjust(35) + "\n"
+                 + 'city'.ljust(30) + self.city.rjust(35) + "\n"
+                 + 'state'.ljust(30) + self.state.rjust(35) + "\n"
+                 + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
+                 + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n"
+                 + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n"
+                 + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n"
+                 + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n")
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
@@ -762,9 +764,6 @@ class Setup(object):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
         self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
-        f = open("%s/conf/salt" % self.tomcatHome, 'w')
-        f.write('encodeSalt = %s' % self.encode_salt)
-        f.close()
         self.run(['/sbin/service', 'httpd', 'start'])
 
     def copy_scripts(self):
@@ -885,10 +884,19 @@ class Setup(object):
                 os.makedirs(self.oxPhotosFolder)
             if not os.path.exists(self.oxTrustRemovedFolder):
                 os.makedirs(self.oxTrustRemovedFolder)
-
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
+
+    def make_salt(self):
+        try:
+            f = open("%s/conf/salt" % self.tomcatHome, 'w')
+            f.write('encodeSalt = %s' % self.encode_salt)
+            f.close()
+        except:
+            self.logIt("Error writing salt", True)
+            self.logIt(traceback.format_exc(), True)
+            sys.exit()
 
     def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
         return_value = None
@@ -915,8 +923,7 @@ class Setup(object):
     def download_latest(self):
         download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "Yes")[0].lower()
         if download_wars == 'y':
-            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
-            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
+            self.downloadWars = True
         download_setup = self.getPrompt("Download latest Gluu Server setup files (requires exit)", "No")[0].lower()
         if download_setup == 'y':
             self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
@@ -994,6 +1001,14 @@ class Setup(object):
         print "    -f   specify setup.properties file"
         print "    -n   No interactive prompt before install starts."
 
+    def downloadWarFiles(self):
+        if self.downloadWars == True:
+            print "Downloading latest oxauth... "
+            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
+            print "Downloading latests oxTrust"
+            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
+            print "Finished downloading latest war files"
+
     def getOpts(self, argv):
         self.logIt("Parsing command line options")
         setup_properties = None
@@ -1067,6 +1082,8 @@ if __name__ == '__main__':
     if (noPrompt or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.makeFolders()
+            installObject.makeSalt()
+            installObject.downloadWarFiles()
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
