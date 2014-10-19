@@ -9,6 +9,9 @@
         <g:north size='56'>
             <g:HTMLPanel>
                 <h2>License Management</h2>
+                <div style="float: right !important;">
+                    <g:Button ui:field="logoutButton">Logout</g:Button>
+                </div>
             </g:HTMLPanel>
         </g:north>
         <g:center>

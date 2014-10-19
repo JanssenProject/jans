@@ -1,6 +1,9 @@
 package org.xdi.oxd.license.admin.client.ui;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HasWidgets;
+import org.xdi.oxd.license.admin.client.LoginController;
 import org.xdi.oxd.license.admin.client.Presenter;
 
 /**
@@ -21,6 +24,13 @@ public class MainPanelPresenter implements Presenter {
     public void go(HasWidgets.ForIsWidget container) {
         container.clear();
         container.add(view);
+
+        view.getLogoutButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                LoginController.logout();
+            }
+        });
 
         new CustomerTabPresenter(view.getCustomerTab());
         new LicenseCryptTabPresenter(view.getLicenseCryptTab());

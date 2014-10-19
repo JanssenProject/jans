@@ -17,6 +17,26 @@ public class Configuration implements Serializable {
     private Integer threadNumberPaidLicense;
     @JsonProperty(value = "thread-number-premium-license")
     private Integer threadNumberPremiumLicense;
+    @JsonProperty(value = "authorize-request")
+    private String authorizeRequest;
+    @JsonProperty(value = "logout-url")
+    private String logoutUrl;
+
+    public String getLogoutUrl() {
+        return logoutUrl;
+    }
+
+    public void setLogoutUrl(String logoutUrl) {
+        this.logoutUrl = logoutUrl;
+    }
+
+    public String getAuthorizeRequest() {
+        return authorizeRequest;
+    }
+
+    public void setAuthorizeRequest(String authorizeRequest) {
+        this.authorizeRequest = authorizeRequest;
+    }
 
     public Configuration() {
     }

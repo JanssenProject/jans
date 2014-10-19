@@ -34,4 +34,7 @@ public interface AdminServiceAsync {
 
     void remove(Collection<LdapLicenseId> entities, AsyncCallback<Void> async);
 
+    void getLoginUrl(AsyncCallback<String> async);
+
+    void getLogoutUrl(AsyncCallback<String> async);
 }

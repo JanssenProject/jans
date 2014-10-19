@@ -6,6 +6,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import org.xdi.oxd.license.admin.client.service.AdminService;
 import org.xdi.oxd.license.admin.client.service.AdminServiceAsync;
@@ -59,8 +60,12 @@ public class Admin implements EntryPoint {
     @Override
     public void onModuleLoad() {
         LOGGER.info("started to load module...");
-        MainPanelPresenter mainPanelPresenter = new MainPanelPresenter();
-        mainPanelPresenter.go(RootLayoutPanel.get());
+        if (LoginController.login()) {
+            MainPanelPresenter mainPanelPresenter = new MainPanelPresenter();
+            mainPanelPresenter.go(RootLayoutPanel.get());
+        } else {
+            RootLayoutPanel.get().add(new Label("Failed to identify IDP for License Server. Please check 'authorize-request' parameter in configuration. Otherwise internal server error occurred. Please contact yuriy@gluu.org or support@gluu.org."));
+        }
     }
 
     public static AdminServiceAsync getService() {
