@@ -56,6 +56,8 @@ public class LicenseCryptDetailsPanel implements IsWidget {
     Button editButton;
     @UiField
     Button refreshButton;
+    @UiField
+    Button copyIds;
 
     public LicenseCryptDetailsPanel() {
         uiBinder.createAndBindUi(this);
@@ -106,6 +108,10 @@ public class LicenseCryptDetailsPanel implements IsWidget {
             }
         }, "Multi-server");
 
+    }
+
+    public Button getCopyIds() {
+        return copyIds;
     }
 
     public Button getEditButton() {

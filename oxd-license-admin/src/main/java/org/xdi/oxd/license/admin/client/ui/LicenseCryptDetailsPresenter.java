@@ -7,6 +7,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.SuccessCallback;
 import org.xdi.oxd.license.admin.client.dialogs.LicenseIdMetadataDialog;
+import org.xdi.oxd.license.admin.client.dialogs.TextAreaDialog;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
@@ -53,6 +54,12 @@ public class LicenseCryptDetailsPresenter {
                 loadLicenseIds();
             }
         });
+        this.view.getCopyIds().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showCopyDialog();
+            }
+        });
         view.getLicenseIds().setSelectionModel(selectionModel);
 
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -62,6 +69,22 @@ public class LicenseCryptDetailsPresenter {
             }
         });
         setButtonsState();
+    }
+
+    private void showCopyDialog() {
+        TextAreaDialog dialog = new TextAreaDialog();
+        dialog.setTitle("License IDs for copy");
+        dialog.getTextArea().setValue(licenseIdAsStringForCopy());
+        dialog.show();
+    }
+
+    private String licenseIdAsStringForCopy() {
+        final List<LdapLicenseId> visibleItems = view.getLicenseIds().getVisibleItems();
+        String s = "";
+        for (LdapLicenseId id : visibleItems) {
+            s = s + id.getLicenseId() + "\n";
+        }
+        return s;
     }
 
     private void onRemove() {

@@ -15,6 +15,7 @@
                 <g:Button ui:field="editButton" enabled="false">Edit (Auto-update)</g:Button>
                 <g:Button ui:field="removeButton" enabled="false">Remove</g:Button>
                 <g:Button ui:field="refreshButton">Refresh</g:Button>
+                <g:Button ui:field="copyIds">Show IDs for copy</g:Button>
             </g:FlowPanel>
             <cellview:CellTable ui:field="licenseIds"/>
         </g:VerticalPanel>
