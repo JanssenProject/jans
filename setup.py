@@ -481,7 +481,7 @@ class Setup(object):
             if err:
                 self.logIt(err, True)
             if output:
-                openid_key_json_fn = "%s/conf/oxauth-web-keys.json" % self.tomcatHome
+                openid_key_json_fn = "%s/oxauth-web-keys.json" % self.certFolder
                 f = open(openid_key_json_fn, 'w')
                 f.write(output)
                 f.close()
@@ -826,6 +826,9 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
+
+        self.run(['/bin/chmod', 'u+X', self.certFolder])
+        self.run(['/bin/chmod', 'a-x', "%s/*" % self.certFolder])
 
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
