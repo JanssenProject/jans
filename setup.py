@@ -922,7 +922,7 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
-    def download_latest(self):
+    def download_prompt(self):
         download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "Yes")[0].lower()
         if download_wars == 'y':
             self.downloadWars = True
@@ -1060,9 +1060,6 @@ if __name__ == '__main__':
 
     installObject.logIt("Installing Gluu Server", True)
 
-    if not noPrompt:
-        installObject.download_latest()
-
     if setup_properties:
         installObject.logIt('%s Properties found!\n' % setup_properties)
         installObject.load_properties(setup_properties)
@@ -1071,6 +1068,7 @@ if __name__ == '__main__':
         installObject.load_properties(installObject.setup_properties_fn)
     else:
         installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
+        installObject.download_prompt()
         installObject.promptForProperties()
 
     # Validate Properties
