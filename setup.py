@@ -827,6 +827,7 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
+    def change_permissions(self):
         self.run(['/bin/chmod', 'a-x', "%s/*" % self.certFolder])
 
     def copy_static(self):
@@ -1099,6 +1100,7 @@ if __name__ == '__main__':
             installObject.setup_init_scripts()
             installObject.copy_static()
             installObject.change_ownership()
+            installObject.change_permissions()
             installObject.start_services()
             installObject.save_properties()
         except:
