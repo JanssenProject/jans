@@ -151,7 +151,8 @@ public class FileConfiguration {
     }
 
     public String getKey(String value) {
-        Iterator<String> keyIterator = propertiesConfiguration.getKeys();
+        @SuppressWarnings("unchecked")
+		Iterator<String> keyIterator = propertiesConfiguration.getKeys();
         while (keyIterator.hasNext()) {
             String k = keyIterator.next();
             String v = propertiesConfiguration.getString(k);
