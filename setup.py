@@ -123,7 +123,9 @@ class Setup(object):
                                 'static/scripts/testBind.py']
         self.init_files = ['static/tomcat/tomcat', 'static/opendj/opendj']
         self.redhat_services = ['tomcat', 'opendj', 'httpd']
-        self.debian_services = ['tomcat', 'opendj', 'apache2']
+        self.debian_services = [{ 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
+                                { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
+                                { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
@@ -804,9 +806,9 @@ class Setup(object):
         if self.os_type in ['centos', 'redhat', 'fedora']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        elif self.os_types in ['ubuntu', 'debian']:
+        elif self.os_type in ['ubuntu', 'debian']:
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service, "defaults"])
+                self.run(["/usr/sbin/update-rc.d", service['name'], 'start', service['order'], service['runlevel'], "."])
 
     def start_services(self):
         # Apache HTTPD
