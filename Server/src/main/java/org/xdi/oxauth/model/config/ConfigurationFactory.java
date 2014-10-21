@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -31,8 +24,16 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Javier Rojas Blum
+ * @version 0.9, 10/21/2014
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
@@ -45,15 +46,15 @@ public class ConfigurationFactory {
             System.getProperty("catalina.home") :
             System.getProperty("jboss.home.dir");
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
-    private static final String CERTS_DIR = "/etc/certs/";
 
     private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
     public static final String ERRORS_FILE_PATH = DIR + "oxauth-errors.json";
     public static final String STATIC_CONF_FILE_PATH = DIR + "oxauth-static-conf.json";
-    public static final String WEB_KEYS_FILE_PATH = CERTS_DIR + "oxauth-web-keys.json";
     public static final String ID_GEN_SCRIPT_FILE_PATH = DIR + "oxauth-id-gen.py";
+    public static final String WEB_KEYS_FILE = "oxauth-web-keys.json";
+    private static String webKeysFilePath;
 
     public static final String CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE = DIR + "salt";
 
@@ -145,7 +146,7 @@ public class ConfigurationFactory {
         if (webKeysFromFile != null) {
             INSTANCE.setKeyValueList(webKeysFromFile);
         } else {
-            LOG.error("Failed to load web keys configuration from file: {0}. ", WEB_KEYS_FILE_PATH);
+            LOG.error("Failed to load web keys configuration from file: {0}. ", webKeysFilePath);
         }
 
         if (StringUtils.isNotBlank(idGenScriptFromFile)) {
@@ -304,7 +305,8 @@ public class ConfigurationFactory {
 
     private static JSONWebKeySet loadWebKeysFromFile() {
         try {
-            return ServerUtil.createJsonMapper().readValue(new File(WEB_KEYS_FILE_PATH), JSONWebKeySet.class);
+            webKeysFilePath = LdapHolder.LDAP_CONF.getKey("certsDir") + WEB_KEYS_FILE;
+            return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), JSONWebKeySet.class);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
         }
