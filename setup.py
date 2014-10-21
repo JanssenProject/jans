@@ -838,7 +838,7 @@ class Setup(object):
 
     def change_permissions(self):
         self.run(['/bin/chmod', 'a-x', self.certFolder])
-        self.run(['/bin/chmod', 'u+X', self.certFolder])
+        self.run(['/bin/chmod', '-R', 'u+X', self.certFolder])
 
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
