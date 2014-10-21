@@ -750,6 +750,10 @@ class Setup(object):
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
 
+    ### Notify system about hostname update
+    def update_hostname(self):
+        self.run(['/bin/hostname', self.hostname])
+
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
         self.run(['/usr/sbin/service', 'httpd', 'stop'])
@@ -828,7 +832,8 @@ class Setup(object):
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
     def change_permissions(self):
-        self.run(['/bin/chmod', 'a-x', "%s/*" % self.certFolder])
+        self.run(['/bin/chmod', 'a-x', self.certFolder])
+        self.run(['/bin/chmod', 'u+X', self.certFolder])
 
     def copy_static(self):
         self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
@@ -1089,6 +1094,7 @@ if __name__ == '__main__':
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.render_templates()
+            installObject.update_hostname()
             installObject.gen_crypto()
             installObject.configure_httpd()
             installObject.setup_opendj()
