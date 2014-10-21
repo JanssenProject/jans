@@ -361,6 +361,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
         return "/auth/gplus/gpluspostlogin.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):
+        # TODO Revoke token
         return True
 
     def destroy(self, authConfiguration):

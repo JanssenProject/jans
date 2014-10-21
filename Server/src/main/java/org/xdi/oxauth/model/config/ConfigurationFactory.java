@@ -305,7 +305,7 @@ public class ConfigurationFactory {
 
     private static JSONWebKeySet loadWebKeysFromFile() {
         try {
-            webKeysFilePath = LdapHolder.LDAP_CONF.getKey("certsDir") + WEB_KEYS_FILE;
+            webKeysFilePath = LdapHolder.LDAP_CONF.getKey("certsDir") + File.separator + WEB_KEYS_FILE;
             return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), JSONWebKeySet.class);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
