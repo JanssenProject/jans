@@ -752,7 +752,12 @@ class Setup(object):
 
     ### Notify system about hostname update
     def update_hostname(self):
+        self.logIt("Copying hosts and hostname to final destination")
+
+        self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
         self.run(['/bin/hostname', self.hostname])
+
+        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
@@ -1011,7 +1016,7 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars == True:
-            print "Downloading latest oxauth... "
+            print "Downloading latest oxAuth... "
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
             print "Downloading latest oxTrust"
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
