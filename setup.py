@@ -826,7 +826,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            self.run(['/usr/sbin/service', 'tomcat', 'start'])
+            self.run(['service', 'tomcat', 'start'])
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
