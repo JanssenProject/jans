@@ -811,11 +811,15 @@ class Setup(object):
                 self.run(["/usr/sbin/update-rc.d", service['name'], 'start', service['order'], service['runlevel'], "."])
 
     def start_services(self):
+        # Determine sbin path and apache service name
+        sbin_path = '/sbin/service'
+        apache_service_name = 'httpd'
+        if self.os_type in ['debian', 'ubuntu']:
+            sbin_path = '/usr/sbin/service'
+            apache_service_name = 'apache2'
+
         # Apache HTTPD
-        if self.os_type in ['redhat', 'centos', 'fedora']:
-            self.run(['/usr/sbin/service', 'httpd', 'start'])
-        elif self.os_type in ['debian', 'ubuntu']:
-            self.run(['/usr/sbin/service', 'apache2', 'start'])
+        self.run([sbin_path, apache_service_name, 'start'])
 
         # Apache Tomcat
         try:
@@ -826,7 +830,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            self.run(['service', 'tomcat', 'start'])
+            self.run([sbin_path, 'tomcat', 'start'])
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
