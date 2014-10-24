@@ -30,9 +30,9 @@ public interface AdminService extends RemoteService {
 
     public void save(LdapLicenseCrypt entity);
 
-    public void remove(LdapCustomer entity);
+    public void removeCustomer(LdapCustomer entity);
 
-    public void remove(LdapLicenseCrypt entity);
+    public void removeCrypt(LdapLicenseCrypt entity);
 
     public void remove(Collection<LdapLicenseId> entities);
 

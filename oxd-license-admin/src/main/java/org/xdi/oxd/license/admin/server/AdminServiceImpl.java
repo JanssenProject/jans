@@ -144,12 +144,12 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     }
 
     @Override
-    public void remove(LdapCustomer entity) {
+    public void removeCustomer(LdapCustomer entity) {
         customerService.remove(entity);
     }
 
     @Override
-    public void remove(LdapLicenseCrypt entity) {
+    public void removeCrypt(LdapLicenseCrypt entity) {
         licenseCryptService.remove(entity);
         remove(loadLicenseIdsByCrypt(entity));
     }

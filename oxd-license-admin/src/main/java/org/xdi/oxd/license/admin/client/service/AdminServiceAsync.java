@@ -22,9 +22,9 @@ public interface AdminServiceAsync {
 
     void getAllLicenseCryptObjects(AsyncCallback<List<LdapLicenseCrypt>> async);
 
-    void remove(LdapCustomer entity, AsyncCallback<Void> async);
+    void removeCustomer(LdapCustomer entity, AsyncCallback<Void> async);
 
-    void remove(LdapLicenseCrypt entity, AsyncCallback<Void> async);
+    void removeCrypt(LdapLicenseCrypt entity, AsyncCallback<Void> async);
 
     void generateLicenseIds(int count, LdapLicenseCrypt licenseCrypt, LicenseMetadata metadata, AsyncCallback<List<LdapLicenseId>> async);
 

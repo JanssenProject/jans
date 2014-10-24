@@ -85,7 +85,7 @@ public class LicenseCryptTabPresenter {
     }
 
     private void removeEntity() {
-        Admin.getService().remove(selectionModel.getSelectedObject(), new SuccessCallback<Void>() {
+        Admin.getService().removeCrypt(selectionModel.getSelectedObject(), new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 loadTableData();
