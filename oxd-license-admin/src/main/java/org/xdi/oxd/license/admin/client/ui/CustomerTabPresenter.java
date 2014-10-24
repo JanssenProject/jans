@@ -87,7 +87,7 @@ public class CustomerTabPresenter {
     }
 
     private void onRemove() {
-        Admin.getService().removeCustomer(selectionModel.getSelectedObject(), new SuccessCallback<Void>() {
+        Admin.getService().remove(selectionModel.getSelectedObject(), new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 loadCustomers();
