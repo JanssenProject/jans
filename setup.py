@@ -52,6 +52,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
         self.downloadWars = False
+        self.modifyNetworking = False
 
         self.oxtrust_war = 'http://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
         self.oxauth_war = 'http://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
@@ -189,8 +190,8 @@ class Setup(object):
                      self.org_custom_schema: False,
                      self.apache2_conf: False,
                      self.apache2_ssl_conf: False,
-                     self.etc_hosts: True,
-                     self.etc_hostname: True,
+                     self.etc_hosts: False,
+                     self.etc_hostname: False,
                      self.ldif_base: False,
                      self.ldif_appliance: False,
                      self.ldif_attributes: False,
@@ -210,6 +211,7 @@ class Setup(object):
                  + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n"
                  + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n"
                  + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n"
+                 + 'Modify Networking'.ljust(30) + self.modifyNetworking.rjust(35) + "\n"
                  + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n")
 
     def logIt(self, msg, errorLog=False):
@@ -952,6 +954,13 @@ class Setup(object):
             print "\n\n ** Downloaded fresh setup file. Exiting... re-run /install/setup.py **\n\n"
             sys.exit()
 
+    def modify_netowrking_prompt(self):
+        modify_networking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
+        if modify_networking == 'y':
+            self.modifyNetworking = True
+            self.ce_templates[self.etc_hosts] = True
+            self.ce_templates[self.etc_hostname] = True
+
     def promptForProperties(self):
         detectedIP = None
         try:
@@ -1101,6 +1110,7 @@ if __name__ == '__main__':
             installObject.makeFolders()
             installObject.make_salt()
             installObject.downloadWarFiles()
+            installObject.modify_netowrking_prompt()
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
