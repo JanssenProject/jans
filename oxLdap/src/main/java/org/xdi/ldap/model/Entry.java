@@ -45,4 +45,9 @@ public class Entry implements Serializable {
 		return String.format("Entry [dn=%s]", dn);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		return super.equals(obj);
+	}
 }

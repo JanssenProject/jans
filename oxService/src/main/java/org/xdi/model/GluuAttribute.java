@@ -110,7 +110,8 @@ public @Data class GluuAttribute extends Entry implements Serializable {
 
 	@Transient
 	private boolean requred;
-
+	
+	private String regExp;
 
 	public boolean allowEditBy(GluuUserRole role) {
 		return GluuUserRole.containsRole(editType, role);
