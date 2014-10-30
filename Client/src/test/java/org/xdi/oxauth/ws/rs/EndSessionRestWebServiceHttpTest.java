@@ -34,7 +34,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 /**
  * Functional tests for End Session Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 12.16.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
@@ -97,14 +98,18 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         String idToken = response1.getIdToken();
 
         // 3. End session
-        EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
-        EndSessionResponse endSessionResponse = endSessionClient.execEndSession(idToken, postLogoutRedirectUri);
-
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri);
+        endSessionRequest.setState("af0ifjsldkj");
+
+        EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
+        endSessionClient.setRequest(endSessionRequest);
+
+        EndSessionResponse endSessionResponse = endSessionClient.exec();
 
         showClient(endSessionClient);
         assertEquals(endSessionResponse.getStatus(), 302, "Unexpected response code: " + endSessionResponse.getStatus());
         assertNotNull(endSessionResponse.getLocation(), "The location is null");
+        assertEquals(endSessionResponse.getState(), "af0ifjsldkj");
     }
 
     @Test

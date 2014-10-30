@@ -6,23 +6,25 @@
 
 package org.xdi.oxauth.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * Represents an end session request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 12.14.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 public class EndSessionRequest extends BaseRequest {
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
     private String sessionId;
+    private String state;
 
     /**
      * Constructs an end session request.
@@ -89,6 +91,30 @@ public class EndSessionRequest extends BaseRequest {
     }
 
     /**
+     * Returns the state. The state is an opaque value used by the RP to maintain state between the logout request and
+     * the callback to the endpoint specified by the post_logout_redirect_uri parameter. If included in the logout
+     * request, the OP passes this value back to the RP using the state query parameter when redirecting the User Agent
+     * back to the RP.
+     *
+     * @return The state.
+     */
+    public String getState() {
+        return state;
+    }
+
+    /**
+     * Sets the state. The state is an opaque value used by the RP to maintain state between the logout request and the
+     * callback to the endpoint specified by the post_logout_redirect_uri parameter. If included in the logout request,
+     * the OP passes this value back to the RP using the state query parameter when redirecting the User Agent back to
+     * the RP.
+     *
+     * @param state he state.
+     */
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    /**
      * Returns a query string with the parameters of the end session request.
      * Any <code>null</code> or empty parameter will be omitted.
      *
@@ -109,6 +135,12 @@ public class EndSessionRequest extends BaseRequest {
                         .append(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI)
                         .append("=")
                         .append(URLEncoder.encode(postLogoutRedirectUri, "UTF-8"));
+            }
+            if (StringUtils.isNotBlank(state)) {
+                queryStringBuilder.append("&")
+                        .append(EndSessionRequestParam.STATE)
+                        .append("=")
+                        .append(URLEncoder.encode(state, "UTF-8"));
             }
 
             if (StringUtils.isNotBlank(sessionId)) {

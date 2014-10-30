@@ -25,14 +25,18 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
+import org.xdi.oxauth.model.session.EndSessionRequestParam;
+import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.util.StringHelper;
 
 /**
- * @author Javier Rojas Blum Date: 12.15.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 @Name("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
@@ -56,8 +60,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private SessionIdService sessionIdService;
 
     @Override
-    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String sessionId, HttpServletRequest httpRequest,
-                                      @Context HttpServletResponse httpResponse, SecurityContext sec) {
+    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
+                                      HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         log.debug("Attempting to end session, idTokenHint: {0}, postLogoutRedirectUri: {1}, sessionId: {2}, Is Secure = {3}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
         Response.ResponseBuilder builder = Response.ok();
@@ -70,7 +74,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             boolean isExternalAuthenticatorLogoutPresent = false;
             boolean externalLogoutResult = false;
             if (authorizationGrant != null) {
-            	removeSessionId(sessionId, httpRequest, httpResponse);
+                removeSessionId(sessionId, httpRequest, httpResponse);
 
                 isExternalAuthenticatorLogoutPresent = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.LOGOUT);
                 if (isExternalAuthenticatorLogoutPresent) {
@@ -96,8 +100,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
 
                 if (StringUtils.isNotBlank(redirectUri)) {
-                    StringBuilder sb = new StringBuilder(postLogoutRedirectUri);
-                    builder = RedirectUtil.getRedirectResponseBuilder(sb.toString(), httpRequest);
+                    RedirectUri redirectUriResponse = new RedirectUri(redirectUri);
+                    if (StringUtils.isNotBlank(state)) {
+                        redirectUriResponse.addResponseParameter(EndSessionResponseParam.STATE, state);
+                    }
+
+                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
                 } else {
                     builder = Response.status(400);
                     builder.entity(errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_REQUEST));
@@ -110,24 +118,24 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return builder.build();
     }
 
-	private void removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-		String id = sessionId;
-		if (StringHelper.isEmpty(id)) {
-			id = sessionIdService.getSessionIdFromCookie(httpRequest);
-		}
+    private void removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        String id = sessionId;
+        if (StringHelper.isEmpty(id)) {
+            id = sessionIdService.getSessionIdFromCookie(httpRequest);
+        }
 
-		if (StringHelper.isNotEmpty(id)) {
-			SessionId ldapSessionId = sessionIdService.getSessionId(id);
-			if (ldapSessionId != null) {
-				boolean result = sessionIdService.remove(ldapSessionId);
-				if (!result) {
-					log.error("Failed to remove session_id '{0}' from LDAP", id);
-				}
-			} else {
-				log.error("Failed to load session from LDAP by session_id: '{0}'", id);
-			}
-		}
+        if (StringHelper.isNotEmpty(id)) {
+            SessionId ldapSessionId = sessionIdService.getSessionId(id);
+            if (ldapSessionId != null) {
+                boolean result = sessionIdService.remove(ldapSessionId);
+                if (!result) {
+                    log.error("Failed to remove session_id '{0}' from LDAP", id);
+                }
+            } else {
+                log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+            }
+        }
 
-		sessionIdService.removeSessionIdCookie(httpResponse);
-	}
+        sessionIdService.removeSessionIdCookie(httpResponse);
+    }
 }

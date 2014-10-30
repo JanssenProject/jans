@@ -17,6 +17,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
+import org.xdi.oxauth.model.session.EndSessionResponseParam;
 
 /**
  * Encapsulates functionality to make end session request calls to an
@@ -101,6 +102,9 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
         if (StringUtils.isNotBlank(getRequest().getPostLogoutRedirectUri())) {
             clientRequest.queryParameter(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI, getRequest().getPostLogoutRedirectUri());
         }
+        if (StringUtils.isNotBlank(getRequest().getState())) {
+            clientRequest.queryParameter(EndSessionRequestParam.STATE, getRequest().getState());
+        }
         if (StringUtils.isNotBlank(getRequest().getSessionId())) {
             clientRequest.queryParameter(Parameters.SESSION_ID.getParamName(), getRequest().getSessionId());
         }
@@ -122,8 +126,10 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
                 if (queryStringIndex != -1) {
                     String queryString = location
                             .substring(queryStringIndex + 1);
-                    Map<String, String> params = QueryStringDecoder
-                            .decode(queryString);
+                    Map<String, String> params = QueryStringDecoder.decode(queryString);
+                    if (params.containsKey(EndSessionResponseParam.STATE)) {
+                        getResponse().setState(params.get(EndSessionResponseParam.STATE));
+                    }
                 }
             }
 

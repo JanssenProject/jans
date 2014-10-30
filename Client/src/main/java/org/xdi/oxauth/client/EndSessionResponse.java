@@ -11,11 +11,13 @@ import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 /**
  * Represents an end session response received from the authorization server.
  *
- * @author Javier Rojas Blum Date: 12.14.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 27, 2014
  */
 public class EndSessionResponse extends BaseResponse {
 
     private String location;
+    private String state;
 
     private EndSessionErrorResponseType errorType;
     private String errorDescription;
@@ -46,6 +48,30 @@ public class EndSessionResponse extends BaseResponse {
      */
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    /**
+     * Returns the state. The state is an opaque value used by the RP to maintain state between the logout request and
+     * the callback to the endpoint specified by the post_logout_redirect_uri parameter. If included in the logout
+     * request, the OP passes this value back to the RP using the state query parameter when redirecting the User Agent
+     * back to the RP.
+     *
+     * @return The state.
+     */
+    public String getState() {
+        return state;
+    }
+
+    /**
+     * Sets the state. The state is an opaque value used by the RP to maintain state between the logout request and the
+     * callback to the endpoint specified by the post_logout_redirect_uri parameter. If included in the logout request,
+     * the OP passes this value back to the RP using the state query parameter when redirecting the User Agent back to
+     * the RP.
+     *
+     * @param state he state.
+     */
+    public void setState(String state) {
+        this.state = state;
     }
 
     /**

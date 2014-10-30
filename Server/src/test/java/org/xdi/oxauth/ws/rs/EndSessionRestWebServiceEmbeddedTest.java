@@ -41,12 +41,14 @@ import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
 /**
  * Test cases for the end session web service (embedded)
  *
- * @author Javier Rojas Blum Date: 12.14.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -182,6 +184,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri);
+                endSessionRequest.setState("af0ifjsldkj");
 
                 request.setQueryString(endSessionRequest.getQueryString());
             }
@@ -193,7 +196,24 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
                 assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-                assertEquals(response.getHeader("Location"), postLogoutRedirectUri);
+
+                if (response.getHeader("Location") != null) {
+                    try {
+                        URI uri = new URI(response.getHeader("Location").toString());
+                        assertNotNull(uri.getQuery(), "The query string is null");
+
+                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+
+                        assertNotNull(params.get(EndSessionResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(EndSessionResponseParam.STATE), "af0ifjsldkj");
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        fail("Response URI is not well formed");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        fail(e.getMessage());
+                    }
+                }
             }
         }.run();
     }

@@ -24,7 +24,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
 /**
- * @author Javier Rojas Date: 12.15.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "End Session Endpoint - URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP")
@@ -46,6 +47,9 @@ public interface EndSessionRestWebService {
             @QueryParam(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI)
             @ApiParam(value = "URL to which the RP is requesting that the End-User's User Agent be redirected after a logout has been performed. The value MUST have been previously registered with the OP, either using the post_logout_redirect_uris Registration parameter or via another mechanism. If supplied, the OP SHOULD honor this request following the logout.", required = false)
             String postLogoutRedirectUri,
+            @QueryParam(EndSessionRequestParam.STATE)
+            @ApiParam(value = "Opaque value used by the RP to maintain state between the logout request and the callback to the endpoint specified by the post_logout_redirect_uri parameter. If included in the logout request, the OP passes this value back to the RP using the state query parameter when redirecting the User Agent back to the RP.", required = false)
+            String state,
             @QueryParam("session_id")
             @ApiParam(value = "Session ID", required = false)
             String sessionId,

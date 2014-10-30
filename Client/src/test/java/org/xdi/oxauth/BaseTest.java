@@ -29,6 +29,8 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -206,7 +208,7 @@ public abstract class BaseTest {
     }
 
     public void startSelenium() {
-        //System.setProperty("webdriver.chrome.driver", "/home/javier/tmp/chromedriver");
+        //System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
         //driver = new ChromeDriver();
 
         //driver = new FirefoxDriver();

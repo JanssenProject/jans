@@ -20,7 +20,8 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.util.Util;
 
 /**
- * @author Javier Rojas Blum Date: 02.27.2014
+ * @author Javier Rojas Blum
+ * @version 0.9 October 28, 2014
  */
 public class RedirectUri {
 
@@ -29,12 +30,16 @@ public class RedirectUri {
     private ResponseMode responseMode;
     private Map<String, String> responseParameters;
 
-    public RedirectUri(String baseRedirectUri, List<ResponseType> responseTypes, ResponseMode responseMode) {
+    public RedirectUri(String baseRedirectUri) {
         this.baseRedirectUri = baseRedirectUri;
-        this.responseTypes = responseTypes;
-        this.responseMode = responseMode;
 
         responseParameters = new HashMap<String, String>();
+    }
+
+    public RedirectUri(String baseRedirectUri, List<ResponseType> responseTypes, ResponseMode responseMode) {
+        this(baseRedirectUri);
+        this.responseTypes = responseTypes;
+        this.responseMode = responseMode;
     }
 
     public String getBaseRedirectUri() {
@@ -115,20 +120,21 @@ public class RedirectUri {
     public String toString() {
         StringBuilder sb = new StringBuilder(baseRedirectUri);
 
-        if (responseMode != null) {
-            if (responseMode == ResponseMode.QUERY) {
-                appendQuerySymbol(sb);
-            } else if (responseMode == ResponseMode.FRAGMENT) {
+        if (responseParameters.size() > 0) {
+            if (responseMode != null) {
+                if (responseMode == ResponseMode.QUERY) {
+                    appendQuerySymbol(sb);
+                } else if (responseMode == ResponseMode.FRAGMENT) {
+                    appendFragmentSymbol(sb);
+                }
+            } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
                 appendFragmentSymbol(sb);
+            } else {
+                appendQuerySymbol(sb);
             }
-        } else if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
-            appendFragmentSymbol(sb);
-        } else {
-            appendQuerySymbol(sb);
+
+            sb.append(getQueryString());
         }
-
-        sb.append(getQueryString());
-
         return sb.toString();
     }
 }
