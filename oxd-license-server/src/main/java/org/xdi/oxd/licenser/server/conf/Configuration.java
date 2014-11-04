@@ -21,6 +21,16 @@ public class Configuration implements Serializable {
     private String authorizeRequest;
     @JsonProperty(value = "logout-url")
     private String logoutUrl;
+    @JsonProperty(value = "client-id")
+    private String clientId;
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
     public String getLogoutUrl() {
         return logoutUrl;
