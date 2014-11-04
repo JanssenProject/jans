@@ -1,5 +1,6 @@
 package org.xdi.oxd.license.admin.client;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.user.client.Window;
@@ -24,12 +25,20 @@ public class LoginController {
             LOGGER.fine("Already logged in.");
             return true;
         }
-        final String idTokenParameter = Window.Location.getParameter("id_token");
+        final String idTokenParameter = HashParser.getIdTokenFromHash(Window.Location.getHash());
+        LOGGER.fine("idTokenParameter=" + idTokenParameter);
         if (!Admin.isEmpty(idTokenParameter)) {
             ID_TOKEN = idTokenParameter;
             return true;
         }
-        redirectToLoginPage();
+        Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                redirectToLoginPage();
+                return false;
+            }
+        }, 500);
+
         return false;
     }
 
