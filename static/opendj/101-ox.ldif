@@ -1945,6 +1945,18 @@ attributeTypes: ( updatedAt-oid NAME 'updatedAt'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+attributeTypes: ( gluuRegExp-oid NAME 'gluuRegExp'
+  DESC 'Regular expression used to validate attribute data'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
+attributeTypes: ( gluuTooltip-oid NAME 'gluuTooltip'
+  DESC 'Custom tooltip to be shown on the UI'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
@@ -2004,7 +2016,7 @@ objectclasses: ( gluuAttribute-oid NAME 'gluuAttribute' SUP top STRUCTURAL MUST 
   $ gluuAttributePrivacyLevel $ gluuAttributeSystemEditType $ gluuAttributeType
   $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI
   $ gluuSAML2URI $ gluuStatus $ iname $ inum $ objectClass $ oxAttributeType $ oxMultivaluedAttribute
-  $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuLdapAttributeName )
+  $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuLdapAttributeName $ gluuRegExp $ gluuTooltip )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuSAMLconfig-oid NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUST objectclass MAY 
  ( description $ displayName $ federationRules $ gluuContainerFederation $ gluuEntityId
