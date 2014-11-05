@@ -111,7 +111,11 @@ public @Data class GluuAttribute extends Entry implements Serializable {
 	@Transient
 	private boolean requred;
 	
+	@LdapAttribute(name = "gluuRegExp")
 	private String regExp;
+	
+	@LdapAttribute(name = "gluuTooltip")
+	private String gluuTooltip;
 
 	public boolean allowEditBy(GluuUserRole role) {
 		return GluuUserRole.containsRole(editType, role);
