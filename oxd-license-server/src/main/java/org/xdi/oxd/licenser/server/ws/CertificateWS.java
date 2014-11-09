@@ -42,11 +42,13 @@ public class CertificateWS {
     @Path("/grant")
     @Produces({MediaType.APPLICATION_JSON})
     public Response grant(@QueryParam("license_id") String licenseId, @Context HttpServletRequest httpRequest) {
+        LOG.trace("/grant, license_id=" + licenseId);
         final LdapLicenseId ldapLicenseId = validateLicenseId(licenseId);
         // todo bound to license_id
 
         CertificateGrantResponse response = new CertificateGrantResponse();
         response.setExpiresAt(oneYearFromNow());
+        LOG.trace("/grant, response OK, entity:" + response);
         return Response.ok().entity(Jackson.asJsonSilently(response)).build();
     }
 
@@ -56,16 +58,14 @@ public class CertificateWS {
         return new Date(now + oneYear);
     }
 
-    public static void main(String[] args) {
-        System.out.println(oneYearFromNow());
-    }
-
     @POST
     @Path("/notify")
     @Produces({MediaType.APPLICATION_JSON})
     public Response notify(@FormParam("license_id") String licenseId, @Context HttpServletRequest httpRequest) {
+        LOG.trace("/notify, license_id=" + licenseId);
         final LdapLicenseId ldapLicenseId =validateLicenseId(licenseId);
         // todo increase counter
+        LOG.trace("/notify, response OK, license_id:" + licenseId);
         return Response.ok().entity("").build();
     }
 

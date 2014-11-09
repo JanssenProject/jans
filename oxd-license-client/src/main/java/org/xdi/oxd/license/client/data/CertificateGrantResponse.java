@@ -29,4 +29,13 @@ public class CertificateGrantResponse implements Serializable {
     public void setExpiresAt(Date expiresAt) {
         this.expiresAt = expiresAt;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("CertificateGrantResponse");
+        sb.append("{expiresAt=").append(expiresAt);
+        sb.append('}');
+        return sb.toString();
+    }
 }

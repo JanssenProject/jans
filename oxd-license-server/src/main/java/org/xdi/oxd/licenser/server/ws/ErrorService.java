@@ -19,6 +19,7 @@ public class ErrorService {
     private static final Logger LOG = LoggerFactory.getLogger(ErrorService.class);
 
     public void throwError(Response.StatusType status, String entity) throws WebApplicationException {
+        LOG.trace("status: " + status + ", entity:" + entity);
         throw new WebApplicationException(Response.status(status).entity(entity).build());
     }
 
