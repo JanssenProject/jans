@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @version 0.9, 09/11/2014
  */
 
-@Path("/certificate")
+@Path("/rest/certificate")
 public class CertificateWS {
 
     private static final Logger LOG = LoggerFactory.getLogger(CertificateWS.class);
