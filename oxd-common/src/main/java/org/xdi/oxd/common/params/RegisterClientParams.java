@@ -2,6 +2,8 @@ package org.xdi.oxd.common.params;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 13/08/2013
@@ -31,6 +33,8 @@ public class RegisterClientParams implements IParams {
     private String tokenEndpointAuthMethod;
     @JsonProperty(value = "token_endpoint_auth_signing_alg")
     private String tokenEndpointAuthSigningAlg;
+    @JsonProperty(value = "request_uris")
+    private List<String> requestUris;
 
     public RegisterClientParams() {
     }
@@ -39,6 +43,14 @@ public class RegisterClientParams implements IParams {
         discoveryUrl = p_discoveryUrl;
         redirectUrl = p_redirectUrl;
         clientName = p_clientName;
+    }
+
+    public List<String> getRequestUris() {
+        return requestUris;
+    }
+
+    public void setRequestUris(List<String> requestUris) {
+        this.requestUris = requestUris;
     }
 
     public String getTokenEndpointAuthMethod() {

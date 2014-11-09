@@ -10,6 +10,7 @@ import org.xdi.oxd.common.params.RegisterClientParams;
 import org.xdi.oxd.common.response.RegisterClientOpResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -67,6 +68,7 @@ public class RegisterClientTest {
             params.setContacts(contacts);
             params.setJwksUri(jwksUri);
             params.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
+            params.setRequestUris(new ArrayList<String>());
 
             final Command command = new Command(CommandType.REGISTER_CLIENT);
             command.setParamsObject(params);

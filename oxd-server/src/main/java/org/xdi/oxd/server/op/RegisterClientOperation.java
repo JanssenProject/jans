@@ -74,6 +74,10 @@ public class RegisterClientOperation extends BaseOperation {
                         }
                     }
 
+                    if (params.getRequestUris() != null && !params.getRequestUris().isEmpty()) {
+                        request.setRequestUris(params.getRequestUris());
+                    }
+
 
                     final RegisterClient registerClient = new RegisterClient(discoveryResponse.getRegistrationEndpoint());
                     registerClient.setRequest(request);
