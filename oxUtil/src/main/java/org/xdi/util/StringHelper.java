@@ -111,12 +111,23 @@ public final class StringHelper {
 		return buf.append(array[len - 1]).toString();
 	}
 
-	public static boolean isNotEmpty(String string) {
-		return string != null && string.length() > 0;
+	public static boolean isNotEmpty(String str) {
+		return !StringHelper.isEmpty(str);
 	}
 
-	public static boolean isEmpty(String string) {
-		return string == null || string.length() == 0;
+	public static boolean isEmpty(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return true;
+        }
+
+        for (int i = 0; i < strLen; i++) {
+            if (Character.isWhitespace(str.charAt(i)) == false) {
+                return false;
+            }
+        }
+
+        return true;
 	}
 
 	public static String truncate(String string, int length) {
