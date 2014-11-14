@@ -28,7 +28,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 26/12/2012
+ * @version 0.9 November 12, 2014
  */
 
 public class ConfSerialization {
@@ -118,7 +118,6 @@ public class ConfSerialization {
         claimMappingList.add(new ClaimMappingConfiguration("st", "region"));
         claimMappingList.add(new ClaimMappingConfiguration("postalCode", "postal_code"));
         claimMappingList.add(new ClaimMappingConfiguration("telephoneNumber", "phone_number"));
-        claimMappingList.add(new ClaimMappingConfiguration("oxInum", "inum"));
 
         final StaticConf c = new StaticConf();
         c.setClaimMapping(claimMappingList);

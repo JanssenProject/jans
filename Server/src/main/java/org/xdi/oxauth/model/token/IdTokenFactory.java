@@ -52,7 +52,8 @@ import org.xdi.util.security.StringEncrypter;
  * using a JSON Web Signature (JWS). JWTs may also be optionally encrypted using
  * JSON Web Encryption (JWE).
  *
- * @author Javier Rojas Blum Date: 10.31.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 November 12, 2014
  */
 public class IdTokenFactory {
 
@@ -110,11 +111,9 @@ public class IdTokenFactory {
         jwt.getClaims().setIssuedAt(issuedAt);
 
         if (authorizationGrant.getUserDn() != null) {
-            jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUserId());
+            ClaimMappingConfiguration subMapping = ClaimMappingConfiguration.getMappingByClaim(JwtClaimName.SUBJECT_IDENTIFIER);
 
-            String ldapAttribute = ClaimMappingConfiguration.getClaimByLdap(JwtClaimName.OX_INUM);
-
-            jwt.getClaims().setClaim(JwtClaimName.OX_INUM, authorizationGrant.getUser().getAttribute(ldapAttribute));
+            jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(subMapping.getLdap()));
         }
         // TODO: acr
         //if (authenticationContextClassReference != null) {
@@ -208,11 +207,9 @@ public class IdTokenFactory {
         jwe.getClaims().setIssuedAt(issuedAt);
 
         if (authorizationGrant.getUserDn() != null) {
-            jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUserId());
+            ClaimMappingConfiguration subMapping = ClaimMappingConfiguration.getMappingByClaim(JwtClaimName.SUBJECT_IDENTIFIER);
 
-            String ldapAttribute = ClaimMappingConfiguration.getClaimByLdap(JwtClaimName.OX_INUM);
-
-            jwe.getClaims().setClaim(JwtClaimName.OX_INUM, authorizationGrant.getUser().getAttribute(ldapAttribute));
+            jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(subMapping.getLdap()));
         }
         // TODO: acr
         //if (authenticationContextClassReference != null) {

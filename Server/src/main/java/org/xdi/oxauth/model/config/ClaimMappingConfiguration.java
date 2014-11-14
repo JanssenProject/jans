@@ -37,10 +37,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  * postalCode: postal_code
  * #<LDAP_VALUE>: country
  * telephoneNumber: phone_number
- * oxInum: inum
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 23/01/2013
+ * @version 0.9 November 12, 2014
  */
 @XmlRootElement(name = "claim-mapping")
 public class ClaimMappingConfiguration {

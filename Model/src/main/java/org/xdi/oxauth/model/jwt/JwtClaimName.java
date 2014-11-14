@@ -7,7 +7,8 @@
 package org.xdi.oxauth.model.jwt;
 
 /**
- * @author Javier Rojas Blum Date: 11.09.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 November 12, 2014
  */
 public final class JwtClaimName {
 
@@ -203,7 +204,6 @@ public final class JwtClaimName {
     public static final String ADDRESS_COUNTRY = "country";
 
     // Custom attributes
-    public static final String OX_INUM = "oxInum";
     public static final String OX_VALIDATION_URI = "oxValidationURI";
     public static final String OX_OPENID_CONNECT_VERSION = "oxOpenIDConnectVersion";
 
