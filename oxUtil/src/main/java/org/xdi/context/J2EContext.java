@@ -34,6 +34,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getRequestParameter(final String name) {
 		return this.request.getParameter(name);
 	}
@@ -41,6 +42,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Map<String, String[]> getRequestParameters() {
 		return this.request.getParameterMap();
 	}
@@ -48,6 +50,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getRequestHeader(final String name) {
 		return this.request.getHeader(name);
 	}
@@ -55,10 +58,15 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setSessionAttribute(final String name, final Object value) {
 		this.request.getSession().setAttribute(name, value);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Object getSessionAttribute(final String name) {
 		return this.request.getSession().getAttribute(name);
 	}
@@ -66,6 +74,23 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
+	public void setRequestAttribute(final String name, final Object value) {
+		this.request.setAttribute(name, value);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Object getRequestAttribute(final String name) {
+		return this.request.getAttribute(name);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getRequestMethod() {
 		return this.request.getMethod();
 	}
@@ -73,20 +98,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
-	public HttpServletRequest getRequest() {
-		return this.request;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public HttpServletResponse getResponse() {
-		return this.response;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeResponseContent(final String content) throws IOException {
 		if (content != null) {
 			this.response.getWriter().write(content);
@@ -96,6 +108,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void setResponseHeader(final String name, final String value) {
 		this.response.setHeader(name, value);
 	}
@@ -103,6 +116,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getServerName() {
 		return this.request.getServerName();
 	}
@@ -110,6 +124,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public int getServerPort() {
 		return this.request.getServerPort();
 	}
@@ -117,6 +132,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getScheme() {
 		return this.request.getScheme();
 	}
@@ -124,6 +140,7 @@ public class J2EContext implements WebContext {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getFullRequestURL() {
 		StringBuffer requestURL = request.getRequestURL();
 		String queryString = request.getQueryString();

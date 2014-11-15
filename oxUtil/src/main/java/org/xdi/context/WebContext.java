@@ -55,6 +55,22 @@ public interface WebContext {
 	public Object getSessionAttribute(String name);
 
 	/**
+	 * Save an attribute in request
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void setRequestAttribute(final String name, final Object value);
+
+	/**
+	 * Get an attribute from request
+	 * 
+	 * @param name
+	 * @return the request attribute
+	 */
+	public Object getRequestAttribute(final String name);
+
+	/**
 	 * Return the request method
 	 * 
 	 * @return the request method

@@ -11,7 +11,6 @@ package org.xdi.util.init;
  * 
  * @author Yuriy Movchan 11/14/2014
  */
-
 public abstract class Initializable {
 
 	private static Object lock = new Object();
