@@ -69,6 +69,17 @@ public class CertificateWS {
         return Response.ok().entity("").build();
     }
 
+    @POST
+    @Path("/update_ejbca")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response updateEjbCa(@FormParam("license_id") String licenseId, @Context HttpServletRequest httpRequest) {
+        LOG.trace("/update_ejbca, license_id=" + licenseId);
+        final LdapLicenseId ldapLicenseId =validateLicenseId(licenseId);
+        // todo increase counter
+        LOG.trace("/update_ejbca, response OK, license_id:" + licenseId);
+        return Response.ok().entity("").build();
+    }
+
     private LdapLicenseId validateLicenseId(String licenseId) {
         try {
             if (StringUtils.isBlank(licenseId)) {
