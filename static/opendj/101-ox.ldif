@@ -1960,7 +1960,7 @@ attributeTypes: ( gluuTooltip-oid NAME 'gluuTooltip'
 objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
-  $ mail $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
+  $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
   $ oxInviteCode $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail
   $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue
   $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion
