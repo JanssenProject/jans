@@ -5,6 +5,7 @@
  */
 package org.xdi.util.init;
 
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Allow class to avoid parallel initializations
@@ -13,25 +14,28 @@ package org.xdi.util.init;
  */
 public abstract class Initializable {
 
-	private static Object lock = new Object();
-    
-    private boolean initialized = false;
+	private final ReentrantLock lock = new ReentrantLock();
 
-    public void init() {
-    	if (!this.initialized) {
-			synchronized (lock) {
-                if (!this.initialized) {
-                    initInternal();
-                    this.initialized = true;
-                }
+	private boolean initialized = false;
+
+	public void init() {
+		if (!this.initialized) {
+			lock.lock();
+			try {
+				if (!this.initialized) {
+					initInternal();
+					this.initialized = true;
+				}
+			} finally {
+				lock.unlock();
 			}
-    	}
-    }
-    
-    public synchronized void reinit() {
-    	initInternal();
-        this.initialized = true;
-    }
-    
-    protected abstract void initInternal();
+		}
+	}
+
+	public synchronized void reinit() {
+		initInternal();
+		this.initialized = true;
+	}
+
+	protected abstract void initInternal();
 }
