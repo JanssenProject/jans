@@ -1,6 +1,4 @@
-package org.xdi.oxd.licenser.server.conf;
-
-import org.xdi.oxd.license.client.js.Configuration;
+package org.xdi.oxd.license.client.js;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -14,7 +14,7 @@ import org.xdi.oxd.licenser.server.KeyPairService;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.licenser.server.conf.ConfigurationFactory;
-import org.xdi.oxd.licenser.server.conf.JsonFileConfiguration;
+import org.xdi.oxd.license.client.js.JsonFileConfiguration;
 import org.xdi.oxd.licenser.server.ldap.Conf;
 import org.xdi.oxd.licenser.server.service.LdapStructureChecker;
 import org.xdi.oxd.licenser.server.ws.CertificateWS;
