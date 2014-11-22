@@ -100,8 +100,6 @@ public class LicenseIdMetadataDialog {
                 initFeaturesListBox(result.getLicensePossibleFeatures());
             }
         });
-
-        setEditMode();
     }
 
     private void initFeaturesListBox(List<String> features) {
@@ -110,6 +108,7 @@ public class LicenseIdMetadataDialog {
                 licenseFeatures.addItem(feature, feature);
             }
         }
+        setEditMode();
     }
 
 //    private void setThreadsCount() {
@@ -138,7 +137,6 @@ public class LicenseIdMetadataDialog {
                 final String valueByIndex = licenseFeatures.getValue(i);
                 if (metadataAsObject.getLicenseFeatures().contains(valueByIndex)) {
                     licenseFeatures.setSelectedIndex(i);
-                    break;
                 }
             }
 
