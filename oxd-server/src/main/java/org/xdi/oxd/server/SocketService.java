@@ -1,5 +1,7 @@
 package org.xdi.oxd.server;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,8 @@ public class SocketService {
     }
 
     public void listenSocket() {
+        final Injector injector = Guice.createInjector(new GuiceModule());
+
         final Configuration c = Configuration.getInstance();
         final int port = c.getPort();
 
@@ -82,7 +86,7 @@ public class SocketService {
 
                     final Socket clientSocket = m_serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    executorService.execute(new SocketProcessor(clientSocket, licenseService));
+                    executorService.execute(new SocketProcessor(clientSocket, injector));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;

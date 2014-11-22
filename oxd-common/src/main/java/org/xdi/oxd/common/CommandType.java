@@ -22,6 +22,7 @@ public enum CommandType {
     REGISTER_TICKET("register_ticket"),
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
+    LICENSE_STATUS("license_status"),
     DISCOVERY("discovery");
 
     private final String value;

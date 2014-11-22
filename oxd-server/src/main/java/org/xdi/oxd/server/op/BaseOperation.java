@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.node.POJONode;
@@ -31,13 +32,25 @@ public abstract class BaseOperation implements IOperation {
      */
     private final Command m_command;
 
+    private final Injector injector;
+
     /**
      * Base constructor
      *
      * @param p_command command
      */
-    protected BaseOperation(Command p_command) {
+    protected BaseOperation(Command p_command, final Injector injector) {
+        this.injector = injector;
         m_command = p_command;
+    }
+
+    /**
+     * Gets injector.
+     *
+     * @return injector
+     */
+    public Injector getInjector() {
+        return injector;
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
@@ -23,8 +24,8 @@ public class RegisterResourceOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterResourceOperation.class);
 
-    protected RegisterResourceOperation(Command p_command) {
-        super(p_command);
+    protected RegisterResourceOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     @Override

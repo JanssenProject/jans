@@ -17,7 +17,7 @@ import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
-import org.xdi.oxd.licenser.server.ws.GenerateLicenseWS;
+import org.xdi.oxd.licenser.server.ws.LicenseWS;
 
 import java.io.IOException;
 
@@ -32,7 +32,7 @@ public class LicenseGeneratorTest {
     @Inject
     LicenseCryptService licenseCryptService;
     @Inject
-    GenerateLicenseWS generateLicenseWS;
+    LicenseWS generateLicenseWS;
     @Inject
     LicenseIdService licenseIdService;
 

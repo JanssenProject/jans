@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
@@ -20,8 +21,8 @@ public class DiscoveryOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(DiscoveryOperation.class);
 
-    protected DiscoveryOperation(Command p_command) {
-        super(p_command);
+    protected DiscoveryOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     @Override

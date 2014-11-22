@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,8 @@ public class ObtainRptOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(ObtainRptOperation.class);
 
-    protected ObtainRptOperation(Command p_command) {
-        super(p_command);
+    protected ObtainRptOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     @Override

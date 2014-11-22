@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.license;
 
 import com.google.common.base.Strings;
+import com.google.inject.Inject;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class LicenseService {
     private LicenseType licenseType = LicenseType.FREE;
     private boolean isMultiServer = false;
 
+    @Inject
     public LicenseService(Configuration conf) {
         this.conf = conf;
         this.updateService = new LicenseUpdateService(conf);

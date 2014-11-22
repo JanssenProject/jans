@@ -1,5 +1,6 @@
 package org.xdi.oxd.server;
 
+import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,9 +31,9 @@ public class SocketProcessor implements Runnable {
     private final Socket socket;
     private final Processor processor;
 
-    public SocketProcessor(Socket socket, LicenseService licenseService) {
+    public SocketProcessor(Socket socket, final Injector injector) {
         this.socket = socket;
-        this.processor = new Processor(licenseService);
+        this.processor = new Processor(injector);
     }
 
     @Override

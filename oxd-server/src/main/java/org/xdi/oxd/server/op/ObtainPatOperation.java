@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.AuthorizationRequest;
@@ -37,8 +38,8 @@ public class ObtainPatOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(ObtainPatOperation.class);
 
-    protected ObtainPatOperation(Command p_command) {
-        super(p_command);
+    protected ObtainPatOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     public UmaScopeType getScope() {

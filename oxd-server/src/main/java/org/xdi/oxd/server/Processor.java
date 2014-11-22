@@ -1,5 +1,6 @@
 package org.xdi.oxd.server;
 
+import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -29,10 +30,12 @@ public class Processor {
      */
     private static final Logger LOG = LoggerFactory.getLogger(Processor.class);
 
+    private final Injector injector;
     private final LicenseService licenseService;
 
-    public Processor(LicenseService licenseService) {
-        this.licenseService = licenseService;
+    public Processor(final Injector injector) {
+        this.injector = injector;
+        this.licenseService = injector.getInstance(LicenseService.class);
     }
 
     /**
@@ -95,7 +98,7 @@ public class Processor {
     public CommandResponse process(Command p_command) {
         if (p_command != null) {
             try {
-                final IOperation iOperation = OperationFactory.create(p_command);
+                final IOperation iOperation = OperationFactory.create(p_command, injector);
                 if (iOperation != null) {
                     return iOperation.execute();
                 } else {

@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,8 @@ public class RegisterClientOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterClientOperation.class);
 
-    public RegisterClientOperation(Command p_command) {
-        super(p_command);
+    public RegisterClientOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     @Override

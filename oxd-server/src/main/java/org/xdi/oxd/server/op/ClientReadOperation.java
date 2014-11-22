@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.RegisterClient;
@@ -21,8 +22,8 @@ public class ClientReadOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientReadOperation.class);
 
-    public ClientReadOperation(Command p_command) {
-        super(p_command);
+    public ClientReadOperation(Command p_command, final Injector injector) {
+        super(p_command, injector);
     }
 
     @Override
