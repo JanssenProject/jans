@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.licenser.server.conf.Configuration;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
 import java.util.Collections;

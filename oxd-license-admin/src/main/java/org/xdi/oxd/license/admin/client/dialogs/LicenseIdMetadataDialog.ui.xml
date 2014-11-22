@@ -12,9 +12,14 @@
         <g:TextBox ui:field="numberOfLicenseIds"/>
 
         <g:HTML>
-            <h3>Type:</h3>
+            <h3>Name:</h3>
         </g:HTML>
-        <g:ListBox ui:field="licenseType"/>
+        <g:TextBox ui:field="licenseName"/>
+
+        <g:HTML>
+            <h3>Support features:</h3>
+        </g:HTML>
+        <g:ListBox ui:field="licenseFeatures" multipleSelect="true"/>
 
         <g:HTML>
             <h3>Threads count:</h3>

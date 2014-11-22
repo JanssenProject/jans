@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
-import org.xdi.oxd.licenser.server.conf.Configuration;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 
 import java.security.KeyPair;

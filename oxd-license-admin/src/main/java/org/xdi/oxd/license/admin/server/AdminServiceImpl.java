@@ -13,7 +13,7 @@ import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.licenser.server.conf.Configuration;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.licenser.server.service.CustomerService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
@@ -42,13 +42,8 @@ public class AdminServiceImpl extends RemoteServiceServlet implements AdminServi
     Configuration conf;
 
     @Override
-    public String getLoginUrl() {
-        return conf.getAuthorizeRequest();
-    }
-
-    @Override
-    public String getLogoutUrl() {
-        return conf.getLogoutUrl();
+    public Configuration getConfiguration() {
+        return conf;
     }
 
     @Override

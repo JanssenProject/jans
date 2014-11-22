@@ -36,16 +36,18 @@ public class LicenseMetadata implements Serializable {
         return licenseFeatures;
     }
 
-    public void setLicenseFeatures(List<String> licenseFeatures) {
+    public LicenseMetadata setLicenseFeatures(List<String> licenseFeatures) {
         this.licenseFeatures = licenseFeatures;
+        return this;
     }
 
     public String getLicenseName() {
         return licenseName;
     }
 
-    public void setLicenseName(String licenseName) {
+    public LicenseMetadata setLicenseName(String licenseName) {
         this.licenseName = licenseName;
+        return this;
     }
 
     public LicenseType getLicenseType() {

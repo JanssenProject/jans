@@ -2,7 +2,7 @@ package org.xdi.oxd.licenser.server.ldap;
 
 import com.google.inject.Inject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.oxd.licenser.server.conf.Configuration;
+import org.xdi.oxd.license.client.js.Configuration;
 
 /**
  * @author Yuriy Zabrovarnyy

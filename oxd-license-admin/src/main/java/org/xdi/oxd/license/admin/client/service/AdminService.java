@@ -2,6 +2,7 @@ package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
@@ -18,9 +19,7 @@ import java.util.List;
 @RemoteServiceRelativePath("adminService.rpc")
 public interface AdminService extends RemoteService {
 
-    public String getLoginUrl();
-
-    public String getLogoutUrl();
+    public Configuration getConfiguration();
 
     public List<LdapCustomer> getAllCustomers();
 

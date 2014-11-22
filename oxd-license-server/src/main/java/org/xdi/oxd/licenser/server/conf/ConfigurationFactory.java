@@ -2,6 +2,7 @@ package org.xdi.oxd.licenser.server.conf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.util.properties.FileConfiguration;
 
 import java.io.File;

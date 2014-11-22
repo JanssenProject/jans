@@ -6,7 +6,7 @@ import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.licenser.server.conf.Configuration;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.licenser.server.ldap.LdapStructure;
 

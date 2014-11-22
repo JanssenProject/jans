@@ -5,6 +5,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.xdi.oxd.license.client.js.Configuration;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,23 +44,24 @@ public class LoginController {
     }
 
     private static void redirectToLoginPage() {
-        Admin.getService().getLoginUrl(new AsyncCallback<String>() {
+        Admin.getService().getConfiguration(new AsyncCallback<Configuration>() {
             @Override
             public void onFailure(Throwable caught) {
                 LOGGER.log(Level.SEVERE, caught.getMessage(), caught);
             }
 
             @Override
-            public void onSuccess(String result) {
-                LOGGER.fine("Redirect to:" + result);
-                Window.Location.assign(result);
+            public void onSuccess(Configuration result) {
+                LOGGER.fine("Redirect to:" + result.getAuthorizeRequest());
+                Window.Location.assign(result.getAuthorizeRequest());
             }
         });
     }
 
     public static boolean logout() {
         ID_TOKEN = null;
-        Admin.getService().getLogoutUrl(new AsyncCallback<String>() {
+
+        Admin.getService().getConfiguration(new AsyncCallback<Configuration>() {
             @Override
             public void onFailure(Throwable caught) {
                 LOGGER.log(Level.SEVERE, caught.getMessage(), caught);
@@ -67,8 +69,8 @@ public class LoginController {
             }
 
             @Override
-            public void onSuccess(String result) {
-                String url = result + ID_TOKEN;
+            public void onSuccess(Configuration result) {
+                String url = result.getLogoutUrl() + ID_TOKEN;
                 LOGGER.fine("Call end session url: " + url);
                 RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
                 try {

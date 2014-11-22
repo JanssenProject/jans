@@ -5,12 +5,19 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.framework.Framework;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.license.client.js.LicenseType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,10 +25,17 @@ import org.xdi.oxd.license.client.js.LicenseType;
  */
 
 public class LicenseIdMetadataDialog {
+
+    private static final Logger LOGGER = Logger.getLogger(LicenseIdMetadataDialog.class.getName());
+
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, LicenseIdMetadataDialog> {
     }
+
+    private static final List<String> FALLBACK_FEATURES = Arrays.asList(
+            "gluu_server", "cas", "shib_idp", "mod_ox", "nginx"
+    );
 
     private final DialogBox dialog;
 
@@ -38,11 +52,13 @@ public class LicenseIdMetadataDialog {
     @UiField
     TextBox threadsCount;
     @UiField
-    ListBox licenseType;
-    @UiField
     CheckBox multiServer;
     @UiField
     HTML numberOfLicenseIdsLabel;
+    @UiField
+    TextBox licenseName;
+    @UiField
+    ListBox licenseFeatures;
 
     private final LdapLicenseId licenseId;
     private final boolean isEditMode;
@@ -72,12 +88,28 @@ public class LicenseIdMetadataDialog {
             }
         });
 
-        for (LicenseType type : LicenseType.values()) {
-            licenseType.addItem(type.getValue(), type.getValue());
-        }
+        Admin.getService().getConfiguration(new AsyncCallback<Configuration>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                LOGGER.log(Level.SEVERE, caught.getMessage(), caught);
+                initFeaturesListBox(FALLBACK_FEATURES);
+            }
+
+            @Override
+            public void onSuccess(Configuration result) {
+                initFeaturesListBox(result.getLicensePossibleFeatures());
+            }
+        });
 
         setEditMode();
+    }
 
+    private void initFeaturesListBox(List<String> features) {
+        if (features != null) {
+            for (String feature : features) {
+                licenseFeatures.addItem(feature, feature);
+            }
+        }
     }
 
 //    private void setThreadsCount() {
@@ -99,11 +131,12 @@ public class LicenseIdMetadataDialog {
         if (metadataAsObject != null) {
             threadsCount.setValue(Integer.toString(metadataAsObject.getThreadsCount()));
             multiServer.setValue(metadataAsObject.isMultiServer());
+            licenseName.setValue(metadataAsObject.getLicenseName());
 
-            // select license type
-            for (int i = 0; i < licenseType.getItemCount(); i++) {
-                if (licenseType.getValue(i).equalsIgnoreCase(metadataAsObject.getLicenseType().getValue())) {
-                    licenseType.setSelectedIndex(i);
+            // select license features
+            for (int i = 0; i < licenseFeatures.getItemCount(); i++) {
+                if (metadataAsObject.getLicenseFeatures().contains(licenseFeatures.getValue(i))) {
+                    licenseFeatures.setSelectedIndex(i);
                     break;
                 }
             }
@@ -121,18 +154,24 @@ public class LicenseIdMetadataDialog {
 
         final Integer numberOfLicenses = numberOfLicenses();
         final Integer threadsCount = threadsCount();
-        final LicenseType licenseType = licenseType();
+        final List<String> selectedLicenseFeatures = selectedLicenseFeatures();
 
         if ((numberOfLicenses == null || numberOfLicenses <= 0) && !isEditMode) {
             showError("Unable to parse number of licenses. Please enter integer more then zero.");
             return false;
         }
-        if (threadsCount == null || threadsCount <= 0) {
+        if (threadsCount == null || threadsCount < 0) {
             showError("Unable to parse number of threads.");
             return false;
         }
-        if (licenseType == null) {
-            showError("Unable to identify license type.");
+        if (selectedLicenseFeatures == null || selectedLicenseFeatures.isEmpty()) {
+            showError("Please select any feature for license.");
+            return false;
+        }
+
+        final String licenseName = this.licenseName.getValue();
+        if (licenseName == null || licenseName.isEmpty()) {
+            showError("Please enter name for license.");
             return false;
         }
 
@@ -141,17 +180,22 @@ public class LicenseIdMetadataDialog {
 
     public LicenseMetadata licenseMetadata() {
         return new LicenseMetadata()
-                .setLicenseType(licenseType())
+                .setLicenseFeatures(selectedLicenseFeatures())
+                .setLicenseName(licenseName.getValue())
                 .setMultiServer(multiServer.getValue())
                 .setThreadsCount(threadsCount());
     }
 
-    public LicenseType licenseType() {
-        final int selectedIndex = licenseType.getSelectedIndex();
-        if (selectedIndex != -1) {
-            return LicenseType.fromValue(licenseType.getValue(selectedIndex));
+    public List<String> selectedLicenseFeatures() {
+        List<String> selectedItems = new ArrayList<String>();
+
+        for (int i = 0; i < licenseFeatures.getItemCount(); i++) {
+            if (licenseFeatures.isItemSelected(i)) {
+                selectedItems.add(licenseFeatures.getValue(i));
+            }
         }
-        return null;
+
+        return selectedItems;
     }
 
     public Integer numberOfLicenses() {

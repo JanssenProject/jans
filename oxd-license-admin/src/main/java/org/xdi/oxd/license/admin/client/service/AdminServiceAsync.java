@@ -1,6 +1,7 @@
 package org.xdi.oxd.license.admin.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.xdi.oxd.license.client.js.Configuration;
 import org.xdi.oxd.license.client.js.LdapCustomer;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
@@ -34,7 +35,5 @@ public interface AdminServiceAsync {
 
     void remove(Collection<LdapLicenseId> entities, AsyncCallback<Void> async);
 
-    void getLoginUrl(AsyncCallback<String> async);
-
-    void getLogoutUrl(AsyncCallback<String> async);
+    void getConfiguration(AsyncCallback<Configuration> async);
 }

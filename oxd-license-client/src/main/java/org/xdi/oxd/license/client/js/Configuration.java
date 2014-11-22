@@ -1,8 +1,9 @@
-package org.xdi.oxd.licenser.server.conf;
+package org.xdi.oxd.license.client.js;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,6 +24,16 @@ public class Configuration implements Serializable {
     private String logoutUrl;
     @JsonProperty(value = "client-id")
     private String clientId;
+    @JsonProperty(value = "license-possible-features")
+    private List<String> licensePossibleFeatures;
+
+    public List<String> getLicensePossibleFeatures() {
+        return licensePossibleFeatures;
+    }
+
+    public void setLicensePossibleFeatures(List<String> licensePossibleFeatures) {
+        this.licensePossibleFeatures = licensePossibleFeatures;
+    }
 
     public String getClientId() {
         return clientId;
