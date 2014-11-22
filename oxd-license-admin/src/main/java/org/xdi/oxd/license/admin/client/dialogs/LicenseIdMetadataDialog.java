@@ -135,7 +135,8 @@ public class LicenseIdMetadataDialog {
 
             // select license features
             for (int i = 0; i < licenseFeatures.getItemCount(); i++) {
-                if (metadataAsObject.getLicenseFeatures().contains(licenseFeatures.getValue(i))) {
+                final String valueByIndex = licenseFeatures.getValue(i);
+                if (metadataAsObject.getLicenseFeatures().contains(valueByIndex)) {
                     licenseFeatures.setSelectedIndex(i);
                     break;
                 }

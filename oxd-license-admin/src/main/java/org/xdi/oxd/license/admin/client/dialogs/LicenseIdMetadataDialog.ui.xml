@@ -19,7 +19,7 @@
         <g:HTML>
             <h3>Support features:</h3>
         </g:HTML>
-        <g:ListBox ui:field="licenseFeatures" multipleSelect="true"/>
+        <g:ListBox ui:field="licenseFeatures" multipleSelect="true" width="300px" visibleItemCount="6"/>
 
         <g:HTML>
             <h3>Threads count:</h3>
