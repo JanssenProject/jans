@@ -45,15 +45,22 @@ public class LicenseService {
     private LicenseType licenseType = LicenseType.FREE;
     private boolean isMultiServer = false;
 
+    private volatile boolean licenseValid = false;
+
     @Inject
     public LicenseService(Configuration conf) {
         this.conf = conf;
         this.updateService = new LicenseUpdateService(conf);
         this.updateService.start();
 
-        if (validate()) {
+        licenseValid = validate();
+        if (licenseValid) {
             schedulePeriodicValidation();
         }
+    }
+
+    public boolean isLicenseValid() {
+        return licenseValid;
     }
 
     private boolean validate() {
@@ -105,6 +112,7 @@ public class LicenseService {
         licenseType = LicenseType.FREE;
         isMultiServer = false;
         licenseChanged = false;
+        licenseValid = false;
     }
 
     private void schedulePeriodicValidation() {
@@ -112,7 +120,7 @@ public class LicenseService {
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                validate();
+                licenseValid = validate();
             }
         }, 1, 24, TimeUnit.HOURS);
     }

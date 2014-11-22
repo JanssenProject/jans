@@ -3,6 +3,13 @@
     "thread-number-paid-license":100,
     "thread-number-premium-license":1000000,
     "client-id":"@!1111!0008!FF81!2DFF",
+    "license-possible-features":[
+            "gluu_server",
+            "cas",
+            "shib_idp",
+            "mod_ox",
+            "nginx"
+    ],
     "authorize-request":"https://seed.gluu.org/oxauth/authorize.seam?scope=openid+profile+address+email&response_type=code+id_token&nonce=nonce&redirect_uri=https%3A%2F%2Fseed.gluu.org%2FoxLicenseAdmin&auth_mode=duo&client_id= %40!1111!0008!FF81!2DFF",
     "logout-url":"https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/end_session?post_logout_redirect_uri=https%3A%2F%2Fseed.gluu.org%2FoxLicenseAdmin&id_token_hint="
 }

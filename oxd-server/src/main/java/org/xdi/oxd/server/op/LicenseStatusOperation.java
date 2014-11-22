@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.server.license.LicenseService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,6 +22,8 @@ public class LicenseStatusOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
+        final LicenseService licenseService = getInjector().getInstance(LicenseService.class);
+//        licenseService.
         return null;
     }
 }

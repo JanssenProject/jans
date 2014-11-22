@@ -3,6 +3,7 @@ package org.xdi.oxd.license.client.js;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -17,6 +18,10 @@ public class LicenseMetadata implements Serializable {
     private boolean multiServer;
     @JsonProperty(value = "license_type")
     private LicenseType licenseType;
+    @JsonProperty(value = "license_name")
+    private String licenseName;
+    @JsonProperty(value = "license_features")
+    private List<String> licenseFeatures;
 
     public LicenseMetadata() {
     }
@@ -25,6 +30,22 @@ public class LicenseMetadata implements Serializable {
         this.licenseType = licenseType;
         this.multiServer = multiServer;
         this.threadsCount = threadsCount;
+    }
+
+    public List<String> getLicenseFeatures() {
+        return licenseFeatures;
+    }
+
+    public void setLicenseFeatures(List<String> licenseFeatures) {
+        this.licenseFeatures = licenseFeatures;
+    }
+
+    public String getLicenseName() {
+        return licenseName;
+    }
+
+    public void setLicenseName(String licenseName) {
+        this.licenseName = licenseName;
     }
 
     public LicenseType getLicenseType() {
