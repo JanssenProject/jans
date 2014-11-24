@@ -51,12 +51,23 @@ class Setup(object):
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+        self.idpFolder = "/opt/idp"
+        self.idpMetadataFolder = "/opt/idp"
+        self.idpLogsFolder = "/opt/idp/logs"
+        self.idpLibFolder = "/opt/idp/lib"
+        self.idpConfFolder = "/opt/idp/conf"
+        self.idpSslFolder = "/opt/idp/ssl"
+        self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
+        self.idpWarFolder = "/opt/idp/war"
+
         self.downloadWars = False
         self.modifyNetworking = False
+        self.downloadSaml = False
 
         self.oxtrust_war = 'http://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
         self.oxauth_war = 'http://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
+        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxIdp/2.4.0-Final/oxIdp-2.4.0-Final.war'
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -212,7 +223,8 @@ class Setup(object):
                  + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n"
                  + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n"
                  + 'Modify Networking'.ljust(30) + self.modifyNetworking.rjust(35) + "\n"
-                 + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n")
+                 + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
+                 + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n")
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
@@ -905,6 +917,22 @@ class Setup(object):
                 os.makedirs(self.oxPhotosFolder)
             if not os.path.exists(self.oxTrustRemovedFolder):
                 os.makedirs(self.oxTrustRemovedFolder)
+            if not os.path.exists(self.idpFolder):
+                os.makedirs(self.idpFolder)
+            if not os.path.exists(self.idpMetadataFolder):
+                os.makedirs(self.idpMetadataFolder)
+            if not os.path.exists(self.idpLogsFolder):
+                os.makedirs(self.idpLogsFolder)
+            if not os.path.exists(self.idpLibFolder):
+                os.makedirs(self.idpLibFolder)
+            if not os.path.exists(self.idpConfFolder):
+                os.makedirs(self.idpConfFolder)
+            if not os.path.exists(self.idpSslFolder):
+                os.makedirs(self.idpSslFolder)
+            if not os.path.exists(self.idpTempMetadataFolder):
+                os.makedirs(self.idpTempMetadataFolder)
+            if not os.path.exists(self.idpWarFolder):
+                os.makedirs(self.idpWarFolder)
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -945,6 +973,9 @@ class Setup(object):
         download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "Yes")[0].lower()
         if download_wars == 'y':
             self.downloadWars = True
+        deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
+        if deploy_saml == 'y':
+            self.downloadSaml = True
         download_setup = self.getPrompt("Download latest Gluu Server setup files (requires exit)", "No")[0].lower()
         if download_setup == 'y':
             self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
@@ -1030,6 +1061,10 @@ class Setup(object):
         print "    -n   No interactive prompt before install starts."
 
     def downloadWarFiles(self):
+        if self.downloadSaml == True:
+            print "Downloading latest idp..."
+            self.run(['/usr/bin/wget', self.idp_war, '-O', '/opt/idp/war/idp.war'])
+
         if self.downloadWars == True:
             print "Downloading latest oxAuth... "
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
