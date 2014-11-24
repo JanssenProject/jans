@@ -94,14 +94,14 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
                 if (jsonObj.has(CLIENT_ID_ISSUED_AT.toString())) {
                     long clientIdIssuedAt = jsonObj.getLong(CLIENT_ID_ISSUED_AT.toString());
                     if (clientIdIssuedAt > 0) {
-                        setClientIdIssuedAt(new Date(clientIdIssuedAt));
+                        setClientIdIssuedAt(new Date(clientIdIssuedAt * 1000L));
                     }
                     jsonObj.remove(CLIENT_ID_ISSUED_AT.toString());
                 }
                 if (jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString())) {
                     long clientSecretExpiresAt = jsonObj.getLong(CLIENT_SECRET_EXPIRES_AT.toString());
                     if (clientSecretExpiresAt > 0) {
-                        setClientSecretExpiresAt(new Date(clientSecretExpiresAt));
+                        setClientSecretExpiresAt(new Date(clientSecretExpiresAt * 1000L));
                     }
                     jsonObj.remove(CLIENT_SECRET_EXPIRES_AT.toString());
                 }
