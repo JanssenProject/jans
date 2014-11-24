@@ -50,7 +50,8 @@ import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.error.IErrorType;
 
 /**
- * @author Javier Rojas Blum Date: 11.30.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 November 12, 2014
  */
 public abstract class BaseTest {
 

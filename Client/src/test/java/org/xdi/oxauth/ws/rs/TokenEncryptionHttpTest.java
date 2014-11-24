@@ -30,7 +30,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
 /**
- * @author Javier Rojas Blum Date: 12.13.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 November 12, 2014
  */
 public class TokenEncryptionHttpTest extends BaseTest {
 
@@ -97,7 +98,6 @@ public class TokenEncryptionHttpTest extends BaseTest {
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
     }
@@ -165,7 +165,6 @@ public class TokenEncryptionHttpTest extends BaseTest {
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
     }
@@ -233,7 +232,6 @@ public class TokenEncryptionHttpTest extends BaseTest {
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
     }
@@ -297,7 +295,6 @@ public class TokenEncryptionHttpTest extends BaseTest {
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
     }
@@ -361,7 +358,6 @@ public class TokenEncryptionHttpTest extends BaseTest {
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
     }

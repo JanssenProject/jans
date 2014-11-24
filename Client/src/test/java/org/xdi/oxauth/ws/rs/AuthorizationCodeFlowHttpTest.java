@@ -49,7 +49,7 @@ import org.xdi.oxauth.model.util.StringUtils;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version 0.9 November 12, 2014
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
@@ -139,7 +139,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
 
@@ -250,7 +249,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxInum"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
 

@@ -1,84 +1,80 @@
 {
-    "claimMapping":[
+    "claimMapping": [
         {
-            "ldap":"uid",
-            "claim":"sub"
+            "ldap": "inum",
+            "claim": "sub"
         },
         {
-            "ldap":"displayName",
-            "claim":"name"
+            "ldap": "displayName",
+            "claim": "name"
         },
         {
-            "ldap":"givenName",
-            "claim":"given_name"
+            "ldap": "givenName",
+            "claim": "given_name"
         },
         {
-            "ldap":"sn",
-            "claim":"family_name"
+            "ldap": "sn",
+            "claim": "family_name"
         },
         {
-            "ldap":"photo1",
-            "claim":"picture"
+            "ldap": "photo1",
+            "claim": "picture"
         },
         {
-            "ldap":"timezone",
-            "claim":"zoneinfo"
+            "ldap": "timezone",
+            "claim": "zoneinfo"
         },
         {
-            "ldap":"preferredLanguage",
-            "claim":"locale"
+            "ldap": "preferredLanguage",
+            "claim": "locale"
         },
         {
-            "ldap":"mail",
-            "claim":"email"
+            "ldap": "mail",
+            "claim": "email"
         },
         {
-            "ldap":"homePostalAddress",
-            "claim":"formatted"
+            "ldap": "homePostalAddress",
+            "claim": "formatted"
         },
         {
-            "ldap":"street",
-            "claim":"street_address"
+            "ldap": "street",
+            "claim": "street_address"
         },
         {
-            "ldap":"l",
-            "claim":"locality"
+            "ldap": "l",
+            "claim": "locality"
         },
         {
-            "ldap":"st",
-            "claim":"region"
+            "ldap": "st",
+            "claim": "region"
         },
         {
-            "ldap":"c",
-            "claim":"country"
+            "ldap": "c",
+            "claim": "country"
         },
         {
-            "ldap":"postalCode",
-            "claim":"postal_code"
+            "ldap": "postalCode",
+            "claim": "postal_code"
         },
         {
-            "ldap":"telephoneNumber",
-            "claim":"phone_number"
-        },
-        {
-            "ldap":"oxInum",
-            "claim":"inum"
+            "ldap": "telephoneNumber",
+            "claim": "phone_number"
         }
     ],
-    "baseDn":{
-        "appliance":"ou=appliances,o=gluu",
-        "people":"ou=people,o=@!1111,o=gluu",
-        "groups":"ou=groups,o=@!1111,o=gluu",
-        "clients":"ou=clients,o=@!1111,o=gluu",
-        "scopes":"ou=scopes,o=@!1111,o=gluu",
-        "attributes":"ou=attributes,o=@!1111,o=gluu",
-        "sessionId":"ou=session,o=@!1111,o=gluu",
-        "federationMetadata":"ou=metadata,ou=federation,o=@!1111,o=gluu",
-        "federationRP":"ou=rp,ou=federation,o=@!1111,o=gluu",
-        "federationOP":"ou=op,ou=federation,o=@!1111,o=gluu",
-        "federationRequest":"ou=request,ou=federation,o=@!1111,o=gluu",
-        "federationTrust":"ou=trust,ou=federation,o=@!1111,o=gluu",
-        "umaBase":"ou=uma,o=@!1111,o=gluu",
-        "umaPolicy":"ou=policies,ou=uma,o=@!1111,o=gluu"
+    "baseDn": {
+        "appliance": "ou=appliances,o=gluu",
+        "people": "ou=people,o=@!1111,o=gluu",
+        "groups": "ou=groups,o=@!1111,o=gluu",
+        "clients": "ou=clients,o=@!1111,o=gluu",
+        "scopes": "ou=scopes,o=@!1111,o=gluu",
+        "attributes": "ou=attributes,o=@!1111,o=gluu",
+        "sessionId": "ou=session,o=@!1111,o=gluu",
+        "federationMetadata": "ou=metadata,ou=federation,o=@!1111,o=gluu",
+        "federationRP": "ou=rp,ou=federation,o=@!1111,o=gluu",
+        "federationOP": "ou=op,ou=federation,o=@!1111,o=gluu",
+        "federationRequest": "ou=request,ou=federation,o=@!1111,o=gluu",
+        "federationTrust": "ou=trust,ou=federation,o=@!1111,o=gluu",
+        "umaBase": "ou=uma,o=@!1111,o=gluu",
+        "umaPolicy": "ou=policies,ou=uma,o=@!1111,o=gluu"
     }
 }
