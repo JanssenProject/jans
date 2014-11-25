@@ -253,7 +253,7 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
             print "CAS2 prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
-            
+
             context.set("cas_service_request_uri", cas_service_request_uri)
 
             return True

@@ -4,7 +4,7 @@ This installation process has 5 parts.
     - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
-2. Copy required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
+2. Copy json simple library folder from ../shared_libs to $CATALINA_HOME/conf/python folder.
 
 3. Prepare file with IdP public certificate /etc/certs/saml.pem
 
