@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.params.LicenseStatusParams;
+import org.xdi.oxd.common.response.LicenseStatusOpResponse;
 
 import java.io.IOException;
 
@@ -81,6 +84,13 @@ public class CommandClient {
         if (p_client != null) {
             p_client.close();
         }
+    }
+
+    public LicenseStatusOpResponse licenseStatus() {
+        final Command command = new Command(CommandType.LICENSE_STATUS);
+        command.setParamsObject(new LicenseStatusParams());
+        final CommandResponse response = send(command);
+        return response.dataAsResponse(LicenseStatusOpResponse.class);
     }
 
 }

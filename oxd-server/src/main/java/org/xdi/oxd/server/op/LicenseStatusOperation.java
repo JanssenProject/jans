@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.response.LicenseStatusOpResponse;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.server.license.LicenseService;
 
 /**
@@ -22,8 +24,24 @@ public class LicenseStatusOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        final LicenseService licenseService = getInjector().getInstance(LicenseService.class);
-//        licenseService.
-        return null;
+        try {
+            final LicenseService licenseService = getInjector().getInstance(LicenseService.class);
+            final LicenseStatusOpResponse opResponse = new LicenseStatusOpResponse();
+            opResponse.setValid(licenseService.isLicenseValid());
+
+            if (licenseService.isLicenseValid()) {
+                final LicenseMetadata metadata = licenseService.getMetadata();
+
+                opResponse.setThreadCount(metadata.getThreadsCount());
+                opResponse.setName(metadata.getLicenseName());
+                opResponse.setFeatures(metadata.getLicenseFeatures());
+
+            }
+
+            return okResponse(opResponse);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 }

@@ -10,7 +10,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.license.client.js.LicenseType;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
@@ -73,7 +72,7 @@ public class Processor {
 
     private void enforceLicenseRestrictions(Command command) {
         try {
-            if (licenseService.getLicenseType() == LicenseType.FREE) {
+            if (licenseService.getThreadsCount() == 1) { // if thread count 1 then we assume it's is FREE license
                 final CommandType commandType = command.getCommandType();
                 switch (commandType) {
                     case CHECK_ID_TOKEN:

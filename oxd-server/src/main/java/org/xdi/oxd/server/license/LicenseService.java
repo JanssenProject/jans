@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.license.client.js.LicenseType;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
@@ -41,9 +40,7 @@ public class LicenseService {
 
     private boolean licenseChanged = false;
     private String encodedLicense = null;
-    private int threadsCount = 1;
-    private LicenseType licenseType = LicenseType.FREE;
-    private boolean isMultiServer = false;
+    private LicenseMetadata metadata = null;
 
     private volatile boolean licenseValid = false;
 
@@ -57,6 +54,10 @@ public class LicenseService {
         if (licenseValid) {
             schedulePeriodicValidation();
         }
+    }
+
+    public LicenseMetadata getMetadata() {
+        return metadata;
     }
 
     public boolean isLicenseValid() {
@@ -76,7 +77,7 @@ public class LicenseService {
             if (!licenseChanged) {
                 licenseChanged = encodedLicense != null && !licenseFile.getEncodedLicense().equals(encodedLicense);
                 if (licenseChanged) {
-                   LOG.debug("License was changed!");
+                    LOG.debug("License was changed!");
                 }
             }
             encodedLicense = licenseFile.getEncodedLicense();
@@ -90,13 +91,10 @@ public class LicenseService {
             LOG.trace("License is valid!");
 
             final String subject = decryptedLicense.getSubject();
-            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
+            metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
 
             LOG.trace("License metadata: " + metadata);
 
-            threadsCount = metadata.getThreadsCount();
-            licenseType = metadata.getLicenseType();
-            isMultiServer = metadata.isMultiServer();
             return true;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -108,9 +106,7 @@ public class LicenseService {
     }
 
     public void reset() {
-        threadsCount = 1;
-        licenseType = LicenseType.FREE;
-        isMultiServer = false;
+        metadata = null;
         licenseChanged = false;
         licenseValid = false;
     }
@@ -156,14 +152,9 @@ public class LicenseService {
     }
 
     public int getThreadsCount() {
-        return threadsCount;
-    }
-
-    public LicenseType getLicenseType() {
-        return licenseType;
-    }
-
-    public boolean isMultiServer() {
-        return isMultiServer;
+        if (metadata.getThreadsCount() <= 0) {
+            return 1; // 0 is used for n/a - gain at least 2 threads
+        }
+        return metadata.getThreadsCount();
     }
 }
