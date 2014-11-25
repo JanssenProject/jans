@@ -5,6 +5,10 @@
             "claim": "sub"
         },
         {
+            "ldap": "uid",
+            "claim": "userName"
+        },
+        {
             "ldap": "displayName",
             "claim": "name"
         },
