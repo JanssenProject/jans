@@ -135,7 +135,7 @@ public final class JwtClaimName {
     /**
      * The End-User's preferred userName.
      */
-    public static final String USER_NAME = "userName";
+    public static final String USER_NAME = "user_name";
     /**
      * True if the End-User's e-mail address has been verified; otherwise false.
      */
