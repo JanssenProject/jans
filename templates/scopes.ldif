@@ -9,6 +9,15 @@ displayName: openid
 inum: %(inumOrg)s!0009!F0C4
 description: The default identifier released by your OpenID Provider
 defaultScope: true
+oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: user_name
+inum: %(inumOrg)s!0009!10B2
+description: Your user name
+defaultScope: true
 oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!764C.2818,ou=scopes,o=%(inumOrg)s,o=gluu

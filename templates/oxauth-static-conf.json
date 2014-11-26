@@ -1,8 +1,12 @@
 {
     "claimMapping":[
         {
-            "ldap":"uid",
-            "claim":"sub"
+            "ldap": "inum",
+            "claim": "sub"
+        },
+        {
+            "ldap": "uid",
+            "claim": "user_name"
         },
         {
             "ldap":"displayName",
@@ -59,10 +63,6 @@
         {
             "ldap":"telephoneNumber",
             "claim":"phone_number"
-        },
-        {
-            "ldap":"oxInum",
-            "claim":"inum"
         }
     ],
     "baseDn":{
