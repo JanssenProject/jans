@@ -6,7 +6,7 @@
         },
         {
             "ldap": "uid",
-            "claim": "userName"
+            "claim": "user_name"
         },
         {
             "ldap": "displayName",
