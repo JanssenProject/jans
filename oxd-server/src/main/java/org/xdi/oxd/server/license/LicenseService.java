@@ -152,7 +152,7 @@ public class LicenseService {
     }
 
     public int getThreadsCount() {
-        if (metadata.getThreadsCount() <= 0) {
+        if (metadata == null || metadata.getThreadsCount() <= 0) {
             return 1; // 0 is used for n/a - gain at least 2 threads
         }
         return metadata.getThreadsCount();
