@@ -777,7 +777,15 @@ class Setup(object):
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
-        self.run(['/sbin/service', 'httpd', 'stop'])
+
+        # Detect sevice path and apache service name
+        service_path = '/sbin/service'
+        apache_service_name = 'httpd'
+        if self.os_type in ['debian', 'ubuntu']:
+            service_path = '/usr/sbin/service'
+            apache_service_name = 'apache2'
+
+        self.run([service_path, apache_service_name, 'stop'])
         for dest_fn in self.ce_templates.keys():
             if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
@@ -789,7 +797,7 @@ class Setup(object):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
         self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
-        self.run(['/sbin/service', 'httpd', 'start'])
+        self.run([service_path, apache_service_name, 'start'])
 
     def copy_scripts(self):
         self.logIt("Copying script files")
@@ -825,15 +833,15 @@ class Setup(object):
                 self.run(["/usr/sbin/update-rc.d", service['name'], 'start', service['order'], service['runlevel'], "."])
 
     def start_services(self):
-        # Determine sbin path and apache service name
-        sbin_path = '/sbin/service'
+        # Detect sevice path and apache service name
+        service_path = '/sbin/service'
         apache_service_name = 'httpd'
         if self.os_type in ['debian', 'ubuntu']:
-            sbin_path = '/usr/sbin/service'
+            service_path = '/usr/sbin/service'
             apache_service_name = 'apache2'
 
         # Apache HTTPD
-        self.run([sbin_path, apache_service_name, 'start'])
+        self.run([service_path, apache_service_name, 'start'])
 
         # Apache Tomcat
         try:
@@ -844,7 +852,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            self.run([sbin_path, 'tomcat', 'start'])
+            self.run([service_path, 'tomcat', 'start'])
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
@@ -970,7 +978,7 @@ class Setup(object):
         return return_value
 
     def download_prompt(self):
-        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "Yes")[0].lower()
+        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
         if download_wars == 'y':
             self.downloadWars = True
         deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
