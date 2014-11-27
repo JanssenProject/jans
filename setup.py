@@ -222,7 +222,7 @@ class Setup(object):
                  + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n"
                  + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n"
                  + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n"
-                 + 'Modify Networking'.ljust(30) + self.modifyNetworking.rjust(35) + "\n"
+                 + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
                  + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
                  + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n")
 
@@ -1173,4 +1173,3 @@ if __name__ == '__main__':
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
                          (installObject.savedProperties, installObject.setup_properties_fn)
-
