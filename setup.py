@@ -925,22 +925,23 @@ class Setup(object):
                 os.makedirs(self.oxPhotosFolder)
             if not os.path.exists(self.oxTrustRemovedFolder):
                 os.makedirs(self.oxTrustRemovedFolder)
-            if not os.path.exists(self.idpFolder):
-                os.makedirs(self.idpFolder)
-            if not os.path.exists(self.idpMetadataFolder):
-                os.makedirs(self.idpMetadataFolder)
-            if not os.path.exists(self.idpLogsFolder):
-                os.makedirs(self.idpLogsFolder)
-            if not os.path.exists(self.idpLibFolder):
-                os.makedirs(self.idpLibFolder)
-            if not os.path.exists(self.idpConfFolder):
-                os.makedirs(self.idpConfFolder)
-            if not os.path.exists(self.idpSslFolder):
-                os.makedirs(self.idpSslFolder)
-            if not os.path.exists(self.idpTempMetadataFolder):
-                os.makedirs(self.idpTempMetadataFolder)
-            if not os.path.exists(self.idpWarFolder):
-                os.makedirs(self.idpWarFolder)
+            if self.downloadSaml:
+                if not os.path.exists(self.idpFolder):
+                    os.makedirs(self.idpFolder)
+                if not os.path.exists(self.idpMetadataFolder):
+                    os.makedirs(self.idpMetadataFolder)
+                if not os.path.exists(self.idpLogsFolder):
+                    os.makedirs(self.idpLogsFolder)
+                if not os.path.exists(self.idpLibFolder):
+                    os.makedirs(self.idpLibFolder)
+                if not os.path.exists(self.idpConfFolder):
+                    os.makedirs(self.idpConfFolder)
+                if not os.path.exists(self.idpSslFolder):
+                    os.makedirs(self.idpSslFolder)
+                if not os.path.exists(self.idpTempMetadataFolder):
+                    os.makedirs(self.idpTempMetadataFolder)
+                if not os.path.exists(self.idpWarFolder):
+                    os.makedirs(self.idpWarFolder)
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
