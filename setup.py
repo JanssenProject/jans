@@ -212,19 +212,22 @@ class Setup(object):
                      self.ldif_groups: False}
 
     def __repr__(self):
-        return ( 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
-                 + 'ip'.ljust(30) + self.ip.rjust(35) + "\n"
-                 + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n"
-                 + 'os'.ljust(30) + self.os_type.rjust(35) + "\n"
-                 + 'city'.ljust(30) + self.city.rjust(35) + "\n"
-                 + 'state'.ljust(30) + self.state.rjust(35) + "\n"
-                 + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
-                 + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n"
-                 + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n"
-                 + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n"
-                 + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
-                 + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
-                 + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n")
+        s = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
+            + 'ip'.ljust(30) + self.ip.rjust(35) + "\n" \
+            + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
+            + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
+            + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
+            + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
+            + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
+            + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
+            + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
+            + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
+            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
+        if self.downloadWars:
+            s = s + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
+        if self.downloadSaml:
+            s = s + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n"
+        return s
 
     def logIt(self, msg, errorLog=False):
         if errorLog:
