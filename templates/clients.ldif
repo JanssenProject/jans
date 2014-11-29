@@ -5,7 +5,7 @@
 dn: inum=%(oxauth_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
-displayName: gluu
+displayName: oxTrust Admin GUI
 inum: %(oxauth_client_id)s
 oxAuthClientSecret: %(oxauthClient_encoded_pw)s
 oxAuthAppType: web
