@@ -998,9 +998,7 @@ class Setup(object):
             sys.exit()
 
     def modify_netowrking_prompt(self):
-        modify_networking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
-        if modify_networking == 'y':
-            self.modifyNetworking = True
+        if self.modifyNetworking:
             self.ce_templates[self.etc_hosts] = True
             self.ce_templates[self.etc_hostname] = True
 
@@ -1061,6 +1059,9 @@ class Setup(object):
         installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1024')
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
+        modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
+        if modifyNetworking == 'y':
+            installObject.modifyNetworking = True
 
     def print_help(self):
         print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
