@@ -48,6 +48,7 @@ class Setup(object):
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
         self.tomcat_user_home_lib = "/home/tomcat/lib"
+        self.tomcatWebAppFolder = "/opt/tomcat/webapps"
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
@@ -222,11 +223,9 @@ class Setup(object):
             + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
-        if self.downloadWars:
-            s = s + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
-        if self.downloadSaml:
-            s = s + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n"
+            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n" \
+            + 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n" \
+            + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n"
         return s
 
     def logIt(self, msg, errorLog=False):
@@ -981,13 +980,7 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
-    def download_prompt(self):
-        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
-        if download_wars == 'y':
-            self.downloadWars = True
-        deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
-        if deploy_saml == 'y':
-            self.downloadSaml = True
+    def download_setup_prompt(self):
         download_setup = self.getPrompt("Download latest Gluu Server setup files (requires exit)", "No")[0].lower()
         if download_setup == 'y':
             self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
@@ -1062,6 +1055,12 @@ class Setup(object):
         modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
+        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
+        if download_wars == 'y':
+            installObject.downloadWars = True
+        deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
+        if deploy_saml == 'y':
+            installObject.downloadSaml = True
 
     def print_help(self):
         print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
@@ -1074,15 +1073,15 @@ class Setup(object):
         print "    -n   No interactive prompt before install starts."
 
     def downloadWarFiles(self):
-        if self.downloadSaml == True:
-            print "Downloading latest idp..."
-            self.run(['/usr/bin/wget', self.idp_war, '-O', '/opt/idp/war/idp.war'])
+        if self.downloadSaml:
+            print "Downloading latest Shibboleth idp war file..."
+            self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
 
-        if self.downloadWars == True:
-            print "Downloading latest oxAuth... "
-            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '/opt/tomcat/webapps/oxauth.war'])
-            print "Downloading latest oxTrust..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '/opt/tomcat/webapps/identity.war'])
+        if self.downloadWars:
+            print "Downloading latest oxAuth war file..."
+            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
+            print "Downloading latest oxTrust war file..."
+            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
 
     def getOpts(self, argv):
@@ -1142,7 +1141,7 @@ if __name__ == '__main__':
         installObject.load_properties(installObject.setup_properties_fn)
     else:
         installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
-        installObject.download_prompt()
+        installObject.download_setup_prompt()
         installObject.promptForProperties()
 
     # Validate Properties
