@@ -65,8 +65,8 @@ class Setup(object):
         self.modifyNetworking = False
         self.downloadSaml = False
 
-        self.oxtrust_war = 'http://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
-        self.oxauth_war = 'http://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
+        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxIdp/2.4.0-Final/oxIdp-2.4.0-Final.war'
 
@@ -980,15 +980,13 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
-    def download_setup_prompt(self):
-        download_setup = self.getPrompt("Download latest Gluu Server setup files (requires exit)", "No")[0].lower()
-        if download_setup == 'y':
-            self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
-            self.run(['/bin/rm', '-rf', '/install'])
-            self.run(['/usr/bin/unzip', '/tmp/master.zip', '-d', '/tmp'])
-            self.run(['/bin/mv', '/tmp/community-edition-setup-master', '-d', '/install'])
-            print "\n\n ** Downloaded fresh setup file. Exiting... re-run /install/setup.py **\n\n"
-            sys.exit()
+    def download_community_edition_setup(self):
+        self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
+        self.run(['/bin/rm', '-rf', '/install'])
+        self.run(['/usr/bin/unzip', '/tmp/master.zip', '-d', '/tmp'])
+        self.run(['/bin/mv', '/tmp/community-edition-setup-master', '-d', '/install'])
+        print "\n\n ** Downloaded fresh setup files. Exiting... re-run /install/setup.py **\n\n"
+        sys.exit()
 
     def modify_netowrking_prompt(self):
         if self.modifyNetworking:
@@ -1070,6 +1068,7 @@ class Setup(object):
         print ""
         print "    -h   Help"
         print "    -f   specify setup.properties file"
+        print "    -u   Update setup files and exit"
         print "    -n   No interactive prompt before install starts."
 
     def downloadWarFiles(self):
@@ -1097,6 +1096,8 @@ class Setup(object):
             if opt == '-h':
                 self.print_help()
                 sys.exit()
+            if opt == '-u':
+                self.download_community_edition_setup()
             elif opt == "-f":
                 try:
                     if os.path.isfile(arg):
@@ -1141,7 +1142,6 @@ if __name__ == '__main__':
         installObject.load_properties(installObject.setup_properties_fn)
     else:
         installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
-        installObject.download_setup_prompt()
         installObject.promptForProperties()
 
     # Validate Properties
