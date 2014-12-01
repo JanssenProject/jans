@@ -1088,7 +1088,7 @@ class Setup(object):
         setup_properties = None
         noPrompt = False
         try:
-            opts, args = getopt.getopt(argv, "hnf:")
+            opts, args = getopt.getopt(argv, "uhnf:")
         except getopt.GetoptError:
             self.print_help()
             sys.exit(2)
