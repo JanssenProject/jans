@@ -984,7 +984,8 @@ class Setup(object):
         self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
         self.run(['/bin/rm', '-rf', '/install'])
         self.run(['/usr/bin/unzip', '/tmp/master.zip', '-d', '/tmp'])
-        self.run(['/bin/mv', '/tmp/community-edition-setup-master', '-d', '/install'])
+        self.run(['/bin/mv', '/tmp/community-edition-setup-master', '/install'])
+        self.run(['/bin/rm', '-f', '/tmp/master.zip'])
         print "\n\n ** Downloaded fresh setup files. Exiting... re-run /install/setup.py **\n\n"
         sys.exit()
 
