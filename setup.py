@@ -980,15 +980,6 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
-    def download_community_edition_setup(self):
-        self.run(['/usr/bin/wget', self.ce_setup_zip, '-O', '/tmp/master.zip'])
-        self.run(['/bin/rm', '-rf', '/install'])
-        self.run(['/usr/bin/unzip', '/tmp/master.zip', '-d', '/tmp'])
-        self.run(['/bin/mv', '/tmp/community-edition-setup-master', '/install'])
-        self.run(['/bin/rm', '-f', '/tmp/master.zip'])
-        print "\n\n ** Downloaded fresh setup files. Exiting... re-run /install/setup.py **\n\n"
-        sys.exit()
-
     def modify_netowrking_prompt(self):
         if self.modifyNetworking:
             self.ce_templates[self.etc_hosts] = True
@@ -1069,7 +1060,6 @@ class Setup(object):
         print ""
         print "    -h   Help"
         print "    -f   specify setup.properties file"
-        print "    -u   Update setup files and exit"
         print "    -n   No interactive prompt before install starts."
 
     def downloadWarFiles(self):
@@ -1097,8 +1087,6 @@ class Setup(object):
             if opt == '-h':
                 self.print_help()
                 sys.exit()
-            if opt == '-u':
-                self.download_community_edition_setup()
             elif opt == "-f":
                 try:
                     if os.path.isfile(arg):
