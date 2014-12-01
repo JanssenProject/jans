@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
-import org.xdi.oxauth.service.python.interfaces.ExternalAuthenticatorType;
+import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
 
 /**
  * External authenticator configuration
@@ -19,12 +19,12 @@ import org.xdi.oxauth.service.python.interfaces.ExternalAuthenticatorType;
  */
 public class ExternalAuthenticatorConfiguration {
 	private CustomAuthenticationConfiguration customAuthenticationConfiguration;
-	private ExternalAuthenticatorType externalAuthenticatorType;
+	private CustomAuthenticatorType externalAuthenticatorType;
 	private Map<String, SimpleCustomProperty> configurationAttributes;
 
 	public ExternalAuthenticatorConfiguration(
 			CustomAuthenticationConfiguration customAuthenticationConfiguration,
-			ExternalAuthenticatorType externalAuthenticatorType, Map<String, SimpleCustomProperty> configurationAttributes) {
+			CustomAuthenticatorType externalAuthenticatorType, Map<String, SimpleCustomProperty> configurationAttributes) {
 		this.customAuthenticationConfiguration = customAuthenticationConfiguration;
 		this.externalAuthenticatorType = externalAuthenticatorType;
 		this.configurationAttributes = configurationAttributes;
@@ -46,7 +46,7 @@ public class ExternalAuthenticatorConfiguration {
 		return customAuthenticationConfiguration;
 	}
 
-	public ExternalAuthenticatorType getExternalAuthenticatorType() {
+	public CustomAuthenticatorType getExternalAuthenticatorType() {
 		return externalAuthenticatorType;
 	}
 
