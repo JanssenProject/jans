@@ -20,3 +20,5 @@ oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
 oxAuthRedirectURI: https://%(hostname)s/identity/authentication/authcode
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finishlogout
 oxAuthTokenEndpointAuthMethod: client_secret_basic
+oxAuthIdTokenSignedResponseAlg: HS256
+oxAuthTrustedClient: true
