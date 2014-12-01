@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service;
+package org.xdi.oxauth.service.custom;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -43,34 +43,28 @@ import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.oxauth.model.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
+import org.xdi.oxauth.service.custom.conf.CustomScriptType;
 import org.xdi.oxauth.service.custom.interfaces.auth.DummyCustomAuthenticatorType;
 import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
 import org.xdi.service.PythonService;
 import org.xdi.util.StringHelper;
 
 /**
- * Provides factory methods needed to create external authenticator
+ * Maintains list of latest custom scripts
  *
- * @author Yuriy Movchan Date: 08.21.2012
+ * @author Yuriy Movchan Date: 11/11/2014
  */
 @Scope(ScopeType.APPLICATION)
-@Name("externalAuthenticationService")
+@Name("customScriptService")
 @AutoCreate
 @Startup(depends = "appInitializer")
-public class ExternalAuthenticationService implements Serializable {
+public class CustomScriptService implements Serializable {
 
-	private static final long serialVersionUID = -1225880597520443390L;
+	private static final long serialVersionUID = -3225880597520553390L;
 
-	public final static String ACR_METHOD_PREFIX = "https://schema.gluu.org/openid/acr/method/";
-
-	private final static String EVENT_TYPE = "ExternalAuthenticationTimerEvent";
+	private final static String EVENT_TYPE = "CustomScriptTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
-
-	private static final CustomAuthenticatorType DUMMY_AUTHENTICATOR_TYPE = new DummyCustomAuthenticatorType();
-
-	private static final String PYTHON_ENTRY_INTERCEPTOR_TYPE = "ExternalAuthenticator";
-
-//	private transient ExternalAuthenticatorConfiguration defaultExternalAuthenticator;
 
 	private Map<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations;
 	private Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> externalAuthenticatorConfigurationsByUsageType;
@@ -95,7 +89,7 @@ public class ExternalAuthenticationService implements Serializable {
 
 		reload();
 
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL * 1000L, DEFAULT_INTERVAL * 1000L));
     }
 
 	@Observer(EVENT_TYPE)
@@ -112,24 +106,10 @@ public class ExternalAuthenticationService implements Serializable {
 		try {
 			reload();
 		} catch (Throwable ex) {
-			log.error("Exception happened while reloading custom external authentication configuration", ex);
+			log.error("Exception happened while reloading custom scripts", ex);
 		} finally {
 			this.isActive.set(false);
 			this.lastFinishedTime = System.currentTimeMillis();
-		}
-	}
-
-	// Commented out due to bug in SEAM
-	//@Destroy
-	public void destroy() {
-		log.debug("Destroying external authentication methods");
-		if (this.externalAuthenticatorConfigurations == null) {
-			return;
-		}
-
-		// Destroy authentication methods
-		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
-			destroyExternalAuthenticator(externalAuthenticatorConfigurationEntry.getValue());
 		}
 	}
 
@@ -138,6 +118,23 @@ public class ExternalAuthenticationService implements Serializable {
 		reloadImpl(currentCustomAuthenticationConfigurations);
 	}
 
+	// Commented out due to bug in SEAM
+	//@Destroy
+	public void destroy() {
+		log.debug("Destroying loaded custom scripts");
+		if (this.customScripts == null) {
+			return;
+		}
+
+		// Destroy authentication methods
+		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.customScripts.entrySet()) {
+			destroyCustomScript(externalAuthenticatorConfigurationEntry.getValue());
+		}
+	}
+
+	List<CustomScript<CustomScriptType, BaseScriptConfiguration>> getCustomScripts (String scriptType);
+	List<CustomScript<CustomScriptType, BaseScriptConfiguration>> getClientCustomScripts (String scriptType);
+	 
 	private void reloadImpl(List<CustomAuthenticationConfiguration> newCustomAuthenticationConfigurations) {
 		// Store updated external authenticator configurations
 		this.externalAuthenticatorConfigurations = reloadExternalConfigurations(this.externalAuthenticatorConfigurations, newCustomAuthenticationConfigurations);
@@ -661,8 +658,8 @@ public class ExternalAuthenticationService implements Serializable {
 		return false;
 	}
 
-    public static ExternalAuthenticationService instance() {
-        return (ExternalAuthenticationService) Component.getInstance(ExternalAuthenticationService.class);
+    public static CustomScriptService instance() {
+        return (CustomScriptService) Component.getInstance(CustomScriptService.class);
     }
 
 }
