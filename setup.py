@@ -1082,7 +1082,7 @@ def getOpts(argv, install_dir=None):
     setup_properties = None
     noPrompt = False
     try:
-        opts, args = getopt.getopt(argv, "dhnf:")
+        opts, args = getopt.getopt(argv, "d:hnf:")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
