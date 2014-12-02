@@ -40,8 +40,8 @@ import getopt
 import hashlib
 
 class Setup(object):
-    def __init__(self):
-        self.install_dir = None
+    def __init__(self, install_dir=None):
+        self.install_dir = install_dir
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
@@ -1078,43 +1078,45 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
 
-    def getOpts(self, argv):
-        self.logIt("Parsing command line options")
-        setup_properties = None
-        noPrompt = False
-        install_dir = "."
-        try:
-            opts, args = getopt.getopt(argv, "dhnf:")
-        except getopt.GetoptError:
-            self.print_help()
-            sys.exit(2)
-        for opt, arg in opts:
-            if opt == '-h':
-                self.print_help()
-                sys.exit()
-            elif opt == '-d':
-                install_dir = arg
-            elif opt == "-f":
-                try:
-                    if os.path.isfile(arg):
-                        setup_properties = arg
-                        self.logIt("setup.properties specified as %s" % arg)
-                        print "Found setup properties %s\n" % arg
-                    else:
-                        print "\nOoops... %s file not found\n" % arg
-                except:
-                    print "\nOoops... %s file not found\n" % arg
-            elif opt == "-n":
-                self.logIt("-n option specified. No interactive confirmation before proceeding.")
-                noPrompt = True
-        return setup_properties, noPrompt, install_dir
-
-if __name__ == '__main__':
-    installObject = Setup()
+def getOpts(self, argv):
+    self.logIt("Parsing command line options")
     setup_properties = None
     noPrompt = False
+    install_dir = "."
+    try:
+        opts, args = getopt.getopt(argv, "dhnf:")
+    except getopt.GetoptError:
+        self.print_help()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            self.print_help()
+            sys.exit()
+        elif opt == '-d':
+            install_dir = arg
+        elif opt == "-f":
+            try:
+                if os.path.isfile(arg):
+                    setup_properties = arg
+                    self.logIt("setup.properties specified as %s" % arg)
+                    print "Found setup properties %s\n" % arg
+                else:
+                    print "\nOoops... %s file not found\n" % arg
+            except:
+                print "\nOoops... %s file not found\n" % arg
+        elif opt == "-n":
+            self.logIt("-n option specified. No interactive confirmation before proceeding.")
+            noPrompt = True
+    return setup_properties, noPrompt, install_dir
+
+if __name__ == '__main__':
+    setup_properties = None
+    noPrompt = False
+    install_dir = "."
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, installObject.install_dir = installObject.getOpts(sys.argv[1:])
+        setup_properties, noPrompt, install_dir = getOpts(sys.argv[1:])
+    installObject = Setup(install_dir)
+
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
     try:
