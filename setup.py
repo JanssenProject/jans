@@ -41,7 +41,7 @@ import hashlib
 
 class Setup(object):
     def __init__(self):
-        self.install_dir = "."
+        self.install_dir = None
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
@@ -1082,6 +1082,7 @@ class Setup(object):
         self.logIt("Parsing command line options")
         setup_properties = None
         noPrompt = False
+        install_dir = "."
         try:
             opts, args = getopt.getopt(argv, "dhnf:")
         except getopt.GetoptError:
@@ -1092,7 +1093,7 @@ class Setup(object):
                 self.print_help()
                 sys.exit()
             elif opt == '-d':
-                installObject.install_dir = arg
+                install_dir = arg
             elif opt == "-f":
                 try:
                     if os.path.isfile(arg):
@@ -1106,14 +1107,14 @@ class Setup(object):
             elif opt == "-n":
                 self.logIt("-n option specified. No interactive confirmation before proceeding.")
                 noPrompt = True
-        return setup_properties, noPrompt
+        return setup_properties, noPrompt, install_dir
 
 if __name__ == '__main__':
     installObject = Setup()
     setup_properties = None
     noPrompt = False
     if len(sys.argv) > 1:
-        setup_properties, noPrompt = installObject.getOpts(sys.argv[1:])
+        setup_properties, noPrompt, installObject.install_dir = installObject.getOpts(sys.argv[1:])
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
     try:
