@@ -41,17 +41,26 @@ import hashlib
 
 class Setup(object):
     def __init__(self):
-        self.setup_properties_fn = "./setup.properties"
-        self.log = 'setup.log'
-        self.logError = 'setup_error.log'
-        self.savedProperties = "./setup.properties.last"
+        self.install_dir = "."
+        self.setup_properties_fn = "%s/setup.properties" % self.install_dir
+        self.log = '%s/setup.log' % self.install_dir
+        self.logError = '%s/setup_error.log' % self.install_dir
+        self.savedProperties = "%s/setup.properties.last" % self.install_dir
+
         self.gluuOptFolder = "/opt/gluu"
         self.gluuOptBinFolder = "/opt/gluu/bin"
+        self.configFolder = '/etc/gluu/config'
+        self.certFolder = '/etc/certs'
+        self.tomcatHome = '/opt/tomcat'
         self.tomcat_user_home_lib = "/home/tomcat/lib"
+        self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
         self.tomcatWebAppFolder = "/opt/tomcat/webapps"
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+        self.etc_hosts = '/etc/hosts'
+        self.etc_hostname = '/etc/hostname'
+
         self.idpFolder = "/opt/idp"
         self.idpMetadataFolder = "/opt/idp"
         self.idpLogsFolder = "/opt/idp/logs"
@@ -68,7 +77,7 @@ class Setup(object):
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
-        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxIdp/2.4.0-Final/oxIdp-2.4.0-Final.war'
+        self.idp_war = 'https://ox.gluu.org/maven/org/xdi/oxIdp/2.4.0-Final/oxIdp-2.4.0-Final.war'
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -95,16 +104,11 @@ class Setup(object):
         self.oxauthClient_pw = None
         self.encode_salt = "123456789012345678901234"
 
-        self.outputFolder = './output'
-        self.templateFolder = './templates'
-        self.staticFolder = './static/opendj'
-        self.tomcatHome = '/opt/tomcat'
-        self.configFolder = '/etc/gluu/config'
-        self.indexJson = './static/opendj/opendj_index.json'
-        self.certFolder = '/etc/certs'
-        self.gluuHome = '/opt/gluu'
-        self.oxauth_error_json = 'static/oxauth/oxauth-errors.json'
-        self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
+        self.outputFolder = '%s/output' % self.install_dir
+        self.templateFolder = '%s/templates' % self.install_dir
+        self.staticFolder = '%s/static/opendj' % self.install_dir
+        self.indexJson = '%s/static/opendj/opendj_index.json' % self.install_dir
+        self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
@@ -128,13 +132,14 @@ class Setup(object):
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
-        self.schemaFiles = ["static/%s/96-eduperson.ldif" % self.ldap_type,
-                            "static/%s/101-ox.ldif" % self.ldap_type,
-                            "static/%s/77-customAttributes.ldif" % self.ldap_type,
-                            "output/100-user.ldif"]
-        self.gluuScriptFiles = ['static/scripts/logmanager.sh',
-                                'static/scripts/testBind.py']
-        self.init_files = ['static/tomcat/tomcat', 'static/opendj/opendj']
+        self.schemaFiles = ["%s/static/%s/96-eduperson.ldif" % (self.install_dir, self.ldap_type),
+                            "%s/static/%s/101-ox.ldif" % (self.install_dir, self.ldap_type),
+                            "%s/static/%s/77-customAttributes.ldif" % (self.install_dir, self.ldap_type),
+                            "%s/output/100-user.ldif" % self.install_dir]
+        self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
+                                '%s/static/scripts/testBind.py' % self.install_dir]
+        self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
+                           '%s/static/opendj/opendj' % self.install_dir]
         self.redhat_services = ['tomcat', 'opendj', 'httpd']
         self.debian_services = [{ 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
                                 { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
@@ -145,7 +150,7 @@ class Setup(object):
         self.tomcat_start_script = '/etc/init.d/tomcat'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
-        self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuHome
+        self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
         self.opensslCommand = '/usr/bin/openssl'
         self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
@@ -168,8 +173,6 @@ class Setup(object):
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
         self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
-        self.etc_hosts = '/etc/hosts'
-        self.etc_hostname = '/etc/hostname'
         self.ldif_base = '%s/base.ldif' % self.outputFolder
         self.ldif_appliance = '%s/appliance.ldif' % self.outputFolder
         self.ldif_attributes = '%s/attributes.ldif' % self.outputFolder
@@ -177,8 +180,8 @@ class Setup(object):
         self.ldif_clients = '%s/clients.ldif' % self.outputFolder
         self.ldif_people = '%s/people.ldif' % self.outputFolder
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
-        self.ldif_site = './static/cache-refresh/o_site.ldif'
-        self.encode_script = '%s/bin/encode.py' % self.gluuHome
+        self.ldif_site = '%s/static/cache-refresh/o_site.ldif' % self.install_dir
+        self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -467,14 +470,14 @@ class Setup(object):
 
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
-        self.copyFile("static/oxauth/java.security", "/usr/java/latest/lib/security")
-        self.copyFile("static/oxauth/lib/oxauth.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/bcprov-jdk16-1.46.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/commons-codec-1.5.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/commons-lang-2.6.jar", self.tomcat_user_home_lib)
-        self.copyFile("static/oxauth/lib/log4j-1.2.14.jar", self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/java.security" % self.install_dir, "/usr/java/latest/lib/security")
+        self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/bcprov-jdk16-1.46.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.tomcat_user_home_lib)
 
         self.change_ownership()
 
@@ -727,7 +730,7 @@ class Setup(object):
                       '%s' % importCmd])
 
         self.logIt("Importing site LDIF")
-        self.copyFile("static/cache-refresh/o_site.ldif", ldifFolder)
+        self.copyFile("%s/static/cache-refresh/o_site.ldif" % self.install_dir, ldifFolder)
         site_ldif_fn = "%s/o_site.ldif" % ldifFolder
         self.run(['/bin/chown', 'ldap:ldap', site_ldif_fn])
         importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
@@ -871,8 +874,8 @@ class Setup(object):
         self.run(['/bin/chmod', '-R', 'u+X', self.certFolder])
 
     def copy_static(self):
-        self.copyFile("static/oxauth/oxauth-id-gen.py", "%s/conf" % self.tomcatHome)
-        self.copyFile("static/tomcat/server.xml", "%s/conf" % self.tomcatHome)
+        self.copyFile("%s/static/oxauth/oxauth-id-gen.py" % self.install_dir, "%s/conf" % self.tomcatHome)
+        self.copyFile("%s/static/tomcat/server.xml" % self.install_dir, "%s/conf" % self.tomcatHome)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -1060,6 +1063,7 @@ class Setup(object):
         print ""
         print "    -h   Help"
         print "    -f   specify setup.properties file"
+        print "    -d   specify directory of installation"
         print "    -n   No interactive prompt before install starts."
 
     def downloadWarFiles(self):
@@ -1079,7 +1083,7 @@ class Setup(object):
         setup_properties = None
         noPrompt = False
         try:
-            opts, args = getopt.getopt(argv, "hnf:")
+            opts, args = getopt.getopt(argv, "dhnf:")
         except getopt.GetoptError:
             self.print_help()
             sys.exit(2)
@@ -1087,6 +1091,8 @@ class Setup(object):
             if opt == '-h':
                 self.print_help()
                 sys.exit()
+            elif opt == '-d':
+                installObject.install_dir = arg
             elif opt == "-f":
                 try:
                     if os.path.isfile(arg):
