@@ -1055,17 +1055,6 @@ class Setup(object):
         if deploy_saml == 'y':
             installObject.downloadSaml = True
 
-    def print_help(self):
-        print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
-        print "oxAuth and oxTrust to start. If setup.properties is found in this folder, these"
-        print "properties will automatically be used instead of the interactive setup."
-        print "Options:"
-        print ""
-        print "    -h   Help"
-        print "    -f   specify setup.properties file"
-        print "    -d   specify directory of installation"
-        print "    -n   No interactive prompt before install starts."
-
     def downloadWarFiles(self):
         if self.downloadSaml:
             print "Downloading latest Shibboleth idp war file..."
@@ -1078,19 +1067,28 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
 
-def getOpts(self, argv):
-    self.logIt("Parsing command line options")
+def print_help():
+    print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
+    print "oxAuth and oxTrust to start. If setup.properties is found in this folder, these"
+    print "properties will automatically be used instead of the interactive setup."
+    print "Options:"
+    print ""
+    print "    -h   Help"
+    print "    -f   specify setup.properties file"
+    print "    -d   specify directory of installation"
+    print "    -n   No interactive prompt before install starts."
+
+def getOpts(argv, install_dir=None):
     setup_properties = None
     noPrompt = False
-    install_dir = "."
     try:
         opts, args = getopt.getopt(argv, "dhnf:")
     except getopt.GetoptError:
-        self.print_help()
+        print_help()
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            self.print_help()
+            print_help()
             sys.exit()
         elif opt == '-d':
             install_dir = arg
@@ -1098,14 +1096,12 @@ def getOpts(self, argv):
             try:
                 if os.path.isfile(arg):
                     setup_properties = arg
-                    self.logIt("setup.properties specified as %s" % arg)
                     print "Found setup properties %s\n" % arg
                 else:
                     print "\nOoops... %s file not found\n" % arg
             except:
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
-            self.logIt("-n option specified. No interactive confirmation before proceeding.")
             noPrompt = True
     return setup_properties, noPrompt, install_dir
 
@@ -1114,7 +1110,7 @@ if __name__ == '__main__':
     noPrompt = False
     install_dir = "."
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, install_dir = getOpts(sys.argv[1:])
+        setup_properties, noPrompt, install_dir = getOpts(sys.argv[1:], install_dir)
     installObject = Setup(install_dir)
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
