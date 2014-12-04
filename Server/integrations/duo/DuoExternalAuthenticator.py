@@ -59,8 +59,8 @@ class ExternalAuthenticator(ExternalAuthenticatorType):
             if (not configurationAttributes.containsKey("audit_attribute")):
                 print "Duo initialization. Property audit_attribute is not specified"
                 return False
-
-        self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
+            else:
+                self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
 
 
         print "Duo initialized successfully"
