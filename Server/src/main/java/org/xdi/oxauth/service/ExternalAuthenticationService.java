@@ -414,46 +414,6 @@ public class ExternalAuthenticationService implements Serializable {
         return true;
 	}
 
-	public CustomAuthenticatorType createExternalAuthenticatorFromFile() {
-		CustomAuthenticatorType externalAuthenticator;
-		try {
-			externalAuthenticator = createExternalAuthenticatorFromFileWithPythonException();
-		} catch (PythonException ex) {
-			log.error("Failed to prepare external authenticator", ex);
-			return null;
-		}
-
-		if (externalAuthenticator == null) {
-			log.debug("Using default external authenticator class");
-			externalAuthenticator = DUMMY_AUTHENTICATOR_TYPE;
-		}
-
-		return externalAuthenticator;
-	}
-
-	public CustomAuthenticatorType createExternalAuthenticatorFromFileWithPythonException() throws PythonException {
-		String externalAuthenticatorScriptFileName = ConfigurationFactory.getConfiguration().getExternalAuthenticatorScriptFileName();
-		if (StringHelper.isEmpty(externalAuthenticatorScriptFileName)) {
-			return null;
-		}
-
-		String tomcatHome = System.getProperty("catalina.home");
-		if (tomcatHome == null) {
-			return null;
-		}
-
-		String fullPathToExternalAuthenticatorPythonScript = tomcatHome + File.separator + "conf" + File.separator + "python" + File.separator + externalAuthenticatorScriptFileName; 
-
-		CustomAuthenticatorType externalAuthenticatorType = pythonService.loadPythonScript(fullPathToExternalAuthenticatorPythonScript, PYTHON_ENTRY_INTERCEPTOR_TYPE, CustomAuthenticatorType.class,  new PyObject[] { new PyLong(System.currentTimeMillis()) });
-
-		boolean initialized = externalAuthenticatorType.init(null);
-		if (initialized) {
-			return externalAuthenticatorType;
-		}
-
-		return null;
-	}
-
 	public CustomAuthenticatorType createExternalAuthenticatorFromStringWithPythonException(CustomAuthenticationConfiguration customAuthenticationConfiguration, Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
 		String customAuthenticationScript = customAuthenticationConfiguration.getCustomAuthenticationScript();
 		if (customAuthenticationScript == null) {

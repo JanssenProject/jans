@@ -36,6 +36,4 @@ public interface CustomAuthenticatorType extends BaseExternalType {
 
 	public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
-	public int getApiVersion();
-
 }

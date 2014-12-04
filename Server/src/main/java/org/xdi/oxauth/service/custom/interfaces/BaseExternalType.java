@@ -21,4 +21,6 @@ public interface BaseExternalType {
 
 	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes);
 
+	public int getApiVersion();
+
 }

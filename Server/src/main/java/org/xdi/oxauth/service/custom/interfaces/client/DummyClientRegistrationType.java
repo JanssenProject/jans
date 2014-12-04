@@ -25,4 +25,8 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
 		return true;
 	}
 
+	public int getApiVersion() {
+		return 1;
+	}
+
 }
