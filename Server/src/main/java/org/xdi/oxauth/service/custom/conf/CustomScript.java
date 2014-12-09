@@ -46,10 +46,14 @@ public class CustomScript extends BaseEntry {
 
     @LdapAttribute(name = "programmingLanguage")
     private ProgrammingLanguage programmingLanguage;
+
+    @LdapJsonObject
+    @LdapAttribute(name = "oxModuleProperty")
+	private List<SimpleCustomProperty> moduleProperties;
     
     @LdapJsonObject
-    @LdapAttribute(name = "oxProperty")
-	private List<SimpleCustomProperty> properties;
+    @LdapAttribute(name = "oxConfigurationProperty")
+	private List<SimpleCustomProperty> configurationProperties;
 
     @LdapAttribute(name = "oxLevel")
     private int level;
@@ -61,7 +65,7 @@ public class CustomScript extends BaseEntry {
     private boolean enabled;
 	
 	public CustomScript() {
-		this.properties = new ArrayList<SimpleCustomProperty>();
+		this.configurationProperties = new ArrayList<SimpleCustomProperty>();
 	}
 
 	public String getInum() {
@@ -112,12 +116,20 @@ public class CustomScript extends BaseEntry {
 		this.programmingLanguage = programmingLanguage;
 	}
 
-	public List<SimpleCustomProperty> getProperties() {
-		return properties;
+	public List<SimpleCustomProperty> getModuleProperties() {
+		return moduleProperties;
 	}
 
-	public void setProperties(List<SimpleCustomProperty> properties) {
-		this.properties = properties;
+	public void setModuleProperties(List<SimpleCustomProperty> moduleProperties) {
+		this.moduleProperties = moduleProperties;
+	}
+
+	public List<SimpleCustomProperty> getConfigurationProperties() {
+		return configurationProperties;
+	}
+
+	public void setConfigurationProperties(List<SimpleCustomProperty> properties) {
+		this.configurationProperties = properties;
 	}
 
 	public int getLevel() {

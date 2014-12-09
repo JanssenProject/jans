@@ -17,6 +17,7 @@ import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
  *
  * @author Yuriy Movchan Date: 01.24.2013
  */
+@Deprecated
 public class ExternalAuthenticatorConfiguration {
 	private CustomAuthenticationConfiguration customAuthenticationConfiguration;
 	private CustomAuthenticatorType externalAuthenticatorType;
@@ -38,6 +39,7 @@ public class ExternalAuthenticatorConfiguration {
 		return customAuthenticationConfiguration.getLevel();
 	}
 
+	@Deprecated
 	public int getPriority() {
 		return customAuthenticationConfiguration.getPriority();
 	}

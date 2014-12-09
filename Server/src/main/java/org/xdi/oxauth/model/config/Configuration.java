@@ -113,6 +113,8 @@ public class Configuration {
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
 
+    private Boolean externalAuthenticatorEnabled;
+
     private String applianceInum;
     private int sessionIdUnusedLifetime;
     private Boolean sessionIdEnabled;
@@ -1036,7 +1038,16 @@ public class Configuration {
         return clientAuthenticationFilters;
     }
 
-    @XmlElement(name = "appliance-inum")
+    @XmlElement(name = "external-auth-enabled")
+    public Boolean getExternalAuthenticatorEnabled() {
+        return externalAuthenticatorEnabled;
+    }
+
+    public void setExternalAuthenticatorEnabled(Boolean externalAuthenticatorEnabled) {
+        this.externalAuthenticatorEnabled = externalAuthenticatorEnabled;
+    }
+
+	@XmlElement(name = "appliance-inum")
     public String getApplianceInum() {
         return applianceInum;
     }

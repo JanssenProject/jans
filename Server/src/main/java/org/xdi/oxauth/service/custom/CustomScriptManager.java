@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
+import org.jboss.beans.metadata.api.annotations.Destroy;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -35,12 +37,17 @@ import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.config.CustomAuthenticationConfiguration;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.uma.persistence.ProgrammingLanguage;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
 import org.xdi.oxauth.service.custom.conf.CustomScript;
 import org.xdi.oxauth.service.custom.conf.CustomScriptType;
 import org.xdi.oxauth.service.custom.interfaces.BaseExternalType;
 import org.xdi.oxauth.service.custom.model.CustomScriptConfiguration;
 import org.xdi.service.PythonService;
+import org.xdi.util.INumGenerator;
 import org.xdi.util.StringHelper;
 
 /**
@@ -49,12 +56,13 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @Scope(ScopeType.APPLICATION)
-@Name("customScriptHolder")
-public class CustomScriptHolder implements Serializable {
+@Name("customScriptManager")
+public class CustomScriptManager implements Serializable {
 
 	private static final long serialVersionUID = -4225890597520443390L;
 
 	private final static String EVENT_TYPE = "CustomScriptHolderTimerEvent";
+	public final static String MODIFIED_EVENT_TYPE = "CustomScriptModifiedEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
     
     private final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "gluuStatus" };
@@ -65,8 +73,8 @@ public class CustomScriptHolder implements Serializable {
 	@In
 	private PythonService pythonService;
 	
-	@In
-	private CustomScriptService customScriptService;
+	@In(value = "customScriptService")
+	private AbstractCustomScriptService customScriptService;
 
 	private List<CustomScriptType> supportedCustomScriptTypes;
 	private Map<String, CustomScriptConfiguration> customScriptConfigurations;
@@ -85,6 +93,50 @@ public class CustomScriptHolder implements Serializable {
 		reload();
 
 		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+    }
+
+    // Remove this method after CE 1.7 release
+    public void migrateOldConfigurations() {
+    	// Check if there are new configuration
+		List<CustomScript> customScripts = customScriptService.findCustomScripts(supportedCustomScriptTypes, CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
+		if (customScripts.size() > 0) {
+			return;
+		}
+		
+		// Load authentication configurations stored in old format
+		LdapCustomAuthenticationConfigurationService ldapCustomAuthenticationConfigurationService = (LdapCustomAuthenticationConfigurationService) Component.getInstance(LdapCustomAuthenticationConfigurationService.class);
+		List<CustomAuthenticationConfiguration> customAuthenticationConfigurations = ldapCustomAuthenticationConfigurationService.getCustomAuthenticationConfigurations();
+		
+		if (customAuthenticationConfigurations.size() == 0) {
+			return;
+		}
+		
+		String basedInum = ConfigurationFactory.getConfiguration().getOrganizationInum();
+		for (CustomAuthenticationConfiguration customAuthenticationConfiguration : customAuthenticationConfigurations) {
+			String customScriptId = basedInum + "!" + INumGenerator.generate(2);
+			String dn = customScriptService.buildDn(customScriptId);
+			
+			CustomScript customScript = new CustomScript();
+			customScript.setDn(dn);
+			customScript.setInum(customScriptId);
+			customScript.setProgrammingLanguage(ProgrammingLanguage.PYTHON);
+			customScript.setScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
+			
+			customScript.setName(customAuthenticationConfiguration.getName());
+			customScript.setLevel(customAuthenticationConfiguration.getLevel());
+			customScript.setEnabled(customAuthenticationConfiguration.isEnabled());
+			customScript.setRevision(customAuthenticationConfiguration.getVersion());
+			customScript.setScript(customAuthenticationConfiguration.getCustomAuthenticationScript());
+
+			List<SimpleCustomProperty> moduleProperties = Arrays.asList(new SimpleCustomProperty("usage_type", customAuthenticationConfiguration.getUsageType().toString()));
+			customScript.setModuleProperties(moduleProperties);
+
+			customScript.setConfigurationProperties(customAuthenticationConfiguration.getCustomAuthenticationAttributes());
+			
+			customScriptService.add(customScript);
+
+			log.info("Successfully imported '{0}' authentication script", customScript.getName());
+		}
     }
 
 	@Observer(EVENT_TYPE)
@@ -109,8 +161,7 @@ public class CustomScriptHolder implements Serializable {
 		}
 	}
 
-	// Commented out due to bug in SEAM
-	//@Destroy
+	@Destroy
 	public void destroy() {
 		log.debug("Destroying custom scripts configurations");
 		if (this.customScriptConfigurations == null) {
@@ -124,19 +175,52 @@ public class CustomScriptHolder implements Serializable {
 	}
 
 	private void reload() {
+		boolean modified = reloadImpl();
+		
+		if (modified) {
+			Events.instance().raiseEvent(MODIFIED_EVENT_TYPE);
+		}
+	}
+
+	private boolean reloadImpl() {
 		// Load current script revisions
 		List<CustomScript> customScripts = customScriptService.findCustomScripts(supportedCustomScriptTypes, CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
 
 		// Store updated external authenticator configurations
-		this.customScriptConfigurations = reloadCustomScriptConfigurations(this.customScriptConfigurations, customScripts);
+		ReloadResult reloadResult = reloadCustomScriptConfigurations(this.customScriptConfigurations, customScripts);
+		this.customScriptConfigurations = reloadResult.getCustomScriptConfigurations();
 
 		// Group external authenticator configurations by usage type
 		this.customScriptConfigurationsByScriptType = groupCustomScriptConfigurationsByScriptType(this.customScriptConfigurations);
+		
+		return reloadResult.isModified();
+	}
+	
+	private class ReloadResult {
+		private Map<String, CustomScriptConfiguration> customScriptConfigurations;
+		private boolean modified;
+
+		public ReloadResult(Map<String, CustomScriptConfiguration> customScriptConfigurations, boolean modified) {
+			this.customScriptConfigurations = customScriptConfigurations;
+			this.modified = modified;
+		}
+
+		public Map<String, CustomScriptConfiguration> getCustomScriptConfigurations() {
+			return customScriptConfigurations;
+		}
+
+		public boolean isModified() {
+			return modified;
+		}
+		
 	}
 
-	private Map<String, CustomScriptConfiguration> reloadCustomScriptConfigurations(
+	private ReloadResult reloadCustomScriptConfigurations(
 			Map<String,  CustomScriptConfiguration> customScriptConfigurations, List<CustomScript> newCustomScripts) {
 		Map<String, CustomScriptConfiguration> newCustomScriptConfigurations;
+		
+		boolean modified = false;
+
 		if (customScriptConfigurations == null) {
 			newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>();
 		} else {
@@ -165,7 +249,7 @@ public class CustomScriptHolder implements Serializable {
 
 				// Prepare configuration attributes
 				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
-				for (SimpleCustomProperty simpleCustomProperty : loadedCustomScript.getProperties()) {
+				for (SimpleCustomProperty simpleCustomProperty : loadedCustomScript.getConfigurationProperties()) {
 					newConfigurationAttributes.put(simpleCustomProperty.getValue1(), simpleCustomProperty);
 				}
 
@@ -176,6 +260,8 @@ public class CustomScriptHolder implements Serializable {
 
 				// Store configuration and authenticator
 				newCustomScriptConfigurations.put(newSupportedCustomScriptInum, newCustomScriptConfiguration);
+
+				modified = true;
 			}
 		}
 
@@ -189,10 +275,12 @@ public class CustomScriptHolder implements Serializable {
 				// Destroy old authentication method
 				destroyCustomScript(externalAuthenticatorConfigurationEntry.getValue());
 				it.remove();
+
+				modified = true;
 			}
 		}
 
-		return newCustomScriptConfigurations;
+		return new ReloadResult(newCustomScriptConfigurations, modified);
 	}
 
 	private boolean destroyCustomScript(CustomScriptConfiguration customScriptConfiguration) {
@@ -305,8 +393,8 @@ public class CustomScriptHolder implements Serializable {
 		return new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurations.values());
 	}
 
-    public static CustomScriptHolder instance() {
-        return (CustomScriptHolder) Component.getInstance(CustomScriptHolder.class);
+    public static CustomScriptManager instance() {
+        return (CustomScriptManager) Component.getInstance(CustomScriptManager.class);
     }
 
 }
