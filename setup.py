@@ -153,6 +153,7 @@ class Setup(object):
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
         self.opensslCommand = '/usr/bin/openssl'
+        self.defaultTrustStore = '/usr/java/latest/lib/security/'
         self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStorePW = 'changeit'
 
@@ -424,7 +425,14 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), key])
         self.run(["/bin/chmod", '700', key])
 
-        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, "-file", public_certificate, "-keystore", "/usr/java/latest/lib/security/cacerts", "-storepass", "changeit", "-noprompt"])
+        self.run([self.keytoolCommand,
+                  '-import',
+                  '-trustcacerts',
+                  '-alias', self.hostname,
+                  '-file', public_certificate,
+                  '-keystore', self.defaultTrustStoreFN,
+                  '-storepass', 'changeit',
+                  '-noprompt'])
 
     def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, user='root'):
         self.logIt("Creating keystore %s" % suffix)
@@ -470,6 +478,7 @@ class Setup(object):
 
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
+<<<<<<< HEAD
         self.copyFile("%s/static/oxauth/java.security" % self.install_dir, "/usr/java/latest/lib/security")
         self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
@@ -478,6 +487,16 @@ class Setup(object):
         self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.tomcat_user_home_lib)
+=======
+        self.copyFile("static/oxauth/java.security", self.defaultTrustStore)
+        self.copyFile("static/oxauth/lib/oxauth.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/jettison-1.3.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/oxauth-model.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/bcprov-jdk16-1.46.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-codec-1.5.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/commons-lang-2.6.jar", self.tomcat_user_home_lib)
+        self.copyFile("static/oxauth/lib/log4j-1.2.14.jar", self.tomcat_user_home_lib)
+>>>>>>> e62f54b785544dcd900fb6f3fa17c88a3cc5675a
 
         self.change_ownership()
 
