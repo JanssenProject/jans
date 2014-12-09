@@ -779,7 +779,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			attributeValues[0] = convertJsonToString(propertyValue);
 		} else {
 			throw new MappingException(
-					"Entry property should has getter with String, String[], Boolean, Integer, Date, List, LdapEnum or LdapEnum[] return type or has annotation LdapJsonObject");
+					"Entry property '" + propertyName + "' should has getter with String, String[], Boolean, Integer, Date, List, LdapEnum or LdapEnum[] return type or has annotation LdapJsonObject");
 		}
 
 		if (log.isDebugEnabled()) {
@@ -999,9 +999,9 @@ public abstract class AbstractEntryManager implements EntityManager {
 		Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
 		if (parameterType.equals(String.class)) {
 			propertyValueSetter.set(entry, attribute.getValue());
-		} else if (parameterType.equals(Boolean.class)) {
+		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
 			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf(attribute.getValue()));
-		} else if (parameterType.equals(Integer.class)) {
+		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
 			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf(attribute.getValue()));
 		} else if (parameterType.equals(Date.class)) {
 			propertyValueSetter.set(entry, decodeGeneralizedTime(attribute.getValue()));
@@ -1054,7 +1054,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
 			throw new MappingException(
-					"Entry property should has setter with String, Boolean, Integer, Date, String[], List, LdapEnum or LdapEnum[] parameter type or has annotation LdapJsonObject");
+					"Entry property '" + propertyName + "' should has setter with String, Boolean, Integer, Date, String[], List, LdapEnum or LdapEnum[] parameter type or has annotation LdapJsonObject");
 		}
 	}
 
