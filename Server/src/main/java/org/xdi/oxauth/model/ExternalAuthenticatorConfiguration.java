@@ -10,21 +10,22 @@ import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
-import org.xdi.oxauth.service.python.interfaces.ExternalAuthenticatorType;
+import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
 
 /**
  * External authenticator configuration
  *
  * @author Yuriy Movchan Date: 01.24.2013
  */
+@Deprecated
 public class ExternalAuthenticatorConfiguration {
 	private CustomAuthenticationConfiguration customAuthenticationConfiguration;
-	private ExternalAuthenticatorType externalAuthenticatorType;
+	private CustomAuthenticatorType externalAuthenticatorType;
 	private Map<String, SimpleCustomProperty> configurationAttributes;
 
 	public ExternalAuthenticatorConfiguration(
 			CustomAuthenticationConfiguration customAuthenticationConfiguration,
-			ExternalAuthenticatorType externalAuthenticatorType, Map<String, SimpleCustomProperty> configurationAttributes) {
+			CustomAuthenticatorType externalAuthenticatorType, Map<String, SimpleCustomProperty> configurationAttributes) {
 		this.customAuthenticationConfiguration = customAuthenticationConfiguration;
 		this.externalAuthenticatorType = externalAuthenticatorType;
 		this.configurationAttributes = configurationAttributes;
@@ -38,6 +39,7 @@ public class ExternalAuthenticatorConfiguration {
 		return customAuthenticationConfiguration.getLevel();
 	}
 
+	@Deprecated
 	public int getPriority() {
 		return customAuthenticationConfiguration.getPriority();
 	}
@@ -46,7 +48,7 @@ public class ExternalAuthenticatorConfiguration {
 		return customAuthenticationConfiguration;
 	}
 
-	public ExternalAuthenticatorType getExternalAuthenticatorType() {
+	public CustomAuthenticatorType getExternalAuthenticatorType() {
 		return externalAuthenticatorType;
 	}
 

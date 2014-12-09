@@ -31,6 +31,8 @@ public class BaseDnConfiguration {
     private String scopes;
     @XmlElement(name = "attributes")
     private String attributes;
+    @XmlElement(name = "scripts")
+    private String scripts;
     @XmlElement(name = "sessionId")
     private String sessionId;
     @XmlElement(name = "federationMetadata")
@@ -80,7 +82,15 @@ public class BaseDnConfiguration {
         attributes = p_attributes;
     }
 
-    public String getClients() {
+    public String getScripts() {
+		return scripts;
+	}
+
+	public void setScripts(String scripts) {
+		this.scripts = scripts;
+	}
+
+	public String getClients() {
         return clients;
     }
 

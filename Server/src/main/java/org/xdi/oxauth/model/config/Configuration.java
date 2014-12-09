@@ -114,7 +114,7 @@ public class Configuration {
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
 
     private Boolean externalAuthenticatorEnabled;
-    private String externalAuthenticatorScriptFileName;
+
     private String applianceInum;
     private int sessionIdUnusedLifetime;
     private Boolean sessionIdEnabled;
@@ -1047,16 +1047,7 @@ public class Configuration {
         this.externalAuthenticatorEnabled = externalAuthenticatorEnabled;
     }
 
-    @XmlElement(name = "external-auth-script-file-name")
-    public String getExternalAuthenticatorScriptFileName() {
-        return externalAuthenticatorScriptFileName;
-    }
-
-    public void setExternalAuthenticatorScriptFileName(String externalAuthenticatorScriptFileName) {
-        this.externalAuthenticatorScriptFileName = externalAuthenticatorScriptFileName;
-    }
-
-    @XmlElement(name = "appliance-inum")
+	@XmlElement(name = "appliance-inum")
     public String getApplianceInum() {
         return applianceInum;
     }

@@ -43,6 +43,10 @@ import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
+import org.xdi.oxauth.service.custom.CustomScriptManager;
+import org.xdi.oxauth.service.custom.conf.CustomScriptType;
+import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
+import org.xdi.oxauth.service.custom.interfaces.client.ClientRegistrationType;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
@@ -104,6 +108,10 @@ public class AppInitializer {
         
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
+        
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION );
+        CustomScriptManager.instance().migrateOldConfigurations();
+        CustomScriptManager.instance().init(supportedCustomScriptTypes);
     }
 
 	private void createStringEncrypter() {

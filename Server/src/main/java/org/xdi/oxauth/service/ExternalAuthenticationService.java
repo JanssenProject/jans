@@ -7,32 +7,25 @@
 package org.xdi.oxauth.service;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
@@ -41,10 +34,13 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.oxauth.model.ExternalAuthenticatorConfiguration;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.python.interfaces.DummyExternalAuthenticatorType;
-import org.xdi.oxauth.service.python.interfaces.ExternalAuthenticatorType;
+import org.xdi.oxauth.service.custom.CustomScriptManager;
+import org.xdi.oxauth.service.custom.conf.CustomScript;
+import org.xdi.oxauth.service.custom.conf.CustomScriptType;
+import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
+import org.xdi.oxauth.service.custom.interfaces.auth.DummyCustomAuthenticatorType;
+import org.xdi.oxauth.service.custom.model.CustomScriptConfiguration;
 import org.xdi.service.PythonService;
 import org.xdi.util.StringHelper;
 
@@ -56,17 +52,14 @@ import org.xdi.util.StringHelper;
 @Scope(ScopeType.APPLICATION)
 @Name("externalAuthenticationService")
 @AutoCreate
-@Startup(depends = "appInitializer")
+@Startup
 public class ExternalAuthenticationService implements Serializable {
 
 	private static final long serialVersionUID = -1225880597520443390L;
 
 	public final static String ACR_METHOD_PREFIX = "https://schema.gluu.org/openid/acr/method/";
 
-	private final static String EVENT_TYPE = "ExternalAuthenticationTimerEvent";
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
-
-	private static final ExternalAuthenticatorType DUMMY_AUTHENTICATOR_TYPE = new DummyExternalAuthenticatorType();
+	private static final CustomAuthenticatorType DUMMY_AUTHENTICATOR_TYPE = new DummyCustomAuthenticatorType();
 
 	private static final String PYTHON_ENTRY_INTERCEPTOR_TYPE = "ExternalAuthenticator";
 
@@ -81,66 +74,17 @@ public class ExternalAuthenticationService implements Serializable {
 
 	@In
 	private PythonService pythonService;
-
+	
 	@In
-	private LdapCustomAuthenticationConfigurationService ldapCustomAuthenticationConfigurationService;
+	private CustomScriptManager customScriptManager;
 
-	private AtomicBoolean isActive;
-	private long lastFinishedTime;
+	@Observer(CustomScriptManager.MODIFIED_EVENT_TYPE)
+	public void reload() {
+		// Get actual list of external authenticator configurations
+		List<CustomScriptConfiguration> customScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
 
-	@Observer("org.jboss.seam.postInitialization")
-    public void init() {
-		this.isActive = new AtomicBoolean(false);
-		this.lastFinishedTime = System.currentTimeMillis();
-
-		reload();
-
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
-    }
-
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void reloadTimerEvent() {
-		if (this.isActive.get()) {
-			return;
-		}
-
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
-
-		try {
-			reload();
-		} catch (Throwable ex) {
-			log.error("Exception happened while reloading custom external authentication configuration", ex);
-		} finally {
-			this.isActive.set(false);
-			this.lastFinishedTime = System.currentTimeMillis();
-		}
-	}
-
-	// Commented out due to bug in SEAM
-	//@Destroy
-	public void destroy() {
-		log.debug("Destroying external authentication methods");
-		if (this.externalAuthenticatorConfigurations == null) {
-			return;
-		}
-
-		// Destroy authentication methods
-		for (Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry : this.externalAuthenticatorConfigurations.entrySet()) {
-			destroyExternalAuthenticator(externalAuthenticatorConfigurationEntry.getValue());
-		}
-	}
-
-	private void reload() {
-		List<CustomAuthenticationConfiguration> currentCustomAuthenticationConfigurations = ldapCustomAuthenticationConfigurationService.getCustomAuthenticationConfigurations();
-		reloadImpl(currentCustomAuthenticationConfigurations);
-	}
-
-	private void reloadImpl(List<CustomAuthenticationConfiguration> newCustomAuthenticationConfigurations) {
 		// Store updated external authenticator configurations
-		this.externalAuthenticatorConfigurations = reloadExternalConfigurations(this.externalAuthenticatorConfigurations, newCustomAuthenticationConfigurations);
+		this.externalAuthenticatorConfigurations = reloadExternalConfigurations(customScriptConfigurations);
 
 		// Group external authenticator configurations by usage type
 		this.externalAuthenticatorConfigurationsByUsageType = groupExternalAuthenticatorConfigurationsByUsageType(this.externalAuthenticatorConfigurations);
@@ -149,74 +93,33 @@ public class ExternalAuthenticationService implements Serializable {
 		this.defaultExternalAuthenticators = determineDefaultExternalAuthenticatorConfigurations(this.externalAuthenticatorConfigurations);
 	}
 
-	public Map<String, ExternalAuthenticatorConfiguration> reloadExternalConfigurations(
-			Map<String,  ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations, List<CustomAuthenticationConfiguration> newCustomAuthenticationConfigurations) {
-		Map<String, ExternalAuthenticatorConfiguration> newExternalAuthenticatorConfigurations;
-		if (externalAuthenticatorConfigurations == null) {
-			newExternalAuthenticatorConfigurations = new HashMap<String, ExternalAuthenticatorConfiguration>();
-		} else {
-			// Clone old map to avoid reload not changed scripts becuase it's time and CPU consuming process
-			newExternalAuthenticatorConfigurations = new HashMap<String, ExternalAuthenticatorConfiguration>(externalAuthenticatorConfigurations);
-		}
-
-		List<String> newSupportedNames = new ArrayList<String>();
-		for (CustomAuthenticationConfiguration newCustomAuthenticationConfiguration : newCustomAuthenticationConfigurations) {
-	        if (!newCustomAuthenticationConfiguration.isEnabled()) {
-	        	continue;
-	        }
-	        	
-			String newSupportedName = StringHelper.toLowerCase(newCustomAuthenticationConfiguration.getName());
-			newSupportedNames.add(newSupportedName);
-
-			ExternalAuthenticatorConfiguration prevExternalAuthenticatorConfiguration = newExternalAuthenticatorConfigurations.get(newSupportedName);
-			if ((prevExternalAuthenticatorConfiguration == null) || (prevExternalAuthenticatorConfiguration.getCustomAuthenticationConfiguration().getVersion() != newCustomAuthenticationConfiguration.getVersion())) {
-				// Destroy old version properly before creating new one
-				if (prevExternalAuthenticatorConfiguration != null) {
-					destroyExternalAuthenticator(prevExternalAuthenticatorConfiguration);
-				}
-
-				// Prepare configuration attributes
-				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
-				for (SimpleCustomProperty simpleCustomProperty : newCustomAuthenticationConfiguration.getCustomAuthenticationAttributes()) {
-					newConfigurationAttributes.put(simpleCustomProperty.getValue1(), simpleCustomProperty);
-				}
-
-				// Create authenticator
-	        	ExternalAuthenticatorType newExternalAuthenticatorType = createExternalAuthenticator(newCustomAuthenticationConfiguration, newConfigurationAttributes);
-
-				ExternalAuthenticatorConfiguration newExternalAuthenticatorConfiguration = new ExternalAuthenticatorConfiguration(newCustomAuthenticationConfiguration, newExternalAuthenticatorType, newConfigurationAttributes);
-
-				// Store configuration and authenticator
-				newExternalAuthenticatorConfigurations.put(newSupportedName, newExternalAuthenticatorConfiguration);
-			}
-		}
-
-		// Remove old external authenticator configurations
-		for (Iterator<Entry<String, ExternalAuthenticatorConfiguration>> it = newExternalAuthenticatorConfigurations.entrySet().iterator(); it.hasNext();) {
-			Entry<String, ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurationEntry = it.next();
-
-			String prevSupportedName = externalAuthenticatorConfigurationEntry.getKey();
-
-			if (!newSupportedNames.contains(prevSupportedName)) {
-				// Destroy old authentication method
-				destroyExternalAuthenticator(externalAuthenticatorConfigurationEntry.getValue());
-				it.remove();
-			}
-		}
-
-		return newExternalAuthenticatorConfigurations;
-	}
-
-	private boolean destroyExternalAuthenticator(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
-		String externalAuthenticatorName = externalAuthenticatorConfiguration.getName();
-
-		boolean result = executeExternalAuthenticatorDestroy(externalAuthenticatorConfiguration);
-		if (!result) {
-			log.error("Failed to destroy authenticator '{0}' correctly", externalAuthenticatorName);
-		}
+	private Map<String, ExternalAuthenticatorConfiguration> reloadExternalConfigurations(List<CustomScriptConfiguration> customScriptConfigurations) {
+		Map<String, ExternalAuthenticatorConfiguration> reloadedExternalConfigurations = new HashMap<String, ExternalAuthenticatorConfiguration>(customScriptConfigurations.size());
 		
-		return result;
+		// Convert CustomScript to old model
+		for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
+			CustomScript customScript = customScriptConfiguration.getCustomScript();
+			CustomAuthenticationConfiguration customAuthenticationConfiguration = new CustomAuthenticationConfiguration();
+			customAuthenticationConfiguration.setName(customScript.getName());
+			customAuthenticationConfiguration.setLevel(customScript.getLevel());
+			
+			String usageType = null;
+			for (SimpleCustomProperty moduleProperty : customScript.getModuleProperties()) {
+				if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
+					usageType = moduleProperty.getValue2();
+					break;
+				}
+			}
+			customAuthenticationConfiguration.setUsageType(AuthenticationScriptUsageType.getByValue(usageType));
+
+			ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = new ExternalAuthenticatorConfiguration(customAuthenticationConfiguration, (CustomAuthenticatorType) customScriptConfiguration.getExternalType(), customScriptConfiguration.getConfigurationAttributes());
+
+			reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getCustomScript().getName()), externalAuthenticatorConfiguration);
+		}
+
+		return reloadedExternalConfigurations;
 	}
+
 
 	public Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> groupExternalAuthenticatorConfigurationsByUsageType(Map<String,  ExternalAuthenticatorConfiguration> externalAuthenticatorConfigurations) {
 		Map<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>> newExternalAuthenticatorConfigurationsByUsageType = new HashMap<AuthenticationScriptUsageType, List<ExternalAuthenticatorConfiguration>>();
@@ -258,8 +161,8 @@ public class ExternalAuthenticationService implements Serializable {
 		return newDefaultExternalAuthenticatorConfigurations;
 	}
 
-	public ExternalAuthenticatorType createExternalAuthenticator(CustomAuthenticationConfiguration customAuthenticationConfiguration, Map<String, SimpleCustomProperty> configurationAttributes) {
-		ExternalAuthenticatorType externalAuthenticator;
+	public CustomAuthenticatorType createExternalAuthenticator(CustomAuthenticationConfiguration customAuthenticationConfiguration, Map<String, SimpleCustomProperty> configurationAttributes) {
+		CustomAuthenticatorType externalAuthenticator;
 		try {
 			externalAuthenticator = createExternalAuthenticatorFromStringWithPythonException(customAuthenticationConfiguration, configurationAttributes);
 		} catch (PythonException ex) {
@@ -278,7 +181,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public boolean executeExternalAuthenticatorIsValidAuthenticationMethod(AuthenticationScriptUsageType usageType, ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
 		try {
 			log.debug("Executing python 'isValidAuthenticationMethod' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes);
 		} catch (Exception ex) {
@@ -291,7 +194,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public String executeExternalAuthenticatorGetAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
 		try {
 			log.debug("Executing python 'getAlternativeAuthenticationMethod' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes);
 		} catch (Exception ex) {
@@ -304,7 +207,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public int executeExternalAuthenticatorGetCountAuthenticationSteps(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
 		try {
 			log.debug("Executing python 'getCountAuthenticationSteps' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.getCountAuthenticationSteps(configurationAttributes);
 		} catch (Exception ex) {
@@ -317,7 +220,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public boolean executeExternalAuthenticatorAuthenticate(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration, Map<String, String[]> requestParameters, int step) {
 		try {
 			log.debug("Executing python 'authenticate' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.authenticate(configurationAttributes, requestParameters, step);
 		} catch (Exception ex) {
@@ -333,7 +236,7 @@ public class ExternalAuthenticationService implements Serializable {
         if (apiVersion > 2) {
 			try {
 				log.debug("Executing python 'logout' authenticator method");
-				ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+				CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 				Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 				return externalAuthenticator.logout(configurationAttributes, requestParameters);
 			} catch (Exception ex) {
@@ -348,7 +251,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public boolean executeExternalAuthenticatorPrepareForStep(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration, Map<String, String[]> requestParameters, int step) {
 		try {
 			log.debug("Executing python 'prepareForStep' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step);
 		} catch (Exception ex) {
@@ -361,7 +264,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public List<String> executeExternalAuthenticatorGetExtraParametersForStep(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration, int step) {
 		try {
 			log.debug("Executing python 'getPageForStep' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.getExtraParametersForStep(configurationAttributes, step);
 		} catch (Exception ex) {
@@ -374,7 +277,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public String executeExternalAuthenticatorGetPageForStep(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration, int step) {
 		try {
 			log.debug("Executing python 'getPageForStep' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.getPageForStep(configurationAttributes, step);
 		} catch (Exception ex) {
@@ -387,7 +290,7 @@ public class ExternalAuthenticationService implements Serializable {
 	public int executeExternalAuthenticatorGetApiVersion(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
 		try {
 			log.debug("Executing python 'getApiVersion' authenticator method");
-			ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
+			CustomAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
 			return externalAuthenticator.getApiVersion();
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
@@ -396,83 +299,15 @@ public class ExternalAuthenticationService implements Serializable {
 		return -1;
 	}
 
-	public boolean executeExternalAuthenticatorDestroy(ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration) {
-    	// Validate API version
-        int apiVersion = executeExternalAuthenticatorGetApiVersion(externalAuthenticatorConfiguration);
-        if (apiVersion > 3) {
-			try {
-				log.debug("Executing python 'destroy' authenticator method");
-				ExternalAuthenticatorType externalAuthenticator = externalAuthenticatorConfiguration.getExternalAuthenticatorType();
-				Map<String, SimpleCustomProperty> configurationAttributes = externalAuthenticatorConfiguration.getConfigurationAttributes();
-				return externalAuthenticator.destroy(configurationAttributes);
-			} catch (Exception ex) {
-				log.error(ex.getMessage(), ex);
-			}
-			return false;
-        }
-
-        return true;
-	}
-
-	public ExternalAuthenticatorType createExternalAuthenticatorFromFile() {
-		ExternalAuthenticatorType externalAuthenticator;
-		try {
-			externalAuthenticator = createExternalAuthenticatorFromFileWithPythonException();
-		} catch (PythonException ex) {
-			log.error("Failed to prepare external authenticator", ex);
-			return null;
-		}
-
-		if (externalAuthenticator == null) {
-			log.debug("Using default external authenticator class");
-			externalAuthenticator = DUMMY_AUTHENTICATOR_TYPE;
-		}
-
-		return externalAuthenticator;
-	}
-
-	public ExternalAuthenticatorType createExternalAuthenticatorFromFileWithPythonException() throws PythonException {
-		String externalAuthenticatorScriptFileName = ConfigurationFactory.getConfiguration().getExternalAuthenticatorScriptFileName();
-		if (StringHelper.isEmpty(externalAuthenticatorScriptFileName)) {
-			return null;
-		}
-
-		String tomcatHome = System.getProperty("catalina.home");
-		if (tomcatHome == null) {
-			return null;
-		}
-
-		String fullPathToExternalAuthenticatorPythonScript = tomcatHome + File.separator + "conf" + File.separator + "python" + File.separator + externalAuthenticatorScriptFileName; 
-
-		ExternalAuthenticatorType externalAuthenticatorType = pythonService.loadPythonScript(fullPathToExternalAuthenticatorPythonScript, PYTHON_ENTRY_INTERCEPTOR_TYPE, ExternalAuthenticatorType.class,  new PyObject[] { new PyLong(System.currentTimeMillis()) });
-
-		boolean initialized = externalAuthenticatorType.init(null);
-		if (initialized) {
-			return externalAuthenticatorType;
-		}
-
-		return null;
-	}
-
-	public ExternalAuthenticatorType createExternalAuthenticatorFromStringWithPythonException(CustomAuthenticationConfiguration customAuthenticationConfiguration, Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
+	public CustomAuthenticatorType createExternalAuthenticatorFromStringWithPythonException(CustomAuthenticationConfiguration customAuthenticationConfiguration, Map<String, SimpleCustomProperty> configurationAttributes) throws PythonException {
 		String customAuthenticationScript = customAuthenticationConfiguration.getCustomAuthenticationScript();
 		if (customAuthenticationScript == null) {
 			return null;
 		}
 
-		ExternalAuthenticatorType externalAuthenticatorType = null;
+		CustomAuthenticatorType externalAuthenticatorType = null;
 
-		InputStream bis = null;
-		try {
-            bis = new ByteArrayInputStream(customAuthenticationScript.getBytes(Util.UTF8_STRING_ENCODING));
-            externalAuthenticatorType = pythonService.loadPythonScript(bis, PYTHON_ENTRY_INTERCEPTOR_TYPE,
-					ExternalAuthenticatorType.class, new PyObject[] { new PyLong(System.currentTimeMillis()) });
-		} catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-        } finally {
-			IOUtils.closeQuietly(bis);
-		}
-
+		externalAuthenticatorType = createExternalAuthenticator(customAuthenticationScript, externalAuthenticatorType);
 		if (externalAuthenticatorType == null) {
 			return null;
 		}
@@ -489,6 +324,21 @@ public class ExternalAuthenticationService implements Serializable {
 		}
 		
 		return null;
+	}
+
+	private CustomAuthenticatorType createExternalAuthenticator(String customAuthenticationScript,
+			CustomAuthenticatorType externalAuthenticatorType) throws PythonException {
+		InputStream bis = null;
+		try {
+            bis = new ByteArrayInputStream(customAuthenticationScript.getBytes(Util.UTF8_STRING_ENCODING));
+            externalAuthenticatorType = pythonService.loadPythonScript(bis, PYTHON_ENTRY_INTERCEPTOR_TYPE,
+					CustomAuthenticatorType.class, new PyObject[] { new PyLong(System.currentTimeMillis()) });
+		} catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+			IOUtils.closeQuietly(bis);
+		}
+		return externalAuthenticatorType;
 	}
 
 	public boolean isEnabled(AuthenticationScriptUsageType usageType) {
