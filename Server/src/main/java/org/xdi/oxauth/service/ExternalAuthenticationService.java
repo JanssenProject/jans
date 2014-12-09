@@ -33,15 +33,15 @@ import org.xdi.exception.PythonException;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
-import org.xdi.oxauth.model.ExternalAuthenticatorConfiguration;
+import org.xdi.model.cusom.script.CustomScriptConfiguration;
+import org.xdi.model.cusom.script.type.CustomScriptType;
+import org.xdi.model.cusom.script.type.auth.CustomAuthenticatorType;
+import org.xdi.model.cusom.script.type.auth.DummyCustomAuthenticatorType;
+import org.xdi.oxauth.model.custom.auth.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.custom.CustomScriptManager;
-import org.xdi.oxauth.service.custom.conf.CustomScript;
-import org.xdi.oxauth.service.custom.conf.CustomScriptType;
-import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
-import org.xdi.oxauth.service.custom.interfaces.auth.DummyCustomAuthenticatorType;
-import org.xdi.oxauth.service.custom.model.CustomScriptConfiguration;
+import org.xdi.oxauth.service.custom.ExtendedCustomScriptManager;
 import org.xdi.service.PythonService;
+import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.util.StringHelper;
 
 /**
@@ -76,12 +76,12 @@ public class ExternalAuthenticationService implements Serializable {
 	private PythonService pythonService;
 	
 	@In
-	private CustomScriptManager customScriptManager;
+	private ExtendedCustomScriptManager extendedCustomScriptManager;
 
 	@Observer(CustomScriptManager.MODIFIED_EVENT_TYPE)
 	public void reload() {
 		// Get actual list of external authenticator configurations
-		List<CustomScriptConfiguration> customScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
+		List<CustomScriptConfiguration> customScriptConfigurations = extendedCustomScriptManager.getCustomScriptConfigurationsByScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
 
 		// Store updated external authenticator configurations
 		this.externalAuthenticatorConfigurations = reloadExternalConfigurations(customScriptConfigurations);

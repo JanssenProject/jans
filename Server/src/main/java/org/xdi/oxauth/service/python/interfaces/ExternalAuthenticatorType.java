@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.python.interfaces;
 
-import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
+import org.xdi.model.cusom.script.type.auth.CustomAuthenticatorType;
 
 /**
  * Base interface for external authentication python script

@@ -4,15 +4,15 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.model;
+package org.xdi.oxauth.model.custom.auth;
 
 import java.util.Map;
 
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.oxauth.service.custom.conf.CustomScript;
-import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
-import org.xdi.oxauth.service.custom.model.CustomScriptConfiguration;
+import org.xdi.model.cusom.script.CustomScriptConfiguration;
+import org.xdi.model.cusom.script.conf.CustomScript;
+import org.xdi.model.cusom.script.type.auth.CustomAuthenticatorType;
 import org.xdi.util.StringHelper;
 
 /**

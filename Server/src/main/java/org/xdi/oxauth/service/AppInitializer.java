@@ -38,15 +38,12 @@ import org.jboss.seam.log.Log;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.SmtpConfiguration;
+import org.xdi.model.cusom.script.type.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
-import org.xdi.oxauth.service.custom.CustomScriptManager;
-import org.xdi.oxauth.service.custom.conf.CustomScriptType;
-import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
-import org.xdi.oxauth.service.custom.interfaces.client.ClientRegistrationType;
+import org.xdi.oxauth.service.custom.ExtendedCustomScriptManager;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
@@ -110,8 +107,8 @@ public class AppInitializer {
         PythonService.instance().initPythonInterpreter();
         
         List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION );
-        CustomScriptManager.instance().migrateOldConfigurations();
-        CustomScriptManager.instance().init(supportedCustomScriptTypes);
+        ExtendedCustomScriptManager.instance().migrateOldConfigurations();
+        ExtendedCustomScriptManager.instance().init(supportedCustomScriptTypes);
     }
 
 	private void createStringEncrypter() {

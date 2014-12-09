@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
+import org.xdi.model.ProgrammingLanguage;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.model.uma.persistence.ProgrammingLanguage;
 import org.xdi.oxauth.model.uma.persistence.UmaPolicy;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.service.uma.PolicyService;

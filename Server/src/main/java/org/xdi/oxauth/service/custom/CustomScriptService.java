@@ -11,6 +11,7 @@ import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.service.custom.script.AbstractCustomScriptService;
 
 /**
  * Operations with custom scripts
