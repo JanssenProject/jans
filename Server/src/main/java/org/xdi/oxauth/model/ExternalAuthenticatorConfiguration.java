@@ -8,52 +8,65 @@ package org.xdi.oxauth.model;
 
 import java.util.Map;
 
+import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.config.CustomAuthenticationConfiguration;
+import org.xdi.oxauth.service.custom.conf.CustomScript;
 import org.xdi.oxauth.service.custom.interfaces.auth.CustomAuthenticatorType;
+import org.xdi.oxauth.service.custom.model.CustomScriptConfiguration;
+import org.xdi.util.StringHelper;
 
 /**
  * External authenticator configuration
  *
- * @author Yuriy Movchan Date: 01.24.2013
+ * @author Yuriy Movchan Date: 01/24/2013
  */
-@Deprecated
 public class ExternalAuthenticatorConfiguration {
-	private CustomAuthenticationConfiguration customAuthenticationConfiguration;
-	private CustomAuthenticatorType externalAuthenticatorType;
-	private Map<String, SimpleCustomProperty> configurationAttributes;
+	private AuthenticationScriptUsageType usageType;
+	private CustomScriptConfiguration customScriptConfiguration;
 
-	public ExternalAuthenticatorConfiguration(
-			CustomAuthenticationConfiguration customAuthenticationConfiguration,
-			CustomAuthenticatorType externalAuthenticatorType, Map<String, SimpleCustomProperty> configurationAttributes) {
-		this.customAuthenticationConfiguration = customAuthenticationConfiguration;
-		this.externalAuthenticatorType = externalAuthenticatorType;
-		this.configurationAttributes = configurationAttributes;
+	public ExternalAuthenticatorConfiguration(CustomScriptConfiguration customScriptConfiguration) {
+		this.customScriptConfiguration = customScriptConfiguration;
+		initUsageType();
+	}
+
+	private void initUsageType() {
+		AuthenticationScriptUsageType tmpUsageType = null;
+		for (SimpleCustomProperty moduleProperty : this.customScriptConfiguration.getCustomScript().getModuleProperties()) {
+			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
+				tmpUsageType = AuthenticationScriptUsageType.getByValue(moduleProperty.getValue2());
+				break;
+			}
+		}
+		this.usageType = tmpUsageType;
 	}
 
 	public String getName() {
-		return customAuthenticationConfiguration.getName();
+		return this.customScriptConfiguration.getCustomScript().getName();
 	}
 
 	public int getLevel() {
-		return customAuthenticationConfiguration.getLevel();
+		return this.customScriptConfiguration.getCustomScript().getLevel();
 	}
 
 	@Deprecated
 	public int getPriority() {
-		return customAuthenticationConfiguration.getPriority();
+		return 0;
 	}
 
-	public CustomAuthenticationConfiguration getCustomAuthenticationConfiguration() {
-		return customAuthenticationConfiguration;
+	public AuthenticationScriptUsageType getUsageType() {
+		return usageType;
+	}
+
+	public CustomScript getCustomScript() {
+		return this.customScriptConfiguration.getCustomScript();
 	}
 
 	public CustomAuthenticatorType getExternalAuthenticatorType() {
-		return externalAuthenticatorType;
+		return (CustomAuthenticatorType) this.customScriptConfiguration.getExternalType();
 	}
 
 	public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
-		return configurationAttributes;
+		return this.customScriptConfiguration.getConfigurationAttributes();
 	}
 
 }

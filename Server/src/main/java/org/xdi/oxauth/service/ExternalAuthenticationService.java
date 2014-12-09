@@ -98,21 +98,7 @@ public class ExternalAuthenticationService implements Serializable {
 		
 		// Convert CustomScript to old model
 		for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
-			CustomScript customScript = customScriptConfiguration.getCustomScript();
-			CustomAuthenticationConfiguration customAuthenticationConfiguration = new CustomAuthenticationConfiguration();
-			customAuthenticationConfiguration.setName(customScript.getName());
-			customAuthenticationConfiguration.setLevel(customScript.getLevel());
-			
-			String usageType = null;
-			for (SimpleCustomProperty moduleProperty : customScript.getModuleProperties()) {
-				if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
-					usageType = moduleProperty.getValue2();
-					break;
-				}
-			}
-			customAuthenticationConfiguration.setUsageType(AuthenticationScriptUsageType.getByValue(usageType));
-
-			ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = new ExternalAuthenticatorConfiguration(customAuthenticationConfiguration, (CustomAuthenticatorType) customScriptConfiguration.getExternalType(), customScriptConfiguration.getConfigurationAttributes());
+			ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = new ExternalAuthenticatorConfiguration(customScriptConfiguration);
 
 			reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getCustomScript().getName()), externalAuthenticatorConfiguration);
 		}
@@ -485,7 +471,7 @@ public class ExternalAuthenticationService implements Serializable {
 			return false;
 		}
 		
-		AuthenticationScriptUsageType externalAuthenticatorUsageType = externalAuthenticatorConfiguration.getCustomAuthenticationConfiguration().getUsageType();
+		AuthenticationScriptUsageType externalAuthenticatorUsageType = externalAuthenticatorConfiguration.getUsageType();
 		
 		// Set default usage type
 		if (externalAuthenticatorUsageType == null) {

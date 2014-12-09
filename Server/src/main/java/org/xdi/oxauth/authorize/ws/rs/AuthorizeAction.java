@@ -363,9 +363,8 @@ public class AuthorizeAction {
         if (StringHelper.isNotEmpty(authMode)) {
             ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticationService.getExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
             if (externalAuthenticatorConfiguration != null) {
-                CustomAuthenticationConfiguration customAuthenticationConfiguration = externalAuthenticatorConfiguration.getCustomAuthenticationConfiguration();
-                parameterMap.put("auth_mode", customAuthenticationConfiguration.getName());
-                parameterMap.put("auth_level", customAuthenticationConfiguration.getLevel());
+                parameterMap.put("auth_mode", externalAuthenticatorConfiguration.getName());
+                parameterMap.put("auth_level", externalAuthenticatorConfiguration.getLevel());
             }
         }
     }
