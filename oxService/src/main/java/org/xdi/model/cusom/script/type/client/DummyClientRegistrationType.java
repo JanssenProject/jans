@@ -1,10 +1,8 @@
 /*
- * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */
-
-package org.xdi.model.cusom.script.type.client;
+ */package org.xdi.model.cusom.script.type.client;
 
 import java.util.Map;
 
