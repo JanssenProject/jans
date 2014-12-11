@@ -73,6 +73,7 @@
         "scopes":"ou=scopes,o=%(inumOrg)s,o=gluu",
         "attributes":"ou=attributes,o=%(inumOrg)s,o=gluu",
         "sessionId":"ou=session,o=%(inumOrg)s,o=gluu",
+        "scripts": "ou=scripts,o=%(inumOrg)s,o=gluu",
         "federationMetadata":"ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu",
         "federationRP":"ou=rp,ou=federation,o=%(inumOrg)s,o=gluu",
         "federationOP":"ou=op,ou=federation,o=%(inumOrg)s,o=gluu",
