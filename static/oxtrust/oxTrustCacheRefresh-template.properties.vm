@@ -1,0 +1,73 @@
+# Define LDAP server configurations
+server.source.configs=#set( $idx = 1 )#foreach( $config in $sourceConfigs )$propUtil.escapeString($config.configId)#if($idx < $sourceConfigs.size()), #end#set( $idx = $idx + 1 )#end
+
+server.inum.config=$propUtil.escapeString($inumConfig.configId)
+server.target.config=$propUtil.escapeString($targetConfig.configId)
+cache.config.sizelimit=$cacheRefreshConfig.cacheSizeLimit
+
+#set( $idx = 1 )
+#foreach( $sourceConfig in $sourceConfigs )
+# Define configuration for source LDAP server #$idx
+#set($ldapConfPrefix = 'ldap.conf.' +  $propUtil.escapeString($sourceConfig.configId))
+#set($key = $ldapConfPrefix + '.bindDN')$key=$propUtil.escapeString($sourceConfig.bindDN)
+#set($key = $ldapConfPrefix + '.bindPassword')$key=#if(!$propUtil.isEmptyString($sourceConfig.bindPassword))$propUtil.encryptString($sourceConfig.bindPassword)#end
+
+#set($key = $ldapConfPrefix + '.servers')$key=$propUtil.simplePropertiesToCommaSeparatedList($sourceConfig.servers)
+#set($key = $ldapConfPrefix + '.maxconnections')$key=$sourceConfig.maxConnections
+#set($key = $ldapConfPrefix + '.useSSL')$key=$sourceConfig.useSSL
+#set($key = $ldapConfPrefix + '.baseDNs')$key=$propUtil.simplePropertiesToCommaSeparatedList($sourceConfig.baseDNs)
+#set($key = $ldapConfPrefix + '.useAnonymousBind')$key=$sourceConfig.useAnonymousBind
+
+#set( $idx = $idx + 1 )
+#end
+# Define configuration for InumDB server
+#set($ldapConfPrefix = 'ldap.conf.' +  $propUtil.escapeString($inumConfig.configId))
+#set($key = $ldapConfPrefix + '.bindDN')$key=$propUtil.escapeString($inumConfig.bindDN)
+#set($key = $ldapConfPrefix + '.bindPassword')$key=#if(!$propUtil.isEmptyString($inumConfig.bindPassword))$propUtil.encryptString($inumConfig.bindPassword)#end
+
+#set($key = $ldapConfPrefix + '.servers')$key=$propUtil.simplePropertiesToCommaSeparatedList($inumConfig.servers)
+#set($key = $ldapConfPrefix + '.maxconnections')$key=$inumConfig.maxConnections
+#set($key = $ldapConfPrefix + '.useSSL')$key=$inumConfig.useSSL
+#set($key = $ldapConfPrefix + '.baseDNs')$key=$propUtil.simplePropertiesToCommaSeparatedList($inumConfig.baseDNs)
+
+#if( $cacheRefreshConfig.updateMethod == "vds" )
+# Define configuration for target server
+#set($ldapConfPrefix = 'ldap.conf.' +  $propUtil.escapeString($targetConfig.configId))
+#set($key = $ldapConfPrefix + '.bindDN')$key=$propUtil.escapeString($targetConfig.bindDN)
+#set($key = $ldapConfPrefix + '.bindPassword')$key=#if(!$propUtil.isEmptyString($targetConfig.bindPassword))$propUtil.encryptString($targetConfig.bindPassword)#end
+
+#set($key = $ldapConfPrefix + '.servers')$key=$propUtil.simplePropertiesToCommaSeparatedList($targetConfig.servers)
+#set($key = $ldapConfPrefix + '.maxconnections')$key=$targetConfig.maxConnections
+#set($key = $ldapConfPrefix + '.useSSL')$key=$targetConfig.useSSL
+#set($key = $ldapConfPrefix + '.baseDNs')$key=$propUtil.simplePropertiesToCommaSeparatedList($targetConfig.baseDNs)
+#end
+# Define compound key
+ldap.conf.source.compoundKey.attr=$propUtil.simplePropertiesToCommaSeparatedList($cacheRefreshConfig.attrs)
+ldap.conf.source.compoundKey.objectClasses=$propUtil.simplePropertiesToCommaSeparatedList($cacheRefreshConfig.objectClasses)
+
+# Define source attributes which application synchronize
+ldap.conf.source.attrs=$propUtil.simplePropertiesToCommaSeparatedList($cacheRefreshConfig.sourceAttributes)
+
+# Define custom filter
+ldap.conf.source.custom.filter=$cacheRefreshConfig.customLdapFilter
+
+# Use VDS or direct copy update method. Allowed values are 'vds', 'copy'
+target.server.update.method=$cacheRefreshConfig.updateMethod
+
+# Keep non cache refresh users. Allowed values are 'true', 'false'
+target.keep.external.person=$cacheRefreshConfig.keepExternalPerson
+
+# Use unlimited search or not. Allowed values are 'true', 'false'
+source.load.use.search.limit=$cacheRefreshConfig.loadSourceUsingSearchLimit
+
+# Define mapping from source attribute names to destination attribute names. It's needed for target.server.update.method=copy only
+#foreach( $attrMapping in $cacheRefreshConfig.attrsMapping )
+ldap.conf.target.attr.mapping.$attrMapping.value2=$attrMapping.value1
+#end
+
+# Snapshot configuration
+snapshot.folder=$propUtil.escapeString($cacheRefreshConfig.snapshotsFolder)
+snapshot.max.count=$cacheRefreshConfig.snapshotsCount
+
+# Interceptor script
+interceptor.script.fileName=$propUtil.escapeString($cacheRefreshConfig.interceptorScriptFileName)
