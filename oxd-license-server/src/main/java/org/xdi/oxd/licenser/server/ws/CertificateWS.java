@@ -4,24 +4,19 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.license.client.Jackson;
-import org.xdi.oxd.license.client.data.CertificateGrantResponse;
 import org.xdi.oxd.license.client.data.ErrorType;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.licenser.server.service.EjbCaService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,26 +32,8 @@ public class CertificateWS {
     LicenseIdService licenseIdService;
     @Inject
     ErrorService errorService;
-
-    @GET
-    @Path("/grant")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response grant(@QueryParam("license_id") String licenseId, @Context HttpServletRequest httpRequest) {
-        LOG.trace("/grant, license_id=" + licenseId);
-        final LdapLicenseId ldapLicenseId = validateLicenseId(licenseId);
-        // todo bound to license_id
-
-        CertificateGrantResponse response = new CertificateGrantResponse();
-        response.setExpiresAt(oneYearFromNow());
-        LOG.trace("/grant, response OK, entity:" + response);
-        return Response.ok().entity(Jackson.asJsonSilently(response)).build();
-    }
-
-    public static Date oneYearFromNow() {
-        final long now = new Date().getTime();
-        final long oneYear = TimeUnit.DAYS.toMillis(364);
-        return new Date(now + oneYear);
-    }
+    @Inject
+    EjbCaService ejbCaService;
 
     @POST
     @Path("/notify")
@@ -70,13 +47,14 @@ public class CertificateWS {
     }
 
     @POST
-    @Path("/update_ejbca")
+    @Path("/sign_csr")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response updateEjbCa(@FormParam("license_id") String licenseId, @Context HttpServletRequest httpRequest) {
-        LOG.trace("/update_ejbca, license_id=" + licenseId);
-        final LdapLicenseId ldapLicenseId =validateLicenseId(licenseId);
+    public Response signCsrByEjbCa(@FormParam("license_id") String licenseId, @FormParam("csr_as_pem") String csrAsPem, @Context HttpServletRequest httpRequest) {
+        LOG.trace("/sign_csr, license_id=" + licenseId);
+        final LdapLicenseId ldapLicenseId = validateLicenseId(licenseId);
+        ejbCaService.createUser(ldapLicenseId);
         // todo increase counter
-        LOG.trace("/update_ejbca, response OK, license_id:" + licenseId);
+        LOG.trace("/sign_csr, response OK, license_id:" + licenseId);
         return Response.ok().entity("").build();
     }
 

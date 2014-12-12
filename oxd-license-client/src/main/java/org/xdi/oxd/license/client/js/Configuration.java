@@ -26,6 +26,16 @@ public class Configuration implements Serializable {
     private String clientId;
     @JsonProperty(value = "license-possible-features")
     private List<String> licensePossibleFeatures;
+    @JsonProperty(value = "ejbca-ws-url")
+    private String ejbCaWsUrl;
+
+    public String getEjbCaWsUrl() {
+        return ejbCaWsUrl;
+    }
+
+    public void setEjbCaWsUrl(String ejbCaWsUrl) {
+        this.ejbCaWsUrl = ejbCaWsUrl;
+    }
 
     public List<String> getLicensePossibleFeatures() {
         return licensePossibleFeatures;
