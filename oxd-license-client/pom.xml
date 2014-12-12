@@ -16,7 +16,7 @@
     </parent>
 
     <build>
-        <finalName>oxd-license-server</finalName>
+        <finalName>oxd-license-client</finalName>
 
         <resources>
             <resource>
