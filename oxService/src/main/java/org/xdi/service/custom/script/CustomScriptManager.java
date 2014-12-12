@@ -165,6 +165,7 @@ public class CustomScriptManager implements Serializable {
 
 		if (customScriptConfigurations == null) {
 			newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>();
+			modified = true;
 		} else {
 			// Clone old map to avoid reload not changed scripts becuase it's time and CPU consuming process
 			newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations);
