@@ -61,7 +61,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 		return result;
 	}
 
-    public List<CustomScript> findCustomScripts(List<CustomScriptType> customScriptTypes, String[] returnAttributes) {
+    public List<CustomScript> findCustomScripts(List<CustomScriptType> customScriptTypes, String ... returnAttributes) {
         String baseDn = baseDn();
         
         if ((customScriptTypes == null) || (customScriptTypes.size() == 0)) {
