@@ -1,3 +1,9 @@
+/*
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.ldap.model;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
