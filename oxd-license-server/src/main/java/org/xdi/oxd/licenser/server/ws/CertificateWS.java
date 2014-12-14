@@ -2,9 +2,13 @@ package org.xdi.oxd.licenser.server.ws;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.ejbca.core.protocol.ws.client.gen.CertificateResponse;
+import org.ejbca.core.protocol.ws.common.CertificateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.data.ErrorType;
+import org.xdi.oxd.license.client.data.SignCsrResponse;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
 import org.xdi.oxd.licenser.server.service.EjbCaService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
@@ -51,11 +55,23 @@ public class CertificateWS {
     @Produces({MediaType.APPLICATION_JSON})
     public Response signCsrByEjbCa(@FormParam("license_id") String licenseId, @FormParam("csr_as_pem") String csrAsPem, @Context HttpServletRequest httpRequest) {
         LOG.trace("/sign_csr, license_id=" + licenseId);
+
+        if (StringUtils.isBlank(csrAsPem)) {
+            errorService.throwError(Response.Status.BAD_REQUEST, ErrorType.CSR_EMPTY);
+        }
+
         final LdapLicenseId ldapLicenseId = validateLicenseId(licenseId);
         ejbCaService.createUser(ldapLicenseId);
-        // todo increase counter
+
+        CertificateResponse certificateResponse = ejbCaService.signCsr(ldapLicenseId.getLicenseId(), ldapLicenseId.getLicenseId(), csrAsPem, CertificateHelper.RESPONSETYPE_CERTIFICATE);
+
+        if (certificateResponse == null || certificateResponse.getData() == null) {
+            errorService.throwError(Response.Status.BAD_REQUEST, ErrorType.EJB_CA_FAILED_TO_SIGN_CSR);
+        }
+
+        SignCsrResponse signCsrResponse = new SignCsrResponse(new String(certificateResponse.getData()));
         LOG.trace("/sign_csr, response OK, license_id:" + licenseId);
-        return Response.ok().entity("").build();
+        return Response.ok().entity(Jackson.asJsonSilently(signCsrResponse)).build();
     }
 
     private LdapLicenseId validateLicenseId(String licenseId) {

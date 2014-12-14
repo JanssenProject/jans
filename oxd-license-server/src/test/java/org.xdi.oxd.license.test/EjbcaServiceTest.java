@@ -22,6 +22,10 @@ package org.xdi.oxd.license.test;
  */
 
 import com.google.inject.Inject;
+import org.apache.commons.io.IOUtils;
+import org.ejbca.core.protocol.ws.client.gen.CertificateResponse;
+import org.ejbca.core.protocol.ws.client.gen.UserDataVOWS;
+import org.ejbca.core.protocol.ws.common.CertificateHelper;
 import org.testng.annotations.*;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
@@ -30,6 +34,9 @@ import org.xdi.oxd.license.client.js.LicenseType;
 import org.xdi.oxd.licenser.server.service.EjbCaService;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
 import org.xdi.oxd.licenser.server.service.LicenseIdService;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author yuriyz on 12/14/2014.
@@ -69,8 +76,23 @@ public class EjbcaServiceTest {
     }
 
     @Test
-    public void createUser() {
-        ejbCaService.createUser(licenseId);
+    public void createUserAndSignCsr() {
+        UserDataVOWS user = ejbCaService.createUser(licenseId);
+
+        CertificateResponse certificateResponse = ejbCaService.signCsr(licenseId.getLicenseId(), licenseId.getLicenseId(), testCsr(), CertificateHelper.RESPONSETYPE_CERTIFICATE);
+        System.out.println("==> Signed certificate.");
+        System.out.println(new String(certificateResponse.getData()));
+
+        // remove user
         ejbCaService.removeUser(licenseId);
+    }
+
+    private static String testCsr() {
+        final InputStream inputStream = org.xdi.oxd.license.test.EjbcaManualTest.class.getResourceAsStream("csr.txt");
+        try {
+            return IOUtils.toString(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

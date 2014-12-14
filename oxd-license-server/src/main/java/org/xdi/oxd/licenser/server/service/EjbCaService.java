@@ -24,10 +24,7 @@ package org.xdi.oxd.licenser.server.service;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.cesecore.util.CryptoProviderTools;
-import org.ejbca.core.protocol.ws.client.gen.EjbcaWS;
-import org.ejbca.core.protocol.ws.client.gen.EjbcaWSService;
-import org.ejbca.core.protocol.ws.client.gen.UserDataVOWS;
-import org.ejbca.core.protocol.ws.client.gen.UserMatch;
+import org.ejbca.core.protocol.ws.client.gen.*;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +83,7 @@ public class EjbCaService {
         return getService().getEjbcaWSPort();
     }
 
-    public void createUser(LdapLicenseId ldapLicenseId) {
+    public UserDataVOWS createUser(LdapLicenseId ldapLicenseId) {
 
         try {
             String licenseId = ldapLicenseId.getLicenseId();
@@ -104,15 +101,17 @@ public class EjbCaService {
             user.setTokenType("USERGENERATED");
             user.setUsername(licenseId);
             getPort().editUser(user);
-
+            return user;
         } catch (Exception e) {
             handle(e);
+            return null;
         }
     }
 
 
     public void removeUser(LdapLicenseId licenseId) {
         try {
+            getPort().revokeUser(licenseId.getLicenseId(), RevokeStatus.REVOKATION_REASON_UNSPECIFIED, true);
         } catch (Exception e) {
             handle(e);
         }
@@ -160,5 +159,14 @@ public class EjbCaService {
 
     private static boolean pathExists(String tomcatHome) {
         return new File(tomcatHome + KEY_STORE_NAME).exists();
+    }
+
+    public CertificateResponse signCsr(String licenseId, String pass, String csrAspkcs10, String responseType) {
+        try {
+            return getPort().pkcs10Request(licenseId, pass, csrAspkcs10, "NULL", responseType);
+        } catch (Exception e) {
+            handle(e);
+            return null;
+        }
     }
 }
