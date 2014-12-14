@@ -26,7 +26,7 @@ import java.io.IOException;
  * @version 0.9, 06/10/2014
  */
 
-@Guice(modules = TestAppModule.class)
+@Guice(modules = org.xdi.oxd.license.test.TestAppModule.class)
 public class LicenseGeneratorTest {
 
     @Inject
