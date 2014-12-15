@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public class SignCsrResponse implements Serializable  {
 
-    @JsonProperty(value = "certificateBase64")
+    @JsonProperty(value = "certificate_base64")
     private String certificateBase64;
 
     public SignCsrResponse() {
