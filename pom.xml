@@ -65,7 +65,7 @@
     <repository>
       <id>local</id>
       <name>oxd local repository</name>
-      <url>file://${project.basedir}/oxd-repo</url>
+      <url>file://${project.basedir}/../oxd-repo</url>
     </repository>
   </repositories>
 
