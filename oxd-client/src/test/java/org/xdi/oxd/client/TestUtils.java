@@ -2,13 +2,7 @@ package org.xdi.oxd.client;
 
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.Assert;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.ClientUtils;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -44,7 +38,7 @@ public class TestUtils {
 
 
     public static TokenResponse obtainAccessToken(String userId, String userSecret, String clientId, String clientSecret, String redirectUrl,
-                                            String p_authorizationEndpoint, String p_tokenEndpoint) {
+                                                  String p_authorizationEndpoint, String p_tokenEndpoint) {
         // 1. Request authorization and receive the authorization code.
         final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(ResponseType.CODE);
@@ -139,9 +133,9 @@ public class TestUtils {
     }
 
     public static ObtainAatOpResponse obtainAat(CommandClient p_commandClient,
-                                   String p_discoveryUrl, String p_umaDiscoveryUrl, String p_redirectUrl,
-                                   String p_clientId, String p_clientSecret,
-                                   String p_userId, String p_userSecret) {
+                                                String p_discoveryUrl, String p_umaDiscoveryUrl, String p_redirectUrl,
+                                                String p_clientId, String p_clientSecret,
+                                                String p_userId, String p_userSecret) {
         final ObtainAatParams params = new ObtainAatParams();
         params.setDiscoveryUrl(p_discoveryUrl);
         params.setUmaDiscoveryUrl(p_umaDiscoveryUrl);
