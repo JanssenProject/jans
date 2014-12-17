@@ -79,7 +79,7 @@ public class EjbcaServiceTest {
     public void createUserAndSignCsr() {
         UserDataVOWS user = ejbCaService.createUser(licenseId);
 
-        CertificateResponse certificateResponse = ejbCaService.signCsr(licenseId.getLicenseId(), licenseId.getLicenseId(), testCsr(), CertificateHelper.RESPONSETYPE_CERTIFICATE);
+        CertificateResponse certificateResponse = ejbCaService.signCsr(licenseId.getLicenseId(), "secret", testCsr(), CertificateHelper.RESPONSETYPE_CERTIFICATE);
         System.out.println("==> Signed certificate.");
         System.out.println(new String(certificateResponse.getData()));
 
