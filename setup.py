@@ -1086,7 +1086,7 @@ class Setup(object):
 
         installObject.orgName = installObject.getPrompt("Enter Organization Name")
         installObject.admin_email = installObject.getPrompt("Enter email address for support at your organization")
-        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1024')
+        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1536')
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
         modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
