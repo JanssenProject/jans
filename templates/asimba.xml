@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+ * Asimba Server
+ * 
+ * Copyright (C) 2012 Asimba
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see www.gnu.org/licenses
+ * 
+ * Asimba - Serious Open Source SSO - More information on www.asimba.org
+ * 
+ -->
+
+<asimba-server>
+	<!--  Server configuration -->
+	<server id="%(hostname)s" friendlyname="<$$A_NAME_FOR_DISCOVERY_PAGE> 'Asimba Baseline Server'">
+		<organization id="%(hostname)s" friendlyname="<$$A_NAME_FOR_DISCOVERY_PAGE> 'Asimba SSO'"/>
+	</server>
+
+	<!-- 
+		Crypto configuration describes the behavior of the central cryptographic services
+		and keystores that are used for protocol operations. There is a keystore that holds
+		the cryptographic credentials (private- and public key and certificate) of the server itself
+		as well as a truststore, that works as a placeholder for certificates of trusted entities 
+		For using SHA2 as signing algorithm, the value of signing algorithm 
+		should be "SHA256withRSA" -->
+	<crypto>
+		<message_digest algorithm="SHA1"/>		
+		<random_generator algorithm="SHA1PRNG" />
+		
+		<signing algorithm="SHA1withRSA">
+			<signingfactory class="com.alfaariss.oa.engine.crypto.keystore.KeystoreSigningFactory">
+				<keystore>
+					<file>${webapp.root}/WEB-INF/sample-data/asimba-demo-keystore.jks</file>
+					<type>JKS</type>
+					<keystore_password>changeit</keystore_password>		
+					<alias>asimba-demo</alias>	
+					<password>changeit</password>
+				</keystore>
+	
+				<!-- No truststore in baseline config yet; to enable the truststore, rename 
+				     the 'no_truststore' element to 'truststore' 
+				-->
+				<no_truststore>
+					<file>${webapp.root}/WEB-INF/sample-data/asimba-demo-truststore.jks</file>
+					<type>JKS</type>
+					<keystore_password>changeit</keystore_password>
+				</no_truststore>
+			</signingfactory>
+		</signing>
+	</crypto>  
+		
+	<!-- Configure sessionfactory implementation and behavior. The baseline server configures
+	     an in-memory session store.
+	 -->
+	<sessionfactory class="com.alfaariss.oa.engine.session.memory.MemorySessionFactory">
+		<expire>900</expire>
+	    <interval>60</interval>
+	    <max>100</max>
+	</sessionfactory>
+
+	<!-- Configure the TicketGrantingTicket-factory implemententation and behavior. The baseline
+	     server configures an in-memory TGT store  -->
+	<tgtfactory class="com.alfaariss.oa.engine.tgt.memory.MemoryTGTFactory">
+		<expire>3600</expire>
+	    <interval>60</interval>
+	    <max>100</max>
+	</tgtfactory>  
+	
+	<!-- 
+		RequestorPoolFactory defines how requestors (sp's) are defined; they can be defined in this configuration file,
+		but they can also be sourced from a table, available through a JDBC-connection (not in baseline config)
+		A ResourcePool groups together the following attributes and behavior for a SP making a request:
+		  * the actual Requestor definitions
+		  * which authentication-profiles are available for a user
+		  * the attributerelease policy to apply
+		  * the pre- and post-authorization policy to apply
+		  * a property-list for each requestor 
+	-->
+	<requestorpoolfactory class="com.alfaariss.oa.engine.requestor.configuration.ConfigurationFactory">
+		<pool id="requestorpool.1" friendlyname="Requestor Pool 1" enabled="true">
+			<authentication forced="false">
+				<profile id="remote.saml2" />
+			</authentication>
+
+    <!--
+       This configuration is for SP which will be connected with Asimba server.
+       Add SP / protecte location in requestFactory section.
+       * Requestor ID: It should be the entityID of SP
+       * FriendlyName: It can be anything. Should be human readable.
+       * enabled: true -->
+
+            <requestors>
+                <requestor id="$$ENTITYID_OF_SP_1"
+                    friendlyname="$$FRIENDLYNAME_FOR_SP"
+                    enabled="true" />
+
+                <requestor id="$$ENTITYID_OF_SP_2"
+                    friendlyname="$$FRIENDLYNAME_FOR_SP"
+                    enabled="true" />
+            </requestors>
+
+            <authorization>
+                <post profile="postauthz.1" />
+            </authorization>
+
+            <attributerelease policy="asimba-saml-proxy.releasepolicy.1" />
+        </pool>
+    </requestorpoolfactory>
+        
+
+	<!-- authentication: define Authentication Profiles; an AuthenticationProfile is made up of one or 
+	     more authentication methods, which are executed sequentially. The behaviour of the actual authentication
+	     methods is defined in the websso section of the configuration  -->
+
+
+    <authentication class="com.alfaariss.oa.engine.authentication.configuration.ConfigurationFactory">
+        <profile id="remote.saml2" friendlyname="remote.saml2" enabled="true">
+            <method id="RemoteSAML" />
+        </profile>
+    </authentication>
+
+
+
+	<!-- websso: configure the behaviour of the server frontend. This is made up of
+	       * authentication: the authentication methods
+	       * profiles: the IDP profiles (SAML, A-Select, etc.)
+	       * postauthorization: the web postauthorization phase
+	-->
+	<websso>
+		<authentication always_show_select_form="false">
+			<methods>
+                <method id="RemoteSAML" friendlyname="Remote SAML authentication"
+                        enabled="true"
+                        response_signing_required="true"
+                        class="com.alfaariss.oa.authentication.remote.saml2.SAML2AuthenticationMethod">
+
+    <!--
+        Custom attribute will be configured here
+        map ext == The source attribute ( i.e: uid, email etc)
+        int == The name of custom attribute  -->
+                <attributemapper>
+                        <map ext="urn:oid:0.9.2342.19200300.100.1.1" int="$$CustomAttribute" />
+                </attributemapper>
+
+    <!--
+         The SAML2 IDP Profile that services the ResponseEndpoint for the Remote SAML2 AuthenticationMethod, implementing a SAML2 SP  -->
+                <idpprofile id="saml2" />
+
+    <!--
+        When IDP could not be automatically selected, use a selector component
+        to select an IDP -->
+                <selector
+                    class="com.alfaariss.oa.authentication.remote.saml2.selector.DefaultSelector"
+                    always_show_select_form="false" />
+
+                  
+                <!--
+                    Indicate whether logout is supported by the SAML-SP profile -->
+                    <logout enabled="false" />
+
+                    <authnstmt>
+                            <window before_offset="1800" after_offset="60" />
+                    </authnstmt>
+
+                <!--
+                    <idps> configure the IDP's that this SAML-SP can use to request authentication. Configure remote IDP/ADFS which will do the authenticati                    on. 
+                    * Download the metdata of remote IDP/ADFS and save it in some location with xml extension. 
+                    * Grab the Base64 encoded SAML certificate of this IDP/ADFS and insert it in the JKS. Check “Work on keystore” in: 
+                        http://www.gluu.org/docs/admin-guide/saml/inbound-saml/#asimba-configuration-with-gluu-server
+                    * idp id: It should be the entityID of remote IDP/ADFS
+                    * friendlyName: Anything human readable
+                    * scoping: false
+                    * avoid_subjectconfirmation: false
+                    * nameidpolicy enabled: false
+                    * “file”: Provide the absolute location of metadata -->
+
+                         <idps id="saml2idps-chained"
+                                class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
+
+                                <!-- our own trusted idp federation -->
+                                
+                                    <idp id="<$$ENTITYID_OF_IDP_1" friendlyname="<$$FRIENDLYNAME_OF_IDP_1" scoping="true"
+                                        avoid_subjectconfirmation="false">
+                                        <nameidpolicy enabled="false" />
+                                            <metadata>
+                                                <file>${webapp.root}/WEB-INF/metadata/idp/$METADATA_OF_IDP_1.xml</file>
+                                            </metadata>
+
+                                    <idp id="<$$ENTITYID_OF_IDP_2" friendlyname="<$$FRIENDLYNAME_OF_IDP_2" scoping="false"
+                                        avoid_subjectconfirmation="false">
+                                        <nameidpolicy enabled="false" />
+                                            <metadata>
+                                                <file>${webapp.root}/WEB-INF/metadata/idp/$$METADATA_OF_IDP_2.xml</file>
+                                            </metadata>
+                                    </idp>
+                    
+                        </idps>
+                    </method>
+                </methods>
+    		</authentication>
+		
+		 
+		<postauthorization enabled="true">
+            <methods>
+		    	<method id="AuthnContextToUserAttributesMethod" friendlyname="Add AuthenticationContext attributes to User attributes"
+			    	class="org.asimba.custom.postauthz.authncontextattribute.AuthnContextToUserAttributes"
+				    enabled="true" >
+                    
+                        <attributes>
+                            <attribute
+                                authnmethod="RemoteSAML"
+                                src="issuer"
+                                dest="issuerIDP"
+                                required="true" />
+                        </attributes>
+                </method>
+            </methods>
+        </postauthorization>
+	</websso>
+	
+	<!--  
+        IDP Profiles.
+        Configure the “baseURL” of Asimba Proxy server. Just add the hostname of your IDP. Rest of the URL will be same as it is by default. -->	
+
+	<profiles>
+		<profile id="saml2" class="com.alfaariss.oa.profile.saml2.SAML2Profile">
+			<baseURL>http://localhost:8080/asimba-wa/profiles/saml2</baseURL>
+			<websso path="/sso/web" />
+			
+			<!-- 
+				requestors : configure the SAML-specific attributes of the requestors that have been
+					declared in the requestorpoolfactory/requestors section
+					When a requestor is not configured here, it is not considered to be a trusted SP
+                    Add metadata of remote SP
+                    requestor id: entityID of remote SP/protected location
+                    “file”: Absolute path of SP metadata. -->
+
+			<requestors signing="TRUE">
+				<requestor id="localhost/AsimbaSimpleSP" 
+						signing="FALSE">
+					<metadata>
+						<file>${webapp.root}/WEB-INF/sample-data/metadata-asimbasimplesp.xml</file>
+						<!-- when metadata is sourced from a URL instead, the configuration could look like this:
+						<http timeout="10000" url="http://my.serviceprovider.com/sp/metadata" />
+						 -->
+					</metadata>
+				</requestor>
+			</requestors>
+			
+			<!-- 
+				Issue Instant configuration; configures the timewindow for validating the timestamp of
+				SAML messages; defaults to 60 seconds before- and after the local time
+				Ensure that the clocks of all elements are synchronized in some way to a trusted time source!
+			 -->
+			<IssueInstant>
+				<window before_offset="60" after_offset="60" />	<!-- defaults -->
+			</IssueInstant>
+			
+			<!-- 
+				Metadata configuration allows specific attributes of the SAML entity to be entered
+				so they can be published as part of the metadata
+			 -->
+			<metadata entityID="http://localhost:8080/asimba-wa/profiles/saml2">
+				<signing enabled="TRUE"/>
+				<organization url="http://www.asimba.org"/>
+			</metadata>
+			
+			<!-- 
+				Configure the SAML profiles, like SSO and Single Logout
+			 -->
+			<profiles>
+				<!-- SAML Profiles configuration -->
+				<profile id="sso/web" class="com.alfaariss.oa.profile.saml2.profile.sso.WebBrowserSSO">
+					<!-- response: configure response settings
+						   response/expiration@offset :(optional) response expiration in seconds, defaults to 60 
+						   response/attributes@nameformat: (optional) specify the format in which attributes 
+						     are returnes
+					 -->
+					<response>
+						<expiration offset="120" />
+						<attributes nameformat="urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified" />
+					</response>
+
+					<!-- authentication: configure for each Asimba AuthenticationProfile, the SAML2 AuthnContext 
+							value to return; i.e.:
+						<authentication>
+							<profile id="local.password" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport" />
+						</authentication>
+						
+						See: http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf
+					 -->					
+					<authentication>
+						<profile id="local.guest" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified" />
+						<profile id="local.identifying" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified" />
+						<profile id="local.asimba.passwd" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" />
+						<profile id="local.sms.cm" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered" />
+						<profile id="local.pwdplussms" authncontext="urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered" />
+					</authentication>
+				
+					
+					<bindings default="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect">
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" />
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+							<property name="path" value="/ui/profiles/saml2/http-post.jsp" />
+						</binding>
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" >
+							<property name="post" value="TRUE" />
+							<property name="path" value="/ui/profiles/saml2/http-artifact-post.jsp" />
+						</binding>
+					</bindings>
+					
+					<nameid default="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">
+					<!-- --> 
+						<format id="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">
+							<!-- attribute@name: optional user attribute name that is used to build specified NameID format 
+							     must be provided when setting opaque to be disabled 
+							-->
+							<attribute name="email"/>
+							
+							<opaque enabled="FALSE" salt="0"/>
+						</format>
+						<format id="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">
+							<length>16</length>
+						</format>
+						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" />
+						
+<!-- 						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:email">
+							<attribute name="email"/>
+						</format>
+ -->
+ 						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+							<attribute name="email"/>
+						</format>
+					</nameid>
+				</profile> <!-- sso/web -->
+				
+				<profile id="sso/logout" class="com.alfaariss.oa.profile.saml2.profile.sso.SingleLogout">
+                    
+					<bindings default="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect">
+                        <binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" />
+                        <binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+                            <property name="path" value="/ui/profiles/saml2/http-post.jsp" />
+                        </binding>
+<!--                        
+                        <binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" >
+                        	<property name="post" value="false" />
+                        	<property name="path" value="/ui/profiles/saml2/http-artifact-post.jsp" />                                                       
+                        </binding>
+                        <binding id="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" />
+ -->
+                    </bindings>
+                    
+                    <nameid>
+						<format id="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">
+							<attribute name="email"/>
+							<opaque enabled="FALSE" salt="0"/>
+						</format>
+						<format id="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">
+							<length>16</length>
+						</format>
+						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" />
+						
+						<!-- dopey adds: -->
+<!-- 						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:email">
+							<attribute name="email"/>
+						</format>
+ -->						<!-- dopey adds until here -->
+						
+						<format id="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+							<attribute name="email"/>
+						</format>
+					</nameid>
+				</profile> <!-- sso/logout -->
+				
+			</profiles>
+			
+		</profile>
+
+		
+		<!-- Also add development profile aselect: -->
+		<profile id="aselect" class="com.alfaariss.oa.profile.aselect.processor.ASelectProcessor" >
+			<redirect_url>http://localhost:8080/asimba-wa/profiles/aselect</redirect_url>
+			
+			<!-- optional websso configuration tweaks -->
+			<websso>
+				<path>/sso</path>
+				<url>http://localhost:8080/asimba-wa/sso</url>
+			</websso>
+			
+			<!-- optional error configuration tweaks -->
+			<error>
+				<jsp path="/ui/profiles/aselect/error.jsp" />
+				<handling local="FALSE" />
+			</error>
+			
+			<!-- configure to not use A-Select WS -->
+			<ws enabled="TRUE" force_requestor_id="FALSE" />
+			
+			<!-- does not work though.. -->
+			<logout enabled="TRUE" />
+			
+			<requesthandlers>
+				<sp enabled="TRUE" app_level="9">
+					<!-- 
+						requestorpool : Configure the requestors from the specified pool
+							as allowed requestors
+					 -->
+					<requestorpool id="requestorpool.1">
+						<signing enabled="FALSE" />
+						<app_level>2</app_level>
+						<!-- uid: when @attribute is not configured, uses the authenticated 
+							userid instead of the configured attribute
+							i.e.
+							<uid attribute="phonenr">
+							will return the value of the "phonenr" attribute as the user-id
+						-->
+						<uid> <!-- attribute="email"  --> 
+							<opaque enabled="FALSE" salt="bad"/>
+						</uid>
+					</requestorpool>
+				</sp>
+				<idp enabled="FALSE" app_level="0">
+					<!-- Optional Requestorpool configuration -->
+				</idp>
+			</requesthandlers>
+			
+			<authentication authsp_level="0">
+				<profile id="local.guest" authsp_level="1" />
+				<profile id="local.identifying" authsp_level="1" />
+				<profile id="local.asimba.passwd" authsp_level="10" />
+				<profile id="local.sms.cm" authsp_level="20" />
+				<profile id="local.pwdplussms" authsp_level="40" />
+			</authentication>
+		</profile>
+		
+	</profiles>
+	
+	<attributegatherer id="asimba.gatherer.1" friendlyname="Collect attributes from all sources" 
+			enabled="true">
+		<processor id="AsimbaUsersXml" friendlyname="Source asimba-users.xml" 
+				class="org.asimba.engine.attribute.gather.processor.file.AsimbaUsersXmlGatherer">
+			<file>${webapp.root}/WEB-INF/sample-data/asimba-users.xml</file>
+			
+			<!-- 
+			gather can specify a whitelist of attributes to gather
+			if omitted, all available attributes are gathered
+			-->
+			<!--
+			<gather>
+				<attribute name="whitelist-attribute-name" />
+			</gather>
+			 -->
+			
+			<mapper>
+				<map ext="ext.phonenr" int="phonenr" />
+			</mapper>
+		</processor>
+	</attributegatherer>
+	
+	
+	<attributerelease class="com.alfaariss.oa.engine.attribute.release.configuration.ConfigurationFactory">
+		<policy id="asimba.releasepolicy.1" friendlyname="Default Attribute Release policy" enabled="true">
+			<attribute name="firstname" />
+			<attribute name="lastname" />
+			<attribute name="email" />
+			<attribute name="role" />
+			<attribute name="country" />	<!-- country is defined in <global ..> attribute section -->
+			<!-- when all available attributes can be released, use the wildcard "*" for name,
+				like:
+				<attribute name="*" />
+				Asimba Baseline keeps the password in the same format as the attributes, so
+				allowing all attributes to be released, would expose the password as well!
+			 -->
+		</policy>
+	</attributerelease>
+	
+	
+	<!--
+	  <postauthorization> defines which profiles are available in this server instance 
+	 -->
+	 
+	 <postauthorization class="com.alfaariss.oa.engine.authorization.configuration.ConfigurationFactory"
+	 		enabled="true">
+	 	<profile id="postauthz.1" friendlyname="Default PostAuthorization Profile" enabled="true">
+	 		<method id="AuthnContextToUserAttributesMethod" />
+	 	</profile>
+	 </postauthorization>
+	
+	  
+	
+	
+	<!--  Helpers -->
+	<helpers>
+		<helper id="stylesheet" enabled="true" 
+			class="com.alfaariss.oa.helper.stylesheet.StyleSheetHelper" />
+	</helpers>
+</asimba-server>
