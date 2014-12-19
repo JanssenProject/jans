@@ -42,6 +42,12 @@ import hashlib
 class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
+
+        self.oxVersion = '1.7.0.Beta4'
+        self.githubBranchName = 'version_1.7'
+
+        self.distFolder = "/opt/dist"
+
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
@@ -74,10 +80,10 @@ class Setup(object):
         self.modifyNetworking = False
         self.downloadSaml = False
 
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-1.7.0-SNAPSHOT.war'
-        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-1.7.0-SNAPSHOT.war'
-        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
-        self.idp_war = 'https://ox.gluu.org/maven/org/xdi/oxIdp/2.4.0-Final/oxIdp-2.4.0-Final.war'
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-%s.war' % self.oxVersion
+        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-%s.war' % self.oxVersion
+        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -152,6 +158,7 @@ class Setup(object):
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
+        self.jarCommand = '/usr/bin/jar'
         self.opensslCommand = '/usr/bin/openssl'
         self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStorePW = 'changeit'
@@ -182,6 +189,8 @@ class Setup(object):
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
         self.ldif_site = '%s/static/cache-refresh/o_site.ldif' % self.install_dir
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
+        self.cas_properties = '%s/cas.properties' % self.outputFolder
+        self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -213,7 +222,11 @@ class Setup(object):
                      self.ldif_scopes: False,
                      self.ldif_clients: False,
                      self.ldif_people: False,
-                     self.ldif_groups: False}
+                     self.ldif_groups: False,
+                     self.cas_properties: False,
+                     self.asimba_configuration: False
+                     }
+                     
 
     def __repr__(self):
         s = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
@@ -241,10 +254,10 @@ class Setup(object):
         f.close()
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args):
+    def run(self, args, cwd=None):
         self.logIt('Running: %s' % ' '.join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
             output, err = p.communicate()
             if output:
                 self.logIt(output)
@@ -554,6 +567,33 @@ class Setup(object):
             self.logIt("Copied %s to %s" % (inFile, destFolder))
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
+            self.logIt(traceback.format_exc(), True)
+
+    def removeFile(self, fileName):
+        try:
+            if os.path.exists(fileName):
+                os.remove(fileName)
+                self.logIt('Removed file: %s' % fileName)
+        except:
+            self.logIt("Error removing file %s" % fileName, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def createDirs(self, name):
+        try:
+            if not os.path.exists(name):
+                os.makedirs(name, 0600)
+                self.logIt('Created dir: %s' % name)
+        except:
+            self.logIt("Error making directory %s" % name, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def removeDirs(self, name):
+        try:
+            if os.path.exists(name):
+                shutil.rmtree(name)
+                self.logIt('Removed dir: %s' % name)
+        except:
+            self.logIt("Error removing directory %s" % name, True)
             self.logIt(traceback.format_exc(), True)
 
     def add_ldap_schema(self):
@@ -878,7 +918,7 @@ class Setup(object):
         self.copyFile("%s/static/oxauth/oxauth-id-gen.py" % self.install_dir, "%s/conf" % self.tomcatHome)
         self.copyFile("%s/static/tomcat/server.xml" % self.install_dir, "%s/conf" % self.tomcatHome)
 
-        os.makedirs("%s/conf/template/conf" % self.tomcatHome)
+        self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
 
     def getPrompt(self, prompt, defaultValue=None):
@@ -1070,6 +1110,42 @@ class Setup(object):
             print "Downloading latest oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
+    
+    def generate_cas_war(self):
+        casWar = 'ox-cas-server-webapp-%s.war' % self.oxVersion
+        distCasPath = '%s/%s' % (self.distFolder, casWar)
+        tmpCasDir = '%s/tmp_cas' % self.distFolder
+
+        print "Unpacking %s..." % casWar
+        self.removeDirs(tmpCasDir)
+        self.createDirs(tmpCasDir)
+
+        self.run([self.jarCommand,
+                  'xf',
+                  distCasPath],
+                 tmpCasDir)
+
+        print "Configuring CAS..."
+        casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
+        casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
+        
+        self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
+
+        print "Generating cas.war..."
+        self.run([self.jarCommand,
+                  'cmf',
+                  'tmp_cas/META-INF/MANIFEST.MF',
+                  'cas.war',
+                  '-C',
+                  '%s/' % tmpCasDir ,
+                  '.'],
+                 self.distFolder)
+
+        print "Copying cas.war into tomcat webapps folder..."
+        self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
+
+        self.removeDirs(tmpCasDir)
+        self.removeFile('%s/cas.war' % self.distFolder)
 
 def print_help():
     print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
@@ -1171,6 +1247,7 @@ if __name__ == '__main__':
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.copy_static()
+            installObject.generate_cas_war()
             installObject.change_ownership()
             installObject.change_permissions()
             installObject.start_services()
