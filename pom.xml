@@ -7,10 +7,9 @@
     <name>oxCore</name>
     <url>http://ox.gluu.org</url>
 
-    <scm>
-        <developerConnection>scm:svn:file:///c:/sourcecontrol/gluu/openxdi_release_trunk/oxCore/tags/oxCore-0.1.5
-        </developerConnection>
-    </scm>
+    <prerequisites>
+        <maven>${maven.min-version}</maven>
+    </prerequisites>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,10 +22,6 @@
         <gxt.version>3.0.1</gxt.version>
         <gwt.version>2.5.0</gwt.version>
     </properties>
-
-    <prerequisites>
-        <maven>${maven.min-version}</maven>
-    </prerequisites>
 
     <repositories>
         <repository>
@@ -46,6 +41,12 @@
             <url>http://ox.gluu.org/maven</url>
         </repository>
     </repositories>
+
+    <scm>
+        <url>https://github.com/GluuFederation/oxCore</url>
+        <connection>scm:git:git://github.com/GluuFederation/oxCore.git</connection>
+        <developerConnection>scm:git:git@github.com:GluuFederation/oxCore.git</developerConnection>
+    </scm>
 
     <modules>
         <module>oxLdap</module>
