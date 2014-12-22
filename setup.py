@@ -920,7 +920,7 @@ class Setup(object):
         self.run(['/bin/chmod', 'a-x', realCertFolder])
         self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
 
-        self.run(['/bin/chmod', '-R', '644', realTomcatWebappsFolder])
+        self.run(['/bin/chmod', '-R', '644', "%s/*" % realTomcatWebappsFolder])
 
     def copy_static(self):
         self.copyFile("%s/static/oxauth/oxauth-id-gen.py" % self.install_dir, "%s/conf" % self.tomcatHome)
