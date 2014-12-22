@@ -906,14 +906,21 @@ class Setup(object):
 
     def change_ownership(self):
         self.logIt("Changing ownership")
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcatHome])
-        self.run(['/bin/chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.tomcat_user_home_lib])
+        realTomcatFolder = os.path.realpath(self.tomcatHome)
+        realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
+
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
+        self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
     def change_permissions(self):
-        self.run(['/bin/chmod', 'a-x', self.certFolder])
-        self.run(['/bin/chmod', '-R', 'u+X', self.certFolder])
+        realCertFolder = os.path.realpath(self.certFolder)
+        realTomcatWebappsFolder = os.path.realpath("%s/webapps" % self.tomcatHome)
+
+        self.run(['/bin/chmod', 'a-x', realCertFolder])
+        self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
+
+        self.run(['/bin/chmod', '-R', '644', realTomcatWebappsFolder])
 
     def copy_static(self):
         self.copyFile("%s/static/oxauth/oxauth-id-gen.py" % self.install_dir, "%s/conf" % self.tomcatHome)
