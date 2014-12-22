@@ -147,8 +147,9 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
-        self.redhat_services = ['tomcat', 'opendj', 'httpd']
-        self.debian_services = [{ 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
+        self.redhat_services = ['tomcat', 'opendj', 'httpd', 'memcached']
+        self.debian_services = [{ 'name' : 'memcached', 'order' : '30', 'runlevel' : '3'},
+                                { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
                                 { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
                                 { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
 
