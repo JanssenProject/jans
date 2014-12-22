@@ -123,6 +123,7 @@ class Setup(object):
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
         self.asimbaJksPass = None
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
+        self.openDjCertFn = '%s/opendj.crt' % self.certFolder
 
         self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
@@ -1111,7 +1112,7 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
     
-    def generate_cas_war(self):
+    def install_cas_war(self):
         casWar = 'ox-cas-server-webapp-%s.war' % self.oxVersion
         distCasPath = '%s/%s' % (self.distFolder, casWar)
         tmpCasDir = '%s/tmp_cas' % self.distFolder
@@ -1146,6 +1147,36 @@ class Setup(object):
 
         self.removeDirs(tmpCasDir)
         self.removeFile('%s/cas.war' % self.distFolder)
+    
+    def export_opendj_public_cert(self):
+        # Load password to acces OpenDJ truststore
+        self.logIt("Reding OpenDJ truststore")
+
+        openDjPinFn = '%s/config/keystore.pin' % self.ldapBaseFolder
+        openDjTruststoreFn = '%s/config/truststore' % self.ldapBaseFolder
+
+        openDjPin = None
+        try:
+            f = open(openDjPinFn)
+            openDjPin = f.read().splitlines()[0]
+            f.close()
+        except:
+            self.logIt("Error reding OpenDJ truststore", True)
+            self.logIt(traceback.format_exc(), True)
+
+        # Export public OpenDJ certificate
+        self.logIt("Exporting OpenDJ certificate")
+        self.run([self.keytoolCommand,
+                  '-exportcert',
+                  '-keystore',
+                  openDjTruststoreFn,
+                  '-storepass',
+                  openDjPin,
+                  '-file',
+                  self.openDjCertFn,
+                  '-alias',
+                  'server-cert',
+                  '-rfc'])
 
 def print_help():
     print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
@@ -1244,10 +1275,11 @@ if __name__ == '__main__':
             installObject.index_opendj()
             installObject.import_ldif()
             installObject.deleteLdapPw()
+            installObject.export_opendj_public_cert()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.copy_static()
-            installObject.generate_cas_war()
+            installObject.install_cas_war()
             installObject.change_ownership()
             installObject.change_permissions()
             installObject.start_services()
