@@ -172,12 +172,12 @@ class Setup(object):
 
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        self.oxauth_ldap_properties = '/opt/tomcat/conf/oxauth-ldap.properties'
-        self.oxauth_config_xml = '/opt/tomcat/conf/oxauth-config.xml'
-        self.oxTrust_properties = '/opt/tomcat/conf/oxTrust.properties'
-        self.oxtrust_ldap_properties = '/opt/tomcat/conf/oxTrustLdap.properties'
-        self.tomcat_gluuTomcatWrapper = '/opt/tomcat/conf/gluuTomcatWrapper.conf'
-        self.tomcat_oxauth_static_conf_json = '/opt/tomcat/conf/oxauth-static-conf.json'
+        self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
+        self.oxauth_config_xml = '%s/conf/oxauth-config.xml' % self.tomcatHome
+        self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
+        self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
+        self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
+        self.tomcat_oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
@@ -195,6 +195,7 @@ class Setup(object):
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
+        self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -228,7 +229,8 @@ class Setup(object):
                      self.ldif_people: False,
                      self.ldif_groups: False,
                      self.cas_properties: False,
-                     self.asimba_configuration: False
+                     self.asimba_configuration: False,
+                     self.asimba_selector_configuration: True
                      }
                      
 
@@ -1127,11 +1129,11 @@ class Setup(object):
             print "Finished downloading latest war files"
 
     def install_cas_war(self):
-        casWar = 'ox-cas-server-webapp.war'
+        casWar = 'oxcas.war'
         distCasPath = '%s/%s' % (self.distFolder, casWar)
         tmpCasDir = '%s/tmp_cas' % self.distFolder
 
-        print "Unpacking %s..." % casWar
+        self.logIt("Unpacking %s..." % casWar)
         self.removeDirs(tmpCasDir)
         self.createDirs(tmpCasDir)
 
@@ -1140,13 +1142,13 @@ class Setup(object):
                   distCasPath],
                  tmpCasDir)
 
-        print "Configuring CAS..."
+        self.logIt("Configuring CAS...")
         casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
         casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
         
         self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
 
-        print "Generating cas.war..."
+        self.logIt("Generating cas.war...")
         self.run([self.jarCommand,
                   'cmf',
                   'tmp_cas/META-INF/MANIFEST.MF',
@@ -1156,11 +1158,47 @@ class Setup(object):
                   '.'],
                  self.distFolder)
 
-        print "Copying cas.war into tomcat webapps folder..."
+        self.logIt("Copying cas.war into tomcat webapps folder...")
         self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
 
         self.removeDirs(tmpCasDir)
         self.removeFile('%s/cas.war' % self.distFolder)
+
+    def install_asimba_war(self):
+        asimbaWar = 'oxasimba.war'
+        distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+        tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
+
+        self.logIt("Unpacking %s..." % asimbaWar)
+        self.removeDirs(tmpAsimbaDir)
+        self.createDirs(tmpAsimbaDir)
+
+        self.run([self.jarCommand,
+                  'xf',
+                  distAsimbaPath],
+                 tmpAsimbaDir)
+
+        self.logIt("Configuring Asimba...")
+        asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
+        asimbaWarConfigurationPath = '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir
+        
+        self.copyFile(asimbaTemplateConfigurationPath, asimbaWarConfigurationPath)
+
+        self.logIt("Generating asimba.war...")
+        self.run([self.jarCommand,
+                  'cmf',
+                  'tmp_asimba/META-INF/MANIFEST.MF',
+                  'asimba.war',
+                  '-C',
+                  '%s/' % tmpAsimbaDir ,
+                  '.'],
+                 self.distFolder)
+
+        self.logIt("Copying asimba.war into tomcat webapps folder...")
+        self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
+
+        self.removeDirs(tmpAsimbaDir)
+        self.removeFile('%s/asimba.war' % self.distFolder)
     
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
@@ -1294,6 +1332,7 @@ if __name__ == '__main__':
             installObject.setup_init_scripts()
             installObject.copy_static()
             installObject.install_cas_war()
+            installObject.install_asimba_war()
             installObject.change_ownership()
             installObject.change_permissions()
             installObject.start_services()
