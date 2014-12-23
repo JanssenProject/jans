@@ -147,8 +147,9 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
-        self.redhat_services = ['tomcat', 'opendj', 'httpd', 'memcached']
+        self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = [{ 'name' : 'memcached', 'order' : '30', 'runlevel' : '3'},
+                                { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
                                 { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
                                 { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
                                 { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
@@ -883,6 +884,9 @@ class Setup(object):
     def start_services(self):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
+
+        self.run([service_path, 'memcached', 'start'])
+
         apache_service_name = 'httpd'
         if self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
@@ -1119,9 +1123,9 @@ class Setup(object):
             print "Downloading latest oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
-    
+
     def install_cas_war(self):
-        casWar = 'ox-cas-server-webapp-%s.war' % self.oxVersion
+        casWar = 'ox-cas-server-webapp.war'
         distCasPath = '%s/%s' % (self.distFolder, casWar)
         tmpCasDir = '%s/tmp_cas' % self.distFolder
 
