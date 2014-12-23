@@ -45,6 +45,7 @@ class Setup(object):
 
         self.oxVersion = '1.7.0.Beta4'
         self.githubBranchName = 'version_1.7'
+        self.promptDownloadWars = True
 
         self.distFolder = "/opt/dist"
 
@@ -80,8 +81,8 @@ class Setup(object):
         self.modifyNetworking = False
         self.downloadSaml = False
 
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/1.7.0-SNAPSHOT/oxtrust-server-%s.war' % self.oxVersion
-        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/1.7.0-SNAPSHOT/oxauth-server-%s.war' % self.oxVersion
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
@@ -1105,12 +1106,13 @@ class Setup(object):
         modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
-        download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
-        if download_wars == 'y':
-            installObject.downloadWars = True
-        deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
-        if deploy_saml == 'y':
-            installObject.downloadSaml = True
+        if self.promptDownloadWars:
+            download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
+            if download_wars == 'y':
+                installObject.downloadWars = True
+            deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
+            if deploy_saml == 'y':
+                installObject.downloadSaml = True
 
     def downloadWarFiles(self):
         if self.downloadSaml:
