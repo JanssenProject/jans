@@ -14,7 +14,7 @@ oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
 dn: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
-displayName: username
+displayName: user_name
 inum: %(inumOrg)s!0009!10B2
 description: Your local username in the Gluu Server
 defaultScope: false
