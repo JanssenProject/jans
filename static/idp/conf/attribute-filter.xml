@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<afp:AttributeFilterPolicyGroup id="ShibbolethFilterPolicy"
+                            xmlns:afp="urn:mace:shibboleth:2.0:afp"
+                            xmlns:basic="urn:mace:shibboleth:2.0:afp:mf:basic"
+                            xmlns:saml="urn:mace:shibboleth:2.0:afp:mf:saml"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xs                                                                                                                          d
+                                                urn:mace:shibboleth:2.0:afp:mf:basic classpath:/schema/shibboleth-2                                                                                                                          .0-afp-mf-basic.xsd
+                                                urn:mace:shibboleth:2.0:afp:mf:saml classpath:/schema/shibboleth-2.                                                                                                                          0-afp-mf-saml.xsd">
+</afp:AttributeFilterPolicyGroup>
