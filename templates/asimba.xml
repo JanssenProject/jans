@@ -108,11 +108,22 @@
 -->
             </requestors>
 
+            <!--START: Demo -->
+  			<requestor id="demo-aselect-sp" friendlyname="Test Request A-Select SP" enabled="true">
+				<properties>
+					<property name="aselect.app_level" value="9" />
+				</properties>                    
+			</requestor>
+			<requestor id="localhost/AsimbaSimpleSP" 
+				friendlyname="Asimba Simple SP" 
+				enabled="true" />
+            <!--END: Demo -->
+			
             <authorization>
                 <post profile="postauthz.1" />
             </authorization>
 
-            <attributerelease policy="asimba-saml-proxy.releasepolicy.1" />
+            <attributerelease policy="asimba.releasepolicy.1" />
         </pool>
     </requestorpoolfactory>
         
@@ -120,15 +131,11 @@
 	<!-- authentication: define Authentication Profiles; an AuthenticationProfile is made up of one or 
 	     more authentication methods, which are executed sequentially. The behaviour of the actual authentication
 	     methods is defined in the websso section of the configuration  -->
-
-
     <authentication class="com.alfaariss.oa.engine.authentication.configuration.ConfigurationFactory">
         <profile id="remote.saml2" friendlyname="remote.saml2" enabled="true">
             <method id="RemoteSAML" />
         </profile>
     </authentication>
-
-
 
 	<!-- websso: configure the behaviour of the server frontend. This is made up of
 	       * authentication: the authentication methods
@@ -143,47 +150,43 @@
                         response_signing_required="true"
                         class="com.alfaariss.oa.authentication.remote.saml2.SAML2AuthenticationMethod">
 
-    <!--
-        Custom attribute will be configured here
-        map ext == The source attribute ( i.e: uid, email etc)
-        int == The name of custom attribute  -->
-                <attributemapper>
-                        <map ext="urn:oid:0.9.2342.19200300.100.1.1" int="$$CustomAttribute" />
-                </attributemapper>
-
-    <!--
-         The SAML2 IDP Profile that services the ResponseEndpoint for the Remote SAML2 AuthenticationMethod, implementing a SAML2 SP  -->
-                <idpprofile id="saml2" />
-
-    <!--
-        When IDP could not be automatically selected, use a selector component
-        to select an IDP -->
-                <selector
-                    class="com.alfaariss.oa.authentication.remote.saml2.selector.DefaultSelector"
-                    always_show_select_form="false" />
+						<!-- Custom attribute will be configured here map ext == The source attribute ( i.e: uid, email etc)
+							int == The name of custom attribute  -->
+						<attributemapper>
+<!--
+		                    <map ext="urn:oid:0.9.2342.19200300.100.1.1" int="$$CustomAttribute" />
+-->
+		                </attributemapper>
+		
+						<!-- The SAML2 IDP Profile that services the ResponseEndpoint for the Remote SAML2 AuthenticationMethod, implementing a SAML2 SP  -->
+		                <idpprofile id="saml2" />
+		
+					    <!-- When IDP could not be automatically selected, use a selector component to select an IDP -->
+		                <selector
+		                    class="com.alfaariss.oa.authentication.remote.saml2.selector.DefaultSelector"
+		                    always_show_select_form="false" />
 
                   
-                <!--
-                    Indicate whether logout is supported by the SAML-SP profile -->
-                    <logout enabled="false" />
+						<!-- Indicate whether logout is supported by the SAML-SP profile -->
+						<logout enabled="false" />
 
-                    <authnstmt>
-                            <window before_offset="1800" after_offset="60" />
-                    </authnstmt>
+						<authnstmt>
+							<window before_offset="1800" after_offset="60" />
+						</authnstmt>
 
-                <!--
-                    <idps> configure the IDP's that this SAML-SP can use to request authentication. Configure remote IDP/ADFS which will do the authenticati                    on. 
-                    * Download the metdata of remote IDP/ADFS and save it in some location with xml extension. 
-                    * Grab the Base64 encoded SAML certificate of this IDP/ADFS and insert it in the JKS. Check �Work on keystore� in: 
-                        http://www.gluu.org/docs/admin-guide/saml/inbound-saml/#asimba-configuration-with-gluu-server
-                    * idp id: It should be the entityID of remote IDP/ADFS
-                    * friendlyName: Anything human readable
-                    * scoping: false
-                    * avoid_subjectconfirmation: false
-                    * nameidpolicy enabled: false
-                    * �file�: Provide the absolute location of metadata -->
+						<!--
+							<idps> configure the IDP's that this SAML-SP can use to request authentication. Configure remote IDP/ADFS which will do the authenticati                    on. 
+							* Download the metdata of remote IDP/ADFS and save it in some location with xml extension. 
+							* Grab the Base64 encoded SAML certificate of this IDP/ADFS and insert it in the JKS. Check �Work on keystore� in: 
+							    http://www.gluu.org/docs/admin-guide/saml/inbound-saml/#asimba-configuration-with-gluu-server
+							* idp id: It should be the entityID of remote IDP/ADFS
+							* friendlyName: Anything human readable
+							* scoping: false
+							* avoid_subjectconfirmation: false
+							* nameidpolicy enabled: false
+							* �file�: Provide the absolute location of metadata -->
 
-                         <idps id="saml2idps-chained"
+						<idps id="saml2idps-chained"
                                 class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
 
                                 <!-- our own trusted idp federation -->
@@ -196,28 +199,20 @@
                                             </metadata>
                                     </idp>
  -->
-                        </idps>
-                    </method>
-                </methods>
-    		</authentication>
+						</idps>
+					</method>
+				</methods>
+		</authentication>
 		
-		 
 		<postauthorization enabled="true">
-            <methods>
-		    	<method id="AuthnContextToUserAttributesMethod" friendlyname="Add AuthenticationContext attributes to User attributes"
-			    	class="org.asimba.custom.postauthz.authncontextattribute.AuthnContextToUserAttributes"
-				    enabled="true" >
-                    
-                        <attributes>
-                            <attribute
-                                authnmethod="RemoteSAML"
-                                src="issuer"
-                                dest="issuerIDP"
-                                required="true" />
-                        </attributes>
-                </method>
-            </methods>
-        </postauthorization>
+			<methods>
+				<method id="AuthnContextToUserAttributesMethod" friendlyname="Add AuthenticationContext attributes to User attributes" class="org.asimba.custom.postauthz.authncontextattribute.AuthnContextToUserAttributes" enabled="true">
+					<attributes>
+						<attribute authnmethod="RemoteSAML" src="issuer" dest="issuerIDP" required="true" />
+					</attributes>
+				</method>
+			</methods>
+		</postauthorization>
 	</websso>
 	
 	<!--  
