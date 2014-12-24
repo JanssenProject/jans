@@ -109,11 +109,6 @@
             </requestors>
 
             <!--START: Demo -->
-  			<requestor id="demo-aselect-sp" friendlyname="Test Request A-Select SP" enabled="true">
-				<properties>
-					<property name="aselect.app_level" value="9" />
-				</properties>                    
-			</requestor>
 			<requestor id="localhost/AsimbaSimpleSP" 
 				friendlyname="Asimba Simple SP" 
 				enabled="true" />
@@ -372,68 +367,10 @@
 			</profiles>
 			
 		</profile>
-
-		
-		<!-- Also add development profile aselect: -->
-		<profile id="aselect" class="com.alfaariss.oa.profile.aselect.processor.ASelectProcessor" >
-			<redirect_url>https://%(hostaname)s/asimba/profiles/aselect</redirect_url>
-			
-			<!-- optional websso configuration tweaks -->
-			<websso>
-				<path>/sso</path>
-				<url>https://%(hostaname)s/asimba/sso</url>
-			</websso>
-			
-			<!-- optional error configuration tweaks -->
-			<error>
-				<jsp path="/ui/profiles/aselect/error.jsp" />
-				<handling local="FALSE" />
-			</error>
-			
-			<!-- configure to not use A-Select WS -->
-			<ws enabled="TRUE" force_requestor_id="FALSE" />
-			
-			<!-- does not work though.. -->
-			<logout enabled="TRUE" />
-			
-			<requesthandlers>
-				<sp enabled="TRUE" app_level="9">
-					<!-- 
-						requestorpool : Configure the requestors from the specified pool
-							as allowed requestors
-					 -->
-					<requestorpool id="requestorpool.1">
-						<signing enabled="FALSE" />
-						<app_level>2</app_level>
-						<!-- uid: when @attribute is not configured, uses the authenticated 
-							userid instead of the configured attribute
-							i.e.
-							<uid attribute="phonenr">
-							will return the value of the "phonenr" attribute as the user-id
-						-->
-						<uid> <!-- attribute="email"  --> 
-							<opaque enabled="FALSE" salt="bad"/>
-						</uid>
-					</requestorpool>
-				</sp>
-				<idp enabled="FALSE" app_level="0">
-					<!-- Optional Requestorpool configuration -->
-				</idp>
-			</requesthandlers>
-			
-			<authentication authsp_level="0">
-				<profile id="local.guest" authsp_level="1" />
-				<profile id="local.identifying" authsp_level="1" />
-				<profile id="local.asimba.passwd" authsp_level="10" />
-				<profile id="local.sms.cm" authsp_level="20" />
-				<profile id="local.pwdplussms" authsp_level="40" />
-			</authentication>
-		</profile>
-		
 	</profiles>
 	
 	<attributegatherer id="asimba.gatherer.1" friendlyname="Collect attributes from all sources" 
-			enabled="true">
+			enabled="false">
 		<processor id="AsimbaUsersXml" friendlyname="Source asimba-users.xml" 
 				class="org.asimba.engine.attribute.gather.processor.file.AsimbaUsersXmlGatherer">
 			<file>${webapp.root}/WEB-INF/sample-data/asimba-users.xml</file>
