@@ -23,8 +23,8 @@
 
 <asimba-server>
 	<!--  Server configuration -->
-	<server id="%(hostname)s" friendlyname="<$$A_NAME_FOR_DISCOVERY_PAGE> 'Asimba Baseline Server'">
-		<organization id="%(hostname)s" friendlyname="<$$A_NAME_FOR_DISCOVERY_PAGE> 'Asimba SSO'"/>
+	<server id="%(hostname)s" friendlyname="Gluu Asimba Proxy">
+		<organization id="%(hostname)s" friendlyname="Gluu Asimba SSO"/>
 	</server>
 
 	<!-- 
@@ -41,11 +41,11 @@
 		<signing algorithm="SHA1withRSA">
 			<signingfactory class="com.alfaariss.oa.engine.crypto.keystore.KeystoreSigningFactory">
 				<keystore>
-					<file>${webapp.root}/WEB-INF/sample-data/asimba-demo-keystore.jks</file>
+					<file>%(asimbaJksFn)s</file>
 					<type>JKS</type>
-					<keystore_password>changeit</keystore_password>		
-					<alias>asimba-demo</alias>	
-					<password>changeit</password>
+					<keystore_password>%(asimbaJksPass)</keystore_password>		
+					<alias>%(hostname)</alias>	
+					<password>%(asimbaJksPass)</password>
 				</keystore>
 	
 				<!-- No truststore in baseline config yet; to enable the truststore, rename 
@@ -101,13 +101,11 @@
        * enabled: true -->
 
             <requestors>
+<!--                
                 <requestor id="$$ENTITYID_OF_SP_1"
                     friendlyname="$$FRIENDLYNAME_FOR_SP"
                     enabled="true" />
-
-                <requestor id="$$ENTITYID_OF_SP_2"
-                    friendlyname="$$FRIENDLYNAME_FOR_SP"
-                    enabled="true" />
+-->
             </requestors>
 
             <authorization>
@@ -176,35 +174,28 @@
                 <!--
                     <idps> configure the IDP's that this SAML-SP can use to request authentication. Configure remote IDP/ADFS which will do the authenticati                    on. 
                     * Download the metdata of remote IDP/ADFS and save it in some location with xml extension. 
-                    * Grab the Base64 encoded SAML certificate of this IDP/ADFS and insert it in the JKS. Check “Work on keystore” in: 
+                    * Grab the Base64 encoded SAML certificate of this IDP/ADFS and insert it in the JKS. Check ï¿½Work on keystoreï¿½ in: 
                         http://www.gluu.org/docs/admin-guide/saml/inbound-saml/#asimba-configuration-with-gluu-server
                     * idp id: It should be the entityID of remote IDP/ADFS
                     * friendlyName: Anything human readable
                     * scoping: false
                     * avoid_subjectconfirmation: false
                     * nameidpolicy enabled: false
-                    * “file”: Provide the absolute location of metadata -->
+                    * ï¿½fileï¿½: Provide the absolute location of metadata -->
 
                          <idps id="saml2idps-chained"
                                 class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
 
                                 <!-- our own trusted idp federation -->
-                                
+<!--                                
                                     <idp id="<$$ENTITYID_OF_IDP_1" friendlyname="<$$FRIENDLYNAME_OF_IDP_1" scoping="true"
                                         avoid_subjectconfirmation="false">
                                         <nameidpolicy enabled="false" />
                                             <metadata>
                                                 <file>${webapp.root}/WEB-INF/metadata/idp/$METADATA_OF_IDP_1.xml</file>
                                             </metadata>
-
-                                    <idp id="<$$ENTITYID_OF_IDP_2" friendlyname="<$$FRIENDLYNAME_OF_IDP_2" scoping="false"
-                                        avoid_subjectconfirmation="false">
-                                        <nameidpolicy enabled="false" />
-                                            <metadata>
-                                                <file>${webapp.root}/WEB-INF/metadata/idp/$$METADATA_OF_IDP_2.xml</file>
-                                            </metadata>
                                     </idp>
-                    
+ -->
                         </idps>
                     </method>
                 </methods>
@@ -231,11 +222,11 @@
 	
 	<!--  
         IDP Profiles.
-        Configure the “baseURL” of Asimba Proxy server. Just add the hostname of your IDP. Rest of the URL will be same as it is by default. -->	
+        Configure the ï¿½baseURLï¿½ of Asimba Proxy server. Just add the hostname of your IDP. Rest of the URL will be same as it is by default. -->	
 
 	<profiles>
 		<profile id="saml2" class="com.alfaariss.oa.profile.saml2.SAML2Profile">
-			<baseURL>http://localhost:8080/asimba-wa/profiles/saml2</baseURL>
+			<baseURL>https://%(hostaname)s/asimba/profiles/saml2</baseURL>
 			<websso path="/sso/web" />
 			
 			<!-- 
@@ -244,7 +235,7 @@
 					When a requestor is not configured here, it is not considered to be a trusted SP
                     Add metadata of remote SP
                     requestor id: entityID of remote SP/protected location
-                    “file”: Absolute path of SP metadata. -->
+                    ï¿½fileï¿½: Absolute path of SP metadata. -->
 
 			<requestors signing="TRUE">
 				<requestor id="localhost/AsimbaSimpleSP" 
@@ -271,7 +262,7 @@
 				Metadata configuration allows specific attributes of the SAML entity to be entered
 				so they can be published as part of the metadata
 			 -->
-			<metadata entityID="http://localhost:8080/asimba-wa/profiles/saml2">
+			<metadata entityID="https://%(hostaname)s/asimba/profiles/saml2">
 				<signing enabled="TRUE"/>
 				<organization url="http://www.asimba.org"/>
 			</metadata>
@@ -390,12 +381,12 @@
 		
 		<!-- Also add development profile aselect: -->
 		<profile id="aselect" class="com.alfaariss.oa.profile.aselect.processor.ASelectProcessor" >
-			<redirect_url>http://localhost:8080/asimba-wa/profiles/aselect</redirect_url>
+			<redirect_url>https://%(hostaname)s/asimba/profiles/aselect</redirect_url>
 			
 			<!-- optional websso configuration tweaks -->
 			<websso>
 				<path>/sso</path>
-				<url>http://localhost:8080/asimba-wa/sso</url>
+				<url>https://%(hostaname)s/asimba/sso</url>
 			</websso>
 			
 			<!-- optional error configuration tweaks -->
