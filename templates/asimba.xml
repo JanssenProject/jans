@@ -43,9 +43,9 @@
 				<keystore>
 					<file>%(asimbaJksFn)s</file>
 					<type>JKS</type>
-					<keystore_password>%(asimbaJksPass)</keystore_password>		
-					<alias>%(hostname)</alias>	
-					<password>%(asimbaJksPass)</password>
+					<keystore_password>%(asimbaJksPass)s</keystore_password>		
+					<alias>%(hostname)s</alias>	
+					<password>%(asimbaJksPass)s</password>
 				</keystore>
 	
 				<!-- No truststore in baseline config yet; to enable the truststore, rename 
@@ -109,6 +109,11 @@
             </requestors>
 
             <!--START: Demo -->
+  			<requestor id="demo-aselect-sp" friendlyname="Test Request A-Select SP" enabled="true">
+				<properties>
+					<property name="aselect.app_level" value="9" />
+				</properties>                    
+			</requestor>
 			<requestor id="localhost/AsimbaSimpleSP" 
 				friendlyname="Asimba Simple SP" 
 				enabled="true" />
@@ -216,7 +221,7 @@
 
 	<profiles>
 		<profile id="saml2" class="com.alfaariss.oa.profile.saml2.SAML2Profile">
-			<baseURL>https://%(hostaname)s/asimba/profiles/saml2</baseURL>
+			<baseURL>https://%(hostname)s/asimba/profiles/saml2</baseURL>
 			<websso path="/sso/web" />
 			
 			<!-- 
@@ -252,7 +257,7 @@
 				Metadata configuration allows specific attributes of the SAML entity to be entered
 				so they can be published as part of the metadata
 			 -->
-			<metadata entityID="https://%(hostaname)s/asimba/profiles/saml2">
+			<metadata entityID="https://%(hostname)s/asimba/profiles/saml2">
 				<signing enabled="TRUE"/>
 				<organization url="http://www.asimba.org"/>
 			</metadata>
@@ -370,7 +375,7 @@
 	</profiles>
 	
 	<attributegatherer id="asimba.gatherer.1" friendlyname="Collect attributes from all sources" 
-			enabled="false">
+			enabled="true">
 		<processor id="AsimbaUsersXml" friendlyname="Source asimba-users.xml" 
 				class="org.asimba.engine.attribute.gather.processor.file.AsimbaUsersXmlGatherer">
 			<file>${webapp.root}/WEB-INF/sample-data/asimba-users.xml</file>
