@@ -45,7 +45,7 @@ class Setup(object):
 
         self.oxVersion = '1.7.0.Beta5'
         self.githubBranchName = 'version_1.7'
-        self.promptDownloadWars = True
+        self.promptDownloadWars = False
 
         self.distFolder = "/opt/dist"
 
@@ -79,7 +79,7 @@ class Setup(object):
 
         self.downloadWars = False
         self.modifyNetworking = False
-        self.downloadSaml = False
+        self.configureSaml = False
 
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -247,8 +247,7 @@ class Setup(object):
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
             + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
         if self.promptDownloadWars:
-            s += 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n" \
-                 + 'Download and install SAML'.ljust(30) + `self.downloadSaml`.rjust(35) + "\n"
+            s += 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
         return s
 
     def logIt(self, msg, errorLog=False):
@@ -991,7 +990,7 @@ class Setup(object):
                 os.makedirs(self.oxPhotosFolder)
             if not os.path.exists(self.oxTrustRemovedFolder):
                 os.makedirs(self.oxTrustRemovedFolder)
-            if self.downloadSaml:
+            if self.configureSaml:
                 if not os.path.exists(self.idpFolder):
                     os.makedirs(self.idpFolder)
                 if not os.path.exists(self.idpMetadataFolder):
@@ -1110,23 +1109,22 @@ class Setup(object):
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
         if self.promptDownloadWars:
-            download_wars = self.getPrompt("Download latest oxAuth and oxTrust war files?", "No")[0].lower()
+            download_wars = self.getPrompt("Download latest war files?", "No")[0].lower()
             if download_wars == 'y':
                 installObject.downloadWars = True
-            deploy_saml = self.getPrompt("Download and deploy saml IDP and SP?", "No")[0].lower()
-            if deploy_saml == 'y':
-                installObject.downloadSaml = True
+        deploy_saml = self.getPrompt("Configure Shibboleth SAML IDP and SP?", "No")[0].lower()
+        if deploy_saml == 'y':
+            installObject.configureSaml = True
+
 
     def downloadWarFiles(self):
-        if self.downloadSaml:
-            print "Downloading latest Shibboleth idp war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
-
         if self.downloadWars:
             print "Downloading latest oxAuth war file..."
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
             print "Downloading latest oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
+            print "Downloading latest Shibboleth IDP war file..."
+            self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
             print "Finished downloading latest war files"
 
     def install_cas_war(self):
@@ -1241,12 +1239,14 @@ def print_help():
     print "    -f   specify setup.properties file"
     print "    -d   specify directory of installation"
     print "    -n   No interactive prompt before install starts."
+    print "    -w   Get the latest war files"
 
 def getOpts(argv, install_dir=None):
     setup_properties = None
     noPrompt = False
+    downloadWarsBoolean = False
     try:
-        opts, args = getopt.getopt(argv, "d:hnf:")
+        opts, args = getopt.getopt(argv, "d:hnf:w")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1267,15 +1267,19 @@ def getOpts(argv, install_dir=None):
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
             noPrompt = True
-    return setup_properties, noPrompt, install_dir
+        elif opt == "-w":
+            downloadWarsBoolean = True
+    return setup_properties, noPrompt, install_dir, downloadWarsBoolean
 
 if __name__ == '__main__':
     setup_properties = None
     noPrompt = False
+    downloadWarOption = False
     install_dir = "."
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, install_dir = getOpts(sys.argv[1:], install_dir)
+        setup_properties, noPrompt, install_dir, downloadWarOption = getOpts(sys.argv[1:], install_dir)
     installObject = Setup(install_dir)
+    installObject.downloadWars = downloadWarOption
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
