@@ -22,14 +22,15 @@ import org.xdi.model.cusom.script.type.client.DummyClientRegistrationType;
  */
 public enum CustomScriptType implements LdapEnum {
 	
-	CUSTOM_AUTHENTICATION("custom_authentication", CustomAuthenticatorType.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
-	CLIENT_REGISTRATION("client_registration", ClientRegistrationType.class, "ClientRegistration", new DummyClientRegistrationType());
+	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
+	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, "ClientRegistration", new DummyClientRegistrationType());
 
 	private String value;
+	private String displayName;
 	private Class<? extends BaseExternalType> customScriptType;
 	private String pythonClass;
 	private BaseExternalType defaultImplementation;
-
+	
 	private static Map<String, CustomScriptType> mapByValues = new HashMap<String, CustomScriptType>();
 	static {
 		for (CustomScriptType enumType : values()) {
@@ -37,11 +38,20 @@ public enum CustomScriptType implements LdapEnum {
 		}
 	}
 
-	private CustomScriptType(String value, Class<? extends BaseExternalType> customScriptType, String pythonClass, BaseExternalType defaultImplementation) {
+	private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, String pythonClass, BaseExternalType defaultImplementation) {
+		this.displayName = displayName;
 		this.value = value;
 		this.customScriptType = customScriptType;
 		this.pythonClass = pythonClass;
 		this.defaultImplementation = defaultImplementation;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public String getValue() {

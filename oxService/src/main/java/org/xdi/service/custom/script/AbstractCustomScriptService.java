@@ -15,7 +15,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
-import org.xdi.model.cusom.script.conf.CustomScript;
+import org.xdi.model.cusom.script.CustomScript;
 import org.xdi.model.cusom.script.type.CustomScriptType;
 
 import com.unboundid.ldap.sdk.Filter;

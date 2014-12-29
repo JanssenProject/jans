@@ -2,12 +2,12 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.cusom.script;
+ */package org.xdi.model.cusom.script.conf;
 
 import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.cusom.script.conf.CustomScript;
+import org.xdi.model.cusom.script.CustomScript;
 import org.xdi.model.cusom.script.type.BaseExternalType;
 
 /**

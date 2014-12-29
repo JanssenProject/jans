@@ -31,8 +31,8 @@ import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.cusom.script.CustomScriptConfiguration;
-import org.xdi.model.cusom.script.conf.CustomScript;
+import org.xdi.model.cusom.script.CustomScript;
+import org.xdi.model.cusom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.cusom.script.type.BaseExternalType;
 import org.xdi.model.cusom.script.type.CustomScriptType;
 import org.xdi.service.PythonService;
@@ -104,6 +104,7 @@ public class CustomScriptManager implements Serializable {
 	}
 
 	@Destroy
+	@Asynchronous
 	public void destroy() {
 		log.debug("Destroying custom scripts configurations");
 		if (this.customScriptConfigurations == null) {
@@ -192,7 +193,13 @@ public class CustomScriptManager implements Serializable {
 
 				// Prepare configuration attributes
 				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
-				for (SimpleCustomProperty simpleCustomProperty : loadedCustomScript.getConfigurationProperties()) {
+
+				List<SimpleCustomProperty> simpleCustomProperties = loadedCustomScript.getConfigurationProperties();
+				if (simpleCustomProperties == null) {
+					simpleCustomProperties = new ArrayList<SimpleCustomProperty>(0);
+				}
+
+				for (SimpleCustomProperty simpleCustomProperty : simpleCustomProperties) {
 					newConfigurationAttributes.put(simpleCustomProperty.getValue1(), simpleCustomProperty);
 				}
 

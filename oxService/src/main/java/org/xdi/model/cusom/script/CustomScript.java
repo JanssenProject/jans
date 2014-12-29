@@ -2,11 +2,11 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.cusom.script.conf;
+ */package org.xdi.model.cusom.script;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -62,9 +62,26 @@ public class CustomScript extends BaseEntry {
 
     @LdapAttribute(name = "gluuStatus")
     private boolean enabled;
-	
-	public CustomScript() {
-		this.configurationProperties = new ArrayList<SimpleCustomProperty>();
+
+    @Transient
+    private boolean modified;
+
+	public CustomScript() {}
+
+	public CustomScript(CustomScript customScript) {
+		super(customScript.getDn());
+		this.inum = customScript.inum;
+		this.name = customScript.name;
+		this.description = customScript.description;
+		this.script = customScript.script;
+		this.scriptType = customScript.scriptType;
+		this.programmingLanguage = customScript.programmingLanguage;
+		this.moduleProperties = customScript.moduleProperties;
+		this.configurationProperties = customScript.configurationProperties;
+		this.level = customScript.level;
+		this.revision = customScript.revision;
+		this.enabled = customScript.enabled;
+		this.modified = customScript.modified;
 	}
 
 	public String getInum() {
@@ -153,6 +170,14 @@ public class CustomScript extends BaseEntry {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public boolean isModified() {
+		return modified;
+	}
+
+	public void setModified(boolean modified) {
+		this.modified = modified;
 	}
 
 }
