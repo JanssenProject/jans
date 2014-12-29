@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.cusom.script.CustomScriptConfiguration;
-import org.xdi.model.cusom.script.conf.CustomScript;
+import org.xdi.model.cusom.script.CustomScript;
+import org.xdi.model.cusom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.cusom.script.type.auth.CustomAuthenticatorType;
 import org.xdi.util.StringHelper;
 
