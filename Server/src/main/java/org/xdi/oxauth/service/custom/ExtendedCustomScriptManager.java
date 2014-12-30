@@ -6,50 +6,23 @@
 
 package org.xdi.oxauth.service.custom;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.io.IOUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
-import org.python.core.PyLong;
-import org.python.core.PyObject;
-import org.xdi.exception.PythonException;
 import org.xdi.model.ProgrammingLanguage;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
-import org.xdi.model.cusom.script.CustomScript;
-import org.xdi.model.cusom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.cusom.script.type.BaseExternalType;
-import org.xdi.model.cusom.script.type.CustomScriptType;
+import org.xdi.model.custom.script.CustomScriptType;
+import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
-import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.util.INumGenerator;
-import org.xdi.util.StringHelper;
 
 /**
  * Provides actual versions of scrips
@@ -94,7 +67,13 @@ public class ExtendedCustomScriptManager extends CustomScriptManager {
 			customScript.setLevel(customAuthenticationConfiguration.getLevel());
 			customScript.setEnabled(customAuthenticationConfiguration.isEnabled());
 			customScript.setRevision(customAuthenticationConfiguration.getVersion());
-			customScript.setScript(customAuthenticationConfiguration.getCustomAuthenticationScript());
+
+			// Corect package name and base type
+			String script = customAuthenticationConfiguration.getCustomAuthenticationScript();
+			script = script.
+					replaceAll("from org.xdi.oxauth.service.python.interfaces import", "from org.xdi.model.custom.script.type.auth import").
+					replaceAll("ExternalAuthenticatorType", "CustomAuthenticatorType");
+			customScript.setScript(script);
 
 			List<SimpleCustomProperty> moduleProperties = Arrays.asList(new SimpleCustomProperty("usage_type", customAuthenticationConfiguration.getUsageType().toString()));
 			customScript.setModuleProperties(moduleProperties);

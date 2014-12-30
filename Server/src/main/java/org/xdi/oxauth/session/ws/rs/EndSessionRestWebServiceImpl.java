@@ -8,7 +8,6 @@ package org.xdi.oxauth.session.ws.rs;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -18,14 +17,13 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.model.AuthenticationScriptUsageType;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.custom.auth.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
-import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.oxauth.service.RedirectionUriService;
@@ -78,15 +76,15 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
                 isExternalAuthenticatorLogoutPresent = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.LOGOUT);
                 if (isExternalAuthenticatorLogoutPresent) {
-                    ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticationService
-                            .determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.LOGOUT, 1, "1", "logout");
+                	CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+                            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.LOGOUT, 1, "1", "logout");
 
-                    if (externalAuthenticatorConfiguration == null) {
+                    if (customScriptConfiguration == null) {
                         log.error("Failed to get ExternalAuthenticatorConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
                                 1, "1", "logout");
                     } else {
                         externalLogoutResult = externalAuthenticationService.executeExternalAuthenticatorAuthenticate(
-                                externalAuthenticatorConfiguration, null, 1);
+                                customScriptConfiguration, null, 1);
                         log.info("Authentication result for {0}. auth_step: {1}, result: {2}", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
                     }
                 }

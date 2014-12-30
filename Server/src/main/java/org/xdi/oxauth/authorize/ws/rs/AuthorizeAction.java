@@ -37,7 +37,7 @@ import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.model.AuthenticationScriptUsageType;
-import org.xdi.model.config.CustomAuthenticationConfiguration;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
@@ -46,7 +46,6 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.custom.auth.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
@@ -200,21 +199,21 @@ public class AuthorizeAction {
 					return;
 				}
             	
-            	ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration;
+            	CustomScriptConfiguration customScriptConfiguration;
             	
             	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
-                	externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
+                	customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
             	} else {
-            		externalAuthenticatorConfiguration = externalAuthenticationService.determineExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
+            		customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
             	}
 
-                if (externalAuthenticatorConfiguration == null) {
-                    log.error("Failed to get ExternalAuthenticatorConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}", 1, authMode, authLevel);
+                if (customScriptConfiguration == null) {
+                    log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}", 1, authMode, authLevel);
                     permissionDenied();
                     return;
                 }
 
-                this.authMode = externalAuthenticatorConfiguration.getName();
+                this.authMode = customScriptConfiguration.getName();
 
                 // Set updated authentication parameters
                 parameterMap = new HashMap<String, String>(parameterMap);
@@ -223,7 +222,7 @@ public class AuthorizeAction {
                 parameterMap.put("auth_mode", this.authMode);
                 parameterMap.put("auth_step", Integer.toString(1));
 
-                String tmpRedirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(externalAuthenticatorConfiguration, 1);
+                String tmpRedirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
                     log.trace("Redirect to custom authentication login page: {0}", tmpRedirectTo);
                     redirectTo = tmpRedirectTo;
@@ -361,10 +360,10 @@ public class AuthorizeAction {
     public void addAuthModeParameters(final Map<String, Object> parameterMap, String authMode) {
         // Add authentication mode and authentication level parameters
         if (StringHelper.isNotEmpty(authMode)) {
-            ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticationService.getExternalAuthenticatorConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
-            if (externalAuthenticatorConfiguration != null) {
-                parameterMap.put("auth_mode", externalAuthenticatorConfiguration.getName());
-                parameterMap.put("auth_level", externalAuthenticatorConfiguration.getLevel());
+            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
+            if (customScriptConfiguration != null) {
+                parameterMap.put("auth_mode", customScriptConfiguration.getName());
+                parameterMap.put("auth_level", customScriptConfiguration.getLevel());
             }
         }
     }

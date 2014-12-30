@@ -38,7 +38,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.SmtpConfiguration;
-import org.xdi.model.cusom.script.type.CustomScriptType;
+import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -106,7 +106,7 @@ public class AppInitializer {
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
         
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION );
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.USER_REGISTRATION );
         ExtendedCustomScriptManager.instance().migrateOldConfigurations();
         ExtendedCustomScriptManager.instance().init(supportedCustomScriptTypes);
     }

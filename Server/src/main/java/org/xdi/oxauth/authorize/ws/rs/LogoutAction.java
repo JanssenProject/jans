@@ -15,9 +15,9 @@ import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
 import org.jboss.seam.log.Log;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.custom.auth.ExternalAuthenticatorConfiguration;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
@@ -93,13 +93,13 @@ public class LogoutAction {
 		if (isExternalAuthenticatorLogoutPresent) {
 			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", authMode);
 
-			ExternalAuthenticatorConfiguration externalAuthenticatorConfiguration = externalAuthenticationService.getExternalAuthenticatorConfiguration(authMode);
-			if (externalAuthenticatorConfiguration == null) {
+			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(authMode);
+			if (customScriptConfiguration == null) {
 				log.error("Failed to get ExternalAuthenticatorConfiguration. auth_mode: {0}", authMode);
 				return false;
 			} else {
 				boolean externalLogoutResult = externalAuthenticationService.executeExternalAuthenticatorLogout(
-						externalAuthenticatorConfiguration, null);
+						customScriptConfiguration, null);
 				log.debug("Logout result for {0}. result: {1}", authorizationGrant.getUser().getUserId(), authMode, externalLogoutResult);
 
 				return externalLogoutResult;
