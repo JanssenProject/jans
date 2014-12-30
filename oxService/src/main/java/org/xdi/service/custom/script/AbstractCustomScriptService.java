@@ -15,8 +15,8 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
-import org.xdi.model.custom.script.CustomScript;
-import org.xdi.model.custom.script.type.CustomScriptType;
+import org.xdi.model.custom.script.CustomScriptType;
+import org.xdi.model.custom.script.model.CustomScript;
 
 import com.unboundid.ldap.sdk.Filter;
 
@@ -49,6 +49,10 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
     public CustomScript getCustomScriptByDn(String customScriptDn) {
 		return ldapEntryManager.find(CustomScript.class, customScriptDn);
+	}
+
+    public CustomScript getCustomScriptByDn(Class<?> customScriptType, String customScriptDn) {
+		return (CustomScript) ldapEntryManager.find(customScriptType, customScriptDn);
 	}
 
     public List<CustomScript> findAllCustomScripts(String[] returnAttributes) {

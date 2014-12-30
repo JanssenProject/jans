@@ -4,12 +4,15 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.custom.script.type;
+package org.xdi.model.custom.script;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+import org.xdi.model.custom.script.model.CustomScript;
+import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
+import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.model.custom.script.type.auth.CustomAuthenticatorType;
 import org.xdi.model.custom.script.type.auth.DummyCustomAuthenticatorType;
 import org.xdi.model.custom.script.type.client.ClientRegistrationType;
@@ -26,14 +29,15 @@ import org.xdi.model.custom.script.type.user.UserRegistrationType;
  */
 public enum CustomScriptType implements LdapEnum {
 	
-	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
-	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, "CacheRefresh", new DummyCacheRefreshType()),
-	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, "ClientRegistration", new DummyClientRegistrationType()),
-	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, "UserRegistration", new DummyUserRegistrationType());
+	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, AuthenticationCustomScript.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
+	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
+	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
+	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType());
 
 	private String value;
 	private String displayName;
 	private Class<? extends BaseExternalType> customScriptType;
+	private Class<? extends CustomScript> customScriptModel;
 	private String pythonClass;
 	private BaseExternalType defaultImplementation;
 	
@@ -44,10 +48,11 @@ public enum CustomScriptType implements LdapEnum {
 		}
 	}
 
-	private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, String pythonClass, BaseExternalType defaultImplementation) {
+	private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
 		this.displayName = displayName;
 		this.value = value;
 		this.customScriptType = customScriptType;
+		this.customScriptModel = customScriptModel;
 		this.pythonClass = pythonClass;
 		this.defaultImplementation = defaultImplementation;
 	}
@@ -66,6 +71,10 @@ public enum CustomScriptType implements LdapEnum {
 
 	public Class<? extends BaseExternalType> getCustomScriptType() {
 		return customScriptType;
+	}
+
+	public Class<? extends CustomScript> getCustomScriptModel() {
+		return customScriptModel;
 	}
 
 	public String getPythonClass() {

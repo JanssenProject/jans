@@ -31,10 +31,10 @@ import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.custom.script.CustomScript;
+import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
-import org.xdi.model.custom.script.type.CustomScriptType;
 import org.xdi.service.PythonService;
 import org.xdi.util.StringHelper;
 
@@ -51,7 +51,7 @@ public class CustomScriptManager implements Serializable {
 	public final static String MODIFIED_EVENT_TYPE = "CustomScriptModifiedEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
     
-    protected final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "gluuStatus" };
+    protected final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "gluuStatus" };
 
 	@Logger
 	protected Log log;
@@ -189,7 +189,7 @@ public class CustomScriptManager implements Serializable {
 				}
 				
 				// Load script entry with all attributes
-				CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(newCustomScript.getDn());
+				CustomScript loadedCustomScript = customScriptService.getCustomScriptByDn(newCustomScript.getScriptType().getCustomScriptModel(), newCustomScript.getDn());
 
 				// Prepare configuration attributes
 				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();

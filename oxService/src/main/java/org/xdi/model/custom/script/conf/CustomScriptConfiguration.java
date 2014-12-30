@@ -7,7 +7,7 @@
 import java.util.Map;
 
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.custom.script.CustomScript;
+import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 
 /**
@@ -41,6 +41,14 @@ public class CustomScriptConfiguration {
 
 	public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
 		return configurationAttributes;
+	}
+
+	public String getName() {
+		return this.customScript.getName();
+	}
+
+	public int getLevel() {
+		return this.customScript.getLevel();
 	}
 
 }
