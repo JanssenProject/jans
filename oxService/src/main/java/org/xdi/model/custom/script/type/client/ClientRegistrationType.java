@@ -4,9 +4,12 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.cusom.script.type.client;
+package org.xdi.model.custom.script.type.client;
 
-import org.xdi.model.cusom.script.type.BaseExternalType;
+import java.util.Map;
+
+import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.custom.script.type.BaseExternalType;
 
 /**
  * Base interface for external custom client registration python script
@@ -14,5 +17,7 @@ import org.xdi.model.cusom.script.type.BaseExternalType;
  * @author Yuriy Movchan Date: 11/11/2014
  */
 public interface ClientRegistrationType extends BaseExternalType {
+
+	public boolean updateClient(Object client, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

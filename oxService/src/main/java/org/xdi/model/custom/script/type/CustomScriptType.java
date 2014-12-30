@@ -4,16 +4,20 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.cusom.script.type;
+package org.xdi.model.custom.script.type;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
-import org.xdi.model.cusom.script.type.auth.CustomAuthenticatorType;
-import org.xdi.model.cusom.script.type.auth.DummyCustomAuthenticatorType;
-import org.xdi.model.cusom.script.type.client.ClientRegistrationType;
-import org.xdi.model.cusom.script.type.client.DummyClientRegistrationType;
+import org.xdi.model.custom.script.type.auth.CustomAuthenticatorType;
+import org.xdi.model.custom.script.type.auth.DummyCustomAuthenticatorType;
+import org.xdi.model.custom.script.type.client.ClientRegistrationType;
+import org.xdi.model.custom.script.type.client.DummyClientRegistrationType;
+import org.xdi.model.custom.script.type.user.CacheRefreshType;
+import org.xdi.model.custom.script.type.user.DummyCacheRefreshType;
+import org.xdi.model.custom.script.type.user.DummyUserRegistrationType;
+import org.xdi.model.custom.script.type.user.UserRegistrationType;
 
 /**
  * List of supported custom scripts
@@ -23,7 +27,9 @@ import org.xdi.model.cusom.script.type.client.DummyClientRegistrationType;
 public enum CustomScriptType implements LdapEnum {
 	
 	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
-	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, "ClientRegistration", new DummyClientRegistrationType());
+	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, "CacheRefresh", new DummyCacheRefreshType()),
+	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, "ClientRegistration", new DummyClientRegistrationType()),
+	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, "UserRegistration", new DummyUserRegistrationType());
 
 	private String value;
 	private String displayName;

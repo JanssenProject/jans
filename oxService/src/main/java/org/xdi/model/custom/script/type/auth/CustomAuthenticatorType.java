@@ -4,14 +4,14 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.cusom.script.type.auth;
+package org.xdi.model.custom.script.type.auth;
 
 import java.util.List;
 import java.util.Map;
 
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.cusom.script.type.BaseExternalType;
+import org.xdi.model.custom.script.type.BaseExternalType;
 
 /**
  * Base interface for external authentication python script

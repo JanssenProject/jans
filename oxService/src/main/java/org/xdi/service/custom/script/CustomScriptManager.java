@@ -31,10 +31,10 @@ import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.cusom.script.CustomScript;
-import org.xdi.model.cusom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.cusom.script.type.BaseExternalType;
-import org.xdi.model.cusom.script.type.CustomScriptType;
+import org.xdi.model.custom.script.CustomScript;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.type.BaseExternalType;
+import org.xdi.model.custom.script.type.CustomScriptType;
 import org.xdi.service.PythonService;
 import org.xdi.util.StringHelper;
 
