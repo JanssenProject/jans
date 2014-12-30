@@ -31,7 +31,7 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
 	}
 
 	@Override
-	public boolean updateClient(Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 

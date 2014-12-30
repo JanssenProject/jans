@@ -18,6 +18,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface ClientRegistrationType extends BaseExternalType {
 
-	public boolean updateClient(Object client, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
