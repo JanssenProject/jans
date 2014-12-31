@@ -54,13 +54,13 @@ import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserGroupService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
 /**

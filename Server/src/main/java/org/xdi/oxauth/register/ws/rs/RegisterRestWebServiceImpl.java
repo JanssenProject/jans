@@ -81,6 +81,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
@@ -109,6 +110,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private ClientService clientService;
     @In
     private TokenService tokenService;
+    
+    @In
+    private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
 
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
@@ -173,6 +177,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         }
 
                         updateClientFromRequestObject(client, r);
+                        
+                        if (externalDynamicClientRegistrationService.isEnabled()) {
+                        	externalDynamicClientRegistrationService.executeDefaultExternalClientRegistrationUpdateClientMethod(r, client);
+                        }
 
                         clientService.persist(client);
 

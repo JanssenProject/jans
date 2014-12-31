@@ -72,8 +72,8 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.service.ExternalAuthenticationService;
 import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 
 /**
  * @author Javier Rojas Blum Date: 12.7.2011

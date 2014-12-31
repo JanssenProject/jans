@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service;
+package org.xdi.oxauth.service.external;
 
 import java.io.Serializable;
 import java.util.ArrayList;
