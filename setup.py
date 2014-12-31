@@ -43,7 +43,7 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '1.7.0.Beta5'
+        self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
         self.promptDownloadWars = False
 
