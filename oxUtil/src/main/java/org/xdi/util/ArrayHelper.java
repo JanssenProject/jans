@@ -86,4 +86,14 @@ public final class ArrayHelper {
 		return Arrays.equals(valuesSorted1, valuesSorted2);
 	}
 
+	public static String[] addItemToStringArray(String[] array, String item) {
+		String[] array2 = new String[] { item }; 
+		if (array == null) {
+			return array2;
+		}
+		
+
+		return arrayMerge(array, array2);
+	}
+
 }
