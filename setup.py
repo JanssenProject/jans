@@ -84,6 +84,7 @@ class Setup(object):
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/1.8.0-SNAPSHOT/oxasimba-proxy-1.8.0-SNAPSHOT.war"
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -1125,6 +1126,8 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Downloading latest Shibboleth IDP war file..."
             self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
+            print "Downloading latest Asimba war file..."
+            self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/idp.war' % self.tomcatWebAppFolder])
             print "Finished downloading latest war files"
 
     def install_cas_war(self):
