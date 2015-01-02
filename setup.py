@@ -46,7 +46,6 @@ class Setup(object):
         self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
 
-        self.promptDownloadWars = False
         self.useDocker = False
         self.distFolder = "/opt/dist"
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
@@ -78,6 +77,8 @@ class Setup(object):
         self.idpWarFolder = "/opt/idp/war"
 
         self.downloadWars = False
+        self.installAsimba = False
+        self.installCAS = False
         self.modifyNetworking = False
         self.configureSaml = False
 
@@ -234,7 +235,6 @@ class Setup(object):
                      self.asimba_configuration: False,
                      self.asimba_selector_configuration: True
                      }
-                     
 
     def __repr__(self):
         s = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
@@ -248,8 +248,12 @@ class Setup(object):
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
             + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
-        if self.promptDownloadWars:
-            s += 'Download latest wars'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
+        if self.downloadWars:
+            s += 'Download latest development WAR files'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
+        if self.installAsimba:
+            s += 'Configure Asimba'.ljust(30) + `self.installAsimba`.rjust(35) + "\n"
+        if self.installCAS:
+            s += 'Configure CAS'.ljust(30) + `self.installCAS`.rjust(35) + "\n"
         return s
 
     def add_ldap_schema(self):
@@ -821,76 +825,78 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def install_asimba_war(self):
-        asimbaWar = 'oxasimba.war'
-        distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
-        tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
+        if self.installAsimba:
+            asimbaWar = 'oxasimba.war'
+            distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+            tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
-        self.logIt("Unpacking %s..." % asimbaWar)
-        self.removeDirs(tmpAsimbaDir)
-        self.createDirs(tmpAsimbaDir)
+            self.logIt("Unpacking %s..." % asimbaWar)
+            self.removeDirs(tmpAsimbaDir)
+            self.createDirs(tmpAsimbaDir)
 
-        self.run([self.jarCommand,
-                  'xf',
-                  distAsimbaPath],
-                 tmpAsimbaDir)
+            self.run([self.jarCommand,
+                      'xf',
+                      distAsimbaPath],
+                     tmpAsimbaDir)
 
-        self.logIt("Configuring Asimba...")
-        asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
-        asimbaWarConfigurationPath = '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir
+            self.logIt("Configuring Asimba...")
+            asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
+            asimbaWarConfigurationPath = '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir
 
-        self.copyFile(asimbaTemplateConfigurationPath, asimbaWarConfigurationPath)
+            self.copyFile(asimbaTemplateConfigurationPath, asimbaWarConfigurationPath)
 
-        self.logIt("Generating asimba.war...")
-        self.run([self.jarCommand,
-                  'cmf',
-                  'tmp_asimba/META-INF/MANIFEST.MF',
-                  'asimba.war',
-                  '-C',
-                  '%s/' % tmpAsimbaDir ,
-                  '.'],
-                 self.distFolder)
+            self.logIt("Generating asimba.war...")
+            self.run([self.jarCommand,
+                      'cmf',
+                      'tmp_asimba/META-INF/MANIFEST.MF',
+                      'asimba.war',
+                      '-C',
+                      '%s/' % tmpAsimbaDir ,
+                      '.'],
+                     self.distFolder)
 
-        self.logIt("Copying asimba.war into tomcat webapps folder...")
-        self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
+            self.logIt("Copying asimba.war into tomcat webapps folder...")
+            self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
 
-        self.removeDirs(tmpAsimbaDir)
-        self.removeFile('%s/asimba.war' % self.distFolder)
+            self.removeDirs(tmpAsimbaDir)
+            self.removeFile('%s/asimba.war' % self.distFolder)
 
     def install_cas_war(self):
-        casWar = 'oxcas.war'
-        distCasPath = '%s/%s' % (self.distFolder, casWar)
-        tmpCasDir = '%s/tmp_cas' % self.distFolder
+        if self.installCAS:
+            casWar = 'oxcas.war'
+            distCasPath = '%s/%s' % (self.distFolder, casWar)
+            tmpCasDir = '%s/tmp_cas' % self.distFolder
 
-        self.logIt("Unpacking %s..." % casWar)
-        self.removeDirs(tmpCasDir)
-        self.createDirs(tmpCasDir)
+            self.logIt("Unpacking %s..." % casWar)
+            self.removeDirs(tmpCasDir)
+            self.createDirs(tmpCasDir)
 
-        self.run([self.jarCommand,
-                  'xf',
-                  distCasPath],
-                 tmpCasDir)
+            self.run([self.jarCommand,
+                      'xf',
+                      distCasPath],
+                     tmpCasDir)
 
-        self.logIt("Configuring CAS...")
-        casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
-        casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
+            self.logIt("Configuring CAS...")
+            casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
+            casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
 
-        self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
+            self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
 
-        self.logIt("Generating cas.war...")
-        self.run([self.jarCommand,
-                  'cmf',
-                  'tmp_cas/META-INF/MANIFEST.MF',
-                  'cas.war',
-                  '-C',
-                  '%s/' % tmpCasDir ,
-                  '.'],
-                 self.distFolder)
+            self.logIt("Generating cas.war...")
+            self.run([self.jarCommand,
+                      'cmf',
+                      'tmp_cas/META-INF/MANIFEST.MF',
+                      'cas.war',
+                      '-C',
+                      '%s/' % tmpCasDir ,
+                      '.'],
+                     self.distFolder)
 
-        self.logIt("Copying cas.war into tomcat webapps folder...")
-        self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
+            self.logIt("Copying cas.war into tomcat webapps folder...")
+            self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
 
-        self.removeDirs(tmpCasDir)
-        self.removeFile('%s/cas.war' % self.distFolder)
+            self.removeDirs(tmpCasDir)
+            self.removeFile('%s/cas.war' % self.distFolder)
 
     def isIP(self, address):
         try:
@@ -1070,10 +1076,6 @@ class Setup(object):
         modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
-        if self.promptDownloadWars:
-            download_wars = self.getPrompt("Download latest war files?", "No")[0].lower()
-            if download_wars == 'y':
-                installObject.downloadWars = True
         deploy_saml = self.getPrompt("Configure Shibboleth SAML IDP and SP?", "No")[0].lower()
         if deploy_saml == 'y':
             installObject.configureSaml = True
@@ -1224,6 +1226,7 @@ class Setup(object):
             self.logIt("Error writing temporary LDAP password.")
 
 ############################   Main Loop   #################################################
+
 def print_help():
     print "\nUse setup.py to configure your Gluu Server and to add initial data required for"
     print "oxAuth and oxTrust to start. If setup.properties is found in this folder, these"
@@ -1235,24 +1238,30 @@ def print_help():
     print "    -d   specify directory of installation"
     print "    -D   use Docker"
     print "    -n   No interactive prompt before install starts."
-    print "    -w   Get the latest war files"
+    print "    -w   Get the development head war files"
 
 def getOpts(argv, install_dir=None):
     setup_properties = None
     noPrompt = False
     downloadWarsBoolean = False
     useDocker = False
+    installCAS = False
+    installAsimba = False
     try:
-        opts, args = getopt.getopt(argv, "d:Dhnf:w")
+        opts, args = getopt.getopt(argv, "acd:Dhnf:w")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
-            print_help()
-            sys.exit()
+        if opt == '-a':
+            installAsimba = True
+        elif opt == '-c':
+            installCAS = True
         elif opt == '-d':
             install_dir = arg
+        elif opt == '-h':
+            print_help()
+            sys.exit()
         elif opt == "-f":
             try:
                 if os.path.isfile(arg):
@@ -1268,7 +1277,7 @@ def getOpts(argv, install_dir=None):
             downloadWarsBoolean = True
         elif opt == "-D":
             useDocker = True
-    return setup_properties, noPrompt, install_dir, downloadWarsBoolean, useDocker
+    return setup_properties, noPrompt, install_dir, downloadWarsBoolean, useDocker, installAsimba, installCAS
 
 if __name__ == '__main__':
     setup_properties = None
@@ -1276,11 +1285,15 @@ if __name__ == '__main__':
     downloadWarOption = False
     useDocker = False
     install_dir = "."
+    installAsimba = False
+    installCAS = False
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, install_dir, downloadWarOption, useDocker = getOpts(sys.argv[1:], install_dir)
+        setup_properties, noPrompt, install_dir, downloadWarOption, useDocker, installAsimba, installCAS = getOpts(sys.argv[1:], install_dir)
     installObject = Setup(install_dir)
     installObject.downloadWars = downloadWarOption
     installObject.useDocker = useDocker
+    installObject.installAsimba = installAsimba
+    installObject.installCAS = installCAS
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
