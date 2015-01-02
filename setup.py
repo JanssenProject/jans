@@ -1248,13 +1248,18 @@ def print_help():
     print "    -n   No interactive prompt before install starts."
     print "    -w   Get the development head war files"
 
-def getOpts(argv, install_dir=None):
-    setup_properties = None
-    noPrompt = False
-    downloadWarsBoolean = False
-    useDocker = False
-    installCAS = False
-    installAsimba = False
+def getOpts(argv):
+    setupOptions = {
+        'install_dir': '.',
+        'setup_properties': None,
+        'noPrompt': False,
+        'downloadWarsBoolean': False,
+        'useDocker': False,
+        'installCAS': False,
+        'installAsimba': False,
+        'installShibIDP': False,
+        'installLDAP': False
+    }
     try:
         opts, args = getopt.getopt(argv, "acd:Dhnf:w")
     except getopt.GetoptError:
@@ -1262,46 +1267,45 @@ def getOpts(argv, install_dir=None):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-a':
-            installAsimba = True
+            setupOptions['installAsimba'] = True
         elif opt == '-c':
-            installCAS = True
+            setupOptions['installCAS'] = True
         elif opt == '-d':
-            install_dir = arg
+            if os.path.exists(arg):
+                setupOptions['install_dir'] = arg
+            else:
+                print 'System folder %s does not exist. Installing in %s' % (arg, os.getcwd())
         elif opt == '-h':
             print_help()
             sys.exit()
         elif opt == "-f":
             try:
                 if os.path.isfile(arg):
-                    setup_properties = arg
+                    setupOptions['setup_properties'] = arg
                     print "Found setup properties %s\n" % arg
                 else:
                     print "\nOoops... %s file not found\n" % arg
             except:
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
-            noPrompt = True
+            setupOptions['noPrompt'] = True
         elif opt == "-w":
-            downloadWarsBoolean = True
+            setupOptions['downloadWarsBoolean'] = True
         elif opt == "-D":
-            useDocker = True
-    return setup_properties, noPrompt, install_dir, downloadWarsBoolean, useDocker, installAsimba, installCAS
+            setupOptions['useDocker'] = True
+    return setupOptions
 
 if __name__ == '__main__':
-    setup_properties = None
-    noPrompt = False
-    downloadWarOption = False
-    useDocker = False
-    install_dir = "."
-    installAsimba = False
-    installCAS = False
+    setupOptions = {}
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, install_dir, downloadWarOption, useDocker, installAsimba, installCAS = getOpts(sys.argv[1:], install_dir)
-    installObject = Setup(install_dir)
-    installObject.downloadWars = downloadWarOption
-    installObject.useDocker = useDocker
-    installObject.installAsimba = installAsimba
-    installObject.installCAS = installCAS
+        setupOptions = getOpts(sys.argv[1:])
+    installObject = Setup(setupOptions['install_dir'])
+    installObject.downloadWars = setupOptions['downloadWarOption']
+    installObject.useDocker = setupOptions['useDocker']
+    installObject.installAsimba = setupOptions['installAsimba']
+    installObject.installCAS = setupOptions['installCAS']
+    installObject.installLDAP = setupOptions['installLDAP']
+    installObject.installShibIDP = setupOptions['installShibIDP']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
@@ -1318,9 +1322,9 @@ if __name__ == '__main__':
 
     installObject.logIt("Installing Gluu Server", True)
 
-    if setup_properties:
-        installObject.logIt('%s Properties found!\n' % setup_properties)
-        installObject.load_properties(setup_properties)
+    if setupOptions['setup_properties']:
+        installObject.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
+        installObject.load_properties(setupOptions['setup_properties'])
     elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
         installObject.load_properties(installObject.setup_properties_fn)
@@ -1334,9 +1338,9 @@ if __name__ == '__main__':
     # Show to properties for approval
     print '\n%s\n' % `installObject`
     proceed = "NO"
-    if not noPrompt:
+    if not setupOptions['noPrompt']:
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
-    if (noPrompt or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
+    if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.makeFolders()
             installObject.make_salt()
@@ -1372,3 +1376,5 @@ if __name__ == '__main__':
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
                          (installObject.savedProperties, installObject.setup_properties_fn)
+
+# END
