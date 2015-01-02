@@ -45,10 +45,10 @@ class Setup(object):
 
         self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
+
         self.promptDownloadWars = False
-
+        self.useDocker = False
         self.distFolder = "/opt/dist"
-
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
@@ -85,6 +85,7 @@ class Setup(object):
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/1.8.0-SNAPSHOT/oxasimba-proxy-1.8.0-SNAPSHOT.war"
+
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -1241,6 +1242,7 @@ def print_help():
     print "    -h   Help"
     print "    -f   specify setup.properties file"
     print "    -d   specify directory of installation"
+    print "    -D   use Docker"
     print "    -n   No interactive prompt before install starts."
     print "    -w   Get the latest war files"
 
@@ -1248,8 +1250,9 @@ def getOpts(argv, install_dir=None):
     setup_properties = None
     noPrompt = False
     downloadWarsBoolean = False
+    useDocker = False
     try:
-        opts, args = getopt.getopt(argv, "d:hnf:w")
+        opts, args = getopt.getopt(argv, "d:Dhnf:w")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1272,17 +1275,21 @@ def getOpts(argv, install_dir=None):
             noPrompt = True
         elif opt == "-w":
             downloadWarsBoolean = True
-    return setup_properties, noPrompt, install_dir, downloadWarsBoolean
+        elif opt == "-D":
+            useDocker = True
+    return setup_properties, noPrompt, install_dir, downloadWarsBoolean, useDocker
 
 if __name__ == '__main__':
     setup_properties = None
     noPrompt = False
     downloadWarOption = False
+    useDocker = False
     install_dir = "."
     if len(sys.argv) > 1:
-        setup_properties, noPrompt, install_dir, downloadWarOption = getOpts(sys.argv[1:], install_dir)
+        setup_properties, noPrompt, install_dir, downloadWarOption, useDocker = getOpts(sys.argv[1:], install_dir)
     installObject = Setup(install_dir)
     installObject.downloadWars = downloadWarOption
+    installObject.useDocker = useDocker
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
