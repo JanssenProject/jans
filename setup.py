@@ -1216,6 +1216,14 @@ class Setup(object):
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
 
+    def update_hostname(self):
+        self.logIt("Copying hosts and hostname to final destination")
+
+        self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
+        self.run(['/bin/hostname', self.hostname])
+
+        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+
     def writeLdapPW(self):
         try:
             f = open(self.ldapPassFn, 'w')
