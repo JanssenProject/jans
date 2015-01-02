@@ -914,20 +914,6 @@ class Setup(object):
         f.write('%s %s\n' % (time.strftime('%X %x'), msg))
         f.close()
 
-    # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None):
-        self.logIt('Running: %s' % ' '.join(args))
-        try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
-            output, err = p.communicate()
-            if output:
-                self.logIt(output)
-            if err:
-                self.logIt(err, True)
-        except:
-            self.logIt("Error running command : %s" % " ".join(args), True)
-            self.logIt(traceback.format_exc(), True)
-
     def ldap_encode(self, password):
         salt = os.urandom(4)
         sha = hashlib.sha1(password)
@@ -1113,6 +1099,20 @@ class Setup(object):
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
+
+    # args = command + args, i.e. ['ls', '-ltr']
+    def run(self, args, cwd=None):
+        self.logIt('Running: %s' % ' '.join(args))
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+            output, err = p.communicate()
+            if output:
+                self.logIt(output)
+            if err:
+                self.logIt(err, True)
+        except:
+            self.logIt("Error running command : %s" % " ".join(args), True)
+            self.logIt(traceback.format_exc(), True)
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
