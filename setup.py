@@ -1279,7 +1279,7 @@ def getOpts(argv, setupOptions):
         elif opt == "-n":
             setupOptions['noPrompt'] = True
         elif opt == "-w":
-            setupOptions['downloadWarsBoolean'] = True
+            setupOptions['downloadWars'] = True
         elif opt == "-D":
             setupOptions['useDocker'] = True
     return setupOptions
@@ -1289,7 +1289,7 @@ if __name__ == '__main__':
         'install_dir': '.',
         'setup_properties': None,
         'noPrompt': False,
-        'downloadWarsBoolean': False,
+        'downloadWars': False,
         'useDocker': False,
         'installCAS': False,
         'installAsimba': False,
@@ -1299,7 +1299,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
     installObject = Setup(setupOptions['install_dir'])
-    installObject.downloadWars = setupOptions['downloadWarOption']
+    installObject.downloadWars = setupOptions['downloadWars']
     installObject.useDocker = setupOptions['useDocker']
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCAS = setupOptions['installCAS']
