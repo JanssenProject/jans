@@ -1248,18 +1248,7 @@ def print_help():
     print "    -n   No interactive prompt before install starts."
     print "    -w   Get the development head war files"
 
-def getOpts(argv):
-    setupOptions = {
-        'install_dir': '.',
-        'setup_properties': None,
-        'noPrompt': False,
-        'downloadWarsBoolean': False,
-        'useDocker': False,
-        'installCAS': False,
-        'installAsimba': False,
-        'installShibIDP': False,
-        'installLDAP': False
-    }
+def getOpts(argv, setupOptions):
     try:
         opts, args = getopt.getopt(argv, "acd:Dhnf:w")
     except getopt.GetoptError:
@@ -1284,7 +1273,7 @@ def getOpts(argv):
                     setupOptions['setup_properties'] = arg
                     print "Found setup properties %s\n" % arg
                 else:
-                    print "\nOoops... %s file not found\n" % arg
+                    print "\nOoops... %s file not found for setup properties.\n" % arg
             except:
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
@@ -1296,9 +1285,19 @@ def getOpts(argv):
     return setupOptions
 
 if __name__ == '__main__':
-    setupOptions = {}
+    setupOptions = {
+        'install_dir': '.',
+        'setup_properties': None,
+        'noPrompt': False,
+        'downloadWarsBoolean': False,
+        'useDocker': False,
+        'installCAS': False,
+        'installAsimba': False,
+        'installShibIDP': False,
+        'installLDAP': False
+    }
     if len(sys.argv) > 1:
-        setupOptions = getOpts(sys.argv[1:])
+        setupOptions = getOpts(sys.argv[1:], setupOptions)
     installObject = Setup(setupOptions['install_dir'])
     installObject.downloadWars = setupOptions['downloadWarOption']
     installObject.useDocker = setupOptions['useDocker']
