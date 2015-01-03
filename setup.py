@@ -75,13 +75,16 @@ class Setup(object):
         self.idpSslFolder = "/opt/idp/ssl"
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
-        self.modifyNetworking = None
 
+        self.modifyNetworking = False
         self.downloadWars = None
+
         self.installAsimba = None
         self.installCAS = None
         self.configureSaml = None
         self.installLDAP = None
+
+        self.components = []
 
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -588,7 +591,9 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), key])
         self.run(["/bin/chmod", '700', key])
 
-        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, "-file", public_certificate, "-keystore", "/usr/java/latest/lib/security/cacerts", "-storepass", "changeit", "-noprompt"])
+        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, \
+                  "-file", public_certificate, "-keystore", "/usr/java/latest/lib/security/cacerts", \
+                  "-storepass", "changeit", "-noprompt"])
 
     def gen_crypto(self):
         try:
@@ -841,8 +846,7 @@ class Setup(object):
 
             self.run([self.jarCommand,
                       'xf',
-                      distAsimbaPath],
-                     tmpAsimbaDir)
+                      distAsimbaPath], None, tmpAsimbaDir)
 
             self.logIt("Configuring Asimba...")
             asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
@@ -857,8 +861,7 @@ class Setup(object):
                       'asimba.war',
                       '-C',
                       '%s/' % tmpAsimbaDir ,
-                      '.'],
-                     self.distFolder)
+                      '.'], None, self.distFolder)
 
             self.logIt("Copying asimba.war into tomcat webapps folder...")
             self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
@@ -878,8 +881,7 @@ class Setup(object):
 
             self.run([self.jarCommand,
                       'xf',
-                      distCasPath],
-                     tmpCasDir)
+                      distCasPath], None, tmpCasDir)
 
             self.logIt("Configuring CAS...")
             casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
@@ -894,8 +896,7 @@ class Setup(object):
                       'cas.war',
                       '-C',
                       '%s/' % tmpCasDir ,
-                      '.'],
-                     self.distFolder)
+                      '.'], None, self.distFolder)
 
             self.logIt("Copying cas.war into tomcat webapps folder...")
             self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
@@ -957,37 +958,22 @@ class Setup(object):
 
     def makeFolders(self):
         try:
-            if not os.path.exists(self.gluuOptFolder):
-                os.makedirs(self.gluuOptFolder)
-            if not os.path.exists(self.gluuOptBinFolder):
-                os.makedirs(self.gluuOptBinFolder)
-            if not os.path.exists(self.tomcat_user_home_lib):
-                os.makedirs(self.tomcat_user_home_lib)
-            if not os.path.exists(self.configFolder):
-                os.makedirs(self.configFolder)
-            if not os.path.exists(self.certFolder):
-                os.makedirs(self.certFolder)
-            if not os.path.exists(self.oxPhotosFolder):
-                os.makedirs(self.oxPhotosFolder)
-            if not os.path.exists(self.oxTrustRemovedFolder):
-                os.makedirs(self.oxTrustRemovedFolder)
+            self.run(['/bin/mkir', '-p', self.gluuOptFolder])
+            self.run(['bin/mkdir', '-p', self.gluuOptBinFolder])
+            self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib])
+            self.run(['bin/mkdir', '-p', self.configFolder])
+            self.run(['bin/mkdir', '-p', self.certFolder])
+            self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
+            self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
             if self.configureSaml:
-                if not os.path.exists(self.idpFolder):
-                    os.makedirs(self.idpFolder)
-                if not os.path.exists(self.idpMetadataFolder):
-                    os.makedirs(self.idpMetadataFolder)
-                if not os.path.exists(self.idpLogsFolder):
-                    os.makedirs(self.idpLogsFolder)
-                if not os.path.exists(self.idpLibFolder):
-                    os.makedirs(self.idpLibFolder)
-                if not os.path.exists(self.idpConfFolder):
-                    os.makedirs(self.idpConfFolder)
-                if not os.path.exists(self.idpSslFolder):
-                    os.makedirs(self.idpSslFolder)
-                if not os.path.exists(self.idpTempMetadataFolder):
-                    os.makedirs(self.idpTempMetadataFolder)
-                if not os.path.exists(self.idpWarFolder):
-                    os.makedirs(self.idpWarFolder)
+                self.run(['bin/mkdir', '-p', self.idpFolder])
+                self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
+                self.run(['bin/mkdir', '-p', self.idpLogsFolder])
+                self.run(['bin/mkdir', '-p', self.idpLibFolder])
+                self.run(['bin/mkdir', '-p', self.idpConfFolder])
+                self.run(['bin/mkdir', '-p', self.idpSslFolder])
+                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder])
+                self.run(['bin/mkdir', '-p', self.idpWarFolder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1118,7 +1104,7 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None):
+    def run(self, args, component=None, cwd=None):
         self.logIt('Running: %s' % ' '.join(args))
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
@@ -1326,10 +1312,19 @@ if __name__ == '__main__':
     installObject = Setup(setupOptions['install_dir'])
     installObject.downloadWars = setupOptions['downloadWars']
     installObject.useDocker = setupOptions['useDocker']
+
     installObject.installAsimba = setupOptions['installAsimba']
+    if setupOptions['installAsimba']:
+        installObject.components.append('asimba')
     installObject.installCAS = setupOptions['installCAS']
+    if setupOptions['installCAS']:
+        installObject.components.append('cas')
     installObject.installLDAP = setupOptions['installLDAP']
+    if setupOptions['installLDAP']:
+        installObject.components.append('ldap')
     installObject.configureSaml = setupOptions['configureSaml']
+    if setupOptions['configureSaml']:
+        installObject.components.append('saml')
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
