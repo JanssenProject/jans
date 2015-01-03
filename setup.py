@@ -75,12 +75,13 @@ class Setup(object):
         self.idpSslFolder = "/opt/idp/ssl"
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
+        self.modifyNetworking = None
 
-        self.downloadWars = False
-        self.installAsimba = False
-        self.installCAS = False
-        self.modifyNetworking = False
-        self.configureSaml = False
+        self.downloadWars = None
+        self.installAsimba = None
+        self.installCAS = None
+        self.configureSaml = None
+        self.installLDAP = None
 
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -248,12 +249,16 @@ class Setup(object):
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
             + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
+        if self.installLDAP:
+            s += 'Install LDAP'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
         if self.downloadWars:
             s += 'Download latest development WAR files'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
         if self.installAsimba:
             s += 'Configure Asimba'.ljust(30) + `self.installAsimba`.rjust(35) + "\n"
         if self.installCAS:
             s += 'Configure CAS'.ljust(30) + `self.installCAS`.rjust(35) + "\n"
+        if self.configureSaml:
+            s += 'Configure SAML'.ljust(30) + `self.configureSaml`.rjust(35) + "\n"
         return s
 
     def add_ldap_schema(self):
@@ -1062,9 +1067,6 @@ class Setup(object):
         modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
-        deploy_saml = self.getPrompt("Configure Shibboleth SAML IDP and SP?", "No")[0].lower()
-        if deploy_saml == 'y':
-            installObject.configureSaml = True
 
     def removeDirs(self, name):
         try:
@@ -1241,16 +1243,20 @@ def print_help():
     print "properties will automatically be used instead of the interactive setup."
     print "Options:"
     print ""
-    print "    -h   Help"
-    print "    -f   specify setup.properties file"
+    print "    -a   Install Asimba"
+    print "    -c   Install CAS"
     print "    -d   specify directory of installation"
     print "    -D   use Docker"
+    print "    -f   specify setup.properties file"
+    print "    -h   Help"
+    print "    -l   Don't install LDAP"
     print "    -n   No interactive prompt before install starts."
+    print "    -s   Install the Shibboleth IDP"
     print "    -w   Get the development head war files"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:Dhnf:w")
+        opts, args = getopt.getopt(argv, "acd:Dfhln:sw")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1267,6 +1273,8 @@ def getOpts(argv, setupOptions):
         elif opt == '-h':
             print_help()
             sys.exit()
+        elif opt == '-l':
+            setupOptions['installLDAP'] = False
         elif opt == "-f":
             try:
                 if os.path.isfile(arg):
@@ -1278,6 +1286,8 @@ def getOpts(argv, setupOptions):
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
             setupOptions['noPrompt'] = True
+        elif opt == "-s":
+            setupOptions['configureSaml'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == "-D":
@@ -1293,8 +1303,8 @@ if __name__ == '__main__':
         'useDocker': False,
         'installCAS': False,
         'installAsimba': False,
-        'installShibIDP': False,
-        'installLDAP': False
+        'configureSaml': False,
+        'installLDAP': True
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -1304,7 +1314,7 @@ if __name__ == '__main__':
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCAS = setupOptions['installCAS']
     installObject.installLDAP = setupOptions['installLDAP']
-    installObject.installShibIDP = setupOptions['installShibIDP']
+    installObject.configureSaml = setupOptions['configureSaml']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
