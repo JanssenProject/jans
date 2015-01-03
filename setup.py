@@ -1068,6 +1068,21 @@ class Setup(object):
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
 
+        promptForLDAP = self.getPrompt("Install LDAP?", "Yes")[0].lower()
+        if promptForLDAP == 'y':
+            installObject.installLDAP = True
+        promptForComponents = self.getPrompt("Prompt for additional components?", "No")[0].lower()
+        if promptForComponents == 'y':
+            promptForShibIDP = self.getPrompt("Install Shibboleth IDP?", "No")[0].lower()
+            if promptForShibIDP == 'y':
+                installObject.configureSaml = True
+            promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
+            if promptForAsimba == 'y':
+                installObject.installAsimba = True
+            promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
+            if promptForCAS == 'y':
+                installObject.installCAS = True
+
     def removeDirs(self, name):
         try:
             if os.path.exists(name):
@@ -1249,7 +1264,7 @@ def print_help():
     print "    -D   use Docker"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
-    print "    -l   Don't install LDAP"
+    print "    -l   Install LDAP"
     print "    -n   No interactive prompt before install starts."
     print "    -s   Install the Shibboleth IDP"
     print "    -w   Get the development head war files"
@@ -1274,7 +1289,7 @@ def getOpts(argv, setupOptions):
             print_help()
             sys.exit()
         elif opt == '-l':
-            setupOptions['installLDAP'] = False
+            setupOptions['installLDAP'] = True
         elif opt == "-f":
             try:
                 if os.path.isfile(arg):
@@ -1304,7 +1319,7 @@ if __name__ == '__main__':
         'installCAS': False,
         'installAsimba': False,
         'configureSaml': False,
-        'installLDAP': True
+        'installLDAP': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
