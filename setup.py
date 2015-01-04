@@ -1138,13 +1138,10 @@ class Setup(object):
     def run(self, args, components=[], cwd=None):
         if self.docker:
             self.logIt('Components: %s \nRunning: %s' % (`components`, ' '.join(args)))
-        else:
-            self.logIt('Running: %s' % ' '.join(args))
-
-        if self.docker:
             # TODO - Use API to execute command in container
             pass
         else:
+            self.logIt('Running: %s' % ' '.join(args))
             try:
                 p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
                 output, err = p.communicate()
