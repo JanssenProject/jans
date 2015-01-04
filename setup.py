@@ -46,6 +46,8 @@ class Setup(object):
         self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
 
+        self.docker = False
+
         # Used only if -w (get wars) options is given to setup.py
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -56,7 +58,6 @@ class Setup(object):
 
         self.modifyNetworking = False
         self.downloadWars = None
-        self.useDocker = False
         self.installOxAuth = False
         self.installOxTrust = False
         self.installLDAP = False
@@ -965,6 +966,7 @@ class Setup(object):
             self.run(['bin/mkdir', '-p', self.certFolder])
             self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
             self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
+
             if self.installSAML:
                 self.run(['bin/mkdir', '-p', self.idpFolder])
                 self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
@@ -1133,18 +1135,26 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, component=None, cwd=None):
-        self.logIt('Running: %s' % ' '.join(args))
-        try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
-            output, err = p.communicate()
-            if output:
-                self.logIt(output)
-            if err:
-                self.logIt(err, True)
-        except:
-            self.logIt("Error running command : %s" % " ".join(args), True)
-            self.logIt(traceback.format_exc(), True)
+    def run(self, args, components=[], cwd=None):
+        if self.docker:
+            self.logIt('Components: %s \nRunning: %s' % (`components`, ' '.join(args)))
+        else:
+            self.logIt('Running: %s' % ' '.join(args))
+
+        if self.docker:
+            # TODO - Use API to execute command in container
+            pass
+        else:
+            try:
+                p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+                output, err = p.communicate()
+                if output:
+                    self.logIt(output)
+                if err:
+                    self.logIt(err, True)
+            except:
+                self.logIt("Error running command : %s" % " ".join(args), True)
+                self.logIt(traceback.format_exc(), True)
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
