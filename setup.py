@@ -1139,7 +1139,8 @@ class Setup(object):
         if self.docker:
             self.logIt('Components: %s \nRunning: %s' % (`components`, ' '.join(args)))
             # TODO - Use API to execute command in container
-            pass
+            for component in components:
+                pass
         else:
             self.logIt('Running: %s' % ' '.join(args))
             try:
