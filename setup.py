@@ -46,7 +46,28 @@ class Setup(object):
         self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
 
+        # Used only if -w (get wars) options is given to setup.py
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/%s/oxasimba-proxy-%s.war" % (self.oxVersion, self.oxVersion)
+        self.cas_war = "http://ox.gluu.org/maven/org/xdi/oxcas/%s/oxcas-%s.war" % (self.oxVersion, self.oxVersion) # TODO lookup URL!
+        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
+
+        self.modifyNetworking = False
+        self.downloadWars = None
         self.useDocker = False
+        self.installOxAuth = False
+        self.installOxTrust = False
+        self.installLDAP = False
+        self.installHTTPD = False
+        self.installSAML = False
+        self.installAsimba = False
+        self.installCAS = False
+
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os_type = None
+
         self.distFolder = "/opt/dist"
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
@@ -76,26 +97,6 @@ class Setup(object):
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
 
-        self.modifyNetworking = False
-        self.downloadWars = None
-
-        self.installAsimba = None
-        self.installCAS = None
-        self.configureSaml = None
-        self.installLDAP = None
-
-        self.components = []
-
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/1.8.0-SNAPSHOT/oxasimba-proxy-1.8.0-SNAPSHOT.war"
-
-        self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
-
-        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
-        self.os_type = None
-
         self.hostname = None
         self.ip = None
         self.orgName = None
@@ -104,7 +105,6 @@ class Setup(object):
         self.city = None
         self.state = None
         self.admin_email = None
-
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
         self.oxauthClient_encoded_pw = None
@@ -260,8 +260,8 @@ class Setup(object):
             s += 'Configure Asimba'.ljust(30) + `self.installAsimba`.rjust(35) + "\n"
         if self.installCAS:
             s += 'Configure CAS'.ljust(30) + `self.installCAS`.rjust(35) + "\n"
-        if self.configureSaml:
-            s += 'Configure SAML'.ljust(30) + `self.configureSaml`.rjust(35) + "\n"
+        if self.installSAML:
+            s += 'Configure SAML'.ljust(30) + `self.installSAML`.rjust(35) + "\n"
         return s
 
     def add_ldap_schema(self):
@@ -965,7 +965,7 @@ class Setup(object):
             self.run(['bin/mkdir', '-p', self.certFolder])
             self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
             self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
-            if self.configureSaml:
+            if self.installSAML:
                 self.run(['bin/mkdir', '-p', self.idpFolder])
                 self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
                 self.run(['bin/mkdir', '-p', self.idpLogsFolder])
@@ -1054,20 +1054,49 @@ class Setup(object):
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
 
-        promptForLDAP = self.getPrompt("Install LDAP?", "Yes")[0].lower()
-        if promptForLDAP == 'y':
-            installObject.installLDAP = True
-        promptForComponents = self.getPrompt("Prompt for additional components?", "No")[0].lower()
+        promptForComponents = self.getPrompt("Select individual components?", "No")[0].lower()
         if promptForComponents == 'y':
-            promptForShibIDP = self.getPrompt("Install Shibboleth IDP?", "No")[0].lower()
+            promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
+            if promptForOxAuth == 'y':
+                installObject.installOxAuth = True
+            else:
+                installObject.installOxAuth = False
+
+            promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
+            if promptForOxTrust == 'y':
+                installObject.installOxTrust = True
+            else:
+                installObject.installOxTrust = False
+
+            promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
+            if promptForLDAP == 'y':
+                installObject.installLDAP = True
+            else:
+                installObject.installLDAP = False
+
+            promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
+            if promptForHTTPD == 'y':
+                installObject.installHTTPD = True
+            else:
+                installObject.installHTTPD = False
+
+            promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
             if promptForShibIDP == 'y':
-                installObject.configureSaml = True
+                installObject.installSAML = True
+            else:
+                installObject.installSAML = False
+
             promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
             if promptForAsimba == 'y':
                 installObject.installAsimba = True
+            else:
+                installObject.installAsimba = False
+
             promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
             if promptForCAS == 'y':
                 installObject.installCAS = True
+            else:
+                installObject.installCAS = False
 
     def removeDirs(self, name):
         try:
@@ -1288,7 +1317,7 @@ def getOpts(argv, setupOptions):
         elif opt == "-n":
             setupOptions['noPrompt'] = True
         elif opt == "-s":
-            setupOptions['configureSaml'] = True
+            setupOptions['installSAML'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == "-D":
@@ -1302,29 +1331,28 @@ if __name__ == '__main__':
         'noPrompt': False,
         'downloadWars': False,
         'useDocker': False,
-        'installCAS': False,
+        'installOxAuth': True,
+        'installOxTrust': True,
+        'installLDAP': True,
+        'installHTTPD': True,
+        'installSAML': False,
         'installAsimba': False,
-        'configureSaml': False,
-        'installLDAP': False
+        'installCAS': False,
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
-    installObject = Setup(setupOptions['install_dir'])
-    installObject.downloadWars = setupOptions['downloadWars']
-    installObject.useDocker = setupOptions['useDocker']
 
-    installObject.installAsimba = setupOptions['installAsimba']
-    if setupOptions['installAsimba']:
-        installObject.components.append('asimba')
-    installObject.installCAS = setupOptions['installCAS']
-    if setupOptions['installCAS']:
-        installObject.components.append('cas')
+    installObject = Setup(setupOptions['install_dir'])
+
+    installObject.useDocker = setupOptions['useDocker']
+    installObject.downloadWars = setupOptions['downloadWars']
+    installObject.installOxAuth = setupOptions['installOxAuth']
+    installObject.installOxTrust = setupOptions['installOxTrust']
     installObject.installLDAP = setupOptions['installLDAP']
-    if setupOptions['installLDAP']:
-        installObject.components.append('ldap')
-    installObject.configureSaml = setupOptions['configureSaml']
-    if setupOptions['configureSaml']:
-        installObject.components.append('saml')
+    installObject.installHTTPD = setupOptions['installHTTPD']
+    installObject.installSAML = setupOptions['installSAML']
+    installObject.installAsimba = setupOptions['installAsimba']
+    installObject.installCAS = setupOptions['installCAS']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
