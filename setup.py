@@ -243,7 +243,6 @@ class Setup(object):
 
     def __repr__(self):
         s = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
-            + 'ip'.ljust(30) + self.ip.rjust(35) + "\n" \
             + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
             + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
             + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
@@ -253,6 +252,8 @@ class Setup(object):
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
             + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
+        if self.installHTTPD | self.modifyNetworking:
+            s += 'ip'.ljust(30) + self.ip.rjust(35) + "\n"
         if self.installLDAP:
             s += 'Install LDAP'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
         if self.downloadWars:
@@ -996,19 +997,22 @@ class Setup(object):
             self.ce_templates[self.etc_hostname] = True
 
     def promptForProperties(self):
-        detectedIP = None
-        try:
-            testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
-                           testSocket.getsockname()[0],
-                           testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
-        except:
-            installObject.logIt("No detected IP address", True)
-            self.logIt(traceback.format_exc(), True)
-        if detectedIP:
-            installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
-        else:
-            installObject.ip = installObject.getPrompt("Enter IP Address")
+        # IP address needed only for Apache2 and hosts file update
+        if self.installHTTPD | self.modifyNetworking:
+            detectedIP = None
+            try:
+                testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
+                               testSocket.getsockname()[0],
+                               testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+            except:
+                installObject.logIt("No detected IP address", True)
+                self.logIt(traceback.format_exc(), True)
+            if detectedIP:
+                installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
+            else:
+                installObject.ip = installObject.getPrompt("Enter IP Address")
+
         detectedHostname = None
         try:
             detectedHostname = socket.gethostbyaddr(socket.gethostname())[0]
@@ -1289,12 +1293,14 @@ def print_help():
     print "    -h   Help"
     print "    -l   Install LDAP"
     print "    -n   No interactive prompt before install starts."
+    print "    -N   No apache httpd server"
     print "    -s   Install the Shibboleth IDP"
+    print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:Dfhln:sw")
+        opts, args = getopt.getopt(argv, "acd:DfhlNn:suw")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1324,8 +1330,12 @@ def getOpts(argv, setupOptions):
                 print "\nOoops... %s file not found\n" % arg
         elif opt == "-n":
             setupOptions['noPrompt'] = True
+        elif opt == "-N":
+            setupOptions['installHTTPD'] = False
         elif opt == "-s":
             setupOptions['installSAML'] = True
+        elif opt == "-u":
+            setupOptions['modifyNetworking'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == "-D":
@@ -1346,6 +1356,7 @@ if __name__ == '__main__':
         'installSAML': False,
         'installAsimba': False,
         'installCAS': False,
+        'modifyNetworking': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -1361,6 +1372,7 @@ if __name__ == '__main__':
     installObject.installSAML = setupOptions['installSAML']
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCAS = setupOptions['installCAS']
+    installObject.modifyNetworking = setupOptions['modifyNetworking']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
