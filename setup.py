@@ -258,19 +258,19 @@ class Setup(object):
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
             + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
         if self.components['oxauth']['enabled']:
-            s += 'Install oxAuth'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
+            s += 'Install oxAuth'.ljust(30) + `self.components['oxauth']['enabled']`.rjust(35) + "\n"
         if self.components['oxtrust']['enabled']:
-            s += 'Install oxTrust'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
+            s += 'Install oxTrust'.ljust(30) + `self.components['oxtrust']['enabled']`.rjust(35) + "\n"
         if self.components['ldap']['enabled']:
-            s += 'Install LDAP'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
+            s += 'Install LDAP'.ljust(30) + `self.components['ldap']['enabled']`.rjust(35) + "\n"
         if self.components['httpd']['enabled']:
-            s += 'Install Apache 2 web server'.ljust(30) + `self.installLDAP`.rjust(35) + "\n"
+            s += 'Install Apache 2 web server'.ljust(30) + `self.components['httpd']['enabled']`.rjust(35) + "\n"
         if self.components['saml']['enabled']:
-            s += 'Configure SAML'.ljust(30) + `self.installSAML`.rjust(35) + "\n"
+            s += 'Configure SAML'.ljust(30) + `self.components['saml']['enabled']`.rjust(35) + "\n"
         if self.components['asimba']['enabled']:
-            s += 'Configure Asimba'.ljust(30) + `self.installAsimba`.rjust(35) + "\n"
+            s += 'Configure Asimba'.ljust(30) + `self.components['asimba']['enabled']`.rjust(35) + "\n"
         if self.components['cas']['enabled']:
-            s += 'Configure CAS'.ljust(30) + `self.installCAS`.rjust(35) + "\n"
+            s += 'Configure CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n"
         if self.downloadWars:
             s += 'Download latest development WAR files'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
         return s
