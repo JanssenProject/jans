@@ -59,13 +59,13 @@ class Setup(object):
         self.modifyNetworking = False
         self.downloadWars = None
 
-        self.components = {'oxAuth'  : {'description': 'OX OAuth2 Authorization Server', 'enabled': True},
-                           'oxTrust' : {'description': 'OX Admin UID', 'enabled': True},
-                           'ldap'    : {'description': 'Gluu OpenDJ LDAP Server', 'enabled': True},
-                           'httpd'   : {'description': 'Apache2 HTTPD Server', 'enabled': True},
-                           'saml'    : {'description': 'Shibboleth SAML IDP', 'enabled': False},
-                           'asimba'  : {'description': 'Asimba SAML Proxy', 'enabled': False},
-                           'cas'     : {'description': 'CAS Server', 'enabled': False}
+        self.components = {'oxauth':  {'description': 'OX OAuth2 Authorization Server', 'enabled': True},
+                           'oxtrust': {'description': 'OX Admin UID', 'enabled': True},
+                           'ldap':    {'description': 'Gluu OpenDJ LDAP Server', 'enabled': True},
+                           'httpd':   {'description': 'Apache2 HTTPD Server', 'enabled': True},
+                           'saml':    {'description': 'Shibboleth SAML IDP', 'enabled': False},
+                           'asimba':  {'description': 'Asimba SAML Proxy', 'enabled': False},
+                           'cas':     {'description': 'CAS Server', 'enabled': False}
         }
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -969,24 +969,26 @@ class Setup(object):
 
     def makeFolders(self):
         try:
-            self.run(['/bin/mkir', '-p', self.gluuOptFolder])
-            self.run(['bin/mkdir', '-p', self.gluuOptBinFolder])
+            # Create these folder on all instances
+            self.run(['bin/mkdir', '-p', self.configFolder], self.components.keys())
+            self.run(['bin/mkdir', '-p', self.certFolder], self.components.keys())
 
-            self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib])
-            self.run(['bin/mkdir', '-p', self.configFolder])
-            self.run(['bin/mkdir', '-p', self.certFolder])
-            self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
-            self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
+            if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
+                self.run(['/bin/mkir', '-p', self.gluuOptFolder], ['oxauth', 'oxtrust'])
+                self.run(['bin/mkdir', '-p', self.gluuOptBinFolder], ['oxauth', 'oxtrust'])
+                self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib], ['oxauth', 'oxtrust'])
+                self.run(['bin/mkdir', '-p', self.oxPhotosFolder], ['oxauth', 'oxtrust'])
+                self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder], ['oxauth', 'oxtrust'])
 
-            if self.installSAML:
-                self.run(['bin/mkdir', '-p', self.idpFolder])
-                self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
-                self.run(['bin/mkdir', '-p', self.idpLogsFolder])
-                self.run(['bin/mkdir', '-p', self.idpLibFolder])
-                self.run(['bin/mkdir', '-p', self.idpConfFolder])
-                self.run(['bin/mkdir', '-p', self.idpSslFolder])
-                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder])
-                self.run(['bin/mkdir', '-p', self.idpWarFolder])
+            if self.components['saml']['enabled']:
+                self.run(['bin/mkdir', '-p', self.idpFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpMetadataFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpLogsFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpLibFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpConfFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpSslFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpWarFolder], ['saml'])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
