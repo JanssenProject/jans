@@ -894,7 +894,7 @@ class Setup(object):
             self.removeFile('%s/asimba.war' % self.distFolder)
 
     def install_cas_war(self):
-        if self.installCAS:
+        if self.components['cas']['enabled']:
             casWar = 'oxcas.war'
             distCasPath = '%s/%s' % (self.distFolder, casWar)
             tmpCasDir = '%s/tmp_cas' % self.distFolder
