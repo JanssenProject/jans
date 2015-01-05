@@ -1010,7 +1010,7 @@ class Setup(object):
 
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
-        if self.installHTTPD | self.modifyNetworking:
+        if self.components['httpd']['enabled'] | self.modifyNetworking:
             detectedIP = None
             try:
                 testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
