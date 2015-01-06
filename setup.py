@@ -1016,7 +1016,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
             sys.exit()
 
-    def modify_netowrking_prompt(self):
+    def modify_networking_prompt(self):
         if self.modifyNetworking:
             self.ce_templates[self.etc_hosts] = True
             self.ce_templates[self.etc_hostname] = True
@@ -1438,7 +1438,7 @@ if __name__ == '__main__':
             installObject.makeFolders()
             installObject.make_salt()
             installObject.downloadWarFiles()
-            installObject.modify_netowrking_prompt()
+            installObject.modify_networking_prompt()
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
