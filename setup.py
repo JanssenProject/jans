@@ -46,8 +46,6 @@ class Setup(object):
         self.oxVersion = '1.7.0.Beta6'
         self.githubBranchName = 'version_1.7'
 
-        self.docker = False
-
         # Used only if -w (get wars) options is given to setup.py
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -59,13 +57,13 @@ class Setup(object):
         self.modifyNetworking = False
         self.downloadWars = None
 
-        self.components = {'oxauth':  {'description': 'OX OAuth2 Authorization Server', 'enabled': True},
-                           'oxtrust': {'description': 'OX Admin UID', 'enabled': True},
-                           'ldap':    {'description': 'Gluu OpenDJ LDAP Server', 'enabled': True},
-                           'httpd':   {'description': 'Apache2 HTTPD Server', 'enabled': True},
-                           'saml':    {'description': 'Shibboleth SAML IDP', 'enabled': False},
-                           'asimba':  {'description': 'Asimba SAML Proxy', 'enabled': False},
-                           'cas':     {'description': 'CAS Server', 'enabled': False}
+        self.components = {'oxauth':  {'enabled': True},
+                           'oxtrust': {'enabled': True},
+                           'ldap':    {'enabled': True},
+                           'httpd':   {'enabled': True},
+                           'saml':    {'enabled': False},
+                           'asimba':  {'enabled': False},
+                           'cas':     {'enabled': False}
         }
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -859,7 +857,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def install_asimba_war(self):
-        if self.installAsimba:
+        if self.components['asimba']['enabled']:
             asimbaWar = 'oxasimba.war'
             distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
@@ -870,7 +868,7 @@ class Setup(object):
 
             self.run([self.jarCommand,
                       'xf',
-                      distAsimbaPath], None, tmpAsimbaDir)
+                      distAsimbaPath], tmpAsimbaDir)
 
             self.logIt("Configuring Asimba...")
             asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
@@ -885,7 +883,7 @@ class Setup(object):
                       'asimba.war',
                       '-C',
                       '%s/' % tmpAsimbaDir ,
-                      '.'], None, self.distFolder)
+                      '.'], self.distFolder)
 
             self.logIt("Copying asimba.war into tomcat webapps folder...")
             self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
@@ -905,7 +903,7 @@ class Setup(object):
 
             self.run([self.jarCommand,
                       'xf',
-                      distCasPath], None, tmpCasDir)
+                      distCasPath], tmpCasDir)
 
             self.logIt("Configuring CAS...")
             casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
@@ -919,8 +917,8 @@ class Setup(object):
                       'tmp_cas/META-INF/MANIFEST.MF',
                       'cas.war',
                       '-C',
-                      '%s/' % tmpCasDir ,
-                      '.'], None, self.distFolder)
+                      '%s/' % tmpCasDir,
+                      '.'], self.distFolder)
 
             self.logIt("Copying cas.war into tomcat webapps folder...")
             self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
@@ -983,25 +981,25 @@ class Setup(object):
     def makeFolders(self):
         try:
             # Create these folder on all instances
-            self.run(['bin/mkdir', '-p', self.configFolder], self.components.keys())
-            self.run(['bin/mkdir', '-p', self.certFolder], self.components.keys())
+            self.run(['bin/mkdir', '-p', self.configFolder])
+            self.run(['bin/mkdir', '-p', self.certFolder])
 
             if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
-                self.run(['/bin/mkir', '-p', self.gluuOptFolder], ['oxauth', 'oxtrust'])
-                self.run(['bin/mkdir', '-p', self.gluuOptBinFolder], ['oxauth', 'oxtrust'])
-                self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib], ['oxauth', 'oxtrust'])
-                self.run(['bin/mkdir', '-p', self.oxPhotosFolder], ['oxauth', 'oxtrust'])
-                self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder], ['oxauth', 'oxtrust'])
+                self.run(['/bin/mkir', '-p', self.gluuOptFolder])
+                self.run(['bin/mkdir', '-p', self.gluuOptBinFolder])
+                self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib])
+                self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
+                self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
 
             if self.components['saml']['enabled']:
-                self.run(['bin/mkdir', '-p', self.idpFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpMetadataFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpLogsFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpLibFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpConfFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpSslFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder], ['saml'])
-                self.run(['bin/mkdir', '-p', self.idpWarFolder], ['saml'])
+                self.run(['bin/mkdir', '-p', self.idpFolder])
+                self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
+                self.run(['bin/mkdir', '-p', self.idpLogsFolder])
+                self.run(['bin/mkdir', '-p', self.idpLibFolder])
+                self.run(['bin/mkdir', '-p', self.idpConfFolder])
+                self.run(['bin/mkdir', '-p', self.idpSslFolder])
+                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder])
+                self.run(['bin/mkdir', '-p', self.idpWarFolder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1164,24 +1162,18 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, components=[], cwd=None):
-        if self.docker:
-            self.logIt('Components: %s \nRunning: %s' % (`components`, ' '.join(args)))
-            # TODO - Use API to execute command in container
-            for component in components:
-                pass
-        else:
-            self.logIt('Running: %s' % ' '.join(args))
-            try:
-                p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
-                output, err = p.communicate()
-                if output:
-                    self.logIt(output)
-                if err:
-                    self.logIt(err, True)
-            except:
-                self.logIt("Error running command : %s" % " ".join(args), True)
-                self.logIt(traceback.format_exc(), True)
+    def run(self, args, cwd=None):
+        self.logIt('Running: %s' % ' '.join(args))
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+            output, err = p.communicate()
+            if output:
+                self.logIt(output)
+            if err:
+                self.logIt(err, True)
+        except:
+            self.logIt("Error running command : %s" % " ".join(args), True)
+            self.logIt(traceback.format_exc(), True)
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
