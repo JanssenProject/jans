@@ -24,21 +24,23 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
 /**
- * @author "Oleksiy Tataryn"
- *
+ * Provides operations with attributes
+ * 
+ * @author Oleksiy Tataryn
+ * @author Yuriy Movchan Date: 01/06/2015
  */
 public  @Data class AttributeService {
-    @In
-    LdapEntryManager ldapEntryManager;
-    
 	@Logger
 	private Log log;
+
+	@In
+    private LdapEntryManager ldapEntryManager;
 	
 	@In
 	private SchemaService schemaService;
 
 	@In
-	CacheService cacheService;
+	private CacheService cacheService;
 	
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
     	  String[] targetArray = new String[] { attributeValue };
