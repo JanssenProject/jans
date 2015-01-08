@@ -32,7 +32,7 @@ public class DummyUserRegistrationType implements UserRegistrationType {
 	}
 
 	@Override
-	public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean updateUser(Object person, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
