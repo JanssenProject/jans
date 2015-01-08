@@ -52,7 +52,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		return false;
 	}
 
-	public boolean executeDefaultExternalClientRegistrationUpdateClientMethod(RegisterRequest registerRequest, Client client) {
+	public boolean executeExternalDefaultClientRegistrationUpdateClientMethod(RegisterRequest registerRequest, Client client) {
 		return executeExternalClientRegistrationUpdateClientMethod(this.defaultExternalCustomScript, registerRequest, client);
 	}
 

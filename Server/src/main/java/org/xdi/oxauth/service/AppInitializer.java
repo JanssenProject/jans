@@ -106,7 +106,7 @@ public class AppInitializer {
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
         
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.USER_REGISTRATION );
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION );
         ExtendedCustomScriptManager.instance().migrateOldConfigurations();
         ExtendedCustomScriptManager.instance().init(supportedCustomScriptTypes);
     }
