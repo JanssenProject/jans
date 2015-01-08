@@ -17,6 +17,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface UserRegistrationType extends BaseExternalType {
 
-	public boolean updateUser(Object person, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
