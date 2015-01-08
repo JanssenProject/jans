@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,76 +15,49 @@ import java.util.Map.Entry;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.log.Log;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.auth.CustomAuthenticatorType;
-import org.xdi.oxauth.service.custom.ExtendedCustomScriptManager;
-import org.xdi.service.custom.script.CustomScriptManager;
+import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
 
 /**
  * Provides factory methods needed to create external authenticator
  *
- * @author Yuriy Movchan Date: 08.21.2012
+ * @author Yuriy Movchan Date: 21/08/2012
  */
 @Scope(ScopeType.APPLICATION)
 @Name("externalAuthenticationService")
 @AutoCreate
 @Startup
-public class ExternalAuthenticationService implements Serializable {
+public class ExternalAuthenticationService extends ExternalScriptService {
 
-	private static final long serialVersionUID = -1225880597520443390L;
+	private static final long serialVersionUID = 7339887464253044927L;
 
 	public final static String ACR_METHOD_PREFIX = "https://schema.gluu.org/openid/acr/method/";
-
-//	private transient CustomScriptConfiguration defaultExternalAuthenticator;
 
 	private Map<String, CustomScriptConfiguration> customScriptConfigurations;
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsByUsageType;
 	private Map<AuthenticationScriptUsageType, CustomScriptConfiguration> defaultExternalAuthenticators;
 
-	@Logger
-	private Log log;
-	
-	@In
-	private ExtendedCustomScriptManager extendedCustomScriptManager;
+	public ExternalAuthenticationService(CustomScriptType customScriptType) {
+		super(CustomScriptType.CUSTOM_AUTHENTICATION);
+	}
 
-	@Observer(CustomScriptManager.MODIFIED_EVENT_TYPE)
-	public void reload() {
-		// Get actual list of external authenticator configurations
-		List<CustomScriptConfiguration> customScriptConfigurations = extendedCustomScriptManager.getCustomScriptConfigurationsByScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
-
-		// Store updated external authenticator configurations
-		this.customScriptConfigurations = reloadExternalConfigurations(customScriptConfigurations);
-
+	@Override
+	protected void reloadExternal() {
 		// Group external authenticator configurations by usage type
 		this.customScriptConfigurationsByUsageType = groupCustomScriptConfigurationsByUsageType(this.customScriptConfigurations);
 
 		// Determine default authenticator for every usage type
 		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurations(this.customScriptConfigurations);
 	}
-
-	private Map<String, CustomScriptConfiguration> reloadExternalConfigurations(List<CustomScriptConfiguration> customScriptConfigurations) {
-		Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations.size());
-		
-		// Convert CustomScript to old model
-		for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
-			reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getName()), customScriptConfiguration);
-		}
-
-		return reloadedExternalConfigurations;
-	}
-
 
 	public Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsByUsageType(Map<String,  CustomScriptConfiguration> customScriptConfigurations) {
 		Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsByUsageType = new HashMap<AuthenticationScriptUsageType, List<CustomScriptConfiguration>>();

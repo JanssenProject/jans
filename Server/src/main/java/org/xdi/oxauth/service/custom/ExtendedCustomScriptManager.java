@@ -30,7 +30,7 @@ import org.xdi.util.INumGenerator;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @Scope(ScopeType.APPLICATION)
-@Name("extendedCustomScriptManager")
+@Name("customScriptManager")
 @AutoCreate
 // Remove this class after CE 1.7 release
 public class ExtendedCustomScriptManager extends CustomScriptManager {
