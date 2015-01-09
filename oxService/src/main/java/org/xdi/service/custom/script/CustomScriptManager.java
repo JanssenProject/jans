@@ -19,10 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.Component;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
@@ -43,6 +47,9 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
+@Scope(ScopeType.APPLICATION)
+@Name("customScriptManager")
+@AutoCreate
 public class CustomScriptManager implements Serializable {
 
 	private static final long serialVersionUID = -4225890597520443390L;
@@ -51,7 +58,7 @@ public class CustomScriptManager implements Serializable {
 	public final static String MODIFIED_EVENT_TYPE = "CustomScriptModifiedEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
     
-    protected final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "gluuStatus" };
+    public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "gluuStatus" };
 
 	@Logger
 	protected Log log;
@@ -343,7 +350,11 @@ public class CustomScriptManager implements Serializable {
 		return new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurations.values());
 	}
 
-    public static CustomScriptManager instance() {
+    public List<CustomScriptType> getSupportedCustomScriptTypes() {
+		return supportedCustomScriptTypes;
+	}
+
+	public static CustomScriptManager instance() {
         return (CustomScriptManager) Component.getInstance(CustomScriptManager.class);
     }
 

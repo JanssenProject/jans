@@ -37,7 +37,7 @@ public class ExternalScriptService implements Serializable {
 	@Logger
 	protected Log log;
 	
-	@In(value = "customScriptManager")
+	@In
 	protected CustomScriptManager customScriptManager;
 	
 	public ExternalScriptService(CustomScriptType customScriptType) {
