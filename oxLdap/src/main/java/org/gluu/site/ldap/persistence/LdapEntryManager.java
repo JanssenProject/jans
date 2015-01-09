@@ -570,7 +570,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
                         Class<?> propertyType = propertyGetters[i][tmpProperties.length - 1].getReturnType();
 			if (!((propertyType == String.class) || (propertyType == Date.class) || (propertyType == Integer.class) || (propertyType == Integer.TYPE))) {
-				throw new MappingException("Entry properties should has String, Date or Integer type. Property: '" + tmpProperties[tmpProperties.length - 1]) + "'";
+				throw new MappingException("Entry properties should has String, Date or Integer type. Property: '" + tmpProperties[tmpProperties.length - 1] + "'");
 			}
 		}
 
