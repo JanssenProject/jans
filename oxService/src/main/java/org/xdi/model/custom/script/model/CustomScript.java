@@ -23,7 +23,7 @@ import org.xdi.model.custom.script.CustomScriptType;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@LdapEntry(sortBy = "oxLevel")
+@LdapEntry(sortBy = "level")
 @LdapObjectClass(values = {"top", "oxCustomScript"})
 public class CustomScript extends BaseEntry {
 
