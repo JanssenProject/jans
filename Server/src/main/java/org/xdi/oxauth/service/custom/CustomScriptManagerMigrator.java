@@ -12,8 +12,11 @@ import java.util.List;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.log.Log;
 import org.xdi.model.ProgrammingLanguage;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
@@ -30,16 +33,25 @@ import org.xdi.util.INumGenerator;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @Scope(ScopeType.APPLICATION)
-@Name("customScriptManager")
+@Name("customScriptManagerMigrator")
 @AutoCreate
 // Remove this class after CE 1.7 release
-public class ExtendedCustomScriptManager extends CustomScriptManager {
+public class CustomScriptManagerMigrator {
+	
+	@In
+	private CustomScriptManager customScriptManager;
+	
+	@In
+	private CustomScriptService customScriptService;
+
+	@Logger
+    private Log log;
 
 	private static final long serialVersionUID = -3225890597520443390L;
 
     public void migrateOldConfigurations() {
     	// Check if there are new configuration
-		List<CustomScript> customScripts = customScriptService.findCustomScripts(this.supportedCustomScriptTypes, CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
+		List<CustomScript> customScripts = customScriptService.findCustomScripts(customScriptManager.getSupportedCustomScriptTypes(), CustomScriptManager.CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
 		if (customScripts.size() > 0) {
 			return;
 		}
@@ -86,8 +98,8 @@ public class ExtendedCustomScriptManager extends CustomScriptManager {
 		}
     }
 
-    public static ExtendedCustomScriptManager instance() {
-        return (ExtendedCustomScriptManager) Component.getInstance(ExtendedCustomScriptManager.class);
+    public static CustomScriptManagerMigrator instance() {
+        return (CustomScriptManagerMigrator) Component.getInstance(CustomScriptManagerMigrator.class);
     }
 
 }
