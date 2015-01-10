@@ -110,8 +110,7 @@ public class CustomScriptManager implements Serializable {
 		}
 	}
 
-	@Destroy
-	@Asynchronous
+//	@Destroy
 	public void destroy() {
 		log.debug("Destroying custom scripts configurations");
 		if (this.customScriptConfigurations == null) {
