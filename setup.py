@@ -1316,7 +1316,6 @@ def print_help():
     print "    -a   Install Asimba"
     print "    -c   Install CAS"
     print "    -d   specify directory of installation"
-    print "    -D   use Docker"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
     print "    -l   Install LDAP"
@@ -1328,7 +1327,7 @@ def print_help():
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:DfhlNn:suw")
+        opts, args = getopt.getopt(argv, "acd:fhlNn:suw")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1366,8 +1365,6 @@ def getOpts(argv, setupOptions):
             setupOptions['modifyNetworking'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
-        elif opt == "-D":
-            setupOptions['useDocker'] = True
     return setupOptions
 
 if __name__ == '__main__':
@@ -1376,7 +1373,6 @@ if __name__ == '__main__':
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
-        'useDocker': False,
         'installOxAuth': True,
         'installOxTrust': True,
         'installLDAP': True,
@@ -1391,7 +1387,6 @@ if __name__ == '__main__':
 
     installObject = Setup(setupOptions['install_dir'])
 
-    installObject.useDocker = setupOptions['useDocker']
     installObject.downloadWars = setupOptions['downloadWars']
     installObject.modifyNetworking = setupOptions['modifyNetworking']
 
