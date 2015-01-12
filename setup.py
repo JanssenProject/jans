@@ -981,25 +981,26 @@ class Setup(object):
     def makeFolders(self):
         try:
             # Create these folder on all instances
-            self.run(['bin/mkdir', '-p', self.configFolder])
-            self.run(['bin/mkdir', '-p', self.certFolder])
+            mkdir = '/bin/mkdir'
+            self.run([mkdir, '-p', self.configFolder])
+            self.run([mkdir, '-p', self.certFolder])
 
             if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
-                self.run(['/bin/mkir', '-p', self.gluuOptFolder])
-                self.run(['bin/mkdir', '-p', self.gluuOptBinFolder])
-                self.run(['bin/mkdir', '-p', self.tomcat_user_home_lib])
-                self.run(['bin/mkdir', '-p', self.oxPhotosFolder])
-                self.run(['bin/mkdir', '-p', self.oxTrustRemovedFolder])
+                self.run([mkdir, '-p', self.gluuOptFolder])
+                self.run([mkdir, '-p', self.gluuOptBinFolder])
+                self.run([mkdir, '-p', self.tomcat_user_home_lib])
+                self.run([mkdir, '-p', self.oxPhotosFolder])
+                self.run([mkdir, '-p', self.oxTrustRemovedFolder])
 
             if self.components['saml']['enabled']:
-                self.run(['bin/mkdir', '-p', self.idpFolder])
-                self.run(['bin/mkdir', '-p', self.idpMetadataFolder])
-                self.run(['bin/mkdir', '-p', self.idpLogsFolder])
-                self.run(['bin/mkdir', '-p', self.idpLibFolder])
-                self.run(['bin/mkdir', '-p', self.idpConfFolder])
-                self.run(['bin/mkdir', '-p', self.idpSslFolder])
-                self.run(['bin/mkdir', '-p', self.idpTempMetadataFolder])
-                self.run(['bin/mkdir', '-p', self.idpWarFolder])
+                self.run([mkdir, '-p', self.idpFolder])
+                self.run([mkdir, '-p', self.idpMetadataFolder])
+                self.run([mkdir, '-p', self.idpLogsFolder])
+                self.run([mkdir, '-p', self.idpLibFolder])
+                self.run([mkdir, '-p', self.idpConfFolder])
+                self.run([mkdir, '-p', self.idpSslFolder])
+                self.run([mkdir, '-p', self.idpTempMetadataFolder])
+                self.run([mkdir, '-p', self.idpWarFolder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
