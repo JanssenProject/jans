@@ -1118,25 +1118,25 @@ class Setup(object):
             if promptForHTTPD == 'y':
                 installObject.components['httpd']['enabled'] = True
             else:
-                installObject.components['httpd']['enabled'] = True
+                installObject.components['httpd']['enabled'] = False
 
             promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
             if promptForShibIDP == 'y':
                 installObject.components['saml']['enabled'] = True
             else:
-                installObject.components['saml']['enabled'] = True
+                installObject.components['saml']['enabled'] = False
 
             promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
             if promptForAsimba == 'y':
                 installObject.components['asimba']['enabled'] = True
             else:
-                installObject.components['asimba']['enabled'] = True
+                installObject.components['asimba']['enabled'] = False
 
             promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
             if promptForCAS == 'y':
                 installObject.components['cas']['enabled'] = True
             else:
-                installObject.components['cas']['enabled'] = True
+                installObject.components['cas']['enabled'] = False
 
     def removeDirs(self, name):
         try:
