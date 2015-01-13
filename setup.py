@@ -490,15 +490,7 @@ class Setup(object):
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
         
-        self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/Catalina/localhost/" % self.tomcatHome)
-        self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/attribute-resolver.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/handler.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/internal.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/logging.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/login.config" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s" % self.idpConfFolder)
-        self.copyFile("%s/static/idp/conf/service.xml" % self.install_dir, "%s" % self.idpConfFolder)
+        self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
 
     def createDirs(self, name):
         try:
