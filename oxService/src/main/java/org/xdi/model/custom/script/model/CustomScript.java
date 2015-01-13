@@ -68,6 +68,12 @@ public class CustomScript extends BaseEntry {
 
 	public CustomScript() {}
 
+	public CustomScript(String dn, String inum, String name) {
+		super(dn);
+		this.inum = inum;
+		this.name = name;
+	}
+
 	public CustomScript(CustomScript customScript) {
 		super(customScript.getDn());
 		this.inum = customScript.inum;

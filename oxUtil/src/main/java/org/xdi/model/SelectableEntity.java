@@ -25,8 +25,8 @@ public class SelectableEntity<T> implements Serializable {
 		this.selected = false;
 	}
 
-	public SelectableEntity(T entiry) {
-		this(entiry, false);
+	public SelectableEntity(T entity) {
+		this(entity, false);
 	}
 
 	public T getEntity() {
