@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -17,6 +19,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 22/04/2013
  */
 @LdapEntry
@@ -50,8 +53,9 @@ public class ScopeDescription {
     private String url;
     @LdapAttribute(name = "oxType")
     private InternalExternal type;
-//    @LdapAttribute(name = "oxAssociatedClient")
-//    private List<String> clients;
+    
+    @LdapAttribute(name = "oxPolicyScriptDn")
+    private List<String> authorizationPolicies;
 
     public ScopeDescription() {
     }
@@ -144,29 +148,22 @@ public class ScopeDescription {
         url = p_url;
     }
 
-//    public List<String> getClients() {
-//        return clients;
-//    }
-//
-//    public void setClients(List<String> p_clients) {
-//        clients = p_clients;
-//    }
+	public List<String> getAuthorizationPolicies() {
+		return authorizationPolicies;
+	}
+
+	public void setAuthorizationPolicies(List<String> authorizationPolicies) {
+		this.authorizationPolicies = authorizationPolicies;
+	}
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("UmaScope");
-        sb.append("{dn='").append(dn).append('\'');
-        sb.append(", inum='").append(inum).append('\'');
-        sb.append(", displayName='").append(displayName).append('\'');
-        sb.append(", owner='").append(owner).append('\'');
-        sb.append(", faviconImageAsXml='").append(faviconImageAsXml).append('\'');
-        sb.append(", oxId='").append(id).append('\'');
-        sb.append(", policyRule='").append(policyRule).append('\'');
-        sb.append(", revision='").append(revision).append('\'');
-        sb.append(", iconUrl='").append(iconUrl).append('\'');
-        sb.append(", url='").append(url).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ScopeDescription [dn=").append(dn).append(", inum=").append(inum).append(", displayName=").append(displayName)
+				.append(", owner=").append(owner).append(", faviconImageAsXml=").append(faviconImageAsXml).append(", id=").append(id)
+				.append(", policyRule=").append(policyRule).append(", revision=").append(revision).append(", iconUrl=").append(iconUrl)
+				.append(", url=").append(url).append(", type=").append(type).append(", authorizationPolicies=")
+				.append(authorizationPolicies).append("]");
+		return builder.toString();
+	}
 }
