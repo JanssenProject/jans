@@ -200,6 +200,7 @@ class Setup(object):
         self.ldif_people = '%s/people.ldif' % self.outputFolder
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
         self.ldif_site = '%s/static/cache-refresh/o_site.ldif' % self.install_dir
+        self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -214,7 +215,8 @@ class Setup(object):
                            self.ldif_clients,
                            self.ldif_people,
                            self.ldif_groups,
-                           self.ldif_site]
+                           self.ldif_site,
+                           self.ldif_scripts]
 
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_xml: True,
@@ -236,6 +238,7 @@ class Setup(object):
                      self.ldif_clients: False,
                      self.ldif_people: False,
                      self.ldif_groups: False,
+                     self.ldif_scripts: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_selector_configuration: True
