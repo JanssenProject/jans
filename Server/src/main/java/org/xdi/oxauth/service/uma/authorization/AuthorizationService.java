@@ -79,7 +79,10 @@ public class AuthorizationService {
     	HashSet<String> result = new HashSet<String>();
     	
     	for (ScopeDescription scope : scopes)  {
-    		result.addAll(scope.getAuthorizationPolicies());
+    		List<String> authorizationPolicies = scope.getAuthorizationPolicies(); 
+    		if (authorizationPolicies != null) {
+    			result.addAll(authorizationPolicies);
+    		}
     	}
     	
 		return result;
