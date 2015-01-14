@@ -24,7 +24,57 @@
                                        urn:mace:shibboleth:2.0:security:saml classpath:/schema/shibboleth-2.0-security-policy-saml.xsd
                                        urn:oasis:names:tc:SAML:2.0:metadata classpath:/schema/saml-schema-metadata-2.0.xsd">
     <rp:AnonymousRelyingParty provider="idp"
-                           defaultSigningCredentialRef="IdPCredential" />
+                            />
+    <rp:DefaultRelyingParty provider="https://guestID-dev.weill.cornell.edu/idp/shibboleth"
+                        >
+        <!-- defaultSigningCredentialRef="IdPCredential"
+            Each attribute in these profiles configuration is set to its default value,
+            that is, the values that would be in effect if those attributes were not present.
+            We list them here so that people are aware of them (since they seem reluctant to
+            read the documentation).
+        -->
+        <rp:ProfileConfiguration xsi:type="saml:ShibbolethSSOProfile"
+                              includeAttributeStatement="false"
+                              assertionLifetime="PT5M"
+                              signResponses="conditional"
+                              signAssertions="never" />
+
+        <rp:ProfileConfiguration xsi:type="saml:SAML1AttributeQueryProfile"
+                              assertionLifetime="PT5M"
+                              signResponses="conditional"
+                              signAssertions="never" />
+
+        <rp:ProfileConfiguration xsi:type="saml:SAML1ArtifactResolutionProfile"
+                              signResponses="conditional"
+                              signAssertions="never" />
+
+        <rp:ProfileConfiguration xsi:type="saml:SAML2SSOProfile"
+                              includeAttributeStatement="true"
+                              assertionLifetime="PT5M"
+                              assertionProxyCount="0"
+                              signResponses="conditional"
+                              signAssertions="never"
+                              encryptAssertions="conditional"
+                              encryptNameIds="never" />
+
+        <rp:ProfileConfiguration xsi:type="saml:SAML2AttributeQueryProfile"
+                              assertionLifetime="PT5M"
+                              assertionProxyCount="0"
+                              signResponses="conditional"
+                              signAssertions="never"
+                              encryptAssertions="conditional"
+                              encryptNameIds="never" />
+
+        <rp:ProfileConfiguration xsi:type="saml:SAML2ArtifactResolutionProfile"
+                              signResponses="conditional"
+                              signAssertions="never"
+                              encryptAssertions="conditional"
+                              encryptNameIds="never"/>
+
+    </rp:DefaultRelyingParty>
+
+    <metadata:MetadataProvider id="ShibbolethMetadata" xsi:type="metadata:ChainingMetadataProvider">
+    </metadata:MetadataProvider>
 
     <!-- DO NOT EDIT BELOW THIS POINT -->
     <!--
