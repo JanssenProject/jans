@@ -30,7 +30,7 @@ public class ExternalScriptService implements Serializable {
 	
 	protected CustomScriptType customScriptType;
 
-	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsMap;
+	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
 	protected List<CustomScriptConfiguration> customScriptConfigurations;
 	protected CustomScriptConfiguration defaultExternalCustomScript;
 
@@ -48,7 +48,7 @@ public class ExternalScriptService implements Serializable {
 	public void reload() {
 		// Get actual list of external configurations
 		this.customScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
-		this.customScriptConfigurationsMap = reloadExternalConfigurations(customScriptConfigurations);
+		this.customScriptConfigurationsNameMap = buildExternalConfigurationsNameMap(customScriptConfigurations);
 
 		// Determine default configuration
 		this.defaultExternalCustomScript = determineDefaultCustomScriptConfiguration(this.customScriptConfigurations);
@@ -60,7 +60,7 @@ public class ExternalScriptService implements Serializable {
 	protected void reloadExternal() {
 	}
 
-	private Map<String, CustomScriptConfiguration> reloadExternalConfigurations(List<CustomScriptConfiguration> customScriptConfigurations) {
+	private Map<String, CustomScriptConfiguration> buildExternalConfigurationsNameMap(List<CustomScriptConfiguration> customScriptConfigurations) {
 		Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations.size());
 		
 		for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
@@ -87,8 +87,8 @@ public class ExternalScriptService implements Serializable {
 		return this.customScriptConfigurations.size() > 0;
 	}
 
-	public CustomScriptConfiguration getCustomScriptConfiguration(String name) {
-		return this.customScriptConfigurationsMap.get(StringHelper.toLowerCase(name));
+	public CustomScriptConfiguration getCustomScriptConfigurationByName(String name) {
+		return this.customScriptConfigurationsNameMap.get(StringHelper.toLowerCase(name));
 	}
 
 	public CustomScriptConfiguration getDefaultExternalCustomScript() {
