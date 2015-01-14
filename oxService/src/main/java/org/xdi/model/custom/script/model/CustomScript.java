@@ -31,7 +31,7 @@ public class CustomScript extends BaseEntry {
 	private String inum;
 
     @NotNull(message = "Name should be not empty")
-    @LdapAttribute(name = "name")
+    @LdapAttribute(name = "displayName")
 	private String name;
 
     @LdapAttribute(name = "description")
