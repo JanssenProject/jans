@@ -18,6 +18,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface AuthorizationPolicyType extends BaseExternalType {
 
-	public boolean authorize(Object authorizationContext, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean authorize(Object authorizationContext, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
