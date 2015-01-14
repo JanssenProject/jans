@@ -68,7 +68,8 @@ import org.xdi.util.security.StringEncrypter;
 /**
  * Provides interface for User Info REST web services
  *
- * @author Javier Rojas Blum Date: 11.29.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 December 9, 2014
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -189,6 +190,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws StringEncrypter.EncryptionException, InvalidJwtException, InvalidClaimException, SignatureException {
         Jwt jwt = new Jwt();
+        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
 
         // Header
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
@@ -197,27 +199,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             jwt.getHeader().setType(JwtType.JWS);
         }
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
-        switch (signatureAlgorithm) {
-            case RS256:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs256KeyId());
-                break;
-            case RS384:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs384KeyId());
-                break;
-            case RS512:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs512KeyId());
-                break;
-            case ES256:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs256KeyId());
-                break;
-            case ES384:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs384KeyId());
-                break;
-            case ES512:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs512KeyId());
-                break;
-            default:
-                break;
+
+        List<JSONWebKey> availableKeys = jwks.getKeys(signatureAlgorithm);
+        if (availableKeys.size() > 0) {
+            jwt.getHeader().setKeyId(availableKeys.get(0).getKeyId());
         }
 
         // Claims
@@ -277,7 +262,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Signature
-        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
         JSONWebKey jwk = null;
         switch (signatureAlgorithm) {
             case HS256:

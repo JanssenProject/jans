@@ -13,14 +13,15 @@ import org.xdi.oxauth.model.util.StringUtils;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9, 09/23/2014
+ * @version 0.9 December 8, 2014
  */
-public class Key<E extends  PrivateKey, F extends PublicKey> implements JSONable {
+public class Key<E extends PrivateKey, F extends PublicKey> implements JSONable {
 
     private String keyType;
     private String use;
     private String algorithm;
     private String keyId;
+    private Long expirationTime;
     private Object curve;
     private E privateKey;
     private F publicKey;
@@ -56,6 +57,14 @@ public class Key<E extends  PrivateKey, F extends PublicKey> implements JSONable
 
     public void setKeyId(String keyId) {
         this.keyId = keyId;
+    }
+
+    public Long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Long expirationTime) {
+        this.expirationTime = expirationTime;
     }
 
     public Object getCurve() {
@@ -98,6 +107,7 @@ public class Key<E extends  PrivateKey, F extends PublicKey> implements JSONable
         jsonObject.put("use", getUse());
         jsonObject.put("algorithm", getAlgorithm());
         jsonObject.put("keyId", getKeyId());
+        jsonObject.put("expirationTime", getExpirationTime() == null ? JSONObject.NULL : getExpirationTime());
         jsonObject.put("curve", getCurve());
         jsonObject.put("privateKey", getPrivateKey().toJSONObject());
         jsonObject.put("publicKey", getPublicKey().toJSONObject());

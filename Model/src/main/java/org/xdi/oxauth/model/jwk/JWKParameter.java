@@ -22,6 +22,7 @@ public interface JWKParameter {
     public static final String KEY_USE = "use";
     public static final String ALGORITHM = "alg";
     public static final String KEY_ID = "kid";
+    public static final String EXPIRATION_TIME = "exp";
 
     // Public Key
     public static final String MODULUS = "n";

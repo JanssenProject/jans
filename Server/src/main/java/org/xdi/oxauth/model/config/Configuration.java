@@ -6,22 +6,21 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.xdi.oxauth.model.common.Mode;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.xdi.oxauth.model.common.Mode;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the configuration XML file.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.1, 03.10.2011
+ * @version 0.9 December 8, 2014
  */
 @XmlRootElement(name = "configuration")
 public class Configuration {
@@ -86,13 +85,8 @@ public class Configuration {
     private Boolean umaKeepClientDuringResourceSetRegistration;
     private int cleanServiceInterval;
     private int federationCheckInterval;
+    private int keyRegenerationInterval;
     private String defaultSignatureAlgorithm;
-    private String rs256KeyId;
-    private String rs384KeyId;
-    private String rs512KeyId;
-    private String es256KeyId;
-    private String es384KeyId;
-    private String es512KeyId;
     private String oxOpenIdConnectVersion;
     private String organizationInum;
     private String oxId;
@@ -120,7 +114,7 @@ public class Configuration {
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private int configurationUpdateInterval;
-    
+
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
@@ -820,6 +814,15 @@ public class Configuration {
         federationCheckInterval = p_federationCheckInterval;
     }
 
+    @XmlElement(name = "key-regeneration-interval")
+    public int getKeyRegenerationInterval() {
+        return keyRegenerationInterval;
+    }
+
+    public void setKeyRegenerationInterval(int keyRegenerationInterval) {
+        this.keyRegenerationInterval = keyRegenerationInterval;
+    }
+
     @XmlElement(name = "default-signature-algorithm")
     public String getDefaultSignatureAlgorithm() {
         return defaultSignatureAlgorithm;
@@ -827,60 +830,6 @@ public class Configuration {
 
     public void setDefaultSignatureAlgorithm(String defaultSignatureAlgorithm) {
         this.defaultSignatureAlgorithm = defaultSignatureAlgorithm;
-    }
-
-    @XmlElement(name = "RS256-keyid")
-    public String getRs256KeyId() {
-        return rs256KeyId;
-    }
-
-    public void setRs256KeyId(String rs256KeyId) {
-        this.rs256KeyId = rs256KeyId;
-    }
-
-    @XmlElement(name = "RS384-keyid")
-    public String getRs384KeyId() {
-        return rs384KeyId;
-    }
-
-    public void setRs384KeyId(String rs384KeyId) {
-        this.rs384KeyId = rs384KeyId;
-    }
-
-    @XmlElement(name = "RS512-keyid")
-    public String getRs512KeyId() {
-        return rs512KeyId;
-    }
-
-    public void setRs512KeyId(String rs512KeyId) {
-        this.rs512KeyId = rs512KeyId;
-    }
-
-    @XmlElement(name = "ES256-keyid")
-    public String getEs256KeyId() {
-        return es256KeyId;
-    }
-
-    public void setEs256KeyId(String es256KeyId) {
-        this.es256KeyId = es256KeyId;
-    }
-
-    @XmlElement(name = "ES384-keyid")
-    public String getEs384KeyId() {
-        return es384KeyId;
-    }
-
-    public void setEs384KeyId(String es384KeyId) {
-        this.es384KeyId = es384KeyId;
-    }
-
-    @XmlElement(name = "ES512-keyid")
-    public String getEs512KeyId() {
-        return es512KeyId;
-    }
-
-    public void setEs512KeyId(String es512KeyId) {
-        this.es512KeyId = es512KeyId;
     }
 
     @XmlElement(name = "oxOpenIDConnectVersion")
@@ -1091,32 +1040,32 @@ public class Configuration {
     public void setConfigurationUpdateInterval(int p_configurationUpdateInterval) {
         configurationUpdateInterval = p_configurationUpdateInterval;
     }
-    
+
     @XmlElement(name = "jsLocation")
     public String getJsLocation() {
         return jsLocation;
     }
 
     public void setJsLocation(String jsLocation) {
-    	this.jsLocation = jsLocation;
+        this.jsLocation = jsLocation;
     }
-    
+
     @XmlElement(name = "cssLocation")
     public String getCssLocation() {
         return cssLocation;
     }
 
     public void setCssLocation(String cssLocation) {
-    	this.cssLocation = cssLocation;
+        this.cssLocation = cssLocation;
     }
-    
+
     @XmlElement(name = "imgLocation")
     public String getImgLocation() {
         return imgLocation;
     }
 
     public void setImgLocation(String imgLocation) {
-    	this.imgLocation = imgLocation;
+        this.imgLocation = imgLocation;
     }
-    
+
 }

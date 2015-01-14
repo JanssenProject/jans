@@ -366,6 +366,7 @@ public abstract class BaseTest {
             validateTokenEndpoint = context.getCurrentXmlTest().getParameter("validateTokenEndpoint");
             federationMetadataEndpoint = context.getCurrentXmlTest().getParameter("federationMetadataEndpoint");
             federationEndpoint = context.getCurrentXmlTest().getParameter("federationEndpoint");
+            configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();

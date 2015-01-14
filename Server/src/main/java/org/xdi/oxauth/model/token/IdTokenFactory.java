@@ -53,7 +53,7 @@ import org.xdi.util.security.StringEncrypter;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version 0.9 November 12, 2014
+ * @version 0.9 December 9, 2014
  */
 public class IdTokenFactory {
 
@@ -61,6 +61,7 @@ public class IdTokenFactory {
                                             AuthorizationCode authorizationCode, AccessToken accessToken,
                                             Map<String, String> claims) throws SignatureException, InvalidJwtException, StringEncrypter.EncryptionException {
         Jwt jwt = new Jwt();
+        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
 
         // Header
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getDefaultSignatureAlgorithm());
@@ -74,28 +75,7 @@ public class IdTokenFactory {
             jwt.getHeader().setType(JwtType.JWS);
         }
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
-        switch (signatureAlgorithm) {
-            case RS256:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs256KeyId());
-                break;
-            case RS384:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs384KeyId());
-                break;
-            case RS512:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getRs512KeyId());
-                break;
-            case ES256:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs256KeyId());
-                break;
-            case ES384:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs384KeyId());
-                break;
-            case ES512:
-                jwt.getHeader().setKeyId(ConfigurationFactory.getConfiguration().getEs512KeyId());
-                break;
-            default:
-                break;
-        }
+        jwt.getHeader().setKeyId(jwks.getKeys(signatureAlgorithm).get(0).getKeyId());
 
         // Claims
         jwt.getClaims().setIssuer(ConfigurationFactory.getConfiguration().getIssuer());
@@ -145,7 +125,6 @@ public class IdTokenFactory {
         }
 
         // Signature
-        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
         JSONWebKey jwk = null;
         switch (signatureAlgorithm) {
             case HS256:

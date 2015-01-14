@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 10/21/2014
+ * @version 0.9 December 8, 2014
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
@@ -54,7 +54,7 @@ public class ConfigurationFactory {
     public static final String STATIC_CONF_FILE_PATH = DIR + "oxauth-static-conf.json";
     public static final String ID_GEN_SCRIPT_FILE_PATH = DIR + "oxauth-id-gen.py";
     public static final String WEB_KEYS_FILE = "oxauth-web-keys.json";
-    private static String webKeysFilePath;
+    public static String webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE;
 
     public static final String CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE = DIR + "salt";
 
@@ -305,7 +305,6 @@ public class ConfigurationFactory {
 
     private static JSONWebKeySet loadWebKeysFromFile() {
         try {
-            webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE;
             return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), JSONWebKeySet.class);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);

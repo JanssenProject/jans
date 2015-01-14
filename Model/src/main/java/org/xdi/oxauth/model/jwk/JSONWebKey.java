@@ -9,14 +9,16 @@ package org.xdi.oxauth.model.jwk;
 import java.util.List;
 
 /**
- * @author Javier Rojas Blum Date: 11.15.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 December 9, 2014
  */
-public class JSONWebKey {
+public class JSONWebKey implements Comparable<JSONWebKey> {
 
     private KeyType keyType;
     private Use use;
     private String algorithm;
     private String keyId;
+    private Long expirationTime;
     private String curve;
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -80,6 +82,14 @@ public class JSONWebKey {
         this.keyId = keyId;
     }
 
+    public Long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public void setExpirationTime(Long expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+
     /**
      * Returns the curve member that identifies the cryptographic curve used with the key.
      *
@@ -120,5 +130,14 @@ public class JSONWebKey {
 
     public void setCertificateChain(List<String> certificateChain) {
         this.certificateChain = certificateChain;
+    }
+
+    @Override
+    public int compareTo(JSONWebKey o) {
+        if (this.getExpirationTime() == null || o.getExpirationTime() == null) {
+            return 0;
+        }
+
+        return getExpirationTime().compareTo(o.getExpirationTime());
     }
 }

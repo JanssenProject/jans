@@ -7,20 +7,21 @@
 package org.xdi.oxauth.model.crypto.signature;
 
 /**
- * @author Javier Rojas Blum Date: 05.09.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 December 9, 2014
  */
 public enum SignatureAlgorithm {
 
     NONE("none"),
-    HS256("HS256", "HMAC", "HMACSHA256"),
-    HS384("HS384", "HMAC", "HMACSHA384"),
-    HS512("HS512", "HMAC", "HMACSHA512"),
-    RS256("RS256", "RSA", "SHA256WITHRSA"),
-    RS384("RS384", "RSA", "SHA384WITHRSA"),
-    RS512("RS512", "RSA", "SHA512WITHRSA"),
-    ES256("ES256", "EC", "SHA256WITHECDSA", "P-256"),
-    ES384("ES384", "EC", "SHA384WITHECDSA", "P-384"),
-    ES512("ES512", "EC", "SHA512WITHECDSA", "P-521");
+    HS256("HS256", SignatureAlgorithmFamily.HMAC, "HMACSHA256"),
+    HS384("HS384", SignatureAlgorithmFamily.HMAC, "HMACSHA384"),
+    HS512("HS512", SignatureAlgorithmFamily.HMAC, "HMACSHA512"),
+    RS256("RS256", SignatureAlgorithmFamily.RSA, "SHA256WITHRSA"),
+    RS384("RS384", SignatureAlgorithmFamily.RSA, "SHA384WITHRSA"),
+    RS512("RS512", SignatureAlgorithmFamily.RSA, "SHA512WITHRSA"),
+    ES256("ES256", SignatureAlgorithmFamily.EC, "SHA256WITHECDSA", ECDSAEllipticCurve.P_256),
+    ES384("ES384", SignatureAlgorithmFamily.EC, "SHA384WITHECDSA", ECDSAEllipticCurve.P_384),
+    ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECDSAEllipticCurve.P_521);
 
     private final String name;
     private final String family;

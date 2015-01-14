@@ -221,13 +221,9 @@
     <refresh-user-session-timeout-enabled>true</refresh-user-session-timeout-enabled>
     <refresh-user-session-timeout>1800</refresh-user-session-timeout>
 
+    <!-- Key regeneration interval in hours -->
+    <key-regeneration-interval>48</key-regeneration-interval>
     <default-signature-algorithm>RS256</default-signature-algorithm>
-    <RS256-keyid>1</RS256-keyid>
-    <RS384-keyid>2</RS384-keyid>
-    <RS512-keyid>3</RS512-keyid>
-    <ES256-keyid>4</ES256-keyid>
-    <ES384-keyid>5</ES384-keyid>
-    <ES512-keyid>6</ES512-keyid>
 
     <federation-enabled>false</federation-enabled>
     <!-- Federation check interval in seconds. Checks whether data in trusts are still valid
@@ -294,11 +290,11 @@
             <base-dn>ou=clients,o=@!1111,o=gluu</base-dn>
         </client-auth-filter-->
     </client-auth-filters>
-    
+
     <cssLocation>/${config.oxauth.contextPath}/stylesheet</cssLocation>
-    
+
     <jsLocation>/${config.oxauth.contextPath}/js</jsLocation>
-    
+
     <imgLocation>/${config.oxauth.contextPath}/img</imgLocation>
 
 </configuration>
