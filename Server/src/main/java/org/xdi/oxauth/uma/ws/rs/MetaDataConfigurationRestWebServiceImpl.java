@@ -53,7 +53,7 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
             c.setTokenEndpoint(baseEndpointUri + "/oxauth/token");
             c.setUserEndpoint(baseEndpointUri + "/oxauth/authorize");
             c.setIntrospectionEndpoint(baseEndpointUri + "/host/status");
-            c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc");
+            c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionRegistrationEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
             c.setAuthorizationRequestEndpoint(baseEndpointUri + "/requester/perm");

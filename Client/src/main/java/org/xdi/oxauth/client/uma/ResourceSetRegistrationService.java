@@ -28,7 +28,6 @@ import org.xdi.oxauth.model.uma.VersionedResourceSet;
  * 
  * @author Yuriy Movchan Date: 10/04/2012
  */
-@Path("/host/rsrc/resource_set")
 public interface ResourceSetRegistrationService {
 	@PUT
 	@Path("{rsid}")
