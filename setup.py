@@ -987,6 +987,7 @@ class Setup(object):
         try:
             # Create these folder on all instances
             mkdir = '/bin/mkdir'
+            chown = '/bin/chown'
             self.run([mkdir, '-p', self.configFolder])
             self.run([mkdir, '-p', self.certFolder])
 
@@ -1006,6 +1007,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idpSslFolder])
                 self.run([mkdir, '-p', self.idpTempMetadataFolder])
                 self.run([mkdir, '-p', self.idpWarFolder])
+                self.run([chown, '-R', 'tomcat:tomcat', self.idpFolder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
