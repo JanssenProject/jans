@@ -68,6 +68,3 @@ ldap.conf.target.attr.mapping.$attrMapping.value2=$attrMapping.value1
 # Snapshot configuration
 snapshot.folder=$propUtil.escapeString($cacheRefreshConfig.snapshotsFolder)
 snapshot.max.count=$cacheRefreshConfig.snapshotsCount
-
-# Interceptor script
-interceptor.script.fileName=$propUtil.escapeString($cacheRefreshConfig.interceptorScriptFileName)
