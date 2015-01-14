@@ -133,12 +133,6 @@ objectclass: top
 objectclass: organizationalUnit
 ou: uma
 
-# UMA policy data - LEVEL 4
-dn: ou=policies,ou=uma,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: policies
-
 # UMA scope data - LEVEL 4
 dn: ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 objectclass: top
