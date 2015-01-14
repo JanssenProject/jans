@@ -95,6 +95,8 @@ public class AuthorizationService {
         if (customScriptConfiguration != null) {
         	final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
 			log.trace("Policy '{0}' result: {1}", authorizationPolicyDn, result);
+			
+			return result;
         } else {
             log.error("Unable to load cusom script dn: '{0}'", authorizationPolicyDn);
         }
