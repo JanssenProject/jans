@@ -31,7 +31,7 @@ public class DummyAuthorizationPolicyType implements AuthorizationPolicyType {
 	}
 
 	@Override
-	public boolean authorize(Object authorizationContext, Object client, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean authorize(Object authorizationContext, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
