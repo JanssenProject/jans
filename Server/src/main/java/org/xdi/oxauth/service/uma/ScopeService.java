@@ -200,6 +200,7 @@ public class ScopeService {
         return Collections.emptyList();
     }
 
+    // TODO: Optimize scopes loading. It's possible to loads all scope in one request.
     public List<ScopeDescription> getScopesByDns(List<String> p_scopeDns) {
         final List<ScopeDescription> result = new ArrayList<ScopeDescription>();
         try {

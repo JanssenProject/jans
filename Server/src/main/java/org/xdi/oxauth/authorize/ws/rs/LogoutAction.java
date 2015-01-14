@@ -93,7 +93,7 @@ public class LogoutAction {
 		if (isExternalAuthenticatorLogoutPresent) {
 			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", authMode);
 
-			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(authMode);
+			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfigurationByName(authMode);
 			if (customScriptConfiguration == null) {
 				log.error("Failed to get ExternalAuthenticatorConfiguration. auth_mode: {0}", authMode);
 				return false;

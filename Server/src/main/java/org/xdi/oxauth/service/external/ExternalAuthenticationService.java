@@ -52,10 +52,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	@Override
 	protected void reloadExternal() {
 		// Group external authenticator configurations by usage type
-		this.customScriptConfigurationsMapByUsageType = groupCustomScriptConfigurationsMapByUsageType(this.customScriptConfigurationsMap);
+		this.customScriptConfigurationsMapByUsageType = groupCustomScriptConfigurationsMapByUsageType(this.customScriptConfigurationsNameMap);
 
 		// Determine default authenticator for every usage type
-		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsMap);
+		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
 	}
 
 	public Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsMapByUsageType(Map<String,  CustomScriptConfiguration> customScriptConfigurationsMap) {
@@ -277,7 +277,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		for (String acrValue : acrValues) {
 			if (StringHelper.isNotEmpty(acrValue) && StringHelper.toLowerCase(acrValue).startsWith(ACR_METHOD_PREFIX)) {
 				String authMode = acrValue.substring(ACR_METHOD_PREFIX.length());
-				if (customScriptConfigurationsMap.containsKey(StringHelper.toLowerCase(authMode))) {
+				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(authMode))) {
 					authModes.add(authMode);
 				}
 			}
@@ -330,8 +330,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return null;
 	}
 
-	public CustomScriptConfiguration getCustomScriptConfiguration(String name) {
-		for (Entry<String, CustomScriptConfiguration> customScriptConfigurationEntry : this.customScriptConfigurationsMap.entrySet()) {
+	public CustomScriptConfiguration getCustomScriptConfigurationByName(String name) {
+		for (Entry<String, CustomScriptConfiguration> customScriptConfigurationEntry : this.customScriptConfigurationsNameMap.entrySet()) {
 			if (StringHelper.equalsIgnoreCase(name, customScriptConfigurationEntry.getKey())) {
 				return customScriptConfigurationEntry.getValue();
 			}
@@ -341,13 +341,13 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public List<CustomScriptConfiguration> getcustomScriptConfigurationsMap() {
-		return new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsMap.values());
+		return new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
 	}
 
 	public  List<String> getAcrValuesList() {
 		List<String> acrValues = new ArrayList<String>();
 
-		for (Entry<String, CustomScriptConfiguration> customScriptConfigurationEntry : this.customScriptConfigurationsMap.entrySet()) {
+		for (Entry<String, CustomScriptConfiguration> customScriptConfigurationEntry : this.customScriptConfigurationsNameMap.entrySet()) {
 			String acrValue = ACR_METHOD_PREFIX + customScriptConfigurationEntry.getKey();
 			acrValues.add(acrValue);
 		}
