@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 8, 2014
+ * @version 0.9 January 14, 2015
  */
 public class KeyGenerator {
 
@@ -46,7 +46,7 @@ public class KeyGenerator {
 
         key.setKeyType("RSA");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("RS256");
+        key.setAlgorithm(SignatureAlgorithm.RS256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve(JSONObject.NULL);
@@ -63,7 +63,7 @@ public class KeyGenerator {
 
         key.setKeyType("RSA");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("RS384");
+        key.setAlgorithm(SignatureAlgorithm.RS384.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve(JSONObject.NULL);
@@ -80,7 +80,7 @@ public class KeyGenerator {
 
         key.setKeyType("RSA");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("RS512");
+        key.setAlgorithm(SignatureAlgorithm.RS512.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve(JSONObject.NULL);
@@ -97,7 +97,7 @@ public class KeyGenerator {
 
         key.setKeyType("EC");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("EC");
+        key.setAlgorithm(SignatureAlgorithm.ES256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve("P-256");
@@ -114,7 +114,7 @@ public class KeyGenerator {
 
         key.setKeyType("EC");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("EC");
+        key.setAlgorithm(SignatureAlgorithm.ES384.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve("P-384");
@@ -131,7 +131,7 @@ public class KeyGenerator {
 
         key.setKeyType("EC");
         key.setUse("SIGNATURE");
-        key.setAlgorithm("EC");
+        key.setAlgorithm(SignatureAlgorithm.ES512.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
         key.setCurve("P-521");

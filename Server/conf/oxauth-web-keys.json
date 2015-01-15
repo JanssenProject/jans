@@ -62,7 +62,7 @@
     {
         "keyType": "EC",
         "use": "SIGNATURE",
-        "algorithm": "EC",
+        "algorithm": "ES256",
         "keyId": "4",
         "expirationTime": null,
         "curve": "P-256",
@@ -82,7 +82,7 @@
     {
         "keyType": "EC",
         "use": "SIGNATURE",
-        "algorithm": "EC",
+        "algorithm": "ES384",
         "keyId": "5",
         "expirationTime": null,
         "curve": "P-384",
@@ -102,7 +102,7 @@
     {
         "keyType": "EC",
         "use": "SIGNATURE",
-        "algorithm": "EC",
+        "algorithm": "ES512",
         "keyId": "6",
         "expirationTime": null,
         "curve": "P-521",
