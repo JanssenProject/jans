@@ -24,6 +24,7 @@ public final @Data class ApplicationConfiguration implements Serializable {
 	private String orgIname;
 	private String orgDisplayName;
 	private String orgShortName;
+	private String orgSupportEmail;
 
 	private String applianceIname;
 	private String applianceInum;

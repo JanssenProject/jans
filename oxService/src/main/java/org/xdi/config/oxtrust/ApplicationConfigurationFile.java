@@ -294,6 +294,10 @@ public final class ApplicationConfigurationFile {
 		return applicationConfiguration.getString("orgShortName");
 	}
 
+	public String getOrgSupportEmail() {
+		return applicationConfiguration.getString("orgSupportEmail");
+	}
+
 	public String getOxPlusIname() {
 		return applicationConfiguration.getString("oxplusIname");
 	}
