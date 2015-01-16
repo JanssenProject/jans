@@ -42,8 +42,6 @@ public class AuthorizationService {
 
     @Logger
     private Log log;
-    @In
-    private PythonService pythonService;
     
     @In
     private ScopeService umaScopeService;
