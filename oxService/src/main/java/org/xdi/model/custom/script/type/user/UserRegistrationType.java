@@ -13,10 +13,14 @@ import org.xdi.model.custom.script.type.BaseExternalType;
 /**
  * Base interface for external user registration python script
  *
- * @author Yuriy Movchan Date: 12/30/2012
+ * @author Yuriy Movchan Date: 01/16/2015
  */
 public interface UserRegistrationType extends BaseExternalType {
 
-	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean initRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+
+	public boolean preRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+
+	public boolean postRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

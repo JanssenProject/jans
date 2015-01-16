@@ -12,7 +12,7 @@ import org.xdi.model.SimpleCustomProperty;
 /**
  * Dummy implementation of interface UserRegistrationType
  *
- * @author Yuriy Movchan Date: 12/30/2014
+ * @author Yuriy Movchan Date: 01/16/2015
  */
 public class DummyUserRegistrationType implements UserRegistrationType {
 
@@ -32,7 +32,20 @@ public class DummyUserRegistrationType implements UserRegistrationType {
 	}
 
 	@Override
-	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean initRegistration(Object user, Map<String, String[]> requestParameters,
+			Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean preRegistration(Object user, Map<String, String[]> requestParameters,
+			Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean postRegistration(Object user, Map<String, String[]> requestParameters,
+			Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
