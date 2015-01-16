@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appliance-inum>%(inumAppliance)s</appliance-inum>
     <issuer>https://%(hostname)s</issuer>
     <login-page>https://%(hostname)s/oxauth/login.seam</login-page>
     <authorization-page>https://%(hostname)s/oxauth/authorize.seam</authorization-page>
@@ -21,6 +20,8 @@
     <id-generation-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/id</id-generation-endpoint>
     <introspection-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/introspection</introspection-endpoint>
     <uma-configuration-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/uma-configuration</uma-configuration-endpoint>
+
+    <appliance-inum>%(inumAppliance)s</appliance-inum>
 
     <!-- sets mode of the server. Possible values: memory, ldap-->
     <mode>ldap</mode>
@@ -113,6 +114,7 @@
     </id-token-encryption-enc-values-supported>
 
     <request-object-signing-alg-values-supported>
+        <request-object-signing-alg>none</request-object-signing-alg>
         <request-object-signing-alg>HS256</request-object-signing-alg>
         <request-object-signing-alg>HS384</request-object-signing-alg>
         <request-object-signing-alg>HS512</request-object-signing-alg>
@@ -170,15 +172,26 @@
 
     <claim-types-supported>
         <claim-type>normal</claim-type>
+        <!--claim-type>	aggregated</claim-type-->
         <!--claim-type>distributed</claim-type-->
     </claim-types-supported>
 
     <claims-supported>
-        <claim>uid</claim>
-        <claim>displayName</claim>
-        <claim>givenName</claim>
-        <claim>sn</claim>
-        <claim>mail</claim>
+        <claim>sub</claim>
+        <claim>iss</claim>
+        <claim>auth_time</claim>
+        <claim>acr</claim>
+        <claim>name</claim>
+        <claim>given_name</claim>
+        <claim>family_name</claim>
+        <claim>nickname</claim>
+        <claim>profile</claim>
+        <claim>picture</claim>
+        <claim>website</claim>
+        <claim>email</claim>
+        <claim>email_verified</claim>
+        <claim>locale</claim>
+        <claim>zoneinfo</claim>
     </claims-supported>
 
     <service-documentation>http://gluu.org/docs</service-documentation>
@@ -222,6 +235,7 @@
          Lifetime in seconds, 86400 seconds = 1 day  -->
     <session-id-unused-lifetime>86400</session-id-unused-lifetime>
     <session-id-enabled>true</session-id-enabled>
+    <session-id-persist-on-prompt-none>false</session-id-persist-on-prompt-none>
 
     <uma-add-scopes-automatically>false</uma-add-scopes-automatically>
     <uma-requester-permission-token-lifetime>3600</uma-requester-permission-token-lifetime>
@@ -233,13 +247,9 @@
     <refresh-user-session-timeout-enabled>true</refresh-user-session-timeout-enabled>
     <refresh-user-session-timeout>1800</refresh-user-session-timeout>
 
+    <!-- Key regeneration interval in hours -->
+    <key-regeneration-interval>48</key-regeneration-interval>
     <default-signature-algorithm>RS256</default-signature-algorithm>
-    <RS256-keyid>1</RS256-keyid>
-    <RS384-keyid>2</RS384-keyid>
-    <RS512-keyid>3</RS512-keyid>
-    <ES256-keyid>4</ES256-keyid>
-    <ES384-keyid>5</ES384-keyid>
-    <ES512-keyid>6</ES512-keyid>
 
     <federation-enabled>false</federation-enabled>
     <!-- Federation check interval in seconds. Checks whether data in trusts are still valid
@@ -256,6 +266,7 @@
     <federation-signing-kid>1</federation-signing-kid>
 
     <!-- Dynamic registration custom stuff -->
+    <dynamic-registration-scopes-param-enabled>true</dynamic-registration-scopes-param-enabled>
     <dynamic-registration-custom-object-class>oxAuthClientCustomAttributes</dynamic-registration-custom-object-class>
 
     <dynamic-registration-custom-attribute-supported>
@@ -304,5 +315,11 @@
             <base-dn>ou=clients,o=%(inumOrg)s,o=gluu</base-dn>
         </client-auth-filter-->
     </client-auth-filters>
+
+    <cssLocation>/${config.oxauth.contextPath}/stylesheet</cssLocation>
+
+    <jsLocation>/${config.oxauth.contextPath}/js</jsLocation>
+
+    <imgLocation>/${config.oxauth.contextPath}/img</imgLocation>
 
 </configuration>
