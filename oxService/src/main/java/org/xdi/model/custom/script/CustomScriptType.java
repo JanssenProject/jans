@@ -35,7 +35,7 @@ import org.xdi.model.custom.script.type.user.UserRegistrationType;
  */
 public enum CustomScriptType implements LdapEnum {
 	
-	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, AuthenticationCustomScript.class, "ExternalAuthenticator", new DummyCustomAuthenticatorType()),
+	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, AuthenticationCustomScript.class, "CustomAuthenticator", new DummyCustomAuthenticatorType()),
 	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
 	UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
 	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
