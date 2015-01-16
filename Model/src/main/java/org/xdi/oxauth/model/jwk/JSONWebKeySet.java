@@ -15,15 +15,11 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version 0.9 January 16, 2015
  */
 public class JSONWebKeySet {
 
     private List<JSONWebKey> keys;
-
-    /*public JSONWebKeySet(List<JSONWebKey> keys){
-        this.keys=keys;
-    }*/
 
     public List<JSONWebKey> getKeys() {
         return keys;
@@ -34,9 +30,9 @@ public class JSONWebKeySet {
     }
 
     public JSONWebKey getKey(String keyId) {
-        for (JSONWebKey JSONWebKey : keys) {
-            if (JSONWebKey.getKeyId().equals(keyId)) {
-                return JSONWebKey;
+        for (JSONWebKey jsonWebKey : keys) {
+            if (jsonWebKey.getKeyId().equals(keyId)) {
+                return jsonWebKey;
             }
         }
 
@@ -47,15 +43,15 @@ public class JSONWebKeySet {
         List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
 
         if (SignatureAlgorithmFamily.RSA.equals(algorithm.getFamily())) {
-            for (JSONWebKey JSONWebKey : keys) {
-                if (JSONWebKey.getAlgorithm().equals(algorithm.getName())) {
-                    jsonWebKeys.add(JSONWebKey);
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                    jsonWebKeys.add(jsonWebKey);
                 }
             }
         } else if (SignatureAlgorithmFamily.EC.equals(algorithm.getFamily())) {
-            for (JSONWebKey JSONWebKey : keys) {
-                if (JSONWebKey.getCurve().equals(algorithm.getCurve())) {
-                    jsonWebKeys.add(JSONWebKey);
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                    jsonWebKeys.add(jsonWebKey);
                 }
             }
         }
