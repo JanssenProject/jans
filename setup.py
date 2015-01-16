@@ -51,7 +51,7 @@ class Setup(object):
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/%s/oxasimba-proxy-%s.war" % (self.oxVersion, self.oxVersion)
-        self.cas_war = "http://ox.gluu.org/maven/org/xdi/oxcas/%s/oxcas-%s.war" % (self.oxVersion, self.oxVersion) # TODO lookup URL!
+        self.cas_war = "http://ox.gluu.org/maven/org/xdi/oxcas/%s/oxcas-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.modifyNetworking = False
@@ -1316,7 +1316,7 @@ def print_help():
     print "    -f   specify setup.properties file"
     print "    -h   Help"
     print "    -l   Install LDAP"
-    print "    -n   No interactive prompt before install starts."
+    print "    -n   No interactive prompt before install starts. Run with -f"
     print "    -N   No apache httpd server"
     print "    -s   Install the Shibboleth IDP"
     print "    -u   Update hosts file with IP address / hostname"
