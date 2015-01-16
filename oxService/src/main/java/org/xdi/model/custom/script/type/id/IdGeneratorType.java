@@ -16,7 +16,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  *
  * @author Yuriy Movchan Date: 01/16/2015
  */
-public interface IdGenerationType extends BaseExternalType {
+public interface IdGeneratorType extends BaseExternalType {
 
     public String generateId(String appId, String idType, String idPrefix, Map<String, SimpleCustomProperty> configurationAttributes);
 

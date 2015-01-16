@@ -9,11 +9,11 @@ import java.util.Map;
 import org.xdi.model.SimpleCustomProperty;
 
 /**
- * Dummy implementation of interface IdGenerationType
+ * Dummy implementation of interface IdGeneratorType
  *
  * @author Yuriy Movchan Date: 01/16/2015
  */
-public class DummyIdGenerationType implements IdGenerationType {
+public class DummyIdGeneratorType implements IdGeneratorType {
 
 	@Override
 	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {

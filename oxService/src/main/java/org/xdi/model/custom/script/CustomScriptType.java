@@ -17,8 +17,8 @@ import org.xdi.model.custom.script.type.auth.CustomAuthenticatorType;
 import org.xdi.model.custom.script.type.auth.DummyCustomAuthenticatorType;
 import org.xdi.model.custom.script.type.client.ClientRegistrationType;
 import org.xdi.model.custom.script.type.client.DummyClientRegistrationType;
-import org.xdi.model.custom.script.type.id.DummyIdGenerationType;
-import org.xdi.model.custom.script.type.id.IdGenerationType;
+import org.xdi.model.custom.script.type.id.DummyIdGeneratorType;
+import org.xdi.model.custom.script.type.id.IdGeneratorType;
 import org.xdi.model.custom.script.type.uma.DummyAuthorizationPolicyType;
 import org.xdi.model.custom.script.type.uma.AuthorizationPolicyType;
 import org.xdi.model.custom.script.type.user.CacheRefreshType;
@@ -40,7 +40,7 @@ public enum CustomScriptType implements LdapEnum {
 	UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
 	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
 	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
-	ID_GENERATION("id_generation", "Id Generation", IdGenerationType.class, CustomScript.class, "IdGeneration", new DummyIdGenerationType()),
+	ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
 	UMA_AUTHORIZATION_POLICY("uma_authorization_policy", "UMA Authorization Policies", AuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new DummyAuthorizationPolicyType());
 
 	private String value;
