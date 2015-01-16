@@ -84,7 +84,8 @@ public class CustomScriptManagerMigrator {
 			String script = customAuthenticationConfiguration.getCustomAuthenticationScript();
 			script = script.
 					replaceAll("from org.xdi.oxauth.service.python.interfaces import", "from org.xdi.model.custom.script.type.auth import").
-					replaceAll("ExternalAuthenticatorType", "CustomAuthenticatorType");
+					replaceAll("ExternalAuthenticatorType", "CustomAuthenticatorType").
+					replaceAll("ExternalAuthenticator", "CustomAuthenticator");
 			customScript.setScript(script);
 
 			List<SimpleCustomProperty> moduleProperties = Arrays.asList(new SimpleCustomProperty("usage_type", customAuthenticationConfiguration.getUsageType().toString()));
