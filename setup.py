@@ -363,19 +363,6 @@ class Setup(object):
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
 
-    def detect_OS_type(self):
-        # TODO Change this to support more distros. For example according to
-        # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.file_get_contents('/etc/redhat-release')
-        if 'CentOS' in distro_info:
-            return self.os_types[0]
-        else:
-            return installObject.choose_from_list(self.os_types, "Operating System")
-
-    def file_get_contents(self, filename):
-        with open(filename) as f:
-            return f.read()
-
     def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
         return_value = None
         choice_map = {}
@@ -512,6 +499,15 @@ class Setup(object):
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
             self.logIt(traceback.format_exc(), True)
 
+    def detect_OS_type(self):
+        # TODO Change this to support more distros. For example according to
+        # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
+        distro_info = self.file_get_contents('/etc/redhat-release')
+        if 'CentOS' in distro_info:
+            return self.os_types[0]
+        else:
+            return installObject.choose_from_list(self.os_types, "Operating System")
+
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading latest oxAuth war file..."
@@ -566,6 +562,10 @@ class Setup(object):
                   '-alias',
                   'server-cert',
                   '-rfc'])
+
+    def file_get_contents(self, filename):
+        with open(filename) as f:
+            return f.read()
 
     def gen_cert(self, suffix, password, user='root'):
         self.logIt('Generating Certificate for %s' % suffix)
