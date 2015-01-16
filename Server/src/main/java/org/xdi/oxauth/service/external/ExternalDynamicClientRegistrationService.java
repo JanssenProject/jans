@@ -39,7 +39,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		super(CustomScriptType.CLIENT_REGISTRATION);
 	}
 
-	public boolean executeExternalClientRegistrationUpdateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
+	public boolean executeExternalUpdateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
 		try {
 			log.debug("Executing python 'updateClient' method");
 			ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
@@ -52,14 +52,14 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		return false;
 	}
 
-	public boolean executeExternalDefaultClientRegistrationUpdateClientMethod(RegisterRequest registerRequest, Client client) {
-		return executeExternalClientRegistrationUpdateClientMethod(this.defaultExternalCustomScript, registerRequest, client);
+	public boolean executeExternalDefaultUpdateClientMethod(RegisterRequest registerRequest, Client client) {
+		return executeExternalUpdateClientMethod(this.defaultExternalCustomScript, registerRequest, client);
 	}
 
-	public boolean executeExternalClientRegistrationUpdateClientMethods(RegisterRequest registerRequest, Client client) {
+	public boolean executeExternalUpdateClientMethods(RegisterRequest registerRequest, Client client) {
 		boolean result = true;
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			result &= executeExternalClientRegistrationUpdateClientMethod(customScriptConfiguration, registerRequest, client);
+			result &= executeExternalUpdateClientMethod(customScriptConfiguration, registerRequest, client);
 			if (!result) {
 				return result;
 			}

@@ -98,7 +98,7 @@ public class LogoutAction {
 				log.error("Failed to get ExternalAuthenticatorConfiguration. auth_mode: {0}", authMode);
 				return false;
 			} else {
-				boolean externalLogoutResult = externalAuthenticationService.executeExternalAuthenticatorLogout(
+				boolean externalLogoutResult = externalAuthenticationService.executeExternalLogout(
 						customScriptConfiguration, null);
 				log.debug("Logout result for {0}. result: {1}", authorizationGrant.getUser().getUserId(), authMode, externalLogoutResult);
 

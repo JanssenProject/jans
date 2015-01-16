@@ -162,7 +162,7 @@ public class Authenticator implements Serializable {
                     } else {
                         this.authMode = customScriptConfiguration.getCustomScript().getName();
 
-                        boolean result = externalAuthenticationService.executeExternalAuthenticatorAuthenticate(
+                        boolean result = externalAuthenticationService.executeExternalAuthenticate(
                                 customScriptConfiguration, null, 1);
                         log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
 
@@ -197,7 +197,7 @@ public class Authenticator implements Serializable {
 
                         this.authMode = customScriptConfiguration.getName();
 
-                        boolean result = externalAuthenticationService.executeExternalAuthenticatorAuthenticate(
+                        boolean result = externalAuthenticationService.executeExternalAuthenticate(
                                 customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
                         log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
                         if (!result) {
@@ -205,10 +205,10 @@ public class Authenticator implements Serializable {
                         }
 
                         int countAuthenticationSteps = externalAuthenticationService
-                                .executeExternalAuthenticatorGetCountAuthenticationSteps(customScriptConfiguration);
+                                .executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
                         if (this.authStep < countAuthenticationSteps) {
                             final int nextStep = this.authStep + 1;
-                            String redirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(
+                            String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
                                     customScriptConfiguration, nextStep);
                             if (StringHelper.isEmpty(redirectTo)) {
                                 return authenticationFailed();
@@ -217,7 +217,7 @@ public class Authenticator implements Serializable {
                             Contexts.getEventContext().set("auth_step", Integer.toString(nextStep));
                             Contexts.getEventContext().set("auth_mode", this.authMode);
 
-                            List<String> extraParameters = externalAuthenticationService.executeExternalAuthenticatorGetExtraParametersForStep(customScriptConfiguration, nextStep);
+                            List<String> extraParameters = externalAuthenticationService.executeExternalGetExtraParametersForStep(customScriptConfiguration, nextStep);
 
                             Map<String, String> parametersMap;
                             if (restoredRequestParametersFromSession == null) {
@@ -277,7 +277,7 @@ public class Authenticator implements Serializable {
                         } else {
                             this.authMode = customScriptConfiguration.getName();
 
-                            boolean result = externalAuthenticationService.executeExternalAuthenticatorAuthenticate(
+                            boolean result = externalAuthenticationService.executeExternalAuthenticate(
                                     customScriptConfiguration, null, 1);
                             log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
 
@@ -356,7 +356,7 @@ public class Authenticator implements Serializable {
 			if (!StringHelper.equalsIgnoreCase(currentAuthMode,
 					determinedAuthMode)) {
 				// Redirect user to alternative login workflow
-				String redirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(
+				String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
                         customScriptConfiguration, this.authStep);
 
 				if (StringHelper.isEmpty(redirectTo)) {
@@ -379,7 +379,7 @@ public class Authenticator implements Serializable {
 
 
         ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-        Boolean result = externalAuthenticationService.executeExternalAuthenticatorPrepareForStep(customScriptConfiguration,
+        Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
                 extCtx.getRequestParameterValuesMap(), authStep);
         if (result == null) {
             return Constants.RESULT_FAILURE;

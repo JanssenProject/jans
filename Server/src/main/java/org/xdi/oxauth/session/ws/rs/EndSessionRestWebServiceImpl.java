@@ -83,7 +83,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                         log.error("Failed to get ExternalAuthenticatorConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
                                 1, "1", "logout");
                     } else {
-                        externalLogoutResult = externalAuthenticationService.executeExternalAuthenticatorAuthenticate(
+                        externalLogoutResult = externalAuthenticationService.executeExternalAuthenticate(
                                 customScriptConfiguration, null, 1);
                         log.info("Authentication result for {0}. auth_step: {1}, result: {2}", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
                     }

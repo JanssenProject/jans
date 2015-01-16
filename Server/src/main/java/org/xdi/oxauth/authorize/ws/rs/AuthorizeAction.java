@@ -222,7 +222,7 @@ public class AuthorizeAction {
                 parameterMap.put("auth_mode", this.authMode);
                 parameterMap.put("auth_step", Integer.toString(1));
 
-                String tmpRedirectTo = externalAuthenticationService.executeExternalAuthenticatorGetPageForStep(customScriptConfiguration, 1);
+                String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
                     log.trace("Redirect to custom authentication login page: {0}", tmpRedirectTo);
                     redirectTo = tmpRedirectTo;
