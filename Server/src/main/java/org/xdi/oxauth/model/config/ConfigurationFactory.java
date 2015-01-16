@@ -6,8 +6,13 @@
 
 package org.xdi.oxauth.model.config;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import java.io.File;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
@@ -20,15 +25,8 @@ import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,7 +61,6 @@ public class ConfigurationFactory {
     private volatile Configuration m_conf;
     private volatile StaticConf m_staticConf;
     private volatile JSONWebKeySet m_jwks;
-    private volatile String m_idGenScript;
 
     private static class LdapHolder {
         private static final FileConfiguration LDAP_CONF = createLdapConfiguration();
@@ -80,10 +77,6 @@ public class ConfigurationFactory {
 
     public static FileConfiguration getLdapConfiguration() {
         return LdapHolder.LDAP_CONF;  // lazy init via static holder
-    }
-
-    public static String getIdGenerationScript() {
-        return INSTANCE.getIdGenScript();
     }
 
     public static Configuration getConfiguration() {
@@ -122,7 +115,6 @@ public class ConfigurationFactory {
         final ErrorMessages errorsFromFile = loadErrorsFromFile();
         final StaticConf staticConfFromFile = loadStaticConfFromFile();
         final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
-        final String idGenScriptFromFile = loadIdGenPythonScriptFromFile();
 
         if (configFromFile != null) {
             INSTANCE.setConf(configFromFile);
@@ -147,12 +139,6 @@ public class ConfigurationFactory {
             INSTANCE.setKeyValueList(webKeysFromFile);
         } else {
             LOG.error("Failed to load web keys configuration from file: {0}. ", webKeysFilePath);
-        }
-
-        if (StringUtils.isNotBlank(idGenScriptFromFile)) {
-            INSTANCE.setIdGenScript(idGenScriptFromFile);
-        } else {
-            LOG.error("Failed to load id gen script from file: {0}", ID_GEN_SCRIPT_FILE_PATH);
         }
     }
 
@@ -206,7 +192,6 @@ public class ConfigurationFactory {
             c.setErrors(ServerUtil.createJsonMapper().writeValueAsString(errorFactory.getMessages()));
             c.setStatics(ServerUtil.createJsonMapper().writeValueAsString(INSTANCE.getStaticConf()));
             c.setWebKeys(ServerUtil.createJsonMapper().writeValueAsString(INSTANCE.getKeyValueList()));
-            c.setIdGeneratorScript(INSTANCE.getIdGenScript());
             return c;
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
@@ -219,11 +204,6 @@ public class ConfigurationFactory {
         initStaticConfigurationFromJson(p_conf.getStatics());
         initErrorsFromJson(p_conf.getErrors());
         initWebKeysFromJson(p_conf.getWebKeys());
-
-        final String idGeneratorScript = p_conf.getIdGeneratorScript();
-        if (StringUtils.isNotBlank(idGeneratorScript)) {
-            INSTANCE.setIdGenScript(idGeneratorScript);
-        }
     }
 
     private static void initWebKeysFromJson(String p_webKeys) {
@@ -312,15 +292,6 @@ public class ConfigurationFactory {
         return null;
     }
 
-    private static String loadIdGenPythonScriptFromFile() {
-        try {
-            return FileUtils.readFileToString(new File(ID_GEN_SCRIPT_FILE_PATH), Util.UTF8_STRING_ENCODING);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     private static FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
         try {
             FileConfiguration fileConfiguration = new FileConfiguration(fileName);
@@ -371,11 +342,4 @@ public class ConfigurationFactory {
         m_jwks = p_jwks;
     }
 
-    public String getIdGenScript() {
-        return m_idGenScript;
-    }
-
-    public void setIdGenScript(String p_idGenScript) {
-        m_idGenScript = p_idGenScript;
-    }
 }
