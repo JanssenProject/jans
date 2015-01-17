@@ -58,6 +58,7 @@ public class IdGenServiceTest extends BaseComponentTest {
     public void testCustomIdGenerationByPythonScript() {
         final IdGenService instance = IdGenService.instance();
         final String uuid = instance.generateId("", "");
-        Assert.assertTrue(StringUtils.isNotBlank(uuid));
+        Assert.assertFalse(StringUtils.isNotBlank(uuid));
     }
+
 }
