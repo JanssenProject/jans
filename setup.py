@@ -97,6 +97,7 @@ class Setup(object):
         self.idpSslFolder = "/opt/idp/ssl"
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
+        self.idpSPFolder = "/opt/idp/sp"
 
         self.hostname = None
         self.ip = None
@@ -1010,6 +1011,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idpSslFolder])
                 self.run([mkdir, '-p', self.idpTempMetadataFolder])
                 self.run([mkdir, '-p', self.idpWarFolder])
+                self.run([mkdir, '-p', self.idpSPFolder])
                 self.run([chown, '-R', 'tomcat:tomcat', self.idpFolder])
         except:
             self.logIt("Error making folders", True)
