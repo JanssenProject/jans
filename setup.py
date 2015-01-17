@@ -115,6 +115,7 @@ class Setup(object):
         self.inumAppliance = None
         self.inumOrgFN = None
         self.inumApplianceFN = None
+        self.oxTrustConfigGeneration = "disabled"
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
@@ -1159,6 +1160,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def render_templates(self):
+        if self.components['saml']['enabled']: 
+            oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
             try:
