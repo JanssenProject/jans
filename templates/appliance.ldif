@@ -26,6 +26,7 @@ oxIDPAuthentication: {"type": "auth",
             \"useSSL\": \"true\",
             \"baseDNs\": [{\"value\":\"o=gluu\"}],
             \"primaryKey\": \"uid\",
+            \"localPrimaryKey\": \"uid\",
             \"useAnonymousBind\": false,
             \"enabled\": true}"
   }
