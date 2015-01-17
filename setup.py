@@ -1161,7 +1161,7 @@ class Setup(object):
 
     def render_templates(self):
         if self.components['saml']['enabled']: 
-            oxTrustConfigGeneration = "enabled"
+            self.oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
             try:
