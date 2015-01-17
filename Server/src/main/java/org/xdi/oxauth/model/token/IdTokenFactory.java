@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.io.UnsupportedEncodingException;
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
@@ -44,6 +37,10 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.security.StringEncrypter;
 
+import java.io.UnsupportedEncodingException;
+import java.security.SignatureException;
+import java.util.*;
+
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
  * environments such as HTTP Authorization headers and URI query parameters.
@@ -53,7 +50,7 @@ import org.xdi.util.security.StringEncrypter;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version 0.9 January 16, 2015
  */
 public class IdTokenFactory {
 
@@ -75,7 +72,10 @@ public class IdTokenFactory {
             jwt.getHeader().setType(JwtType.JWS);
         }
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
-        jwt.getHeader().setKeyId(jwks.getKeys(signatureAlgorithm).get(0).getKeyId());
+        List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
+        if (jsonWebKeys.size()>0) {
+            jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKeyId());
+        }
 
         // Claims
         jwt.getClaims().setIssuer(ConfigurationFactory.getConfiguration().getIssuer());
