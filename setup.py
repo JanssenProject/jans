@@ -474,7 +474,6 @@ class Setup(object):
         self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        self.copyFile("%s/static/oxauth/oxauth-id-gen.py" % self.install_dir, "%s/conf" % self.tomcatHome)
         self.copyFile("%s/static/tomcat/server.xml" % self.install_dir, "%s/conf" % self.tomcatHome)
 
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
