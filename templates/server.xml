@@ -21,9 +21,9 @@
     tomcatAuthentication="false" scheme="https" secure="true" 
     clientAuth="false" sslProtocol="TLS" SSLEnabled="true"
     keystoreFile="/etc/certs/shibIDP.jks"
-    keystoreType="JKS" keystorePass="%(shibJksPass)"
+    keystoreType="JKS" keystorePass="%(shibJksPass)s"
     truststoreFile="/etc/certs/shibIDP.jks"
-    truststorePass="%(shibJksPass)" truststoreType="JKS"
+    truststorePass="%(shibJksPass)s" truststoreType="JKS"
     truststoreAlgorithm="DelegateToApplication"/>
 
     <Engine name="Catalina" defaultHost="localhost">
