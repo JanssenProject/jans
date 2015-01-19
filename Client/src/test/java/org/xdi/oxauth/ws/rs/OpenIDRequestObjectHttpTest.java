@@ -1770,7 +1770,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
-    @Test
+//    @Test
     public void requestParameterMethodAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
         showTitle("requestParameterMethodAlgRSAOAEPEncA256GCM");
@@ -1852,7 +1852,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
-    @Test
+//    @Test
     public void requestParameterMethodAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
         showTitle("requestParameterMethodAlgRSA15EncA128CBCPLUSHS256");
@@ -1935,7 +1935,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
-    @Test
+//    @Test
     public void requestParameterMethodAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri,
             final String redirectUris) throws Exception {
