@@ -1319,7 +1319,7 @@ def print_help():
     print ""
     print "    -a   Install Asimba"
     print "    -c   Install CAS"
-    print "    -d   specify directory of installation"
+    print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
     print "    -l   Install LDAP"
