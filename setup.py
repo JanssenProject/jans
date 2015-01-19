@@ -90,13 +90,14 @@ class Setup(object):
         self.etc_hostname = '/etc/hostname'
 
         self.idpFolder = "/opt/idp"
-        self.idpMetadataFolder = "/opt/idp"
+        self.idpMetadataFolder = "/opt/idp/metadata"
         self.idpLogsFolder = "/opt/idp/logs"
         self.idpLibFolder = "/opt/idp/lib"
         self.idpConfFolder = "/opt/idp/conf"
         self.idpSslFolder = "/opt/idp/ssl"
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
+        self.idpSPFolder = "/opt/idp/sp"
 
         self.hostname = None
         self.ip = None
@@ -114,6 +115,7 @@ class Setup(object):
         self.inumAppliance = None
         self.inumOrgFN = None
         self.inumApplianceFN = None
+        self.oxTrustConfigGeneration = "disabled"
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
@@ -478,8 +480,11 @@ class Setup(object):
 
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
-        
-        self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
+        if self.components['saml']['enabled']: 
+            self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
+            self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
+            self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
+            self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
     def createDirs(self, name):
         try:
@@ -1006,6 +1011,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idpSslFolder])
                 self.run([mkdir, '-p', self.idpTempMetadataFolder])
                 self.run([mkdir, '-p', self.idpWarFolder])
+                self.run([mkdir, '-p', self.idpSPFolder])
                 self.run([chown, '-R', 'tomcat:tomcat', self.idpFolder])
         except:
             self.logIt("Error making folders", True)
@@ -1153,6 +1159,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def render_templates(self):
+        if self.components['saml']['enabled']: 
+            self.oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
             try:
