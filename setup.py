@@ -109,6 +109,7 @@ class Setup(object):
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
+        self.encoded_shib_jks_pw
         self.oxauthClient_encoded_pw = None
         self.baseInum = None
         self.inumOrg = None
@@ -185,6 +186,7 @@ class Setup(object):
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_xml = '%s/conf/oxauth-config.xml' % self.tomcatHome
         self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
+        self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.tomcat_oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
@@ -223,6 +225,7 @@ class Setup(object):
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_xml: True,
                      self.oxTrust_properties: True,
+                     self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.tomcat_oxauth_static_conf_json: True,
@@ -476,8 +479,6 @@ class Setup(object):
         self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        self.copyFile("%s/static/tomcat/server.xml" % self.install_dir, "%s/conf" % self.tomcatHome)
-
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
         if self.components['saml']['enabled']: 
@@ -528,6 +529,7 @@ class Setup(object):
         self.logIt("Encoding passwords")
         try:
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
+            self.encoded_shib_jks_pw = self.ldap_encode(self.shibJksPass)
             cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
             self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
             self.oxauthClient_pw = self.getPW()
