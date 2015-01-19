@@ -109,7 +109,7 @@ class Setup(object):
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
-        self.encoded_shib_jks_pw
+        self.encoded_shib_jks_pw = None
         self.oxauthClient_encoded_pw = None
         self.baseInum = None
         self.inumOrg = None
