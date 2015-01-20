@@ -20,7 +20,7 @@ description: Your local username in the Gluu Server
 defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 
-dn: inum=%(inumOrg)s!0009!764C.2818,ou=scopes,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope
 displayName: email
