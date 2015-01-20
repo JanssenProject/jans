@@ -19,6 +19,8 @@ import org.xdi.model.custom.script.type.client.ClientRegistrationType;
 import org.xdi.model.custom.script.type.client.DummyClientRegistrationType;
 import org.xdi.model.custom.script.type.id.DummyIdGeneratorType;
 import org.xdi.model.custom.script.type.id.IdGeneratorType;
+import org.xdi.model.custom.script.type.session.ApplicationSessionType;
+import org.xdi.model.custom.script.type.session.DummyApplicationSessionType;
 import org.xdi.model.custom.script.type.uma.DummyAuthorizationPolicyType;
 import org.xdi.model.custom.script.type.uma.AuthorizationPolicyType;
 import org.xdi.model.custom.script.type.user.CacheRefreshType;
@@ -36,6 +38,7 @@ import org.xdi.model.custom.script.type.user.UserRegistrationType;
 public enum CustomScriptType implements LdapEnum {
 	
 	CUSTOM_AUTHENTICATION("custom_authentication", "Custom Authentication", CustomAuthenticatorType.class, AuthenticationCustomScript.class, "CustomAuthenticator", new DummyCustomAuthenticatorType()),
+	APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession", new DummyApplicationSessionType()),
 	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
 	UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
 	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
