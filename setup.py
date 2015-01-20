@@ -521,8 +521,10 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Downloading latest Shibboleth IDP war file..."
             self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
+            print "Downloading latest CAS war file..."
+            self.run(['/usr/bin/wget', self.cas_war, '-O', '%s/oxcas.war' % self.distFolder])
             print "Downloading latest Asimba war file..."
-            self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/idp.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
             print "Finished downloading latest war files"
 
     def encode_passwords(self):
