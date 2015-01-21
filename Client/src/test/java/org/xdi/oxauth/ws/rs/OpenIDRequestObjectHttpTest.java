@@ -6,32 +6,10 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -43,16 +21,30 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for OpenID Request Object (HTTP)
  *
- * @author Javier Rojas Blum Date: 09.04.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 January 20, 2015
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
@@ -1796,8 +1788,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String clientId = response.getClientId();
 
-        // 2. Request authorization
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, "1");
+        // 2. Choose encryption key
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
+        assertTrue(jsonWebKeys.size() > 0);
+        String keyId = jsonWebKeys.get(0).getKeyId();
+
+        // 3. Request authorization
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1811,6 +1810,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
                 KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, publicKey);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1836,7 +1836,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String accessToken = response1.getAccessToken();
 
-        // 3. Request user info
+        // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
@@ -1879,8 +1879,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
         String clientSecret = response.getClientSecret();
 
-        // 2. Request authorization
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, "1");
+        // 2. Choose encryption key
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
+        assertTrue(jsonWebKeys.size() > 0);
+        String keyId = jsonWebKeys.get(0).getKeyId();
+
+        // 3. Request authorization
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1894,6 +1901,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
                 KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, publicKey);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1919,7 +1927,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String accessToken = response1.getAccessToken();
 
-        // 3. Request user info
+        // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
@@ -1963,8 +1971,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
         String clientSecret = response.getClientSecret();
 
-        // 2. Request authorization
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, "1");
+        // 2. Choose encryption key
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
+        assertTrue(jsonWebKeys.size() > 0);
+        String keyId = jsonWebKeys.get(0).getKeyId();
+
+        // 3. Request authorization
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1978,6 +1993,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request,
                 KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, publicKey);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -2003,7 +2019,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String accessToken = response1.getAccessToken();
 
-        // 3. Request user info
+        // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 

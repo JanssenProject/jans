@@ -6,20 +6,18 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 12.5.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 January 20, 2015
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
@@ -51,7 +49,7 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
         assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
         assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-        assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is not empty");
+        assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
         assertTrue(response.getAmrValuesSupported().size() > 0, "The amrValuesSupported is empty");
         assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
         assertTrue(response.getUserInfoSigningAlgValuesSupported().size() > 0, "The userInfoSigningAlgValuesSupported is empty");

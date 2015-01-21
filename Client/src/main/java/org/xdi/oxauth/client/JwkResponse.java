@@ -6,18 +6,22 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.List;
-
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a JSON Web Key (JWK) received from the authorization server.
  *
- * @author Javier Rojas Blum Date: 11.15.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 January 20, 2015
  */
 public class JwkResponse extends BaseResponse {
 
@@ -91,5 +95,26 @@ public class JwkResponse extends BaseResponse {
         }
 
         return publicKey;
+    }
+
+    public List<JSONWebKey> getKeys(SignatureAlgorithm algorithm) {
+        List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
+
+        if (SignatureAlgorithmFamily.RSA.equals(algorithm.getFamily())) {
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                    jsonWebKeys.add(jsonWebKey);
+                }
+            }
+        } else if (SignatureAlgorithmFamily.EC.equals(algorithm.getFamily())) {
+            for (JSONWebKey jsonWebKey : keys) {
+                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                    jsonWebKeys.add(jsonWebKey);
+                }
+            }
+        }
+
+        Collections.sort(jsonWebKeys);
+        return jsonWebKeys;
     }
 }
