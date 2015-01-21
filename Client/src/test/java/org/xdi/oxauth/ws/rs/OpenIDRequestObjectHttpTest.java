@@ -1791,9 +1791,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
-        assertTrue(jsonWebKeys.size() > 0);
-        String keyId = jsonWebKeys.get(0).getKeyId();
+        String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        assertNotNull(keyId);
 
         // 3. Request authorization
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);
@@ -1882,9 +1881,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
-        assertTrue(jsonWebKeys.size() > 0);
-        String keyId = jsonWebKeys.get(0).getKeyId();
+        String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        assertNotNull(keyId);
 
         // 3. Request authorization
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);
@@ -1974,9 +1972,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Choose encryption key
         JwkClient jwkClient = new JwkClient(jwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
-        List<JSONWebKey> jsonWebKeys = jwkResponse.getKeys(SignatureAlgorithm.RS256);
-        assertTrue(jsonWebKeys.size() > 0);
-        String keyId = jsonWebKeys.get(0).getKeyId();
+        String keyId = jwkResponse.getKeyId(SignatureAlgorithm.RS256);
+        assertNotNull(keyId);
 
         // 3. Request authorization
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, keyId);

@@ -117,4 +117,13 @@ public class JwkResponse extends BaseResponse {
         Collections.sort(jsonWebKeys);
         return jsonWebKeys;
     }
+
+    public String getKeyId(SignatureAlgorithm signatureAlgorithm) {
+        List<JSONWebKey> jsonWebKeys = getKeys(SignatureAlgorithm.RS256);
+        if (jsonWebKeys.size() > 0) {
+            return jsonWebKeys.get(0).getKeyId();
+        } else {
+            return null;
+        }
+    }
 }
