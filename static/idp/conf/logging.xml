@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <!--
+        Loggers define indicate which packages/categories are logged, at which level, and to which appender.
+        Levels: OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL
+    -->
+    <!-- Logs IdP, but not OpenSAML, messages -->
+    <logger name="edu.internet2.middleware.shibboleth" level="ALL" />
+
+    <!-- Logs OpenSAML, but not IdP, messages -->
+    <logger name="org.opensaml" level="WARN" />
+
+    <!-- Logs LDAP related messages -->
+    <logger name="edu.vt.middleware.ldap" level="WARN" />
+
+    <!-- Logs inbound and outbound protocols messages at DEBUG level -->
+    <!--
+    <logger name="PROTOCOL_MESSAGE" level="DEBUG" />
+    -->
+
+    <!--
+        Normally you should not edit below this point.  These default configurations are sufficient for
+        almost every system.
+    -->
+
+    <!--
+        Logging appenders define where and how logging messages are logged.
+     -->
+    <appender name="IDP_ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/opt/idp/logs/idp-access.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <MaxHistory>31</MaxHistory>
+            <FileNamePattern>/opt/idp/logs/idp-access-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="IDP_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/opt/idp/logs/idp-audit.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <MaxHistory>31</MaxHistory>
+            <FileNamePattern>/opt/idp/logs/idp-audit-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="IDP_PROCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/opt/idp/logs/idp-process.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <MaxHistory>31</MaxHistory>
+            <FileNamePattern>/opt/idp/logs/idp-process-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%date{HH:mm:ss.SSS} - %level [%logger:%line] - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="Shibboleth-Access" level="ALL">
+        <appender-ref ref="IDP_ACCESS" />
+    </logger>
+
+    <logger name="Shibboleth-Audit" level="ALL">
+        <appender-ref ref="IDP_AUDIT" />
+    </logger>
+
+    <logger name="org.springframework" level="OFF" />
+
+    <logger name="org.apache.catalina" level="ERROR" />
+
+    <root level="ERROR">
+        <appender-ref ref="IDP_PROCESS" />
+    </root>
+
+</configuration>

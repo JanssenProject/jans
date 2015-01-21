@@ -18,13 +18,7 @@
   <Service name="Catalina">
 
   <Connector port="8009" address="localhost" protocol="AJP/1.3"
-    tomcatAuthentication="false" scheme="https" secure="true" 
-    clientAuth="false" sslProtocol="TLS" SSLEnabled="true"
-    keystoreFile="/etc/certs/shibIDP.jks"
-    keystoreType="JKS" keystorePass="%(shibJksPass)s"
-    truststoreFile="/etc/certs/shibIDP.jks"
-    truststorePass="%(shibJksPass)s" truststoreType="JKS"
-    truststoreAlgorithm="DelegateToApplication"/>
+	tomcatAuthentication="false" scheme="https" secure="true" />
 
     <Engine name="Catalina" defaultHost="localhost">
 

@@ -11,23 +11,24 @@ gluuVdsCacheRefreshEnabled: disabled
 oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
-oxIDPAuthentication:
-  {"type": "auth",
+oxTrustCacheRefreshServerIpAddress: 255.255.255.255
+oxIDPAuthentication: {"type": "auth",
   "name": null,
   "level": 0,
   "priority": 1,
   "enabled": true,
   "version": 0,
-  "config": {"configId": "auth_ldap_server",
-            "servers": [{"value":"%(hostname)s:%(ldaps_port)s"}],
-            "maxConnections": 1000,
-            "bindDN": "%(ldap_binddn)s",
-            "bindPassword": "%(encoded_ox_ldap_pw)s",
-            "useSSL": "true",
-            "baseDNs":[{"value":"o=gluu"}],
-            "primaryKey": "uid",
-            "useAnonymousBind": false,
-            "enabled": true}
+  "config": "{\"configId\": \"auth_ldap_server\",
+            \"servers\": [{\"value\":\"%(hostname)s:%(ldaps_port)s\"}],
+            \"maxConnections\": 1000,
+            \"bindDN\": \"%(ldap_binddn)s\",
+            \"bindPassword\": \"%(encoded_ox_ldap_pw)s\",
+            \"useSSL\": \"true\",
+            \"baseDNs\": [{\"value\":\"o=gluu\"}],
+            \"primaryKey\": \"uid\",
+            \"localPrimaryKey\": \"uid\",
+            \"useAnonymousBind\": false,
+            \"enabled\": true}"
   }
 
 ######################################
@@ -55,18 +56,3 @@ dn: ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: configuration
-
-# oxAuth static configuration data - LEVEL 4
-dn: ou=oxAuth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxAuth
-
-# oxTrust CONFIGURATION DATA - LEVEL 4
-dn: ou=oxTrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-objectclass: oxAuthConfiguration
-ou: oxTrust
-

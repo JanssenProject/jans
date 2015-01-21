@@ -4,7 +4,12 @@ import sys
 import base64
 from pyDes import *
 
-key = "%(encode_salt)s"
+saltFn = "%(tomcatHome)s/conf/salt"
+f = open(saltFn)
+salt_property = f.read()
+f.close()
+
+key = salt_property.split("=")[1].strip()
 
 def obscure(data=""):
     engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)

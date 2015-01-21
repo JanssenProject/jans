@@ -1,0 +1,4 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+<asimba-selector>
+    <application entityId="https://ce.gluu.info/secure" organizationId="https://ce.gluu.org/idp/shibboleth" />
+</asimba-selector> 
