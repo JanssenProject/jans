@@ -6,22 +6,6 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -50,8 +34,24 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.security.StringEncrypter;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 03.09.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 January 20, 2015
  */
 public class JwtAuthorizationRequest {
 
@@ -94,6 +94,7 @@ public class JwtAuthorizationRequest {
 
                     JwtHeader jwtHeader = new JwtHeader(encodedHeader);
 
+                    keyId = jwtHeader.getKeyId();
                     KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(
                             jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
                     BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(
@@ -102,7 +103,7 @@ public class JwtAuthorizationRequest {
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
                         JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
-                        JSONWebKey jwk = jwks.getKeys(SignatureAlgorithm.RS256).get(0);
+                        JSONWebKey jwk = jwks.getKey(keyId);
                         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
                                 jwk.getPrivateKey().getModulus(),
                                 jwk.getPrivateKey().getPrivateExponent());
