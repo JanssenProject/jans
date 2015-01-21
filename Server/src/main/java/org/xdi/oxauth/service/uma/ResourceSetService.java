@@ -6,9 +6,8 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Preconditions;
+import com.unboundid.ldap.sdk.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -24,7 +23,8 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Provides operations with resource set descriptions
@@ -58,7 +58,13 @@ public class ResourceSetService {
      * @param resourceSet resourceSet
      */
     public void addResourceSet(ResourceSet resourceSet) {
+        validate(resourceSet);
         ldapEntryManager.persist(resourceSet);
+    }
+
+    public void validate(ResourceSet resourceSet) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(resourceSet.getName()), "Name is required for resource set.");
+        Preconditions.checkArgument(resourceSet.getScopes() != null && !resourceSet.getScopes().isEmpty(), "Scope must be specified for resource set.");
     }
 
     /**
@@ -67,6 +73,7 @@ public class ResourceSetService {
      * @param resourceSet resourceSet
      */
     public void updateResourceSet(ResourceSet resourceSet) {
+        validate(resourceSet);
         ldapEntryManager.merge(resourceSet);
     }
 
