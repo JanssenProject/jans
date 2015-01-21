@@ -192,7 +192,7 @@ public abstract class AbstractToken {
     }
 
     /**
-     * Returns the custom authentication level.
+     * Returns the authentication level.
      *
      * @return The authentication level.
      */
@@ -201,7 +201,7 @@ public abstract class AbstractToken {
 	}
 
     /**
-     * Sets the custom authentication level.
+     * Sets the authentication level.
      *
      * @param authLevel The authentication level.
      */
@@ -210,7 +210,7 @@ public abstract class AbstractToken {
 	}
 
     /**
-     * Returns the custom authentication mode.
+     * Returns the authentication mode.
      *
      * @return The authentication mode.
      */
@@ -219,7 +219,7 @@ public abstract class AbstractToken {
 	}
 
     /**
-     * Sets the custom authentication mode.
+     * Sets the authentication mode.
      *
      * @param authMode The authentication mode.
      */
