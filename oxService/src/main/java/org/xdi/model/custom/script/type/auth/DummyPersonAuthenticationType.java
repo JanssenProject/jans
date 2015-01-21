@@ -13,11 +13,11 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 
 /**
- * Dummy implementation of interface CustomAuthenticatorType
+ * Dummy implementation of interface PersonAuthenticationType
  *
  * @author Yuriy Movchan Date: 08/21/2012
  */
-public class DummyCustomAuthenticatorType implements CustomAuthenticatorType {
+public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 
 	@Override
 	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {

@@ -13,7 +13,7 @@ import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.util.StringHelper;
 
 /**
- * Custom authentication script configuration 
+ * Person authentication script configuration 
  *
  * @author Yuriy Movchan Date: 12/29/2014
  */

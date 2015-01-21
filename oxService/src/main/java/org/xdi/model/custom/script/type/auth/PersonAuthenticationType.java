@@ -18,7 +18,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  *
  * @author Yuriy Movchan Date: 08/21/2012
  */
-public interface CustomAuthenticatorType extends BaseExternalType {
+public interface PersonAuthenticationType extends BaseExternalType {
 
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
