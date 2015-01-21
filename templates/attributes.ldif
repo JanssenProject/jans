@@ -2,6 +2,22 @@
 # Gluu Person Attributes
 #########################
 
+dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+displayName: Inum
+gluuAttributeName: inum
+gluuAttributeOrigin: gluuPerson
+gluuAttributePrivacyLevel: level3
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: inum
+gluuStatus: active
+inum: %(inumOrg)s!0005!29DA
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:inum
+description: XRI i-number, persistent non-reassignable identifier
+
 dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: First Name
 gluuAttributeEditType: user
@@ -26,7 +42,6 @@ description: Given name(s) or first name(s) of the End-User.
 dn: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Username
 gluuAttributeName: uid
-gluuAttributeName: sub
 gluuAttributeOrigin: gluuPerson
 gluuAttributePrivacyLevel: level3
 gluuAttributeType: string

@@ -80,6 +80,12 @@ objectclass: top
 objectclass: organizationalUnit
 ou: session
 
+# Custom scripts - LEVEL 3
+dn: ou=scripts,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: scripts
+
 ################################
 
 # Oauth2 federation data - LEVEL 3
@@ -126,12 +132,6 @@ dn: ou=uma,o=%(inumOrg)s,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: uma
-
-# UMA policy data - LEVEL 4
-dn: ou=policies,ou=uma,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: policies
 
 # UMA scope data - LEVEL 4
 dn: ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
