@@ -2092,7 +2092,7 @@ objectclasses: ( oxTrustConfiguration-oid NAME 'oxTrustConfiguration' SUP top ST
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaResourceSet-oid NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
  ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage
-  $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType ) 
+  $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaScopeDescription-oid NAME 'oxAuthUmaScopeDescription' SUP top STRUCTURAL MUST objectclass MAY 
  ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxRevision

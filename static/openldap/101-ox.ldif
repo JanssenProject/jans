@@ -1567,7 +1567,7 @@ olcObjectClasses: ( 7.3.5.2.6 NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUS
   X-ORIGIN 'Gluu created objectclass' )
 olcObjectClasses: ( 8.2.1.4.9 NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
  ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage
-  $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType ) 
+  $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl  )
   X-ORIGIN 'Gluu created objectclass' )
 olcObjectClasses: ( 7.5.4.6.3 NAME 'oxAuthUmaScopeDescription' SUP top STRUCTURAL MUST objectclass MAY 
  ( displayName $ inum $ owner $ oxAssociatedClient $ oxFaviconImage $ oxIconUrl
