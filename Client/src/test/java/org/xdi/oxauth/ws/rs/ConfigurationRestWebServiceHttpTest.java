@@ -17,7 +17,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 20, 2015
+ * @version 0.9 January 22, 2015
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
@@ -50,7 +50,6 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
         assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
         assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
-        assertTrue(response.getAmrValuesSupported().size() > 0, "The amrValuesSupported is empty");
         assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
         assertTrue(response.getUserInfoSigningAlgValuesSupported().size() > 0, "The userInfoSigningAlgValuesSupported is empty");
         assertTrue(response.getUserInfoEncryptionAlgValuesSupported().size() > 0, "The userInfoEncryptionAlgValuesSupported is empty");

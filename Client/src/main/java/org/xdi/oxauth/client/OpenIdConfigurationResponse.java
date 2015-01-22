@@ -20,7 +20,8 @@ import org.xdi.oxauth.model.configuration.ConfigurationResponseClaim;
 /**
  * Represents an OpenId Configuration received from the authorization server.
  *
- * @author Javier Rojas Blum Date: 12.6.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 January 22, 2015
  */
 public class OpenIdConfigurationResponse extends BaseResponse {
 
@@ -42,7 +43,6 @@ public class OpenIdConfigurationResponse extends BaseResponse {
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
-    private List<String> amrValuesSupported;
     private List<String> subjectTypesSupported;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
@@ -81,7 +81,6 @@ public class OpenIdConfigurationResponse extends BaseResponse {
         responseTypesSupported = new ArrayList<String>();
         grantTypesSupported = new ArrayList<String>();
         acrValuesSupported = new ArrayList<String>();
-        amrValuesSupported = new ArrayList<String>();
         subjectTypesSupported = new ArrayList<String>();
         userInfoSigningAlgValuesSupported = new ArrayList<String>();
         userInfoEncryptionAlgValuesSupported = new ArrayList<String>();
@@ -424,14 +423,6 @@ public class OpenIdConfigurationResponse extends BaseResponse {
      */
     public void setAcrValuesSupported(List<String> acrValuesSupported) {
         this.acrValuesSupported = acrValuesSupported;
-    }
-
-    public List<String> getAmrValuesSupported() {
-        return amrValuesSupported;
-    }
-
-    public void setAmrValuesSupported(List<String> amrValuesSupported) {
-        this.amrValuesSupported = amrValuesSupported;
     }
 
     /**
