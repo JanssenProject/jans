@@ -485,6 +485,7 @@ class Setup(object):
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.components['saml']['enabled']: 
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
+            self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.tomcatHome, "%s/conf/shibboleth2/idp/" % self.tomcatHome)
             self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
