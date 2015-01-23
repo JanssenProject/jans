@@ -639,7 +639,7 @@ class Setup(object):
         self.run(["/bin/chmod", '700', key])
 
         self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
-                  "-file", public_certificate, "-keystore", "self.defaultTrustStoreFN", \
+                  "-file", public_certificate, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
     def gen_crypto(self):
