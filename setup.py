@@ -571,6 +571,13 @@ class Setup(object):
                   'server-cert',
                   '-rfc'])
 
+        # Import OpenDJ certificate into java truststore
+        self.logIt("Import OpenDJ certificate")
+
+        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
+                  "-file", self.openDjCertFn, "-keystore", self.defaultTrustStoreFN, \
+                  "-storepass", "changeit", "-noprompt"])
+
     def file_get_contents(self, filename):
         with open(filename) as f:
             return f.read()
@@ -627,7 +634,7 @@ class Setup(object):
         self.run(["/bin/chmod", '700', key])
 
         self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, \
-                  "-file", public_certificate, "-keystore", "/usr/java/latest/lib/security/cacerts", \
+                  "-file", public_certificate, "-keystore", "self.defaultTrustStoreFN", \
                   "-storepass", "changeit", "-noprompt"])
 
     def gen_crypto(self):
