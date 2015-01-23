@@ -534,7 +534,9 @@ class Setup(object):
         self.logIt("Encoding passwords")
         try:
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
-            self.encoded_shib_jks_pw = self.ldap_encode(self.shibJksPass)
+            
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.shibJksPass)
+            self.encoded_shib_jks_pw = os.popen(cmd, 'r').read().strip()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
             self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
             self.oxauthClient_pw = self.getPW()
