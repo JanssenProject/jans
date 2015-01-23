@@ -633,7 +633,7 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), key])
         self.run(["/bin/chmod", '700', key])
 
-        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", self.hostname, \
+        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
                   "-file", public_certificate, "-keystore", "self.defaultTrustStoreFN", \
                   "-storepass", "changeit", "-noprompt"])
 
