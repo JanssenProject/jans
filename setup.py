@@ -481,6 +481,8 @@ class Setup(object):
     def copy_static(self):
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
+        # TODO: add this file to rpm.
+        self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.components['saml']['enabled']: 
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
             self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
@@ -505,7 +507,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def detect_OS_type(self):
-        # TODO Change this to support more distros. For example according to
+        # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         distro_info = self.file_get_contents('/etc/redhat-release')
         if 'CentOS' in distro_info:
