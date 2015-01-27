@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.9 December 8, 2014
+ * @version 0.9 January 22, 2015
  */
 @XmlRootElement(name = "configuration")
 public class Configuration {
@@ -49,7 +49,6 @@ public class Configuration {
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
-    private List<String> amrValuesSupported;
     private List<String> subjectTypesSupported;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
@@ -487,16 +486,6 @@ public class Configuration {
 
     public void setAcrValuesSupported(List<String> acrValuesSupported) {
         this.acrValuesSupported = acrValuesSupported;
-    }
-
-    @XmlElementWrapper(name = "amr-values-supported")
-    @XmlElement(name = "amr")
-    public List<String> getAmrValuesSupported() {
-        return amrValuesSupported;
-    }
-
-    public void setAmrValuesSupported(List<String> amrValuesSupported) {
-        this.amrValuesSupported = amrValuesSupported;
     }
 
     @XmlElementWrapper(name = "subject-types-supported")
