@@ -17,7 +17,6 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
-import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
 
