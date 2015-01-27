@@ -81,10 +81,6 @@ public @Data class GluuAttribute extends Entry implements Serializable {
 	@LdapAttribute(name = "gluuAttributeViewType")
 	private GluuUserRole[] viewType;
 
-	@NotNull
-	@LdapAttribute(name = "gluuAttributePrivacyLevel")
-	private GluuAttributePrivacyLevel privacyLevel;
-
 	@LdapAttribute(name = "gluuAttributeUsageType")
 	private GluuAttributeUsageType[] usageType;
 
