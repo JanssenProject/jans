@@ -250,10 +250,7 @@ class Setup(object):
                      }
 
     def __repr__(self):
-        s = ""
-        if self.components['httpd']['enabled'] | self.modifyNetworking:
-            s += 'ip'.ljust(30) + self.ip.rjust(35) + "\n"
-        s += 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
+        return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
             + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
             + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
             + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
@@ -262,24 +259,14 @@ class Setup(object):
             + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n"
-        if self.components['oxauth']['enabled']:
-            s += 'Install oxAuth'.ljust(30) + `self.components['oxauth']['enabled']`.rjust(35) + "\n"
-        if self.components['oxtrust']['enabled']:
-            s += 'Install oxTrust'.ljust(30) + `self.components['oxtrust']['enabled']`.rjust(35) + "\n"
-        if self.components['ldap']['enabled']:
-            s += 'Install LDAP'.ljust(30) + `self.components['ldap']['enabled']`.rjust(35) + "\n"
-        if self.components['httpd']['enabled']:
-            s += 'Install Apache 2 web server'.ljust(30) + `self.components['httpd']['enabled']`.rjust(35) + "\n"
-        if self.components['saml']['enabled']:
-            s += 'Configure SAML'.ljust(30) + `self.components['saml']['enabled']`.rjust(35) + "\n"
-        if self.components['asimba']['enabled']:
-            s += 'Configure Asimba'.ljust(30) + `self.components['asimba']['enabled']`.rjust(35) + "\n"
-        if self.components['cas']['enabled']:
-            s += 'Configure CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n"
-        if self.downloadWars:
-            s += 'Download latest development WAR files'.ljust(30) + `self.downloadWars`.rjust(35) + "\n"
-        return s
+            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n" \
+            + 'Install oxAuth'.ljust(30) + `self.components['oxauth']['enabled']`.rjust(35) + "\n" \
+            + 'Install oxTrust'.ljust(30) + `self.components['oxtrust']['enabled']`.rjust(35) + "\n" \
+            + 'Install LDAP'.ljust(30) + `self.components['ldap']['enabled']`.rjust(35) + "\n" \
+            + 'Install Apache 2 web server'.ljust(30) + `self.components['httpd']['enabled']`.rjust(35) + "\n" \
+            + 'Install Shibboleth 2 SAML IDP'.ljust(30) + `self.components['saml']['enabled']`.rjust(35) + "\n" \
+            + 'Install Asimba SAML Proxy'.ljust(30) + `self.components['asimba']['enabled']`.rjust(35) + "\n" \
+            + 'Install CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n"
 
     def add_ldap_schema(self):
         try:
@@ -1112,49 +1099,47 @@ class Setup(object):
         if modifyNetworking == 'y':
             installObject.modifyNetworking = True
 
-        promptForComponents = self.getPrompt("Select individual components?", "No")[0].lower()
-        if promptForComponents == 'y':
-            promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
-            if promptForOxAuth == 'y':
-                installObject.components['oxauth']['enabled'] = True
-            else:
-                installObject.components['oxauth']['enabled'] = False
+        promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
+        if promptForOxAuth == 'y':
+            installObject.components['oxauth']['enabled'] = True
+        else:
+            installObject.components['oxauth']['enabled'] = False
 
-            promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
-            if promptForOxTrust == 'y':
-                installObject.components['oxtrust']['enabled'] = True
-            else:
-                installObject.components['oxtrust']['enabled'] = False
+        promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
+        if promptForOxTrust == 'y':
+            installObject.components['oxtrust']['enabled'] = True
+        else:
+            installObject.components['oxtrust']['enabled'] = False
 
-            promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
-            if promptForLDAP == 'y':
-                installObject.components['ldap']['enabled'] = True
-            else:
-                installObject.components['ldap']['enabled'] = False
+        promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
+        if promptForLDAP == 'y':
+            installObject.components['ldap']['enabled'] = True
+        else:
+            installObject.components['ldap']['enabled'] = False
 
-            promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
-            if promptForHTTPD == 'y':
-                installObject.components['httpd']['enabled'] = True
-            else:
-                installObject.components['httpd']['enabled'] = False
+        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
+        if promptForHTTPD == 'y':
+            installObject.components['httpd']['enabled'] = True
+        else:
+            installObject.components['httpd']['enabled'] = False
 
-            promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
-            if promptForShibIDP == 'y':
-                installObject.components['saml']['enabled'] = True
-            else:
-                installObject.components['saml']['enabled'] = False
+        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+        if promptForShibIDP == 'y':
+            installObject.components['saml']['enabled'] = True
+        else:
+            installObject.components['saml']['enabled'] = False
 
-            promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
-            if promptForAsimba == 'y':
-                installObject.components['asimba']['enabled'] = True
-            else:
-                installObject.components['asimba']['enabled'] = False
+        promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
+        if promptForAsimba == 'y':
+            installObject.components['asimba']['enabled'] = True
+        else:
+            installObject.components['asimba']['enabled'] = False
 
-            promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
-            if promptForCAS == 'y':
-                installObject.components['cas']['enabled'] = True
-            else:
-                installObject.components['cas']['enabled'] = False
+        promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
+        if promptForCAS == 'y':
+            installObject.components['cas']['enabled'] = True
+        else:
+            installObject.components['cas']['enabled'] = False
 
     def removeDirs(self, name):
         try:
@@ -1338,7 +1323,6 @@ def print_help():
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
-    print "    -l   Install LDAP"
     print "    -n   No interactive prompt before install starts. Run with -f"
     print "    -N   No apache httpd server"
     print "    -s   Install the Shibboleth IDP"
@@ -1347,7 +1331,7 @@ def print_help():
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:fhlNn:suw")
+        opts, args = getopt.getopt(argv, "acd:fhNn:suw")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1364,8 +1348,6 @@ def getOpts(argv, setupOptions):
         elif opt == '-h':
             print_help()
             sys.exit()
-        elif opt == '-l':
-            setupOptions['installLDAP'] = True
         elif opt == "-f":
             try:
                 if os.path.isfile(arg):
