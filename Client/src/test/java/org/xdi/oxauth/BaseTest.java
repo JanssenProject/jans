@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.scheme.Scheme;
@@ -29,29 +18,26 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.BaseClient;
-import org.xdi.oxauth.client.BaseResponseWithErrors;
-import org.xdi.oxauth.client.ClientUtils;
-import org.xdi.oxauth.client.OpenIdConfigurationClient;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.error.IErrorType;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.*;
+
 /**
  * @author Javier Rojas Blum
- * @version 0.9 November 12, 2014
+ * @version 0.9 January 22, 2015
  */
 public abstract class BaseTest {
 
@@ -212,7 +198,10 @@ public abstract class BaseTest {
         //System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
         //driver = new ChromeDriver();
 
+        //driver = new SafariDriver();
+
         //driver = new FirefoxDriver();
+
         driver = new HtmlUnitDriver();
     }
 
@@ -330,8 +319,7 @@ public abstract class BaseTest {
             assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
             assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
             assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-            assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is not empty");
-            assertTrue(response.getAmrValuesSupported().size() > 0, "The amrValuesSupported is empty");
+            assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
             assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
             assertTrue(response.getIdTokenSigningAlgValuesSupported().size() > 0, "The idTokenSigningAlgValuesSupported is empty");
             assertTrue(response.getRequestObjectSigningAlgValuesSupported().size() > 0, "The requestObjectSigningAlgValuesSupported is empty");

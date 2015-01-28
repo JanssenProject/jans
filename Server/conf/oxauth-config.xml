@@ -45,9 +45,6 @@
         <grant-type>urn:ietf:params:oauth:grant-type:jwt-bearer</grant-type>
     </grant-types-supported>
 
-    <amr-values-supported>
-    </amr-values-supported>
-
     <subject-types-supported>
         <subject-type>public</subject-type>
         <subject-type>pairwise</subject-type>
@@ -242,7 +239,7 @@
     <uma-keep-client-during-resource-set-registration>true</uma-keep-client-during-resource-set-registration>
 
     <!-- Clean service interval in seconds -->
-    <clean-service-interval>600</clean-service-interval>
+    <clean-service-interval>${config.client.clean-service-interval}</clean-service-interval>
 
     <refresh-user-session-timeout-enabled>true</refresh-user-session-timeout-enabled>
     <refresh-user-session-timeout>1800</refresh-user-session-timeout>

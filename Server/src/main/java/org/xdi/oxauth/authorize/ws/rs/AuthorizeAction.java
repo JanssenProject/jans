@@ -224,7 +224,7 @@ public class AuthorizeAction {
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
-                    log.trace("Redirect to custom authentication login page: {0}", tmpRedirectTo);
+                    log.trace("Redirect to person authentication login page: {0}", tmpRedirectTo);
                     redirectTo = tmpRedirectTo;
                 }
             }

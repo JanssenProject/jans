@@ -73,7 +73,7 @@ public class CustomScriptManagerMigrator {
 			customScript.setDn(dn);
 			customScript.setInum(customScriptId);
 			customScript.setProgrammingLanguage(ProgrammingLanguage.PYTHON);
-			customScript.setScriptType(CustomScriptType.CUSTOM_AUTHENTICATION);
+			customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
 			
 			customScript.setName(customAuthenticationConfiguration.getName());
 			customScript.setLevel(customAuthenticationConfiguration.getLevel());

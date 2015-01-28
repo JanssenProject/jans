@@ -107,7 +107,7 @@ public class AppInitializer {
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
         
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.CUSTOM_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY );
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION );
         CustomScriptManager.instance().init(supportedCustomScriptTypes);
         CustomScriptManagerMigrator.instance().migrateOldConfigurations();
     }
@@ -229,7 +229,7 @@ public class AppInitializer {
     	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
 
     	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
-	    log.debug("Created custom authentication LdapEntryManager: {0}", ldapAuthEntryManager);
+	    log.debug("Created authentication LdapEntryManager: {0}", ldapAuthEntryManager);
 	        
 		return ldapAuthEntryManager;
 	}

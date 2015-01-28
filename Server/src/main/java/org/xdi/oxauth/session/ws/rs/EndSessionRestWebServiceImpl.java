@@ -16,8 +16,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.model.AuthenticationScriptUsageType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionId;
@@ -27,13 +25,14 @@ import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version 0.9 October 28, 2014
  */
 @Name("endSessionRestWebService")
@@ -50,9 +49,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @In
     private AuthorizationGrantList authorizationGrantList;
-
+    
     @In
-    private ExternalAuthenticationService externalAuthenticationService;
+    private ExternalApplicationSessionService externalApplicationSessionService;
 
     @In
     private SessionIdService sessionIdService;
@@ -74,19 +73,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             if (authorizationGrant != null) {
                 removeSessionId(sessionId, httpRequest, httpResponse);
 
-                isExternalAuthenticatorLogoutPresent = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.LOGOUT);
+                isExternalAuthenticatorLogoutPresent = externalApplicationSessionService.isEnabled();
                 if (isExternalAuthenticatorLogoutPresent) {
-                	CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.LOGOUT, 1, "1", "logout");
-
-                    if (customScriptConfiguration == null) {
-                        log.error("Failed to get ExternalAuthenticatorConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
-                                1, "1", "logout");
-                    } else {
-                        externalLogoutResult = externalAuthenticationService.executeExternalAuthenticate(
-                                customScriptConfiguration, null, 1);
-                        log.info("Authentication result for {0}. auth_step: {1}, result: {2}", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
-                    }
+                    externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, authorizationGrant);
+                    log.info("End session result for '{0}': '{1}'", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
                 }
             }
             boolean isGrantAndNoExternalLogout = authorizationGrant != null && !isExternalAuthenticatorLogoutPresent;

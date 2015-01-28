@@ -7,7 +7,8 @@
 package org.xdi.oxauth.model.configuration;
 
 /**
- * @author Javier Rojas Blum Date: 03.14.2013
+ * @author Javier Rojas Blum
+ * @version 0.9 January 22, 2015
  */
 public interface ConfigurationResponseClaim {
 
@@ -30,7 +31,6 @@ public interface ConfigurationResponseClaim {
     public static final String RESPONSE_TYPES_SUPPORTED = "response_types_supported";
     public static final String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     public static final String ACR_VALUES_SUPPORTED = "acr_values_supported";
-    public static final String AMR_VALUES_SUPPORTED = "amr_values_supported";
     public static final String SUBJECT_TYPES_SUPPORTED = "subject_types_supported";
     public static final String USER_INFO_SIGNING_ALG_VALUES_SUPPORTED = "userinfo_signing_alg_values_supported";
     public static final String USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED = "userinfo_encryption_alg_values_supported";
