@@ -493,7 +493,7 @@ class Setup(object):
     def createDirs(self, name):
         try:
             if not os.path.exists(name):
-                os.makedirs(name, 0600)
+                os.makedirs(name, 0700)
                 self.logIt('Created dir: %s' % name)
         except:
             self.logIt("Error making directory %s" % name, True)
