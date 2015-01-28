@@ -1123,7 +1123,7 @@ class Setup(object):
         else:
             installObject.components['httpd']['enabled'] = False
 
-        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
+        promptForShibIDP = self.getPrompt("Install Shibboleth 2 SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
             installObject.components['saml']['enabled'] = True
         else:
