@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.federation.ws.rs;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -36,6 +28,13 @@ import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.FederationMetadataService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides implementation of Federation Metadata REST web services interface.
@@ -87,19 +86,23 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
                 build();
     }
 
-    private static String asSignedJSON(FederationMetadata p_metadata) throws JSONException, InvalidJwtException {
-        final String keyId = ConfigurationFactory.getConfiguration().getFederationSigningKid();
-        final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getFederationSigningAlg());
-        final String jwkUrl = ConfigurationFactory.getConfiguration().getJwksUri();
+    private String asSignedJSON(FederationMetadata p_metadata) throws JSONException, InvalidJwtException {
+        try {
+            final String keyId = ConfigurationFactory.getConfiguration().getFederationSigningKid();
+            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getFederationSigningAlg());
 
-        final JSONWebKey JSONWebKey = ConfigurationFactory.getWebKeys().getKey(keyId);
-        final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
+            final JSONWebKey JSONWebKey = ConfigurationFactory.getWebKeys().getKey(keyId);
+            final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
-        final JSONObject jsonHeader = JwtHeader.instance().
-                setType(JwtType.JWS).setAlgorithm(algorithm).setKeyId(keyId).
-                toJsonObject();
-        final JSONObject jsonPayload = asJSON(p_metadata);
-        return JwtUtil.encodeJwt(jsonHeader, jsonPayload, algorithm, factory.getPrivateKey());
+            final JSONObject jsonHeader = JwtHeader.instance().
+                    setType(JwtType.JWS).setAlgorithm(algorithm).setKeyId(keyId).
+                    toJsonObject();
+            final JSONObject jsonPayload = asJSON(p_metadata);
+            return JwtUtil.encodeJwt(jsonHeader, jsonPayload, algorithm, factory.getPrivateKey());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return asJSON(p_metadata).toString(); // in case we failed to sign it for some return plain json
+        }
     }
 
     private static JSONObject asJSON(FederationMetadata p_metadata) throws JSONException {
