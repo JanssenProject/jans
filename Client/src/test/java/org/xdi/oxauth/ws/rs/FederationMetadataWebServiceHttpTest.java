@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.List;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -20,6 +14,10 @@ import org.xdi.oxauth.client.FederationMetadataRequest;
 import org.xdi.oxauth.client.FederationMetadataResponse;
 import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
+
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -47,8 +45,12 @@ public class FederationMetadataWebServiceHttpTest extends BaseTest {
     public void requestFederationMetadataById(final String federationMetadataId) throws Exception {
         showTitle("requestFederationMetadataId");
 
+        FederationMetadataRequest request = new FederationMetadataRequest();
+        request.setSigned(false);
+        request.setFederationId(federationMetadataId);
+
         FederationMetadataClient client = new FederationMetadataClient(federationMetadataEndpoint);
-        FederationMetadataResponse response = client.execGetMetadataById(federationMetadataId);
+        FederationMetadataResponse response = client.exec(request);
 
         showClient(client);
         assertEquals(response.getStatus(), 200, "Unexpected response code. Entity: " + response.getEntity());
