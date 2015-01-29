@@ -109,6 +109,6 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
 
         final FederationTrust trust = getLdapManager().find(FederationTrust.class, m_invalidRedirectUrlTrust.getDn());
         Assert.assertEquals(trust.getRedirectUris().size(), 1);
-        Assert.assertTrue(trust.getRedirectUris().get(0).equals(m_redirectUri));
+        Assert.assertTrue(trust.getRedirectUris().contains(m_redirectUri));
     }
 }
