@@ -17,7 +17,7 @@ import java.net.URLEncoder;
  * Represents an end session request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version 0.9 October 28, 2014
+ * @version 0.9 January 28, 2015
  */
 public class EndSessionRequest extends BaseRequest {
 
@@ -29,9 +29,10 @@ public class EndSessionRequest extends BaseRequest {
     /**
      * Constructs an end session request.
      */
-    public EndSessionRequest(String idTokenHint, String postLogoutRedirectUri) {
+    public EndSessionRequest(String idTokenHint, String postLogoutRedirectUri, String state) {
         this.idTokenHint = idTokenHint;
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+        this.state = state;
     }
 
     /**

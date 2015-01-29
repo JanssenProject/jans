@@ -6,14 +6,13 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Resource set description LDAP model
@@ -55,6 +54,9 @@ public class ResourceSet {
     @LdapAttribute(name = "owner")
     private String creator;
 
+    @LdapAttribute(name = "oxUrl")
+    private String url;
+
     @LdapAttribute(name = "oxType")
     private InternalExternal type;
 
@@ -64,6 +66,14 @@ public class ResourceSet {
 
     public void setDn(String dn) {
         this.dn = dn;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getInum() {

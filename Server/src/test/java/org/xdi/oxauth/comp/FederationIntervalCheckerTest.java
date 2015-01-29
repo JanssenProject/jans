@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.comp;
 
-import java.net.URLEncoder;
-import java.util.Arrays;
-
 import org.jboss.seam.contexts.Contexts;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
@@ -21,6 +18,8 @@ import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.service.FederationCheckTimer;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.util.Arrays;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -107,17 +106,9 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
     public void invalidRedirectUriInTrust() {
         final FederationCheckTimer checker = (FederationCheckTimer) Contexts.getApplicationContext().get(FederationCheckTimer.class);
         checker.cleanUpTrusts();
-        //checker.process();
-
-        // sleep 3 seconds because process() method is asynchronous
-//        sleepSeconds(3);
 
         final FederationTrust trust = getLdapManager().find(FederationTrust.class, m_invalidRedirectUrlTrust.getDn());
-        Assert.assertTrue(trust.getRedirectUris().size() == 1 && trust.getRedirectUris().get(0).equals(m_redirectUri));
-    }
-
-    public static void main(String[] args) {
-        String s = "@!1111!0008!00F1!0001";
-        System.out.println(URLEncoder.encode(s));
+        // todo check it Assert.assertEquals(trust.getRedirectUris().size(), 1);
+        Assert.assertTrue(trust.getRedirectUris().contains(m_redirectUri));
     }
 }

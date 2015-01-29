@@ -6,16 +6,14 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.util.Arrays;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Arrays;
 
 /**
  * UMA metadata configuration
@@ -71,7 +69,7 @@ public class MetadataConfiguration {
             required = true)
     private String dynamicClientEndpoint;
 
-    @ApiModelProperty(value = "The endpoint URI at which the resource server or client asks the authorization server for a PAT or AAT, respectively. A requested scope of \"http://docs.kantarainitiative.org/uma/scopes/prot.json\" results in a PAT. A requested scope of \"http://docs.kantarainitiative.org/uma/scopes/authz.json\" results in an AAT. Usage of this endpoint is defined by [OAuth2].",
+    @ApiModelProperty(value = "The endpoint URI at which the resource server or client asks the authorization server for a PAT or AAT, respectively. A requested scope of \"uma_protection\" results in a PAT. A requested scope of \"uma_authorization\" results in an AAT. Usage of this endpoint is defined by [OAuth2].",
             required = true)
     private String tokenEndpoint;
 

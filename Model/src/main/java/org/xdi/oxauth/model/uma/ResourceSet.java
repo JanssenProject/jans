@@ -6,15 +6,14 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * Resource set that needs protection by registering a resource set description
@@ -27,16 +26,28 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({"name", "icon_uri", "scopes", "type"})
+@JsonPropertyOrder({"name", "uri", "type", "scopes", "icon_uri"})
 @JsonIgnoreProperties(value = {"type"})
 //@JsonRootName(value = "resourceSet")
 @XmlRootElement
 public class ResourceSet {
 
     private String name;
+    private String uri;
     private String iconUri;
     private List<String> scopes;
     private String type;
+
+    @JsonProperty(value = "uri")
+    @XmlElement(name = "uri")
+    public String getUri() {
+        return uri;
+    }
+
+    public ResourceSet setUri(String uri) {
+        this.uri = uri;
+        return this;
+    }
 
     @JsonProperty(value = "type")
     @XmlElement(name = "type")
@@ -44,8 +55,9 @@ public class ResourceSet {
         return type;
     }
 
-    public void setType(String p_type) {
+    public ResourceSet setType(String p_type) {
         type = p_type;
+        return this;
     }
 
     @JsonProperty(value = "name")
@@ -54,8 +66,9 @@ public class ResourceSet {
         return name;
     }
 
-    public void setName(String name) {
+    public ResourceSet setName(String name) {
         this.name = name;
+        return this;
     }
 
     @JsonProperty(value = "icon_uri")
@@ -64,8 +77,9 @@ public class ResourceSet {
         return iconUri;
     }
 
-    public void setIconUri(String iconUri) {
+    public ResourceSet setIconUri(String iconUri) {
         this.iconUri = iconUri;
+        return this;
     }
 
     @JsonProperty(value = "scopes")
@@ -74,8 +88,9 @@ public class ResourceSet {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
+    public ResourceSet setScopes(List<String> scopes) {
         this.scopes = scopes;
+        return this;
     }
 
     @Override
@@ -83,9 +98,10 @@ public class ResourceSet {
         final StringBuilder sb = new StringBuilder();
         sb.append("ResourceSet");
         sb.append("{name='").append(name).append('\'');
-        sb.append(", iconUri='").append(iconUri).append('\'');
-        sb.append(", scopes=").append(scopes);
+        sb.append(", uri='").append(uri).append('\'');
         sb.append(", type='").append(type).append('\'');
+        sb.append(", scopes=").append(scopes);
+        sb.append(", iconUri='").append(iconUri).append('\'');
         sb.append('}');
         return sb.toString();
     }
