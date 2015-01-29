@@ -15,7 +15,8 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.EndSessionClient;
 
 /**
- * @author Javier Rojas Blum Date: 02.22.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 January 28, 2015
  */
 @Name("endSessionAction")
 @Scope(ScopeType.SESSION)
@@ -28,6 +29,7 @@ public class EndSessionAction {
     private String endSessionEndpoint;
     private String idTokenHint;
     private String postLogoutRedirectUri;
+    private String state;
 
     private boolean showResults;
     private String requestString;
@@ -36,7 +38,7 @@ public class EndSessionAction {
     public void exec() {
         try {
             EndSessionClient client = new EndSessionClient(endSessionEndpoint);
-            client.execEndSession(idTokenHint, postLogoutRedirectUri);
+            client.execEndSession(idTokenHint, postLogoutRedirectUri, state);
 
             showResults = true;
             requestString = client.getRequestAsString();
@@ -68,6 +70,14 @@ public class EndSessionAction {
 
     public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
         this.postLogoutRedirectUri = postLogoutRedirectUri;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public boolean isShowResults() {

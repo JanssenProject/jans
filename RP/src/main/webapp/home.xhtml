@@ -137,6 +137,12 @@
              size="40"/>
 <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
 
+<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
+<h:inputText id="postLogoutRedirectUris"
+             value="#{registrationAction.postLogoutRedirectUris}"
+             size="40"/>
+<h:outputText></h:outputText>
+
 <h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
 <h:selectManyListbox id="registrationResponseType"
                      value="#{registrationAction.responseTypes}">
@@ -327,12 +333,6 @@
 <h:outputLabel for="initiateLoginUri">Initiate Login URI</h:outputLabel>
 <h:inputText id="initiateLoginUri"
              value="#{registrationAction.initiateLoginUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
-<h:inputText id="postLogoutRedirectUris"
-             value="#{registrationAction.postLogoutRedirectUris}"
              size="40"/>
 <h:outputText></h:outputText>
 
@@ -960,6 +960,12 @@
                                  value="#{endSessionAction.postLogoutRedirectUri}"
                                  size="40"/>
                     <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+
+                    <h:outputLabel for="endSessionState">State</h:outputLabel>
+                    <h:inputText id="endSessionState"
+                                 value="#{endSessionAction.state}"
+                                 size="40"/>
+                    <h:outputText></h:outputText>
                 </h:panelGrid>
             </div>
         </s:div>

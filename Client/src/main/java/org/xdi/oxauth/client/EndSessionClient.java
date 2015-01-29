@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.Map;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -19,11 +14,16 @@ import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.Map;
+
 /**
  * Encapsulates functionality to make end session request calls to an
  * authorization server via REST Services.
  *
- * @author Javier Rojas Blum Date: 12.14.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 January 28, 2015
  */
 public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionResponse> {
 
@@ -77,10 +77,11 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
      * @param idTokenHint           The issued ID Token.
      * @param postLogoutRedirectUri The URL to which the RP is requesting that the End-User's User-Agent be redirected
      *                              after a logout has been performed.
+     * @param state                 The state.
      * @return The service response.
      */
-    public EndSessionResponse execEndSession(String idTokenHint, String postLogoutRedirectUri) {
-        setRequest(new EndSessionRequest(idTokenHint, postLogoutRedirectUri));
+    public EndSessionResponse execEndSession(String idTokenHint, String postLogoutRedirectUri, String state) {
+        setRequest(new EndSessionRequest(idTokenHint, postLogoutRedirectUri, state));
 
         return exec();
     }
