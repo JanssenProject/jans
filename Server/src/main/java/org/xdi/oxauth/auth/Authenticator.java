@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.auth;
 
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -51,11 +41,21 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Authenticator component
  *
- * @author Javier Rojas Blum Date: 09.27.2011
- * @author Yuriy Movchan Date: 05.05.2013
+ * @author Javier Rojas Blum
+ * @author Yuriy Movchan
+ * @version 0.9 January 29, 2015
  */
 @Name("authenticator")
 @Scope(ScopeType.EVENT)
@@ -110,7 +110,11 @@ public class Authenticator implements Serializable {
      * @return Returns <code>true</code> if the authentication succeed
      */
     public boolean authenticate() {
-        return authenticateImpl(Contexts.getEventContext(), true);
+        if (!authenticateImpl(Contexts.getEventContext(), true)) {
+            return authenticationFailed();
+        } else {
+            return true;
+        }
     }
 
     public String authenticateWithOutcome() {
@@ -138,13 +142,13 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateImpl(Context context, boolean interactive) {
-    	Map<String, String> restoredRequestParametersFromSession = authenticationService.restoreRequestParametersFromSession();
+        Map<String, String> restoredRequestParametersFromSession = authenticationService.restoreRequestParametersFromSession();
         initCustomAuthenticatorVariables(restoredRequestParametersFromSession);
 
         setAuthModeFromAcr();
 
         if (interactive && (this.authStep == null)) {
-            return authenticationFailed();
+            return false;
         }
 
         try {
@@ -192,7 +196,7 @@ public class Authenticator implements Serializable {
                         if (customScriptConfiguration == null) {
                             log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
                                     this.authStep, this.authMode, this.authLevel);
-                            return authenticationFailed();
+                            return false;
                         }
 
                         this.authMode = customScriptConfiguration.getName();
@@ -201,7 +205,7 @@ public class Authenticator implements Serializable {
                                 customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
                         log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
                         if (!result) {
-                            return authenticationFailed();
+                            return false;
                         }
 
                         int countAuthenticationSteps = externalAuthenticationService
@@ -211,7 +215,7 @@ public class Authenticator implements Serializable {
                             String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
                                     customScriptConfiguration, nextStep);
                             if (StringHelper.isEmpty(redirectTo)) {
-                                return authenticationFailed();
+                                return false;
                             }
 
                             Contexts.getEventContext().set("auth_step", Integer.toString(nextStep));
@@ -325,57 +329,57 @@ public class Authenticator implements Serializable {
     }
 
     public String prepareAuthenticationForStep() {
-    	setAuthModeFromAcr();
+        setAuthModeFromAcr();
 
         if (this.authMode == null) {
-    		return Constants.RESULT_SUCCESS;
-    	}
+            return Constants.RESULT_SUCCESS;
+        }
 
-    	if ((this.authStep == null) || (this.authStep < 1)) {
+        if ((this.authStep == null) || (this.authStep < 1)) {
             return Constants.RESULT_NO_PERMISSIONS;
         }
 
         CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                 .determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authStep, this.authLevel, this.authMode);
-    	String currentAuthMode = customScriptConfiguration.getName();
+        String currentAuthMode = customScriptConfiguration.getName();
         if (customScriptConfiguration == null) {
             log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
             return Constants.RESULT_FAILURE;
         }
-        
 
-		customScriptConfiguration = externalAuthenticationService
-				.determineExternalAuthenticatorForWorkflow(
-						AuthenticationScriptUsageType.INTERACTIVE,
-						customScriptConfiguration);
-		if (customScriptConfiguration == null) {
-			return Constants.RESULT_FAILURE;
-		} else {
-			String determinedAuthMode = customScriptConfiguration
-					.getName();
-			if (!StringHelper.equalsIgnoreCase(currentAuthMode,
-					determinedAuthMode)) {
-				// Redirect user to alternative login workflow
-				String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
+
+        customScriptConfiguration = externalAuthenticationService
+                .determineExternalAuthenticatorForWorkflow(
+                        AuthenticationScriptUsageType.INTERACTIVE,
+                        customScriptConfiguration);
+        if (customScriptConfiguration == null) {
+            return Constants.RESULT_FAILURE;
+        } else {
+            String determinedAuthMode = customScriptConfiguration
+                    .getName();
+            if (!StringHelper.equalsIgnoreCase(currentAuthMode,
+                    determinedAuthMode)) {
+                // Redirect user to alternative login workflow
+                String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
                         customScriptConfiguration, this.authStep);
 
-				if (StringHelper.isEmpty(redirectTo)) {
-					redirectTo = "/login.xhtml";
-				}
+                if (StringHelper.isEmpty(redirectTo)) {
+                    redirectTo = "/login.xhtml";
+                }
 
-				log.debug(
-						"Redirect to page: {0}. Force to use auth_mode: '{1}'",
-						redirectTo, determinedAuthMode);
+                log.debug(
+                        "Redirect to page: {0}. Force to use auth_mode: '{1}'",
+                        redirectTo, determinedAuthMode);
 
-				Map<String, String> parametersMap = authenticationService
-						.getParametersMap(null);
-				parametersMap.put("auth_mode", determinedAuthMode);
-				FacesManager.instance().redirect(redirectTo,
-						(Map) parametersMap, false);
+                Map<String, String> parametersMap = authenticationService
+                        .getParametersMap(null);
+                parametersMap.put("auth_mode", determinedAuthMode);
+                FacesManager.instance().redirect(redirectTo,
+                        (Map) parametersMap, false);
 
-				return Constants.RESULT_SUCCESS;
-			}
-		}
+                return Constants.RESULT_SUCCESS;
+            }
+        }
 
 
         ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
@@ -410,7 +414,7 @@ public class Authenticator implements Serializable {
         sessionClient.setClient(client);
 
         context.set("sessionClient", sessionClient);
-        
+
         clientService.updatAccessTime(client, true);
     }
 
@@ -467,10 +471,10 @@ public class Authenticator implements Serializable {
         return null;
     }
 
-	private void setAuthModeFromAcr() {
-		if (StringHelper.isNotEmpty(this.authAcr)) {
-    		this.authMode = this.authAcr;
-    	}
-	}
+    private void setAuthModeFromAcr() {
+        if (StringHelper.isNotEmpty(this.authAcr)) {
+            this.authMode = this.authAcr;
+        }
+    }
 
 }
