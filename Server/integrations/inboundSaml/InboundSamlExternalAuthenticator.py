@@ -1,7 +1,7 @@
 from org.jboss.seam.contexts import Context, Contexts, ServerConversationContext
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
-from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AttributeService
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
@@ -14,7 +14,7 @@ from org.xdi.oxauth.model.common import User, CustomAttribute
 
 import java
 
-class ExternalAuthenticator(ExternalAuthenticatorType):
+class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 

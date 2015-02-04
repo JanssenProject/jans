@@ -16,7 +16,7 @@ This installation process has 5 parts.
     - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
     - Select usage type "Interactive".
     - Add custom properties: duo_creds_file, duo_host and optinal audit_attribute, duo_group, audit_group, audit_group_email.
-    - Copy/paste script from DuoExternalAuthenticator.py.
+    - Copy/paste script from DuoPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
     - In panel "Default Authentication Method" select "duo" if you are planning to use it by default.

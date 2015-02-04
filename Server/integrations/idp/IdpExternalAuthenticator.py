@@ -1,6 +1,6 @@
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
-from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import ClientService
 from org.xdi.service.sso import ShibbolethLoginService
@@ -11,7 +11,7 @@ from java.lang import String
 
 import java
 
-class ExternalAuthenticator(ExternalAuthenticatorType):
+class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
         self.sb = ShibbolethLoginService.instance()

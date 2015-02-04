@@ -16,7 +16,7 @@ This installation process has 5 parts.
     - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
     - Select usage type "Interactive".
     - Add custom mandatory and required optional properties which specified in README.txt.
-    - Copy/paste script from SamlExternalAuthenticator.py.
+    - Copy/paste script from SamlPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
     - In panel "Default Authentication Method" select "saml" if you are planning to use it by default.

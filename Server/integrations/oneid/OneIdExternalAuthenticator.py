@@ -4,7 +4,7 @@ from org.jboss.seam import Component
 from javax.faces.context import FacesContext
 from org.jboss.seam import Component
 from org.apache.http.entity import ContentType 
-from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
@@ -22,7 +22,7 @@ except ImportError:
 
 from oneid import OneID
 
-class ExternalAuthenticator(ExternalAuthenticatorType):
+class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 

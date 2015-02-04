@@ -14,7 +14,7 @@ This installation process has 3 parts.
     - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
     - Select usage type "Interactive".
     - Add mandatory properties which specified in README.txt.
-    - Copy/paste script from BasicMultiAuthConfExternalAuthenticator.py.
+    - Copy/paste script from BasicMultiAuthConfPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
     - In panel "Default Authentication Method" select "basic_multi_auth" if you are planning to use it by default.

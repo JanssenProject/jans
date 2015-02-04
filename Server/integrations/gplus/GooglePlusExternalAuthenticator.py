@@ -1,7 +1,7 @@
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
-from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
@@ -18,10 +18,10 @@ try:
 except ImportError:
     import simplejson as json
 
-class ExternalAuthenticator(ExternalAuthenticatorType):
+class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
-#+
+
     def init(self, configurationAttributes):
         print "Google+ initialization"
 

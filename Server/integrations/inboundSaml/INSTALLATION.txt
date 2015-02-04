@@ -11,7 +11,7 @@ This installation process has 2 parts.
     - Select usage type "Interactive".
     - Add custom properties: saml_certificate_file, saml_idp_sso_target_url, saml_issuer, saml_map_user and saml_name_identifier_format.
     - Add optional custom property: saml_extension_module.
-    - Copy/paste script from InboundSamlExternalAuthenticator.py.
+    - Copy/paste script from InboundSamlPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
     - In panel "Default Authentication Method" select "saml" if you are planning to use it by default.

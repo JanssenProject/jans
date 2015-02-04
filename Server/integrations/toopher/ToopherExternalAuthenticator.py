@@ -3,7 +3,7 @@ from org.jboss.seam.security import Identity
 from org.jboss.seam import Component
 from javax.faces.context import FacesContext
 from org.jboss.seam import Component
-from org.xdi.oxauth.service.python.interfaces import ExternalAuthenticatorType
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
@@ -19,7 +19,7 @@ try:
 except ImportError:
     import simplejson as json
 
-class ExternalAuthenticator(ExternalAuthenticatorType):
+class PersonAuthentication(PersonAuthenticationType):
 
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
