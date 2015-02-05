@@ -139,8 +139,11 @@ class Setup(object):
 
         self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
+        self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
+        self.ldap_jmx_port = '1689'
+        self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
         self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
@@ -400,9 +403,9 @@ class Setup(object):
                                         '--trustAll',
                                         '--no-prompt',
                                         '--hostname',
-                                        'localhost',
+                                        self.ldap_hostname,
                                         '--port',
-                                        '4444',
+                                        self.ldap_admin_port,
                                         '--bindDN',
                                         '"%s"' % self.ldap_binddn,
                                         '--bindPasswordFile',
@@ -784,9 +787,9 @@ class Setup(object):
                                   '--backendID',
                                   'userRoot',
                                   '--hostname',
-                                  'localhost',
+                                  self.ldap_hostname,
                                   '--port',
-                                  '4444',
+                                  self.ldap_admin_port,
                                   '--bindDN',
                                   '"%s"' % self.ldap_binddn,
                                   '-j',
@@ -809,9 +812,9 @@ class Setup(object):
                               '--backendID',
                               'site',
                               '--hostname',
-                              'localhost',
+                              self.ldap_hostname,
                               '--port',
-                              '4444',
+                              self.ldap_admin_port,
                               '--bindDN',
                               '"%s"' % self.ldap_binddn,
                               '-j',
@@ -849,9 +852,9 @@ class Setup(object):
                                              '--set',
                                              'index-entry-limit:4000',
                                              '--hostName',
-                                             'localhost',
+                                             self.ldap_hostname,
                                              '--port',
-                                             '4444',
+                                             self.ldap_admin_port,
                                              '--bindDN',
                                              '"%s"' % self.ldap_binddn,
                                              '-j', self.ldapPassFn,
