@@ -20,6 +20,9 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+# This program is used to generate the documentation for the Gluu Server schema found on
+# http://www.gluu.org/docs/reference/ldap/schema
+
 import sys
 import string
 from ldif import LDIFParser, LDIFWriter
