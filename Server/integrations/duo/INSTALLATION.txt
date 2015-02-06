@@ -27,9 +27,11 @@ This list of steps needed to do to enable DUO athentication module.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "duo" authentication mode.
     - Click "Update" button at the bottom of this page.
+6. Try to log in
     - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
+    - Open second browser or private browsing session and try to log in again. It's better to try to do that from another browser session becuse we can return back to previous authentication method if something will go wrong.
 
-5. This step is an optional. We need to define SMTP configuration if we are plaaning to use audit_group property. In order to set SMTP configuration
+7. This step is an optional. We need to define SMTP configuration if we are plaaning to use audit_group property. In order to set SMTP configuration
    we need to do:
     - Open "Configuration"->"Organization configuration" page.
     - Scroll down to "SMTP Server Configuration" section.
