@@ -1,4 +1,4 @@
-This is a custom authentication module for oxAuth that enables [Duo Authentication](https://www.duosecurity.com) for user authentication.
+This is a person  authentication module for oxAuth that enables [Duo Authentication](https://www.duosecurity.com) for user authentication.
 
 The module has a few properties:
 
@@ -10,12 +10,12 @@ Example content of this file:
 2) duo_host - It's mandatory property. The URL of the DUO API server.
    Example: `api-random.duosecurity.com`
 
-3) audit_attribute - It's optional property. It allows the admin to define an attribute which the script should check for to determine whether the user belongs to duo_group or audit_group. Person DUO authentication module uses it if there is `duo_group` or `audit_group` property.
+3) audit_attribute - It's optional property. It allows to define an attribute which the module should check for to determine whether the user belongs to duo_group or audit_group. Person DUO authentication module uses it if there is `duo_group` or `audit_group` property.
    Example: `memberOf`
 
-4) duo_group - It's optional property. It is an optional attribute that alows to specify if DUO should be used for specific users. i.e. use DUO only for users who have audit_attribute (`memberOf`) attribute value equal to `duo_group`. If there is none DUO will be enforced for all users. 
+4) duo_group - It's optional property. It's an optional attribute that alows to specify if DUO should be used for specific users. i.e. use DUO only for users who have audit_attribute (`memberOf`) attribute value equal to `duo_group`. If there is none DUO will be enforced for all users. 
 
 5) audit_group - It's optional property. Specify if module should send an e-mail to administrator upon login of a user who has audit_attribute `memberOf` attribute value equal to `audit_group`.
 
-6) audit_group_email - It's optional property. It is the administrator's e-mail. Person DUO authentication module uses it if there is `audit_group` property.
+6) audit_group_email - It's optional property. It's the administrator's e-mail. Person DUO authentication module uses it if there is `audit_group` property.
 
