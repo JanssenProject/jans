@@ -27,7 +27,8 @@ This list of steps needed to do to enable DUO athentication module.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "duo" authentication mode.
     - Click "Update" button at the bottom of this page.
-6. Try to log in
+
+6. Try to log in usinf DUO person authentication method
     - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
     - Open second browser or private browsing session and try to log in again. It's better to try to do that from another browser session becuse we can return back to previous authentication method if something will go wrong.
 
