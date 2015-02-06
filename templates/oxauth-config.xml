@@ -316,10 +316,10 @@
         </client-auth-filter-->
     </client-auth-filters>
 
-    <cssLocation>/${config.oxauth.contextPath}/stylesheet</cssLocation>
-
-    <jsLocation>/${config.oxauth.contextPath}/js</jsLocation>
-
-    <imgLocation>/${config.oxauth.contextPath}/img</imgLocation>
+<!-- Use default pathes
+    <cssLocation>/oxauth/stylesheet</cssLocation>
+    <jsLocation>/oxauth/js</jsLocation>
+    <imgLocation>/oxauth/img</imgLocation>
+-->
 
 </configuration>
