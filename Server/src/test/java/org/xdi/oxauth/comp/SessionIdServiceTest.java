@@ -43,17 +43,24 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
     @Test
     public void statePersistence() {
-        final SessionId newId = m_service.generateSessionIdInteractive("dummyDn1");
-        Assert.assertEquals(newId.state(), SessionIdState.UNAUTHENTICATED);
+        SessionId newId = null;
+        try {
+            newId = m_service.generateSessionIdInteractive("dummyDn1");
+            Assert.assertEquals(newId.state(), SessionIdState.UNAUTHENTICATED);
 
-        newId.setState(SessionIdState.AUTHENTICATED.getValue());
-        newId.addAttribute("k1", "v1");
-        m_service.updateSession(newId);
+            newId.setState(SessionIdState.AUTHENTICATED.getValue());
+            newId.addAttribute("k1", "v1");
+            m_service.updateSession(newId);
 
-        final SessionId fresh = m_service.getSessionByDN(newId.getDn());
-        Assert.assertEquals(fresh.state(), SessionIdState.AUTHENTICATED);
-        Assert.assertTrue(fresh.attributes().containsKey("k1"));
-        Assert.assertTrue(fresh.attributes().containsValue("v1"));
+            final SessionId fresh = m_service.getSessionByDN(newId.getDn());
+            Assert.assertEquals(fresh.state(), SessionIdState.AUTHENTICATED);
+            Assert.assertTrue(fresh.attributes().containsKey("k1"));
+            Assert.assertTrue(fresh.attributes().containsValue("v1"));
+        } finally {
+            if (newId != null) {
+                getLdapManager().remove(newId);
+            }
+        }
     }
 
     @Test
