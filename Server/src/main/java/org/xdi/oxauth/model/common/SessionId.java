@@ -13,9 +13,14 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
+import org.xdi.util.ArrayHelper;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,7 +49,7 @@ public class SessionId implements Serializable {
     private Date authenticationTime;
 
     @LdapAttribute(name = "oxState")
-    private String state;
+    private String state = SessionIdState.UNAUTHENTICATED.getValue();
 
     @LdapAttribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
@@ -148,6 +153,46 @@ public class SessionId implements Serializable {
 
     public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
         this.sessionIdAttributes = sessionIdAttributes;
+    }
+
+    public Map<String, String> attributes() {
+        Map<String, String> map = new HashMap<String, String>();
+        if (sessionIdAttributes != null) {
+            for (SessionIdAttribute attr : sessionIdAttributes) {
+                map.put(attr.getName(), attr.getValue());
+            }
+        }
+        return map;
+    }
+
+    public void overrideAttributes(Map<String, String> maps) {
+        if (maps != null && !maps.isEmpty()) {
+            List<SessionIdAttribute> attributes = new ArrayList<SessionIdAttribute>();
+            for (Map.Entry<String, String> entry : maps.entrySet()) {
+                attributes.add(new SessionIdAttribute(entry.getKey(), entry.getValue()));
+            }
+            setSessionIdAttributes(attributes.toArray(new SessionIdAttribute[attributes.size()]));
+        }
+    }
+
+    public void addAttribute(String name, String value) {
+        addAttribute(new SessionIdAttribute(name, value));
+    }
+
+    public void addAttribute(SessionIdAttribute attribute) {
+        addAttribute(new SessionIdAttribute[]{attribute});
+    }
+
+    public void addAttribute(SessionIdAttribute[] attributes) {
+        SessionIdAttribute[] sessionIdAttributes = getSessionIdAttributes();
+        SessionIdAttribute[] newSessionIdAttributes;
+        if (ArrayHelper.isEmpty(sessionIdAttributes)) {
+            newSessionIdAttributes = attributes;
+        } else {
+            newSessionIdAttributes = ArrayHelper.arrayMerge(sessionIdAttributes, attributes);
+        }
+
+        setSessionIdAttributes(newSessionIdAttributes);
     }
 
     @Override

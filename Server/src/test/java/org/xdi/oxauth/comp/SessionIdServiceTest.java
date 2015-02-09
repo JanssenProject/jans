@@ -6,19 +6,16 @@
 
 package org.xdi.oxauth.comp;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Date;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.service.SessionIdService;
+
+import java.util.Date;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,6 +39,21 @@ public class SessionIdServiceTest extends BaseComponentTest {
         if (m_sessionId != null) {
             getLdapManager().remove(m_sessionId);
         }
+    }
+
+    @Test
+    public void statePersistence() {
+        final SessionId newId = m_service.generateSessionIdInteractive("dummyDn1");
+        Assert.assertEquals(newId.state(), SessionIdState.UNAUTHENTICATED);
+
+        newId.setState(SessionIdState.AUTHENTICATED.getValue());
+        newId.addAttribute("k1", "v1");
+        m_service.updateSession(newId);
+
+        final SessionId fresh = m_service.getSessionByDN(newId.getDn());
+        Assert.assertEquals(fresh.state(), SessionIdState.AUTHENTICATED);
+        Assert.assertTrue(fresh.attributes().containsKey("k1"));
+        Assert.assertTrue(fresh.attributes().containsValue("v1"));
     }
 
     @Test

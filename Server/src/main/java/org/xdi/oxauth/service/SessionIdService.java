@@ -6,18 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -31,14 +21,20 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdAttribute;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -328,25 +324,5 @@ public class SessionIdService {
 
 		return true;
 	}
-    
-    public void addSessionAttribute(String sessionId, SessionIdAttribute sessionIdAttribute) {
-    	if (StringHelper.isEmpty(sessionId)) {
-    		return;
-    	}
-
-    	SessionId entity = getSessionId(sessionId);
-
-    	SessionIdAttribute[] sessionIdAttributes = entity.getSessionIdAttributes();
-    	SessionIdAttribute[] newSessionIdAttributes;
-    	if (ArrayHelper.isEmpty(sessionIdAttributes)) {
-    		newSessionIdAttributes = new SessionIdAttribute[] {sessionIdAttribute};
-    	} else {
-    		newSessionIdAttributes = ArrayHelper.arrayMerge(sessionIdAttributes, new SessionIdAttribute[] { sessionIdAttribute }); 
-    	}
-
-    	entity.setSessionIdAttributes(newSessionIdAttributes);
-    	
-    	updateSession(entity);
-    }
 
 }
