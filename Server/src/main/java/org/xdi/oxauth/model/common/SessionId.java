@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -16,6 +13,9 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,13 +43,16 @@ public class SessionId implements Serializable {
     @LdapAttribute(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
 
-    @LdapAttribute(name = "oxAuthPermissionGranted")
+    @LdapAttribute(name = "oxState")
+    private String state;
+
+    @LdapAttribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
     private SessionIdAttribute[] sessionIdAttributes;
@@ -63,6 +66,18 @@ public class SessionId implements Serializable {
 
     public void setDn(String p_dn) {
         dn = p_dn;
+    }
+
+    public SessionIdState state() {
+        return SessionIdState.fromValue(state);
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getId() {
@@ -128,14 +143,14 @@ public class SessionId implements Serializable {
     }
 
     public SessionIdAttribute[] getSessionIdAttributes() {
-		return sessionIdAttributes;
-	}
+        return sessionIdAttributes;
+    }
 
-	public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
-		this.sessionIdAttributes = sessionIdAttributes;
-	}
+    public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
+        this.sessionIdAttributes = sessionIdAttributes;
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
