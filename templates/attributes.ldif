@@ -6,7 +6,6 @@ dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Inum
 gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -25,7 +24,6 @@ gluuAttributeEditType: admin
 gluuAttributeName: givenName
 gluuAttributeName: given_name
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -43,7 +41,6 @@ dn: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Username
 gluuAttributeName: uid
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -63,7 +60,6 @@ displayName: Preferred Username
 gluuAttributeName: preferred_username
 gluuLdapAttributeName: preferredUsername
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -80,7 +76,6 @@ displayName: Profile URL
 gluuAttributeName: profile
 gluuLdapAttributeName: profile
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -98,7 +93,6 @@ displayName: Website URL
 gluuAttributeName: website
 gluuLdapAttributeName: website
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -116,7 +110,6 @@ displayName: Email Verified
 gluuAttributeName: email_verified
 gluuLdapAttributeName: emailVerified
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -133,7 +126,6 @@ displayName: Phone Number Verified
 gluuAttributeName: phone_number_verified
 gluuLdapAttributeName: phoneNumberVerified
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -149,7 +141,6 @@ displayName: OpenID Connect JSON formatted address
 gluuAttributeName: address
 gluuLdapAttributeName: address
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -167,7 +158,6 @@ displayName: Last Updated
 gluuAttributeName: updated_at
 gluuLdapAttributeName: updatedAt
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -185,7 +175,6 @@ displayName: Gender, male or female
 gluuAttributeName: gender
 gluuLdapAttributeName: gender
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -203,7 +192,6 @@ displayName: Birthdate
 gluuAttributeName: birthdate
 gluuLdapAttributeName: birthdate
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -219,7 +207,6 @@ description: memberOf
 displayName: memberOf
 gluuAttributeName: memberOf
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: memberOf
@@ -234,7 +221,6 @@ displayName: Time zone info
 gluuAttributeName: timezone
 gluuAttributeName: zoneinfo
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -255,7 +241,6 @@ objectClass: gluuAttribute
 displayName: Locale
 gluuAttributeName: locale
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -278,7 +263,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: secretQuestion
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -296,7 +280,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: secretAnswer
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -314,7 +297,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: preferredLanguage
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -331,7 +313,6 @@ description: iname
 displayName: iname
 gluuAttributeName: iname
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -349,7 +330,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: mail
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -367,7 +347,6 @@ gluuAttributeEditType: admin
 gluuAttributeName: middle_name
 gluuLdapAttributeName: middleName
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -390,7 +369,6 @@ gluuAttributeEditType: admin
 gluuAttributeName: nickname
 gluuLdapAttributeName: middleName
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -408,7 +386,6 @@ gluuLdapAttributeName: sn
 gluuAttributeName: sn
 gluuAttributeName: family_name
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -430,7 +407,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: transientId
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -450,7 +426,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: persistentId
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -470,7 +445,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: c
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -490,7 +464,6 @@ gluuAttributeEditType: admin
 gluuAttributeName: displayName
 gluuAttributeName: name
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -512,7 +485,6 @@ description: URL of the End-User's profile picture
 displayName: Picture URL
 gluuAttributeName: picture
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: photo
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -527,7 +499,6 @@ description: XRI i-number
 displayName: i-number
 gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -543,7 +514,6 @@ description: Organization i-number
 displayName: Organization i-number
 gluuAttributeName: o
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: o
@@ -560,7 +530,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: userPassword
 gluuAttributeOrigin: gluuPerson
-gluuAttributePrivacyLevel: level5
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -581,7 +550,6 @@ displayName: Title
 gluuAttributeEditType: admin
 gluuAttributeName: title
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -599,7 +567,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: carLicense
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -617,7 +584,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: facsimileTelephoneNumber
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -634,7 +600,6 @@ displayName: Department
 gluuAttributeEditType: admin
 gluuAttributeName: departmentNumber
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -651,7 +616,6 @@ displayName: Employee Type
 gluuAttributeEditType: admin
 gluuAttributeName: employeeType
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: employeeType
@@ -668,7 +632,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: cn
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -686,7 +649,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: mobile
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -704,7 +666,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: homePhone
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -722,7 +683,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: st
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -739,7 +699,6 @@ displayName: Manager
 gluuAttributeEditType: admin
 gluuAttributeName: manager
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: manager
@@ -756,7 +715,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: street
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -774,7 +732,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: postOfficeBox
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -791,7 +748,6 @@ displayName: Employee Number
 gluuAttributeEditType: admin
 gluuAttributeName: employeeNumber
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: employeeNumber
@@ -807,7 +763,6 @@ displayName: Preferred Delivery Method
 gluuAttributeEditType: admin
 gluuAttributeName: preferredDeliveryMethod
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: preferredDeliveryMethod
@@ -825,7 +780,6 @@ gluuAttributeEditType: admin
 gluuAttributeName: telephoneNumber
 gluuAttributeName: phone_number
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -843,7 +797,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: roomNumber
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -860,7 +813,6 @@ displayName: Secretary
 gluuAttributeEditType: admin
 gluuAttributeName: secretary
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: secretary
@@ -877,7 +829,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: homePostalAddress
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -895,7 +846,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: l
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -913,7 +863,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: postalCode
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -931,7 +880,6 @@ gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: description
 gluuAttributeOrigin: inetOrgPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -956,7 +904,6 @@ description: Specifies the person's relationship(s) to the institution
  in broad categories such as student, faculty, staff, alum, etc.
 displayName: eduPersonAffiliation
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -970,7 +917,6 @@ gluuLdapAttributeName: eduPersonNickName
 gluuAttributeName: eduPersonNickName
 displayName: eduPersonNickName
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -989,7 +935,6 @@ description: The distinguished name (DN) of the directory entry
  representing the institution with which the person is associated.
 displayName: eduPersonOrgDN
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1008,7 +953,6 @@ description: The distinguished name(s) (DN) of the directory entries
  and an employee in another.
 displayName: eduPersonOrgUnitDN
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1025,7 +969,6 @@ description: Specifies the person's primary relationship to the
  alum, etc. (See controlled vocabulary).
 displayName: eduPersonPrimaryAffiliation
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1046,7 +989,6 @@ description: A scoped identifier for a person. It should be
  the same at a given point in time, they refer to the same person.
 displayName: eduPersonPrincipalName
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1061,7 +1003,6 @@ gluuAttributeName: eduPersonEntitlement
 description: URI (either URN or URL) that indicates a set of rights to specific resources.
 displayName: eduPersonEntitlement
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1077,7 +1018,6 @@ description: The distinguished name (DN) of the directory entry representing
  the person's primary Organizational Unit(s).
 displayName: eduPersonPrimaryOrgUnitDN
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1101,7 +1041,6 @@ description: Specifies the person's affiliation within a particular security dom
  disambiguation method in regular expression processing.
 displayName: eduPersonScopedAffiliation
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1116,7 +1055,6 @@ gluuAttributeName: eduPersonTargetedID
 description: A persistent, non-reassigned, opaque identifier for a principal.
 displayName: eduPersonTargetedID
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -1132,7 +1070,6 @@ description: Set of URIs that assert compliance with specific standards
  for identity assurance.
 displayName: eduPersonAssurance
 gluuAttributeOrigin: eduPerson
-gluuAttributePrivacyLevel: level3
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
