@@ -157,35 +157,7 @@ public class Authenticator implements Serializable {
             if (StringHelper.isNotEmpty(credentials.getUsername()) && StringHelper.isNotEmpty(credentials.getPassword())
                     && credentials.getUsername().startsWith("@!")) {
 
-                boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
-                if (isServiceUsesExternalAuthenticator) {
-                    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
-
-                    if (customScriptConfiguration == null) {
-                        log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
-                                this.authStep, this.authMode, authLevel);
-                    } else {
-                        this.authMode = customScriptConfiguration.getCustomScript().getName();
-
-                        boolean result = externalAuthenticationService.executeExternalAuthenticate(
-                                customScriptConfiguration, null, 1);
-                        log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
-
-                        if (result) {
-                            configureSessionClient(context);
-
-                            log.info("Authentication success for Client: {0}", credentials.getUsername());
-                            return true;
-                        }
-                    }
-                }
-
-                boolean loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
-                if (loggedIn) {
-                    configureSessionClient(context);
-
-                    log.info("Authentication success for Client: {0}", credentials.getUsername());
+                if (clientAuthentication(context, interactive)) {
                     return true;
                 }
             } else {
@@ -314,6 +286,41 @@ public class Authenticator implements Serializable {
         }
 
         log.info("Authentication failed for {0}", credentials.getUsername());
+        return false;
+    }
+
+    private boolean clientAuthentication(Context context, boolean interactive) {
+        boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
+        if (isServiceUsesExternalAuthenticator) {
+            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+                    .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
+
+            if (customScriptConfiguration == null) {
+                log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
+                        this.authStep, this.authMode, authLevel);
+            } else {
+                this.authMode = customScriptConfiguration.getCustomScript().getName();
+
+                boolean result = externalAuthenticationService.executeExternalAuthenticate(
+                        customScriptConfiguration, null, 1);
+                log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
+
+                if (result) {
+                    configureSessionClient(context);
+
+                    log.info("Authentication success for Client: {0}", credentials.getUsername());
+                    return true;
+                }
+            }
+        }
+
+        boolean loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
+        if (loggedIn) {
+            configureSessionClient(context);
+
+            log.info("Authentication success for Client: {0}", credentials.getUsername());
+            return true;
+        }
         return false;
     }
 

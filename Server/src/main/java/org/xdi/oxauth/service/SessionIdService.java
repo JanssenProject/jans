@@ -267,14 +267,13 @@ public class SessionIdService {
     }
 
     public void updateSessionWithLastUsedDate(SessionId p_sessionId, List<Prompt> prompts) {
-            if (!isPersisted(prompts)) {
-                return;
-            }
+        if (!isPersisted(prompts)) {
+            return;
+        }
 
-            final Date newDate = new Date();
-    		p_sessionId.setLastUsedAt(newDate);
+        p_sessionId.setLastUsedAt(new Date());
 
-    		updateSession(p_sessionId);
+        updateSession(p_sessionId);
     }
 
     public void cleanUpSessions() {
