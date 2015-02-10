@@ -7,6 +7,7 @@
 package org.xdi.oxauth.auth;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpRequest;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -27,6 +28,7 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
@@ -435,8 +437,9 @@ public class Authenticator implements Serializable {
         if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.getConfiguration().getSessionIdEnabled()) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
-                log.trace("authenticateBySessionId, sessionId = {0}, session = {1}", p_sessionId, sessionId);
-                if (sessionId != null) {
+                log.trace("authenticateBySessionId, sessionId = {0}, session = {1}, state= {2}", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
+                // IMPORTANT : authenticate by session id only if state of session is authenticated!
+                if (sessionId != null && sessionId.state() == SessionIdState.AUTHENTICATED) {
                     final User user = getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());

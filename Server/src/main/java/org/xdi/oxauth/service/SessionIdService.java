@@ -29,6 +29,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -146,7 +147,7 @@ public class SessionIdService {
         httpResponse.addCookie(cookie);
     }
 
-    public String generateId(String p_userDn, List<Prompt> prompts) {
+    public String generateId(@NotNull String p_userDn, List<Prompt> prompts) {
         final SessionId id = generateSessionId(p_userDn, prompts);
         if (id != null) {
             return id.getId();
@@ -154,11 +155,11 @@ public class SessionIdService {
         return "";
     }
 
-    public SessionId generateSessionIdInteractive(String p_userDn) {
+    public SessionId generateSessionIdInteractive(@NotNull String p_userDn) {
         return generateSessionId(p_userDn, new ArrayList<Prompt>());
     }
 
-    public SessionId generateSessionId(String p_userDn, Date authenticationDate, List<Prompt> prompts) {
+    public SessionId generateSessionId(@NotNull String p_userDn, Date authenticationDate, List<Prompt> prompts) {
         try {
             final String uuid = UUID.randomUUID().toString();
             final String dn = dn(uuid);
