@@ -1279,8 +1279,6 @@ class Setup(object):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
 
-        self.run([service_path, 'memcached', 'start'])
-
         apache_service_name = 'httpd'
         if self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
@@ -1288,6 +1286,9 @@ class Setup(object):
 
         # Apache HTTPD
         self.run([service_path, apache_service_name, 'start'])
+
+        # Memcached
+        self.run([service_path, 'memcached', 'start'])
 
         # Apache Tomcat
         try:
