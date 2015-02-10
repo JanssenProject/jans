@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.config;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.common.Mode;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -23,6 +24,7 @@ import java.util.List;
  * @version 0.9 January 22, 2015
  */
 @XmlRootElement(name = "configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
 
     private String mode;
