@@ -500,9 +500,16 @@ class Setup(object):
     def detect_OS_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.file_get_contents('/etc/redhat-release')
+        try:
+            distro_info = self.file_get_contents('/etc/redhat-release')
+        except IOError as e:
+            distro_info = self.file_get_contents('/etc/os-release')
+
         if 'CentOS' in distro_info:
             return self.os_types[0]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+
         else:
             return installObject.choose_from_list(self.os_types, "Operating System")
 
