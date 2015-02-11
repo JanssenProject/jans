@@ -1006,6 +1006,7 @@ class Setup(object):
             chown = '/bin/chown'
             self.run([mkdir, '-p', self.configFolder])
             self.run([mkdir, '-p', self.certFolder])
+            self.run([mkdir, '-p', self.outputFolder])
 
             if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
                 self.run([mkdir, '-p', self.gluuOptFolder])
