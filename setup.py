@@ -1271,9 +1271,9 @@ class Setup(object):
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service['name'], 'enable'])
-            self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
 
     def start_services(self):
         # Detect sevice path and apache service name
