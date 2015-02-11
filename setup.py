@@ -1273,6 +1273,7 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service['name'], 'enable'])
+            self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
 
     def start_services(self):
         # Detect sevice path and apache service name
