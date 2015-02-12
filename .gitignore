@@ -2,7 +2,6 @@ setup.properties
 *.log
 *.pyc
 setup.properties.last
-output/
 /.project
 /.pydevproject
 /.idea
