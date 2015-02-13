@@ -6,43 +6,61 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.ClientInfoClient;
-import org.xdi.oxauth.client.ClientInfoResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Functional tests for Client Info Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 07.20.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 February 12, 2015
  */
 public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "clientId", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
     public void requestClientInfoImplicitFlow(final String userId, final String userSecret,
-                                              final String clientId, final String redirectUri) throws Exception {
+                                              final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestClientInfoImplicitFlow");
 
-        // 1. Request authorization
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-        responseTypes.add(ResponseType.TOKEN);
-        responseTypes.add(ResponseType.ID_TOKEN);
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
         List<String> scopes = new ArrayList<String>();
         scopes.add("clientinfo");
         String nonce = UUID.randomUUID().toString();
@@ -70,7 +88,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
         String accessToken = authorizationResponse.getAccessToken();
 
-        // 2. Request client info
+        // 3. Request client info
         ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
         ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
 
@@ -84,14 +102,32 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("oxAuthScope"), "Unexpected result: oxAuthScope not found");
     }
 
-    @Parameters({"userId", "userSecret", "clientId", "clientSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris"})
     @Test
     public void requestClientInfoPasswordFlow(
-            final String userId, final String userSecret,
-            final String clientId, final String clientSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUris) throws Exception {
         showTitle("requestClientInfoPasswordFlow");
 
-        // 1. Request authorization
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization
         String username = userId;
         String password = userSecret;
         String scope = "clientinfo";
@@ -110,7 +146,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
         String accessToken = response1.getAccessToken();
 
-        // 2. Request client info
+        // 3. Request client info
         ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
         ClientInfoResponse response2 = clientInfoClient.execClientInfo(accessToken);
 

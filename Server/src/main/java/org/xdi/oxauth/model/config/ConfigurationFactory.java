@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
@@ -28,10 +21,15 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9 December 8, 2014
+ * @version 0.9 February 12, 2015
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
@@ -41,17 +39,17 @@ public class ConfigurationFactory {
     private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
 
     static {
-    	 if (System.getProperty("catalina.base") != null) {
-    		 BASE_DIR = System.getProperty("catalina.base");
-    	 } else if (System.getProperty("catalina.home") != null) {
-    		 BASE_DIR = System.getProperty("catalina.home");
-    	 } else if (System.getProperty("jboss.home.dir") != null) {
-    		 BASE_DIR = System.getProperty("jboss.home.dir");
-    	 } else {
-    		 BASE_DIR = null;
-    	 } 
+        if (System.getProperty("catalina.base") != null) {
+            BASE_DIR = System.getProperty("catalina.base");
+        } else if (System.getProperty("catalina.home") != null) {
+            BASE_DIR = System.getProperty("catalina.home");
+        } else if (System.getProperty("jboss.home.dir") != null) {
+            BASE_DIR = System.getProperty("jboss.home.dir");
+        } else {
+            BASE_DIR = null;
+        }
     }
-    
+
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
@@ -99,10 +97,6 @@ public class ConfigurationFactory {
 
     public static BaseDnConfiguration getBaseDn() {
         return getStaticConfiguration().getBaseDn();
-    }
-
-    public static List<ClaimMappingConfiguration> getClaimMappings() {
-        return getStaticConfiguration().getClaimMapping();
     }
 
     public static JSONWebKeySet getWebKeys() {

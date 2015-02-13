@@ -6,31 +6,31 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPConnectionPool;
+import com.unboundid.ldap.sdk.SearchResultEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.LDAPConnectionPool;
-import com.unboundid.ldap.sdk.SearchResultEntry;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/02/2013
+ * @author Javier Rojas Blum
+ * @version 0.9 February 12, 2015
  */
 
 public class AuthorizationContext {
@@ -98,18 +98,21 @@ public class AuthorizationContext {
     }
 
     public String getClientClaim(String p_claimName) {
-        //return ServerUtil.getAttributeValueByName(getGrant().getClient().getCustomAttributes(), p_claimName);
         return getEntryAttributeValue(getGrant().getClientDn(), p_claimName);
     }
 
     public String getUserClaim(String p_claimName) {
-        final String ldap = ClaimMappingConfiguration.getMappingByClaim(p_claimName).getLdap();
-        //return ServerUtil.getAttributeValueByName(getGrant().getUser().getCustomAttributes(), ldap);
-        return getEntryAttributeValue(getGrant().getUserDn(), ldap);
+        GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(p_claimName);
+
+        if (gluuAttribute != null) {
+            String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+            return getEntryAttributeValue(getGrant().getUserDn(), ldapClaimName);
+        }
+
+        return null;
     }
 
     public String getUserClaimByLdapName(String p_ldapName) {
-//        return ServerUtil.getAttributeValueByName(getGrant().getUser().getCustomAttributes(), p_ldapName);
         return getEntryAttributeValue(getGrant().getUserDn(), p_ldapName);
     }
 

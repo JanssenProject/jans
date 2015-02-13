@@ -6,31 +6,10 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
-import org.xdi.oxauth.client.ValidateTokenClient;
-import org.xdi.oxauth.client.ValidateTokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
@@ -42,19 +21,49 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for Token Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 10.19.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 February 12, 2015
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"redirectUri", "clientId", "clientSecret"})
+    @Parameters({"redirectUris", "redirectUri"})
     @Test
-    public void requestAccessTokenFail(final String redirectUri, final String clientId,
-                                       final String clientSecret) throws Exception {
+    public void requestAccessTokenFail(final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestAccessTokenFail");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request with invalid Authorization Code
         String code = "INVALID_AUTHORIZATION_CODE";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -67,12 +76,35 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"userId", "userSecret", "clientId", "clientSecret"})
+    @Parameters({"userId", "userSecret", "redirectUris"})
     @Test
     public void requestAccessTokenPassword(final String userId, final String userSecret,
-                                           final String clientId, final String clientSecret) throws Exception {
+                                           final String redirectUris) throws Exception {
         showTitle("requestAccessTokenPassword");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request Resource Owner Credentials Grant
         String username = userId;
         String password = userSecret;
         String scope = "openid";
@@ -984,12 +1016,34 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "clientId"})
+    @Parameters({"userId", "userSecret", "redirectUris"})
     @Test
     public void requestAccessTokenWithClientSecretJwtFail(
-            final String userId, final String userSecret, final String clientId) throws Exception {
+            final String userId, final String userSecret, final String redirectUris) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtFail");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request with invalid Client Secret
         String username = userId;
         String password = userSecret;
         String scope = "openid";
@@ -999,7 +1053,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         request.setPassword(password);
         request.setScope(scope);
         request.setAuthUsername(clientId);
-        request.setAuthPassword("INVALID_SECRET");
+        request.setAuthPassword("INVALID_CLIENT_SECRET");
         request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         request.setAudience(tokenEndpoint);
 
@@ -1014,11 +1068,34 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"clientId", "clientSecret"})
+    @Parameters({"redirectUris"})
     @Test
-    public void requestAccessTokenClientCredentials(final String clientId, final String clientSecret) throws Exception {
+    public void requestAccessTokenClientCredentials(final String redirectUris) throws Exception {
         showTitle("requestAccessTokenClientCredentials");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request Client Credentials Grant
         String scope = "storage";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1032,11 +1109,34 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getScope(), "The scope is null");
     }
 
-    @Parameters({"clientId", "clientSecret"})
+    @Parameters({"redirectUris"})
     @Test
-    public void requestAccessTokenExtensions(final String clientId, final String clientSecret) throws Exception {
+    public void requestAccessTokenExtensions(final String redirectUris) throws Exception {
         showTitle("requestAccessTokenExtensions");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request Extension Grant
         String grantTypeUri = "http://oauth.net/grant_type/assertion/saml/2.0/bearer";
         String assertion = "PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQV0aG5TdGF0ZW1lbnQPC9Bc3NlcnRpb24";
 
@@ -1050,11 +1150,34 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"clientId", "clientSecret"})
+    @Parameters({"redirectUris"})
     @Test
-    public void refreshingAccessTokenFail(final String clientId, final String clientSecret) throws Exception {
+    public void refreshingAccessTokenFail(final String redirectUris) throws Exception {
         showTitle("refreshingAccessTokenFail");
 
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request Refresh Token
         String scope = "email read_stream manage_pages";
         String refreshToken = "tGzv3JOkF0XG5Qx2TlKWIA";
 

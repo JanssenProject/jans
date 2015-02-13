@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 22, 2015
+ * @version 0.9 February 12, 2015
  */
 public class OpenIdConfiguration extends HttpServlet {
 
@@ -216,8 +216,12 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray claimsSupported = new JSONArray();
-            for (String claim : ConfigurationFactory.getConfiguration().getClaimsSupported()) {
-                claimsSupported.put(claim);
+            List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
+            for (GluuAttribute gluuAttribute : gluuAttributes) {
+                String claimName = gluuAttribute.getOxAuthClaimName();
+                if (StringUtils.isNotBlank(claimName)) {
+                    claimsSupported.put(claimName);
+                }
             }
             if (claimsSupported.length() > 0) {
                 jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);

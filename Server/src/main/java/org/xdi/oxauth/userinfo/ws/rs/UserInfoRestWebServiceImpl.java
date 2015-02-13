@@ -6,17 +6,7 @@
 
 package org.xdi.oxauth.userinfo.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -27,12 +17,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.DefaultScope;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -65,11 +50,21 @@ import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.security.StringEncrypter;
 
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.io.UnsupportedEncodingException;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version 0.9 February 12, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -211,22 +206,20 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
+                    GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = attribute.getName();
+                    String attributeName = gluuAttribute.getOxAuthClaimName();
                     String attributeValue = null;
-                    if (attributeName.equals("uid")) {
-                        attributeValue = user.getUserId();
-                    } else {
-                        attributeValue = user.getAttribute(attribute.getName());
-                    }
 
-                    final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByLdap(attributeName);
-                    if (mapping != null) {
-                        attributeName = mapping.getClaim();
-                    }
+                    if (StringUtils.isNotBlank(attributeName)) {
+                        if (attributeName.equals("uid")) {
+                            attributeValue = user.getUserId();
+                        } else {
+                            attributeValue = user.getAttribute(gluuAttribute.getName());
+                        }
 
-                    jwt.getClaims().setClaim(attributeName, attributeValue);
+                        jwt.getClaims().setClaim(attributeName, attributeValue);
+                    }
                 }
             }
         }
@@ -234,28 +227,26 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
                 boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-                String claimName = claim.getName();
-                final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByClaim(claimName);
-                String ldapClaimName = mapping != null ? mapping.getLdap() : null;
-                if (ldapClaimName == null) {
-                    ldapClaimName = claimName;
-                }
-                Object attribute = user.getAttribute(ldapClaimName, optional);
-                if (attribute != null) {
-                    if (attribute instanceof JSONArray) {
-                        JSONArray jsonArray = (JSONArray) attribute;
-                        List<String> values = new ArrayList<String>();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            String value = jsonArray.optString(i);
-                            if (value != null) {
-                                values.add(value);
+                if (gluuAttribute != null) {
+                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    Object attribute = user.getAttribute(ldapClaimName, optional);
+                    if (attribute != null) {
+                        if (attribute instanceof JSONArray) {
+                            JSONArray jsonArray = (JSONArray) attribute;
+                            List<String> values = new ArrayList<String>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String value = jsonArray.optString(i);
+                                if (value != null) {
+                                    values.add(value);
+                                }
                             }
+                            jwt.getClaims().setClaim(claim.getName(), values);
+                        } else {
+                            String value = (String) attribute;
+                            jwt.getClaims().setClaim(claim.getName(), value);
                         }
-                        jwt.getClaims().setClaim(claim.getName(), values);
-                    } else {
-                        String value = (String) attribute;
-                        jwt.getClaims().setClaim(claim.getName(), value);
                     }
                 }
             }
@@ -313,22 +304,20 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
+                    GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = attribute.getName();
+                    String attributeName = gluuAttribute.getOxAuthClaimName();
                     String attributeValue = null;
-                    if (attributeName.equals("uid")) {
-                        attributeValue = user.getUserId();
-                    } else {
-                        attributeValue = user.getAttribute(attribute.getName());
-                    }
 
-                    final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByLdap(attributeName);
-                    if (mapping != null) {
-                        attributeName = mapping.getClaim();
-                    }
+                    if (StringUtils.isNotBlank(attributeName)) {
+                        if (attributeName.equals("uid")) {
+                            attributeValue = user.getUserId();
+                        } else {
+                            attributeValue = user.getAttribute(gluuAttribute.getName());
+                        }
 
-                    jwe.getClaims().setClaim(attributeName, attributeValue);
+                        jwe.getClaims().setClaim(attributeName, attributeValue);
+                    }
                 }
             }
         }
@@ -336,29 +325,27 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
                 boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-                String claimName = claim.getName();
+                if (gluuAttribute != null) {
+                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
 
-                final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByClaim(claimName);
-                String ldapClaimName = mapping != null ? mapping.getLdap() : null;
-                if (ldapClaimName == null) {
-                    ldapClaimName = claimName;
-                }
-                Object attribute = user.getAttribute(ldapClaimName, optional);
-                if (attribute != null) {
-                    if (attribute instanceof JSONArray) {
-                        JSONArray jsonArray = (JSONArray) attribute;
-                        List<String> values = new ArrayList<String>();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            String value = jsonArray.optString(i);
-                            if (value != null) {
-                                values.add(value);
+                    Object attribute = user.getAttribute(ldapClaimName, optional);
+                    if (attribute != null) {
+                        if (attribute instanceof JSONArray) {
+                            JSONArray jsonArray = (JSONArray) attribute;
+                            List<String> values = new ArrayList<String>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String value = jsonArray.optString(i);
+                                if (value != null) {
+                                    values.add(value);
+                                }
                             }
+                            jwe.getClaims().setClaim(claim.getName(), values);
+                        } else {
+                            String value = (String) attribute;
+                            jwe.getClaims().setClaim(claim.getName(), value);
                         }
-                        jwe.getClaims().setClaim(claim.getName(), values);
-                    } else {
-                        String value = (String) attribute;
-                        jwe.getClaims().setClaim(claim.getName(), value);
                     }
                 }
             }
@@ -404,22 +391,19 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 if (scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
-                        GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
-
-                        String attributeName = attribute.getName();
+                        GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
+                        String attributeName = gluuAttribute.getOxAuthClaimName();
                         Object attributeValue = null;
-                        if (attributeName.equals("uid")) {
-                            attributeValue = user.getUserId();
-                        } else {
-                            attributeValue = user.getAttribute(attribute.getName(), true);
-                        }
 
-                        final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByLdap(attributeName);
-                        if (mapping != null) {
-                            attributeName = mapping.getClaim();
-                        }
+                        if (StringUtils.isNotBlank(attributeName)) {
+                            if (attributeName.equals("uid")) {
+                                attributeValue = user.getUserId();
+                            } else {
+                                attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                            }
 
-                        jsonObj.put(attributeName, attributeValue);
+                            jsonObj.put(attributeName, attributeValue);
+                        }
                     }
                 }
             }
@@ -428,17 +412,15 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
                 for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
                     boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-                    String claimName = claim.getName();
+                    if (gluuAttribute != null) {
+                        String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
 
-                    final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByClaim(claimName);
-                    String ldapClaimName = mapping != null ? mapping.getLdap() : null;
-                    if (ldapClaimName == null) {
-                        ldapClaimName = claimName;
-                    }
-                    Object attribute = user.getAttribute(ldapClaimName, optional);
-                    if (attribute != null) {
-                        jsonObj.put(claim.getName(), attribute);
+                        Object attribute = user.getAttribute(ldapClaimName, optional);
+                        if (attribute != null) {
+                            jsonObj.put(claim.getName(), attribute);
+                        }
                     }
                 }
             }

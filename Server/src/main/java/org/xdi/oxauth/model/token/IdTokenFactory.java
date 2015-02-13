@@ -7,10 +7,10 @@
 package org.xdi.oxauth.model.token;
 
 import org.apache.commons.lang.StringUtils;
+import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -35,6 +35,7 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.AttributeService;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
@@ -50,7 +51,7 @@ import java.util.*;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 16, 2015
+ * @version 0.9 February 12, 2015
  */
 public class IdTokenFactory {
 
@@ -73,7 +74,7 @@ public class IdTokenFactory {
         }
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
         List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
-        if (jsonWebKeys.size()>0) {
+        if (jsonWebKeys.size() > 0) {
             jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKeyId());
         }
 
@@ -91,9 +92,13 @@ public class IdTokenFactory {
         jwt.getClaims().setIssuedAt(issuedAt);
 
         if (authorizationGrant.getUserDn() != null) {
-            ClaimMappingConfiguration subMapping = ClaimMappingConfiguration.getMappingByClaim(JwtClaimName.SUBJECT_IDENTIFIER);
+            GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(JwtClaimName.SUBJECT_IDENTIFIER);
 
-            jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(subMapping.getLdap()));
+            if (gluuAttribute != null) {
+                String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+
+                jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(ldapClaimName));
+            }
         }
         // TODO: acr
         //if (authenticationContextClassReference != null) {
@@ -186,9 +191,13 @@ public class IdTokenFactory {
         jwe.getClaims().setIssuedAt(issuedAt);
 
         if (authorizationGrant.getUserDn() != null) {
-            ClaimMappingConfiguration subMapping = ClaimMappingConfiguration.getMappingByClaim(JwtClaimName.SUBJECT_IDENTIFIER);
+            GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(JwtClaimName.SUBJECT_IDENTIFIER);
 
-            jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(subMapping.getLdap()));
+            if (gluuAttribute != null) {
+                String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+
+                jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(ldapClaimName));
+            }
         }
         // TODO: acr
         //if (authenticationContextClassReference != null) {

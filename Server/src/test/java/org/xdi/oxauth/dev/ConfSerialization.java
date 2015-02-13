@@ -6,29 +6,27 @@
 
 package org.xdi.oxauth.dev;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.error.ErrorMessage;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9 November 12, 2014
+ * @author Javier Rojas Blum
+ * @version 0.9 February 12, 2015
  */
 
 public class ConfSerialization {
@@ -103,24 +101,7 @@ public class ConfSerialization {
         baseDn.setFederationRequest("ou=request,ou=federation,o=@!1111,o=gluu");
         baseDn.setFederationTrust("ou=trust,ou=federation,o=@!1111,o=gluu");
 
-        final List<ClaimMappingConfiguration> claimMappingList = new ArrayList<ClaimMappingConfiguration>();
-        claimMappingList.add(new ClaimMappingConfiguration("uid", "sub"));
-        claimMappingList.add(new ClaimMappingConfiguration("displayName", "name"));
-        claimMappingList.add(new ClaimMappingConfiguration("givenName", "given_name"));
-        claimMappingList.add(new ClaimMappingConfiguration("sn", "family_name"));
-        claimMappingList.add(new ClaimMappingConfiguration("photo1", "picture"));
-        claimMappingList.add(new ClaimMappingConfiguration("timezone", "zoneinfo"));
-        claimMappingList.add(new ClaimMappingConfiguration("preferredLanguage", "locale"));
-        claimMappingList.add(new ClaimMappingConfiguration("mail", "email"));
-        claimMappingList.add(new ClaimMappingConfiguration("homePostalAddress", "formatted"));
-        claimMappingList.add(new ClaimMappingConfiguration("street", "street_address"));
-        claimMappingList.add(new ClaimMappingConfiguration("l", "locality"));
-        claimMappingList.add(new ClaimMappingConfiguration("st", "region"));
-        claimMappingList.add(new ClaimMappingConfiguration("postalCode", "postal_code"));
-        claimMappingList.add(new ClaimMappingConfiguration("telephoneNumber", "phone_number"));
-
         final StaticConf c = new StaticConf();
-        c.setClaimMapping(claimMappingList);
         c.setBaseDn(baseDn);
 
         final String jsonStr = ServerUtil.createJsonMapper().writeValueAsString(c);

@@ -173,24 +173,6 @@
         <!--claim-type>distributed</claim-type-->
     </claim-types-supported>
 
-    <claims-supported>
-        <claim>sub</claim>
-        <claim>iss</claim>
-        <claim>auth_time</claim>
-        <claim>acr</claim>
-        <claim>name</claim>
-        <claim>given_name</claim>
-        <claim>family_name</claim>
-        <claim>nickname</claim>
-        <claim>profile</claim>
-        <claim>picture</claim>
-        <claim>website</claim>
-        <claim>email</claim>
-        <claim>email_verified</claim>
-        <claim>locale</claim>
-        <claim>zoneinfo</claim>
-    </claims-supported>
-
     <service-documentation>http://ox.gluu.org/doku.php?id=oxauth:home</service-documentation>
 
     <claims-locales-supported>

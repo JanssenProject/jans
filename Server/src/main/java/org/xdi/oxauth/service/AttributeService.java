@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.List;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -18,14 +16,16 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 07.10.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 February 12, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("attributeService")
 @AutoCreate
-public class AttributeService extends org.xdi.service.AttributeService{
-
+public class AttributeService extends org.xdi.service.AttributeService {
 
     /**
      * Get AttributeService instance
@@ -46,14 +46,37 @@ public class AttributeService extends org.xdi.service.AttributeService{
      *
      * @return GluuAttribute
      */
-    public GluuAttribute getScopeByDn(String Dn) {
-        return getLdapEntryManager().find(GluuAttribute.class, Dn);
+    public GluuAttribute getScopeByDn(String dn) {
+        return getLdapEntryManager().find(GluuAttribute.class, dn);
     }
 
-    
-    public List<GluuAttribute> getAllAttributes(){
-    	return getAllAttributes(ConfigurationFactory.getBaseDn().getAttributes());
+    public GluuAttribute getByLdapName(String name) {
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuLdapAttributeName", name, ConfigurationFactory.getBaseDn().getAttributes());
+        if (gluuAttributes.size() > 0) {
+            for (GluuAttribute gluuAttribute : gluuAttributes) {
+                if (gluuAttribute.getGluuLdapAttributeName() != null && gluuAttribute.getGluuLdapAttributeName().equals(name)) {
+                    return gluuAttribute;
+                }
+            }
+        }
+
+        return null;
     }
 
+    public GluuAttribute getByClaimName(String name) {
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, ConfigurationFactory.getBaseDn().getAttributes());
+        if (gluuAttributes.size() > 0) {
+            for (GluuAttribute gluuAttribute : gluuAttributes) {
+                if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
+                    return gluuAttribute;
+                }
+            }
+        }
 
+        return null;
+    }
+
+    public List<GluuAttribute> getAllAttributes() {
+        return getAllAttributes(ConfigurationFactory.getBaseDn().getAttributes());
+    }
 }

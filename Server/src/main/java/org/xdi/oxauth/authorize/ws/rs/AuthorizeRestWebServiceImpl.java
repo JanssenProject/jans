@@ -6,31 +6,8 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
-
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -42,24 +19,8 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.auth.Authenticator;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCode;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.IdToken;
-import org.xdi.oxauth.model.common.Parameters;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.ClaimMappingConfiguration;
+import org.xdi.oxauth.model.authorize.*;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
@@ -68,15 +29,7 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.service.AuthenticationFilterService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserGroupService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.util.QueryStringDecoder;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
@@ -84,13 +37,25 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.security.SignatureException;
+import java.util.*;
+
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version 0.9 February 12, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpointt")
@@ -173,8 +138,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // ATTENTION : please do not add more parameter in this debug method because it will not work with Seam 2.2.2.Final ,
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request authorization: "
-                + "responseType = {0}, clientId = {1}, scope = {2}, redirectUri = {3}, nonce = {4}, "
-                + "state = {5}, request = {6}, isSecure = {7}, requestSessionId = {8}, sessionId = {9}",
+                        + "responseType = {0}, clientId = {1}, scope = {2}, redirectUri = {3}, nonce = {4}, "
+                        + "state = {5}, request = {6}, isSecure = {7}, requestSessionId = {8}, sessionId = {9}",
                 responseType, clientId, scope, redirectUri, nonce,
                 state, request, securityContext.isSecure(), requestSessionId, sessionId);
 
@@ -194,7 +159,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
 
-		ResponseMode responseMode = ResponseMode.getByValue(respMode);
+        ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
@@ -700,23 +665,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
+                    GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = attribute.getName();
+                    String attributeName = gluuAttribute.getOxAuthClaimName();
                     Object attributeValue = null;
-                    if (attributeName.equals("uid")) {
-                        attributeValue = user.getUserId();
-                    } else {
-                        attributeValue = user.getAttribute(attribute.getName(), true);
-                    }
 
-                    final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByLdap(attributeName);
-                    if (mapping != null) {
-                        attributeName = mapping.getClaim();
-                    }
+                    if (StringUtils.isNotBlank(attributeName)) {
+                        if (attributeName.equals("uid")) {
+                            attributeValue = user.getUserId();
+                        } else {
+                            attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        }
 
-                    if (attributeName != null && attributeValue != null) {
-                        claims.put(attributeName, attributeValue.toString());
+                        if (attributeValue != null) {
+                            claims.put(attributeName, attributeValue.toString());
+                        }
                     }
                 }
             }
@@ -730,21 +693,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
                 boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-                String claimName = claim.getName();
+                if (gluuAttribute != null) {
+                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
 
-                final ClaimMappingConfiguration mapping = ClaimMappingConfiguration.getMappingByClaim(claimName);
-                String ldapClaimName = mapping != null ? mapping.getLdap() : null;
-                if (ldapClaimName == null) {
-                    ldapClaimName = claimName;
-                }
-                Object attribute = user.getAttribute(ldapClaimName, optional);
-                if (claim != null && attribute != null) {
-                    claims.put(claim.getName(), attribute.toString());
+                    Object attribute = user.getAttribute(ldapClaimName, optional);
+                    if (claim != null && attribute != null) {
+                        claims.put(claim.getName(), attribute.toString());
+                    }
                 }
             }
         }
-
 
         return claims;
     }

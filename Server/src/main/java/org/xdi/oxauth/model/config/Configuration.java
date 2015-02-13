@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.9 January 22, 2015
+ * @version 0.9 February 12, 2015
  */
 @XmlRootElement(name = "configuration")
 public class Configuration {
@@ -64,7 +64,6 @@ public class Configuration {
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
-    private List<String> claimsSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
     private List<String> uiLocalesSupported;
@@ -638,16 +637,6 @@ public class Configuration {
         this.claimTypesSupported = claimTypesSupported;
     }
 
-    @XmlElementWrapper(name = "claims-supported")
-    @XmlElement(name = "claim")
-    public List<String> getClaimsSupported() {
-        return claimsSupported;
-    }
-
-    public void setClaimsSupported(List<String> claimsSupported) {
-        this.claimsSupported = claimsSupported;
-    }
-
     @XmlElement(name = "service-documentation")
     public String getServiceDocumentation() {
         return serviceDocumentation;
@@ -985,7 +974,7 @@ public class Configuration {
         this.externalAuthenticatorEnabled = externalAuthenticatorEnabled;
     }
 
-	@XmlElement(name = "appliance-inum")
+    @XmlElement(name = "appliance-inum")
     public String getApplianceInum() {
         return applianceInum;
     }
