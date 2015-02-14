@@ -60,7 +60,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 /**
  * Functional tests for User Info Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 12.28.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 February 14, 2015
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -575,8 +576,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
                 jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
                 jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim("gluuStatus", ClaimValue.createEssential(true)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim("gluuWhitePagesListed", ClaimValue.createEssential(true)));
                 jwtAuthorizationRequest.addUserInfoClaim(new Claim("o", ClaimValue.createEssential(true)));
 
                 String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -661,8 +660,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     // Custom attributes
                     assertTrue(jsonObj.has("iname"));
-                    assertTrue(jsonObj.has("gluuStatus"));
-                    assertTrue(jsonObj.has("gluuWhitePagesListed"));
                     assertTrue(jsonObj.has("o"));
                 } catch (JSONException e) {
                     e.printStackTrace();
