@@ -802,7 +802,7 @@ attributeTypes: ( oxAttributeType-oid NAME 'oxAttributeType'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthClaimName-oid NAME 'oxAuthClaimName'
-  DESC 'Specify an identifier for an oxAuth Claim.'
+  DESC 'Used by oxAuth in conjunction with gluuLdapAttributeName to map claims to attributes in LDAP.'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
