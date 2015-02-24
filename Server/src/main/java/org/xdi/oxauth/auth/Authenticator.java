@@ -7,6 +7,7 @@
 package org.xdi.oxauth.auth;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpRequest;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -27,6 +28,7 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
@@ -155,35 +157,7 @@ public class Authenticator implements Serializable {
             if (StringHelper.isNotEmpty(credentials.getUsername()) && StringHelper.isNotEmpty(credentials.getPassword())
                     && credentials.getUsername().startsWith("@!")) {
 
-                boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
-                if (isServiceUsesExternalAuthenticator) {
-                    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
-
-                    if (customScriptConfiguration == null) {
-                        log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
-                                this.authStep, this.authMode, authLevel);
-                    } else {
-                        this.authMode = customScriptConfiguration.getCustomScript().getName();
-
-                        boolean result = externalAuthenticationService.executeExternalAuthenticate(
-                                customScriptConfiguration, null, 1);
-                        log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
-
-                        if (result) {
-                            configureSessionClient(context);
-
-                            log.info("Authentication success for Client: {0}", credentials.getUsername());
-                            return true;
-                        }
-                    }
-                }
-
-                boolean loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
-                if (loggedIn) {
-                    configureSessionClient(context);
-
-                    log.info("Authentication success for Client: {0}", credentials.getUsername());
+                if (clientAuthentication(context, interactive)) {
                     return true;
                 }
             } else {
@@ -315,6 +289,41 @@ public class Authenticator implements Serializable {
         return false;
     }
 
+    private boolean clientAuthentication(Context context, boolean interactive) {
+        boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
+        if (isServiceUsesExternalAuthenticator) {
+            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+                    .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
+
+            if (customScriptConfiguration == null) {
+                log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
+                        this.authStep, this.authMode, authLevel);
+            } else {
+                this.authMode = customScriptConfiguration.getCustomScript().getName();
+
+                boolean result = externalAuthenticationService.executeExternalAuthenticate(
+                        customScriptConfiguration, null, 1);
+                log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
+
+                if (result) {
+                    configureSessionClient(context);
+
+                    log.info("Authentication success for Client: {0}", credentials.getUsername());
+                    return true;
+                }
+            }
+        }
+
+        boolean loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
+        if (loggedIn) {
+            configureSessionClient(context);
+
+            log.info("Authentication success for Client: {0}", credentials.getUsername());
+            return true;
+        }
+        return false;
+    }
+
     private void initCustomAuthenticatorVariables(Map<String, String> restoredRequestParametersFromSession) {
         Map<String, String> requestParameters = restoredRequestParametersFromSession;
         if (restoredRequestParametersFromSession == null) {
@@ -435,8 +444,9 @@ public class Authenticator implements Serializable {
         if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.getConfiguration().getSessionIdEnabled()) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
-                log.trace("authenticateBySessionId, sessionId = {0}, session = {1}", p_sessionId, sessionId);
-                if (sessionId != null) {
+                log.trace("authenticateBySessionId, sessionId = {0}, session = {1}, state= {2}", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
+                // IMPORTANT : authenticate by session id only if state of session is authenticated!
+                if (sessionId != null && sessionId.state() == SessionIdState.AUTHENTICATED) {
                     final User user = getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());

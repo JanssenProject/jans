@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
+
+import java.io.Serializable;
 
 /**
  * @author Yuriy Movchan
@@ -22,7 +22,15 @@ public class SessionIdAttribute implements Serializable {
 
 	private String name;
 	private String value;
-	
+
+    public SessionIdAttribute() {
+    }
+
+    public SessionIdAttribute(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
     public String getName() {
 		return name;
 	}

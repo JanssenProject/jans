@@ -213,6 +213,7 @@
     <!-- if session id is not used during some time then it's removed automatically.
          Lifetime in seconds, 86400 seconds = 1 day  -->
     <session-id-unused-lifetime>86400</session-id-unused-lifetime>
+    <session-id-unauthenticated-unused-lifetime>60</session-id-unauthenticated-unused-lifetime>
     <session-id-enabled>true</session-id-enabled>
     <session-id-persist-on-prompt-none>false</session-id-persist-on-prompt-none>
 

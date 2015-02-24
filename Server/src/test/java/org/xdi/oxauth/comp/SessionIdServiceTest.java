@@ -6,19 +6,18 @@
 
 package org.xdi.oxauth.comp;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Date;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.service.SessionIdService;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -41,6 +40,43 @@ public class SessionIdServiceTest extends BaseComponentTest {
     public void afterClass() {
         if (m_sessionId != null) {
             getLdapManager().remove(m_sessionId);
+        }
+    }
+
+    @Test
+    public void checkOutdatedUnauthenticatedSessionIdentification() {
+
+        // set time -1 hour
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.HOUR, -1);
+        m_sessionId.setLastUsedAt(c.getTime());
+        m_service.updateSession(m_sessionId);
+
+        // check identification
+        final List<SessionId> outdatedSessions = m_service.getUnauthenticatedIdsOlderThan(60);
+        Assert.assertTrue(outdatedSessions.contains(m_sessionId));
+
+    }
+
+    @Test
+    public void statePersistence() {
+        SessionId newId = null;
+        try {
+            newId = m_service.generateSessionIdInteractive("dummyDn1");
+            Assert.assertEquals(newId.state(), SessionIdState.UNAUTHENTICATED);
+
+            newId.setState(SessionIdState.AUTHENTICATED.getValue());
+            newId.addAttribute("k1", "v1");
+            m_service.updateSession(newId);
+
+            final SessionId fresh = m_service.getSessionByDN(newId.getDn());
+            Assert.assertEquals(fresh.state(), SessionIdState.AUTHENTICATED);
+            Assert.assertTrue(fresh.attributes().containsKey("k1"));
+            Assert.assertTrue(fresh.attributes().containsValue("v1"));
+        } finally {
+            if (newId != null) {
+                getLdapManager().remove(newId);
+            }
         }
     }
 

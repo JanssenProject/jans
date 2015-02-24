@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.config;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.common.Mode;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -23,6 +24,7 @@ import java.util.List;
  * @version 0.9 February 12, 2015
  */
 @XmlRootElement(name = "configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
 
     private String mode;
@@ -109,6 +111,7 @@ public class Configuration {
 
     private String applianceInum;
     private int sessionIdUnusedLifetime;
+    private int sessionIdUnauthenticatedUnusedLifetime = 60; // 60 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private int configurationUpdateInterval;
@@ -990,6 +993,15 @@ public class Configuration {
 
     public void setSessionIdUnusedLifetime(int p_sessionIdUnusedLifetime) {
         sessionIdUnusedLifetime = p_sessionIdUnusedLifetime;
+    }
+
+    @XmlElement(name = "session-id-unauthenticated-unused-lifetime")
+    public int getSessionIdUnauthenticatedUnusedLifetime() {
+        return sessionIdUnauthenticatedUnusedLifetime;
+    }
+
+    public void setSessionIdUnauthenticatedUnusedLifetime(int sessionIdUnauthenticatedUnusedLifetime) {
+        this.sessionIdUnauthenticatedUnusedLifetime = sessionIdUnauthenticatedUnusedLifetime;
     }
 
     @XmlElement(name = "session-id-persist-on-prompt-none")

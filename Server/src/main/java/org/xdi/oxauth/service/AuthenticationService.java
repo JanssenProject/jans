@@ -43,6 +43,7 @@ import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.session.OAuthCredentials;
@@ -351,14 +352,15 @@ public class AuthenticationService {
         }
     }
 
-    public void configureEventUser(boolean interactive) {
+    public SessionId configureEventUser(boolean interactive) {
         User user = credentials.getUser();
         if (user != null) {
-            configureEventUser(user, interactive);
+            return configureEventUser(user, interactive);
         }
+        return null;
     }
 
-    public void configureEventUser(User user, boolean interactive) {
+    public SessionId configureEventUser(User user, boolean interactive) {
         final List<Prompt> prompts = new ArrayList<Prompt>();
         if (!interactive) {
             prompts.add(Prompt.NONE);
@@ -366,8 +368,10 @@ public class AuthenticationService {
 
         SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), prompts);
         sessionId.setAuthenticationTime(new Date());
+        sessionId.setState(SessionIdState.AUTHENTICATED.getValue());
 
         configureEventUser(sessionId, prompts);
+        return sessionId;
     }
 
     public void configureEventUser(SessionId sessionId, List<Prompt> prompts) {
