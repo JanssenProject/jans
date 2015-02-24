@@ -165,7 +165,6 @@ class Setup(object):
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = [{ 'name' : 'memcached', 'order' : '30', 'runlevel' : '3'},
                                 { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
-                                { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
                                 { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
                                 { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
 
@@ -500,9 +499,16 @@ class Setup(object):
     def detect_OS_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.file_get_contents('/etc/redhat-release')
+        try:
+            distro_info = self.file_get_contents('/etc/redhat-release')
+        except IOError as e:
+            distro_info = self.file_get_contents('/etc/os-release')
+
         if 'CentOS' in distro_info:
             return self.os_types[0]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+
         else:
             return installObject.choose_from_list(self.os_types, "Operating System")
 
@@ -1000,6 +1006,7 @@ class Setup(object):
             chown = '/bin/chown'
             self.run([mkdir, '-p', self.configFolder])
             self.run([mkdir, '-p', self.certFolder])
+            self.run([mkdir, '-p', self.outputFolder])
 
             if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
                 self.run([mkdir, '-p', self.gluuOptFolder])
@@ -1265,14 +1272,13 @@ class Setup(object):
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service['name'], 'start', service['order'], service['runlevel'], "."])
+                self.run(["/usr/sbin/update-rc.d", service['name'], 'enable'])
 
     def start_services(self):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
-
-        self.run([service_path, 'memcached', 'start'])
 
         apache_service_name = 'httpd'
         if self.os_type in ['debian', 'ubuntu']:
@@ -1281,6 +1287,9 @@ class Setup(object):
 
         # Apache HTTPD
         self.run([service_path, apache_service_name, 'start'])
+
+        # Memcached
+        self.run([service_path, 'memcached', 'start'])
 
         # Apache Tomcat
         try:
