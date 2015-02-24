@@ -21,6 +21,7 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
@@ -262,6 +263,12 @@ public class SessionIdService {
         return true;
     }
 
+    public void remove(List<SessionId> list) {
+        for (SessionId id : list) {
+            remove(id);
+        }
+    }
+
     public void updateSessionWithLastUsedDate(SessionId p_sessionId) {
         updateSessionWithLastUsedDate(p_sessionId, new ArrayList<Prompt>());
     }
@@ -278,13 +285,23 @@ public class SessionIdService {
 
     public void cleanUpSessions() {
         final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-        final List<SessionId> list = getIdsOlderThan(interval);
-        if (list != null && !list.isEmpty()) {
-            for (SessionId id : list) {
-                remove(id);
-            }
-        }
+        final int unauthenticatedInterval = ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime();
+
+        remove(getUnauthenticatedIdsOlderThan(unauthenticatedInterval));
+        remove(getIdsOlderThan(interval));
     }
+
+    public List<SessionId> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {
+        try {
+            final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
+            final Filter filter = Filter.create(String.format("&(lastModifiedTime<=%s)(oxState=unauthenticated)", StaticUtils.encodeGeneralizedTime(new Date(dateInPast))));
+            return ldapEntryManager.findEntries(getBaseDn(), SessionId.class, filter);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
+
 
     public List<SessionId> getIdsOlderThan(int p_intervalInSeconds) {
         try {
@@ -302,11 +319,14 @@ public class SessionIdService {
             return false;
         }
 
-        final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-        final long sessionInterval = TimeUnit.SECONDS.toMillis(interval);
+        final long sessionInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime());
+        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
         if (timeSinceLastAccess > sessionInterval) {
+            return false;
+        }
+        if (sessionId.state() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval) {
             return false;
         }
 

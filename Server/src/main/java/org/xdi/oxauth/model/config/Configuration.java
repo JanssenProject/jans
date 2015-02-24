@@ -112,6 +112,7 @@ public class Configuration {
 
     private String applianceInum;
     private int sessionIdUnusedLifetime;
+    private int sessionIdUnauthenticatedUnusedLifetime = 60; // 60 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private int configurationUpdateInterval;
@@ -1003,6 +1004,15 @@ public class Configuration {
 
     public void setSessionIdUnusedLifetime(int p_sessionIdUnusedLifetime) {
         sessionIdUnusedLifetime = p_sessionIdUnusedLifetime;
+    }
+
+    @XmlElement(name = "session-id-unauthenticated-unused-lifetime")
+    public int getSessionIdUnauthenticatedUnusedLifetime() {
+        return sessionIdUnauthenticatedUnusedLifetime;
+    }
+
+    public void setSessionIdUnauthenticatedUnusedLifetime(int sessionIdUnauthenticatedUnusedLifetime) {
+        this.sessionIdUnauthenticatedUnusedLifetime = sessionIdUnauthenticatedUnusedLifetime;
     }
 
     @XmlElement(name = "session-id-persist-on-prompt-none")

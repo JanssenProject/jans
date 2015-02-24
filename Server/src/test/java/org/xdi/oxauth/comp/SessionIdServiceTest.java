@@ -13,7 +13,9 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.service.SessionIdService;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -39,6 +41,21 @@ public class SessionIdServiceTest extends BaseComponentTest {
         if (m_sessionId != null) {
             getLdapManager().remove(m_sessionId);
         }
+    }
+
+    @Test
+    public void checkOutdatedUnauthenticatedSessionIdentification() {
+
+        // set time -1 hour
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.HOUR, -1);
+        m_sessionId.setLastUsedAt(c.getTime());
+        m_service.updateSession(m_sessionId);
+
+        // check identification
+        final List<SessionId> outdatedSessions = m_service.getUnauthenticatedIdsOlderThan(60);
+        Assert.assertTrue(outdatedSessions.contains(m_sessionId));
+
     }
 
     @Test
