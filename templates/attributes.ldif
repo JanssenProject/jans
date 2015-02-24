@@ -10,6 +10,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: inum
+oxAuthClaimName: sub
 gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
 objectClass: top
@@ -28,6 +29,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: givenName
+oxAuthClaimName: given_name
 gluuStatus: active
 inum: %(inumOrg)s!0005!B4B0
 objectClass: top
@@ -45,6 +47,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: uid
+oxAuthClaimName: user_name
 gluuStatus: active
 inum: %(inumOrg)s!0005!42E0
 objectClass: top
@@ -227,6 +230,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuLdapAttributeName: zoneinfo
+oxAuthClaimName: zoneinfo
 gluuStatus: active
 inum: %(inumOrg)s!0005!A901
 objectClass: top
@@ -302,6 +306,7 @@ gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuAttributeViewType: whitePages
 gluuLdapAttributeName: preferredLanguage
+oxAuthClaimName: locale
 gluuStatus: active
 inum: %(inumOrg)s!0005!6493
 objectClass: top
@@ -334,6 +339,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: mail
+oxAuthClaimName: email
 gluuStatus: active
 inum: %(inumOrg)s!0005!CAE3
 objectClass: top
@@ -383,6 +389,7 @@ dn: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Last Name
 displayName: Last Name
 gluuLdapAttributeName: sn
+oxAuthClaimName: family_name
 gluuAttributeName: sn
 gluuAttributeName: family_name
 gluuAttributeOrigin: gluuPerson
@@ -449,6 +456,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: c
+oxAuthClaimName: country
 gluuSAML1URI: urn:urn:mace:dir:attribute-def:c
 gluuSAML2URI: urn:oid:2.5.4.6
 gluuStatus: active
@@ -468,6 +476,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: displayName
+oxAuthClaimName: name
 gluuStatus: active
 inum: %(inumOrg)s!0005!2B29
 objectClass: top
@@ -491,6 +500,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuLdapAttributeName: picture
+oxAuthClaimName: picture
 gluuStatus: active
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
 
@@ -687,6 +697,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: st
+oxAuthClaimName: region
 gluuStatus: active
 inum: %(inumOrg)s!0005!E6B8
 objectClass: top
@@ -719,6 +730,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: street
+oxAuthClaimName: street_address
 gluuStatus: active
 inum: %(inumOrg)s!0005!6609
 objectClass: top
@@ -784,6 +796,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: telephoneNumber
+oxAuthClaimName: phone_number
 gluuStatus: active
 inum: %(inumOrg)s!0005!570B
 objectClass: top
@@ -833,6 +846,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: homePostalAddress
+oxAuthClaimName: formatted
 gluuStatus: active
 inum: %(inumOrg)s!0005!27DB
 objectClass: top
@@ -850,6 +864,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: l
+oxAuthClaimName: locality
 gluuStatus: active
 inum: %(inumOrg)s!0005!6EEB
 objectClass: top
@@ -867,6 +882,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: postalCode
+oxAuthClaimName: postal_code
 gluuStatus: active
 inum: %(inumOrg)s!0005!2A3D
 objectClass: top
