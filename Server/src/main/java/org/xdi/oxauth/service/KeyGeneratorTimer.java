@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 8, 2014
+ * @version 0.9 February 25, 2015
  */
 @Name("keyGeneratorTimer")
 @AutoCreate
@@ -59,6 +59,10 @@ public class KeyGeneratorTimer {
     @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
+        if (!ConfigurationFactory.getConfiguration().getKeyRegenerationEnabled()) {
+            return;
+        }
+
         if (this.isActive.get()) {
             return;
         }

@@ -227,6 +227,7 @@
     <refresh-user-session-timeout>1800</refresh-user-session-timeout>
 
     <!-- Key regeneration interval in hours -->
+    <key-regeneration-enabled>false</key-regeneration-enabled>
     <key-regeneration-interval>48</key-regeneration-interval>
     <default-signature-algorithm>RS256</default-signature-algorithm>
 

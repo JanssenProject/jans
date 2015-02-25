@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.9 February 12, 2015
+ * @version 0.9 February 25, 2015
  */
 @XmlRootElement(name = "configuration")
 public class Configuration {
@@ -83,6 +83,7 @@ public class Configuration {
     private Boolean umaKeepClientDuringResourceSetRegistration;
     private int cleanServiceInterval;
     private int federationCheckInterval;
+    private Boolean keyRegenerationEnabled;
     private int keyRegenerationInterval;
     private String defaultSignatureAlgorithm;
     private String oxOpenIdConnectVersion;
@@ -790,6 +791,15 @@ public class Configuration {
 
     public void setFederationCheckInterval(int p_federationCheckInterval) {
         federationCheckInterval = p_federationCheckInterval;
+    }
+
+    @XmlElement(name = "key-regeneration-enabled")
+    public Boolean getKeyRegenerationEnabled() {
+        return keyRegenerationEnabled;
+    }
+
+    public void setKeyRegenerationEnabled(Boolean keyRegenerationEnabled) {
+        this.keyRegenerationEnabled = keyRegenerationEnabled;
     }
 
     @XmlElement(name = "key-regeneration-interval")
