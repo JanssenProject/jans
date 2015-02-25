@@ -55,7 +55,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version 0.9 February 24, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpointt")
@@ -667,18 +667,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 for (String claimDn : scope.getOxAuthClaims()) {
                     GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = gluuAttribute.getOxAuthClaimName();
+                    String claimName = gluuAttribute.getOxAuthClaimName();
+                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
                     Object attributeValue = null;
 
-                    if (StringUtils.isNotBlank(attributeName)) {
-                        if (attributeName.equals("uid")) {
+                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                        if (ldapName.equals("uid")) {
                             attributeValue = user.getUserId();
                         } else {
                             attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                         }
 
                         if (attributeValue != null) {
-                            claims.put(attributeName, attributeValue.toString());
+                            claims.put(claimName, attributeValue.toString());
                         }
                     }
                 }

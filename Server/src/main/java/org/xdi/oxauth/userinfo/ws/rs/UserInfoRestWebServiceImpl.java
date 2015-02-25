@@ -64,7 +64,7 @@ import java.util.List;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version 0.9 February 24, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -208,17 +208,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 for (String claimDn : scope.getOxAuthClaims()) {
                     GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = gluuAttribute.getOxAuthClaimName();
+                    String claimName = gluuAttribute.getOxAuthClaimName();
+                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
                     String attributeValue = null;
 
-                    if (StringUtils.isNotBlank(attributeName)) {
-                        if (attributeName.equals("uid")) {
+                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                        if (ldapName.equals("uid")) {
                             attributeValue = user.getUserId();
                         } else {
                             attributeValue = user.getAttribute(gluuAttribute.getName());
                         }
 
-                        jwt.getClaims().setClaim(attributeName, attributeValue);
+                        jwt.getClaims().setClaim(claimName, attributeValue);
                     }
                 }
             }
@@ -306,17 +307,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 for (String claimDn : scope.getOxAuthClaims()) {
                     GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
 
-                    String attributeName = gluuAttribute.getOxAuthClaimName();
+                    String claimName = gluuAttribute.getOxAuthClaimName();
+                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
                     String attributeValue = null;
 
-                    if (StringUtils.isNotBlank(attributeName)) {
-                        if (attributeName.equals("uid")) {
+                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                        if (ldapName.equals("uid")) {
                             attributeValue = user.getUserId();
                         } else {
                             attributeValue = user.getAttribute(gluuAttribute.getName());
                         }
 
-                        jwe.getClaims().setClaim(attributeName, attributeValue);
+                        jwe.getClaims().setClaim(claimName, attributeValue);
                     }
                 }
             }
@@ -392,17 +394,19 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
                         GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
-                        String attributeName = gluuAttribute.getOxAuthClaimName();
+
+                        String claimName = gluuAttribute.getOxAuthClaimName();
+                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
                         Object attributeValue = null;
 
-                        if (StringUtils.isNotBlank(attributeName)) {
-                            if (attributeName.equals("uid")) {
+                        if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                            if (ldapName.equals("uid")) {
                                 attributeValue = user.getUserId();
                             } else {
                                 attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                             }
 
-                            jsonObj.put(attributeName, attributeValue);
+                            jsonObj.put(claimName, attributeValue);
                         }
                     }
                 }
