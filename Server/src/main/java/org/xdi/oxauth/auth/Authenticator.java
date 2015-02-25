@@ -156,7 +156,6 @@ public class Authenticator implements Serializable {
         try {
             if (StringHelper.isNotEmpty(credentials.getUsername()) && StringHelper.isNotEmpty(credentials.getPassword())
                     && credentials.getUsername().startsWith("@!")) {
-
                 if (clientAuthentication(context, interactive)) {
                     return true;
                 }
@@ -337,73 +336,63 @@ public class Authenticator implements Serializable {
 
     }
 
-    public String prepareAuthenticationForStep() {
-        setAuthModeFromAcr();
+	public String prepareAuthenticationForStep() {
+		if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
+			return Constants.RESULT_SUCCESS;
+		}
 
-        if (this.authMode == null) {
-            return Constants.RESULT_SUCCESS;
-        }
+		setAuthModeFromAcr();
 
-        if ((this.authStep == null) || (this.authStep < 1)) {
-            return Constants.RESULT_NO_PERMISSIONS;
-        }
+		if (this.authMode == null) {
+			return Constants.RESULT_SUCCESS;
+		}
 
-        CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                .determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authStep, this.authLevel, this.authMode);
-        String currentAuthMode = customScriptConfiguration.getName();
-        if (customScriptConfiguration == null) {
-            log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
-            return Constants.RESULT_FAILURE;
-        }
+		if ((this.authStep == null) || (this.authStep < 1)) {
+			return Constants.RESULT_NO_PERMISSIONS;
+		}
 
+		CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(
+				AuthenticationScriptUsageType.INTERACTIVE, this.authStep, this.authLevel, this.authMode);
+		String currentAuthMode = customScriptConfiguration.getName();
+		if (customScriptConfiguration == null) {
+			log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
+			return Constants.RESULT_FAILURE;
+		}
 
-        customScriptConfiguration = externalAuthenticationService
-                .determineExternalAuthenticatorForWorkflow(
-                        AuthenticationScriptUsageType.INTERACTIVE,
-                        customScriptConfiguration);
-        if (customScriptConfiguration == null) {
-            return Constants.RESULT_FAILURE;
-        } else {
-            String determinedAuthMode = customScriptConfiguration
-                    .getName();
-            if (!StringHelper.equalsIgnoreCase(currentAuthMode,
-                    determinedAuthMode)) {
-                // Redirect user to alternative login workflow
-                String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
-                        customScriptConfiguration, this.authStep);
+		customScriptConfiguration = externalAuthenticationService.determineExternalAuthenticatorForWorkflow(
+				AuthenticationScriptUsageType.INTERACTIVE, customScriptConfiguration);
+		if (customScriptConfiguration == null) {
+			return Constants.RESULT_FAILURE;
+		} else {
+			String determinedAuthMode = customScriptConfiguration.getName();
+			if (!StringHelper.equalsIgnoreCase(currentAuthMode, determinedAuthMode)) {
+				// Redirect user to alternative login workflow
+				String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, this.authStep);
 
-                if (StringHelper.isEmpty(redirectTo)) {
-                    redirectTo = "/login.xhtml";
-                }
+				if (StringHelper.isEmpty(redirectTo)) {
+					redirectTo = "/login.xhtml";
+				}
 
-                log.debug(
-                        "Redirect to page: {0}. Force to use auth_mode: '{1}'",
-                        redirectTo, determinedAuthMode);
+				log.debug("Redirect to page: {0}. Force to use auth_mode: '{1}'", redirectTo, determinedAuthMode);
 
-                Map<String, String> parametersMap = authenticationService
-                        .getParametersMap(null);
-                parametersMap.put("auth_mode", determinedAuthMode);
-                FacesManager.instance().redirect(redirectTo,
-                        (Map) parametersMap, false);
+				Map<String, String> parametersMap = authenticationService.getParametersMap(null);
+				parametersMap.put("auth_mode", determinedAuthMode);
+				FacesManager.instance().redirect(redirectTo, (Map) parametersMap, false);
 
-                return Constants.RESULT_SUCCESS;
-            }
-        }
+				return Constants.RESULT_SUCCESS;
+			}
+		}
 
+		ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
+		Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
+				extCtx.getRequestParameterValuesMap(), authStep);
 
-        ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-        Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
-                extCtx.getRequestParameterValuesMap(), authStep);
-        if (result == null) {
-            return Constants.RESULT_FAILURE;
-        }
-
-        if (result) {
-            return Constants.RESULT_SUCCESS;
-        } else {
-            return Constants.RESULT_FAILURE;
-        }
-    }
+		if ((result != null) && result) {
+			return Constants.RESULT_SUCCESS;
+		} else {
+			return Constants.RESULT_FAILURE;
+		}
+	}
 
     public void authenticateExternallyWebService(String userName) {
         org.jboss.seam.resteasy.Application application = (org.jboss.seam.resteasy.Application) Component

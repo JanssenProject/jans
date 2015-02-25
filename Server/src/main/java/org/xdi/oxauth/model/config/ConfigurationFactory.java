@@ -39,7 +39,7 @@ public class ConfigurationFactory {
     private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
 
     static {
-        if (System.getProperty("catalina.base") != null) {
+        if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null )) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
             BASE_DIR = System.getProperty("catalina.home");
