@@ -6,6 +6,13 @@
 
 package org.xdi.oxauth.model.common;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -14,13 +21,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
 import org.xdi.util.ArrayHelper;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,7 +33,9 @@ import java.util.Map;
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
 public class SessionId implements Serializable {
 
-    @LdapDN
+	private static final long serialVersionUID = -237476411915686378L;
+
+	@LdapDN
     private String dn;
 
     @LdapAttribute(name = "uniqueIdentifier")
@@ -49,7 +51,7 @@ public class SessionId implements Serializable {
     private Date authenticationTime;
 
     @LdapAttribute(name = "oxState")
-    private String state = SessionIdState.UNAUTHENTICATED.getValue();
+    private SessionIdState state;
 
     @LdapAttribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
@@ -73,15 +75,11 @@ public class SessionId implements Serializable {
         dn = p_dn;
     }
 
-    public SessionIdState state() {
-        return SessionIdState.fromValue(state);
-    }
-
-    public String getState() {
+    public SessionIdState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(SessionIdState state) {
         this.state = state;
     }
 

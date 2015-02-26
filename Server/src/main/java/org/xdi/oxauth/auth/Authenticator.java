@@ -153,135 +153,24 @@ public class Authenticator implements Serializable {
             return false;
         }
 
+        boolean authenticated = false;
         try {
             if (StringHelper.isNotEmpty(credentials.getUsername()) && StringHelper.isNotEmpty(credentials.getPassword())
                     && credentials.getUsername().startsWith("@!")) {
-                if (clientAuthentication(context, interactive)) {
-                    return true;
-                }
+            	authenticated = clientAuthentication(context, interactive); 
             } else {
                 if (interactive) {
-                    if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
-                        ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-                        CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                                .determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
-
-                        if (customScriptConfiguration == null) {
-                            log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
-                                    this.authStep, this.authMode, this.authLevel);
-                            return false;
-                        }
-
-                        this.authMode = customScriptConfiguration.getName();
-
-                        boolean result = externalAuthenticationService.executeExternalAuthenticate(
-                                customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
-                        log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
-                        if (!result) {
-                            return false;
-                        }
-
-                        int countAuthenticationSteps = externalAuthenticationService
-                                .executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
-                        if (this.authStep < countAuthenticationSteps) {
-                            final int nextStep = this.authStep + 1;
-                            String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
-                                    customScriptConfiguration, nextStep);
-                            if (StringHelper.isEmpty(redirectTo)) {
-                                return false;
-                            }
-
-                            Contexts.getEventContext().set("auth_step", Integer.toString(nextStep));
-                            Contexts.getEventContext().set("auth_mode", this.authMode);
-
-                            List<String> extraParameters = externalAuthenticationService.executeExternalGetExtraParametersForStep(customScriptConfiguration, nextStep);
-
-                            Map<String, String> parametersMap;
-                            if (restoredRequestParametersFromSession == null) {
-                                parametersMap = authenticationService.getParametersMap(extraParameters);
-                            } else {
-                                parametersMap = authenticationService.getParametersMap(extraParameters, restoredRequestParametersFromSession);
-                            }
-
-                            log.trace("Redirect to page: {0}", redirectTo);
-                            FacesManager.instance().redirect(redirectTo, (Map) parametersMap, false);
-                            return false;
-                        }
-
-                        if (this.authStep == countAuthenticationSteps) {
-                            authenticationService.configureEventUser(interactive);
-
-                            Principal principal = new SimplePrincipal(credentials.getUsername());
-                            identity.acceptExternallyAuthenticatedPrincipal(principal);
-                            identity.quietLogin();
-
-                            // Redirect back to original page
-                            if (Events.exists()) {
-                                // Parameter authMode is an workaround for basic authentication when there is only one step
-                                log.info("Sending event to trigger user redirection: {0}", credentials.getUsername());
-                                Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, this.authMode, restoredRequestParametersFromSession);
-                            }
-
-                            log.info("Authentication success for User: {0}", credentials.getUsername());
-                            return true;
-                        }
-                    } else {
-                        if (StringHelper.isNotEmpty(credentials.getUsername())) {
-                            boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
-                            if (authenticated) {
-                                authenticationService.configureEventUser(interactive);
-
-                                // Redirect back to original page
-                                if (Events.exists()) {
-                                    // Parameter authMode is an workaround for basic authentication when there is only one step
-                                    log.info("Sending event to trigger user redirection: {0}", credentials.getUsername());
-                                    Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, this.authMode, null);
-                                }
-
-                                log.info("Authentication success for User: {0}", credentials.getUsername());
-                                return true;
-                            }
-                        }
-                    }
+                	authenticated = userAuthenticationInteractive(restoredRequestParametersFromSession);
                 } else {
-                    if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
-                        CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                                .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
-
-                        if (customScriptConfiguration == null) {
-                            log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
-                                    this.authStep, this.authMode, authLevel);
-                        } else {
-                            this.authMode = customScriptConfiguration.getName();
-
-                            boolean result = externalAuthenticationService.executeExternalAuthenticate(
-                                    customScriptConfiguration, null, 1);
-                            log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
-
-                            if (result) {
-                                authenticateExternallyWebService(credentials.getUsername());
-                                authenticationService.configureEventUser(interactive);
-
-                                log.info("Authentication success for User: {0}", credentials.getUsername());
-                                return true;
-                            }
-                        }
-                    }
-
-                    if (StringHelper.isNotEmpty(credentials.getUsername())) {
-                        boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
-                        if (authenticated) {
-                            authenticateExternallyWebService(credentials.getUsername());
-                            authenticationService.configureEventUser(interactive);
-
-                            log.info("Authentication success for User: {0}", credentials.getUsername());
-                            return true;
-                        }
-                    }
+                	authenticated = userAuthenticationService();
                 }
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
+        }
+
+        if (authenticated) {
+            return true;
         }
 
         log.info("Authentication failed for {0}", credentials.getUsername());
@@ -320,8 +209,135 @@ public class Authenticator implements Serializable {
             log.info("Authentication success for Client: {0}", credentials.getUsername());
             return true;
         }
+
         return false;
     }
+
+	private boolean userAuthenticationInteractive(Map<String, String> restoredRequestParametersFromSession) {
+		if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
+		    ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
+		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+		            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
+
+		    if (customScriptConfiguration == null) {
+		        log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
+		                this.authStep, this.authMode, this.authLevel);
+		        return false;
+		    }
+
+		    this.authMode = customScriptConfiguration.getName();
+
+		    boolean result = externalAuthenticationService.executeExternalAuthenticate(
+		            customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+		    log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
+		    if (!result) {
+		        return false;
+		    }
+
+		    int countAuthenticationSteps = externalAuthenticationService
+		            .executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
+		    if (this.authStep < countAuthenticationSteps) {
+		        final int nextStep = this.authStep + 1;
+		        String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(
+		                customScriptConfiguration, nextStep);
+		        if (StringHelper.isEmpty(redirectTo)) {
+		            return false;
+		        }
+
+		        Contexts.getEventContext().set("auth_step", Integer.toString(nextStep));
+		        Contexts.getEventContext().set("auth_mode", this.authMode);
+
+		        List<String> extraParameters = externalAuthenticationService.executeExternalGetExtraParametersForStep(customScriptConfiguration, nextStep);
+
+		        Map<String, String> parametersMap;
+		        if (restoredRequestParametersFromSession == null) {
+		            parametersMap = authenticationService.getParametersMap(extraParameters);
+		        } else {
+		            parametersMap = authenticationService.getParametersMap(extraParameters, restoredRequestParametersFromSession);
+		        }
+
+		        log.trace("Redirect to page: {0}", redirectTo);
+		        FacesManager.instance().redirect(redirectTo, (Map) parametersMap, false);
+		        return false;
+		    }
+
+		    if (this.authStep == countAuthenticationSteps) {
+		        authenticationService.configureEventUser(true);
+
+		        Principal principal = new SimplePrincipal(credentials.getUsername());
+		        identity.acceptExternallyAuthenticatedPrincipal(principal);
+		        identity.quietLogin();
+
+		        // Redirect back to original page
+		        if (Events.exists()) {
+		            // Parameter authMode is an workaround for basic authentication when there is only one step
+		            log.info("Sending event to trigger user redirection: {0}", credentials.getUsername());
+		            Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, this.authMode, true, restoredRequestParametersFromSession);
+		        }
+
+		        log.info("Authentication success for User: {0}", credentials.getUsername());
+		        return true;
+		    }
+		} else {
+		    if (StringHelper.isNotEmpty(credentials.getUsername())) {
+		        boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
+		        if (authenticated) {
+		            authenticationService.configureEventUser(true);
+
+		            // Redirect back to original page
+		            if (Events.exists()) {
+		                // Parameter authMode is an workaround for basic authentication when there is only one step
+		                log.info("Sending event to trigger user redirection: {0}", credentials.getUsername());
+		                Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, this.authMode, false, null);
+		            }
+
+		            log.info("Authentication success for User: {0}", credentials.getUsername());
+		            return true;
+		        }
+		    }
+		}
+
+		return false;
+	}
+
+	private boolean userAuthenticationService() {
+		if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
+		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+		            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
+
+		    if (customScriptConfiguration == null) {
+		        log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}",
+		                this.authStep, this.authMode, authLevel);
+		    } else {
+		        this.authMode = customScriptConfiguration.getName();
+
+		        boolean result = externalAuthenticationService.executeExternalAuthenticate(
+		                customScriptConfiguration, null, 1);
+		        log.info("Authentication result for {0}. auth_step: {1}, result: {2}", credentials.getUsername(), this.authStep, result);
+
+		        if (result) {
+		            authenticateExternallyWebService(credentials.getUsername());
+		            authenticationService.configureEventUser(false);
+
+		            log.info("Authentication success for User: {0}", credentials.getUsername());
+		            return true;
+		        }
+		    }
+		}
+
+		if (StringHelper.isNotEmpty(credentials.getUsername())) {
+		    boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
+		    if (authenticated) {
+		        authenticateExternallyWebService(credentials.getUsername());
+		        authenticationService.configureEventUser(false);
+
+		        log.info("Authentication success for User: {0}", credentials.getUsername());
+		        return true;
+		    }
+		}
+		
+		return false;
+	}
 
     private void initCustomAuthenticatorVariables(Map<String, String> restoredRequestParametersFromSession) {
         Map<String, String> requestParameters = restoredRequestParametersFromSession;
@@ -435,7 +451,7 @@ public class Authenticator implements Serializable {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
                 log.trace("authenticateBySessionId, sessionId = {0}, session = {1}, state= {2}", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
                 // IMPORTANT : authenticate by session id only if state of session is authenticated!
-                if (sessionId != null && sessionId.state() == SessionIdState.AUTHENTICATED) {
+                if (sessionId != null && sessionId.getState() == SessionIdState.AUTHENTICATED) {
                     final User user = getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());

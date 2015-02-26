@@ -63,14 +63,14 @@ public class SessionIdServiceTest extends BaseComponentTest {
         SessionId newId = null;
         try {
             newId = m_service.generateSessionIdInteractive("dummyDn1");
-            Assert.assertEquals(newId.state(), SessionIdState.UNAUTHENTICATED);
+            Assert.assertEquals(newId.getState(), SessionIdState.UNAUTHENTICATED);
 
-            newId.setState(SessionIdState.AUTHENTICATED.getValue());
+            newId.setState(SessionIdState.AUTHENTICATED);
             newId.addAttribute("k1", "v1");
             m_service.updateSession(newId);
 
             final SessionId fresh = m_service.getSessionByDN(newId.getDn());
-            Assert.assertEquals(fresh.state(), SessionIdState.AUTHENTICATED);
+            Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
             Assert.assertTrue(fresh.attributes().containsKey("k1"));
             Assert.assertTrue(fresh.attributes().containsValue("v1"));
         } finally {

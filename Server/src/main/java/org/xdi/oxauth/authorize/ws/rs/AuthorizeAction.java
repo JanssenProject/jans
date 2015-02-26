@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
@@ -43,6 +44,7 @@ import org.xdi.util.StringHelper;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
+
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -53,10 +55,6 @@ import java.util.*;
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
 public class AuthorizeAction {
-
-    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
-            "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr_values", "amr_values", "session_id", "request", "request_uri"));
 
     @Logger
     private Log log;
@@ -87,9 +85,6 @@ public class AuthorizeAction {
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
-
-    @In
-    private SessionId sessionUser;
 
     @In("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
@@ -151,6 +146,7 @@ public class AuthorizeAction {
             final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
             authenticator.authenticateBySessionId(sessionId);
         }
+
         SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
         if (ldapSessionId == null) {
         	identity.logout();
@@ -160,6 +156,8 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
+        List<Prompt> prompts = Prompt.fromString(prompt, " ");
+
         final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 
         final SessionId session = getSession();
@@ -210,6 +208,9 @@ public class AuthorizeAction {
                 }
             }
 
+            SessionId sessionId = sessionIdService.generateSessionId(null, new Date(), prompts);
+//            sessionId.setState(SessionIdState.UNAUTHENTICATED);
+
             FacesManager.instance().redirect(redirectTo, (Map) parameterMap, false);
             return;
         }
@@ -246,7 +247,6 @@ public class AuthorizeAction {
                     }
                 }
 
-                List<Prompt> prompts = Prompt.fromString(prompt, " ");
                 if (AuthorizeParamsValidator.validatePrompt(prompts)) {
                     // if trusted client = true, then skip authorization page and grant access directly
                     if (ConfigurationFactory.getConfiguration().getTrustedClientEnabled()) {
@@ -270,81 +270,6 @@ public class AuthorizeAction {
                 sessionId = SessionIdService.instance().getSessionIdFromCookie((HttpServletRequest) request);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    @Observer(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL)
-    public void onSuccessfulLogin(String authMode, Map<String, String> requestParameterMap) {
-        onSuccessfulLoginImpl(authMode, requestParameterMap);
-    }
-
-    @Observer(Identity.EVENT_LOGIN_SUCCESSFUL)
-    public void onSuccessfulLogin() {
-        onSuccessfulLoginImpl(null, null);
-    }
-
-    public void onSuccessfulLoginImpl(String authMode, Map<String, String> requestParameterMap) {
-        log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
-
-        User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
-                userService.getUserByDn(sessionUser.getUserDn()) : null;
-        if (sessionUser != null) {
-            sessionUser.setAuthenticationTime(new Date());
-        }
-        sessionIdService.updateSessionWithLastUsedDate(sessionUser, Prompt.fromString(prompt, " "));
-
-        log.info("Attempting to redirect user. User: {0}", user);
-
-        if (user != null) {
-            final Map<String, Object> map;
-            if (requestParameterMap == null) {
-                map = parametersForRedirect(user);
-            } else {
-                map = parametersForRedirect(user, requestParameterMap);
-            }
-
-            addAuthModeParameters(map, authMode);
-
-            log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, map);
-            FacesManager.instance().redirect("/authorize.xhtml", map, false);
-        }
-    }
-
-    private Map<String, Object> parametersForRedirect(User p_user) {
-        final Map<String, String> parameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        return parametersForRedirect(p_user, parameterMap);
-    }
-
-    private Map<String, Object> parametersForRedirect(User p_user, final Map<String, String> requestParameterMap) {
-        final Map<String, Object> result = new HashMap<String, Object>();
-        if (requestParameterMap != null && !requestParameterMap.isEmpty()) {
-            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
-            for (Map.Entry<String, String> entry : set) {
-                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        if (!result.isEmpty()) {
-            if (sessionUser == null || sessionUser.getId() == null) {
-                sessionUser = sessionIdService.generateSessionIdInteractive(p_user.getDn());
-            }
-
-            result.put("session_id", sessionUser.getId());
-        }
-
-        return result;
-    }
-
-    public void addAuthModeParameters(final Map<String, Object> parameterMap, String authMode) {
-        // Add authentication mode and authentication level parameters
-        if (StringHelper.isNotEmpty(authMode)) {
-            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
-            if (customScriptConfiguration != null) {
-                parameterMap.put("auth_mode", customScriptConfiguration.getName());
-                parameterMap.put("auth_level", customScriptConfiguration.getLevel());
             }
         }
     }

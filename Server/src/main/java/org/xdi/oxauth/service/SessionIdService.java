@@ -160,7 +160,7 @@ public class SessionIdService {
         return generateSessionId(p_userDn, new ArrayList<Prompt>());
     }
 
-    public SessionId generateSessionId(@NotNull String p_userDn, Date authenticationDate, List<Prompt> prompts) {
+    public SessionId generateSessionId(String p_userDn, Date authenticationDate, List<Prompt> prompts) {
         try {
             final String uuid = UUID.randomUUID().toString();
             final String dn = dn(uuid);
@@ -326,7 +326,7 @@ public class SessionIdService {
         if (timeSinceLastAccess > sessionInterval) {
             return false;
         }
-        if (sessionId.state() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval) {
+        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval) {
             return false;
         }
 

@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,14 +30,18 @@ import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
+import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleProperty;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeAction;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
@@ -46,8 +51,10 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -60,6 +67,10 @@ import org.xdi.util.StringHelper;
 @Name("authenticationService")
 @AutoCreate
 public class AuthenticationService {
+
+    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
+            "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
+            "ui_locales", "id_token_hint", "login_hint", "acr_values", "amr_values", "session_id", "request", "request_uri"));
 
     private static final String STORED_REQUEST_PARAMETERS = "stored_request_parameters";
     private static final String STORED_ORIGIN_HEADERS = "stored_origin_headers";
@@ -88,6 +99,12 @@ public class AuthenticationService {
 
     @In
     private SessionIdService sessionIdService;
+
+    @In
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    @In
+    private SessionId sessionUser;
 
     /**
      * Authenticate user.
@@ -312,7 +329,7 @@ public class AuthenticationService {
     }
 
     public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
-		final List<String> allowedParameters = new ArrayList<String>(AuthorizeAction.ALLOWED_PARAMETER);
+		final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
         allowedParameters.addAll(Arrays.asList("auth_mode", "auth_level", "auth_step"));
 
         putInMap(parameterMap, "auth_mode");
@@ -366,9 +383,7 @@ public class AuthenticationService {
             prompts.add(Prompt.NONE);
         }
 
-        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), prompts);
-        sessionId.setAuthenticationTime(new Date());
-        sessionId.setState(SessionIdState.AUTHENTICATED.getValue());
+        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), new Date(), prompts);
 
         configureEventUser(sessionId, prompts);
         return sessionId;
@@ -377,6 +392,7 @@ public class AuthenticationService {
     public void configureEventUser(SessionId sessionId, List<Prompt> prompts) {
         identity.addRole("user");
 
+        sessionId.setState(SessionIdState.AUTHENTICATED);
         sessionIdService.updateSessionWithLastUsedDate(sessionId, prompts);
 
         Contexts.getEventContext().set("sessionUser", sessionId);
@@ -426,6 +442,86 @@ public class AuthenticationService {
 		
 		return null;
 	}
+
+    @Observer(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL)
+    public void onSuccessfulLogin(String authMode, boolean interactive, Map<String, String> requestParameterMap) {
+        onSuccessfulLoginImpl(authMode, interactive, requestParameterMap);
+    }
+
+    @Observer(Identity.EVENT_LOGIN_SUCCESSFUL)
+    public void onSuccessfulLogin() {
+        onSuccessfulLoginImpl(null, false, null);
+    }
+
+    public void onSuccessfulLoginImpl(String authMode, boolean interactive, Map<String, String> requestParameterMap) {
+        log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
+
+        final List<Prompt> prompts = new ArrayList<Prompt>();
+        if (!interactive) {
+            prompts.add(Prompt.NONE);
+        }
+
+        User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
+                userService.getUserByDn(sessionUser.getUserDn()) : null;
+        if (sessionUser != null) {
+            sessionUser.setAuthenticationTime(new Date());
+        }
+        sessionIdService.updateSessionWithLastUsedDate(sessionUser, prompts);
+
+        log.info("Attempting to redirect user. User: {0}", user);
+
+        if (user != null) {
+            final Map<String, Object> map;
+            if (requestParameterMap == null) {
+                map = parametersForRedirect(user);
+            } else {
+                map = parametersForRedirect(user, requestParameterMap);
+            }
+
+            addAuthModeParameters(map, authMode);
+
+            log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, map);
+            FacesManager.instance().redirect("/authorize.xhtml", map, false);
+        }
+    }
+
+    public void addAuthModeParameters(final Map<String, Object> parameterMap, String authMode) {
+        // Add authentication mode and authentication level parameters
+        if (StringHelper.isNotEmpty(authMode)) {
+            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
+            if (customScriptConfiguration != null) {
+                parameterMap.put("auth_mode", customScriptConfiguration.getName());
+                parameterMap.put("auth_level", customScriptConfiguration.getLevel());
+            }
+        }
+    }
+
+    private Map<String, Object> parametersForRedirect(User p_user) {
+        final Map<String, String> parameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+        return parametersForRedirect(p_user, parameterMap);
+    }
+
+    private Map<String, Object> parametersForRedirect(User p_user, final Map<String, String> requestParameterMap) {
+        final Map<String, Object> result = new HashMap<String, Object>();
+        if (requestParameterMap != null && !requestParameterMap.isEmpty()) {
+            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
+            for (Map.Entry<String, String> entry : set) {
+                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        if (!result.isEmpty()) {
+            if (sessionUser == null || sessionUser.getId() == null) {
+                sessionUser = sessionIdService.generateSessionIdInteractive(p_user.getDn());
+            }
+
+            result.put("session_id", sessionUser.getId());
+        }
+
+        return result;
+    }
 
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);
