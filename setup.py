@@ -290,12 +290,9 @@ class Setup(object):
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
-        realTomcatWebappsFolder = os.path.realpath("%s/webapps" % self.tomcatHome)
 
         self.run(['/bin/chmod', 'a-x', realCertFolder])
         self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
-
-        self.run(['/bin/chmod', '-R', '644', realTomcatWebappsFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
