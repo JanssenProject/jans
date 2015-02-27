@@ -207,7 +207,7 @@ class Setup(object):
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
-        self.asimba_properties = '%s/asimba-wa.properties' % self.outputFolder
+        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
@@ -889,7 +889,7 @@ class Setup(object):
 
             self.logIt("Configuring Asimba...")
             self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
-            self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba-wa.properties' % tmpAsimbaDir)
+            self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
 
             self.logIt("Generating asimba.war...")
             self.run([self.jarCommand,
