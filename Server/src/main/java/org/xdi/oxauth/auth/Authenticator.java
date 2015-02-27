@@ -45,6 +45,7 @@ import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -432,27 +433,14 @@ public class Authenticator implements Serializable {
         clientService.updatAccessTime(client, true);
     }
 
-    public int getCurrentAuthenticationStep() {
-        return authStep;
-    }
-
-    public void setCurrentAuthenticationStep(int currentAuthenticationStep) {
-        this.authStep = currentAuthenticationStep;
-    }
-
-    public boolean authenticationFailed() {
-        facesMessages.addFromResourceBundle(Severity.ERROR, "login.errorMessage");
-        return false;
-    }
-
     public boolean authenticateBySessionId(String p_sessionId) {
         if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.getConfiguration().getSessionIdEnabled()) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
                 log.trace("authenticateBySessionId, sessionId = {0}, session = {1}, state= {2}", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
                 // IMPORTANT : authenticate by session id only if state of session is authenticated!
-                if (sessionId != null && sessionId.getState() == SessionIdState.AUTHENTICATED) {
-                    final User user = getUserOrRemoveSession(sessionId);
+                if (sessionId != null && (SessionIdState.AUTHENTICATED == sessionId.getState())) {
+                    final User user = authenticationService.getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());
                         authenticationService.configureEventUser(sessionId, new ArrayList<Prompt>(Arrays.asList(Prompt.NONE)));
@@ -466,24 +454,17 @@ public class Authenticator implements Serializable {
         return false;
     }
 
-    private User getUserOrRemoveSession(SessionId p_sessionId) {
-        if (p_sessionId != null) {
-            try {
-                if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
-                    final User user = userService.getUserByDn(p_sessionId.getUserDn());
-                    if (user != null) {
-                        return user;
-                    } else { // if there is no user than session is invalid
-                        sessionIdService.remove(p_sessionId);
-                    }
-                } else { // if there is no user than session is invalid
-                    sessionIdService.remove(p_sessionId);
-                }
-            } catch (Exception e) {
-                log.trace(e.getMessage(), e);
-            }
-        }
-        return null;
+    public int getCurrentAuthenticationStep() {
+        return authStep;
+    }
+
+    public void setCurrentAuthenticationStep(int currentAuthenticationStep) {
+        this.authStep = currentAuthenticationStep;
+    }
+
+    public boolean authenticationFailed() {
+        facesMessages.addFromResourceBundle(Severity.ERROR, "login.errorMessage");
+        return false;
     }
 
     private void setAuthModeFromAcr() {

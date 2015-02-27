@@ -7,6 +7,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
@@ -42,6 +43,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -209,7 +211,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     return builder.build();
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateSessionId(user.getDn(), new Date(), prompts);
+                                    sessionUser = sessionIdService.generateSessionId(user.getDn(), new Date(), SessionIdState.AUTHENTICATED, prompts);
                                 }
                             }
 
@@ -345,7 +347,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             String userDn = authenticationFilterService.processAuthenticationFilters(params);
                                             if (userDn != null) {
-                                                sessionUser = sessionIdService.generateSessionId(userDn, new Date(), prompts);
+                                                sessionUser = sessionIdService.generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, prompts);
                                                 user = userService.getUserByDn(sessionUser.getUserDn());
 
                                                 Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);

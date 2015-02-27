@@ -8,6 +8,8 @@ package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -31,6 +33,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -80,6 +83,17 @@ public class SessionIdService {
         }
         return "";
     }
+
+    public String getSessionIdFromCookie() {
+		try {
+		    final HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		    return getSessionIdFromCookie(request);
+		} catch (Exception e) {
+		    log.error(e.getMessage(), e);
+		}
+
+		return null;
+	}
 
     public String getSessionIdFromOpbsCookie(HttpServletRequest request) {
         try {
@@ -160,40 +174,73 @@ public class SessionIdService {
         return generateSessionId(p_userDn, new ArrayList<Prompt>());
     }
 
-    public SessionId generateSessionId(String p_userDn, Date authenticationDate, List<Prompt> prompts) {
-        try {
+    public SessionId generateSessionId(String p_userDn, Date authenticationDate, SessionIdState state, List<Prompt> prompts) {
+    	return generateSessionId(p_userDn, authenticationDate, state, prompts, true);
+    }
+
+    public SessionId generateSessionId(String p_userDn, Date authenticationDate, SessionIdState state, List<Prompt> prompts, boolean persist) {
             final String uuid = UUID.randomUUID().toString();
             final String dn = dn(uuid);
 
-            if (Util.allNotBlank(p_userDn, dn)) {
-                final SessionId sessionId = new SessionId();
-                sessionId.setId(uuid);
-                sessionId.setDn(dn);
-                sessionId.setLastUsedAt(new Date());
-                sessionId.setUserDn(p_userDn);
-                if (authenticationDate != null) {
-                    sessionId.setAuthenticationTime(authenticationDate);
-                }
+            if (StringUtils.isBlank(dn)) {
+        		return null;
+        	}
 
-                final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-                FacesContext facesContext = FacesContext.getCurrentInstance();
-                if (facesContext != null) {
-                    Cookie cookie = new Cookie("opbs", uuid);
-                    cookie.setMaxAge(unusedLifetime);
-                    ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
-                }
-
-                if (unusedLifetime > 0 && isPersisted(prompts)) {
-                    ldapEntryManager.persist(sessionId);
-                }
-                log.trace("Generated new session, id = {0}", sessionId.getId());
-                return sessionId;
+            if (SessionIdState.AUTHENTICATED == state) {
+                if (StringUtils.isBlank(p_userDn)) {
+            		return null;
+            	}
             }
+
+            final SessionId sessionId = new SessionId();
+            sessionId.setId(uuid);
+            sessionId.setDn(dn);
+            sessionId.setLastUsedAt(new Date());
+
+            if (StringUtils.isNotBlank(p_userDn)) {
+            	sessionId.setUserDn(p_userDn);
+            }
+
+            if (authenticationDate != null) {
+                sessionId.setAuthenticationTime(authenticationDate);
+            }
+            
+        	if (state != null) {
+            	sessionId.setState(state);
+            }
+
+        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+            if (SessionIdState.AUTHENTICATED == state) {
+	            FacesContext facesContext = FacesContext.getCurrentInstance();
+	            if (facesContext != null) {
+	                Cookie cookie = new Cookie("opbs", uuid);
+	                cookie.setMaxAge(unusedLifetime);
+	                ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
+	            }
+            }
+
+            boolean persisted = false;
+            if (persist) {
+            	persisted = persistSessionId(sessionId, prompts);
+            }
+
+            log.trace("Generated new session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
+            return sessionId;
+    }
+
+	public boolean persistSessionId(final SessionId sessionId, List<Prompt> prompts) {
+        try {
+        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+			if (unusedLifetime > 0 && isPersisted(prompts)) {
+			    ldapEntryManager.persist(sessionId);
+		        return true;
+			}
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return null;
-    }
+
+        return false;
+	}
 
     private static boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
@@ -204,7 +251,7 @@ public class SessionIdService {
     }
 
     public SessionId generateSessionId(String p_userDn, List<Prompt> prompts) {
-        return generateSessionId(p_userDn, null, prompts);
+        return generateSessionId(p_userDn, null, SessionIdState.AUTHENTICATED, prompts);
     }
 
     private static String dn(String p_id) {
