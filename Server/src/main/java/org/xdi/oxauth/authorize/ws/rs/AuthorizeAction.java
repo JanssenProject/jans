@@ -201,9 +201,13 @@ public class AuthorizeAction {
                 }
 
                 this.authMode = customScriptConfiguration.getName();
+                this.authLevel = Integer.toString(customScriptConfiguration.getLevel());
 
                 SessionIdAttribute sessionIdAttributeAuthMode = new SessionIdAttribute("auth_mode", this.authMode);
                 sessionIdAttributes.add(sessionIdAttributeAuthMode);
+
+                SessionIdAttribute sessionIdAttributeAuthLevel = new SessionIdAttribute("auth_level", this.authLevel);
+                sessionIdAttributes.add(sessionIdAttributeAuthLevel);
 
                 SessionIdAttribute sessionIdAttributeAuthStep = new SessionIdAttribute("auth_step", Integer.toString(1));
                 sessionIdAttributes.add(sessionIdAttributeAuthStep);
@@ -227,7 +231,7 @@ public class AuthorizeAction {
             this.sessionId = unauthenticatedSession.getId();
             SessionIdService.instance().createSessionIdCookie(this.sessionId);
 
-            FacesManager.instance().redirect(redirectTo, redirectParameterMap, false);
+            FacesManager.instance().redirect(redirectTo, null, false);
             return;
         }
 

@@ -371,6 +371,24 @@ public class AuthenticationService {
         }
     }
 
+	public void configureSessionUser(SessionId sessionId) {
+        User user = credentials.getUser();
+        identity.addRole("user");
+
+        final List<Prompt> prompts = new ArrayList<Prompt>();
+
+        SessionId newSessionId;
+        if (sessionId == null) {
+	        newSessionId = sessionIdService.generateSessionId(user.getDn(), new Date(), SessionIdState.AUTHENTICATED, prompts);
+        } else {
+	        newSessionId = sessionIdService.authenticateSessionId(sessionId, user.getDn(), new Date(), prompts, true);
+        }
+
+        sessionIdService.updateSessionWithLastUsedDate(newSessionId, prompts);
+
+        Contexts.getEventContext().set("sessionUser", newSessionId);
+	}
+
     public SessionId configureEventUser(boolean interactive) {
         User user = credentials.getUser();
         if (user != null) {
@@ -419,7 +437,7 @@ public class AuthenticationService {
     }
 
     @Deprecated
-	public void storeRequestHeadersInSession(HttpServletRequest request) {
+	public void storeOriginRequestHeadersInSession(HttpServletRequest request) {
 		String originHeaders = request.getParameter(AuthorizeRequestParam.ORIGIN_HEADERS);
 		if (StringHelper.isEmpty(originHeaders)) {
 			return;
@@ -441,7 +459,19 @@ public class AuthenticationService {
 		sessionContext.set(STORED_ORIGIN_PARAMETERS, attributes);
 	}
 
-	public String getRequestHeadersFromSession() {
+    @SuppressWarnings("unchecked")
+	public List<SessionIdAttribute> getRequestHeadersFromSession() {
+		Context sessionContext = Contexts.getSessionContext();
+		
+		if (sessionContext.isSet(STORED_ORIGIN_HEADERS)) {
+			return (List<SessionIdAttribute>) sessionContext.get(STORED_ORIGIN_HEADERS);
+		}
+		
+		return null;
+	}
+
+    @Deprecated
+	public String getOriginRequestHeadersFromSession() {
 		Context sessionContext = Contexts.getSessionContext();
 		
 		if (sessionContext.isSet(STORED_ORIGIN_HEADERS)) {
@@ -451,42 +481,20 @@ public class AuthenticationService {
 		return null;
 	}
 
-    @Observer(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL)
-    public void onSuccessfulLogin(String authMode, boolean interactive, Map<String, String> requestParameterMap) {
-        onSuccessfulLoginImpl(authMode, interactive, requestParameterMap);
-    }
-
-    @Observer(Identity.EVENT_LOGIN_SUCCESSFUL)
+    @Observer(value = { Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL })
     public void onSuccessfulLogin() {
-        onSuccessfulLoginImpl(null, false, null);
-    }
-
-    public void onSuccessfulLoginImpl(String authMode, boolean interactive, Map<String, String> requestParameterMap) {
         log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
 
-        final List<Prompt> prompts = new ArrayList<Prompt>();
-        if (!interactive) {
-            prompts.add(Prompt.NONE);
+        if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
+        	return;
         }
 
-        User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
-                userService.getUserByDn(sessionUser.getUserDn()) : null;
-        if (sessionUser != null) {
-            sessionUser.setAuthenticationTime(new Date());
-        }
-        sessionIdService.updateSessionWithLastUsedDate(sessionUser, prompts);
+        User user = userService.getUserByDn(sessionUser.getUserDn());
 
         log.info("Attempting to redirect user. User: {0}", user);
 
         if (user != null) {
-            final Map<String, Object> map;
-            if (requestParameterMap == null) {
-                map = parametersForRedirect(user);
-            } else {
-                map = parametersForRedirect(user, requestParameterMap);
-            }
-
-            addAuthModeParameters(map, authMode);
+            final Map<String, Object> map = parametersForRedirect(sessionUser);
 
             log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, map);
             FacesManager.instance().redirect("/authorize.xhtml", map, false);
@@ -519,6 +527,18 @@ public class AuthenticationService {
 
             result.put("session_id", sessionUser.getId());
         }
+
+        return result;
+    }
+
+    private Map<String, Object> parametersForRedirect(final SessionId sessionId) {
+        final Map<String, Object> result = new HashMap<String, Object>();
+        
+        for (SessionIdAttribute sessionIdAttribute : sessionId.getSessionIdAttributes()) {
+        	result.put(sessionIdAttribute.getName(), sessionIdAttribute.getValue());
+        }
+
+        result.put("session_id", sessionUser.getId());
 
         return result;
     }

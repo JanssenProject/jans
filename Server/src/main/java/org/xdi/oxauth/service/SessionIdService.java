@@ -195,7 +195,6 @@ public class SessionIdService {
             final SessionId sessionId = new SessionId();
             sessionId.setId(uuid);
             sessionId.setDn(dn);
-            sessionId.setLastUsedAt(new Date());
 
             if (StringUtils.isNotBlank(p_userDn)) {
             	sessionId.setUserDn(p_userDn);
@@ -219,6 +218,8 @@ public class SessionIdService {
 	            }
             }
 
+            sessionId.setLastUsedAt(new Date());
+
             boolean persisted = false;
             if (persist) {
             	persisted = persistSessionId(sessionId, prompts);
@@ -228,11 +229,53 @@ public class SessionIdService {
             return sessionId;
     }
 
+    public SessionId authenticateSessionId(SessionId sessionId, String p_userDn, Date authenticationDate, List<Prompt> prompts, boolean persist) {
+       	sessionId.setUserDn(p_userDn);
+
+        if (authenticationDate != null) {
+            sessionId.setAuthenticationTime(authenticationDate);
+        }
+        
+       	sessionId.setState(SessionIdState.AUTHENTICATED);
+
+    	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if (facesContext != null) {
+            Cookie cookie = new Cookie("opbs", sessionId.getId());
+            cookie.setMaxAge(unusedLifetime);
+            ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
+        }
+
+        sessionId.setLastUsedAt(new Date());
+
+        boolean persisted = false;
+        if (persist) {
+        	persisted = updateSessionId(sessionId, prompts);
+        }
+
+        log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
+        return sessionId;
+}
+
 	public boolean persistSessionId(final SessionId sessionId, List<Prompt> prompts) {
         try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
 			    ldapEntryManager.persist(sessionId);
+		        return true;
+			}
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return false;
+	}
+
+	public boolean updateSessionId(final SessionId sessionId, List<Prompt> prompts) {
+        try {
+        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+			if (unusedLifetime > 0 && isPersisted(prompts)) {
+			    ldapEntryManager.merge(sessionId);
 		        return true;
 			}
         } catch (Exception e) {
