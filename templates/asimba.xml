@@ -180,7 +180,7 @@
 					
 								<nameidpolicy enabled="false" />
 								<metadata>
-									<file>/opt/idp/metadata/idp/%(inumOrgFN)s-idp-metadata.xml</file>
+									<file>/opt/idp/metadata/%(inumOrgFN)s-idp-metadata.xml</file>
 								</metadata>
 							</idp>
 						</idps>
@@ -313,21 +313,6 @@
 						</format>
 					</nameid>
 				</profile> <!-- sso/web -->
-
-				<!-- SAML Profiles configuration -->
-				<profile id="sp/sso/web"
-					class="com.alfaariss.oa.authentication.remote.saml2.profile.re.ResponseEndpoint">
-					<signing authnRequestsSigned="true" wantAssertionsSigned="true" />
-					<bindings default="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
-						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
-							<property name="path" value="/ui/profiles/saml2/http-post.jsp" />
-						</binding>
-						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact">
-							<property name="post" value="false" />
-							<property name="path" value="/ui/profiles/saml2/http-artifact-post.jsp" />
-						</binding>
-					</bindings>
-				</profile> <!-- sp/sso/web -->
 				
 				<profile id="sso/logout" class="com.alfaariss.oa.profile.saml2.profile.sso.SingleLogout">
                     
@@ -366,6 +351,21 @@
 						</format>
 					</nameid>
 				</profile> <!-- sso/logout -->
+
+				<!-- SAML Profiles configuration -->
+				<profile id="sp/sso/web"
+					class="com.alfaariss.oa.authentication.remote.saml2.profile.re.ResponseEndpoint">
+					<signing authnRequestsSigned="true" wantAssertionsSigned="true" />
+					<bindings default="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+							<property name="path" value="/ui/profiles/saml2/http-post.jsp" />
+						</binding>
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact">
+							<property name="post" value="false" />
+							<property name="path" value="/ui/profiles/saml2/http-artifact-post.jsp" />
+						</binding>
+					</bindings>
+				</profile> <!-- sp/sso/web -->
 				
 			</profiles>
 			
