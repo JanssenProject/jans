@@ -7,10 +7,7 @@
 package org.xdi.oxauth.model.common;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -20,7 +17,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
-import org.xdi.util.ArrayHelper;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -62,7 +58,7 @@ public class SessionId implements Serializable {
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
-    private SessionIdAttribute[] sessionIdAttributes;
+    private Map<String, String> sessionIdAttributes;
 
     public SessionId() {
     }
@@ -145,53 +141,13 @@ public class SessionId implements Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
-    public SessionIdAttribute[] getSessionIdAttributes() {
-        return sessionIdAttributes;
-    }
+    public Map<String, String> getSessionIdAttributes() {
+		return sessionIdAttributes;
+	}
 
-    public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
-        this.sessionIdAttributes = sessionIdAttributes;
-    }
-
-    public Map<String, String> attributes() {
-        Map<String, String> map = new HashMap<String, String>();
-        if (sessionIdAttributes != null) {
-            for (SessionIdAttribute attr : sessionIdAttributes) {
-                map.put(attr.getName(), attr.getValue());
-            }
-        }
-        return map;
-    }
-
-    public void overrideAttributes(Map<String, String> maps) {
-        if (maps != null && !maps.isEmpty()) {
-            List<SessionIdAttribute> attributes = new ArrayList<SessionIdAttribute>();
-            for (Map.Entry<String, String> entry : maps.entrySet()) {
-                attributes.add(new SessionIdAttribute(entry.getKey(), entry.getValue()));
-            }
-            setSessionIdAttributes(attributes.toArray(new SessionIdAttribute[attributes.size()]));
-        }
-    }
-
-    public void addAttribute(String name, String value) {
-        addAttribute(new SessionIdAttribute(name, value));
-    }
-
-    public void addAttribute(SessionIdAttribute attribute) {
-        addAttribute(new SessionIdAttribute[]{attribute});
-    }
-
-    public void addAttribute(SessionIdAttribute[] attributes) {
-        SessionIdAttribute[] sessionIdAttributes = getSessionIdAttributes();
-        SessionIdAttribute[] newSessionIdAttributes;
-        if (ArrayHelper.isEmpty(sessionIdAttributes)) {
-            newSessionIdAttributes = attributes;
-        } else {
-            newSessionIdAttributes = ArrayHelper.arrayMerge(sessionIdAttributes, attributes);
-        }
-
-        setSessionIdAttributes(newSessionIdAttributes);
-    }
+	public void setSessionIdAttributes(Map<String, String> sessionIdAttributes) {
+		this.sessionIdAttributes = sessionIdAttributes;
+	}
 
     @Override
     public boolean equals(Object o) {
@@ -211,12 +167,13 @@ public class SessionId implements Serializable {
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
-                .append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime)
-                .append(", permissionGranted=").append(permissionGranted).append("]");
-        return builder.toString();
-    }
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
+				.append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime).append(", state=")
+				.append(state).append(", permissionGranted=").append(permissionGranted).append(", permissionGrantedMap=")
+				.append(permissionGrantedMap).append(", sessionIdAttributes=").append(sessionIdAttributes).append("]");
+		return builder.toString();
+	}
 
 }

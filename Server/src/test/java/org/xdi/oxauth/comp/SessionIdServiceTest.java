@@ -15,7 +15,9 @@ import org.xdi.oxauth.service.SessionIdService;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -66,13 +68,17 @@ public class SessionIdServiceTest extends BaseComponentTest {
             Assert.assertEquals(newId.getState(), SessionIdState.UNAUTHENTICATED);
 
             newId.setState(SessionIdState.AUTHENTICATED);
-            newId.addAttribute("k1", "v1");
+            
+            Map<String, String> sessionAttributes = new HashMap<String, String>();
+            sessionAttributes.put("k1", "v1");
+            newId.setSessionIdAttributes(sessionAttributes);
+
             m_service.updateSession(newId);
 
             final SessionId fresh = m_service.getSessionByDN(newId.getDn());
             Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
-            Assert.assertTrue(fresh.attributes().containsKey("k1"));
-            Assert.assertTrue(fresh.attributes().containsValue("v1"));
+            Assert.assertTrue(fresh.getSessionIdAttributes().containsKey("k1"));
+            Assert.assertTrue(fresh.getSessionIdAttributes().containsValue("v1"));
         } finally {
             if (newId != null) {
                 getLdapManager().remove(newId);

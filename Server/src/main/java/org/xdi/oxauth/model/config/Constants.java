@@ -22,6 +22,7 @@ public final class Constants extends LDAPConstants {
 	public static final String RESULT_NO_PERMISSIONS = "no_permissions";
 	public static final String RESULT_VALIDATION_ERROR = "validation_error";
 	public static final String RESULT_LOGOUT = "logout";
+	public static final String RESULT_EXPIRED = "expired";
 
     public static final String EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL = "org.xdi.oxauth.security.loginSuccessful";
 }

@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -38,7 +37,6 @@ import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdAttribute;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -158,23 +156,9 @@ public class AuthorizeAction {
         final SessionId session = getSession();
         if ((session == null) || (session.getUserDn() == null) || (SessionIdState.AUTHENTICATED != session.getState())) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, Object> redirectParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
-
-            // Set updated authentication parameters
-            List<SessionIdAttribute> sessionIdAttributes = new ArrayList<SessionIdAttribute>();
-            for (Entry<String, Object> parameterEntry : redirectParameterMap.entrySet()) {
-            	String name = parameterEntry.getKey();
-            	Object value = parameterEntry.getValue();
-
-            	if (StringHelper.isEmptyString(value)) {
-            		continue;
-            	}
-
-            	SessionIdAttribute sessionIdAttribute = new SessionIdAttribute(name, (String) value);
-            	sessionIdAttributes.add(sessionIdAttribute);
-			}
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
@@ -203,14 +187,9 @@ public class AuthorizeAction {
                 this.authMode = customScriptConfiguration.getName();
                 this.authLevel = Integer.toString(customScriptConfiguration.getLevel());
 
-                SessionIdAttribute sessionIdAttributeAuthMode = new SessionIdAttribute("auth_mode", this.authMode);
-                sessionIdAttributes.add(sessionIdAttributeAuthMode);
-
-                SessionIdAttribute sessionIdAttributeAuthLevel = new SessionIdAttribute("auth_level", this.authLevel);
-                sessionIdAttributes.add(sessionIdAttributeAuthLevel);
-
-                SessionIdAttribute sessionIdAttributeAuthStep = new SessionIdAttribute("auth_step", Integer.toString(1));
-                sessionIdAttributes.add(sessionIdAttributeAuthStep);
+                requestParameterMap.put("auth_mode", this.authMode);
+                requestParameterMap.put("auth_level", this.authLevel);
+                requestParameterMap.put("auth_step", Integer.toString(1));
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
@@ -221,11 +200,11 @@ public class AuthorizeAction {
 
             // Create unauthenticated session
             SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, prompts, false);
-            unauthenticatedSession.setSessionIdAttributes(sessionIdAttributes.toArray(new SessionIdAttribute[0]));
+            unauthenticatedSession.setSessionIdAttributes(requestParameterMap);
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, prompts);
             if (!persisted) {
             	// If oxAuth session not allowed we have to store parameters in HTTP session
-                authenticationService.storeRequestHeadersInSession(sessionIdAttributes);
+            	sessionIdService.storeRequestHeadersInSession(requestParameterMap);
             }
 
             this.sessionId = unauthenticatedSession.getId();

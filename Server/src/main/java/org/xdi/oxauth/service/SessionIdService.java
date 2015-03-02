@@ -18,6 +18,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +55,8 @@ import java.util.concurrent.TimeUnit;
 public class SessionIdService {
 
     private static final String SESSION_ID_COOKIE_NAME = "session_id";
+
+    private static final String STORED_ORIGIN_PARAMETERS = "stored_origin_parameters";
 
     @Logger
     private Log log;
@@ -275,7 +279,9 @@ public class SessionIdService {
         try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
-			    ldapEntryManager.merge(sessionId);
+	            sessionId.setLastUsedAt(new Date());
+
+	            ldapEntryManager.merge(sessionId);
 		        return true;
 			}
         } catch (Exception e) {
@@ -425,6 +431,7 @@ public class SessionIdService {
 
 	public boolean updateSession(SessionId p_sessionId) {
 		try {
+			p_sessionId.setLastUsedAt(new Date());
 			ldapEntryManager.merge(p_sessionId);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -433,6 +440,41 @@ public class SessionIdService {
 		}
 
 		return true;
+	}
+
+    public SessionId getSessionId() {
+    	String sessionId = getSessionIdFromCookie();
+
+        if (StringHelper.isNotEmpty(sessionId)) {
+            return getSessionId(sessionId);
+        }
+        
+        return null;
+    }
+
+    public Map<String, String> getSessionAttributes(SessionId sessionId) {
+    	if (sessionId != null) {
+    		return sessionId.getSessionIdAttributes();
+    	}
+    	
+		return getRequestHeadersFromSession();
+    }
+
+    public void storeRequestHeadersInSession(Map<String, String> sessionIdAttributes) {
+        log.trace("Storing request attributes in session: '{0}'", sessionIdAttributes);
+		Context sessionContext = Contexts.getSessionContext();
+		sessionContext.set(STORED_ORIGIN_PARAMETERS, sessionIdAttributes);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, String> getRequestHeadersFromSession() {
+		Context sessionContext = Contexts.getSessionContext();
+		
+		if (sessionContext.isSet(STORED_ORIGIN_PARAMETERS)) {
+			return (Map<String, String>) sessionContext.get(STORED_ORIGIN_PARAMETERS);
+		}
+		
+		return null;
 	}
 
 }
