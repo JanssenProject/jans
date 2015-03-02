@@ -108,10 +108,6 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Duo authenticate for step 2"
 
-            passed_step1 = self.isPassedStep1
-            if (not passed_step1):
-                return False
-
             sig_response_array = requestParameters.get("sig_response")
             if ArrayHelper.isEmpty(sig_response_array):
                 print "Duo authenticate for step 2. sig_response is empty"
@@ -149,10 +145,6 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Duo prepare for step 2"
 
-            passed_step1 = self.isPassedStep1
-            if (not passed_step1):
-                return False
-
             duo_sig_request = duo_web.sign_request(self.ikey, self.skey, self.akey, user_name)
             print "Duo prepare for step 2. duo_sig_request: " + duo_sig_request
             
@@ -178,18 +170,11 @@ class PersonAuthentication(PersonAuthenticationType):
             return "/auth/duo/duologin.xhtml"
         return ""
 
-    def isPassedStep1():
-        credentials = Identity.instance().getCredentials()
-        user_name = credentials.getUsername()
-        passed_step1 = StringHelper.isNotEmptyString(user_name)
-
-        return passed_step1
-
     def logout(self, configurationAttributes, requestParameters):
         return True
 
     def getApiVersion(self):
-        return 3
+        return 1
 
     def isUserMemberOfGroup(self, user, attribute, group):
         is_member = False
