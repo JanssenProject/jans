@@ -8,8 +8,6 @@ package org.xdi.oxauth.auth;
 
 import java.io.Serializable;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +33,6 @@ import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.SimplePrincipal;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
@@ -202,10 +199,14 @@ public class Authenticator implements Serializable {
 
 	private boolean userAuthenticationInteractive() {
     	SessionId sessionId = sessionIdService.getSessionId();
+    	Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
+    	if (sessionIdAttributes == null) {
+            log.error("Failed to get session attributes");
+    		authenticationFailedSessionInvalid();
+            return false;
+        }
 
     	if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
-        	Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
-
         	initCustomAuthenticatorVariables(sessionIdAttributes);
         	if ((this.authStep == null) || StringHelper.isEmpty(this.authMode)) {
                 log.error("Failed to determine authentication mode");
@@ -254,13 +255,12 @@ public class Authenticator implements Serializable {
 		        sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
 
 		        if (sessionId != null) {
-		        	sessionId.setSessionIdAttributes(sessionIdAttributes);
-		        	boolean updateResult = sessionIdService.updateSession(sessionId);
+		        	sessionId.setSessionAttributes(sessionIdAttributes);
+		        	boolean updateResult = sessionIdService.updateSessionId(sessionId);
 		        	if (!updateResult) {
 						log.debug("Failed to update session entry: '{0}'", sessionId.getId());
 						return false;
 		        	}
-		        	sessionIdService.updateSession(sessionId);
 		        }
 
 		        log.trace("Redirect to page: '{0}'", redirectTo);
@@ -269,7 +269,7 @@ public class Authenticator implements Serializable {
 		    }
 
 		    if (this.authStep == countAuthenticationSteps) {
-		        authenticationService.configureSessionUser(sessionId);
+		        authenticationService.configureSessionUser(sessionId, null);
 
 		        Principal principal = new SimplePrincipal(credentials.getUsername());
 		        identity.acceptExternallyAuthenticatedPrincipal(principal);
@@ -288,7 +288,7 @@ public class Authenticator implements Serializable {
 		    if (StringHelper.isNotEmpty(credentials.getUsername())) {
 		        boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
 		        if (authenticated) {
-		            authenticationService.configureSessionUser(sessionId);
+		            authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
 			        // Redirect to authorization workflow
 		            if (Events.exists()) {
@@ -321,7 +321,7 @@ public class Authenticator implements Serializable {
 
 		        if (result) {
 		            authenticateExternallyWebService(credentials.getUsername());
-		            authenticationService.configureEventUser(false);
+		            authenticationService.configureEventUser();
 
 		            log.info("Authentication success for User: '{0}'", credentials.getUsername());
 		            return true;
@@ -333,7 +333,7 @@ public class Authenticator implements Serializable {
 		    boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
 		    if (authenticated) {
 		        authenticateExternallyWebService(credentials.getUsername());
-		        authenticationService.configureEventUser(false);
+		        authenticationService.configureEventUser();
 
 		        log.info("Authentication success for User: '{0}'", credentials.getUsername());
 		        return true;
@@ -396,8 +396,8 @@ public class Authenticator implements Serializable {
 				sessionIdAttributes.put("auth_mode", determinedAuthMode);
 
 		        if (sessionId != null) {
-		        	sessionId.setSessionIdAttributes(sessionIdAttributes);
-		        	boolean updateResult = sessionIdService.updateSession(sessionId);
+		        	sessionId.setSessionAttributes(sessionIdAttributes);
+		        	boolean updateResult = sessionIdService.updateSessionId(sessionId);
 		        	if (!updateResult) {
 						log.debug("Failed to update session entry: '{0}'", sessionId.getId());
 						return Constants.RESULT_EXPIRED;
@@ -440,7 +440,7 @@ public class Authenticator implements Serializable {
                     final User user = authenticationService.getUserOrRemoveSession(sessionId);
                     if (user != null) {
                         authenticateExternallyWebService(user.getUserId());
-                        authenticationService.configureEventUser(sessionId, new ArrayList<Prompt>(Arrays.asList(Prompt.NONE)));
+                        authenticationService.configureEventUser(sessionId);
 
                         return true;
                     }

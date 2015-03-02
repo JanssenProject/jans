@@ -58,7 +58,7 @@ public class SessionId implements Serializable {
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
-    private Map<String, String> sessionIdAttributes;
+    private Map<String, String> sessionAttributes;
 
     public SessionId() {
     }
@@ -141,12 +141,12 @@ public class SessionId implements Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
-    public Map<String, String> getSessionIdAttributes() {
-		return sessionIdAttributes;
+    public Map<String, String> getSessionAttributes() {
+		return sessionAttributes;
 	}
 
-	public void setSessionIdAttributes(Map<String, String> sessionIdAttributes) {
-		this.sessionIdAttributes = sessionIdAttributes;
+	public void setSessionAttributes(Map<String, String> sessionAttributes) {
+		this.sessionAttributes = sessionAttributes;
 	}
 
     @Override
@@ -172,7 +172,7 @@ public class SessionId implements Serializable {
 		builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
 				.append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime).append(", state=")
 				.append(state).append(", permissionGranted=").append(permissionGranted).append(", permissionGrantedMap=")
-				.append(permissionGrantedMap).append(", sessionIdAttributes=").append(sessionIdAttributes).append("]");
+				.append(permissionGrantedMap).append(", sessionAttributes=").append(sessionAttributes).append("]");
 		return builder.toString();
 	}
 

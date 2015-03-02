@@ -111,7 +111,7 @@ public class Configuration {
 
     private String applianceInum;
     private int sessionIdUnusedLifetime;
-    private int sessionIdUnauthenticatedUnusedLifetime = 60; // 60 seconds
+    private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private int configurationUpdateInterval;

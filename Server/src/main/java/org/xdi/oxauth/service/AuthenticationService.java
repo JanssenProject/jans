@@ -44,7 +44,6 @@ import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -70,8 +69,6 @@ public class AuthenticationService {
             "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
             "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_id", "request", "request_uri",
             AuthorizeRequestParam.ORIGIN_HEADERS));
-
-    private static final String STORED_REQUEST_PARAMETERS = "stored_request_parameters";
 
 	@Logger
     private Log log;
@@ -298,136 +295,42 @@ public class AuthenticationService {
 		    log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
 		}
 	}
-
-    // Review
-    public String parametersAsString() throws UnsupportedEncodingException {
-        final Map<String, String> parameterMap = getParametersMap(null);
-
-        return parametersAsString(parameterMap);
-    }
-
-    // Review
-    public String parametersAsString(final Map<String, String> parameterMap) throws UnsupportedEncodingException {
-        final StringBuilder sb = new StringBuilder();
-        final Set<Entry<String, String>> set = parameterMap.entrySet();
-        for (Map.Entry<String, String> entry : set) {
-            final String value = (String) entry.getValue();
-            if (StringUtils.isNotBlank(value)) {
-                sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, Util.UTF8_STRING_ENCODING)).append("&");
-            }
-        }
-
-        String result = sb.toString();
-        if (result.endsWith("&")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
-    }
-
-    // Review
-    public Map<String, String> getParametersMap(List<String> extraParameters) {
-        final Map<String, String> parameterMap = new HashMap<String, String>(FacesContext.getCurrentInstance().getExternalContext()
-                .getRequestParameterMap());
-
-        return getParametersMap(extraParameters, parameterMap);
-    }
-
-    // Review
-    public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
-		final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
-        allowedParameters.addAll(Arrays.asList("auth_mode", "auth_level", "auth_step"));
-
-        putInMap(parameterMap, "auth_mode");
-        putInMap(parameterMap, "auth_level");
-        putInMap(parameterMap, "auth_step");
-
-        if (extraParameters != null) {
-            for (String extraParameter : extraParameters) {
-                putInMap(parameterMap, extraParameter);
-            }
-
-            allowedParameters.addAll(extraParameters);
-        }
-
-        for (Iterator<Entry<String, String>> it = parameterMap.entrySet().iterator(); it.hasNext(); ) {
-            Entry<String, String> entry = it.next();
-            if (!allowedParameters.contains(entry.getKey())) {
-                it.remove();
-            }
-        }
-
-        return parameterMap;
-	}
-
-    // Review
-    private void putInMap(Map<String, String> map, String p_name) {
-        if (map == null) {
-            return;
-        }
-
-        String value = getParameterValue(p_name);
-
-        map.put(p_name, value);
-    }
-
-	public String getParameterValue(String p_name) {
-		final Object o = Contexts.getEventContext().get(p_name);
-        if (o instanceof String) {
-            final String s = (String) o;
-            return s;
-        } else if (o instanceof Boolean) {
-            final Boolean b = (Boolean) o;
-            return b.toString();
-        }
-        
-        return null;
-	}
-
-    // Review
-	public void configureSessionUser(SessionId sessionId) {
+	public void configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
         User user = credentials.getUser();
-        final List<Prompt> prompts = new ArrayList<Prompt>();
 
         SessionId newSessionId;
         if (sessionId == null) {
-	        newSessionId = sessionIdService.generateSessionId(user.getDn(), new Date(), SessionIdState.AUTHENTICATED, prompts);
+	        newSessionId = sessionIdService.generateSessionId(user.getDn(), sessionIdAttributes);
         } else {
-	        newSessionId = sessionIdService.authenticateSessionId(sessionId, user.getDn(), new Date(), prompts, true);
+	        newSessionId = sessionIdService.setSessionIdAuthenticated(sessionId, user.getDn());
         }
 
-        configureEventUser(newSessionId, prompts);
+        configureEventUserContext(newSessionId);
 	}
 
-    // Review
-    public SessionId configureEventUser(boolean interactive) {
+    public SessionId configureEventUser() {
         User user = credentials.getUser();
-        if (user != null) {
-            return configureEventUser(user, interactive);
-        }
-        return null;
-    }
-
-    // Review
-    public SessionId configureEventUser(User user, boolean interactive) {
-        final List<Prompt> prompts = new ArrayList<Prompt>();
-        if (!interactive) {
-            prompts.add(Prompt.NONE);
+        if (user == null) {
+            return null;
         }
 
-        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), new Date(), SessionIdState.AUTHENTICATED, prompts);
+        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), Prompt.NONE.toString());
 
-        configureEventUser(sessionId, prompts);
+        configureEventUserContext(sessionId);
+
         return sessionId;
     }
 
-    // Review
-    public void configureEventUser(SessionId sessionId, List<Prompt> prompts) {
-        identity.addRole("user");
+    public void configureEventUser(SessionId sessionId) {
+        sessionIdService.updateSessionId(sessionId);
 
-        sessionIdService.updateSessionWithLastUsedDate(sessionId, prompts);
-
-        Contexts.getEventContext().set("sessionUser", sessionId);
+        configureEventUserContext(sessionId);
     }
+
+	private void configureEventUserContext(SessionId sessionId) {
+		identity.addRole("user");
+        Contexts.getEventContext().set("sessionUser", sessionId);
+	}
 
     public void configureSessionClient(Context context) {
         identity.addRole("client");
@@ -441,7 +344,8 @@ public class AuthenticationService {
         clientService.updatAccessTime(client, true);
     }
 
-    @Observer(value = { Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Observer(value = { Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL })
     public void onSuccessfulLogin() {
         log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
 
@@ -454,7 +358,7 @@ public class AuthenticationService {
         log.info("Attempting to redirect user. User: {0}", user);
 
         if (user != null) {
-            final Map<String, String> result = sessionUser.getSessionIdAttributes();
+            final Map<String, String> result = sessionUser.getSessionAttributes();
             Map<String, String> allowedParameters = getAllowedParameters(result);
 
             result.put("session_id", sessionUser.getId());
@@ -497,6 +401,81 @@ public class AuthenticationService {
         }
         return null;
     }
+
+    public String parametersAsString() throws UnsupportedEncodingException {
+        final Map<String, String> parameterMap = getParametersMap(null);
+
+        return parametersAsString(parameterMap);
+    }
+
+    public String parametersAsString(final Map<String, String> parameterMap) throws UnsupportedEncodingException {
+        final StringBuilder sb = new StringBuilder();
+        final Set<Entry<String, String>> set = parameterMap.entrySet();
+        for (Map.Entry<String, String> entry : set) {
+            final String value = (String) entry.getValue();
+            if (StringUtils.isNotBlank(value)) {
+                sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, Util.UTF8_STRING_ENCODING)).append("&");
+            }
+        }
+
+        String result = sb.toString();
+        if (result.endsWith("&")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
+    }
+
+    public Map<String, String> getParametersMap(List<String> extraParameters) {
+        final Map<String, String> parameterMap = new HashMap<String, String>(FacesContext.getCurrentInstance().getExternalContext()
+                .getRequestParameterMap());
+
+        return getParametersMap(extraParameters, parameterMap);
+    }
+
+    public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
+		final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
+
+        if (extraParameters != null) {
+            for (String extraParameter : extraParameters) {
+                putInMap(parameterMap, extraParameter);
+            }
+
+            allowedParameters.addAll(extraParameters);
+        }
+
+        for (Iterator<Entry<String, String>> it = parameterMap.entrySet().iterator(); it.hasNext(); ) {
+            Entry<String, String> entry = it.next();
+            if (!allowedParameters.contains(entry.getKey())) {
+                it.remove();
+            }
+        }
+
+        return parameterMap;
+	}
+
+    private void putInMap(Map<String, String> map, String p_name) {
+        if (map == null) {
+            return;
+        }
+
+        String value = getParameterValue(p_name);
+
+        map.put(p_name, value);
+    }
+
+	public String getParameterValue(String p_name) {
+		final Object o = Contexts.getEventContext().get(p_name);
+        if (o instanceof String) {
+            final String s = (String) o;
+            return s;
+        } else if (o instanceof Boolean) {
+            final Boolean b = (Boolean) o;
+            return b.toString();
+        }
+        
+        return null;
+	}
+
 
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);

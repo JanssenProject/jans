@@ -35,7 +35,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Override
     public void beforeClass() {
         m_service = SessionIdService.instance();
-        m_sessionId = m_service.generateSessionIdInteractive("dummyDn");
+        m_sessionId = m_service.generateSessionId("dummyDn");
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.HOUR, -1);
         m_sessionId.setLastUsedAt(c.getTime());
-        m_service.updateSession(m_sessionId);
+        m_service.updateSessionId(m_sessionId);
 
         // check identification
         final List<SessionId> outdatedSessions = m_service.getUnauthenticatedIdsOlderThan(60);
@@ -64,21 +64,21 @@ public class SessionIdServiceTest extends BaseComponentTest {
     public void statePersistence() {
         SessionId newId = null;
         try {
-            newId = m_service.generateSessionIdInteractive("dummyDn1");
+            newId = m_service.generateSessionId("dummyDn1");
             Assert.assertEquals(newId.getState(), SessionIdState.UNAUTHENTICATED);
 
             newId.setState(SessionIdState.AUTHENTICATED);
             
             Map<String, String> sessionAttributes = new HashMap<String, String>();
             sessionAttributes.put("k1", "v1");
-            newId.setSessionIdAttributes(sessionAttributes);
+            newId.setSessionAttributes(sessionAttributes);
 
-            m_service.updateSession(newId);
+            m_service.updateSessionId(newId);
 
             final SessionId fresh = m_service.getSessionByDN(newId.getDn());
             Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
-            Assert.assertTrue(fresh.getSessionIdAttributes().containsKey("k1"));
-            Assert.assertTrue(fresh.getSessionIdAttributes().containsValue("v1"));
+            Assert.assertTrue(fresh.getSessionAttributes().containsKey("k1"));
+            Assert.assertTrue(fresh.getSessionAttributes().containsValue("v1"));
         } finally {
             if (newId != null) {
                 getLdapManager().remove(newId);
@@ -94,7 +94,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         Assert.assertEquals(createdDate, fromLdap1.getLastUsedAt());
 
         sleepSeconds(1);
-        m_service.updateSessionWithLastUsedDate(m_sessionId);
+        m_service.updateSessionId(m_sessionId);
 
         final SessionId fromLdap2 = m_service.getSessionByDN(m_sessionId.getDn());
         System.out.println("Updated date = " + fromLdap2.getLastUsedAt());
@@ -113,7 +113,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         sleepSeconds(1);
         m_sessionId.setAuthenticationTime(new Date());
         m_sessionId.addPermission(clientId, true);
-        m_service.updateSessionWithLastUsedDate(m_sessionId);
+        m_service.updateSessionId(m_sessionId);
 
         final SessionId fromLdap2 = m_service.getSessionByDN(m_sessionId.getDn());
         assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));

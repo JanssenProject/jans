@@ -199,9 +199,9 @@ public class AuthorizeAction {
             }
 
             // Create unauthenticated session
-            SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, prompts, false);
-            unauthenticatedSession.setSessionIdAttributes(requestParameterMap);
-            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, prompts);
+            SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            unauthenticatedSession.setSessionAttributes(requestParameterMap);
+            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession);
             if (!persisted) {
             	// If oxAuth session not allowed we have to store parameters in HTTP session
             	sessionIdService.storeRequestHeadersInSession(requestParameterMap);
@@ -548,7 +548,7 @@ public class AuthorizeAction {
         try {
             SessionId session = getSession();
             session.addPermission(clientId, true);
-            sessionIdService.updateSessionWithLastUsedDate(session, Prompt.fromString(prompt, " "));
+            sessionIdService.updateSessionId(session);
 
             // OXAUTH-297 - set session_id cookie, secure=true
             SessionIdService.instance().createSessionIdCookie(sessionId);
