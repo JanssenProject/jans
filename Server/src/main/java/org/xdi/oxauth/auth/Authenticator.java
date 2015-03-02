@@ -391,9 +391,21 @@ public class Authenticator implements Serializable {
 					redirectTo = "/login.xhtml";
 				}
 
+				CustomScriptConfiguration determinedCustomScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(
+						AuthenticationScriptUsageType.INTERACTIVE, determinedAuthMode);
+				if (determinedCustomScriptConfiguration == null) {
+					log.error("Failed to get determined CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
+					return Constants.RESULT_FAILURE;
+				}
+
 				log.debug("Redirect to page: '{0}'. Force to use auth_mode: '{1}'", redirectTo, determinedAuthMode);
 
+				determinedAuthMode = determinedCustomScriptConfiguration.getName();
+				String determinedAuthLevel = Integer.toString(determinedCustomScriptConfiguration.getLevel());
+
 				sessionIdAttributes.put("auth_mode", determinedAuthMode);
+				sessionIdAttributes.put("auth_level", determinedAuthLevel);
+				sessionIdAttributes.put("auth_step", Integer.toString(1));
 
 		        if (sessionId != null) {
 		        	sessionId.setSessionAttributes(sessionIdAttributes);
