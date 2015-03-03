@@ -128,9 +128,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
         use_basic_auth = False
         if (saml_allow_basic_login):
-            basic_auth = requestParameters.get("basic_auth")
-            if (ArrayHelper.isNotEmpty(basic_auth)):
-                use_basic_auth = StringHelper.toBoolean(basic_auth[0], False)
+            # Detect if user used basic authnetication method
+            user_name = credentials.getUsername()
+            user_password = credentials.getPassword()
+            if (ArrayHelper.isNotEmpty(user_name) and ArrayHelper.isNotEmpty(user_password)):
+                use_basic_auth = True
 
         if ((step == 1) and saml_allow_basic_login and use_basic_auth):
             print "Saml authenticate for step 1. Basic authentication"
