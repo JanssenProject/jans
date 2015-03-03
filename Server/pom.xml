@@ -860,61 +860,6 @@
         </profile>
 
         <profile>
-            <id>phpbridge-enabled</id>
-            <activation>
-                <property>
-                    <name>phpbridge-enabled</name>
-                </property>
-            </activation>
-
-            <build>
-                <filters>
-                    <filter>${project.basedir}/integrations/phpbridge/config-enabled.properties</filter>
-                </filters>
-            </build>
-            <repositories>
-                <repository>
-                    <id>toopher-local</id>
-                    <url>file://${project.basedir}/integrations/phpbridge/repository</url>
-                </repository>
-            </repositories>
-            <dependencies>
-                <dependency>
-                    <groupId>php.java</groupId>
-                    <artifactId>PhpJavaBridge</artifactId>
-                    <version>6.2.1</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>php.java</groupId>
-                    <artifactId>PhpScript</artifactId>
-                    <version>6.2.1</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>php.java</groupId>
-                    <artifactId>PhpServlet</artifactId>
-                    <version>6.2.1</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>phpbridge-disabled</id>
-            <activation>
-                <property>
-                    <name>!phpbridge-enabled</name>
-                </property>
-            </activation>
-
-            <build>
-                <filters>
-                    <filter>${project.basedir}/integrations/phpbridge/config-disabled.properties</filter>
-                </filters>
-            </build>
-        </profile>
-
-        <profile>
             <id>saml</id>
             <activation>
                 <property>
