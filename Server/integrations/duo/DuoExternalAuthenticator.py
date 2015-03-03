@@ -174,7 +174,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 3
 
     def isUserMemberOfGroup(self, user, attribute, group):
         is_member = False

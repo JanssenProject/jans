@@ -223,6 +223,13 @@ public class Authenticator implements Serializable {
 		        return false;
 		    }
 
+		    // Check if all previous steps had passed
+	        boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
+	        if (!passedPreviousSteps) {
+		        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
+		        return false;
+	        }
+
 		    // Set in event context sessionAttributs to allow access them from external authenticator
 		    Context eventContext = Contexts.getEventContext();
 		    eventContext.set("sessionAttributes", sessionIdAttributes);
@@ -253,6 +260,9 @@ public class Authenticator implements Serializable {
 
 		        // Update auth_step
 		        sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
+
+		        // Mark step as passed
+		        markAuthStepAsPassed(sessionIdAttributes, this.authStep);
 
 		        if (sessionId != null) {
 		        	sessionId.setSessionAttributes(sessionIdAttributes);
@@ -422,10 +432,15 @@ public class Authenticator implements Serializable {
 			}
 		}
 
-		ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-		Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
-				extCtx.getRequestParameterValuesMap(), authStep);
+	    // Check if all previous steps had passed
+        boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
+        if (!passedPreviousSteps) {
+	        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
+	        return Constants.RESULT_FAILURE;
+        }
 
+        ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
+		Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
 		if ((result != null) && result) {
 			return Constants.RESULT_SUCCESS;
 		} else {
@@ -494,5 +509,30 @@ public class Authenticator implements Serializable {
             this.authMode = this.authAcr;
         }
     }
+
+	private void markAuthStepAsPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
+        String key = String.format("auth_step_passed_%d", authStep);
+        sessionIdAttributes.put(key, Boolean.TRUE.toString());
+	}
+
+	private boolean isAuthStepPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
+        String key = String.format("auth_step_passed_%d", authStep);
+        if (sessionIdAttributes.containsKey(key) && Boolean.parseBoolean(sessionIdAttributes.get(key))) {
+        	return true;
+        }
+        
+        return false;
+	}
+
+	private boolean isPassedPreviousAuthSteps(Map<String, String> sessionIdAttributes, Integer authStep) {
+		for (int i = 1; i < authStep; i++) {
+			boolean isAuthStepPassed = isAuthStepPassed(sessionIdAttributes, i);
+			if (!isAuthStepPassed) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 }
