@@ -779,7 +779,7 @@
             <id>phonefactor</id>
             <activation>
                 <property>
-                    <name>!phonefactor-disabled</name>
+                    <name>phonefactor-enabled</name>
                 </property>
             </activation>
             <properties>
