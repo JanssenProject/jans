@@ -244,7 +244,7 @@ public class AuthorizeAction {
                         permissionDenied();
                     } else if (FederationDataService.skipAuthorization(list)) {
                         log.trace("Skip authorization (permissions granted), client is in federation trust where skip is allowed, client: {1}", client.getDn());
-                        permissionGranted();
+                        permissionGranted(session);
                     }
                 }
 
@@ -252,7 +252,7 @@ public class AuthorizeAction {
                     // if trusted client = true, then skip authorization page and grant access directly
                     if (ConfigurationFactory.getConfiguration().getTrustedClientEnabled()) {
                         if (Boolean.parseBoolean(client.getTrustedClient()) && !prompts.contains(Prompt.CONSENT)) {
-                            permissionGranted();
+                            permissionGranted(session);
                         }
                     } else {
                         consentRequired();
@@ -271,7 +271,7 @@ public class AuthorizeAction {
     }
 
     private SessionId getSession() {
-        initSessionId();
+    	initSessionId();
         
         Context sessionContext = Contexts.getSessionContext();
         if (sessionContext.isSet("sessionUser")) {
@@ -554,9 +554,8 @@ public class AuthorizeAction {
         sessionId = p_sessionId;
     }
 
-    public void permissionGranted() {
+    public void permissionGranted(SessionId session) {
         try {
-            SessionId session = getSession();
             session.addPermission(clientId, true);
             sessionIdService.updateSessionId(session);
 
