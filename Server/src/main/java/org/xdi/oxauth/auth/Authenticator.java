@@ -276,7 +276,7 @@ public class Authenticator implements Serializable {
 		    }
 
 		    if (this.authStep == countAuthenticationSteps) {
-		        authenticationService.configureSessionUser(sessionId, null);
+		        authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
 		        Principal principal = new SimplePrincipal(credentials.getUsername());
 		        identity.acceptExternallyAuthenticatedPrincipal(principal);
