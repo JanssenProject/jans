@@ -430,6 +430,25 @@ public class SessionIdService {
 		return null;
 	}
 
+	public void storeSessionIdInSession(SessionId sessionId) {
+		if (!sessionId.isPersisted()) {
+			// If sessionId not persisted we need to store it in HTTP session
+			Contexts.getSessionContext().set("sessionUser", sessionId);
+		}
+	}
+
+	public SessionId getSessionIdFromSession() {
+        Context sessionContext = Contexts.getSessionContext();
+        if (sessionContext.isSet("sessionUser")) {
+        	SessionId sessionId =  (SessionId) sessionContext.get("sessionUser");
+            
+        	// User already authenticated. Return session object
+            return sessionId;
+        }
+        
+        return null;
+	}
+
 	private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {
 		List<Prompt> prompts;
 

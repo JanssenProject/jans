@@ -273,12 +273,10 @@ public class AuthorizeAction {
     private SessionId getSession() {
     	initSessionId();
         
-        Context sessionContext = Contexts.getSessionContext();
-        if (sessionContext.isSet("sessionUser")) {
-        	SessionId sessionId =  (SessionId) sessionContext.get("sessionUser");
-            
-        	// User already authenticated. Return session object
-            return sessionId;
+    	SessionId sessionIdFromSession = sessionIdService.getSessionIdFromSession();
+        if (sessionIdFromSession != null) {
+        	// User already authenticated. Return SessionId only
+            return sessionIdFromSession;
         }
 
         if (!identity.isLoggedIn()) {

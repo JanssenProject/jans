@@ -26,8 +26,6 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.intercept.BypassInterceptors;
 import org.jboss.seam.annotations.web.Filter;
-import org.jboss.seam.contexts.Context;
-import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.NotLoggedInException;
@@ -92,13 +90,14 @@ public class AuthenticationFilter extends AbstractFilter {
                             httpResponse.sendError(401, "Not authorized");
                         }
                     } else {
+                    	SessionIdService sessionIdService = SessionIdService.instance();
                         String sessionId = httpRequest.getParameter("session_id");
                         if (StringUtils.isBlank(sessionId)) {
                             // OXAUTH-297 : check whether session_id is present in cookie
-                            sessionId = SessionIdService.instance().getSessionIdFromCookie(httpRequest);
+                            sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
                         }
                         if (StringUtils.isNotBlank(sessionId)) {
-                            processSessionAuth(sessionId, httpRequest, httpResponse, filterChain);
+                            processSessionAuth(sessionId, sessionIdService, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);
                         }
@@ -112,13 +111,12 @@ public class AuthenticationFilter extends AbstractFilter {
         }.run();
     }
 
-    private void processSessionAuth(String p_sessionId, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
+    private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
     	boolean requireAuth;
 
-    	Context sessionContext = Contexts.getSessionContext();
-        if (sessionContext.isSet("sessionUser")) {
-        	SessionId sessionId = (SessionId) sessionContext.get("sessionUser");
-            requireAuth = !getAuthenticator().authenticateBySessionId(sessionId);
+    	SessionId sessionIdFromSession = sessionIdService.getSessionIdFromSession();
+        if (sessionIdFromSession != null) {
+            requireAuth = !getAuthenticator().authenticateBySessionId(sessionIdFromSession);
             log.trace("Process HTTP Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
         } else {
             requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);

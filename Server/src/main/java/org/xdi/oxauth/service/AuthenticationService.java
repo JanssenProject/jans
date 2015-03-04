@@ -308,10 +308,7 @@ public class AuthenticationService {
 
         configureEventUserContext(newSessionId);
 
-        if (!sessionId.isPersisted()) {
-			// If sessionId not persisted we need to store it in HTTP session
-			Contexts.getSessionContext().set("sessionUser", sessionId);
-		}
+        sessionIdService.storeSessionIdInSession(sessionId);
 	}
 
     public SessionId configureEventUser() {
