@@ -26,6 +26,8 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.web.RequestParameter;
+import org.jboss.seam.contexts.Context;
+import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.log.Log;
@@ -270,6 +272,14 @@ public class AuthorizeAction {
 
     private SessionId getSession() {
         initSessionId();
+        
+        Context sessionContext = Contexts.getSessionContext();
+        if (sessionContext.isSet("sessionUser")) {
+        	SessionId sessionId =  (SessionId) sessionContext.get("sessionUser");
+            
+        	// User already authenticated. Return session object
+            return sessionId;
+        }
 
         if (!identity.isLoggedIn()) {
             final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);

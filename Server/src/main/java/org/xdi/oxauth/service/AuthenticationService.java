@@ -330,7 +330,12 @@ public class AuthenticationService {
 
 	private void configureEventUserContext(SessionId sessionId) {
 		identity.addRole("user");
-        Contexts.getEventContext().set("sessionUser", sessionId);
+		
+		Contexts.getEventContext().set("sessionUser", sessionId);
+		if (!sessionId.isPersisted()) {
+			// If sessionId not persisted we need to store it in HTTP session
+			Contexts.getSessionContext().set("sessionUser", sessionId);
+		}
 	}
 
     public void configureSessionClient(Context context) {

@@ -263,6 +263,7 @@ public class SessionIdService {
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
 	            sessionId.setLastUsedAt(new Date());
 
+	            sessionId.setPersisted(true);
 	            ldapEntryManager.persist(sessionId);
 		        return true;
 			}
@@ -281,6 +282,7 @@ public class SessionIdService {
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
 	            sessionId.setLastUsedAt(new Date());
 
+	            sessionId.setPersisted(true);
 	            ldapEntryManager.merge(sessionId);
 			}
         } catch (Exception e) {
@@ -312,7 +314,7 @@ public class SessionIdService {
         try {
             return ldapEntryManager.find(SessionId.class, p_dn);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }

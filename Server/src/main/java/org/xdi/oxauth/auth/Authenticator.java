@@ -458,17 +458,7 @@ public class Authenticator implements Serializable {
         if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.getConfiguration().getSessionIdEnabled()) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
-                log.trace("authenticateBySessionId, sessionId = '{0}', session = '{1}', state= '{2}'", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
-                // IMPORTANT : authenticate by session id only if state of session is authenticated!
-                if (sessionId != null && (SessionIdState.AUTHENTICATED == sessionId.getState())) {
-                    final User user = authenticationService.getUserOrRemoveSession(sessionId);
-                    if (user != null) {
-                        authenticateExternallyWebService(user.getUserId());
-                        authenticationService.configureEventUser(sessionId);
-
-                        return true;
-                    }
-                }
+                return authenticateBySessionId(sessionId);
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);
             }
@@ -476,6 +466,28 @@ public class Authenticator implements Serializable {
 
         return false;
     }
+
+    public boolean authenticateBySessionId(SessionId sessionId) {
+		String p_sessionId = sessionId.getId();
+
+		log.trace("authenticateBySessionId, sessionId = '{0}', session = '{1}', state= '{2}'", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
+		// IMPORTANT : authenticate by session id only if state of session is authenticated!
+		if (sessionId != null && (SessionIdState.AUTHENTICATED == sessionId.getState())) {
+		    final User user = authenticationService.getUserOrRemoveSession(sessionId);
+		    if (user != null) {
+	            try {
+			        authenticateExternallyWebService(user.getUserId());
+			        authenticationService.configureEventUser(sessionId);
+	            } catch (Exception e) {
+	                log.trace(e.getMessage(), e);
+	            }
+
+		        return true;
+		    }
+		}
+		
+		return false;
+	}
 
     private void initCustomAuthenticatorVariables(Map<String, String> sessionIdAttributes) {
 		if (sessionIdAttributes == null) {

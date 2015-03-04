@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
+import javax.persistence.Transient;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -59,6 +61,9 @@ public class SessionId implements Serializable {
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
+    
+    @Transient
+    private transient boolean persisted;
 
     public SessionId() {
     }
@@ -149,7 +154,15 @@ public class SessionId implements Serializable {
 		this.sessionAttributes = sessionAttributes;
 	}
 
-    @Override
+    public boolean isPersisted() {
+		return persisted;
+	}
+
+	public void setPersisted(boolean persisted) {
+		this.persisted = persisted;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

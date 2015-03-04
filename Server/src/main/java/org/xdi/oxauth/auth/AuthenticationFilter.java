@@ -26,6 +26,8 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.intercept.BypassInterceptors;
 import org.jboss.seam.annotations.web.Filter;
+import org.jboss.seam.contexts.Context;
+import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.NotLoggedInException;
@@ -33,6 +35,7 @@ import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
@@ -110,8 +113,18 @@ public class AuthenticationFilter extends AbstractFilter {
     }
 
     private void processSessionAuth(String p_sessionId, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
-        boolean requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
-        log.trace("processSessionAuth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+    	boolean requireAuth;
+
+    	Context sessionContext = Contexts.getSessionContext();
+        if (sessionContext.isSet("sessionUser")) {
+        	SessionId sessionId = (SessionId) sessionContext.get("sessionUser");
+            requireAuth = !getAuthenticator().authenticateBySessionId(sessionId);
+            log.trace("Process HTTP Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+        } else {
+            requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
+            log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+        }
+
         if (!requireAuth) {
             try {
                 p_filterChain.doFilter(p_httpRequest, p_httpResponse);
