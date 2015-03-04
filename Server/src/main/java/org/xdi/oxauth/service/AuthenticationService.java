@@ -308,7 +308,7 @@ public class AuthenticationService {
 
         configureEventUserContext(newSessionId);
 
-        sessionIdService.storeSessionIdInSession(sessionId);
+        sessionIdService.storeSessionIdInSession(newSessionId);
 	}
 
     public SessionId configureEventUser() {
