@@ -27,6 +27,12 @@ public class AuthenticationCustomScript extends CustomScript {
 
 	public AuthenticationScriptUsageType getUsageType() {
 		AuthenticationScriptUsageType usageType = null;
+
+		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
+		if (moduleProperties == null) {
+			return usageType;
+		}
+
 		for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
 			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
 				usageType = AuthenticationScriptUsageType.getByValue(moduleProperty.getValue2());
