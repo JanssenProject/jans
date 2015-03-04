@@ -215,9 +215,7 @@ public class Authenticator implements Serializable {
             }
 
 		    ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-		            .getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authMode);
-
+		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authMode);
 		    if (customScriptConfiguration == null) {
 		        log.error("Failed to get CustomScriptConfiguration for auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
 		        return false;
@@ -234,9 +232,8 @@ public class Authenticator implements Serializable {
 		    Context eventContext = Contexts.getEventContext();
 		    eventContext.set("sessionAttributes", sessionIdAttributes);
 
-		    boolean result = externalAuthenticationService.executeExternalAuthenticate(
-		            customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
-		    log.info("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
+		    boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+		    log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
 		    if (!result) {
 		        return false;
 		    }

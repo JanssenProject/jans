@@ -35,15 +35,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if (not logged_in):
                 return False
-# Commented out becuase we do the same in AuthenticationService.authenticate method
-#
-#            user = userService.getUser(user_name)
-#            if (user == None):
-#                print "Basic authenticate for step 1. Failed to find user in local LDAP"
-#                return False
-#
-#            # Store user to allow use this module for web services 
-#            credentials.setUser(user);
 
             return True
         else:
@@ -69,4 +60,4 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 3
+        return 1

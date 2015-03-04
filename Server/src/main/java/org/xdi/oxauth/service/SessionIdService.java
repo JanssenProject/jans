@@ -55,7 +55,6 @@ import com.unboundid.util.StaticUtils;
 public class SessionIdService {
 
     private static final String SESSION_ID_COOKIE_NAME = "session_id";
-
     private static final String STORED_ORIGIN_PARAMETERS = "stored_origin_parameters";
 
     @Logger
@@ -117,17 +116,6 @@ public class SessionIdService {
         return "";
     }
 
-    @Deprecated
-    public String getSessionIdFromCookies(HttpServletRequest request) {
-    	String sessionId = getSessionIdFromOpbsCookie(request);
-    	
-    	if (StringHelper.isEmpty(sessionId)) {
-    		sessionId = getSessionIdFromCookie(request);
-    	}
-
-    	return sessionId;
-    }
-
     public void createSessionIdCookie(String sessionId) {
         try {
             final Object response = FacesContext.getCurrentInstance().getExternalContext().getResponse();
@@ -187,10 +175,7 @@ public class SessionIdService {
     }
 
     public SessionId generateSessionId(String userDn) {
-    	Map<String, String> sessionIdAttributes = new HashMap<String, String>();
-    	sessionIdAttributes.put("prompt", "");
-
-    	return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    	return generateSessionId(userDn, "");
     }
 
     public SessionId generateSessionId(String userDn, String prompt) {
@@ -238,8 +223,6 @@ public class SessionIdService {
         	
         	sessionId.setSessionAttributes(sessionIdAttributes);
 
-            sessionId.setLastUsedAt(new Date());
-
             boolean persisted = false;
             if (persist) {
             	persisted = persistSessionId(sessionId);
@@ -278,7 +261,9 @@ public class SessionIdService {
         try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
-			    ldapEntryManager.persist(sessionId);
+	            sessionId.setLastUsedAt(new Date());
+
+	            ldapEntryManager.persist(sessionId);
 		        return true;
 			}
         } catch (Exception e) {

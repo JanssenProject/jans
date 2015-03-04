@@ -295,6 +295,7 @@ public class AuthenticationService {
 		    log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
 		}
 	}
+
 	public void configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
         User user = credentials.getUser();
 
@@ -480,4 +481,5 @@ public class AuthenticationService {
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);
     }
+
 }

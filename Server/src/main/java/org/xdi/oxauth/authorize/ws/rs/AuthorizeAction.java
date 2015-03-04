@@ -149,12 +149,10 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
-        List<Prompt> prompts = Prompt.fromString(prompt, " ");
-
-        final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-
         final SessionId session = getSession();
+
         if ((session == null) || (session.getUserDn() == null) || (SessionIdState.AUTHENTICATED != session.getState())) {
+            final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
@@ -215,6 +213,8 @@ public class AuthorizeAction {
         }
 
         if (clientId != null && !clientId.isEmpty()) {
+            List<Prompt> prompts = Prompt.fromString(prompt, " ");
+
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
