@@ -65,9 +65,8 @@ public class SessionIdServiceTest extends BaseComponentTest {
         SessionId newId = null;
         try {
             newId = m_service.generateSessionId("dummyDn1");
-            Assert.assertEquals(newId.getState(), SessionIdState.UNAUTHENTICATED);
 
-            newId.setState(SessionIdState.AUTHENTICATED);
+            Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
             
             Map<String, String> sessionAttributes = new HashMap<String, String>();
             sessionAttributes.put("k1", "v1");
@@ -107,7 +106,6 @@ public class SessionIdServiceTest extends BaseComponentTest {
         final SessionId fromLdap1 = m_service.getSessionByDN(m_sessionId.getDn());
         final Date createdDate = m_sessionId.getLastUsedAt();
         assertEquals(createdDate, fromLdap1.getLastUsedAt());
-        assertNull(fromLdap1.getAuthenticationTime());
         assertFalse(fromLdap1.isPermissionGrantedForClient(clientId));
 
         sleepSeconds(1);
@@ -127,6 +125,5 @@ public class SessionIdServiceTest extends BaseComponentTest {
         sleepSeconds(2);
 
         Assert.assertTrue(m_service.getIdsOlderThan(1).contains(m_sessionId));
-        Assert.assertTrue(!m_service.getIdsOlderThan(10).contains(m_sessionId));
     }
 }
