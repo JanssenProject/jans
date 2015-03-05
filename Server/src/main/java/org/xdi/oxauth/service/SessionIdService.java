@@ -17,7 +17,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
@@ -32,7 +31,6 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -253,12 +251,16 @@ public class SessionIdService {
         }
 	}
 
-	public boolean persistSessionId(final SessionId sessionId) {
+    public boolean persistSessionId(final SessionId sessionId) {
+        return persistSessionId(sessionId, false);
+    }
+
+	public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
 		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-			if (unusedLifetime > 0 && isPersisted(prompts)) {
+			if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
 	            sessionId.setLastUsedAt(new Date());
 
 	            sessionId.setPersisted(true);
@@ -434,16 +436,8 @@ public class SessionIdService {
     }
 
 	private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {
-		List<Prompt> prompts;
-
-		if (sessionId.getSessionAttributes() != null) {
-			String promptParam = sessionId.getSessionAttributes().get("prompt");
-			prompts = Prompt.fromString(promptParam, " ");
-		} else {
-			prompts = new ArrayList<Prompt>();
-		}
-		
-		return prompts;
+    	String promptParam = sessionId.getSessionAttributes().get("prompt");
+		return Prompt.fromString(promptParam, " ");
 	}
 
 }

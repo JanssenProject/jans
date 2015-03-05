@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -26,8 +15,6 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.web.RequestParameter;
-import org.jboss.seam.contexts.Context;
-import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.log.Log;
@@ -48,16 +35,19 @@ import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserGroupService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
@@ -152,8 +142,9 @@ public class AuthorizeAction {
 
     public void checkPermissionGranted() {
         final SessionId session = getSession();
+        List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
-        if ((session == null) || (session.getUserDn() == null) || (SessionIdState.AUTHENTICATED != session.getState())) {
+        if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
             final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
@@ -201,20 +192,19 @@ public class AuthorizeAction {
             // Create unauthenticated session
             SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
-            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession);
+            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
             	log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
             }
 
             this.sessionId = unauthenticatedSession.getId();
-            SessionIdService.instance().createSessionIdCookie(this.sessionId);
+            sessionIdService.createSessionIdCookie(this.sessionId);
 
             FacesManager.instance().redirect(redirectTo, null, false);
             return;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
-            List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
             final Client client = clientService.getClient(clientId);
 
@@ -263,14 +253,13 @@ public class AuthorizeAction {
         }
     }
 
-    private void initSessionId() {
-        if (StringUtils.isBlank(this.sessionId)) {
-        	this.sessionId = sessionIdService.getSessionIdFromCookie();
-        }
-    }
-
     private SessionId getSession() {
-    	initSessionId();
+        if (StringUtils.isBlank(this.sessionId)) {
+            this.sessionId = sessionIdService.getSessionIdFromCookie();
+            if (StringUtils.isBlank(this.sessionId)) {
+                return null;
+            }
+        }
 
         if (!identity.isLoggedIn()) {
             final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
@@ -279,9 +268,9 @@ public class AuthorizeAction {
 
         SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
         if (ldapSessionId == null) {
-        	identity.logout();
+            identity.logout();
         }
-        
+
         return ldapSessionId;
     }
 

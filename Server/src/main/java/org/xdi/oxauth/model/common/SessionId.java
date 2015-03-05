@@ -6,12 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-
-import javax.persistence.Transient;
-
+import com.google.common.collect.Maps;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -19,6 +14,12 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
+
+import javax.annotation.Nonnull;
+import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -146,7 +147,11 @@ public class SessionId implements Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
+    @Nonnull
     public Map<String, String> getSessionAttributes() {
+        if (sessionAttributes == null) {
+            sessionAttributes = Maps.newHashMap();
+        }
 		return sessionAttributes;
 	}
 

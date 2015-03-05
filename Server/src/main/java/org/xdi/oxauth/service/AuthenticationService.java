@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.faces.context.FacesContext;
 
 import org.apache.commons.lang.StringUtils;
@@ -370,9 +371,9 @@ public class AuthenticationService {
         }
     }
 
-    public Map<String, String> getAllowedParameters(final Map<String, String> requestParameterMap) {
+    public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
 		final Map<String, String> result = new HashMap<String, String>();
-        if (requestParameterMap != null && !requestParameterMap.isEmpty()) {
+        if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
             for (Map.Entry<String, String> entry : set) {
                 if (ALLOWED_PARAMETER.contains(entry.getKey())) {
