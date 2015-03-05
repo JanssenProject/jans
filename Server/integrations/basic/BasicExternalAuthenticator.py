@@ -10,9 +10,17 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Basic initialization"
-        print "Basic initialized successfully"
+        print "Basic. Initialization"
+        print "Basic. Initialized successfully"
         return True   
+
+    def destroy(self, configurationAttributes):
+        print "Basic. Destroy"
+        print "Basic. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -22,7 +30,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "Basic authenticate for step 1"
+            print "Basic. Authenticate for step 1"
 
             credentials = Identity.instance().getCredentials()
             user_name = credentials.getUsername()
@@ -42,7 +50,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "Basic prepare for Step 1"
+            print "Basic. Prepare for Step 1"
             return True
         else:
             return False
@@ -58,6 +66,3 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 1

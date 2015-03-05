@@ -18,7 +18,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Basic (multi auth conf) initialization"
+        print "Basic (multi auth conf). Initialization"
 
         if (not configurationAttributes.containsKey("auth_configuration_file")):
             print "Basic (multi auth conf). The property auth_configuration_file is empty"
@@ -40,8 +40,27 @@ class PersonAuthentication(PersonAuthenticationType):
         
         self.ldapExtendedEntryManagers = ldapExtendedEntryManagers
 
-        print "Basic (multi auth conf) initialized successfully"
+        print "Basic (multi auth conf). Initialized successfully"
         return True     
+
+    def destroy(self, authConfiguration):
+        print "Basic (multi auth conf). Destroy"
+        
+        result = True
+        for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
+            ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
+            ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
+
+            destoryResult = ldapEntryManager.destroy()
+            result = result and destoryResult
+            print "Basic (multi auth conf). Destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + str(destoryResult) 
+
+        print "Basic (multi auth conf). Destroyed successfully"
+
+        return result
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -51,7 +70,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "Basic (multi auth conf) authenticate for step 1"
+            print "Basic (multi auth conf). Authenticate for step 1"
 
             credentials = Identity.instance().getCredentials()
             keyValue = credentials.getUsername()
@@ -66,7 +85,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     loginAttributes = ldapExtendedEntryManager["loginAttributes"]
                     localLoginAttributes = ldapExtendedEntryManager["localLoginAttributes"]
 
-                    print "Basic (multi auth conf) authenticate for step 1. Using configuration: " + ldapConfiguration.getConfigId()
+                    print "Basic (multi auth conf). Authenticate for step 1. Using configuration: " + ldapConfiguration.getConfigId()
 
                     idx = 0;
                     count = len(loginAttributes)
@@ -85,7 +104,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "Basic (multi auth conf) prepare for Step 1"
+            print "Basic (multi auth conf). Prepare for Step 1"
             return True
         else:
             return False
@@ -101,23 +120,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def destroy(self, authConfiguration):
-        print "Basic (multi auth conf) destroy"
-        
-        result = True
-        for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
-            ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
-            ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]
-
-            destoryResult = ldapEntryManager.destroy()
-            result = result and destoryResult
-            print "Basic (multi auth conf) destroyed: " + ldapConfiguration.getConfigId() + ". Result: " + str(destoryResult) 
-
-        return result
-
-    def getApiVersion(self):
-        return 4
 
     def loadAuthConfiguration(self, authConfigurationFile):
         authConfiguration = None
