@@ -416,7 +416,7 @@ public class Authenticator implements Serializable {
 
 		        if (sessionId != null) {
 		        	sessionId.setSessionAttributes(sessionIdAttributes);
-		        	boolean updateResult = sessionIdService.updateSessionId(sessionId);
+		        	boolean updateResult = sessionIdService.updateSessionId(sessionId, true, true);
 		        	if (!updateResult) {
 						log.debug("Failed to update session entry: '{0}'", sessionId.getId());
 						return Constants.RESULT_EXPIRED;
