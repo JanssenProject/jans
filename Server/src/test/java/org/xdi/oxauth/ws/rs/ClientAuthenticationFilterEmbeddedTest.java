@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -48,10 +27,22 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for the Client Authentication Filter (embedded)
  *
- * @author Javier Rojas Blum Date: 09.06.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 March 5, 2015
  */
 public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
@@ -120,24 +111,23 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     public void requestAccessTokenCustomClientAuth1(final String authorizePath,
                                                     final String userId, final String userSecret,
                                                     final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.CODE);
-                responseTypes.add(ResponseType.ID_TOKEN);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<ResponseType> responseTypes = Arrays.asList(
+                        ResponseType.CODE,
+                        ResponseType.ID_TOKEN);
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, customAttrValue1, scopes, redirectUri, null);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -164,6 +154,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                     assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                     assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
                     assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -177,25 +168,24 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     public void requestAccessTokenCustomClientAuth2(final String authorizePath,
                                                     final String userId, final String userSecret,
                                                     final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.TOKEN);
-                responseTypes.add(ResponseType.ID_TOKEN);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<ResponseType> responseTypes = Arrays.asList(
+                        ResponseType.TOKEN,
+                        ResponseType.ID_TOKEN);
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, customAttrValue1, scopes, redirectUri, nonce);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -220,13 +210,14 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        assertNotNull(params.get("access_token"), "The access_token is null");
-                        assertNotNull(params.get("id_token"), "The id_token is null");
-                        assertNotNull(params.get("state"), "The state is null");
-                        assertNotNull(params.get("token_type"), "The token type is null");
-                        assertNotNull(params.get("expires_in"), "The expires_in value is null");
-                        assertNotNull(params.get("scope"), "The scope must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access_token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id_token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires_in value is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
                         assertNull(params.get("refresh_token"), "The refresh_token must be null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -263,10 +254,10 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {

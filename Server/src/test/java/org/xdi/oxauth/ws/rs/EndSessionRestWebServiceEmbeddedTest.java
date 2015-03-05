@@ -17,6 +17,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -26,7 +27,10 @@ import org.xdi.oxauth.model.util.StringUtils;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
@@ -35,7 +39,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
  * Test cases for the end session web service (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 28, 2015
+ * @version 0.9 March 5, 2015
  */
 public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -96,6 +100,9 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestEndSessionStep1")
     public void requestEndSessionStep2(final String authorizePath, final String userId, final String userSecret,
                                        final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.GET, authorizePath) {
 
@@ -103,19 +110,15 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.TOKEN);
-                responseTypes.add(ResponseType.ID_TOKEN);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<ResponseType> responseTypes = Arrays.asList(
+                        ResponseType.TOKEN,
+                        ResponseType.ID_TOKEN);
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -140,14 +143,15 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        assertNotNull(params.get("access_token"), "The access token is null");
-                        assertNotNull(params.get("state"), "The state is null");
-                        assertNotNull(params.get("token_type"), "The token type is null");
-                        assertNotNull(params.get("expires_in"), "The expires in value is null");
-                        assertNotNull(params.get("scope"), "The scope must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
                         assertNull(params.get("refresh_token"), "The refresh_token must be null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                        idToken = params.get("id_token");
+                        idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");

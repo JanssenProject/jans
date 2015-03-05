@@ -6,22 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -36,17 +20,24 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
+/**
+ * @author Javier Rojas Blum
+ * @version 0.9 March 5, 2015
+ */
 public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
-    private String clientId1;
     private String registrationAccessToken1;
     private String registrationClientUri1;
 
-    private String clientId2;
     private String registrationAccessToken2;
     private String registrationClientUri2;
 
-    private String clientId3;
     private String registrationAccessToken3;
     private String registrationClientUri3;
 
@@ -93,7 +84,6 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                    clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     registrationAccessToken1 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                     registrationClientUri1 = jsonObj.getString(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString());
                 } catch (JSONException e) {
@@ -200,7 +190,6 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                    clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     registrationAccessToken2 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                     registrationClientUri2 = jsonObj.getString(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString());
                 } catch (JSONException e) {
@@ -405,7 +394,6 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                    clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     registrationAccessToken3 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                     registrationClientUri3 = jsonObj.getString(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString());
                 } catch (JSONException e) {

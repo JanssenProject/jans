@@ -81,6 +81,7 @@
     </userinfo-encryption-enc-values-supported>
 
     <id-token-signing-alg-values-supported>
+        <id-token-signing-alg>none</id-token-signing-alg>
         <id-token-signing-alg>HS256</id-token-signing-alg>
         <id-token-signing-alg>HS384</id-token-signing-alg>
         <id-token-signing-alg>HS512</id-token-signing-alg>
@@ -162,7 +163,7 @@
 
     <display-values-supported>
         <display-value>page</display-value>
-        <!--display-value>popup</display-value-->
+        <display-value>popup</display-value>
         <!--display-value>touch</display-value-->
         <!--display-value>wap</display-value-->
     </display-values-supported>
