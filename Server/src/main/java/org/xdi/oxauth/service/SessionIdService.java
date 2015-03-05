@@ -324,8 +324,14 @@ public class SessionIdService {
             return null;
         }
 
+        String dn = dn(sessionId);
+        boolean contains = containsSessionId(dn);
+    	if (!contains) {
+    		return null;
+    	}
+
         try {
-        	final SessionId entity = getSessionByDN(dn(sessionId));
+        	final SessionId entity = getSessionByDN(dn);
             log.trace("Try to get session by id: {0} ...", sessionId);
             if (entity != null) {
                 log.trace("Session dn: {0}", entity.getDn());
@@ -340,6 +346,16 @@ public class SessionIdService {
 
         log.trace("Failed to get session by id: {0}", sessionId);
         return null;
+    }
+
+    public boolean containsSessionId(String dn) {
+        try {
+            return ldapEntryManager.contains(SessionId.class, dn);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
+
+        return false;
     }
 
     private static String getBaseDn() {
@@ -424,6 +440,7 @@ public class SessionIdService {
 		Context sessionContext = Contexts.getSessionContext();
 		
 		if (sessionContext.isSet(STORED_ORIGIN_PARAMETERS)) {
+			//TODO: Instead of storing sessions attributes we need to store sesionId object
 			return (Map<String, String>) sessionContext.get(STORED_ORIGIN_PARAMETERS);
 		}
 		
