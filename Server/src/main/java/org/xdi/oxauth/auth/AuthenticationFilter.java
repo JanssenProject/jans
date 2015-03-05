@@ -114,14 +114,8 @@ public class AuthenticationFilter extends AbstractFilter {
     private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
     	boolean requireAuth;
 
-    	SessionId sessionIdFromSession = sessionIdService.getSessionIdFromSession();
-        if (sessionIdFromSession != null) {
-            requireAuth = !getAuthenticator().authenticateBySessionId(sessionIdFromSession);
-            log.trace("Process HTTP Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
-        } else {
-            requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
-            log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
-        }
+        requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
+        log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
 
         if (!requireAuth) {
             try {

@@ -169,7 +169,7 @@ public class SessionIdService {
     		return sessionId.getSessionAttributes();
     	}
     	
-		return getRequestHeadersFromSession();
+		return null;
     }
 
     public SessionId generateAuthenticatedSessionId(String userDn) {
@@ -432,43 +432,6 @@ public class SessionIdService {
 
         return true;
     }
-
-    public void storeRequestHeadersInSession(Map<String, String> sessionIdAttributes) {
-        log.trace("Storing request attributes in session: '{0}'", sessionIdAttributes);
-		Context sessionContext = Contexts.getSessionContext();
-		sessionContext.set(STORED_ORIGIN_PARAMETERS, sessionIdAttributes);
-	}
-
-	@SuppressWarnings("unchecked")
-	public Map<String, String> getRequestHeadersFromSession() {
-		Context sessionContext = Contexts.getSessionContext();
-		
-		if (sessionContext.isSet(STORED_ORIGIN_PARAMETERS)) {
-			//TODO: Instead of storing sessions attributes we need to store sesionId object
-			return (Map<String, String>) sessionContext.get(STORED_ORIGIN_PARAMETERS);
-		}
-		
-		return null;
-	}
-
-	public void storeSessionIdInSession(SessionId sessionId) {
-		if (!sessionId.isPersisted()) {
-			// If sessionId not persisted we need to store it in HTTP session
-			Contexts.getSessionContext().set("sessionUser", sessionId);
-		}
-	}
-
-	public SessionId getSessionIdFromSession() {
-        Context sessionContext = Contexts.getSessionContext();
-        if (sessionContext.isSet("sessionUser")) {
-        	SessionId sessionId =  (SessionId) sessionContext.get("sessionUser");
-            
-        	// User already authenticated. Return session object
-            return sessionId;
-        }
-        
-        return null;
-	}
 
 	private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {
 		List<Prompt> prompts;

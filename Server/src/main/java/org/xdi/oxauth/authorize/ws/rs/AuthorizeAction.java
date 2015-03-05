@@ -202,9 +202,8 @@ public class AuthorizeAction {
             SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession);
-            if (!persisted) {
-            	// If oxAuth session not allowed we have to store parameters in HTTP session
-            	sessionIdService.storeRequestHeadersInSession(requestParameterMap);
+            if (persisted && log.isTraceEnabled()) {
+            	log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
             }
 
             this.sessionId = unauthenticatedSession.getId();
@@ -272,12 +271,6 @@ public class AuthorizeAction {
 
     private SessionId getSession() {
     	initSessionId();
-        
-    	SessionId sessionIdFromSession = sessionIdService.getSessionIdFromSession();
-        if (sessionIdFromSession != null) {
-        	// User already authenticated. Return SessionId only
-            return sessionIdFromSession;
-        }
 
         if (!identity.isLoggedIn()) {
             final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
