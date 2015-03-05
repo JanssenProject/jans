@@ -35,7 +35,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Override
     public void beforeClass() {
         m_service = SessionIdService.instance();
-        m_sessionId = m_service.generateSessionId("dummyDn");
+        m_sessionId = m_service.generateSessionId("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         Calendar c = Calendar.getInstance();
         c.add(Calendar.HOUR, -1);
         m_sessionId.setLastUsedAt(c.getTime());
-        m_service.updateSessionId(m_sessionId);
+        m_service.updateSessionId(m_sessionId, false);
 
         // check identification
         final List<SessionId> outdatedSessions = m_service.getUnauthenticatedIdsOlderThan(60);

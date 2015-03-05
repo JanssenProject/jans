@@ -6,20 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
@@ -40,8 +28,18 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -274,13 +272,19 @@ public class SessionIdService {
         return false;
 	}
 
-	public boolean updateSessionId(final SessionId sessionId) {
+    public boolean updateSessionId(final SessionId sessionId) {
+        return updateSessionId(sessionId, true);
+    }
+
+	public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
 		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
 		try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
 			if (unusedLifetime > 0 && isPersisted(prompts)) {
-	            sessionId.setLastUsedAt(new Date());
+                if (updateLastUsedAt) {
+	                sessionId.setLastUsedAt(new Date());
+                }
 
 	            sessionId.setPersisted(true);
 	            ldapEntryManager.merge(sessionId);
