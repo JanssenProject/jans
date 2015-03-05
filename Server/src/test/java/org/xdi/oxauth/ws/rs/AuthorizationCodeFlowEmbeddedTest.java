@@ -564,6 +564,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
+                authorizationRequest.setState(state);
 
                 request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
                 request.addHeader("Accept", MediaType.TEXT_PLAIN);
@@ -800,6 +801,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
+                authorizationRequest.setState(state);
 
                 request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
                 request.addHeader("Accept", MediaType.TEXT_PLAIN);
