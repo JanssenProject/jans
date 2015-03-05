@@ -317,7 +317,7 @@ public class AuthenticationService {
             return null;
         }
 
-        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), Prompt.NONE.toString());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
 
         configureEventUserContext(sessionId);
 
