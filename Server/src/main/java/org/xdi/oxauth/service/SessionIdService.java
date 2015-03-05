@@ -425,10 +425,10 @@ public class SessionIdService {
         final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
-        if (timeSinceLastAccess > sessionInterval) {
+        if (timeSinceLastAccess > sessionInterval && ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime() != -1) {
             return false;
         }
-        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval) {
+        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime() != -1) {
             return false;
         }
 
