@@ -301,7 +301,7 @@ public class AuthenticationService {
 
         SessionId newSessionId;
         if (sessionId == null) {
-	        newSessionId = sessionIdService.generateSessionId(user.getDn(), sessionIdAttributes);
+	        newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
         } else {
 	        newSessionId = sessionIdService.setSessionIdAuthenticated(sessionId, user.getDn());
         }
@@ -317,7 +317,7 @@ public class AuthenticationService {
             return null;
         }
 
-        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), Prompt.NONE.toString());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), Prompt.NONE.toString());
 
         configureEventUserContext(sessionId);
 

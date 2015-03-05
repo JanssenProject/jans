@@ -172,18 +172,18 @@ public class SessionIdService {
 		return getRequestHeadersFromSession();
     }
 
-    public SessionId generateSessionId(String userDn) {
-    	return generateSessionId(userDn, "");
+    public SessionId generateAuthenticatedSessionId(String userDn) {
+    	return generateAuthenticatedSessionId(userDn, "");
     }
 
-    public SessionId generateSessionId(String userDn, String prompt) {
+    public SessionId generateAuthenticatedSessionId(String userDn, String prompt) {
     	Map<String, String> sessionIdAttributes = new HashMap<String, String>();
     	sessionIdAttributes.put("prompt", prompt);
 
     	return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionId generateSessionId(String userDn, Map<String, String> sessionIdAttributes) {
+    public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
     	return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
