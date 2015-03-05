@@ -235,7 +235,7 @@ public class SessionIdService {
 
     	configureOpbsCookie(sessionId);
 
-        boolean persisted = updateSessionId(sessionId);
+        boolean persisted = persistSessionId(sessionId, true);
 
         log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
         return sessionId;
