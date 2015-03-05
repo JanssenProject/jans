@@ -235,7 +235,7 @@ public class SessionIdService {
 
     	configureOpbsCookie(sessionId);
 
-        boolean persisted = persistSessionId(sessionId, true);
+        boolean persisted = updateSessionId(sessionId, true, true);
 
         log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
         return sessionId;
@@ -278,12 +278,16 @@ public class SessionIdService {
         return updateSessionId(sessionId, true);
     }
 
-	public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
+    public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
+        return updateSessionId(sessionId, true, false);
+    }
+
+	public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt, boolean forceUpdate) {
 		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
 		try {
         	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-			if (unusedLifetime > 0 && isPersisted(prompts)) {
+			if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
                 if (updateLastUsedAt) {
 	                sessionId.setLastUsedAt(new Date());
                 }
