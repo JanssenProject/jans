@@ -193,11 +193,6 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "OneId. Prepare for step 1"
 
-            auth_mode_array = requestParameters.get("auth_mode")
-            if ArrayHelper.isEmpty(auth_mode_array):
-                print "OneId. Prepare for step 1. auth_mode is empty"
-                return False
-
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             validation_page = request.getContextPath() + "/postlogin?" + "request_uri=&" + authenticationService.parametersAsString()
             print "OneId. Prepare for step 1. validation_page: " + validation_page
