@@ -25,7 +25,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Toopher initialization"
+        print "Toopher. Initialization"
         toopher_creds_file = configurationAttributes.get("toopher_creds_file").getValue2()
 
         # Load credentials from file
@@ -46,9 +46,17 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         self.tapi = ToopherAPI(consumer_key, consumer_secret)
-        print "Toopher initialized successfully"
+        print "Toopher. Initialized successfully"
 
         return True
+
+    def destroy(self, configurationAttributes):
+        print "Toopher. Destroy"
+        print "Toopher. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -66,7 +74,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         if (step == 1):
-            print "Toopher authenticate for step 1"
+            print "Toopher. Authenticate for step 1"
 
             user_password = credentials.getPassword()
             logged_in = False
@@ -81,13 +89,13 @@ class PersonAuthentication(PersonAuthenticationType):
             userService = UserService.instance()
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
-                print "Toopher authenticate for step 1. Failed to find user"
+                print "Toopher. Authenticate for step 1. Failed to find user"
                 return False
 
             # Check if the user paired account to phone
             user_external_uid_attr = userService.getCustomAttribute(find_user_by_uid, "oxExternalUid")
             if ((user_external_uid_attr == None) or (user_external_uid_attr.getValues() == None)):
-                print "Toopher authenticate for step 1. There is no external UIDs for user: ", user_name
+                print "Toopher. Authenticate for step 1. There is no external UIDs for user: ", user_name
             else:
                 topher_user_uid = None
                 for ext_uid in user_external_uid_attr.getValues():
@@ -96,27 +104,26 @@ class PersonAuthentication(PersonAuthenticationType):
                         break
             
                 if (topher_user_uid == None):
-                    print "Toopher authenticate for step 1. There is no Topher UID for user: ", user_name
+                    print "Toopher. Authenticate for step 1. There is no Topher UID for user: ", user_name
                 else:
                     context.set("toopher_user_uid", topher_user_uid)
 
             return True
         elif (step == 2):
-            print "Toopher authenticate for step 2"
+            print "Toopher. Authenticate for step 2"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
                 return False
 
-            toopher_user_uid_array = requestParameters.get("toopher_user_uid")
-            
-            if (ArrayHelper.isEmpty(toopher_user_uid_array) or StringHelper.isEmptyString(toopher_user_uid_array[0])):
-                print "Toopher authenticate for step 2. toopher_user_uid is empty"
+            sessionAttributes = context.get("sessionAttributes")
+            if (sessionAttributes == None) or not sessionAttributes.isSet("toopher_user_uid"):
+                print "Toopher. Authenticate for step 2. toopher_user_uid is empty"
 
                 # Pair with phone
                 pairing_phrase_array = requestParameters.get("pairing_phrase")
                 if ArrayHelper.isEmpty(pairing_phrase_array):
-                    print "Toopher authenticate for step 2. pairing_phrase is empty"
+                    print "Toopher. Authenticate for step 2. pairing_phrase is empty"
                     return False
                 
                 pairing_phrase = pairing_phrase_array[0]
@@ -124,66 +131,69 @@ class PersonAuthentication(PersonAuthenticationType):
                     pairing_status = self.tapi.pair(pairing_phrase, user_name);
                     toopher_user_uid = pairing_status.id;
                 except RequestError, err:
-                    print "Toopher authenticate for step 2. Failed pair with phone: ", err
+                    print "Toopher. Authenticate for step 2. Failed pair with phone: ", err
                     return False
                 
                 pairing_result = self.checkPairingStatus(toopher_user_uid, toopher_user_timeout) 
 
                 if (not pairing_result):
-                    print "Toopher authenticate for step 2. The pairing has not been authorized by the phone yet"
+                    print "Toopher. Authenticate for step 2. The pairing has not been authorized by the phone yet"
                     return False
                     
-                print "Toopher authenticate for step 2. Storing toopher_user_uid in user entry", toopher_user_uid
+                print "Toopher. Authenticate for step 2. Storing toopher_user_uid in user entry", toopher_user_uid
 
                 # Store toopher_user_uid in user entry
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "toopher:" + toopher_user_uid)
                 if (find_user_by_uid == None):
-                    print "Toopher authenticate for step 2. Failed to update current user"
+                    print "Toopher. Authenticate for step 2. Failed to update current user"
                     return False
 
                 context.set("toopher_user_uid", toopher_user_uid)
             else:
-                toopher_user_uid = toopher_user_uid_array[0]
+                toopher_user_uid = sessionAttributes.get("toopher_user_uid")
 
                 # Check pairing stastus
-                print "Toopher authenticate for step 2. toopher_user_uid: ", toopher_user_uid
+                print "Toopher. Authenticate for step 2. toopher_user_uid: ", toopher_user_uid
                 pairing_result = self.checkPairingStatus(toopher_user_uid, 0) 
                 if (not pairing_result):
-                    print "Toopher authenticate for step 2. The pairing has not been authorized by the phone yet"
+                    print "Toopher. Authenticate for step 2. The pairing has not been authorized by the phone yet"
                     return False
 
             return True
         elif (step == 3):
-            print "Toopher authenticate for step 3"
+            print "Toopher. Authenticate for step 3"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
                 return False
 
-            toopher_user_uid_array = requestParameters.get("toopher_user_uid")
-            if ArrayHelper.isEmpty(toopher_user_uid_array):
-                print "Toopher authenticate for step 3. toopher_user_uid is empty"
+            sessionAttributes = context.get("sessionAttributes")
+            if (sessionAttributes == None) or not sessionAttributes.isSet("toopher_user_uid"):
+                print "Toopher. Authenticate for step 3. toopher_user_uid is empty"
+                return False
+
+            toopher_user_uid = sessionAttributes.get("toopher_user_uid")
+            passed_step1 = StringHelper.isNotEmptyString(toopher_user_uid)
+            if (not passed_step1):
                 return False
 
             toopher_terminal_name = configurationAttributes.get("toopher_terminal_name").getValue2()
-
-            toopher_user_uid = toopher_user_uid_array[0]
 
             try:
                 request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name);
                 request_id = request_status.id;
             except RequestError, err:
-                print "Toopher authenticate for step 3. Failed to send authentication request to phone: ", err
+                print "Toopher. Authenticate for step 3. Failed to send authentication request to phone: ", err
                 return False
 
-            print "Toopher authenticate for step 3. request_id: ", request_id
+            print "Toopher. Authenticate for step 3. request_id: ", request_id
             request_result = self.checkRequestStatus(request_id, toopher_user_timeout) 
 
             if (not request_result):
-                print "Toopher authenticate for step 3. The authentication request has not received a response from the phone yet"
+                print "Toopher. Authenticate for step 3. The authentication request has not received a response from the phone yet"
                 return False
                 
-            print "Toopher authenticate for step 3. The request was granted"
+            print "Toopher. Authenticate for step 3. The request was granted"
 
             return True
         else:
@@ -222,16 +232,16 @@ class PersonAuthentication(PersonAuthenticationType):
             while (endTime >= curTime):
                 pairing_status = self.tapi.getPairingStatus(pairing_id)
                 if (pairing_status.enabled):
-                    print "Pairing complete"
+                    print "Toopher. Pairing complete"
                     return True
 
                 java.lang.Thread.sleep(2000)
                 curTime = java.lang.System.currentTimeMillis()
         except java.lang.Exception, err:
-            print "Could not check pairing status: ", err
+            print "Toopher. Could not check pairing status: ", err
             return False
 
-        print "The pairing has not been authorized by the phone yet"
+        print "Toopher. The pairing has not been authorized by the phone yet"
 
         return False
 
@@ -242,26 +252,23 @@ class PersonAuthentication(PersonAuthenticationType):
             while (endTime >= curTime):
                 request_status = self.tapi.getAuthenticationStatus(request_id)
                 if (request_status.cancelled):
-                    print "The authentication request has been cancelled"
+                    print "Toopher. The authentication request has been cancelled"
                     return False
 
                 if (not request_status.pending):
                     if (request_status.granted):
-                        print "The request was granted"
+                        print "Toopher. The request was granted"
                         return True
 
                 java.lang.Thread.sleep(2000)
                 curTime = java.lang.System.currentTimeMillis()
         except java.lang.Exception, err:
-            print "Could not check authentication status: ", err
+            print "Toopher. Could not check authentication status: ", err
             return False
 
-        print "The authentication request has not received a response from the phone yet"
+        print "Toopher. The authentication request has not received a response from the phone yet"
 
         return False
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 3
