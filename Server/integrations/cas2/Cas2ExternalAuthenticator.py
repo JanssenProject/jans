@@ -8,7 +8,6 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.apache.http.params import CoreConnectionPNames
@@ -84,8 +83,6 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = UserService.instance()
         httpService = HttpService.instance();
 
-        stringEncrypter = StringEncrypter.defaultInstance()
-
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
@@ -151,7 +148,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     print "CAS2. Authenticate for step 1. Setting count steps to 2"
                     context.set("cas2_count_login_steps", 2)
-                    context.set("cas2_user_uid", stringEncrypter.encrypt(cas2_user_uid))
+                    context.set("cas2_user_uid", cas2_user_uid)
                     return True
 
                 found_user_name = find_user_by_uid.getUserId()
@@ -187,7 +184,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
         elif (step == 2):
             print "CAS2. Authenticate for step 2"
-            
+
             sessionAttributes = context.get("sessionAttributes")
             if (sessionAttributes == None) or not sessionAttributes.isSet("cas2_user_uid"):
                 print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
