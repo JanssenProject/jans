@@ -6,56 +6,6 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_ID;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_URL;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.xdi.oxauth.model.util.StringUtils.toList;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -86,14 +36,26 @@ import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.util.*;
+
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.toList;
+
 /**
  * Implementation for register REST web services.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- *         Date: 01.11.2012
  * @author Yuriy Movchan
- *         Date: 04/15/2014
+ * @version 0.9 March 6, 2015
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -110,7 +72,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private ClientService clientService;
     @In
     private TokenService tokenService;
-    
+
     @In
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
 
@@ -177,9 +139,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         }
 
                         updateClientFromRequestObject(client, r);
-                        
+
                         if (externalDynamicClientRegistrationService.isEnabled()) {
-                        	externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
+                            externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
                         }
 
                         clientService.persist(client);
@@ -219,8 +181,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
     public static void updateClientFromRequestObject(Client p_client, RegisterRequest p_request) throws JSONException {
-        final List<String> redirectUris = p_request.getRedirectUris();
+        List<String> redirectUris = p_request.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
+            redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
             p_client.setRedirectUris(redirectUris.toArray(new String[redirectUris.size()]));
         }
         if (p_request.getApplicationType() != null) {
@@ -232,13 +195,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringUtils.isNotBlank(p_request.getSectorIdentifierUri())) {
             p_client.setSectorIdentifierUri(p_request.getSectorIdentifierUri());
         }
-        final List<ResponseType> responseTypes = p_request.getResponseTypes();
+        List<ResponseType> responseTypes = p_request.getResponseTypes();
         if (responseTypes != null && !responseTypes.isEmpty()) {
+            responseTypes = new ArrayList<ResponseType>(new HashSet<ResponseType>(responseTypes)); // Remove repeated elements
             p_client.setResponseTypes(responseTypes.toArray(new ResponseType[responseTypes.size()]));
         }
 
-        final List<String> contacts = p_request.getContacts();
+        List<String> contacts = p_request.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
+            contacts = new ArrayList<String>(new HashSet<String>(contacts)); // Remove repeated elements
             p_client.setContacts(contacts.toArray(new String[contacts.size()]));
         }
         if (StringUtils.isNotBlank(p_request.getLogoUri())) {
@@ -289,20 +254,23 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (p_request.getRequireAuthTime() != null) {
             p_client.setRequireAuthTime(p_request.getRequireAuthTime());
         }
-        final List<String> defaultAcrValues = p_request.getDefaultAcrValues();
+        List<String> defaultAcrValues = p_request.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
+            defaultAcrValues = new ArrayList<String>(new HashSet<String>(defaultAcrValues)); // Remove repeated elements
             p_client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
         }
         if (StringUtils.isNotBlank(p_request.getInitiateLoginUri())) {
             p_client.setInitiateLoginUri(p_request.getInitiateLoginUri());
         }
-        final List<String> postLogoutRedirectUris = p_request.getPostLogoutRedirectUris();
+        List<String> postLogoutRedirectUris = p_request.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
+            postLogoutRedirectUris = new ArrayList<String>(new HashSet<String>(postLogoutRedirectUris)); // Remove repeated elements
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
-        final List<String> requestUris = p_request.getRequestUris();
+        List<String> requestUris = p_request.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
+            requestUris = new ArrayList<String>(new HashSet<String>(requestUris)); // Remove repeated elements
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
