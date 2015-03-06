@@ -10,7 +10,7 @@
 
     <navigation from-action="#{authenticator.prepareAuthenticationForStep}">
         <rule if-outcome="success">
-        	<redirect url="#{saml_idp_auth_request_uri}"/>
+        	<redirect url="#{external_auth_request_uri}"/>
         </rule>
 
         <rule if-outcome="no_permissions">

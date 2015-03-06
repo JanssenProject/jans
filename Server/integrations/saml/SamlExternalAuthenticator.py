@@ -427,11 +427,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Generate an AuthRequest and send it to the identity provider
             samlAuthRequest = AuthRequest(currentSamlConfiguration)
-            saml_idp_auth_request_uri = currentSamlConfiguration.getIdpSsoTargetUrl() + "?SAMLRequest=" + samlAuthRequest.getRequest(True, assertionConsumerServiceUrl)
+            external_auth_request_uri = currentSamlConfiguration.getIdpSsoTargetUrl() + "?SAMLRequest=" + samlAuthRequest.getRequest(True, assertionConsumerServiceUrl)
 
-            print "Saml prepare for step 1. saml_idp_auth_request_uri:", saml_idp_auth_request_uri
+            print "Saml prepare for step 1. external_auth_request_uri:", external_auth_request_uri
             
-            context.set("saml_idp_auth_request_uri", saml_idp_auth_request_uri)
+            context.set("external_auth_request_uri", external_auth_request_uri)
 
             return True
         elif (step == 2):
