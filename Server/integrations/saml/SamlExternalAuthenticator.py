@@ -4,7 +4,6 @@ from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
@@ -103,8 +102,6 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         authenticationService = AuthenticationService.instance()
         userService = UserService.instance()
-
-        stringEncrypter = StringEncrypter.defaultInstance()
 
         saml_map_user = False
         saml_enroll_user = False
@@ -205,7 +202,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml authenticate for step 1. Failed to find user"
                     print "Saml authenticate for step 1. Setting count steps to 2"
                     context.set("saml_count_login_steps", 2)
-                    context.set("saml_user_uid", stringEncrypter.encrypt(saml_user_uid))
+                    context.set("saml_user_uid", saml_user_uid)
                     return True
 
                 found_user_name = find_user_by_uid.getUserId()
@@ -360,7 +357,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml authenticate for step 2. saml_user_uid is empty"
                 return False
 
-            saml_user_uid = stringEncrypter.decrypt(saml_user_uid_array[0])
+            saml_user_uid = saml_user_uid_array[0]
             passed_step1 = StringHelper.isNotEmptyString(saml_user_uid)
             if (not passed_step1):
                 return False

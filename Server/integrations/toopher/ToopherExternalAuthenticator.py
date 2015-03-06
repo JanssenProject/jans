@@ -60,8 +60,6 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         userService = UserService.instance()
 
-        stringEncrypter = StringEncrypter.defaultInstance()
-
         toopher_user_timeout = int(configurationAttributes.get("toopher_user_timeout").getValue2())
 
         credentials = Identity.instance().getCredentials()
@@ -100,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (topher_user_uid == None):
                     print "Toopher authenticate for step 1. There is no Topher UID for user: ", user_name
                 else:
-                    context.set("toopher_user_uid", stringEncrypter.encrypt(topher_user_uid))
+                    context.set("toopher_user_uid", topher_user_uid)
 
             return True
         elif (step == 2):
@@ -143,9 +141,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Toopher authenticate for step 2. Failed to update current user"
                     return False
 
-                context.set("toopher_user_uid", stringEncrypter.encrypt(toopher_user_uid))
+                context.set("toopher_user_uid", toopher_user_uid)
             else:
-                toopher_user_uid = stringEncrypter.decrypt(toopher_user_uid_array[0])
+                toopher_user_uid = toopher_user_uid_array[0]
 
                 # Check pairing stastus
                 print "Toopher authenticate for step 2. toopher_user_uid: ", toopher_user_uid
@@ -169,7 +167,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             toopher_terminal_name = configurationAttributes.get("toopher_terminal_name").getValue2()
 
-            toopher_user_uid = stringEncrypter.decrypt(toopher_user_uid_array[0])
+            toopher_user_uid = toopher_user_uid_array[0]
 
             try:
                 request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name);
