@@ -273,7 +273,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Google+ Authenticate for step 2"
             
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("gplus_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("gplus_user_uid"):
                 print "Google+ Authenticate for step 2. gplus_user_uid is empty"
                 return False
 

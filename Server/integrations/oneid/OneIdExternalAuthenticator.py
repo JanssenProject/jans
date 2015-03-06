@@ -125,7 +125,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "OneId. Authenticate for step 2"
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("oneid_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oneid_user_uid"):
                 print "OneId. Authenticate for step 2. oneid_user_uid is empty"
                 return False
 

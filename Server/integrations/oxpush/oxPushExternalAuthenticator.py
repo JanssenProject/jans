@@ -116,10 +116,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("oxpush_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 2. oxpush_user_uid is empty"
 
-                if (not sessionAttributes.isSet("oxpush_pairing_uid")):
+                if (not sessionAttributes.containsKey("oxpush_pairing_uid")):
                     print "oxPush. Authenticate for step 2. oxpush_pairing_uid is empty"
                     return False
 
@@ -155,7 +155,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             sessionAttributes = context.get("oxpush_user_uid")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("oxpush_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 3. oxpush_user_uid is empty"
                 return False
 
@@ -208,7 +208,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user_name = credentials.getUsername()
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("oxpush_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Prepare for step 2. oxpush_user_uid is empty"
 
                 # Initialize pairing process

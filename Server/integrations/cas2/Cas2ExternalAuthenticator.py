@@ -186,7 +186,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "CAS2. Authenticate for step 2"
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("cas2_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("cas2_user_uid"):
                 print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
                 return False
 

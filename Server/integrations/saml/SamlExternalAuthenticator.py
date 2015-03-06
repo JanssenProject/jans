@@ -136,7 +136,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Detect if user used basic authnetication method
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            if (ArrayHelper.isNotEmpty(user_name) and ArrayHelper.isNotEmpty(user_password)):
+            if (StringHelper.isNotEmpty(user_name) and StringHelper.isNotEmpty(user_password)):
                 use_basic_auth = True
 
         if ((step == 1) and saml_allow_basic_login and use_basic_auth):
@@ -361,7 +361,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Saml. Authenticate for step 2"
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("saml_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("saml_user_uid"):
                 print "Saml. Authenticate for step 2. saml_user_uid is empty"
                 return False
 

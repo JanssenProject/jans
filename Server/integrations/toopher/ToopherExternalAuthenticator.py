@@ -117,7 +117,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("toopher_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 2. toopher_user_uid is empty"
 
                 # Pair with phone
@@ -168,7 +168,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             sessionAttributes = context.get("sessionAttributes")
-            if (sessionAttributes == None) or not sessionAttributes.isSet("toopher_user_uid"):
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 3. toopher_user_uid is empty"
                 return False
 
