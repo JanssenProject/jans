@@ -163,10 +163,7 @@ class Setup(object):
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
-        self.debian_services = [{ 'name' : 'memcached', 'order' : '30', 'runlevel' : '3'},
-                                { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
-                                { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
-                                { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
+        self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
@@ -210,6 +207,7 @@ class Setup(object):
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
+        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
@@ -248,6 +246,7 @@ class Setup(object):
                      self.ldif_scripts: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
+                     self.asimba_properties: False,
                      self.asimba_selector_configuration: True
                      }
 
@@ -291,12 +290,9 @@ class Setup(object):
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
-        realTomcatWebappsFolder = os.path.realpath("%s/webapps" % self.tomcatHome)
 
         self.run(['/bin/chmod', 'a-x', realCertFolder])
         self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
-
-        self.run(['/bin/chmod', '-R', '644', "%s/*" % realTomcatWebappsFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -881,6 +877,12 @@ class Setup(object):
         if self.components['asimba']['enabled']:
             asimbaWar = 'oxasimba.war'
             distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+
+            # Asimba is not part of CE package. We need to download it if needed
+            if not os.path.exists(distAsimbaPath):
+                print "Downloading latest Asimba war file..."
+                self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
             self.logIt("Unpacking %s..." % asimbaWar)
@@ -892,10 +894,8 @@ class Setup(object):
                       distAsimbaPath], tmpAsimbaDir)
 
             self.logIt("Configuring Asimba...")
-            asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
-            asimbaWarConfigurationPath = '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir
-
-            self.copyFile(asimbaTemplateConfigurationPath, asimbaWarConfigurationPath)
+            self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
+            self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
 
             self.logIt("Generating asimba.war...")
             self.run([self.jarCommand,
@@ -1274,7 +1274,7 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service['name'], 'enable'])
+                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
     def start_services(self):
         # Detect sevice path and apache service name
