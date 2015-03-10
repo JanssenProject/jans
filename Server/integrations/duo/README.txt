@@ -1,4 +1,4 @@
-This is a person  authentication module for oxAuth that enables [Duo Authentication](https://www.duosecurity.com) for user authentication.
+This is a person authentication module for oxAuth that enables [Duo Authentication](https://www.duosecurity.com) for user authentication.
 
 The module has a few properties:
 
