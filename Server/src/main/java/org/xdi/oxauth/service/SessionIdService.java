@@ -279,7 +279,7 @@ public class SessionIdService {
     }
 
     public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
-        return updateSessionId(sessionId, true, false);
+        return updateSessionId(sessionId, updateLastUsedAt, false);
     }
 
 	public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt, boolean forceUpdate) {
