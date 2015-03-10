@@ -1,29 +1,38 @@
-This installation process has 5 parts.
+This list of steps needed to do to enable SAML authentication module.
 
-1. Saml module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
+1. This module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
     - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
-2. Copy json simple library folder from ../shared_libs to $CATALINA_HOME/conf/python folder.
+2. Copy required python libraries from ./lib folder to $CATALINA_HOME/conf/python folder.
+3. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
 
-3. Prepare file with IdP public certificate /etc/certs/saml.pem
+4. Prepare file with IdP public certificate /etc/certs/saml.pem  
 
-4. Confire new custom module in oxTrust:
+5. Confire new custom module in oxTrust:
     - Log into oxTrust with administrative permissions.
-    - Open "Configuration"->"Manage Authentication" page.
-    - Click "Add custom authentication configuration" in "Manage Custom Authentication Methods" panel.
+    - Open "Configuration→Manage Custom Scripts" page.
+    - Select "Person Authentication" tab.
+    - Click on "Add custom script configuration" link.
     - Enter name = saml
-    - Enter level = 0 and priority = 0. More information about these properties: http://ox.gluu.org/doku.php?id=oxauth:domain_specific_authentication_levels_and_types
+    - Enter level = 0-100 (priority of this method).
     - Select usage type "Interactive".
-    - Add custom mandatory and required optional properties which specified in README.txt.
+    - Add custom required and optional properties which specified in README.txt
     - Copy/paste script from SamlPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
-    - In panel "Default Authentication Method" select "saml" if you are planning to use it by default.
-    - Click "Update" button at the bottom of this page.
-    - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available custom authentication modules.
 
-5. This step is an optional. We need to define custom client oxAuth attribute if we need to specify custom Saml configuration per oxAuth client.
+6. Configure oxAuth to use SAML authentication by default:
+    - Log into oxTrust with administrative permissions.
+    - Open "Configuration→Manage Authentication" page.
+    - Scroll to "Default Authentication Method" panel. Select "saml" authentication mode.
+    - Click "Update" button at the bottom of this page.
+
+7. Try to log in using SAML authentication method:
+    - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
+    - Open second browser or second browsing session and try to log in again. It's better to try to do that from another browser session because we can return back to previous authentication method if something will go wrong.
+
+8. This step is an optional. We need to define custom client oxAuth attribute if we need to specify custom configuration per oxAuth client.
    These steps allows to do that:
     - Add 'oxAuthSamlConf' attribute definition to 77-customAttributes.ldif and add it to object class oxAuthClientCustomAttributes.
       This is sample content of this file if there is no another custom attributes:
@@ -47,9 +56,7 @@ This installation process has 5 parts.
     - Remove oxAuth configuration from LDAP and restasrt tomcat in order to regenerate oxAuth configuration
     - Add new client via Dynamic client registration API or add object class 'oxAuthClientCustomAttributes' to existing client entry.
     - Add attribute 'oxAuthSamlConf' to client entry with value in JSON format. More information about this configuration is exists in README.txt
-    - oxAuth cache client entry in memory. The client entry lifetime in cache is 30 seconds. Make sure that you try to open login form again
-      withing 30 seconds.
-
+    - oxAuth cache client entry in memory. The client entry lifetime in cache is 30 seconds. Make sure that you try to open login form again withing 30 seconds.
 
 There are log messages in this custom authentication script. In order to debug this module we can use command like this:
-tail -f /opt/tomcat/logs/wrapper.log | grep Saml
+tail -f /opt/tomcat/logs/wrapper.log | grep "Saml"

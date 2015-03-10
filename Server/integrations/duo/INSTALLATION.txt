@@ -17,7 +17,7 @@ This list of steps needed to do to enable DUO authentication module.
     - Enter name = duo
     - Enter level = 0-100 (priority of this method).
     - Select usage type "Interactive".
-    - Add custom properties: duo_creds_file, duo_host and optinal audit_attribute, duo_group, audit_group, audit_group_email.
+    - Add custom required and optional properties which specified in README.txt
     - Copy/paste script from DuoPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
