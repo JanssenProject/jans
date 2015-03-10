@@ -9,7 +9,7 @@ This list of steps needed to do to enable Basic person authentication module.
     - Enter level = 0-100 (priority of this method).
     - Select usage type "Interactive".
     - Add custom required and optional properties which specified in README.txt.
-    - Copy/paste script from BasicMultiAuthConfExternalAuthenticator.py.
+    - Copy/paste script from BasicExternalAuthenticator.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 

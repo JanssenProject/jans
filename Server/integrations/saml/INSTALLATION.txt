@@ -4,12 +4,11 @@ This list of steps needed to do to enable SAML person authentication module.
     - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
-2. Copy required python libraries from ./lib folder to $CATALINA_HOME/conf/python folder.
-3. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
+2. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
 
-4. Prepare file with IdP public certificate /etc/certs/saml.pem  
+3. Prepare file with IdP public certificate /etc/certs/saml.pem  
 
-5. Confire new custom module in oxTrust:
+4. Confire new custom module in oxTrust:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Custom Scripts" page.
     - Select "Person Authentication" tab.
@@ -22,41 +21,15 @@ This list of steps needed to do to enable SAML person authentication module.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 
-6. Configure oxAuth to use SAML authentication by default:
+5. Configure oxAuth to use SAML authentication by default:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "saml" authentication mode.
     - Click "Update" button at the bottom of this page.
 
-7. Try to log in using SAML authentication method:
+6. Try to log in using SAML authentication method:
     - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
     - Open second browser or second browsing session and try to log in again. It's better to try to do that from another browser session because we can return back to previous authentication method if something will go wrong.
-
-8. This step is an optional. We need to define custom client oxAuth attribute if we need to specify custom configuration per oxAuth client.
-   These steps allows to do that:
-    - Add 'oxAuthSamlConf' attribute definition to 77-customAttributes.ldif and add it to object class oxAuthClientCustomAttributes.
-      This is sample content of this file if there is no another custom attributes:
-        dn: cn=schema
-        objectClass: top
-        objectClass: ldapSubentry
-        objectClass: subschema
-        cn: schema
-        attributeTypes: ( oxAuthSamlConf-oid NAME 'oxAuthSamlConf' DESC 'Client configuration for SAML authentication'
-          SUBSTR caseIgnoreSubstringsMatch
-          EQUALITY caseIgnoreMatch
-          SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-          X-ORIGIN 'Gluu created attribute' )
-        objectClasses: ( oxAuthClientCustomAttributes-oid NAME 'oxAuthClientCustomAttributes' SUP top AUXILIARY MAY ( oxAuthSamlConf ) X-ORIGIN 'Gluu - Custom objectclass' )
-    - Restart OpenDJ
-    - Add to oxAuth configuration file 'oxauth-config.xml' if these line not exist already:
-        <!-- Dynamic registration custom stuff -->
-        <dynamic-registration-custom-object-class>oxAuthClientCustomAttributes</dynamic-registration-custom-object-class>
-    - Add to oxAuth configuration file 'oxauth-config.xml' to section '<dynamic-registration-custom-attribute-supported>' next line:
-        <dynamic-registration-custom-attribute>oxAuthSamlConf</dynamic-registration-custom-attribute>
-    - Remove oxAuth configuration from LDAP and restasrt tomcat in order to regenerate oxAuth configuration
-    - Add new client via Dynamic client registration API or add object class 'oxAuthClientCustomAttributes' to existing client entry.
-    - Add attribute 'oxAuthSamlConf' to client entry with value in JSON format. More information about this configuration is exists in README.txt
-    - oxAuth cache client entry in memory. The client entry lifetime in cache is 30 seconds. Make sure that you try to open login form again withing 30 seconds.
 
 There are log messages in this custom authentication script. In order to debug this module we can use command like this:
 tail -f /opt/tomcat/logs/wrapper.log | grep "Saml"

@@ -47,7 +47,8 @@ This module has next properties:
    allow to override next properties: saml_certificate_file, saml_issuer, saml_use_authn_context, saml_idp_attributes_list, saml_local_attributes_list.
    It's optional property.
    Property saml_certificate_file isn't mandatory. If the value is empty Smal script use global saml_certificate_file value.
-   Example: {"saml_certificate_file": "", "saml_issuer": "https://localhost/app1", "saml_use_authn_context": "false", "saml_idp_attributes_list": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "saml_local_attributes_list": "uid, mail, givenName, sn, cn"}
+   Example: oxAuthExtraConf
+   Example content of client oxAuthExtraConf attribute: {"saml_certificate_file": "", "saml_issuer": "https://localhost/app1", "saml_use_authn_context": "false", "saml_idp_attributes_list": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "saml_local_attributes_list": "uid, mail, givenName, sn, cn"}
 
 9) saml_idp_attributes_list - Comma separated list of attribute names. Specify list of IdP attributes which Saml scrpt should use to map to local attributes.
    It's optional property. It's manadatory only if saml_deployment_type has value 'enroll'.

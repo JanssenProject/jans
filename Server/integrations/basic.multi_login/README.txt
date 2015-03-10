@@ -8,6 +8,6 @@ This module has next properties:
    Example: uid, mail
 
 2) local_login_attributes_list - Comma separated list of attribute names. Specify list of local attributes mapped from IdP attributes.
-    It's optional property.
-    The count of attributes in this property should be equal to count attributes in login_attributes_list property.
-    Example: uid, mail
+   It's optional property.
+   The count of attributes in this property should be equal to count attributes in login_attributes_list property.
+   Example: uid, mail
