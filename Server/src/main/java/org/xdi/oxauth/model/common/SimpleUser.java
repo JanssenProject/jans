@@ -18,6 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011
@@ -92,7 +93,7 @@ public class SimpleUser implements Serializable {
         List<String> values = null;
         if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
             for (CustomAttribute customAttribute : customAttributes) {
-                if (customAttribute.getName().equals(ldapAttribute)) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
                 	values = customAttribute.getValues();
                     break;
                 }

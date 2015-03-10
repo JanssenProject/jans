@@ -8,7 +8,6 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util.security import StringEncrypter 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.apache.http.params import CoreConnectionPNames
@@ -23,12 +22,20 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "CAS2 initialization"
-        print "CAS2 initialized successfully"
+        print "CAS2. Initialization"
+        print "CAS2. Initialized successfully"
         return True   
 
+    def destroy(self, configurationAttributes):
+        print "CAS2. Destroy"
+        print "CAS2. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
-        print "CAS2 Rest API authenticate isValidAuthenticationMethod"
+        print "CAS2. Rest API authenticate isValidAuthenticationMethod"
 
         if (not (configurationAttributes.containsKey("cas_validation_uri") and
             configurationAttributes.containsKey("cas_validation_pattern") and
@@ -48,11 +55,11 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_response = httpService.executeGet(http_client, cas_validation_uri)
         except:
-            print "CAS2 Rest API authenticate isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
+            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
             return False
 
         if (http_response.getStatusLine().getStatusCode() != 200):
-            print "CAS2 Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
+            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
             httpService.consume(http_response)
             return False
 
@@ -61,7 +68,7 @@ class PersonAuthentication(PersonAuthenticationType):
         httpService.consume(http_response)
 
         if (validation_response_string == None or validation_response_string.find(cas_validation_pattern) == -1):
-            print "CAS2 Rest API authenticate isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
+            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
             return False
 
         return True
@@ -76,8 +83,6 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = UserService.instance()
         httpService = HttpService.instance();
 
-        stringEncrypter = StringEncrypter.defaultInstance()
-
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
@@ -87,17 +92,17 @@ class PersonAuthentication(PersonAuthenticationType):
             cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
 
         if (step == 1):
-            print "CAS2 authenticate for step 1"
+            print "CAS2. Authenticate for step 1"
             ticket_array = requestParameters.get("ticket")
             if ArrayHelper.isEmpty(ticket_array):
-                print "CAS2 authenticate for step 1. ticket is empty"
+                print "CAS2. Authenticate for step 1. ticket is empty"
                 return False
 
             ticket = ticket_array[0]
-            print "CAS2 authenticate for step 1. ticket: " + ticket
+            print "CAS2. Authenticate for step 1. ticket: " + ticket
 
             if (StringHelper.isEmptyString(ticket)):
-                print "CAS2 authenticate for step 1. ticket is invalid"
+                print "CAS2. Authenticate for step 1. ticket is invalid"
                 return False
 
             # Validate ticket
@@ -113,79 +118,79 @@ class PersonAuthentication(PersonAuthenticationType):
             if (cas_extra_opts != None):
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
-            print "CAS2 authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
+            print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
             http_client = httpService.getHttpsClientTrustAll();
             http_response = httpService.executeGet(http_client, cas_service_request_uri)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
-            print "CAS2 authenticate for step 1. validation_content: " + validation_content
+            print "CAS2. Authenticate for step 1. validation_content: " + validation_content
             if StringHelper.isEmpty(validation_content):
-                print "CAS2 authenticate for step 1. Ticket validation response is invalid"
+                print "CAS2. Authenticate for step 1. Ticket validation response is invalid"
                 return False
 
             cas2_auth_failure = self.parse_tag(validation_content, "cas:authenticationFailure")
-            print "CAS2 authenticate for step 1. cas2_auth_failure: ", cas2_auth_failure
+            print "CAS2. Authenticate for step 1. cas2_auth_failure: ", cas2_auth_failure
 
             cas2_user_uid = self.parse_tag(validation_content, "cas:user")
-            print "CAS2 authenticate for step 1. cas2_user_uid: ", cas2_user_uid
+            print "CAS2. Authenticate for step 1. cas2_user_uid: ", cas2_user_uid
             
             if ((cas2_auth_failure != None) or (cas2_user_uid == None)):
-                print "CAS2 authenticate for step 1. Ticket is invalid"
+                print "CAS2. Authenticate for step 1. Ticket is invalid"
                 return False
 
             if (cas_map_user):
-                print "CAS2 authenticate for step 1. Attempting to find user by oxExternalUid: cas2:" + cas2_user_uid
+                print "CAS2. Authenticate for step 1. Attempting to find user by oxExternalUid: cas2:" + cas2_user_uid
 
                 # Check if the is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "cas2:" + cas2_user_uid)
 
                 if (find_user_by_uid == None):
-                    print "CAS2 authenticate for step 1. Failed to find user"
-                    print "CAS2 authenticate for step 1. Setting count steps to 2"
+                    print "CAS2. Authenticate for step 1. Failed to find user"
+                    print "CAS2. Authenticate for step 1. Setting count steps to 2"
                     context.set("cas2_count_login_steps", 2)
-                    context.set("cas2_user_uid", stringEncrypter.encrypt(cas2_user_uid))
+                    context.set("cas2_user_uid", cas2_user_uid)
                     return True
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "CAS2 authenticate for step 1. found_user_name: " + found_user_name
+                print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
                 credentials = Identity.instance().getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
             
-                print "CAS2 authenticate for step 1. Setting count steps to 1"
+                print "CAS2. Authenticate for step 1. Setting count steps to 1"
                 context.set("cas2_count_login_steps", 1)
 
                 return True
             else:
-                print "CAS2 authenticate for step 1. Attempting to find user by uid:" + cas2_user_uid
+                print "CAS2. Authenticate for step 1. Attempting to find user by uid:" + cas2_user_uid
 
                 # Check if the is user with specified cas2_user_uid
                 find_user_by_uid = userService.getUser(cas2_user_uid)
                 if (find_user_by_uid == None):
-                    print "CAS2 authenticate for step 1. Failed to find user"
+                    print "CAS2. Authenticate for step 1. Failed to find user"
                     return False
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "CAS2 authenticate for step 1. found_user_name: " + found_user_name
+                print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
                 credentials = Identity.instance().getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
 
-                print "CAS2 authenticate for step 1. Setting count steps to 1"
+                print "CAS2. Authenticate for step 1. Setting count steps to 1"
                 context.set("cas2_count_login_steps", 1)
 
                 return True
         elif (step == 2):
-            print "CAS2 authenticate for step 2"
-            
-            cas2_user_uid_array = requestParameters.get("cas2_user_uid")
-            if ArrayHelper.isEmpty(cas2_user_uid_array):
-                print "CAS2 authenticate for step 2. cas2_user_uid is empty"
+            print "CAS2. Authenticate for step 2"
+
+            sessionAttributes = context.get("sessionAttributes")
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("cas2_user_uid"):
+                print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
                 return False
 
-            cas2_user_uid = stringEncrypter.decrypt(cas2_user_uid_array[0])
+            cas2_user_uid = sessionAttributes.get("cas2_user_uid")
             passed_step1 = StringHelper.isNotEmptyString(cas2_user_uid)
             if (not passed_step1):
                 return False
@@ -209,13 +214,13 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Add cas2_user_uid to user one id UIDs
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "cas2:" + cas2_user_uid)
                 if (find_user_by_uid == None):
-                    print "CAS2 authenticate for step 2. Failed to update current user"
+                    print "CAS2. Authenticate for step 2. Failed to update current user"
                     return False
 
                 return True
             else:
                 found_user_name = find_user_by_uid.getUserId()
-                print "CAS2 authenticate for step 2. found_user_name: " + found_user_name
+                print "CAS2. Authenticate for step 2. found_user_name: " + found_user_name
     
                 if StringHelper.equals(user_name, found_user_name):
                     return True
@@ -237,9 +242,9 @@ class PersonAuthentication(PersonAuthenticationType):
             cas_extra_opts = configurationAttributes.get("cas_extra_opts").getValue2()
 
         if (step == 1):
-            print "CAS2 prepare for step 1"
+            print "CAS2. Prepare for step 1"
 
-            print "CAS2 prepare for step 1. Store current request parameters in session because CAS don't pass them via service URI"
+            print "CAS2. Prepare for step 1. Store current request parameters in session because CAS don't pass them via service URI"
             authenticationService.storeRequestParametersInSession()
 
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
@@ -252,13 +257,13 @@ class PersonAuthentication(PersonAuthenticationType):
             if cas_extra_opts != None:
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
-            print "CAS2 prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
+            print "CAS2. Prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
 
             context.set("cas_service_request_uri", cas_service_request_uri)
 
             return True
         elif (step == 2):
-            print "CAS2 prepare for step 2"
+            print "CAS2. Prepare for step 2"
 
             return True
         else:
@@ -295,6 +300,3 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 3

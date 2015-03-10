@@ -22,7 +22,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.pf = PFAuth()
 
     def init(self, configurationAttributes):
-        print "PhoneFactor initialization"
+        print "PhoneFactor. Initialization"
         pf_cert_path = configurationAttributes.get("pf_cert_path").getValue2()
         pf_creds_file = configurationAttributes.get("pf_creds_file").getValue2()
 
@@ -43,9 +43,17 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         self.pf.initialize(pf_cert_path, certPassword)
-        print "PhoneFactor initialized successfully"
+        print "PhoneFactor. Initialized successfully"
 
         return True
+
+    def destroy(self, configurationAttributes):
+        print "PhoneFactor. Destroy"
+        print "PhoneFactor. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -58,7 +66,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_name = credentials.getUsername()
         if (step == 1):
-            print "PhoneFactor authenticate for step 1"
+            print "PhoneFactor. Authenticate for step 1"
 
             user_password = credentials.getPassword()
             logged_in = False
@@ -71,7 +79,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return True
         elif (step == 2):
-            print "PhoneFactor authenticate for step 2"
+            print "PhoneFactor. Authenticate for step 2"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
@@ -85,12 +93,12 @@ class PersonAuthentication(PersonAuthenticationType):
             userService = UserService.instance()
             phone_number_with_country_code_attr = userService.getCustomAttribute(credentials_user, pf_phone_number_attr)
             if (phone_number_with_country_code_attr == None):
-                print "PhoneFactor authenticate for step 2. There is no phone number: ", user_name
+                print "PhoneFactor. Authenticate for step 2. There is no phone number: ", user_name
                 return False
             
             phone_number_with_country_code = phone_number_with_country_code_attr.getValue()
             if (phone_number_with_country_code == None):
-                print "PhoneFactor authenticate for step 2. There is no phone number: ", user_name
+                print "PhoneFactor. Authenticate for step 2. There is no phone number: ", user_name
                 return False
 
             pf_country_delimiter = configurationAttributes.get("pf_country_delimiter").getValue2()
@@ -106,45 +114,45 @@ class PersonAuthentication(PersonAuthenticationType):
                 country_code = phone_number_with_country_code_array[0]
                 phone_number = phone_number_with_country_code_array[1]
 
-            print "PhoneFactor authenticate for step 2. user_name: ", user_name, ", country_code: ", country_code, ", phone_number: ", phone_number
+            print "PhoneFactor. Authenticate for step 2. user_name: ", user_name, ", country_code: ", country_code, ", phone_number: ", phone_number
 
             pf_auth_result = None
             try:
                 pf_auth_result = self.pf.authenticate(user_name, country_code, phone_number, None, None, None)
             except SecurityException, err:
-                print "PhoneFactor authenticate for step 2. BAD AUTH -- Security issue: ", err
+                print "PhoneFactor. Authenticate for step 2. BAD AUTH -- Security issue: ", err
             except TimeoutException, err:
-                print "PhoneFactor authenticate for step 2. BAD AUTH -- Server timeout: ", err
+                print "PhoneFactor. Authenticate for step 2. BAD AUTH -- Server timeout: ", err
             except PFException, err:
-                print "PhoneFactor authenticate for step 2. BAD AUTH -- PFAuth failed with a PFException: ", err
+                print "PhoneFactor. Authenticate for step 2. BAD AUTH -- PFAuth failed with a PFException: ", err
 
             if (pf_auth_result == None):
                 return False
 
-            print "PhoneFactor authenticate for step 2. Call Status: ", pf_auth_result.getCallStatusString()
+            print "PhoneFactor. Authenticate for step 2. Call Status: ", pf_auth_result.getCallStatusString()
             if (pf_auth_result.getAuthenticated()):
-                print "PhoneFactor authenticate for step 2. GOOD AUTH:", user_name
+                print "PhoneFactor. Authenticate for step 2. GOOD AUTH:", user_name
     
                 if (pf_auth_result.getCallStatus() == PFAuthResult.CALL_STATUS_PIN_ENTERED):
-                    print "PhoneFactor authenticate for step 2. I have detected that a PIN was entered"
+                    print "PhoneFactor. Authenticate for step 2. I have detected that a PIN was entered"
                 elif (pf_auth_result.getCallStatus() == PFAuthResult.CALL_STATUS_NO_PIN_ENTERED):
-                    print "PhoneFactor authenticate for step 2. I have detected that NO PIN was entered"
+                    print "PhoneFactor. Authenticate for step 2. I have detected that NO PIN was entered"
 
                 return True
             else:
-                print "PhoneFactor authenticate for step 2. BAD AUTH:", user_name
+                print "PhoneFactor. Authenticate for step 2. BAD AUTH:", user_name
 
                 if (pf_auth_result.getCallStatus() == PFAuthResult.CALL_STATUS_USER_HUNG_UP):
-                    print "PhoneFactor authenticate for step 2. I have detected that the user hung up"
+                    print "PhoneFactor. Authenticate for step 2. I have detected that the user hung up"
                 elif (pf_auth_result.getCallStatus() == PFAuthResult.CALL_STATUS_PHONE_BUSY):
-                    print "PhoneFactor authenticate for step 2. I have detected that the phone was busy"
+                    print "PhoneFactor. Authenticate for step 2. I have detected that the phone was busy"
     
                 if (pf_auth_result.getMessageErrorId() != 0):
-                    print "PhoneFactor authenticate for step 2. Message Error ID: ", pf_auth_result.getMessageErrorId()
+                    print "PhoneFactor. Authenticate for step 2. Message Error ID: ", pf_auth_result.getMessageErrorId()
     
                     message_error = pf_auth_result.getMessageError()
                     if (message_error != null):
-                        print "PhoneFactor authenticate for step 2. Message Error: ", message_error
+                        print "PhoneFactor. Authenticate for step 2. Message Error: ", message_error
     
             return False
         else:
@@ -152,11 +160,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "PhoneFactor prepare for step 1"
+            print "PhoneFactor. Prepare for step 1"
 
             return True
         elif (step == 2):
-            print "PhoneFactor prepare for step 2"
+            print "PhoneFactor. Prepare for step 2"
 
             return self.isPassedDefaultAuthentication
         else:
@@ -182,6 +190,3 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 3

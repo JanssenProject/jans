@@ -6,9 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-
+import com.google.common.collect.Maps;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -16,6 +14,12 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
+
+import javax.annotation.Nonnull;
+import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,7 +32,9 @@ import org.jboss.seam.annotations.Name;
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
 public class SessionId implements Serializable {
 
-    @LdapDN
+	private static final long serialVersionUID = -237476411915686378L;
+
+	@LdapDN
     private String dn;
 
     @LdapAttribute(name = "uniqueIdentifier")
@@ -43,16 +49,22 @@ public class SessionId implements Serializable {
     @LdapAttribute(name = "oxAuthAuthenticationTime")
     private Date authenticationTime;
 
-    @LdapAttribute(name = "oxAuthPermissionGranted")
+    @LdapAttribute(name = "oxState")
+    private SessionIdState state;
+
+    @LdapAttribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
-    private SessionIdAttribute[] sessionIdAttributes;
+    private Map<String, String> sessionAttributes;
+    
+    @Transient
+    private transient boolean persisted;
 
     public SessionId() {
     }
@@ -63,6 +75,14 @@ public class SessionId implements Serializable {
 
     public void setDn(String p_dn) {
         dn = p_dn;
+    }
+
+    public SessionIdState getState() {
+        return state;
+    }
+
+    public void setState(SessionIdState state) {
+        this.state = state;
     }
 
     public String getId() {
@@ -127,12 +147,24 @@ public class SessionId implements Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
-    public SessionIdAttribute[] getSessionIdAttributes() {
-		return sessionIdAttributes;
+    @Nonnull
+    public Map<String, String> getSessionAttributes() {
+        if (sessionAttributes == null) {
+            sessionAttributes = Maps.newHashMap();
+        }
+		return sessionAttributes;
 	}
 
-	public void setSessionIdAttributes(SessionIdAttribute[] sessionIdAttributes) {
-		this.sessionIdAttributes = sessionIdAttributes;
+	public void setSessionAttributes(Map<String, String> sessionAttributes) {
+		this.sessionAttributes = sessionAttributes;
+	}
+
+    public boolean isPersisted() {
+		return persisted;
+	}
+
+	public void setPersisted(boolean persisted) {
+		this.persisted = persisted;
 	}
 
 	@Override
@@ -153,12 +185,13 @@ public class SessionId implements Serializable {
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
-                .append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime)
-                .append(", permissionGranted=").append(permissionGranted).append("]");
-        return builder.toString();
-    }
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
+				.append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime).append(", state=")
+				.append(state).append(", permissionGranted=").append(permissionGranted).append(", permissionGrantedMap=")
+				.append(permissionGrantedMap).append(", sessionAttributes=").append(sessionAttributes).append("]");
+		return builder.toString();
+	}
 
 }

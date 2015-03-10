@@ -57,21 +57,6 @@
 
     <ui:define name="body">
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
-            <input type="hidden" name="auth_step" value="#{param.auth_step}"/>
-            <input type="hidden" name="username" value="#{credentials.username}"/>
-            <input type="hidden" name="response_type" value="#{param.response_type}"/>
-            <input type="hidden" name="scope" value="#{param.scope}"/>
-            <input type="hidden" name="client_id" value="#{param.client_id}"/>
-            <input type="hidden" name="redirect_uri" value="#{param.redirect_uri}"/>
-            <input type="hidden" name="nonce" value="#{param.nonce}"/>
-            <input type="hidden" name="state" value="#{param.state}"/>
-            <input type="hidden" name="prompt" value="#{param.prompt}"/>
-            <input type="hidden" name="display" value="#{param.display}"/>
-            <input type="hidden" name="request_uri" value="#{param.request_uri}"/>
-            <input type="hidden" name="request" value="#{param.request}"/>
-            <input type="hidden" name="auth_mode" value="#{param.auth_mode}"/>
-            <input type="hidden" name="toopher_user_uid" value="#{param.toopher_user_uid}"/>
- 
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
                     <div class="login-panel-header">Toopher Login (Authentication request)</div>

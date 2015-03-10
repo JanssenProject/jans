@@ -5,7 +5,6 @@ from javax.faces.context import FacesContext
 from org.jboss.seam import Component
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
-from org.xdi.util.security import StringEncrypter
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from java.util import Arrays
@@ -24,13 +23,21 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "oxPush initialization"
+        print "oxPush. Initialization"
 
         oxpush_server_base_uri = configurationAttributes.get("oxpush_server_base_uri").getValue2()
         self.oxPushClient = OxPushClient(oxpush_server_base_uri)
-        print "oxPush initialized successfully"
+        print "oxPush. Initialized successfully"
 
         return True
+
+    def destroy(self, configurationAttributes):
+        print "oxPush. Destroy"
+        print "oxPush. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -42,8 +49,6 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         userService = UserService.instance()
 
-        stringEncrypter = StringEncrypter.defaultInstance()
-
         oxpush_user_timeout = int(configurationAttributes.get("oxpush_user_timeout").getValue2())
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
@@ -51,7 +56,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         if (step == 1):
-            print "oxPush authenticate for step 1"
+            print "oxPush. Authenticate for step 1"
 
             user_password = credentials.getPassword()
             logged_in = False
@@ -66,13 +71,13 @@ class PersonAuthentication(PersonAuthenticationType):
             userService = UserService.instance()
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
-                print "oxPush authenticate for step 1. Failed to find user"
+                print "oxPush. Authenticate for step 1. Failed to find user"
                 return False
 
             # Check if the user paired account to phone
             user_external_uid_attr = userService.getCustomAttribute(find_user_by_uid, "oxExternalUid")
             if ((user_external_uid_attr == None) or (user_external_uid_attr.getValues() == None)):
-                print "oxPush authenticate for step 1. There is no external UIDs for user: ", user_name
+                print "oxPush. Authenticate for step 1. There is no external UIDs for user: ", user_name
             else:
                 oxpush_user_uid = None
                 for ext_uid in user_external_uid_attr.getValues():
@@ -81,119 +86,119 @@ class PersonAuthentication(PersonAuthenticationType):
                         break
             
                 if (oxpush_user_uid == None):
-                    print "oxPush authenticate for step 1. There is no oxPush UID for user: ", user_name
+                    print "oxPush. Authenticate for step 1. There is no oxPush UID for user: ", user_name
                 else:
                     # Check deployment status
-                    print "oxPush authenticate for step 1. oxpush_user_uid: ", oxpush_user_uid
+                    print "oxPush. Authenticate for step 1. oxpush_user_uid: ", oxpush_user_uid
                     deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid); 
                     if (deployment_status.result):
-                        print "oxPush authenticate for step 1. Deployment status is valid"
+                        print "oxPush. Authenticate for step 1. Deployment status is valid"
                         if ("enabled" == deployment_status.status):
-                            print "oxPush authenticate for step 1. Deployment is enabled"
-                            context.set("oxpush_user_uid", stringEncrypter.encrypt(oxpush_user_uid))
+                            print "oxPush. Authenticate for step 1. Deployment is enabled"
+                            context.set("oxpush_user_uid", oxpush_user_uid)
                         else:
-                            print "oxPush authenticate for step 1. Deployment is disabled"
+                            print "oxPush. Authenticate for step 1. Deployment is disabled"
                             return False
                     else:
-                        print "oxPush authenticate for step 1. Deployment status is invalid. Force user to pair again"
+                        print "oxPush. Authenticate for step 1. Deployment status is invalid. Force user to pair again"
                         # Remove oxpush_user_uid from user entry
                         find_user_by_uid = userService.removeUserAttribute(user_name, "oxExternalUid", "oxpush:" + oxpush_user_uid)
                         if (find_user_by_uid == None):
-                            print "oxPush authenticate for step 1. Failed to update current user"
+                            print "oxPush. Authenticate for step 1. Failed to update current user"
                             return False
 
             return True
         elif (step == 2):
-            print "oxPush authenticate for step 2"
+            print "oxPush. Authenticate for step 2"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
                 return False
 
-            oxpush_user_uid_array = requestParameters.get("oxpush_user_uid")
-            if (ArrayHelper.isEmpty(oxpush_user_uid_array) or StringHelper.isEmptyString(oxpush_user_uid_array[0])):
-                print "oxPush authenticate for step 2. oxpush_user_uid is empty"
+            sessionAttributes = context.get("sessionAttributes")
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
+                print "oxPush. Authenticate for step 2. oxpush_user_uid is empty"
 
-                oxpush_pairing_uid_array = requestParameters.get("oxpush_pairing_uid")
-                if (ArrayHelper.isEmpty(oxpush_pairing_uid_array) or StringHelper.isEmptyString(oxpush_pairing_uid_array[0])):
-                    print "oxPush authenticate for step 2. oxpush_pairing_uid is empty"
+                if (not sessionAttributes.containsKey("oxpush_pairing_uid")):
+                    print "oxPush. Authenticate for step 2. oxpush_pairing_uid is empty"
                     return False
 
-                oxpush_pairing_uid = stringEncrypter.decrypt(oxpush_pairing_uid_array[0])
+                oxpush_pairing_uid = sessionAttributes.get("oxpush_pairing_uid")
 
                 # Check pairing status                
                 pairing_status = self.checkStatus("pair", oxpush_pairing_uid, oxpush_user_timeout)
                 if (pairing_status == None):
-                    print "oxPush authenticate for step 2. The pairing has not been authorized by user"
+                    print "oxPush. Authenticate for step 2. The pairing has not been authorized by user"
                     return False
 
                 oxpush_user_uid = pairing_status.deploymentId
 
-                print "oxPush authenticate for step 2. Storing oxpush_user_uid in user entry", oxpush_user_uid
+                print "oxPush. Authenticate for step 2. Storing oxpush_user_uid in user entry", oxpush_user_uid
 
                 # Store oxpush_user_uid in user entry
                 find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "oxpush:" + oxpush_user_uid)
                 if (find_user_by_uid == None):
-                    print "oxPush authenticate for step 2. Failed to update current user"
+                    print "oxPush. Authenticate for step 2. Failed to update current user"
                     return False
 
                 context.set("oxpush_count_login_steps", 2)
-                context.set("oxpush_user_uid", stringEncrypter.encrypt(oxpush_user_uid))
+                context.set("oxpush_user_uid", oxpush_user_uid)
             else:
-                print "oxPush authenticate for step 2. Deployment status is valid"
+                print "oxPush. Authenticate for step 2. Deployment status is valid"
 
             return True
         elif (step == 3):
-            print "oxPush authenticate for step 3"
+            print "oxPush. Authenticate for step 3"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
                 return False
 
-            oxpush_user_uid_array = requestParameters.get("oxpush_user_uid")
-            if ArrayHelper.isEmpty(oxpush_user_uid_array):
-                print "oxPush authenticate for step 3. oxpush_user_uid is empty"
+            sessionAttributes = context.get("oxpush_user_uid")
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
+                print "oxPush. Authenticate for step 3. oxpush_user_uid is empty"
                 return False
 
-            oxpush_user_uid = stringEncrypter.decrypt(oxpush_user_uid_array[0])
+            oxpush_user_uid = sessionAttributes.get("oxpush_user_uid")
+            passed_step1 = StringHelper.isNotEmptyString(oxpush_user_uid)
+            if (not passed_step1):
+                return False
 
             # Initialize authentication process
             authentication_request = None
             try:
                 authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name);
             except java.lang.Exception, err:
-                print "oxPush authenticate for step 3. Failed to initialize authentication process: ", err
+                print "oxPush. Authenticate for step 3. Failed to initialize authentication process: ", err
                 return False
 
             if (not authentication_request.result):
-                print "oxPush authenticate for step 3. Failed to initialize authentication process"
+                print "oxPush. Authenticate for step 3. Failed to initialize authentication process"
                 return False
 
             # Check authentication status                
             authentication_status = self.checkStatus("authenticate", authentication_request.authenticationId, oxpush_user_timeout)
             if (authentication_status == None):
-                print "oxPush authenticate for step 3. The authentication has not been authorized by user"
+                print "oxPush. Authenticate for step 3. The authentication has not been authorized by user"
                 return False
                 
-            print "oxPush authenticate for step 3. The request was granted"
+            print "oxPush. Authenticate for step 3. The request was granted"
 
             return True
         else:
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        stringEncrypter = StringEncrypter.defaultInstance()
-
         context = Contexts.getEventContext()
 
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
         if (step == 1):
-            print "oxPush prepare for step 1"
+            print "oxPush. Prepare for step 1"
             oxpush_android_download_url = configurationAttributes.get("oxpush_android_download_url").getValue2()
             context.set("oxpush_android_download_url", oxpush_android_download_url)
         elif (step == 2):
-            print "oxPush prepare for step 2"
+            print "oxPush. Prepare for step 2"
 
             passed_step1 = self.isPassedDefaultAuthentication
             if (not passed_step1):
@@ -202,26 +207,26 @@ class PersonAuthentication(PersonAuthenticationType):
             credentials = Identity.instance().getCredentials()
             user_name = credentials.getUsername()
 
-            oxpush_user_uid_array = requestParameters.get("oxpush_user_uid")
-            if (ArrayHelper.isEmpty(oxpush_user_uid_array) or StringHelper.isEmptyString(oxpush_user_uid_array[0])):
-                print "oxPush prepare for step 2. oxpush_user_uid is empty"
+            sessionAttributes = context.get("sessionAttributes")
+            if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
+                print "oxPush. Prepare for step 2. oxpush_user_uid is empty"
 
                 # Initialize pairing process
                 pairing_process = None
                 try:
                     pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name);
                 except java.lang.Exception, err:
-                    print "oxPush prepare for step 2. Failed to initialize pairing process: ", err
+                    print "oxPush. Prepare for step 2. Failed to initialize pairing process: ", err
                     return False
 
                 if (not pairing_process.result):
-                    print "oxPush prepare for step 2. Failed to initialize pairing process"
+                    print "oxPush. Prepare for step 2. Failed to initialize pairing process"
                     return False
 
                 pairing_id = pairing_process.pairingId
-                print "oxPush prepare for step 2. Pairing Id: ", pairing_id
+                print "oxPush. Prepare for step 2. Pairing Id: ", pairing_id
     
-                context.set("oxpush_pairing_uid", stringEncrypter.encrypt(pairing_id))
+                context.set("oxpush_pairing_uid", pairing_id)
                 context.set("oxpush_pairing_code", pairing_process.pairingCode)
                 context.set("oxpush_pairing_qr_image", pairing_process.pairingQrImage)
 
@@ -268,35 +273,32 @@ class PersonAuthentication(PersonAuthenticationType):
                     response_status = self.oxPushClient.getAuthenticationStatus(request_id)
 
                 if (not response_status.result):
-                    print "oxPush checkStatus. Get false result from oxPushServer"
+                    print "oxPush. CheckStatus. Get false result from oxPushServer"
                     return None
 
                 status = response_status.status
 
                 if ("declined" == status):
-                    print "oxPush checkStatus. The process has been cancelled"
+                    print "oxPush. CheckStatus. The process has been cancelled"
                     return None
 
                 if ("expired" == status):
-                    print "oxPush checkStatus. The process has been expired"
+                    print "oxPush. CheckStatus. The process has been expired"
                     return None
 
                 if ("approved" == status):
-                    print "oxPush checkStatus. The process was approved"
+                    print "oxPush. CheckStatus. The process was approved"
                     return response_status
 
                 java.lang.Thread.sleep(2000)
                 curTime = java.lang.System.currentTimeMillis()
         except java.lang.Exception, err:
-            print "oxPush checkStatus. Could not check process status: ", err
+            print "oxPush. CheckStatus. Could not check process status: ", err
             return None
 
-        print "oxPush checkStatus. The process has not received a response from the phone yet"
+        print "oxPush. CheckStatus. The process has not received a response from the phone yet"
 
         return None
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 3

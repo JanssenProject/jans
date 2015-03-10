@@ -6,7 +6,27 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
+
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
@@ -19,8 +39,23 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.auth.Authenticator;
-import org.xdi.oxauth.model.authorize.*;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.authorize.Claim;
+import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCode;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IdToken;
+import org.xdi.oxauth.model.common.Parameters;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
@@ -29,7 +64,15 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.AuthenticationFilterService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.FederationDataService;
+import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserGroupService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.QueryStringDecoder;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
@@ -37,19 +80,7 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.security.SignatureException;
-import java.util.*;
-
-import static org.xdi.oxauth.model.util.StringUtils.implode;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -209,7 +240,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     return builder.build();
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateSessionId(user.getDn(), new Date(), prompts);
+                                    sessionUser = sessionIdService.generateAuthenticatedSessionId(user.getDn(), prompt);
                                 }
                             }
 
@@ -345,7 +376,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             String userDn = authenticationFilterService.processAuthenticationFilters(params);
                                             if (userDn != null) {
-                                                sessionUser = sessionIdService.generateSessionId(userDn, new Date(), prompts);
+                                                sessionUser = sessionIdService.generateAuthenticatedSessionId(userDn, prompt);
                                                 user = userService.getUserByDn(sessionUser.getUserDn());
 
                                                 Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
@@ -509,7 +540,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                     //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
                                     if (sessionUser.getId() == null) {
-                                        final String newSessionId = sessionIdService.generateId(sessionUser.getUserDn(), prompts);
+                                        final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(sessionUser.getUserDn(), prompt);
+                                        String newSessionId = newSessionUser.getId();
                                         sessionUser.setId(newSessionId);
                                         log.trace("newSessionId = {0}", newSessionId);
                                     }

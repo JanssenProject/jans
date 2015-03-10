@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,8 +19,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -29,24 +30,29 @@ import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
-import org.xdi.oxauth.authorize.ws.rs.AuthorizeAction;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
+import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -60,8 +66,10 @@ import org.xdi.util.StringHelper;
 @AutoCreate
 public class AuthenticationService {
 
-    private static final String STORED_REQUEST_PARAMETERS = "stored_request_parameters";
-    private static final String STORED_ORIGIN_HEADERS = "stored_origin_headers";
+    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
+            "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
+            "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_id", "request", "request_uri",
+            AuthorizeRequestParam.ORIGIN_HEADERS));
 
 	@Logger
     private Log log;
@@ -86,7 +94,16 @@ public class AuthenticationService {
     private UserService userService;
 
     @In
+    private ClientService clientService;
+
+    @In
     private SessionIdService sessionIdService;
+
+    @In
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    @In
+    private SessionId sessionUser;
 
     /**
      * Authenticate user.
@@ -280,6 +297,114 @@ public class AuthenticationService {
 		}
 	}
 
+	public void configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
+        User user = credentials.getUser();
+
+        SessionId newSessionId;
+        if (sessionId == null) {
+	        newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
+        } else {
+	        newSessionId = sessionIdService.setSessionIdAuthenticated(sessionId, user.getDn());
+        }
+
+        configureEventUserContext(newSessionId);
+	}
+
+    public SessionId configureEventUser() {
+        User user = credentials.getUser();
+        if (user == null) {
+            return null;
+        }
+
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
+
+        configureEventUserContext(sessionId);
+
+        return sessionId;
+    }
+
+    public void configureEventUser(SessionId sessionId) {
+        sessionIdService.updateSessionId(sessionId);
+
+        configureEventUserContext(sessionId);
+    }
+
+	private void configureEventUserContext(SessionId sessionId) {
+		identity.addRole("user");
+		
+		Contexts.getEventContext().set("sessionUser", sessionId);
+	}
+
+    public void configureSessionClient(Context context) {
+        identity.addRole("client");
+
+        Client client = clientService.getClient(credentials.getUsername());
+        SessionClient sessionClient = new SessionClient();
+        sessionClient.setClient(client);
+
+        context.set("sessionClient", sessionClient);
+
+        clientService.updatAccessTime(client, true);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Observer(value = { Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL })
+    public void onSuccessfulLogin() {
+        log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
+
+        if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
+        	return;
+        }
+
+        User user = userService.getUserByDn(sessionUser.getUserDn());
+
+        log.info("Attempting to redirect user. User: {0}", user);
+
+        if (user != null) {
+            final Map<String, String> result = sessionUser.getSessionAttributes();
+            Map<String, String> allowedParameters = getAllowedParameters(result);
+
+            result.put("session_id", sessionUser.getId());
+
+            log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, allowedParameters);
+            FacesManager.instance().redirect("/authorize.xhtml", (Map) allowedParameters, false);
+        }
+    }
+
+    public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
+		final Map<String, String> result = new HashMap<String, String>();
+        if (!requestParameterMap.isEmpty()) {
+            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
+            for (Map.Entry<String, String> entry : set) {
+                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        return result;
+	}
+
+    public User getUserOrRemoveSession(SessionId p_sessionId) {
+        if (p_sessionId != null) {
+            try {
+                if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
+                    final User user = userService.getUserByDn(p_sessionId.getUserDn());
+                    if (user != null) {
+                        return user;
+                    } else { // if there is no user than session is invalid
+                        sessionIdService.remove(p_sessionId);
+                    }
+                } else { // if there is no user than session is invalid
+                    sessionIdService.remove(p_sessionId);
+                }
+            } catch (Exception e) {
+                log.trace(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
     public String parametersAsString() throws UnsupportedEncodingException {
         final Map<String, String> parameterMap = getParametersMap(null);
 
@@ -311,12 +436,7 @@ public class AuthenticationService {
     }
 
     public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
-		final List<String> allowedParameters = new ArrayList<String>(AuthorizeAction.ALLOWED_PARAMETER);
-        allowedParameters.addAll(Arrays.asList("auth_mode", "auth_level", "auth_step"));
-
-        putInMap(parameterMap, "auth_mode");
-        putInMap(parameterMap, "auth_level");
-        putInMap(parameterMap, "auth_step");
+		final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
 
         if (extraParameters != null) {
             for (String extraParameter : extraParameters) {
@@ -336,94 +456,32 @@ public class AuthenticationService {
         return parameterMap;
 	}
 
-    private static void putInMap(Map<String, String> map, String p_name) {
+    private void putInMap(Map<String, String> map, String p_name) {
         if (map == null) {
             return;
         }
 
-        final Object o = Contexts.getEventContext().get(p_name);
+        String value = getParameterValue(p_name);
+
+        map.put(p_name, value);
+    }
+
+	public String getParameterValue(String p_name) {
+		final Object o = Contexts.getEventContext().get(p_name);
         if (o instanceof String) {
             final String s = (String) o;
-            map.put(p_name, s);
+            return s;
         } else if (o instanceof Boolean) {
             final Boolean b = (Boolean) o;
-            map.put(p_name, b.toString());
+            return b.toString();
         }
-    }
-
-    public void configureEventUser(boolean interactive) {
-        User user = credentials.getUser();
-        if (user != null) {
-            configureEventUser(user, interactive);
-        }
-    }
-
-    public void configureEventUser(User user, boolean interactive) {
-        final List<Prompt> prompts = new ArrayList<Prompt>();
-        if (!interactive) {
-            prompts.add(Prompt.NONE);
-        }
-
-        SessionId sessionId = sessionIdService.generateSessionId(user.getDn(), prompts);
-        sessionId.setAuthenticationTime(new Date());
-
-        configureEventUser(sessionId, prompts);
-    }
-
-    public void configureEventUser(SessionId sessionId, List<Prompt> prompts) {
-        identity.addRole("user");
-
-        sessionIdService.updateSessionWithLastUsedDate(sessionId, prompts);
-
-        Contexts.getEventContext().set("sessionUser", sessionId);
-    }
-
-    public void storeRequestParametersInSession() {
-        Contexts.getSessionContext().set(STORED_REQUEST_PARAMETERS, getParametersMap(null));
-    }
-
-    @SuppressWarnings("unchecked")
-	public Map<String, String> restoreRequestParametersFromSession() {
-    	Context eventContext = Contexts.getEventContext();
-    	Context sessionContext = Contexts.getSessionContext();
-    	if (sessionContext.isSet(STORED_REQUEST_PARAMETERS)) {
-    		Map<String, String> storedRequestParameters = (Map<String, String>) sessionContext.get(STORED_REQUEST_PARAMETERS);
-    		sessionContext.remove(STORED_REQUEST_PARAMETERS);
-    		eventContext.set(STORED_REQUEST_PARAMETERS, storedRequestParameters);
-
-    		return storedRequestParameters;
-    	}
-    	
-    	return null;
-    }
-
-	public void storeRequestHeadersInSession(HttpServletRequest request) {
-		String originHeaders = request.getParameter(AuthorizeRequestParam.ORIGIN_HEADERS);
-		if (StringHelper.isEmpty(originHeaders)) {
-			return;
-		}
-
-        log.debug("Storing origin_headers: '{0}'", originHeaders);
-		Context sessionContext = Contexts.getSessionContext();
-		sessionContext.set(STORED_ORIGIN_HEADERS, originHeaders);
-		
-//		SessionIdAttribute sessionIdAttribute = new SessionIdAttribute();
-//		sessionIdAttribute.setName(STORED_ORIGIN_HEADERS);
-//		sessionIdAttribute.setValue(originHeaders);
-//		sessionIdService.addSessionAttribute(sessionIdService.getSessionIdFromCookies(request), sessionIdAttribute);
+        
+        return null;
 	}
 
-	public String getRequestHeadersFromSession() {
-		Context sessionContext = Contexts.getSessionContext();
-		
-		if (sessionContext.isSet(STORED_ORIGIN_HEADERS)) {
-			return (String) sessionContext.get(STORED_ORIGIN_HEADERS);
-		}
-		
-		return null;
-	}
 
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);
     }
+
 }

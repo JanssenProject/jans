@@ -19,11 +19,18 @@
                 <message severity="ERROR">You don't have permissions</message>
             </redirect>
         </rule>
-
+        
         <rule if-outcome="failure">
             <end-conversation />
             <redirect view-id="/error.xhtml">
                 <message severity="ERROR">Failed to authenticate</message>
+            </redirect>
+        </rule>
+
+        <rule if-outcome="expired">
+            <end-conversation />
+            <redirect view-id="/error.xhtml">
+                <message severity="ERROR">Failed to authenticate. Authentication session has expired</message>
             </redirect>
         </rule>
     </navigation>

@@ -33,6 +33,7 @@ import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
@@ -89,13 +90,14 @@ public class AuthenticationFilter extends AbstractFilter {
                             httpResponse.sendError(401, "Not authorized");
                         }
                     } else {
+                    	SessionIdService sessionIdService = SessionIdService.instance();
                         String sessionId = httpRequest.getParameter("session_id");
                         if (StringUtils.isBlank(sessionId)) {
                             // OXAUTH-297 : check whether session_id is present in cookie
-                            sessionId = SessionIdService.instance().getSessionIdFromCookie(httpRequest);
+                            sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
                         }
                         if (StringUtils.isNotBlank(sessionId)) {
-                            processSessionAuth(sessionId, httpRequest, httpResponse, filterChain);
+                            processSessionAuth(sessionId, sessionIdService, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);
                         }
@@ -109,9 +111,12 @@ public class AuthenticationFilter extends AbstractFilter {
         }.run();
     }
 
-    private void processSessionAuth(String p_sessionId, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
-        boolean requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
-        log.trace("processSessionAuth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+    private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
+    	boolean requireAuth;
+
+        requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
+        log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+
         if (!requireAuth) {
             try {
                 p_filterChain.doFilter(p_httpRequest, p_httpResponse);

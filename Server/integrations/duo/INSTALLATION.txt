@@ -22,7 +22,7 @@ This list of steps needed to do to enable DUO athentication module.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 
-5. Configure Confire oTrust to use DUO person authentication by default:
+5. Configure oTrust to use DUO person authentication by default:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "duo" authentication mode.

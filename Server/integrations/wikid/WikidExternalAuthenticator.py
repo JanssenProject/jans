@@ -13,7 +13,17 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
+        print "Wikid. Initialization"
+        print "Wikid. Initialized successfully"
         return True   
+
+    def destroy(self, configurationAttributes):
+        print "Wikid. Destroy"
+        print "Wikid. Destroyed successfully"
+        return True
+
+    def getApiVersion(self):
+        return 1
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -24,10 +34,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getApplicationContext()
 
-        print "Wikid authentication. Cheking client"
+        print "Wikid. Authentication. Cheking client"
         wc = context.get("wClient")
         if ((wc is None) or (not wc.isConnected())):
-            print "Wikid authenticate for step 1. Creating new client."
+            print "Wikid. Authenticate for step 1. Creating new client."
             wikid_server_host = configurationAttributes.get("wikid_server_host").getValue2()
             wikid_server_port = int(configurationAttributes.get("wikid_server_port").getValue2())
     
@@ -40,7 +50,7 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("wClient", wc)
 
         if (step == 1):
-            print "Wikid authenticate for step 1"
+            print "Wikid. Authenticate for step 1"
 
             credentials = Identity.instance().getCredentials()
             user_name = credentials.getUsername()
@@ -56,30 +66,30 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return wc.isConnected()
         elif (step == 2):
-            print "Wikid authenticate for step 2"
+            print "Wikid. Authenticate for step 2"
             wc = context.get("wClient")
             if (wc is None):
-                print "Wikid client is invalid"
+                print "Wikid. Authenticate. Client is invalid"
                 return False
 
             wikid_user_array = requestParameters.get("username")
             wikid_passcode_array = requestParameters.get("passcode")
             if ArrayHelper.isEmpty(wikid_user_array) or  ArrayHelper.isEmpty(wikid_passcode_array):
-                print "Username or passcode is empty"
+                print "Wikid. Authenticate. Username or passcode is empty"
                 return False
 
             wikid_user = wikid_user_array[0]
             wikid_passcode = wikid_passcode_array[0]
             wikid_server_code = configurationAttributes.get("wikid_server_code").getValue2()
 
-            print "Wikid authenticate for step 2 wikid_user: " + wikid_user
+            print "Wikid. Authenticate for step 2 wikid_user: " + wikid_user
 
             is_valid = wc.CheckCredentials(wikid_user, wikid_passcode, wikid_server_code);
 
             if is_valid:
-                print "Wikid authenticate for step 2. wikid_user: " + wikid_user + " authenticated successfully"
+                print "Wikid. Authenticate for step 2. wikid_user: " + wikid_user + " authenticated successfully"
             else:
-                print "Wikid authenticate for step 2. Failed to authenticate. wikid_user: " + wikid_user
+                print "Wikid. Authenticate for step 2. Failed to authenticate. wikid_user: " + wikid_user
 
             return is_valid
         else:
@@ -90,11 +100,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
-            print "Wikid prepare for step 1"
+            print "Wikid. Prepare for step 1"
 
             return True
         elif (step == 2):
-            print "Wikid prepare for step 2"
+            print "Wikid. Prepare for step 2"
 
             return True
         else:
@@ -110,6 +120,3 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-
-    def getApiVersion(self):
-        return 3

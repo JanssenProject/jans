@@ -6,22 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -29,7 +13,6 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.faces.FacesManager;
@@ -43,25 +26,28 @@ import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserGroupService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
@@ -70,10 +56,6 @@ import org.xdi.util.StringHelper;
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
 public class AuthorizeAction {
-
-    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
-            "scope", "response_type", "client_id", "redirect_uri", "state", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr_values", "amr_values", "session_id", "request", "request_uri"));
 
     @Logger
     private Log log;
@@ -104,9 +86,6 @@ public class AuthorizeAction {
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
-
-    @In
-    private SessionId sessionUser;
 
     @In("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
@@ -161,36 +140,19 @@ public class AuthorizeAction {
         }
     }
 
-    private SessionId getSession() {
-        initSessionId();
-
-        // todo : quickfix
-        if (!identity.isLoggedIn()) {
-            final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-            authenticator.authenticateBySessionId(sessionId);
-        }
-        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
-        if (ldapSessionId == null) {
-        	identity.logout();
-        }
-        
-        return ldapSessionId;
-    }
-
     public void checkPermissionGranted() {
-        final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-
         final SessionId session = getSession();
-        authenticationService.storeRequestHeadersInSession((HttpServletRequest) externalContext.getRequest());
+        List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
-        if (session == null || session.getUserDn() == null) {
+        if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
+            final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
+            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-            	
             	List<String> acrValuesList = null;
             	try {
 					acrValuesList = Util.jsonArrayStringAsList(this.acrValues);
@@ -214,13 +176,11 @@ public class AuthorizeAction {
                 }
 
                 this.authMode = customScriptConfiguration.getName();
+                this.authLevel = Integer.toString(customScriptConfiguration.getLevel());
 
-                // Set updated authentication parameters
-                parameterMap = new HashMap<String, String>(parameterMap);
-                parameterMap.remove("auth_level");
-
-                parameterMap.put("auth_mode", this.authMode);
-                parameterMap.put("auth_step", Integer.toString(1));
+                requestParameterMap.put("auth_mode", this.authMode);
+                requestParameterMap.put("auth_level", this.authLevel);
+                requestParameterMap.put("auth_step", Integer.toString(1));
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
@@ -229,11 +189,23 @@ public class AuthorizeAction {
                 }
             }
 
-            FacesManager.instance().redirect(redirectTo, (Map) parameterMap, false);
+            // Create unauthenticated session
+            SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            unauthenticatedSession.setSessionAttributes(requestParameterMap);
+            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
+            if (persisted && log.isTraceEnabled()) {
+            	log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
+            }
+
+            this.sessionId = unauthenticatedSession.getId();
+            sessionIdService.createSessionIdCookie(this.sessionId);
+
+            FacesManager.instance().redirect(redirectTo, null, false);
             return;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
+
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
@@ -261,16 +233,15 @@ public class AuthorizeAction {
                         permissionDenied();
                     } else if (FederationDataService.skipAuthorization(list)) {
                         log.trace("Skip authorization (permissions granted), client is in federation trust where skip is allowed, client: {1}", client.getDn());
-                        permissionGranted();
+                        permissionGranted(session);
                     }
                 }
 
-                List<Prompt> prompts = Prompt.fromString(prompt, " ");
                 if (AuthorizeParamsValidator.validatePrompt(prompts)) {
                     // if trusted client = true, then skip authorization page and grant access directly
                     if (ConfigurationFactory.getConfiguration().getTrustedClientEnabled()) {
                         if (Boolean.parseBoolean(client.getTrustedClient()) && !prompts.contains(Prompt.CONSENT)) {
-                            permissionGranted();
+                            permissionGranted(session);
                         }
                     } else {
                         consentRequired();
@@ -282,90 +253,25 @@ public class AuthorizeAction {
         }
     }
 
-    private void initSessionId() {
-        if (StringUtils.isBlank(sessionId)) {
-            try {
-                final Object request = FacesContext.getCurrentInstance().getExternalContext().getRequest();
-                sessionId = SessionIdService.instance().getSessionIdFromCookie((HttpServletRequest) request);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    @Observer(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL)
-    public void onSuccessfulLogin(String authMode, Map<String, String> requestParameterMap) {
-        onSuccessfulLoginImpl(authMode, requestParameterMap);
-    }
-
-    @Observer(Identity.EVENT_LOGIN_SUCCESSFUL)
-    public void onSuccessfulLogin() {
-        onSuccessfulLoginImpl(null, null);
-    }
-
-    public void onSuccessfulLoginImpl(String authMode, Map<String, String> requestParameterMap) {
-        log.info("Attempting to redirect user. SessionUser: {0}", sessionUser);
-
-        User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
-                userService.getUserByDn(sessionUser.getUserDn()) : null;
-        if (sessionUser != null) {
-            sessionUser.setAuthenticationTime(new Date());
-        }
-        sessionIdService.updateSessionWithLastUsedDate(sessionUser, Prompt.fromString(prompt, " "));
-
-        log.info("Attempting to redirect user. User: {0}", user);
-
-        if (user != null) {
-            final Map<String, Object> map;
-            if (requestParameterMap == null) {
-                map = parametersForRedirect(user);
-            } else {
-                map = parametersForRedirect(user, requestParameterMap);
-            }
-
-            addAuthModeParameters(map, authMode);
-
-            log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, map);
-            FacesManager.instance().redirect("/authorize.xhtml", map, false);
-        }
-    }
-
-    private Map<String, Object> parametersForRedirect(User p_user) {
-        final Map<String, String> parameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        return parametersForRedirect(p_user, parameterMap);
-    }
-
-    private Map<String, Object> parametersForRedirect(User p_user, final Map<String, String> requestParameterMap) {
-        final Map<String, Object> result = new HashMap<String, Object>();
-        if (requestParameterMap != null && !requestParameterMap.isEmpty()) {
-            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
-            for (Map.Entry<String, String> entry : set) {
-                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
+    private SessionId getSession() {
+        if (StringUtils.isBlank(this.sessionId)) {
+            this.sessionId = sessionIdService.getSessionIdFromCookie();
+            if (StringUtils.isBlank(this.sessionId)) {
+                return null;
             }
         }
 
-        if (!result.isEmpty()) {
-            if (sessionUser == null || sessionUser.getId() == null) {
-                sessionUser = sessionIdService.generateSessionIdInteractive(p_user.getDn());
-            }
-
-            result.put("session_id", sessionUser.getId());
+        if (!identity.isLoggedIn()) {
+            final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
+            authenticator.authenticateBySessionId(sessionId);
         }
 
-        return result;
-    }
-
-    public void addAuthModeParameters(final Map<String, Object> parameterMap, String authMode) {
-        // Add authentication mode and authentication level parameters
-        if (StringHelper.isNotEmpty(authMode)) {
-            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, authMode);
-            if (customScriptConfiguration != null) {
-                parameterMap.put("auth_mode", customScriptConfiguration.getName());
-                parameterMap.put("auth_level", customScriptConfiguration.getLevel());
-            }
+        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
+        if (ldapSessionId == null) {
+            identity.logout();
         }
+
+        return ldapSessionId;
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
@@ -628,11 +534,10 @@ public class AuthorizeAction {
         sessionId = p_sessionId;
     }
 
-    public void permissionGranted() {
+    public void permissionGranted(SessionId session) {
         try {
-            SessionId session = getSession();
             session.addPermission(clientId, true);
-            sessionIdService.updateSessionWithLastUsedDate(session, Prompt.fromString(prompt, " "));
+            sessionIdService.updateSessionId(session);
 
             // OXAUTH-297 - set session_id cookie, secure=true
             SessionIdService.instance().createSessionIdCookie(sessionId);

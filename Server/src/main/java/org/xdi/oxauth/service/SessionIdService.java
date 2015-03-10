@@ -6,18 +6,9 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -31,14 +22,22 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdAttribute;
+import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,6 +51,7 @@ import com.unboundid.util.StaticUtils;
 public class SessionIdService {
 
     private static final String SESSION_ID_COOKIE_NAME = "session_id";
+    private static final String STORED_ORIGIN_PARAMETERS = "stored_origin_parameters";
 
     @Logger
     private Log log;
@@ -72,7 +72,7 @@ public class SessionIdService {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(SESSION_ID_COOKIE_NAME) /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_id cookie: {0}", cookie.getValue());
+                        log.trace("Found session_id cookie: '{0}'", cookie.getValue());
                         return cookie.getValue();
                     }
                 }
@@ -82,6 +82,17 @@ public class SessionIdService {
         }
         return "";
     }
+
+    public String getSessionIdFromCookie() {
+		try {
+		    final HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		    return getSessionIdFromCookie(request);
+		} catch (Exception e) {
+		    log.error(e.getMessage(), e);
+		}
+
+		return null;
+	}
 
     public String getSessionIdFromOpbsCookie(HttpServletRequest request) {
         try {
@@ -89,7 +100,7 @@ public class SessionIdService {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals("opbs") /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_id cookie: {0}", cookie.getValue());
+                        log.trace("Found session_id cookie: '{0}'", cookie.getValue());
                         return cookie.getValue();
                     }
                 }
@@ -97,17 +108,8 @@ public class SessionIdService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+
         return "";
-    }
-
-    public String getSessionIdFromCookies(HttpServletRequest request) {
-    	String sessionId = getSessionIdFromOpbsCookie(request);
-    	
-    	if (StringHelper.isEmpty(sessionId)) {
-    		sessionId = getSessionIdFromCookie(request);
-    	}
-
-    	return sessionId;
     }
 
     public void createSessionIdCookie(String sessionId) {
@@ -150,52 +152,156 @@ public class SessionIdService {
         httpResponse.addCookie(cookie);
     }
 
-    public String generateId(String p_userDn, List<Prompt> prompts) {
-        final SessionId id = generateSessionId(p_userDn, prompts);
-        if (id != null) {
-            return id.getId();
+    public SessionId getSessionId() {
+    	String sessionId = getSessionIdFromCookie();
+
+        if (StringHelper.isNotEmpty(sessionId)) {
+            return getSessionId(sessionId);
         }
-        return "";
+        
+        return null;
     }
 
-    public SessionId generateSessionIdInteractive(String p_userDn) {
-        return generateSessionId(p_userDn, new ArrayList<Prompt>());
+    public Map<String, String> getSessionAttributes(SessionId sessionId) {
+    	if (sessionId != null) {
+    		return sessionId.getSessionAttributes();
+    	}
+    	
+		return null;
     }
 
-    public SessionId generateSessionId(String p_userDn, Date authenticationDate, List<Prompt> prompts) {
-        try {
+    public SessionId generateAuthenticatedSessionId(String userDn) {
+    	return generateAuthenticatedSessionId(userDn, "");
+    }
+
+    public SessionId generateAuthenticatedSessionId(String userDn, String prompt) {
+    	Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+    	sessionIdAttributes.put("prompt", prompt);
+
+    	return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    }
+
+    public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
+    	return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    }
+
+	public SessionId generateSessionId(String p_userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
             final String uuid = UUID.randomUUID().toString();
             final String dn = dn(uuid);
 
-            if (Util.allNotBlank(p_userDn, dn)) {
-                final SessionId sessionId = new SessionId();
-                sessionId.setId(uuid);
-                sessionId.setDn(dn);
-                sessionId.setLastUsedAt(new Date());
-                sessionId.setUserDn(p_userDn);
-                if (authenticationDate != null) {
-                    sessionId.setAuthenticationTime(authenticationDate);
-                }
+            if (StringUtils.isBlank(dn)) {
+        		return null;
+        	}
 
-                final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-                FacesContext facesContext = FacesContext.getCurrentInstance();
-                if (facesContext != null) {
-                    Cookie cookie = new Cookie("opbs", uuid);
-                    cookie.setMaxAge(unusedLifetime);
-                    ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
-                }
-
-                if (unusedLifetime > 0 && isPersisted(prompts)) {
-                    ldapEntryManager.persist(sessionId);
-                }
-                log.trace("Generated new session, id = {0}", sessionId.getId());
-                return sessionId;
+            if (SessionIdState.AUTHENTICATED == state) {
+                if (StringUtils.isBlank(p_userDn)) {
+            		return null;
+            	}
             }
+
+            final SessionId sessionId = new SessionId();
+            sessionId.setId(uuid);
+            sessionId.setDn(dn);
+
+            if (StringUtils.isNotBlank(p_userDn)) {
+            	sessionId.setUserDn(p_userDn);
+            }
+
+            if (authenticationDate != null) {
+                sessionId.setAuthenticationTime(authenticationDate);
+            }
+            
+        	if (state != null) {
+            	sessionId.setState(state);
+            }
+
+        	configureOpbsCookie(sessionId);
+        	
+        	sessionId.setSessionAttributes(sessionIdAttributes);
+
+            boolean persisted = false;
+            if (persist) {
+            	persisted = persistSessionId(sessionId);
+            }
+
+            log.trace("Generated new session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
+            return sessionId;
+    }
+
+    public SessionId setSessionIdAuthenticated(SessionId sessionId, String p_userDn) {
+       	sessionId.setUserDn(p_userDn);
+        sessionId.setAuthenticationTime(new Date());
+       	sessionId.setState(SessionIdState.AUTHENTICATED);
+
+    	configureOpbsCookie(sessionId);
+
+        boolean persisted = updateSessionId(sessionId, true, true);
+
+        log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionId.getId(), sessionId.getState(), persisted);
+        return sessionId;
+}
+
+	private void configureOpbsCookie(SessionId sessionId) {
+		final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if (facesContext != null) {
+            Cookie cookie = new Cookie("opbs", sessionId.getId());
+            cookie.setMaxAge(unusedLifetime);
+            ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
+        }
+	}
+
+    public boolean persistSessionId(final SessionId sessionId) {
+        return persistSessionId(sessionId, false);
+    }
+
+	public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
+		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
+
+        try {
+        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+			if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
+	            sessionId.setLastUsedAt(new Date());
+
+	            sessionId.setPersisted(true);
+	            ldapEntryManager.persist(sessionId);
+		        return true;
+			}
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return null;
+
+        return false;
+	}
+
+    public boolean updateSessionId(final SessionId sessionId) {
+        return updateSessionId(sessionId, true);
     }
+
+    public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
+        return updateSessionId(sessionId, updateLastUsedAt, false);
+    }
+
+	public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt, boolean forceUpdate) {
+		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
+
+		try {
+        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+			if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
+                if (updateLastUsedAt) {
+	                sessionId.setLastUsedAt(new Date());
+                }
+
+	            sessionId.setPersisted(true);
+	            ldapEntryManager.merge(sessionId);
+			}
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+
+		return true;
+	}
 
     private static boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
@@ -203,10 +309,6 @@ public class SessionIdService {
             return persistOnPromptNone != null && persistOnPromptNone;
         }
         return true;
-    }
-
-    public SessionId generateSessionId(String p_userDn, List<Prompt> prompts) {
-        return generateSessionId(p_userDn, null, prompts);
     }
 
     private static String dn(String p_id) {
@@ -222,7 +324,7 @@ public class SessionIdService {
         try {
             return ldapEntryManager.find(SessionId.class, p_dn);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }
@@ -232,8 +334,14 @@ public class SessionIdService {
             return null;
         }
 
+        String dn = dn(sessionId);
+        boolean contains = containsSessionId(dn);
+    	if (!contains) {
+    		return null;
+    	}
+
         try {
-        	final SessionId entity = getSessionByDN(dn(sessionId));
+        	final SessionId entity = getSessionByDN(dn);
             log.trace("Try to get session by id: {0} ...", sessionId);
             if (entity != null) {
                 log.trace("Session dn: {0}", entity.getDn());
@@ -242,12 +350,22 @@ public class SessionIdService {
                     return entity;
                 }
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception ex) {
+            log.trace(ex.getMessage(), ex);
         }
 
         log.trace("Failed to get session by id: {0}", sessionId);
         return null;
+    }
+
+    public boolean containsSessionId(String dn) {
+        try {
+            return ldapEntryManager.contains(SessionId.class, dn);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
+
+        return false;
     }
 
     private static String getBaseDn() {
@@ -265,30 +383,31 @@ public class SessionIdService {
         return true;
     }
 
-    public void updateSessionWithLastUsedDate(SessionId p_sessionId) {
-        updateSessionWithLastUsedDate(p_sessionId, new ArrayList<Prompt>());
-    }
-
-    public void updateSessionWithLastUsedDate(SessionId p_sessionId, List<Prompt> prompts) {
-            if (!isPersisted(prompts)) {
-                return;
-            }
-
-            final Date newDate = new Date();
-    		p_sessionId.setLastUsedAt(newDate);
-
-    		updateSession(p_sessionId);
+    public void remove(List<SessionId> list) {
+        for (SessionId id : list) {
+            remove(id);
+        }
     }
 
     public void cleanUpSessions() {
         final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-        final List<SessionId> list = getIdsOlderThan(interval);
-        if (list != null && !list.isEmpty()) {
-            for (SessionId id : list) {
-                remove(id);
-            }
-        }
+        final int unauthenticatedInterval = ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime();
+
+        remove(getUnauthenticatedIdsOlderThan(unauthenticatedInterval));
+        remove(getIdsOlderThan(interval));
     }
+
+    public List<SessionId> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {
+        try {
+            final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
+            final Filter filter = Filter.create(String.format("&(lastModifiedTime<=%s)(oxState=unauthenticated)", StaticUtils.encodeGeneralizedTime(new Date(dateInPast))));
+            return ldapEntryManager.findEntries(getBaseDn(), SessionId.class, filter);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
+
 
     public List<SessionId> getIdsOlderThan(int p_intervalInSeconds) {
         try {
@@ -306,47 +425,23 @@ public class SessionIdService {
             return false;
         }
 
-        final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-        final long sessionInterval = TimeUnit.SECONDS.toMillis(interval);
+        final long sessionInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime());
+        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
-        if (timeSinceLastAccess > sessionInterval) {
+        if (timeSinceLastAccess > sessionInterval && ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime() != -1) {
+            return false;
+        }
+        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime() != -1) {
             return false;
         }
 
         return true;
     }
 
-	public boolean updateSession(SessionId p_sessionId) {
-		try {
-			ldapEntryManager.merge(p_sessionId);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			
-			return false;
-		}
-
-		return true;
+	private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {
+    	String promptParam = sessionId.getSessionAttributes().get("prompt");
+		return Prompt.fromString(promptParam, " ");
 	}
-    
-    public void addSessionAttribute(String sessionId, SessionIdAttribute sessionIdAttribute) {
-    	if (StringHelper.isEmpty(sessionId)) {
-    		return;
-    	}
-
-    	SessionId entity = getSessionId(sessionId);
-
-    	SessionIdAttribute[] sessionIdAttributes = entity.getSessionIdAttributes();
-    	SessionIdAttribute[] newSessionIdAttributes;
-    	if (ArrayHelper.isEmpty(sessionIdAttributes)) {
-    		newSessionIdAttributes = new SessionIdAttribute[] {sessionIdAttribute};
-    	} else {
-    		newSessionIdAttributes = ArrayHelper.arrayMerge(sessionIdAttributes, new SessionIdAttribute[] { sessionIdAttribute }); 
-    	}
-
-    	entity.setSessionIdAttributes(newSessionIdAttributes);
-    	
-    	updateSession(entity);
-    }
 
 }

@@ -8,12 +8,10 @@
     <listener>
         <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
     </listener>
-${web.xml.php-bridge.listener}
     <filter>
         <filter-name>Seam Filter</filter-name>
         <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
     </filter>
-${web.xml.php-bridge.filter}
     <filter-mapping>
         <filter-name>Seam Filter</filter-name>
         <url-pattern>/*</url-pattern>
@@ -43,7 +41,6 @@ ${web.xml.php-bridge.filter}
         <servlet-name>WebFinger</servlet-name>
         <url-pattern>/.well-known/webfinger</url-pattern>
     </servlet-mapping>
-${web.xml.php-bridge.servlet}
     <!-- Facelets development mode (disable in production) -->
     <context-param>
         <param-name>facelets.DEVELOPMENT</param-name>
