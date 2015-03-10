@@ -1,4 +1,4 @@
-This is custom authentication module for oxAuth which allows to specify multiple authentication configurations.
+This is person authentication module for oxAuth which allows to specify multiple authentication configurations.
 
 This module has only one property:
 1) auth_configuration_file - It's path to file which contains AD LDAP authentication connection details and list of attributes which user can use in order to log in.

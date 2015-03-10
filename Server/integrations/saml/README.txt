@@ -1,4 +1,4 @@
-This is SAML custom authentication modules for oxAuth. It allows to configure oxAuth to use 2 factor authentication for interactive user logins.
+This is SAML person authentication modules for oxAuth. It allows to configure oxAuth to use 2 factor authentication for interactive user logins.
 
 This module has next properties:
 1) saml_certificate_file - It's path to file which contains public IdP certificate in.

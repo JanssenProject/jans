@@ -1,4 +1,4 @@
-This list of steps needed to do to enable Basic authentication module.
+This list of steps needed to do to enable Basic person authentication module.
 
 1. Confire new custom module in oxTrust:
     - Log into oxTrust with administrative permissions.
