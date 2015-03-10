@@ -877,6 +877,12 @@ class Setup(object):
         if self.components['asimba']['enabled']:
             asimbaWar = 'oxasimba.war'
             distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+
+            # Asimba is not part of CE package. We need to download it if needed
+            if not os.path.exists(distAsimbaPath):
+                print "Downloading latest Asimba war file..."
+                self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
             self.logIt("Unpacking %s..." % asimbaWar)
