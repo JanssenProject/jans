@@ -93,33 +93,19 @@
 				<profile id="remote.saml2" />
 			</authentication>
 
-    <!--
-       This configuration is for SP which will be connected with Asimba server.
-       Add SP / protecte location in requestFactory section.
-       * Requestor ID: It should be the entityID of SP
-       * FriendlyName: It can be anything. Should be human readable.
-       * enabled: true -->
+		    <!--
+		       This configuration is for SP which will be connected with Asimba server.
+		       Add SP / protecte location in requestFactory section.
+		       * Requestor ID: It should be the entityID of SP
+		       * FriendlyName: It can be anything. Should be human readable.
+		       * enabled: true -->
 
-            <requestors>
-<!--                
-                <requestor id="$$ENTITYID_OF_SP_1"
-                    friendlyname="$$FRIENDLYNAME_FOR_SP"
-                    enabled="true" />
--->
-            </requestors>
+			<requestors>
+				<requestor id="http://sptest2.gluu.org/secure" friendlyname="Gluu Test SP"
+					enabled="true" />
+			</requestors>			
 
-            <!--START: Demo -->
-  			<requestor id="demo-aselect-sp" friendlyname="Test Request A-Select SP" enabled="true">
-				<properties>
-					<property name="aselect.app_level" value="9" />
-				</properties>                    
-			</requestor>
-			<requestor id="localhost/AsimbaSimpleSP" 
-				friendlyname="Asimba Simple SP" 
-				enabled="true" />
-            <!--END: Demo -->
-			
-            <authorization>
+			<authorization>
                 <post profile="postauthz.1" />
             </authorization>
 
@@ -164,7 +150,7 @@
 					    <!-- When IDP could not be automatically selected, use a selector component to select an IDP -->
 		                <selector
 		                    class="com.alfaariss.oa.authentication.remote.saml2.selector.DefaultSelector"
-		                    always_show_select_form="false" />
+		                    always_show_select_form="true" />
 
                   
 						<!-- Indicate whether logout is supported by the SAML-SP profile -->
@@ -185,20 +171,18 @@
 							* avoid_subjectconfirmation: false
 							* nameidpolicy enabled: false
 							* �file�: Provide the absolute location of metadata -->
-
+					
 						<idps id="saml2idps-chained"
-                                class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
-
-                                <!-- our own trusted idp federation -->
-<!--                                
-                                    <idp id="<$$ENTITYID_OF_IDP_1" friendlyname="<$$FRIENDLYNAME_OF_IDP_1" scoping="true"
-                                        avoid_subjectconfirmation="false">
-                                        <nameidpolicy enabled="false" />
-                                            <metadata>
-                                                <file>${webapp.root}/WEB-INF/metadata/idp/$METADATA_OF_IDP_1.xml</file>
-                                            </metadata>
-                                    </idp>
- -->
+							class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
+					
+							<idp id="https://%(hostname)s/idp/shibboleth" friendlyname="Gluu Server CE"
+								scoping="false" avoid_subjectconfirmation="false">
+					
+								<nameidpolicy enabled="false" />
+								<metadata>
+									<file>/opt/idp/metadata/%(inumOrgFN)s-idp-metadata.xml</file>
+								</metadata>
+							</idp>
 						</idps>
 					</method>
 				</methods>
@@ -232,11 +216,11 @@
                     requestor id: entityID of remote SP/protected location
                     �file�: Absolute path of SP metadata. -->
 
-			<requestors signing="TRUE">
-				<requestor id="localhost/AsimbaSimpleSP" 
+			<requestors signing="FALSE">
+				<requestor id="http://sptest2.gluu.org/secure" 
 						signing="FALSE">
 					<metadata>
-						<file>${webapp.root}/WEB-INF/sample-data/metadata-asimbasimplesp.xml</file>
+						<file>${webapp.root}/WEB-INF/sample-data/sptest2.xml</file>
 						<!-- when metadata is sourced from a URL instead, the configuration could look like this:
 						<http timeout="10000" url="http://my.serviceprovider.com/sp/metadata" />
 						 -->
@@ -307,7 +291,6 @@
 					</bindings>
 					
 					<nameid default="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">
-					<!-- --> 
 						<format id="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">
 							<!-- attribute@name: optional user attribute name that is used to build specified NameID format 
 							     must be provided when setting opaque to be disabled 
@@ -368,6 +351,21 @@
 						</format>
 					</nameid>
 				</profile> <!-- sso/logout -->
+
+				<!-- SAML Profiles configuration -->
+				<profile id="sp/sso/web"
+					class="com.alfaariss.oa.authentication.remote.saml2.profile.re.ResponseEndpoint">
+					<signing authnRequestsSigned="true" wantAssertionsSigned="true" />
+					<bindings default="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST">
+							<property name="path" value="/ui/profiles/saml2/http-post.jsp" />
+						</binding>
+						<binding id="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact">
+							<property name="post" value="false" />
+							<property name="path" value="/ui/profiles/saml2/http-artifact-post.jsp" />
+						</binding>
+					</bindings>
+				</profile> <!-- sp/sso/web -->
 				
 			</profiles>
 			
