@@ -7,8 +7,6 @@
 package org.xdi.oxauth.comp;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionId;
@@ -31,22 +29,19 @@ import static org.testng.Assert.*;
 
 public class SessionIdServiceTest extends BaseComponentTest {
 
-    private SessionId m_sessionId;
     private SessionIdService m_service;
 
-    @BeforeTest
     @Override
     public void beforeClass() {
         m_service = SessionIdService.instance();
-        m_sessionId = m_service.generateSessionId("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
-    @AfterTest
     @Override
     public void afterClass() {
-        if (m_sessionId != null) {
-            getLdapManager().remove(m_sessionId);
-        }
+    }
+
+    private SessionId generateSession() {
+        return m_service.generateSessionId("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
     @Test
@@ -55,6 +50,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         // set time -1 hour
         Calendar c = Calendar.getInstance();
         c.add(Calendar.HOUR, -1);
+        SessionId m_sessionId = generateSession();
         m_sessionId.setLastUsedAt(c.getTime());
         m_service.updateSessionId(m_sessionId, false);
 
@@ -91,6 +87,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
     @Test
     public void testUpdateLastUsedDate() {
+        SessionId m_sessionId = generateSession();
         final SessionId fromLdap1 = m_service.getSessionByDN(m_sessionId.getDn());
         final Date createdDate = m_sessionId.getLastUsedAt();
         System.out.println("Created date = " + createdDate);
@@ -106,6 +103,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
     @Test
     public void testUpdateAttributes() {
+        SessionId m_sessionId = generateSession();
         final String clientId = "testClientId";
         final SessionId fromLdap1 = m_service.getSessionByDN(m_sessionId.getDn());
         final Date createdDate = m_sessionId.getLastUsedAt();
@@ -126,8 +124,9 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
     @Test
     public void testOldSessionsIdentification() {
-        sleepSeconds(2);
+        SessionId m_sessionId = generateSession();
 
+        sleepSeconds(2);
         Assert.assertTrue(m_service.getIdsOlderThan(1).contains(m_sessionId));
     }
 }
