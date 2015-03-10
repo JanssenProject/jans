@@ -7,6 +7,8 @@
 package org.xdi.oxauth.comp;
 
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionId;
@@ -32,12 +34,14 @@ public class SessionIdServiceTest extends BaseComponentTest {
     private SessionId m_sessionId;
     private SessionIdService m_service;
 
+    @BeforeTest
     @Override
     public void beforeClass() {
         m_service = SessionIdService.instance();
         m_sessionId = m_service.generateSessionId("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
+    @AfterTest
     @Override
     public void afterClass() {
         if (m_sessionId != null) {
@@ -67,7 +71,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
             newId = m_service.generateAuthenticatedSessionId("dummyDn1");
 
             Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
-            
+
             Map<String, String> sessionAttributes = new HashMap<String, String>();
             sessionAttributes.put("k1", "v1");
             newId.setSessionAttributes(sessionAttributes);
