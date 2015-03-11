@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.model.registration;
 
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -21,22 +13,37 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.Util;
+
+import javax.ws.rs.HttpMethod;
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the register web service.
  *
- * @author Javier Rojas Date: 01.13.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 March 11, 2015
  */
 public class RegisterParamsValidator {
 
-    private final static Log LOG = Logging.getLog(RegisterParamsValidator.class);
+    private static final Log LOG = Logging.getLog(RegisterParamsValidator.class);
+
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
+    private static final String LOCALHOST = "localhost";
 
     /**
      * Validates the parameters for a register request.
      *
-     * @param applicationType     native or web.
+     * @param applicationType     The Application Type: native or web.
      * @param redirectUris        Space-separated list of redirect URIs.
      * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
      *                            The URL contains a file with a single JSON array of redirect_uri values.
@@ -48,6 +55,11 @@ public class RegisterParamsValidator {
 
         if (validParams && StringUtils.isNotBlank(sectorIdentifierUrl)) {
             try {
+                URI uri = new URI(sectorIdentifierUrl);
+                if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
+                    return false;
+                }
+
                 ClientRequest clientRequest = new ClientRequest(sectorIdentifierUrl);
                 clientRequest.setHttpMethod(HttpMethod.GET);
 
@@ -92,10 +104,17 @@ public class RegisterParamsValidator {
         return StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(accessToken);
     }
 
-    public static boolean validateRedirectUris(ApplicationType applicationType, List<String> redirectUris) {
-        final String HTTP = "http";
-        final String HTTPS = "https";
-        final String LOCALHOST = "localhost";
+    /**
+     * @param applicationType     The Application Type: native or web.
+     * @param subjectType         Subject Type requested for responses to this Client.
+     * @param redirectUris        Redirection URI values used by the Client.
+     * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
+     *                            The URL contains a file with a single JSON array of redirect_uri values.
+     * @return Whether the Redirect URI parameters are valid or not.
+     */
+    public static boolean validateRedirectUris(ApplicationType applicationType, SubjectType subjectType,
+                                               List<String> redirectUris, String sectorIdentifierUrl) {
+        Set<String> redirectUriHosts = new HashSet<String>();
 
         try {
             if (redirectUris != null && !redirectUris.isEmpty()) {
@@ -104,6 +123,7 @@ public class RegisterParamsValidator {
                         return false;
                     } else {
                         URI uri = new URI(redirectUri);
+                        redirectUriHosts.add(uri.getHost());
                         switch (applicationType) {
                             case WEB:
                                 if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
@@ -129,6 +149,22 @@ public class RegisterParamsValidator {
             return false;
         }
 
+        /*
+         * Providers that use pairwise sub (subject) values SHOULD utilize the sector_identifier_uri value
+         * provided in the Subject Identifier calculation for pairwise identifiers.
+         *
+         * If the Client has not provided a value for sector_identifier_uri in Dynamic Client Registration,
+         * the Sector Identifier used for pairwise identifier calculation is the host component of the
+         * registered redirect_uri.
+         *
+         * If there are multiple hostnames in the registered redirect_uris, the Client MUST register a
+         * sector_identifier_uri.
+         */
+        if (subjectType != null && subjectType.equals(SubjectType.PAIRWISE) && StringUtils.isBlank(sectorIdentifierUrl)) {
+            if (redirectUriHosts.size() > 1) {
+                return false;
+            }
+        }
 
         return true;
     }
