@@ -10,12 +10,28 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: inum
-oxAuthClaimName: sub
+oxAuthClaimName: inum
 gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:inum
+description: XRI i-number, persistent non-reassignable identifier
+
+dn: inum=%(inumOrg)s!0005!18CB,ou=attributes,o=%(inumOrg)s,o=gluu
+displayName: oxAuth Subject Identifier
+gluuAttributeName: oxAuthSubjectIdentifier
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: user
+gluuAttributeViewType: admin
+gluuLdapAttributeName: oxAuthSubjectIdentifier
+oxAuthClaimName: sub
+gluuStatus: active
+inum: %(inumOrg)s!0005!18CB
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:gluu:dir:attribute-def:oxAuthSubjectIdentifier
 description: XRI i-number, persistent non-reassignable identifier
 
 dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
