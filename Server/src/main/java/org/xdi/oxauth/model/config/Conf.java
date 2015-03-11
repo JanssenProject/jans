@@ -28,8 +28,6 @@ public class Conf {
     private String errors;
     @LdapAttribute(name = "oxAuthConfWebKeys")
     private String webKeys;
-    @LdapAttribute(name = "oxAuthConfIdPythonScript")
-    private String idGeneratorScript;
 
     public Conf() {
     }
@@ -40,14 +38,6 @@ public class Conf {
 
     public void setDn(String p_dn) {
         dn = p_dn;
-    }
-
-    public String getIdGeneratorScript() {
-        return idGeneratorScript;
-    }
-
-    public void setIdGeneratorScript(String p_idGeneratorScript) {
-        idGeneratorScript = p_idGeneratorScript;
     }
 
     public String getDynamic() {
