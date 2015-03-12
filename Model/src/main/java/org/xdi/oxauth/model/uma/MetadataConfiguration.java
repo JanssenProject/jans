@@ -24,12 +24,25 @@ import java.util.Arrays;
  */
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({"version", "issuer",
-        "pat_profiles_supported", "aat_profiles_supported", "rptProfilesSupported",
-        "pat_grant_types_supported", "aat_grant_types_supported", "claim_profiles_supported",
-        "dynamic_client_endpoint", "token_endpoint", "user_endpoint", "introspection_endpoint",
-        "resource_set_registration_endpoint", "permission_registration_endpoint", "rpt_endpoint",
-        "authorization_request_endpoint, scope_endpoint"})
+@JsonPropertyOrder({"version",
+        "issuer",
+        "pat_profiles_supported",
+        "aat_profiles_supported",
+        "rptProfilesSupported",
+        "pat_grant_types_supported",
+        "aat_grant_types_supported",
+        "claim_token_profiles_supported",
+        "dynamic_client_endpoint",
+        "token_endpoint",
+        "authorization_endpoint",
+        "requesting_party_claims_endpoint",
+        "introspection_endpoint",
+        "resource_set_registration_endpoint",
+        "permission_registration_endpoint",
+        "rpt_endpoint",
+        "scope_endpoint",
+        "user_endpoint"
+})
 @XmlRootElement
 public class MetadataConfiguration {
 
@@ -63,7 +76,7 @@ public class MetadataConfiguration {
 
     @ApiModelProperty(value = "Claim formats and associated sub-protocols for gathering claims from requesting parties, as supported by this authorization server. The property value is an array of string values, which each string value is either a reserved keyword defined in this specification or a URI identifying a claim profile defined elsewhere.",
             required = true)
-    private String[] claimProfilesSupported;
+    private String[] claimTokenProfilesSupported;
 
     @ApiModelProperty(value = "The endpoint to use for performing dynamic client registration. Usage of this endpoint is defined by [DynClientReg]. The presence of this property indicates authorization server support for the dynamic client registration feature and its absence indicates a lack of support.",
             required = true)
@@ -95,11 +108,25 @@ public class MetadataConfiguration {
 
     @ApiModelProperty(value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
             required = true)
-    private String authorizationRequestEndpoint;
+    private String authorizationEndpoint;
 
     @ApiModelProperty(value = "Scope endpoint.",
             required = true)
     private String scopeEndpoint;
+
+    @ApiModelProperty(value = "The endpoint URI at which the authorization server interacts with the end-user requesting party to gather claims. If this property is absent, the authorization server does not interact with the end-user requesting party for claims gathering.",
+            required = false)
+    private String requestingPartyClaimsEndpoint;
+
+    @JsonProperty(value = "requesting_party_claims_endpoint")
+    @XmlElement(name = "requesting_party_claims_endpoint")
+    public String getRequestingPartyClaimsEndpoint() {
+        return requestingPartyClaimsEndpoint;
+    }
+
+    public void setRequestingPartyClaimsEndpoint(String requestingPartyClaimsEndpoint) {
+        this.requestingPartyClaimsEndpoint = requestingPartyClaimsEndpoint;
+    }
 
     @JsonProperty(value = "scope_endpoint")
     @XmlElement(name = "scope_endpoint")
@@ -182,14 +209,14 @@ public class MetadataConfiguration {
         this.patGrantTypesSupported = p_patGrantTypesSupported;
     }
 
-    @JsonProperty(value = "claim_profiles_supported")
-    @XmlElement(name = "claim_profiles_supported")
-    public String[] getClaimProfilesSupported() {
-        return claimProfilesSupported;
+    @JsonProperty(value = "claim_token_profiles_supported")
+    @XmlElement(name = "claim_token_profiles_supported")
+    public String[] getClaimTokenProfilesSupported() {
+        return claimTokenProfilesSupported;
     }
 
-    public void setClaimProfilesSupported(String[] claimProfilesSupported) {
-        this.claimProfilesSupported = claimProfilesSupported;
+    public void setClaimTokenProfilesSupported(String[] claimTokenProfilesSupported) {
+        this.claimTokenProfilesSupported = claimTokenProfilesSupported;
     }
 
     @JsonProperty(value = "dynamic_client_endpoint")
@@ -262,14 +289,14 @@ public class MetadataConfiguration {
         this.rptEndpoint = rptEndpoint;
     }
 
-    @JsonProperty(value = "authorization_request_endpoint")
-    @XmlElement(name = "authorization_request_endpoint")
-    public String getAuthorizationRequestEndpoint() {
-        return authorizationRequestEndpoint;
+    @JsonProperty(value = "authorization_endpoint")
+    @XmlElement(name = "authorization_endpoint")
+    public String getAuthorizationEndpoint() {
+        return authorizationEndpoint;
     }
 
-    public void setAuthorizationRequestEndpoint(String permissionRequestEndpoint) {
-        this.authorizationRequestEndpoint = permissionRequestEndpoint;
+    public void setAuthorizationEndpoint(String permissionRequestEndpoint) {
+        this.authorizationEndpoint = permissionRequestEndpoint;
     }
 
     @Override
@@ -290,7 +317,7 @@ public class MetadataConfiguration {
         builder.append(", aatGrantTypesSupported=");
         builder.append(Arrays.toString(aatGrantTypesSupported));
         builder.append(", claimProfilesSupported=");
-        builder.append(Arrays.toString(claimProfilesSupported));
+        builder.append(Arrays.toString(claimTokenProfilesSupported));
         builder.append(", tokenEndpoint=");
         builder.append(tokenEndpoint);
         builder.append(", userEndpoint=");
@@ -304,7 +331,7 @@ public class MetadataConfiguration {
         builder.append(", rptEndpoint=");
         builder.append(rptEndpoint);
         builder.append(", authorization_request_endpoint=");
-        builder.append(authorizationRequestEndpoint);
+        builder.append(authorizationEndpoint);
         builder.append("]");
         return builder.toString();
     }
