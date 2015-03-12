@@ -534,6 +534,11 @@ public class AuthorizeAction {
         sessionId = p_sessionId;
     }
 
+    public void permissionGranted() {
+        final SessionId session = getSession();
+    	permissionGranted(session);
+    }
+
     public void permissionGranted(SessionId session) {
         try {
             session.addPermission(clientId, true);
