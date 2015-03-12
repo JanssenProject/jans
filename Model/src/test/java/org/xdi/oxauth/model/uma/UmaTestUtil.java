@@ -6,18 +6,15 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -70,7 +67,6 @@ public class UmaTestUtil {
     public static void assert_(ResourceSetStatus p_status) {
         assertNotNull(p_status, "Resource set status is null");
         assertNotNull(p_status.getId(), "Resource set description id is null");
-        assertNotNull(p_status.getRev(), "Resource set description revision is null");
     }
 
     public static ResourceSet createResourceSet() {
