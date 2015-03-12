@@ -6,23 +6,13 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * This AM's endpoint is part of resource set registration API.
@@ -41,12 +31,18 @@ import com.wordnik.swagger.annotations.Api;
 @Path("/host/rsrc/resource_set")
 @Api(value="/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public interface ResourceSetRegistrationRestWebService {
+
+    @POST
+  	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
+   	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
+   	public Response createResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet);
+
 	@PUT
 	@Path("{rsid}")
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public Response putResourceSet(@HeaderParam("Authorization") String authorization, @HeaderParam("If-Match") String rsver,
-			@PathParam("rsid") String rsid, ResourceSet resourceSet);
+	public Response updateResourceSet(@HeaderParam("Authorization") String authorization,
+                                      @PathParam("rsid") String rsid, ResourceSet resourceSet);
 
 	@GET
 	@Path("{rsid}")
@@ -68,7 +64,12 @@ public interface ResourceSetRegistrationRestWebService {
 
 	@DELETE
 	@Path("{rsid}")
-	public Response deleteResourceSet(@HeaderParam("Authorization") String authorization, @HeaderParam("If-Match") String rsver,
-			@PathParam("rsid") String rsid);
+	public Response deleteResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid);
+
+    @HEAD
+    public Response unsupportedHeadMethod();
+
+    @OPTIONS
+    public Response unsupportedOptionsMethod();
 
 }
