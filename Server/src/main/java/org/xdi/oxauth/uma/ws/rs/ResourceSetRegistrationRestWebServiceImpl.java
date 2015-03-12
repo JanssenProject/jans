@@ -18,8 +18,8 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.VersionedResourceSet;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetService;
 import org.xdi.oxauth.service.uma.ScopeService;
@@ -28,7 +28,6 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
@@ -131,14 +130,14 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
 
             ldapResourceSet = ldapResourceSets.get(0);
 
-            final VersionedResourceSet versionedResourceSet = new VersionedResourceSet();
+            final ResourceSetWithId resourceSetWithId = new ResourceSetWithId();
 
-            BeanUtils.copyProperties(versionedResourceSet, ldapResourceSet);
-            versionedResourceSet.setScopes(umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes()));
+            BeanUtils.copyProperties(resourceSetWithId, ldapResourceSet);
+            resourceSetWithId.setId(ldapResourceSet.getId());
+            resourceSetWithId.setScopes(umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes()));
 
             final ResponseBuilder builder = Response.ok();
-            builder.entity(ServerUtil.asJson(versionedResourceSet)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
-            builder.tag(new EntityTag(versionedResourceSet.getRev()));
+            builder.entity(ServerUtil.asJson(resourceSetWithId)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
 
             return builder.build();
         } catch (Exception ex) {

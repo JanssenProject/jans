@@ -6,25 +6,16 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptStatusRequest;
-import org.xdi.oxauth.model.uma.RptStatusResponse;
-import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import java.util.Arrays;
+
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -163,7 +154,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaRegisterResourcePath"})
     public void cleanUp(String umaRegisterResourcePath) {
         if (m_resourceSet != null) {
-            TUma.deleteResourceSet(this, m_pat, umaRegisterResourcePath, m_resourceSet.getId(), m_resourceSet.getRev());
+            TUma.deleteResourceSet(this, m_pat, umaRegisterResourcePath, m_resourceSet.getId());
         }
     }
 
