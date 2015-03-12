@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -59,9 +59,9 @@ public class TUma {
     }
 
     public static ResourceSetStatus modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
-                                                      final String p_rsid, final String p_rev, ResourceSet p_resourceSet) {
+                                                      final String p_rsid, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
-        return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_rev, p_resourceSet);
+        return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
     }
 
     public static List<String> getResourceSetList(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath) {
@@ -69,9 +69,9 @@ public class TUma {
         return s.getResourceSetList(p_pat, p_umaRegisterResourcePath);
     }
 
-    public static void deleteResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, String p_id, String p_rev) {
+    public static void deleteResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
-        s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id, p_rev);
+        s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id);
     }
 
     public static ResourceSetPermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,

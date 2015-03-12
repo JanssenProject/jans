@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -25,6 +15,13 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -54,9 +51,9 @@ class TRegisterResourceSet {
     }
 
     public ResourceSetStatus modifyResourceSet(final Token p_pat, String umaRegisterResourcePath, final String p_rsId,
-                                               final String p_rev, ResourceSet p_resourceSet) {
+                                               ResourceSet p_resourceSet) {
         try {
-            m_modifyStatus = modifyResourceSetInternal(p_pat, umaRegisterResourcePath, p_rsId, p_rev, p_resourceSet);
+            m_modifyStatus = modifyResourceSetInternal(p_pat, umaRegisterResourcePath, p_rsId, p_resourceSet);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -108,7 +105,7 @@ class TRegisterResourceSet {
     }
 
     private ResourceSetStatus modifyResourceSetInternal(final Token p_pat, String umaRegisterResourcePath,
-                                                        final String p_rsId, final String p_rev, final ResourceSet p_resourceSet) throws Exception {
+                                                        final String p_rsId, final ResourceSet p_resourceSet) throws Exception {
         String path = umaRegisterResourcePath + "/" + p_rsId + "/";
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.PUT, path) {
 
@@ -118,7 +115,6 @@ class TRegisterResourceSet {
 
                 request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
                 request.addHeader("Authorization", "Bearer " + p_pat.getAccessToken());
-                request.addHeader("If-Match", p_rev);
 
                 try {
 //                    final String json = ServerUtil.jsonMapperWithWrapRoot().writeValueAsString(p_resourceSet);
@@ -136,7 +132,7 @@ class TRegisterResourceSet {
                 super.onResponse(response);
                 BaseTest.showResponse("UMA : TRegisterResourceSet.modifyResourceSetInternal() : ", response);
 
-                assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
+                assertEquals(response.getStatus(), Response.Status.NO_CONTENT.getStatusCode(), "Unexpected response code.");
                 m_modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetStatus.class);
 
                 UmaTestUtil.assert_(m_modifyStatus);
@@ -178,7 +174,7 @@ class TRegisterResourceSet {
         return result;
     }
 
-    public void deleteResourceSet(final Token p_pat, String p_umaRegisterResourcePath, String p_id, final String p_rev) {
+    public void deleteResourceSet(final Token p_pat, String p_umaRegisterResourcePath, String p_id) {
         String path = p_umaRegisterResourcePath + "/" + p_id + "/";
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.DELETE, path) {
@@ -189,7 +185,6 @@ class TRegisterResourceSet {
 
                     //request.addHeader("Accept", UmaConstants.RESOURCE_SET_STATUS_MEDIA_TYPE);
                     request.addHeader("Authorization", "Bearer " + p_pat.getAccessToken());
-                    request.addHeader("If-Match", p_rev);
                 }
 
                 @Override

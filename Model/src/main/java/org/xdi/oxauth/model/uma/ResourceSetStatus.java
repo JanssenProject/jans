@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -21,14 +22,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Date: 10/03/2012
  */
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({ "_id", "_rev", "user_access_policy_uri" })
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({ "_id", "user_access_policy_uri" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetStatus")
 @XmlRootElement
 public class ResourceSetStatus {
 
 	private String id;
-	private String rev;
 	private String policyUri;
 
 	@JsonProperty(value = "_id")
@@ -39,16 +39,6 @@ public class ResourceSetStatus {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-    @JsonProperty(value = "_rev")
-	@XmlElement(name = "_rev")
-	public String getRev() {
-		return rev;
-	}
-
-	public void setRev(String rev) {
-		this.rev = rev;
 	}
 
     @JsonProperty(value = "user_access_policy_uri")
@@ -63,8 +53,7 @@ public class ResourceSetStatus {
 
 	@Override
 	public String toString() {
-		return "ResourceSetStatus [id=" + id
-				+ ", rev=" + rev + ", user_access_policy_uri=" + policyUri + "]";
+		return "ResourceSetStatus [id=" + id + ", user_access_policy_uri=" + policyUri + "]";
 	}
 
 }
