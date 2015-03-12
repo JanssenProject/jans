@@ -6,20 +6,18 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -39,12 +37,14 @@ import com.wordnik.swagger.annotations.Api;
         " requester will shortly be asking for from the AM. This AM's endpoint is part " +
         " of resource set registration API.")
 public interface ResourceSetPermissionRegistrationRestWebService {
-	@PUT
-	@Path("{host}")
+
+	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public Response registerResourceSetPermission(@Context HttpServletRequest request, @HeaderParam("Authorization") String authorization, @HeaderParam("Host") String amHost,
-			@PathParam("host") String host, ResourceSetPermissionRequest resourceSetPermissionRequest);
+	public Response registerResourceSetPermission(@Context HttpServletRequest request,
+                                                  @HeaderParam("Authorization") String authorization,
+                                                  @HeaderParam("Host") String amHost,
+			                                      ResourceSetPermissionRequest resourceSetPermissionRequest);
 
     // yuriyz 02.04.2013: commented this endpoint, it's not present in latest specs
 //	@GET

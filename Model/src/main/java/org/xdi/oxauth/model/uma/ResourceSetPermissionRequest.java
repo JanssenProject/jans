@@ -6,15 +6,15 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Resource set that needs protection by registering a resource set description
@@ -28,7 +28,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({"resource_set_id", "scopes", "expires_at"})
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
 public class ResourceSetPermissionRequest {

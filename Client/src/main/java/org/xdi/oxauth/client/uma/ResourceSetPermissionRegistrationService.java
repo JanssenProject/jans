@@ -6,16 +6,14 @@
 
 package org.xdi.oxauth.client.uma;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -28,13 +26,14 @@ import org.xdi.oxauth.model.uma.UmaConstants;
  * sought. The AM returns a permission ticket for the host to give to the
  * requester in its response.
  * 
- * @author Yuriy Movchan Date: 10/11/2012
  */
 public interface ResourceSetPermissionRegistrationService {
-	@PUT
-	@Path("{host}")
+
+	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public ResourceSetPermissionTicket registerResourceSetPermission(@HeaderParam("Authorization") String authorization, @HeaderParam("Host") String amHost,
-			@PathParam("host") String host, ResourceSetPermissionRequest resourceSetPermissionRequest);
+	public ResourceSetPermissionTicket registerResourceSetPermission(
+            @HeaderParam("Authorization") String authorization,
+            @HeaderParam("Host") String amHost,
+			ResourceSetPermissionRequest resourceSetPermissionRequest);
 }

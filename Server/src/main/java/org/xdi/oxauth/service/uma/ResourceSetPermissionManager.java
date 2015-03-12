@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
@@ -19,6 +17,8 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.util.Date;
 
 /**
  * Holds resource set permission tokens and permissions
@@ -66,8 +66,8 @@ public class ResourceSetPermissionManager implements IResourceSetPermissionManag
         return manager.getResourceSetPermissionTicketByConfigurationCode(configurationCode, clientDn);
     }
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, String host, ResourceSetPermissionRequest resourceSetPermissionRequest, Date expirationDate) {
-        return manager.createResourceSetPermission(amHost, host, resourceSetPermissionRequest, expirationDate);
+    public ResourceSetPermission createResourceSetPermission(String amHost, ResourceSetPermissionRequest resourceSetPermissionRequest, Date expirationDate) {
+        return manager.createResourceSetPermission(amHost, resourceSetPermissionRequest, expirationDate);
     }
 
     public void deleteResourceSetPermission(String resourceSetPermissionTicket) {

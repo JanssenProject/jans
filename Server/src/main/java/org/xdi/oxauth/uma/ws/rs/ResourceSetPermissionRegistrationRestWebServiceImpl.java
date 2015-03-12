@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -27,6 +19,13 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author Yuriy Movchan Date: 10/18/2012
@@ -49,14 +48,13 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
     @In
     private UmaValidationService umaValidationService;
 
-    public Response registerResourceSetPermission(HttpServletRequest request, String authorization, String amHost, String host, ResourceSetPermissionRequest resourceSetPermissionRequest) {
+    public Response registerResourceSetPermission(HttpServletRequest request, String authorization, String amHost, ResourceSetPermissionRequest resourceSetPermissionRequest) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            String validatedHost = umaValidationService.validateHost(host);
             umaValidationService.validateResourceSet(authorization, resourceSetPermissionRequest);
 
-            return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, validatedHost, resourceSetPermissionRequest);
+            return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, resourceSetPermissionRequest);
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -68,8 +66,8 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
         }
     }
 
-    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, String validatedHost, ResourceSetPermissionRequest resourceSetPermissionRequest) {
-        final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, validatedHost, resourceSetPermissionRequest, rptExpirationDate());
+    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, ResourceSetPermissionRequest resourceSetPermissionRequest) {
+        final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
         resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
         return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions);
