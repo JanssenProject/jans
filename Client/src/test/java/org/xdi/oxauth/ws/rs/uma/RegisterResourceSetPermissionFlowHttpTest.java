@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
-import java.util.Arrays;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -25,6 +18,11 @@ import org.xdi.oxauth.model.uma.MetadataConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
+
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+
+import static org.testng.Assert.*;
 
 /**
  * Test cases for the registering UMA resource set description permissions flow (HTTP)
@@ -85,7 +83,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         ResourceSetPermissionTicket t = null;
         try {
             t = resourceSetPermissionRegistrationService.registerResourceSetPermission(
-                    "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, "photoz.example.com", resourceSetPermissionRequest);
+                    "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -114,7 +112,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         ResourceSetPermissionTicket resourceSetPermissionTiket = null;
         try {
             resourceSetPermissionTiket = resourceSetPermissionRegistrationService.registerResourceSetPermission(
-                    "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, "photoz.example.com", resourceSetPermissionRequest);
+                    "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
