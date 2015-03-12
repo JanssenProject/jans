@@ -48,14 +48,14 @@ public class UmaTestUtil {
         assertEquals(p_configuration.getRptProfilesSupported(), new String[]{"bearer"}, "Supported RPT profiles aren't correct");
         assertEquals(p_configuration.getPatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported PAT grant types aren't correct");
         assertEquals(p_configuration.getAatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported AAT grant types aren't correct");
-        assertEquals(p_configuration.getClaimProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
+        assertEquals(p_configuration.getClaimTokenProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
         assertNotNull(p_configuration.getTokenEndpoint(), "Token endpoint isn't correct");
         assertNotNull(p_configuration.getUserEndpoint(), "User endpoint isn't correct");
         assertNotNull(p_configuration.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
         assertNotNull(p_configuration.getResourceSetRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
         assertNotNull(p_configuration.getPermissionRegistrationEndpoint(), "Permission registration endpoint isn't correct");
         assertNotNull(p_configuration.getRptEndpoint(), "RPT endpoint isn't correct");
-        assertNotNull(p_configuration.getAuthorizationRequestEndpoint(), "Authorization request endpoint isn't correct");
+        assertNotNull(p_configuration.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
     }
 
     public static void assert_(Token p_token) {
