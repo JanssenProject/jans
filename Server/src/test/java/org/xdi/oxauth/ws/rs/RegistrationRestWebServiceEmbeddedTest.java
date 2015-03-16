@@ -6,25 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -45,10 +26,19 @@ import org.xdi.oxauth.model.uma.TestUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.util.Util;
 
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for Client Registration Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 01.11.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 March 11, 2015
  */
 public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -100,10 +90,10 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri", "contactEmail11", "contactEmail12"})
+    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri", "contactEmail1", "contactEmail2"})
     @Test
     public void requestClientAssociate2(final String registerPath, final String redirectUris,
-                                        final String sectorIdentifierUri, final String contactEmail11, final String contactEmail12) throws Exception {
+                                        final String sectorIdentifierUri, final String contactEmail1, final String contactEmail2) throws Exception {
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.POST, registerPath) {
@@ -113,7 +103,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                 try {
                     super.prepareRequest(request);
 
-                    List<String> contacts = Arrays.asList(contactEmail11, contactEmail12);
+                    List<String> contacts = Arrays.asList(contactEmail1, contactEmail2);
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -125,7 +115,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                     registerRequest.setPolicyUri("http://www.gluu.org/policy");
                     registerRequest.setJwksUri("http://www.gluu.org/jwks");
                     registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-                    registerRequest.setSubjectType(SubjectType.PUBLIC);
+                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
                     registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
 
                     request.setContentType(MediaType.APPLICATION_JSON);
@@ -214,10 +204,10 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         }
     }
 
-    @Parameters({"registerPath", "redirectUris", "contactEmail11", "contactEmail12"})
+    @Parameters({"registerPath", "redirectUris", "contactEmail1", "contactEmail2"})
     @Test(dependsOnMethods = "requestClientAssociate1")
-    public void requestClientUpdate(final String registerPath, final String redirectUris, final String contactEmail11, final String contactEmail12) throws Exception {
-        final String contactEmailNewValue = contactEmail12;
+    public void requestClientUpdate(final String registerPath, final String redirectUris, final String contactEmail1, final String contactEmail2) throws Exception {
+        final String contactEmailNewValue = contactEmail2;
         final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
         final String clientUriNewValue = "http://www.gluu.org/company/yuriy";
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
@@ -231,7 +221,7 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
                     final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
 
-                    registerRequest.setContacts(Arrays.asList(contactEmail11, contactEmailNewValue));
+                    registerRequest.setContacts(Arrays.asList(contactEmail1, contactEmailNewValue));
                     registerRequest.setLogoUri(logoUriNewValue);
                     registerRequest.setClientUri(clientUriNewValue);
 
