@@ -351,10 +351,6 @@ public class Authenticator implements Serializable {
 	}
 
 	public String prepareAuthenticationForStep() {
-		if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
-			return Constants.RESULT_SUCCESS;
-		}
-		
     	SessionId sessionId = sessionIdService.getSessionId();
     	Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
@@ -365,6 +361,10 @@ public class Authenticator implements Serializable {
 		// Set in event context sessionAttributs to allow access them from external authenticator
 	    Context eventContext = Contexts.getEventContext();
 	    eventContext.set("sessionAttributes", sessionIdAttributes);
+
+		if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
+			return Constants.RESULT_SUCCESS;
+		}
 
 		initCustomAuthenticatorVariables(sessionIdAttributes);
 		if (StringHelper.isEmpty(this.authMode)) {
