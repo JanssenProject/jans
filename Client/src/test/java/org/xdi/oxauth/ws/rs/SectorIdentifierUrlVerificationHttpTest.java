@@ -6,31 +6,35 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jws.RSASigner;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
 
 /**
  * Functional tests for Sector Identifier URI Verification (HTTP)
  *
- * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @author Javier Rojas Blum Date: 09.28.2012
  */
 public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
@@ -50,23 +54,22 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
+        RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
 
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
+        String clientId = response.getClientId();
+        String clientSecret = response.getClientSecret();
 
         // 2. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList(
@@ -74,49 +77,30 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 "profile",
                 "address",
                 "email");
-        String state = UUID.randomUUID().toString();
+        String state = "af0ifjsldkj";
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
-        authorizationRequest.setState(state);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        request.setState(state);
+        request.setAuthUsername(userId);
+        request.setAuthPassword(userSecret);
+        request.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        authorizeClient.setRequest(request);
+        AuthorizationResponse response1 = authorizeClient.exec();
 
         showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
-        assertEquals(authorizationResponse.getState(), state);
+        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
+        assertNotNull(response1.getLocation(), "The location is null");
+        assertNotNull(response1.getCode(), "The authorization code is null");
+        assertNotNull(response1.getState(), "The state is null");
+        assertNotNull(response1.getScope(), "The scope is null");
 
-        String authorizationCode = authorizationResponse.getCode();
-        String idToken = authorizationResponse.getIdToken();
+        String scope = response1.getScope();
+        String authorizationCode = response1.getCode();
+        String idToken = response1.getIdToken();
 
-        // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-
-        // 4. Request access token using the authorization code.
+        // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -124,33 +108,17 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
+        TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
+        tokenClient1.setRequest(tokenRequest);
+        TokenResponse response2 = tokenClient1.exec();
 
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-
-        String accessToken = tokenResponse.getAccessToken();
-
-        // 5. Request user info
-        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
-
-        showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        showClient(tokenClient1);
+        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
+        assertNotNull(response2.getEntity(), "The entity is null");
+        assertNotNull(response2.getAccessToken(), "The access token is null");
+        assertNotNull(response2.getExpiresIn(), "The expires in value is null");
+        assertNotNull(response2.getTokenType(), "The token type is null");
+        assertNotNull(response2.getRefreshToken(), "The refresh token is null");
     }
 
     @Parameters({"redirectUris"})
@@ -185,31 +153,6 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
-    }
-
-    /**
-     * Register with pairwise Subject Type and without Sector Identifier URI must fail because there are multiple
-     * hostnames in the Redirect URI list.
-     */
-    @Parameters({"redirectUris"})
-    @Test
-    public void sectorIdentifierUrlVerificationFail3(final String redirectUris) throws Exception {
-        showTitle("sectorIdentifierUrlVerificationFail3");
-
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setSectorIdentifierUri(null);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

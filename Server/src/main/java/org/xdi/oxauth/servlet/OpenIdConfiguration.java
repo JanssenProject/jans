@@ -76,7 +76,7 @@ import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version 0.9 February 12, 2015
  */
 public class OpenIdConfiguration extends HttpServlet {
 
@@ -324,7 +324,7 @@ public class OpenIdConfiguration extends HttpServlet {
                 if (claimIdList != null && !claimIdList.isEmpty()) {
                     for (String claimDn : claimIdList) {
                         final GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
-                        final String claimName = attribute.getOxAuthClaimName();
+                        final String claimName = attribute.getName();
                         if (StringUtils.isNotBlank(claimName)) {
                             claimsList.put(claimName);
                         }
