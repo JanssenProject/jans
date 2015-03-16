@@ -6,6 +6,28 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.HttpMethod;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -19,20 +41,12 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import javax.ws.rs.HttpMethod;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-
 /**
  * Functional tests for Client Registration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.9 March 11, 2015
+ * @version 0.1, 01.17.2012
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -71,7 +85,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setPolicyUri("http://www.gluu.org/policy");
         registerRequest.setJwksUri("http://www.gluu.org/jwks");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
 
