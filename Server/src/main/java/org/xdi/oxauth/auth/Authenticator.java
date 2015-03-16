@@ -362,6 +362,10 @@ public class Authenticator implements Serializable {
 			return Constants.RESULT_EXPIRED;
 		}
 
+		// Set in event context sessionAttributs to allow access them from external authenticator
+	    Context eventContext = Contexts.getEventContext();
+	    eventContext.set("sessionAttributes", sessionIdAttributes);
+
 		initCustomAuthenticatorVariables(sessionIdAttributes);
 		if (StringHelper.isEmpty(this.authMode)) {
 			return Constants.RESULT_SUCCESS;
@@ -385,9 +389,6 @@ public class Authenticator implements Serializable {
 		if (customScriptConfiguration == null) {
 			return Constants.RESULT_FAILURE;
 		} else {
-		    // Set in event context sessionAttributs to allow access them from external authenticator
-		    Context eventContext = Contexts.getEventContext();
-		    eventContext.set("sessionAttributes", sessionIdAttributes);
 
 		    String determinedAuthMode = customScriptConfiguration.getName();
 			if (!StringHelper.equalsIgnoreCase(currentAuthMode, determinedAuthMode)) {
