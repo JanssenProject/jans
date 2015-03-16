@@ -175,7 +175,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public List<String> executeExternalGetExtraParametersForStep(CustomScriptConfiguration customScriptConfiguration, int step) {
 		try {
-			log.debug("Executing python 'getPageForStep' authenticator method");
+			log.debug("Executing python 'getExtraParametersForStep' authenticator method");
 			PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
 			return externalAuthenticator.getExtraParametersForStep(configurationAttributes, step);

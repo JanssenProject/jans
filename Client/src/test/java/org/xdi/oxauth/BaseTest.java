@@ -319,7 +319,7 @@ public abstract class BaseTest {
             assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
             assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
             assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-            assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
+//            assertTrue(response.getAcrValuesSupported().size() > 0, "The acrValuesSupported is empty");
             assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
             assertTrue(response.getIdTokenSigningAlgValuesSupported().size() > 0, "The idTokenSigningAlgValuesSupported is empty");
             assertTrue(response.getRequestObjectSigningAlgValuesSupported().size() > 0, "The requestObjectSigningAlgValuesSupported is empty");
