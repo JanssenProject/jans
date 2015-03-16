@@ -206,6 +206,10 @@ public class Authenticator implements Serializable {
             return false;
         }
 
+	    // Set in event context sessionAttributs to allow access them from external authenticator
+	    Context eventContext = Contexts.getEventContext();
+	    eventContext.set("sessionAttributes", sessionIdAttributes);
+
     	if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
         	initCustomAuthenticatorVariables(sessionIdAttributes);
         	if ((this.authStep == null) || StringHelper.isEmpty(this.authMode)) {
@@ -227,10 +231,6 @@ public class Authenticator implements Serializable {
 		        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
 		        return false;
 	        }
-
-		    // Set in event context sessionAttributs to allow access them from external authenticator
-		    Context eventContext = Contexts.getEventContext();
-		    eventContext.set("sessionAttributes", sessionIdAttributes);
 
 		    boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
 		    log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);

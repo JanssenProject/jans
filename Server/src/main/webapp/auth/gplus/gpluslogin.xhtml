@@ -65,7 +65,7 @@
 									</div>
 									<div class="login-panel-body">
 										<c:set var="client"
-											value='#{clientService.getClient(param.client_id)}' />
+											value='#{clientService.getClient(sessionAttributes['client_id'])}' />
 
 										<s:div rendered='#{!empty client.getLogoUri()}'>
 											<h:graphicImage url='#{client.getLogoUri()}' />
