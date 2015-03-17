@@ -9,6 +9,7 @@ package org.xdi.oxauth.load.benchmark;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import org.testng.Reporter;
 
 /**
  * @author Yuriy Movchan
@@ -38,12 +39,12 @@ public class BenchmarkTestListener implements ITestListener {
 
 	@Override
 	public void onStart(ITestContext context) {
-        System.out.println("Test '" + context.getName() + "' started ...");
+		Reporter.log("Test '" + context.getName() + "' started ...");
 	}
 
 	@Override
 	public void onFinish(ITestContext context) {
         final long takes = (context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000;
-        System.out.println("Test '" + context.getName() + "' finished in " + takes + " seconds");
+        Reporter.log("Test '" + context.getName() + "' finished in " + takes + " seconds");
 	}
 }

@@ -8,6 +8,7 @@ package org.xdi.oxauth.load.benchmark;
 
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
+import org.testng.Reporter;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,12 +22,12 @@ public class BenchmarkTestSuiteListener implements ISuiteListener {
     @Override
     public void onStart(ISuite suite) {
     	this.start = System.currentTimeMillis();
-        System.out.println("Suite '" + suite.getName() + "' started ...");
+    	Reporter.log("Suite '" + suite.getName() + "' started ...");
     }
 
     @Override
     public void onFinish(ISuite suite) {
         final long takes = (System.currentTimeMillis() - start) / 1000;
-        System.out.println("Suite '" + suite.getName() + "' finished in " + takes + " seconds");
+        Reporter.log("Suite '" + suite.getName() + "' finished in " + takes + " seconds");
     }
 }
