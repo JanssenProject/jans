@@ -18,7 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum AuthenticationScriptUsageType implements LdapEnum {
 
-	INTERACTIVE("interactive", "Interactive"), SERVICE("service", "Services"), BOTH("both", "Both methods"), LOGOUT("logout", "Logout");
+	INTERACTIVE("interactive", "Interactive"), SERVICE("service", "Services"), BOTH("both", "Both methods");
 
 	private String value;
 	private String displayName;
