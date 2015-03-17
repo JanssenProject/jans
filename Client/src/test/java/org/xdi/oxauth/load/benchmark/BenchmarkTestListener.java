@@ -44,6 +44,6 @@ public class BenchmarkTestListener implements ITestListener {
 	@Override
 	public void onFinish(ITestContext context) {
         final long takes = (context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000;
-        System.out.println("Suite '" + context.getName() + "' finished in " + takes + " seconds");
+        System.out.println("Test '" + context.getName() + "' finished in " + takes + " seconds");
 	}
 }
