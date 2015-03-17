@@ -698,4 +698,48 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <profiles>
+        <profile>
+            <id>set-configuration-name</id>
+            <activation>
+                <property>
+                    <name>!cfg</name>
+                </property>
+            </activation>
+            <properties>
+                <cfg>default</cfg>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>run-benchmark-tests</id>
+            <activation>
+                <property>
+                    <name>benchmark</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+		                <plugin>
+		                    <groupId>org.apache.maven.plugins</groupId>
+		                    <artifactId>maven-surefire-plugin</artifactId>
+		                    <version>2.12</version>
+		                    <configuration>
+		                        <skipTests>false</skipTests>
+		                        <failIfNoTests>false</failIfNoTests>
+		                        <trimStackTrace>false</trimStackTrace>
+		                        <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true</argLine>
+		                        <suiteXmlFiles>
+		                            <suiteXmlFile>target/test-classes/testng-benchmark.xml</suiteXmlFile>
+		                        </suiteXmlFiles>
+		                    </configuration>
+		                </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+    
 </project>
