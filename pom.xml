@@ -660,9 +660,6 @@
                         <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true</argLine>
                         <suiteXmlFiles>
                             <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
-<!--
-                            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
--->
                         </suiteXmlFiles>
                     </configuration>
                 </plugin>

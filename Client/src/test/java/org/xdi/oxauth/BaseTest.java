@@ -6,6 +6,24 @@
 
 package org.xdi.oxauth;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.scheme.Scheme;
@@ -22,18 +40,23 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
-import org.xdi.oxauth.client.*;
+import org.testng.annotations.Optional;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.BaseClient;
+import org.xdi.oxauth.client.BaseResponseWithErrors;
+import org.xdi.oxauth.client.ClientUtils;
+import org.xdi.oxauth.client.OpenIdConfigurationClient;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.error.IErrorType;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.testng.Assert.*;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
@@ -65,6 +88,35 @@ public abstract class BaseTest {
     private String loginFormLoginButton;
     private String authorizeFormAllowButton;
     private String authorizeFormDoNotAllowButton;
+	
+	@BeforeSuite
+	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+		Reporter.log("Invoked init test suite method \n", true);
+
+		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
+		if (StringHelper.isEmpty(propertiesFile)) {
+			propertiesFile = "target/test-classes/testng.properties";
+		}
+
+		// Load test paramters
+		FileInputStream conf = new FileInputStream(propertiesFile);
+		Properties prop = new Properties();
+		prop.load(conf);
+		
+		Map<String, String> parameters = new HashMap<String, String>();
+		for (Entry<Object, Object> entry : prop.entrySet()) {
+			Object key = entry.getKey();
+			Object value = entry.getValue();
+			
+			if (StringHelper.isEmptyString(key) || StringHelper.isEmptyString(value)) {
+				continue;
+			}
+			parameters.put(key.toString(), value.toString());
+		}
+
+		// Overrided test paramters
+		context.getSuite().getXmlSuite().setParameters(parameters);
+	}
 
     public WebDriver getDriver() {
         return driver;
