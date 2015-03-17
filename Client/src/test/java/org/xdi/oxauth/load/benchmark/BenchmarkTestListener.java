@@ -6,26 +6,44 @@
 
 package org.xdi.oxauth.load.benchmark;
 
-import org.testng.ISuite;
-import org.testng.ISuiteListener;
+import org.testng.ITestContext;
+import org.testng.ITestListener;
+import org.testng.ITestResult;
 
 /**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 03/07/2014
+ * @author Yuriy Movchan
+ * @version 0.1, 03/17/2015
  */
+public class BenchmarkTestListener implements ITestListener {
 
-public class BenchmarkTestListener implements ISuiteListener {
+	@Override
+	public void onTestStart(ITestResult result) {
+	}
 
-    private final long start = System.currentTimeMillis();
+	@Override
+	public void onTestSuccess(ITestResult result) {
+	}
 
-    @Override
-    public void onStart(ISuite suite) {
-        System.out.println("Suite started...");
-    }
+	@Override
+	public void onTestFailure(ITestResult result) {
+	}
 
-    @Override
-    public void onFinish(ISuite suite) {
-        final long takes = (System.currentTimeMillis() - start) / 1000;
-        System.out.println("Suite finished in " + takes + " seconds");
-    }
+	@Override
+	public void onTestSkipped(ITestResult result) {
+	}
+
+	@Override
+	public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+	}
+
+	@Override
+	public void onStart(ITestContext context) {
+        System.out.println("Test '" + context.getName() + "' started ...");
+	}
+
+	@Override
+	public void onFinish(ITestContext context) {
+        final long takes = (context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000;
+        System.out.println("Suite '" + context.getName() + "' finished in " + takes + " seconds");
+	}
 }

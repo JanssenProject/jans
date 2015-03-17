@@ -34,6 +34,7 @@ import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.AuthorizationResponse;
 import org.xdi.oxauth.client.AuthorizeClient;
@@ -47,8 +48,8 @@ import org.xdi.oxauth.model.common.ResponseType;
  * @version 0.9, 03/07/2014
  */
 
-@Listeners({BenchmarkTestListener.class})
-public class BenchmarkAuthorizatoinRequests {
+@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
+public class BenchmarkAuthorizatoinRequests extends BaseTest {
 
 
     @Test
