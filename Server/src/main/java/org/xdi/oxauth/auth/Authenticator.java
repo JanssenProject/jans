@@ -206,6 +206,10 @@ public class Authenticator implements Serializable {
             return false;
         }
 
+	    // Set in event context sessionAttributs to allow access them from external authenticator
+	    Context eventContext = Contexts.getEventContext();
+	    eventContext.set("sessionAttributes", sessionIdAttributes);
+
     	if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
         	initCustomAuthenticatorVariables(sessionIdAttributes);
         	if ((this.authStep == null) || StringHelper.isEmpty(this.authMode)) {
@@ -227,10 +231,6 @@ public class Authenticator implements Serializable {
 		        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
 		        return false;
 	        }
-
-		    // Set in event context sessionAttributs to allow access them from external authenticator
-		    Context eventContext = Contexts.getEventContext();
-		    eventContext.set("sessionAttributes", sessionIdAttributes);
 
 		    boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
 		    log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
@@ -351,15 +351,19 @@ public class Authenticator implements Serializable {
 	}
 
 	public String prepareAuthenticationForStep() {
-		if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
-			return Constants.RESULT_SUCCESS;
-		}
-		
     	SessionId sessionId = sessionIdService.getSessionId();
     	Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
             log.error("Failed to get attributes from session");
 			return Constants.RESULT_EXPIRED;
+		}
+
+		// Set in event context sessionAttributs to allow access them from external authenticator
+	    Context eventContext = Contexts.getEventContext();
+	    eventContext.set("sessionAttributes", sessionIdAttributes);
+
+		if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
+			return Constants.RESULT_SUCCESS;
 		}
 
 		initCustomAuthenticatorVariables(sessionIdAttributes);
@@ -385,9 +389,6 @@ public class Authenticator implements Serializable {
 		if (customScriptConfiguration == null) {
 			return Constants.RESULT_FAILURE;
 		} else {
-		    // Set in event context sessionAttributs to allow access them from external authenticator
-		    Context eventContext = Contexts.getEventContext();
-		    eventContext.set("sessionAttributes", sessionIdAttributes);
 
 		    String determinedAuthMode = customScriptConfiguration.getName();
 			if (!StringHelper.equalsIgnoreCase(currentAuthMode, determinedAuthMode)) {

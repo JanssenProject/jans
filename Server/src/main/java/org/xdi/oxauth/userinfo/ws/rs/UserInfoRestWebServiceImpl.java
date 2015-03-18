@@ -39,7 +39,6 @@ import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
@@ -65,7 +64,7 @@ import java.util.List;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version 0.9 February 24, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -253,8 +252,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         // Signature
         JSONWebKey jwk = null;
@@ -355,8 +352,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
@@ -433,9 +428,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
             }
-
-            //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-            jsonObj.put(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {

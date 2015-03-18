@@ -1,0 +1,12 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="oxAuthClientBenchamrk" parallel="false">
+
+    <!-- Authorization Benchamrk test -->
+    <test name="Authorization Benchamrk tests" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkAuthorizatoinRequests"/>
+        </classes>
+    </test>
+
+</suite>

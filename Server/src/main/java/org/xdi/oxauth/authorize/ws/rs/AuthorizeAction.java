@@ -41,6 +41,7 @@ import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -547,7 +548,9 @@ public class AuthorizeAction {
             // OXAUTH-297 - set session_id cookie, secure=true
             SessionIdService.instance().createSessionIdCookie(sessionId);
 
-            final String parametersAsString = authenticationService.parametersAsString();
+            Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
+            
+            final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
             final String uri = "seam/resource/restv1/oxauth/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {0}", uri);
             FacesManager.instance().redirectToExternalURL(uri);

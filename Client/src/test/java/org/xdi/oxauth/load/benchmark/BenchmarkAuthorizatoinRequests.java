@@ -30,35 +30,25 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.AuthorizationResponse;
 import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.OpenIdConfigurationClient;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 03/07/2014
  */
 
-@Listeners({BenchmarkTestListener.class})
-public class BenchmarkAuthorizatoinRequests {
+@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
+public class BenchmarkAuthorizatoinRequests extends BaseTest {
 
-
-    @Test
-    public void testDiscovery() throws Exception {
-        OpenIdConfigurationClient client = new OpenIdConfigurationClient("https://pcy28751:8443/oxauth/.well-known/openid-configuration");
-//        OpenIdConfigurationClient client = new OpenIdConfigurationClient("https://seed.gluu.org/.well-known/openid-configuration");
-        client.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
-        OpenIdConfigurationResponse r = client.execOpenIdConfiguration();
-        Assert.assertNotNull(r);
-    }
 
     // Think twice before invoking this test ;). Leads to OpenDJ (Berkley DB) failure
     // Caused by: LDAPSearchException(resultCode=80 (other), numEntries=0, numReferences=0, errorMessage='Database exception: (JE 4.1.10) JAVA_ERROR: Java Error occurred, recovery may not be possible.')
@@ -69,7 +59,7 @@ public class BenchmarkAuthorizatoinRequests {
     public void testAuthentication(final String userId, final String userSecret, String redirectUri, String clientId) throws Exception {
 
         // hardcode -> we don't want to loose time on discover call
-        String authorizationEndpoint = "https://pcy28751:8443/oxauth/seam/resource/restv1/oxauth/authorize";
+//        String authorizationEndpoint = "https://pcy28751:8443/oxauth/seam/resource/restv1/oxauth/authorize";
 //        String authorizationEndpoint = "https://localhost:8443/seam/resource/restv1/oxauth/authorize";
 
         final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
@@ -87,7 +77,7 @@ public class BenchmarkAuthorizatoinRequests {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        AuthorizeClient authorizeClient = new AuthorizeClient(this.authorizationEndpoint);
         authorizeClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
         authorizeClient.setRequest(request);
         AuthorizationResponse response = authorizeClient.exec();

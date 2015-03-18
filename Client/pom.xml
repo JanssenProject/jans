@@ -154,18 +154,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>set-configuration-name</id>
-            <activation>
-                <property>
-                    <name>!cfg</name>
-                </property>
-            </activation>
-            <properties>
-                <cfg>default</cfg>
-            </properties>
-        </profile>
-    </profiles>
 </project>
