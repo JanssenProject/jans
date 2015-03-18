@@ -12,6 +12,8 @@ import java.util.List;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
@@ -32,8 +34,8 @@ public class CleanUpClientTest extends BaseComponentTest {
 	public void afterClass() {
 	}
 
-//	@Test
-//	@Parameters(value = "usedClients")
+	@Test
+	@Parameters(value = "usedClients")
 	public void cleanUpClient(String usedClients) {
 		Assert.assertNotNull(usedClients);
 		List<String> usedClientsList = Arrays.asList(StringHelper.split(usedClients, ",", true, false));
