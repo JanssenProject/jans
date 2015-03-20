@@ -10,7 +10,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: inum
-oxAuthClaimName: inum
+oxAuthClaimName: sub
 gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
 objectClass: top
