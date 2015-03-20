@@ -64,7 +64,7 @@ oxAuthClaim: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!36D9,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=%(inumOrg)s,o=gluu
 
-dn: inum=%(inumOrg)s!0009!6D97,ou=scopes,o=@!1111,o=gluu
+dn: inum=%(inumOrg)s!0009!6D97,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: true
 description: Obtain UMA AAT
 displayName: http://docs.kantarainitiative.org/uma/scopes/authz.json
@@ -72,7 +72,7 @@ inum: %(inumOrg)s!0009!6D97
 objectClass: oxAuthCustomScope
 objectClass: top
 
-dn: inum=%(inumOrg)s!0009!6D96,ou=scopes,o=@!1111,o=gluu
+dn: inum=%(inumOrg)s!0009!6D96,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: true
 description: Obtain UMA PAT
 displayName: http://docs.kantarainitiative.org/uma/scopes/prot.json
@@ -80,7 +80,7 @@ inum: %(inumOrg)s!0009!6D96
 objectClass: oxAuthCustomScope
 objectClass: top
 
-dn: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=@!1111,o=gluu
+dn: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: true
 description: Obtain UMA AAT
 displayName: uma_authorization
@@ -88,7 +88,7 @@ inum: %(inumOrg)s!0009!6D98
 objectClass: oxAuthCustomScope
 objectClass: top
 
-dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=@!1111,o=gluu
+dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: true
 description: Obtain UMA PAT
 displayName: uma_protection
