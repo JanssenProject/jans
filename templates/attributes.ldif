@@ -21,7 +21,7 @@ description: XRI i-number, persistent non-reassignable identifier
 dn: inum=%(inumOrg)s!0005!18CB,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: oxAuth Subject Identifier
 gluuAttributeName: oxAuthSubjectIdentifier
-gluuAttributeOrigin: gluuPerson
+gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
