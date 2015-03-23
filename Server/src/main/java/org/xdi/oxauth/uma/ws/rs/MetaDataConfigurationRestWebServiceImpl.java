@@ -63,7 +63,7 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
 
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
-            final String entity = ServerUtil.asJson(c);
+            final String entity = ServerUtil.asPrettyJson(c);
             log.trace("Uma configuration: {0}", entity);
 
             return Response.ok(entity).build();
