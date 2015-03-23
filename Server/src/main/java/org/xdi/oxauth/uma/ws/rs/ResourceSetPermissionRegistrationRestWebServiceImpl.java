@@ -52,7 +52,8 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            umaValidationService.validateResourceSet(authorization, resourceSetPermissionRequest);
+            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.validateResourceSet(resourceSetPermissionRequest);
 
             return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, resourceSetPermissionRequest);
         } catch (Exception ex) {
@@ -88,8 +89,7 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
                                                                 ResourceSetPermission resourceSetPermissions) {
         ResponseBuilder builder = Response.status(Response.Status.CREATED);
 
-        ResourceSetPermissionTicket resourceSetPermissionTiket = new ResourceSetPermissionTicket(resourceSetPermissions.getTicket());
-        builder.entity(resourceSetPermissionTiket);
+        builder.entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket()));
 
         // Add location
         StringBuffer location = request.getRequestURL().append("/").append(resourceSetPermissions.getConfigurationCode());

@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -35,6 +29,11 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan
@@ -67,10 +66,9 @@ public class RptPermissionAuthorizationRestWebServiceImpl implements RptPermissi
 
     public Response requestRptPermissionAuthorization(String authorization, String amHost, RptAuthorizationRequest rptAuthorizationRequest, HttpServletRequest httpRequest) {
         try {
-            umaValidationService.validateAuthorizationWithAuthScope(authorization);
+            final AuthorizationGrant authorizationGrant = umaValidationService.validateAuthorizationWithAuthScope(authorization);
 
             final String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            final AuthorizationGrant authorizationGrant = tokenService.getAuthorizationGrant(authorization);
             authorizeRptPermission(authorizationGrant, validatedAmHost, rptAuthorizationRequest, httpRequest);
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson

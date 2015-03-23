@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -28,6 +22,11 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.
  * The endpoint is RPT introspection profile implementation defined by
@@ -41,12 +40,8 @@ public class RptStatusRestWebServiceImpl implements RptStatusRestWebService {
 
     @Logger
     private Log log;
-    //    @In
-//    private TokenService tokenService;
     @In
     private ErrorResponseFactory errorResponseFactory;
-    //    @In
-//    private AuthorizationGrantList authorizationGrantList;
     @In
     private RPTManager rptManager;
     @In
@@ -58,9 +53,6 @@ public class RptStatusRestWebServiceImpl implements RptStatusRestWebService {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
-//            final String authorizationToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-//            final AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(authorizationToken);
-//            final AbstractToken accessToken = authorizationGrant.getAccessToken(authorizationToken);
             final UmaRPT rpt = rptManager.getRPTByCode(tokenStatusRequest.getRpt());
 
             if (!isValid(rpt)) {
