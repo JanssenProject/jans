@@ -22,7 +22,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
@@ -97,7 +97,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
         request.setRpt(m_rpt.getRpt());
         request.setTicket(m_ticketH.getT().getTicket());
 
-        final AuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
+        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
         assertNotNull(response, "Token response status is null");
     }
 

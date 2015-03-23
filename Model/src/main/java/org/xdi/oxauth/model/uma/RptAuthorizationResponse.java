@@ -20,14 +20,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({"rpt"})
 @XmlRootElement
-public class AuthorizationResponse {
+public class RptAuthorizationResponse {
 
     private String rpt;
 
-    public AuthorizationResponse() {
+    public RptAuthorizationResponse() {
     }
 
-    public AuthorizationResponse(String rpt) {
+    public RptAuthorizationResponse(String rpt) {
         this.rpt = rpt;
     }
 

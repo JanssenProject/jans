@@ -20,7 +20,7 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
@@ -98,7 +98,7 @@ public class IdGenWsHttpTest extends BaseTest {
 
     private void authorizeRpt(String p_ticket) {
         // Authorize RPT token to access permission ticket
-        AuthorizationResponse authorizationResponse = null;
+        RptAuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(m_rpt, p_ticket);
             authorizationResponse = UmaClientFactory.instance().createAuthorizationRequestService(m_metadataConfiguration).requestRptPermissionAuthorization(

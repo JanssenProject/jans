@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -25,7 +25,7 @@ public interface RptAuthorizationRequestService {
 	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public AuthorizationResponse requestRptPermissionAuthorization(@HeaderParam("Authorization") String authorization,
+	public RptAuthorizationResponse requestRptPermissionAuthorization(@HeaderParam("Authorization") String authorization,
 			@HeaderParam("Host") String amHost, RptAuthorizationRequest rptAuthorizationRequest);
 
 }

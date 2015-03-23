@@ -85,7 +85,7 @@ public class TUma {
         return r.requestRptStatus(p_umaRptStatusPath, p_umaAmHost, p_aat, rpt);
     }
 
-    public static AuthorizationResponse requestAuthorization(BaseTest p_test, String p_umaPermissionAuthorizationPath, String p_umaAmHost, Token p_aat, RptAuthorizationRequest p_request) {
+    public static RptAuthorizationResponse requestAuthorization(BaseTest p_test, String p_umaPermissionAuthorizationPath, String p_umaAmHost, Token p_aat, RptAuthorizationRequest p_request) {
         final TAuthorization t = new TAuthorization(p_test);
         return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_umaAmHost, p_aat, p_request);
     }

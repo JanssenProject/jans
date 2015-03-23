@@ -15,7 +15,7 @@ import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
@@ -182,7 +182,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         showTitle("testRequesterAsksForAuthorization");
 
         // Authorize RPT token to access permission ticket
-        AuthorizationResponse authorizationResponse = null;
+        RptAuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
 
