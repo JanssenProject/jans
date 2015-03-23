@@ -101,7 +101,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_3_hostDeterminesRptStatus"})
     @Parameters({"umaAmHost", "umaHost", "umaPermissionPath"})
     public void _4_registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath) throws Exception {
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 

@@ -39,7 +39,7 @@ public class RptIntrospectionResponse {
     private String aud;
     private String iss;
     private String jti;
-    private List<ResourceSetPermissionRequest> permissions;
+    private List<RegisterPermissionRequest> permissions;
 
     public RptIntrospectionResponse() {
     }
@@ -140,11 +140,11 @@ public class RptIntrospectionResponse {
 
     @JsonProperty(value = "permissions")
     @XmlElement(name = "permissions")
-    public List<ResourceSetPermissionRequest> getPermissions() {
+    public List<RegisterPermissionRequest> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<ResourceSetPermissionRequest> p_permissions) {
+    public void setPermissions(List<RegisterPermissionRequest> p_permissions) {
         permissions = p_permissions;
     }
 

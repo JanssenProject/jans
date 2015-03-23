@@ -18,7 +18,7 @@ import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.CustomAttribute;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
@@ -150,9 +150,9 @@ public class ServerUtil {
         });
     }
 
-    public static ResourceSetPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
+    public static RegisterPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
         if (p_permission != null) {
-            final ResourceSetPermissionRequest result = new ResourceSetPermissionRequest();
+            final RegisterPermissionRequest result = new RegisterPermissionRequest();
             result.setResourceSetId(p_permission.getResourceSetId());
             result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
             result.setExpiresAt(p_permission.getExpirationDate());

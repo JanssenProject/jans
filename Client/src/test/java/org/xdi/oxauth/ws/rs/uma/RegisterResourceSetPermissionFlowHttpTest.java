@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
@@ -76,7 +76,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
-        ResourceSetPermissionRequest resourceSetPermissionRequest = new ResourceSetPermissionRequest();
+        RegisterPermissionRequest resourceSetPermissionRequest = new RegisterPermissionRequest();
         resourceSetPermissionRequest.setResourceSetId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId);
         resourceSetPermissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
@@ -104,7 +104,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
-        ResourceSetPermissionRequest resourceSetPermissionRequest = new ResourceSetPermissionRequest();
+        RegisterPermissionRequest resourceSetPermissionRequest = new RegisterPermissionRequest();
         resourceSetPermissionRequest.setResourceSetId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId + "1");
         resourceSetPermissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 

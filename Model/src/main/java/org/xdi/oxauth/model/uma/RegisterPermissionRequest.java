@@ -13,6 +13,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
-public class ResourceSetPermissionRequest {
+public class RegisterPermissionRequest implements Serializable {
 
     private String resourceSetId;
     private List<String> scopes;
@@ -39,10 +40,10 @@ public class ResourceSetPermissionRequest {
     private Date issuedAt;
     private Date nbf;
 
-    public ResourceSetPermissionRequest() {
+    public RegisterPermissionRequest() {
     }
 
-    public ResourceSetPermissionRequest(String p_resourceSetId, List<String> p_scopes) {
+    public RegisterPermissionRequest(String p_resourceSetId, List<String> p_scopes) {
         resourceSetId = p_resourceSetId;
         scopes = p_scopes;
     }
