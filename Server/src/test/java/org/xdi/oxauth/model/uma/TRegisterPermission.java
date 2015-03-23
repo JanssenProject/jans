@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -22,6 +14,11 @@ import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,11 +35,10 @@ class TRegisterPermission {
     }
 
     public ResourceSetPermissionTicket registerPermission(final Token p_pat, final String p_umaAmHost, String p_umaHost,
-                                     final ResourceSetPermissionRequest p_request, String p_umaPermissionPath) {
+                                     final ResourceSetPermissionRequest p_request, String path) {
         final Holder<ResourceSetPermissionTicket> ticketH = new Holder<ResourceSetPermissionTicket>();
-        final String path = p_umaPermissionPath + "/" + p_umaHost + "/";
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.PUT, path) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
