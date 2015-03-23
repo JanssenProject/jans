@@ -37,12 +37,20 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * This AM's endpoint is part of resource set registration API.
+ * <p/>
+ * The host uses the RESTful API at the AM's resource set registration endpoint
+ * to create, read, update, and delete resource set descriptions, along with
+ * listing groups of such descriptions. The host MUST use its valid PAT obtained
+ * previously to gain access to this endpoint. The resource set registration API
+ * is a subset of the protection API.
+ *
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
  *         Date: 10/03/2012
  */
 @Name("resourceSetRegistrationRestWebService")
-public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetRegistrationRestWebService {
+public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS {
 
     @Logger
     private Log log;

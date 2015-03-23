@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -14,9 +16,13 @@ import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -27,7 +33,9 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Zabrovarnyy Date: 03/12/2015
  */
 @Name("umaMetaDataConfigurationRestWebService")
-public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigurationRestWebService {
+@Path("/oxauth/uma-configuration")
+@Api(value = "/oxauth/uma-configuration", description = "The authorization server endpiont that provides configuration data in a JSON [RFC4627] document that resides in an /uma-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
+public class UmaConfigurationWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
 
@@ -36,7 +44,13 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
     @In
     private ErrorResponseFactory errorResponseFactory;
 
-    public Response getMetadataConfiguration() {
+    @GET
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @ApiOperation(
+            value = "Provides configuration data as json document. It contains options and endpoints supported by the authorization server.",
+            response = UmaConfiguration.class
+    )
+    public Response getConfiguration() {
         try {
             final Configuration configuration = ConfigurationFactory.getConfiguration();
             final String baseEndpointUri = configuration.getBaseEndpoint();

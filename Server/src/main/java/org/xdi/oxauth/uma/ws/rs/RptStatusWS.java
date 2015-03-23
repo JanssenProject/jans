@@ -40,7 +40,7 @@ import java.util.List;
         " The endpoint is RPT introspection profile implementation defined by UMA specification")
 
 @Name("rptStatusRestWebService")
-public class RptStatusRestWebServiceImpl {
+public class RptStatusWS {
 
     @Logger
     private Log log;

@@ -49,7 +49,7 @@ import java.util.List;
 @Path("/requester/perm")
 @Api(value = "/requester/perm", description = "RPT authorization endpoint. RPT is authorized with new permission(s).")
 @Name("rptPermissionAuthorizationRestWebService")
-public class RptPermissionAuthorizationRestWebServiceImpl {
+public class RptPermissionAuthorizationWS {
 
     @Logger
     private Log log;
