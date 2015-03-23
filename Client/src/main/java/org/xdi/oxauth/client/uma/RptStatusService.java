@@ -9,7 +9,6 @@ package org.xdi.oxauth.client.uma;
 import org.xdi.oxauth.model.uma.RptStatusResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -23,9 +22,9 @@ import javax.ws.rs.Produces;
 public interface RptStatusService {
 
     @POST
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public RptStatusResponse requestRptStatus(@HeaderParam("Authorization") String authorization,
+                                              @HeaderParam("Content-Type") String contentType,
                                               @FormParam("token") String rptAsString,
                                               @FormParam("token_type_hint") String tokenTypeHint);
 

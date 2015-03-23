@@ -23,6 +23,8 @@ import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
+import javax.ws.rs.core.MediaType;
+
 import static org.testng.Assert.*;
 
 /**
@@ -139,6 +141,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         RptStatusResponse tokenStatusResponse = null;
         try {
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
+                    MediaType.APPLICATION_FORM_URLENCODED,
                     "Bearer " + m_pat.getAccessToken(),
                     this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
@@ -217,12 +220,11 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void testHostDetermineRptStatus2(final String umaAmHost) throws Exception {
         showTitle("testHostDetermineRptStatus2");
 
-        String resourceSetId = umaRegisterResourceSetFlowHttpTest.resourceSetId;
-
         // Determine RPT token to status
         RptStatusResponse tokenStatusResponse = null;
         try {
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
+                    MediaType.APPLICATION_FORM_URLENCODED,
                     "Bearer " + m_pat.getAccessToken(),
                     this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
