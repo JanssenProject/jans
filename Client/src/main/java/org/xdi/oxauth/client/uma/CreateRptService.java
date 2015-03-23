@@ -21,7 +21,7 @@ import javax.ws.rs.Produces;
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
  */
-public interface RequesterPermissionTokenService {
+public interface CreateRptService {
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})

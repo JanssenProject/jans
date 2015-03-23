@@ -63,10 +63,9 @@ class TRegisterResourceSet {
     }
 
     private ResourceSetStatus registerResourceSetInternal(final Token p_pat, String umaRegisterResourcePath, final ResourceSet p_resourceSet) throws Exception {
-        final String rsid = String.valueOf(System.currentTimeMillis());
-        String path = umaRegisterResourcePath + "/" + rsid;
+        String path = umaRegisterResourcePath;
         System.out.println("Path: " + path);
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.PUT, path) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {

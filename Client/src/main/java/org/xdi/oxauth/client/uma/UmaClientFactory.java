@@ -34,12 +34,12 @@ public class UmaClientFactory {
         return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceSetRegistrationEndpoint(), clientExecutor);
     }
 
-    public RequesterPermissionTokenService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration) {
-        return ProxyFactory.create(RequesterPermissionTokenService.class, metadataConfiguration.getRptEndpoint());
+    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration) {
+        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint());
     }
 
-    public RequesterPermissionTokenService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(RequesterPermissionTokenService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
+    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
     }
 
     public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration) {

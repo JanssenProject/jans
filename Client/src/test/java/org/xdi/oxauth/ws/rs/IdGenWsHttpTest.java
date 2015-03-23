@@ -17,7 +17,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.IdClient;
-import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
+import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
@@ -54,7 +54,7 @@ public class IdGenWsHttpTest extends BaseTest {
         m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
 
-        final RequesterPermissionTokenService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);
+        final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);
 
         // Get requester permission token
         RPTResponse requesterPermissionTokenResponse = null;

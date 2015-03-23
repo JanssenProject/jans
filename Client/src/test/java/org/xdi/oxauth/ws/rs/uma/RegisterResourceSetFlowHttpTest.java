@@ -75,8 +75,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
             resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            String id = String.valueOf(System.currentTimeMillis());
-            resourceSetStatus = resourceSetRegistrationService.addResourceSet("Bearer " + m_pat.getAccessToken(), id, resourceSet);
+            resourceSetStatus = resourceSetRegistrationService.addResourceSet("Bearer " + m_pat.getAccessToken(), resourceSet);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
