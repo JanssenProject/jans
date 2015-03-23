@@ -53,7 +53,7 @@ import java.util.List;
 @Name("resourceSetRegistrationRestWebService")
 @Path("/host/rsrc/resource_set")
 @Api(value = "/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
-public class ResourceSetRegistrationWSImpl {
+public class ResourceSetRegistrationWS {
 
     @Logger
     private Log log;

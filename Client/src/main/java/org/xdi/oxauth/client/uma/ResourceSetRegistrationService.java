@@ -20,11 +20,11 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 public interface ResourceSetRegistrationService {
+
 	@POST
-	@Path("{rsid}")
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE})
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public ResourceSetStatus addResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid, ResourceSet resourceSet);
+	public ResourceSetStatus addResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet);
 
 	@PUT
 	@Path("{rsid}")
