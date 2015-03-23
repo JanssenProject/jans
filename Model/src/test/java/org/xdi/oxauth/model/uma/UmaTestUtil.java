@@ -82,9 +82,9 @@ public class UmaTestUtil {
         assertTrue(StringUtils.isNotBlank(p_t.getTicket()), "Ticket is empty");
     }
 
-    public static void assert_(RequesterPermissionTokenResponse p_response) {
+    public static void assert_(RPTResponse p_response) {
         assertNotNull(p_response, "Requester permission token response is null");
-        assertNotNull(p_response.getToken(), "Requester permission token is null");
+        assertNotNull(p_response.getRpt(), "Requester permission token is null");
     }
 
     public static void assert_(ClientResponse p_response) {

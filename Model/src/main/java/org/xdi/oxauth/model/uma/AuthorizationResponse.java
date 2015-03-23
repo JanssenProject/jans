@@ -6,46 +6,46 @@
 
 package org.xdi.oxauth.model.uma;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/04/2013
  */
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({"status"})
+@JsonPropertyOrder({"rpt"})
 @XmlRootElement
 public class AuthorizationResponse {
 
-    private String m_status;
+    private String rpt;
 
     public AuthorizationResponse() {
     }
 
-    public AuthorizationResponse(String p_status) {
-        m_status = p_status;
+    public AuthorizationResponse(String rpt) {
+        this.rpt = rpt;
     }
 
-    @JsonProperty(value = "status")
-    @XmlElement(name = "status")
-    public String getStatus() {
-        return m_status;
+    @JsonProperty(value = "rpt")
+    @XmlElement(name = "rpt")
+    public String getRpt() {
+        return rpt;
     }
 
-    public void setStatus(String p_status) {
-        m_status = p_status;
+    public void setRpt(String rpt) {
+        this.rpt = rpt;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("AuthorizationResponse");
-        sb.append("{m_status='").append(m_status).append('\'');
+        sb.append("{rpt='").append(rpt).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -23,8 +23,8 @@ import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -57,16 +57,16 @@ public class IdGenWsHttpTest extends BaseTest {
         final RequesterPermissionTokenService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);
 
         // Get requester permission token
-        RequesterPermissionTokenResponse requesterPermissionTokenResponse = null;
+        RPTResponse requesterPermissionTokenResponse = null;
         try {
-            requesterPermissionTokenResponse = rptService.getRequesterPermissionToken("Bearer " + m_aat.getAccessToken(), umaAmHost);
+            requesterPermissionTokenResponse = rptService.createRPT("Bearer " + m_aat.getAccessToken(), umaAmHost);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
         UmaTestUtil.assert_(requesterPermissionTokenResponse);
-        m_rpt = requesterPermissionTokenResponse.getToken();
+        m_rpt = requesterPermissionTokenResponse.getRpt();
     }
 
     //    @Test(dependsOnMethods = {"init"})

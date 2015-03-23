@@ -26,7 +26,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 
     private Token m_pat;
     private Token m_aat;
-    private RequesterPermissionTokenResponse m_rpt;
+    private RPTResponse m_rpt;
     private ResourceSetStatus m_resourceSet;
     private ResourceSetPermissionTicket m_ticket;
 
@@ -91,7 +91,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _3_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
         final RptStatusRequest request = new RptStatusRequest();
-        request.setRpt(m_rpt.getToken());
+        request.setRpt(m_rpt.getRpt());
         request.setResourceSetId(m_resourceSet.getId());
 
         final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, request);
@@ -117,7 +117,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaPermissionAuthorizationPath", "umaAmHost"})
     public void _5_authorizePermission(String umaPermissionAuthorizationPath, String umaAmHost) {
         final RptAuthorizationRequest request = new RptAuthorizationRequest();
-        request.setRpt(m_rpt.getToken());
+        request.setRpt(m_rpt.getRpt());
         request.setTicket(m_ticket.getTicket());
 
         final AuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
@@ -131,7 +131,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _6_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
         final RptStatusRequest request = new RptStatusRequest();
-        request.setRpt(m_rpt.getToken());
+        request.setRpt(m_rpt.getRpt());
         request.setResourceSetId(m_resourceSet.getId());
 
         final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, request);

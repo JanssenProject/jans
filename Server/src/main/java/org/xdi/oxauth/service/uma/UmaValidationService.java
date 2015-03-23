@@ -180,13 +180,13 @@ public class UmaValidationService {
     public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
    		if (resourceSetPermission == null) {
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUESTER_TICKET)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
 
    		resourceSetPermission.checkExpired();
    		if (!resourceSetPermission.isValid()) {
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_REQUESTER_TICKET)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_TICKET)).build());
    		}
    	}
 

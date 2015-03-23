@@ -43,7 +43,7 @@ public class TUma {
         return r.newTokenByRefreshToken(tokenPath, p_oldToken, umaClientId, umaClientSecret);
     }
 
-    public static RequesterPermissionTokenResponse requestRpt(BaseTest p_test, Token p_aat, String p_rptPath, String umaAmHost) {
+    public static RPTResponse requestRpt(BaseTest p_test, Token p_aat, String p_rptPath, String umaAmHost) {
         final TTokenRequest r = new TTokenRequest(p_test);
         return r.requestRpt(p_aat, p_rptPath, umaAmHost);
     }

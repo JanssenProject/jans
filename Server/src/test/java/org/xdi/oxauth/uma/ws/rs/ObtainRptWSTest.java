@@ -9,7 +9,7 @@ package org.xdi.oxauth.uma.ws.rs;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -35,8 +35,8 @@ public class ObtainRptWSTest extends BaseTest {
     @Test(dependsOnMethods = "init")
     @Parameters({"umaRptPath", "umaAmHost"})
     public void obtainRpt(String umaRptPath, String umaAmHost) {
-        final RequesterPermissionTokenResponse r = TUma.requestRpt(this, m_aat, umaRptPath, umaAmHost);
+        final RPTResponse r = TUma.requestRpt(this, m_aat, umaRptPath, umaAmHost);
         UmaTestUtil.assert_(r);
-        m_rpt = r.getToken();
+        m_rpt = r.getRpt();
     }
 }

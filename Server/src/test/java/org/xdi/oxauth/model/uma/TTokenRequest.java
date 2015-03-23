@@ -278,8 +278,8 @@ class TTokenRequest {
         }.run();
     }
 
-    public RequesterPermissionTokenResponse requestRpt(final Token p_aat, final String p_rptPath, final String p_umaAmHost) {
-        final Holder<RequesterPermissionTokenResponse> h = new Holder<RequesterPermissionTokenResponse>();
+    public RPTResponse requestRpt(final Token p_aat, final String p_rptPath, final String p_umaAmHost) {
+        final Holder<RPTResponse> h = new Holder<RPTResponse>();
 
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_rptPath) {
@@ -306,7 +306,7 @@ class TTokenRequest {
                             tokenResponse = jsonObj.get("requesterPermissionTokenResponse").toString();
                         }
                         System.out.println("Token response = " + tokenResponse);
-                        RequesterPermissionTokenResponse result = ServerUtil.createJsonMapper().readValue(tokenResponse, RequesterPermissionTokenResponse.class);
+                        RPTResponse result = ServerUtil.createJsonMapper().readValue(tokenResponse, RPTResponse.class);
                         UmaTestUtil.assert_(result);
 
                         h.setT(result);

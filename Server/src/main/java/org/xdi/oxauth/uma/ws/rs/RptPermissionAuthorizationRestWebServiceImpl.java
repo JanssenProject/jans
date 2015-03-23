@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.google.common.base.Strings;
 import com.wordnik.swagger.annotations.Api;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -76,14 +77,13 @@ public class RptPermissionAuthorizationRestWebServiceImpl {
             RptAuthorizationRequest rptAuthorizationRequest,
             @Context HttpServletRequest httpRequest) {
         try {
-            final AuthorizationGrant authorizationGrant = umaValidationService.validateAuthorizationWithAuthScope(authorization);
+            final AuthorizationGrant grant = umaValidationService.validateAuthorizationWithAuthScope(authorization);
 
-            umaValidationService.validateAmHost(amHost);
-            authorizeRptPermission(authorizationGrant, rptAuthorizationRequest, httpRequest);
+            final String validatedAmHost = umaValidationService.validateAmHost(amHost);
+            final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant, validatedAmHost);
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-            final String entity = ServerUtil.asJson(new AuthorizationResponse(Response.Status.OK.getReasonPhrase()));
-            return Response.ok(entity).build();
+            return Response.ok(ServerUtil.asJson(new AuthorizationResponse(rpt.getCode()))).build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
@@ -95,11 +95,27 @@ public class RptPermissionAuthorizationRestWebServiceImpl {
         }
     }
 
-    private ResourceSetPermission authorizeRptPermission(AuthorizationGrant authorizationGrant, RptAuthorizationRequest rptAuthorizationRequest, HttpServletRequest httpRequest) {
-        UmaRPT rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
+    private UmaRPT authorizeRptPermission(String authorization,
+                                                         RptAuthorizationRequest rptAuthorizationRequest,
+                                                         HttpServletRequest httpRequest,
+                                                         AuthorizationGrant grant,
+                                                         String amHost) {
+        UmaRPT rpt;
+        if (Strings.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
+            rpt = rptManager.createRPT(authorization, amHost);
+        } else {
+            rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
+        }
 
         // Validate RPT
-        umaValidationService.validateRPT(rpt);
+        try {
+            umaValidationService.validateRPT(rpt);
+        } catch(WebApplicationException e) {
+            // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
+            // it's up to impelementation whether to create new RPT for each request or pass back requests RPT.
+            // Here we decided to pass back new RPT if request's RPT in invalid.
+            rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
+        }
 
         final ResourceSetPermission resourceSetPermission = resourceSetPermissionManager.getResourceSetPermissionByTicket(rptAuthorizationRequest.getTicket());
 
@@ -117,7 +133,7 @@ public class RptPermissionAuthorizationRestWebServiceImpl {
                         // grant access directly, client is in trust and skipAuthorization=true
                         log.trace("grant access directly, client is in trust and skipAuthorization=true");
                         rptManager.addPermissionToRPT(rpt, resourceSetPermission);
-                        return resourceSetPermission;
+                        return rpt;
                     }
                 }
             } else {
@@ -130,9 +146,9 @@ public class RptPermissionAuthorizationRestWebServiceImpl {
         }
 
         // Add permission to RPT
-        if (umaAuthorizationService.allowToAddPermission(authorizationGrant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest)) {
+        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest)) {
             rptManager.addPermissionToRPT(rpt, resourceSetPermission);
-            return resourceSetPermission;
+            return rpt;
         }
 
         // throw not authorized exception

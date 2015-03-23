@@ -6,27 +6,24 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.io.IOException;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.AbstractToken;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
 
 /**
  * @author Yuriy Movchan Date: 10/16/2012
@@ -38,8 +35,6 @@ public class RptRestWebServiceImpl implements RptRestWebService {
 	private Log log;
 	@In
 	private TokenService tokenService;
-//	@In
-//	private ResourceSetService resourceSetService;
 	@In
 	private ErrorResponseFactory errorResponseFactory;
 	@In
@@ -54,7 +49,7 @@ public class RptRestWebServiceImpl implements RptRestWebService {
             umaValidationService.validateAuthorizationWithAuthScope(authorization);
 			String validatedAmHost = umaValidationService.validateAmHost(amHost);
 
-			return getPermissionTokenImpl(authorization, validatedAmHost);
+			return createRpt(authorization, validatedAmHost);
 		} catch (Exception ex) {
 			log.error("Exception happened", ex);
 			if (ex instanceof WebApplicationException) {
@@ -66,17 +61,11 @@ public class RptRestWebServiceImpl implements RptRestWebService {
 		}
 	}
 
-	private Response getPermissionTokenImpl(String authorization, String amHost) throws IOException {
-		String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-		AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
-		AbstractToken accessToken = authorizationGrant.getAccessToken(aatToken);
-
-		UmaRPT requesterPermissionToken = rptManager.createRPT(accessToken, authorizationGrant.getUserId(), authorizationGrant.getClientId(), amHost);
-		
-		rptManager.addRPT(requesterPermissionToken, authorizationGrant.getClientDn());
+	private Response createRpt(String authorization, String amHost) throws IOException {
+        UmaRPT rpt = rptManager.createRPT(authorization, amHost);
 
         // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-        final String entity = ServerUtil.asJson(new RequesterPermissionTokenResponse(requesterPermissionToken.getCode()));
+        final String entity = ServerUtil.asJson(new RPTResponse(rpt.getCode()));
 
         final ResponseBuilder builder = Response.status(Response.Status.CREATED);
 		builder.entity(entity);

@@ -14,7 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.client.uma.MetaDataConfigurationService;
+import org.xdi.oxauth.client.uma.UmaConfigurationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 
@@ -27,7 +27,7 @@ public class UmaMultithreadTest {
 
 	private String serverUri;
 
-	private MetaDataConfigurationService service;
+	private UmaConfigurationService service;
 
     @Parameters({"serverUri"})
     public UmaMultithreadTest(String serverUri) {
