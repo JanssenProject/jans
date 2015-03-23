@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -19,6 +20,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetService;
@@ -26,8 +28,7 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
@@ -50,7 +51,9 @@ import java.util.List;
  *         Date: 10/03/2012
  */
 @Name("resourceSetRegistrationRestWebService")
-public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS {
+@Path("/host/rsrc/resource_set")
+@Api(value = "/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
+public class ResourceSetRegistrationWSImpl {
 
     @Logger
     private Log log;
@@ -73,7 +76,9 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
     @In
     private ScopeService umaScopeService;
 
-    @Override
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response createResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet) {
         try {
             String id = generatedId();
@@ -92,7 +97,12 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
         }
     }
 
-    public Response updateResourceSet(String authorization, String rsid, ResourceSet resourceSet) {
+    @PUT
+    @Path("{rsid}")
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response updateResourceSet(@HeaderParam("Authorization") String authorization,
+                                      @PathParam("rsid") String rsid, ResourceSet resourceSet) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -113,7 +123,10 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
         return String.valueOf(System.currentTimeMillis());
     }
 
-    public Response getResourceSet(String authorization, String rsid) {
+    @GET
+    @Path("{rsid}")
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response getResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -168,7 +181,9 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
      * @param p_scope       scope of resource set for additional filtering, can blank string.
      * @return resource set ids.
      */
-    public List<String> getResourceSetList(String authorization, String p_scope) {
+    @GET
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public List<String> getResourceSetList(@HeaderParam("Authorization") String authorization, @QueryParam("scope") String p_scope) {
         try {
             log.trace("Getting resource set descriptions.");
 
@@ -210,7 +225,9 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
-    public Response deleteResourceSet(String authorization, String rsid) {
+    @DELETE
+    @Path("{rsid}")
+    public Response deleteResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -361,13 +378,13 @@ public class ResourceSetRegistrationWSImpl implements ResourceSetRegistrationWS 
     }
 
 
-    @Override
+    @HEAD
     public Response unsupportedHeadMethod() {
         log.error("HEAD method is not allowed");
         throw new WebApplicationException(Response.status(405).entity("HEAD Method Not Allowed").build());
     }
 
-    @Override
+    @OPTIONS
     public Response unsupportedOptionsMethod() {
         log.error("OPTIONS method is not allowed");
         throw new WebApplicationException(Response.status(405).entity("OPTIONS Method Not Allowed").build());
