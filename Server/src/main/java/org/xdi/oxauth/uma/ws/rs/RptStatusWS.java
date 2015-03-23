@@ -14,7 +14,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
@@ -64,13 +64,13 @@ public class RptStatusWS {
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
             if (!isValid(rpt)) {
-                return Response.status(Response.Status.OK).entity(new RptStatusResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
+                return Response.status(Response.Status.OK).entity(new RptIntrospectionResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
             }
 
             final List<ResourceSetPermissionRequest> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
-            final RptStatusResponse statusResponse = new RptStatusResponse();
+            final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
             statusResponse.setActive(true);
             statusResponse.setExpiresAt(rpt.getExpirationDate());
             statusResponse.setIssuedAt(rpt.getCreationDate());

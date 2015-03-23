@@ -28,7 +28,7 @@ import java.util.List;
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({"active", "exp", "iat", "nbf", "permissions", "client_id", "sub", "aud", "iss", "jti"})
 @XmlRootElement
-public class RptStatusResponse {
+public class RptIntrospectionResponse {
 
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
     private Date expiresAt;
@@ -41,10 +41,10 @@ public class RptStatusResponse {
     private String jti;
     private List<ResourceSetPermissionRequest> permissions;
 
-    public RptStatusResponse() {
+    public RptIntrospectionResponse() {
     }
 
-    public RptStatusResponse(boolean status) {
+    public RptIntrospectionResponse(boolean status) {
         this.active = status;
     }
 
