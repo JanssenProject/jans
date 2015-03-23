@@ -6,13 +6,12 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.AuthorizationRequestService;
+import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
@@ -40,7 +39,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
 
     protected RptStatusService rptStatusService;
-    protected AuthorizationRequestService rptPermissionAuthorizationService;
+    protected RptAuthorizationRequestService rptPermissionAuthorizationService;
 
     protected Token m_aat;
     protected Token m_pat;
@@ -183,9 +182,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         showTitle("testRequesterAsksForAuthorization");
 
         // Authorize RPT token to access permission ticket
-        ClientResponse<AuthorizationResponse> authorizationResponse = null;
+        AuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
+
             authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(
                     "Bearer " + m_aat.getAccessToken(),
                     umaAmHost,

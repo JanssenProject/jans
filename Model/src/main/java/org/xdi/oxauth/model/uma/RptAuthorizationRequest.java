@@ -6,14 +6,13 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Request for getting token status
@@ -25,12 +24,13 @@ import java.util.List;
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({"rpt", "ticket", "claim_tokens"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 public class RptAuthorizationRequest {
 
     private String rpt;
     private String ticket;
-    private List<ClaimToken> claims = new ArrayList<ClaimToken>();
+    private ClaimTokenList claims;
 
     public RptAuthorizationRequest() {
     }
@@ -42,11 +42,11 @@ public class RptAuthorizationRequest {
 
     @JsonProperty(value = "claim_tokens")
     @XmlElement(name = "claim_tokens")
-    public List<ClaimToken> getClaims() {
+    public ClaimTokenList getClaims() {
         return claims;
     }
 
-    public void setClaims(List<ClaimToken> p_claims) {
+    public void setClaims(ClaimTokenList p_claims) {
         claims = p_claims;
     }
 

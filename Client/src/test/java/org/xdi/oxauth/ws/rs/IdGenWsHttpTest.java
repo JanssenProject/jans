@@ -7,9 +7,7 @@
 package org.xdi.oxauth.ws.rs;
 
 import junit.framework.Assert;
-
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.core.BaseClientResponse;
 import org.testng.annotations.BeforeClass;
@@ -24,9 +22,9 @@ import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.uma.AuthorizationResponse;
 import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
@@ -100,7 +98,7 @@ public class IdGenWsHttpTest extends BaseTest {
 
     private void authorizeRpt(String p_ticket) {
         // Authorize RPT token to access permission ticket
-        ClientResponse<AuthorizationResponse> authorizationResponse = null;
+        AuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(m_rpt, p_ticket);
             authorizationResponse = UmaClientFactory.instance().createAuthorizationRequestService(m_metadataConfiguration).requestRptPermissionAuthorization(
