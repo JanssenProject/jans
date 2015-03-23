@@ -6,24 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -32,11 +14,7 @@ import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.ValidateTokenRequest;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -46,12 +24,24 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for the Use Authentication Filter (embedded)
  *
- * @author Javier Rojas Blum Date: 07.25.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 March 23, 2015
  */
 public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
+
+    private String clientId;
+    private String clientSecret;
 
     private String clientId1;
     private String clientSecret1;
@@ -66,6 +56,57 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
     private String clientSecret4;
 
     String authorizationCode1;
+
+    @Parameters({"registerPath", "redirectUris"})
+    @Test
+    public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+            @Override
+            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+                try {
+                    super.prepareRequest(request);
+
+                    List<ResponseType> responseTypes = Arrays.asList(
+                            ResponseType.CODE,
+                            ResponseType.TOKEN,
+                            ResponseType.ID_TOKEN);
+
+                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                            StringUtils.spaceSeparatedToList(redirectUris));
+                    registerRequest.setResponseTypes(responseTypes);
+
+                    request.setContentType(MediaType.APPLICATION_JSON);
+                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+                    request.setContent(registerRequestContent.getBytes());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
+                }
+            }
+
+            @Override
+            protected void onResponse(EnhancedMockHttpServletResponse response) {
+                super.onResponse(response);
+                showResponse("dynamicClientRegistration", response);
+
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
+                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                try {
+                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
+                    ClientTestUtil.assert_(registerResponse);
+
+                    clientId = registerResponse.getClientId();
+                    clientSecret = registerResponse.getClientSecret();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                }
+            }
+        }.run();
+    }
 
     @Parameters({"registerPath", "redirectUris", "clientJwksUri"})
     @Test
@@ -150,10 +191,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -254,10 +295,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -358,10 +399,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -463,10 +504,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -483,10 +524,13 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
-    @Test
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestAccessTokenCustomAuthStep1(final String authorizePath, final String userId, final String userSecret,
-                                                  final String clientId, final String redirectUri) throws Exception {
+                                                  final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.POST, authorizePath) {
 
@@ -497,23 +541,16 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 List<ResponseType> responseTypes = new ArrayList<ResponseType>();
                 responseTypes.add(ResponseType.CODE);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
-                //authorizationRequest.addCustomParameter("mail", "mike@gluu.org");
-                //authorizationRequest.addCustomParameter("inum", "@!1111!0000!D4E7");
                 authorizationRequest.addCustomParameter("uid", userId);
                 authorizationRequest.addCustomParameter("pwd", userSecret);
 
                 request.setParameters(authorizationRequest.getParameters());
-                //request.setQueryString(authorizationRequest.getQueryString());
             }
 
             @Override
@@ -534,6 +571,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                         assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                         assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
                         assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
                         authorizationCode1 = params.get(AuthorizeResponseParam.CODE);
                     } catch (URISyntaxException e) {
@@ -548,10 +586,9 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "validateTokenPath", "clientId", "clientSecret", "redirectUri"})
-    @Test(dependsOnMethods = {"requestAccessTokenCustomAuthStep1"})
+    @Parameters({"tokenPath", "validateTokenPath", "redirectUri"})
+    @Test(dependsOnMethods = {"requestAccessTokenCustomAuthStep1", "dynamicClientRegistration"})
     public void requestAccessTokenCustomAuthStep2(final String tokenPath, final String validateTokenPath,
-                                                  final String clientId, final String clientSecret,
                                                   final String redirectUri) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
@@ -578,10 +615,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -627,10 +664,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store, private"),
+                                && response.getHeader("Cache-Control").equals("no-store, private"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
 

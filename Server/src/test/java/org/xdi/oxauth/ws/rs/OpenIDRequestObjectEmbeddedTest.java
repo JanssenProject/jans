@@ -18,6 +18,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -49,11 +50,12 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 5, 2015
+ * @version 0.9 March 23, 2015
  */
 public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
     private String clientId;
+    private String clientSecret;
     private String idToken1;
     private String accessToken1;
     private String accessToken2;
@@ -75,14 +77,14 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 try {
                     super.prepareRequest(request);
 
-                    /*List<ResponseType> responseTypes = Arrays.asList(
+                    List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.CODE,
                             ResponseType.TOKEN,
-                            ResponseType.ID_TOKEN);*/
+                            ResponseType.ID_TOKEN);
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
-                    //registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.setResponseTypes(responseTypes);
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -105,6 +107,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                     ClientTestUtil.assert_(registerResponse);
 
                     clientId = registerResponse.getClientId();
+                    clientSecret = registerResponse.getClientSecret();
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
@@ -174,6 +177,9 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     public void requestParameterMethod1Step2(final String authorizePath,
                                              final String userId, final String userSecret,
                                              final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.GET, authorizePath) {
 
@@ -184,13 +190,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(
                         ResponseType.TOKEN,
                         ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList(
-                        "openid",
-                        "profile",
-                        "address",
-                        "email");
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId1, scopes, redirectUri, nonce);
@@ -230,13 +231,14 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("id_token"), "The idToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                    idToken1 = params.get("id_token");
-                    accessToken1 = params.get("access_token");
+                    idToken1 = params.get(AuthorizeResponseParam.ID_TOKEN);
+                    accessToken1 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -350,6 +352,9 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     public void requestParameterMethod2Step2(final String authorizePath,
                                              final String userId, final String userSecret,
                                              final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -359,7 +364,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "STATE0";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId2, scopes, redirectUri, nonce);
@@ -394,11 +398,12 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                    accessToken2 = params.get("access_token");
+                    accessToken2 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -450,10 +455,13 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
-    @Test
-    public void requestParameterMethodFail1(final String authorizePath, final String userId, final String userSecret, final String clientId,
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestParameterMethodFail1(final String authorizePath, final String userId, final String userSecret,
                                             final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -463,7 +471,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -494,7 +501,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -504,12 +512,14 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
-    @Test
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestParameterMethodFail2(final String authorizePath,
                                             final String userId, final String userSecret,
-                                            final String clientId, final String clientSecret,
                                             final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -519,7 +529,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -562,7 +571,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -572,12 +582,14 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
-    @Test
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestParameterMethodFail3(final String authorizePath,
                                             final String userId, final String userSecret,
-                                            final String clientId, final String clientSecret,
                                             final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -587,7 +599,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -631,7 +642,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -641,12 +653,13 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
-    @Test
-    public void requestParameterMethodFail4(final String authorizePath,
-                                            final String userId, final String userSecret,
-                                            final String clientId, final String clientSecret,
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestParameterMethodFail4(final String authorizePath, final String userId, final String userSecret,
                                             final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -656,7 +669,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -693,7 +705,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -703,12 +716,14 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
-    @Test
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestParameterMethodWithMaxAgeRestriction(final String authorizePath,
                                                             final String userId, final String userSecret,
-                                                            final String clientId, final String clientSecret,
                                                             final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -718,7 +733,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -759,10 +773,11 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("id_token"), "The idToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -774,14 +789,17 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri",
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri",
             "requestFileBasePath", "requestFileBaseUrl"})
-    @Test // This tests requires a place to publish a request object via HTTPS
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    // This tests requires a place to publish a request object via HTTPS
     public void requestFileMethod(final String authorizePath,
                                   final String userId, final String userSecret,
-                                  final String clientId, final String clientSecret,
                                   final String redirectUri,
                                   final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -791,7 +809,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -856,8 +873,9 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                     assertNotNull(params.get("access_token"), "The accessToken is null");
                     assertNotNull(params.get("id_token"), "The idToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -869,11 +887,13 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
-    @Test
-    public void requestFileMethodFail1(final String authorizePath,
-                                       final String userId, final String userSecret,
-                                       final String clientId, final String redirectUri) throws Exception {
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestFileMethodFail1(final String authorizePath, final String userId, final String userSecret,
+                                       final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -883,7 +903,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -917,7 +936,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -927,12 +947,13 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri", "requestFileBaseUrl"})
-    @Test
-    public void requestFileMethodFail2(final String authorizePath,
-                                       final String userId, final String userSecret,
-                                       final String clientId, final String redirectUri,
-                                       final String requestFileBaseUrl) throws Exception {
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri", "requestFileBaseUrl"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestFileMethodFail2(final String authorizePath, final String userId, final String userSecret,
+                                       final String redirectUri, final String requestFileBaseUrl) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -942,7 +963,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -975,7 +995,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -985,14 +1006,15 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri",
-            "requestFileBasePath", "requestFileBaseUrl"})
-    @Test // This test requires a place to publish a request object via HTTPS
-    public void requestFileMethodFail3(final String authorizePath,
-                                       final String userId, final String userSecret,
-                                       final String clientId, final String clientSecret,
-                                       final String redirectUri,
-                                       final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri", "requestFileBasePath", "requestFileBaseUrl"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    // This test requires a place to publish a request object via HTTPS
+    public void requestFileMethodFail3(final String authorizePath, final String userId, final String userSecret,
+                                       final String redirectUri, final String requestFileBasePath,
+                                       final String requestFileBaseUrl) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -1002,7 +1024,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
@@ -1062,7 +1083,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                         assertNotNull(params.get("error"), "The error value is null");
                         assertNotNull(params.get("error_description"), "The errorDescription value is null");
-                        assertNotNull(params.get("state"), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), state);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -1129,6 +1151,9 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestParameterMethodAlgNoneStep1")
     public void requestParameterMethodAlgNoneStep2(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -1138,7 +1163,6 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId3, scopes, redirectUri, nonce);
@@ -1178,9 +1202,10 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
