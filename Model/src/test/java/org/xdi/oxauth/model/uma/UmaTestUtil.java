@@ -45,7 +45,9 @@ public class UmaTestUtil {
         assertNotNull(p_configuration.getIssuer(), "Issuer isn't correct");
         assertEquals(p_configuration.getPatProfilesSupported(), new String[]{"bearer"}, "Supported PAT profiles aren't correct");
         assertEquals(p_configuration.getAatProfilesSupported(), new String[]{"bearer"}, "Supported AAT profiles aren't correct");
-        assertEquals(p_configuration.getRptProfilesSupported(), new String[]{"bearer"}, "Supported RPT profiles aren't correct");
+        assertTrue(Arrays.equals(p_configuration.getRptProfilesSupported(), new String[]{"bearer"}) ||
+                Arrays.equals(p_configuration.getRptProfilesSupported(), new String[]{"https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0"})
+                , "Supported RPT profiles aren't correct");
         assertEquals(p_configuration.getPatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported PAT grant types aren't correct");
         assertEquals(p_configuration.getAatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported AAT grant types aren't correct");
         assertEquals(p_configuration.getClaimTokenProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
@@ -61,7 +63,7 @@ public class UmaTestUtil {
     public static void assert_(Token p_token) {
         assertNotNull(p_token, "The token object is null");
         assertNotNull(p_token.getAccessToken(), "The access token is null");
-        assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
+        //assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
     }
 
     public static void assert_(ResourceSetStatus p_status) {
