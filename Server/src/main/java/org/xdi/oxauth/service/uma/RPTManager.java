@@ -6,21 +6,25 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-import java.util.List;
-
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AbstractToken;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * RPT manager component
@@ -34,6 +38,10 @@ public class RPTManager implements IRPTManager {
 
     @Logger
     private Log log;
+    @In
+   	private TokenService tokenService;
+    @In
+   	private AuthorizationGrantList authorizationGrantList;
 
     private IRPTManager manager;
 
@@ -52,6 +60,18 @@ public class RPTManager implements IRPTManager {
                 log.error("Unable to identify mode of the server. (Please check configuration.)");
                 throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.)");
         }
+    }
+
+    @Override
+    public UmaRPT createRPT(String authorization, String amHost) {
+        String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
+        AbstractToken accessToken = authorizationGrant.getAccessToken(aatToken);
+
+        UmaRPT rpt = createRPT(accessToken, authorizationGrant.getUserId(), authorizationGrant.getClientId(), amHost);
+
+        addRPT(rpt, authorizationGrant.getClientDn());
+        return rpt;
     }
 
     public void addRPT(UmaRPT requesterPermissionToken, String clientDn) {

@@ -27,7 +27,7 @@ import javax.ws.rs.Produces;
  * requester in its response.
  * 
  */
-public interface ResourceSetPermissionRegistrationService {
+public interface PermissionRegistrationService {
 
 	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })

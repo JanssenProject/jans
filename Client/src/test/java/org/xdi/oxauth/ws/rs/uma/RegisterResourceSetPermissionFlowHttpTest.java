@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.ResourceSetPermissionRegistrationService;
+import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
@@ -73,7 +73,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     public void testRegisterResourceSetPermission(final String umaAmHost) throws Exception {
         showTitle("testRegisterResourceSetPermission");
 
-        ResourceSetPermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
+        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
         ResourceSetPermissionRequest resourceSetPermissionRequest = new ResourceSetPermissionRequest();
@@ -101,7 +101,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     public void testRegisterResourceSetPermissionForInvalidResource(final String umaAmHost) throws Exception {
         showTitle("testRegisterResourceSetPermissionForInvalidResource");
 
-        ResourceSetPermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
+        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
         ResourceSetPermissionRequest resourceSetPermissionRequest = new ResourceSetPermissionRequest();
