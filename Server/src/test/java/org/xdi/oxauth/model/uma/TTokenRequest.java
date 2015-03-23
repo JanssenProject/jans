@@ -6,20 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -37,8 +23,17 @@ import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -326,7 +321,7 @@ class TTokenRequest {
         return h.getT();
     }
 
-    public RptStatusResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final RptStatusRequest p_request) {
+    public RptStatusResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final String rpt) {
         final Holder<RptStatusResponse> h = new Holder<RptStatusResponse>();
 
         try {
@@ -340,14 +335,15 @@ class TTokenRequest {
                     request.addHeader("Authorization", "Bearer " + p_aat.getAccessToken());
 //                    request.addHeader("Host", p_umaAmHost);
 
-                    try {
-                        final String json = ServerUtil.createJsonMapper().writeValueAsString(p_request);
-                        request.setContent(Util.getBytes(json));
-                        request.setContentType(UmaConstants.JSON_MEDIA_TYPE);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        fail();
-                    }
+                    request.addParameter("token", rpt);
+//                    try {
+//                        final String json = ServerUtil.createJsonMapper().writeValueAsString(rpt);
+//                        request.setContent(Util.getBytes(json));
+//                        request.setContentType(UmaConstants.JSON_MEDIA_TYPE);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        fail();
+//                    }
                 }
 
                 @Override

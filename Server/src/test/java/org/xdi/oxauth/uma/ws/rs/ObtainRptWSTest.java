@@ -22,7 +22,6 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 public class ObtainRptWSTest extends BaseTest {
 
     private Token m_aat;
-    private String m_rpt;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
@@ -37,6 +36,5 @@ public class ObtainRptWSTest extends BaseTest {
     public void obtainRpt(String umaRptPath, String umaAmHost) {
         final RPTResponse r = TUma.requestRpt(this, m_aat, umaRptPath, umaAmHost);
         UmaTestUtil.assert_(r);
-        m_rpt = r.getRpt();
     }
 }

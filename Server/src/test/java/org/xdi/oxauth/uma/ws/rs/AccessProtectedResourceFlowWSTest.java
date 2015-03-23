@@ -90,11 +90,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _3_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-        final RptStatusRequest request = new RptStatusRequest();
-        request.setRpt(m_rpt.getRpt());
-        request.setResourceSetId(m_resourceSet.getId());
-
-        final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, request);
+        final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
         Assert.assertTrue(status.getActive(), "Token response status is not active");
         Assert.assertTrue(status.getPermissions() == null || status.getPermissions().isEmpty(), "Permissions list is not empty.");
     }
@@ -130,11 +126,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_5_authorizePermission"})
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _6_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-        final RptStatusRequest request = new RptStatusRequest();
-        request.setRpt(m_rpt.getRpt());
-        request.setResourceSetId(m_resourceSet.getId());
-
-        final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, request);
+        final RptStatusResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
         UmaTestUtil.assert_(status);
 
     }
