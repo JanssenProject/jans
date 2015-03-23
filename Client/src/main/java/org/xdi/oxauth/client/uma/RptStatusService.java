@@ -6,23 +6,19 @@
 
 package org.xdi.oxauth.client.uma;
 
+import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.UmaConstants;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-
-import org.xdi.oxauth.model.uma.RptStatusRequest;
-import org.xdi.oxauth.model.uma.RptStatusResponse;
-import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.
  * The endpoint is RPT introspection profile implementation defined here:
  * http://docs.kantarainitiative.org/uma/draft-uma-core.html#uma-bearer-token-profile
- *
- * @author Yuriy Movchan
- * @author Yuriy Zabrovarnyy
- *         Date: 10/23/2012
  */
 public interface RptStatusService {
 
@@ -30,6 +26,7 @@ public interface RptStatusService {
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public RptStatusResponse requestRptStatus(@HeaderParam("Authorization") String authorization,
-                                              RptStatusRequest tokenStatusRequest);
+                                              @FormParam("token") String rptAsString,
+                                              @FormParam("token_type_hint") String tokenTypeHint);
 
 }

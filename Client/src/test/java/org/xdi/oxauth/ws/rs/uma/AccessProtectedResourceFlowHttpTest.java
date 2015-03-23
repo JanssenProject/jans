@@ -18,7 +18,6 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.AuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptStatusRequest;
 import org.xdi.oxauth.model.uma.RptStatusResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -139,10 +138,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         // Determine RPT token to status
         RptStatusResponse tokenStatusResponse = null;
         try {
-            RptStatusRequest tokenStatusRequest = new RptStatusRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, resourceSetId);
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + m_pat.getAccessToken(),
-                    tokenStatusRequest);
+                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
 //			assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
@@ -224,10 +222,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         // Determine RPT token to status
         RptStatusResponse tokenStatusResponse = null;
         try {
-            RptStatusRequest tokenStatusRequest = new RptStatusRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, resourceSetId);
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + m_pat.getAccessToken(),
-                    tokenStatusRequest);
+                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;

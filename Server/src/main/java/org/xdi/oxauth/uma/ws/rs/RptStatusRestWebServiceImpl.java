@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -13,8 +14,8 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
-import org.xdi.oxauth.model.uma.RptStatusRequest;
 import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -22,7 +23,7 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +33,14 @@ import java.util.List;
  * The endpoint is RPT introspection profile implementation defined by
  * http://docs.kantarainitiative.org/uma/draft-uma-core.html#uma-bearer-token-profile
  *
- * @author Yuriy Movchan Date: 10/23/2012
  * @author Yuriy Zabrovarnyy
  */
+@Path("/rpt/status")
+@Api(value = "/rpt/status", description = "The endpoint at which the host requests the status of an RPT presented to it by a requester." +
+        " The endpoint is RPT introspection profile implementation defined by UMA specification")
+
 @Name("rptStatusRestWebService")
-public class RptStatusRestWebServiceImpl implements RptStatusRestWebService {
+public class RptStatusRestWebServiceImpl {
 
     @Logger
     private Log log;
@@ -49,11 +53,17 @@ public class RptStatusRestWebServiceImpl implements RptStatusRestWebService {
     @In
     private ScopeService umaScopeService;
 
-    public Response requestRptStatus(String authorization, RptStatusRequest tokenStatusRequest) {
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response requestRptStatus(@HeaderParam("Authorization") String authorization,
+                                     @FormParam("token") String rptAsString,
+                                     @FormParam("token_type_hint") String tokenTypeHint
+    ) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
-            final UmaRPT rpt = rptManager.getRPTByCode(tokenStatusRequest.getRpt());
+            final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
             if (!isValid(rpt)) {
                 return Response.status(Response.Status.OK).entity(new RptStatusResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
@@ -118,5 +128,15 @@ public class RptStatusRestWebServiceImpl implements RptStatusRestWebService {
             }
         }
         return result;
+    }
+
+    @GET
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response requestRptStatusGet(@HeaderParam("Authorization") String authorization,
+                                        @FormParam("token") String rpt,
+                                        @FormParam("token_type_hint") String tokenTypeHint
+    ) {
+        throw new WebApplicationException(Response.status(405).entity("Introspection of RPT is not allowed by GET HTTP method.").build());
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
 
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
-@JsonPropertyOrder({"resource_set_id", "scopes", "expires_at"})
+@JsonPropertyOrder({"resource_set_id", "scopes", "exp", "iat", "nbf"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
@@ -36,6 +36,8 @@ public class ResourceSetPermissionRequest {
     private String resourceSetId;
     private List<String> scopes;
     private Date expiresAt;
+    private Date issuedAt;
+    private Date nbf;
 
     public ResourceSetPermissionRequest() {
     }
@@ -55,6 +57,26 @@ public class ResourceSetPermissionRequest {
         this.resourceSetId = resourceSetId;
     }
 
+    @JsonProperty(value = "nbf")
+       @XmlElement(name = "nbf")
+    public Date getNbf() {
+        return nbf;
+    }
+
+    public void setNbf(Date nbf) {
+        this.nbf = nbf;
+    }
+
+    @JsonProperty(value = "iat")
+    @XmlElement(name = "iat")
+    public Date getIssuedAt() {
+        return issuedAt;
+    }
+
+    public void setIssuedAt(Date issuedAt) {
+        this.issuedAt = issuedAt;
+    }
+
     @JsonProperty(value = "scopes")
     @XmlElement(name = "scopes")
     public List<String> getScopes() {
@@ -65,8 +87,8 @@ public class ResourceSetPermissionRequest {
         this.scopes = scopes;
     }
 
-    @JsonProperty(value = "expires_at")
-    @XmlElement(name = "expires_at")
+    @JsonProperty(value = "exp")
+    @XmlElement(name = "exp")
     public Date getExpiresAt() {
         return expiresAt != null ? new Date(expiresAt.getTime()) : null;
     }
@@ -82,6 +104,7 @@ public class ResourceSetPermissionRequest {
         sb.append("{resourceSetId='").append(resourceSetId).append('\'');
         sb.append(", scopes=").append(scopes);
         sb.append(", expiresAt=").append(expiresAt);
+        sb.append(", nbf=").append(nbf);
         sb.append('}');
         return sb.toString();
     }

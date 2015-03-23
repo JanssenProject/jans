@@ -55,7 +55,7 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
             c.setAuthorizationEndpoint(baseEndpointUri + "/requester/perm");
             c.setRequestingPartyClaimsEndpoint("");
             c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
-            c.setIntrospectionEndpoint(baseEndpointUri + "/host/status");
+            c.setIntrospectionEndpoint(baseEndpointUri + "/rpt/status");
             c.setPermissionRegistrationEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
