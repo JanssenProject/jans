@@ -37,8 +37,8 @@ class TAuthorization {
         m_baseTest = p_baseTest;
     }
 
-    public AuthorizationResponse requestAuthorization(String p_umaPermissionAuthorizationPath, final String p_umaAmHost, final Token p_aat, final RptAuthorizationRequest p_request) {
-        final Holder<AuthorizationResponse> h = new Holder<AuthorizationResponse>();
+    public RptAuthorizationResponse requestAuthorization(String p_umaPermissionAuthorizationPath, final String p_umaAmHost, final Token p_aat, final RptAuthorizationRequest p_request) {
+        final Holder<RptAuthorizationResponse> h = new Holder<RptAuthorizationResponse>();
 
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_umaPermissionAuthorizationPath) {
@@ -68,7 +68,7 @@ class TAuthorization {
 
                     assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
                     try {
-                        AuthorizationResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), AuthorizationResponse.class);
+                        RptAuthorizationResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), RptAuthorizationResponse.class);
 //                        UmaTestUtil.assert_(result);
 
                         h.setT(result);

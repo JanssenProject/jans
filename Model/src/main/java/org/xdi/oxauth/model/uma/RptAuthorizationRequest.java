@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({"rpt", "ticket", "claim_tokens"})
+@JsonPropertyOrder({"rpt", "ticket"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 public class RptAuthorizationRequest {
@@ -40,8 +40,8 @@ public class RptAuthorizationRequest {
         this.ticket = ticket;
     }
 
-    @JsonProperty(value = "claim_tokens")
-    @XmlElement(name = "claim_tokens")
+//    @JsonProperty(value = "claim_tokens")
+//    @XmlElement(name = "claim_tokens")
     public ClaimTokenList getClaims() {
         return claims;
     }

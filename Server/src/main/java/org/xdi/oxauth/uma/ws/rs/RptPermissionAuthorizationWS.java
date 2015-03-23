@@ -19,7 +19,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -83,7 +83,7 @@ public class RptPermissionAuthorizationWS {
             final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant, validatedAmHost);
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-            return Response.ok(ServerUtil.asJson(new AuthorizationResponse(rpt.getCode()))).build();
+            return Response.ok(ServerUtil.asJson(new RptAuthorizationResponse(rpt.getCode()))).build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
