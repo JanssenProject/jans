@@ -14,7 +14,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -66,7 +66,7 @@ public class ResourceSetPermissionManager implements IResourceSetPermissionManag
         return manager.getResourceSetPermissionTicketByConfigurationCode(configurationCode, clientDn);
     }
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, ResourceSetPermissionRequest resourceSetPermissionRequest, Date expirationDate) {
+    public ResourceSetPermission createResourceSetPermission(String amHost, RegisterPermissionRequest resourceSetPermissionRequest, Date expirationDate) {
         return manager.createResourceSetPermission(amHost, resourceSetPermissionRequest, expirationDate);
     }
 

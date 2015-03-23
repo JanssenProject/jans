@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -67,7 +67,7 @@ public class RptStatusWS {
                 return Response.status(Response.Status.OK).entity(new RptIntrospectionResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
             }
 
-            final List<ResourceSetPermissionRequest> permissions = buildStatusResponsePermissions(rpt);
+            final List<RegisterPermissionRequest> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
@@ -107,14 +107,14 @@ public class RptStatusWS {
         return false;
     }
 
-    private List<ResourceSetPermissionRequest> buildStatusResponsePermissions(UmaRPT p_rpt) {
-        final List<ResourceSetPermissionRequest> result = new ArrayList<ResourceSetPermissionRequest>();
+    private List<RegisterPermissionRequest> buildStatusResponsePermissions(UmaRPT p_rpt) {
+        final List<RegisterPermissionRequest> result = new ArrayList<RegisterPermissionRequest>();
         if (p_rpt != null) {
             final List<ResourceSetPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (ResourceSetPermission permission : rptPermissions) {
                     if (isValid(permission)) {
-                        final ResourceSetPermissionRequest toAdd = ServerUtil.convert(permission, umaScopeService);
+                        final RegisterPermissionRequest toAdd = ServerUtil.convert(permission, umaScopeService);
                         if (toAdd != null) {
                             result.add(toAdd);
                         }

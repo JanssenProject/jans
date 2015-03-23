@@ -13,7 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.TUma;
@@ -64,7 +64,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
@@ -75,7 +75,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"testRegisterPermission"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermissionWithInvalidResourceSet(final String umaAmHost, String umaHost) {
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(m_resourceSet.getId() + "x");
 
         final String path = m_umaPermissionPath + "/" + umaHost + "/";

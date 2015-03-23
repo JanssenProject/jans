@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -74,7 +74,7 @@ public class PermissionRegistrationWS {
     public Response registerResourceSetPermission(@Context HttpServletRequest request,
                                                   @HeaderParam("Authorization") String authorization,
                                                   @HeaderParam("Host") String amHost,
-                                                  ResourceSetPermissionRequest resourceSetPermissionRequest) {
+                                                  RegisterPermissionRequest resourceSetPermissionRequest) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
@@ -93,7 +93,7 @@ public class PermissionRegistrationWS {
         }
     }
 
-    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, ResourceSetPermissionRequest resourceSetPermissionRequest) {
+    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, RegisterPermissionRequest resourceSetPermissionRequest) {
         final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
         resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
