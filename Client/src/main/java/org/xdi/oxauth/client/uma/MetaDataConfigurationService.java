@@ -9,7 +9,7 @@ package org.xdi.oxauth.client.uma;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
 /**
@@ -21,6 +21,6 @@ public interface MetaDataConfigurationService {
 
 	@GET
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public MetadataConfiguration getMetadataConfiguration();
+	public UmaConfiguration getMetadataConfiguration();
 
 }

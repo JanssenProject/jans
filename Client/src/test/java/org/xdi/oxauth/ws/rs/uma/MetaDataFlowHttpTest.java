@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.MetaDataConfigurationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 /**
@@ -33,7 +33,7 @@ public class MetaDataFlowHttpTest extends BaseTest {
         MetaDataConfigurationService metaDataConfigurationService = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl);
 
         // Get meta data configuration
-        MetadataConfiguration c = null;
+        UmaConfiguration c = null;
         try {
             c = metaDataConfigurationService.getMetadataConfiguration();
         } catch (ClientResponseFailure ex) {

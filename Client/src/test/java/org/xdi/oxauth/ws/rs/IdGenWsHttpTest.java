@@ -23,7 +23,7 @@ import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
@@ -39,7 +39,7 @@ public class IdGenWsHttpTest extends BaseTest {
 
     protected Token m_aat;
     protected String m_rpt;
-    protected MetadataConfiguration m_metadataConfiguration;
+    protected UmaConfiguration m_metadataConfiguration;
     protected String m_umaAmHost;
 
     @BeforeClass

@@ -14,7 +14,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  */
 public class RegisterResourceSetFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
     protected Token m_pat;
 
     protected String resourceSetId;
@@ -42,7 +42,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
     public RegisterResourceSetFlowHttpTest() {
     }
 
-    public RegisterResourceSetFlowHttpTest(MetadataConfiguration metadataConfiguration) {
+    public RegisterResourceSetFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 

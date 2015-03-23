@@ -9,7 +9,7 @@ package org.xdi.oxauth.uma.ws.rs;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
@@ -23,7 +23,7 @@ public class UmaConfigurationWSTest extends BaseTest {
     @Parameters({"umaConfigurationPath"})
     @Test
     public void configurationPresence(final String umaConfigurationPath) throws Exception {
-        final MetadataConfiguration c = TUma.requestConfiguration(this, umaConfigurationPath);
+        final UmaConfiguration c = TUma.requestConfiguration(this, umaConfigurationPath);
         UmaTestUtil.assert_(c);
     }
 }
