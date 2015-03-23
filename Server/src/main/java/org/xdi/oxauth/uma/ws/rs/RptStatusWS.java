@@ -54,12 +54,10 @@ public class RptStatusWS {
     private ScopeService umaScopeService;
 
     @POST
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response requestRptStatus(@HeaderParam("Authorization") String authorization,
                                      @FormParam("token") String rptAsString,
-                                     @FormParam("token_type_hint") String tokenTypeHint
-    ) {
+                                     @FormParam("token_type_hint") String tokenTypeHint) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 

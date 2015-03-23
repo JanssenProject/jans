@@ -331,7 +331,7 @@ class TTokenRequest {
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                     super.prepareRequest(request);
 
-                    request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
                     request.addHeader("Authorization", "Bearer " + p_aat.getAccessToken());
 //                    request.addHeader("Host", p_umaAmHost);
 
