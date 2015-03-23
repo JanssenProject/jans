@@ -94,9 +94,9 @@ public class UmaTestUtil {
         assertTrue(p_response.getStatus() == Response.Status.OK.getStatusCode(), "Response http code is not OK.");
     }
 
-    public static void assertAuthorizationRequest(ClientResponse<AuthorizationResponse> p_response) {
-        assert_(p_response);
-        assertNotNull(p_response.getEntity(), "Authorization response is null");
+    public static void assertAuthorizationRequest(AuthorizationResponse p_response) {
+        assertNotNull(p_response, "Response is null");
+        assertNotNull(p_response.getRpt(), "Rpt is null");
     }
 
     public static void assert_(Id p_id) {
