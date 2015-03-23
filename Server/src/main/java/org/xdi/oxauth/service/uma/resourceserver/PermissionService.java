@@ -24,7 +24,7 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.oxauth.uma.ws.rs.ResourceSetPermissionRegistrationRestWebServiceImpl;
+import org.xdi.oxauth.uma.ws.rs.PermissionRegistrationWS;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 
@@ -118,7 +118,7 @@ public class PermissionService {
     }
 
     private String registerPermission(UmaRPT p_rpt, ResourceSet p_resource, List<RsScopeType> p_scopes) {
-        final Date expirationDate = ResourceSetPermissionRegistrationRestWebServiceImpl.rptExpirationDate();
+        final Date expirationDate = PermissionRegistrationWS.rptExpirationDate();
 
         final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
         r.setResourceSetId(p_resource.getId());

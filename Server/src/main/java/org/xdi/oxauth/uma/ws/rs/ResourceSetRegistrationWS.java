@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Path("/host/rsrc/resource_set")
 @Api(value="/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
-public interface ResourceSetRegistrationRestWebService {
+public interface ResourceSetRegistrationWS {
 
     @POST
   	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
