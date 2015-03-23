@@ -13,7 +13,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -41,7 +41,7 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
             final Configuration configuration = ConfigurationFactory.getConfiguration();
             final String baseEndpointUri = configuration.getBaseEndpoint();
 
-            final MetadataConfiguration c = new MetadataConfiguration();
+            final UmaConfiguration c = new UmaConfiguration();
             c.setVersion("1.0");
             c.setIssuer(configuration.getIssuer());
             c.setPatProfilesSupported(new String[]{"bearer"});
@@ -61,13 +61,12 @@ public class MetaDataConfigurationRestWebServiceImpl implements MetaDataConfigur
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
             c.setUserEndpoint(baseEndpointUri + "/oxauth/authorize");
 
-
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);
             log.trace("Uma configuration: {0}", entity);
 
             return Response.ok(entity).build();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             log.error(ex.getMessage(), ex);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());

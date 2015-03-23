@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
@@ -20,12 +17,14 @@ import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptStatusRequest;
 import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import static org.testng.Assert.*;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -34,7 +33,7 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
  */
 public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
 
     protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 

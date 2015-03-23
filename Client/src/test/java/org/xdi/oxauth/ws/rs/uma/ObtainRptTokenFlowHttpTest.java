@@ -19,7 +19,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -31,7 +31,7 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
  */
 public class ObtainRptTokenFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
 
     protected Token m_aat;
     protected String rptToken;
@@ -39,7 +39,7 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
     public ObtainRptTokenFlowHttpTest() {
     }
 
-    public ObtainRptTokenFlowHttpTest(MetadataConfiguration metadataConfiguration) {
+    public ObtainRptTokenFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 

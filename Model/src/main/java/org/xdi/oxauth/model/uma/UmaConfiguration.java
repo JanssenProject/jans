@@ -44,7 +44,7 @@ import java.util.Arrays;
         "user_endpoint"
 })
 @XmlRootElement
-public class MetadataConfiguration {
+public class UmaConfiguration {
 
     @ApiModelProperty(value = "The version of the UMA core protocol to which this authorization server conforms. The value MUST be the string \"1.0\"."
             , required = true)

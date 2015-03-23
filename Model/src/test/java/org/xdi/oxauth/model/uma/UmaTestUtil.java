@@ -39,7 +39,7 @@ public class UmaTestUtil {
         assertNotNull(p_rptStatus.getExpiresAt(), "Expiration date is null");
     }
 
-    public static void assert_(MetadataConfiguration p_configuration) {
+    public static void assert_(UmaConfiguration p_configuration) {
         assertNotNull(p_configuration, "Meta data configuration is null");
         assertEquals(p_configuration.getVersion(), "1.0", "Version isn't correct");
         assertNotNull(p_configuration.getIssuer(), "Issuer isn't correct");

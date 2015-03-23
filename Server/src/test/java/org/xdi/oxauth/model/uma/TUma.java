@@ -48,7 +48,7 @@ public class TUma {
         return r.requestRpt(p_aat, p_rptPath, umaAmHost);
     }
 
-    public static MetadataConfiguration requestConfiguration(BaseTest p_test, final String configurationPath) {
+    public static UmaConfiguration requestConfiguration(BaseTest p_test, final String configurationPath) {
         final TConfiguration c = new TConfiguration(p_test);
         return c.getConfiguration(configurationPath);
     }

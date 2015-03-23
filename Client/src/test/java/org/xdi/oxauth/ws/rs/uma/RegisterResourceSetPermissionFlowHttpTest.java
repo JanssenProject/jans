@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.ResourceSetPermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
  */
 public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
 
     protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
     protected String ticketForFullAccess;
@@ -39,7 +39,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     public RegisterResourceSetPermissionFlowHttpTest() {
     }
 
-    public RegisterResourceSetPermissionFlowHttpTest(MetadataConfiguration metadataConfiguration) {
+    public RegisterResourceSetPermissionFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 

@@ -16,7 +16,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.client.uma.MetaDataConfigurationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -48,7 +48,7 @@ public class UmaMultithreadTest {
 
     @Test(invocationCount = 30, threadPoolSize = 3)
     public void test() {
-        final MetadataConfiguration metadataConfiguration = service.getMetadataConfiguration();
+        final UmaConfiguration metadataConfiguration = service.getMetadataConfiguration();
 
         Assert.assertNotNull(metadataConfiguration);
         System.out.println(metadataConfiguration);
