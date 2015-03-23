@@ -80,7 +80,7 @@ public class TUma {
         return p.registerPermission(p_pat, p_umaAmHost, p_umaHost, p_request, p_umaPermissionPath);
     }
 
-    public static RptStatusResponse requestRptStatus(BaseTest p_test, String p_umaRptStatusPath, String p_umaAmHost, Token p_aat, String rpt) {
+    public static RptIntrospectionResponse requestRptStatus(BaseTest p_test, String p_umaRptStatusPath, String p_umaAmHost, Token p_aat, String rpt) {
         final TTokenRequest r = new TTokenRequest(p_test);
         return r.requestRptStatus(p_umaRptStatusPath, p_umaAmHost, p_aat, rpt);
     }

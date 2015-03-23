@@ -32,7 +32,7 @@ public class UmaTestUtil {
     }
 
 
-    public static void assert_(RptStatusResponse p_rptStatus) {
+    public static void assert_(RptIntrospectionResponse p_rptStatus) {
         assertNotNull(p_rptStatus, "Token response status is null");
         assertTrue(p_rptStatus.getActive(), "Token is not active");
         assertTrue(p_rptStatus.getPermissions() != null && !p_rptStatus.getPermissions().isEmpty(), "Permissions are empty.");

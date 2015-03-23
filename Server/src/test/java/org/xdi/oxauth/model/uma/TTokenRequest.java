@@ -321,8 +321,8 @@ class TTokenRequest {
         return h.getT();
     }
 
-    public RptStatusResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final String rpt) {
-        final Holder<RptStatusResponse> h = new Holder<RptStatusResponse>();
+    public RptIntrospectionResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final String rpt) {
+        final Holder<RptIntrospectionResponse> h = new Holder<RptIntrospectionResponse>();
 
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_umaRptStatusPath) {
@@ -353,7 +353,7 @@ class TTokenRequest {
 
                     assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
                     try {
-                        final RptStatusResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), RptStatusResponse.class);
+                        final RptIntrospectionResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), RptIntrospectionResponse.class);
                         Assert.assertNotNull(result);
 
                         h.setT(result);
