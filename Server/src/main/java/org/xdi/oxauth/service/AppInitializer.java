@@ -94,6 +94,8 @@ public class AppInitializer {
 
     @Create
     public void createApplicationComponents() {
+    	installBCProvider();
+
     	createStringEncrypter();
 
     	createConnectionProvider();
@@ -111,6 +113,16 @@ public class AppInitializer {
         CustomScriptManager.instance().init(supportedCustomScriptTypes);
         CustomScriptManagerMigrator.instance().migrateOldConfigurations();
     }
+
+	private void installBCProvider() {
+		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+		if (provider == null) {
+			log.info("Adding Bouncy Castle Provider");
+			Security.addProvider(new BouncyCastleProvider());
+		} else {
+			log.info("Bouncy Castle Provider was added already");
+		}
+	}
 
 	private void createStringEncrypter() {
 		String encodeSalt = ConfigurationFactory.loadCryptoConfigurationSalt();
