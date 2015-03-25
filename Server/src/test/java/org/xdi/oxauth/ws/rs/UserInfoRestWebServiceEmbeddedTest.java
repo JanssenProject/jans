@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -37,14 +16,11 @@ import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.UserInfoRequest;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
@@ -57,13 +33,24 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 14, 2015
+ * @version 0.9 March 23, 2015
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
+
+    private String clientId;
+    private String clientSecret;
 
     private String accessToken1;
     private String accessToken2;
@@ -79,12 +66,64 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     private String clientSecret2;
     private String clientSecret3;
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
+    @Parameters({"registerPath", "redirectUris"})
     @Test
+    public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+            @Override
+            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+                try {
+                    super.prepareRequest(request);
+
+                    List<ResponseType> responseTypes = Arrays.asList(
+                            ResponseType.CODE,
+                            ResponseType.TOKEN,
+                            ResponseType.ID_TOKEN);
+
+                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                            StringUtils.spaceSeparatedToList(redirectUris));
+                    registerRequest.setResponseTypes(responseTypes);
+
+                    request.setContentType(MediaType.APPLICATION_JSON);
+                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
+                    request.setContent(registerRequestContent.getBytes());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
+                }
+            }
+
+            @Override
+            protected void onResponse(EnhancedMockHttpServletResponse response) {
+                super.onResponse(response);
+                showResponse("dynamicClientRegistration", response);
+
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
+                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                try {
+                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
+                    ClientTestUtil.assert_(registerResponse);
+
+                    clientId = registerResponse.getClientId();
+                    clientSecret = registerResponse.getClientSecret();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                }
+            }
+        }.run();
+    }
+
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestUserInfoStep1ImplicitFlow(final String authorizePath,
                                                  final String userId, final String userSecret,
-                                                 final String clientId, final String redirectUri) throws Exception {
+                                                 final String redirectUri) throws Exception {
         final String userEncodedCredentials = Base64.encodeBase64String((userId + ":" + userSecret).getBytes());
+        final String state = UUID.randomUUID().toString();
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 Method.GET, authorizePath) {
@@ -105,7 +144,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
 
                 request.setQueryString(authorizationRequest.getQueryString());
@@ -126,14 +165,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        assertNotNull(params.get("access_token"), "The access token is null");
-                        assertNotNull(params.get("state"), "The state is null");
-                        assertNotNull(params.get("token_type"), "The token type is null");
-                        assertNotNull(params.get("expires_in"), "The expires in value is null");
-                        assertNotNull(params.get("scope"), "The scope must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
                         assertNull(params.get("refresh_token"), "The refresh_token must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                        accessToken1 = params.get("access_token");
+                        accessToken1 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -237,10 +277,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "clientId", "clientSecret"})
-    @Test
-    public void requestUserInfoStep1PasswordFlow(final String tokenPath, final String userId, final String userSecret,
-                                                 final String clientId, final String clientSecret) throws Exception {
+    @Parameters({"tokenPath", "userId", "userSecret"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestUserInfoStep1PasswordFlow(final String tokenPath, final String userId, final String userSecret)
+            throws Exception {
         // Testing with valid parameters
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
 
@@ -267,10 +307,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -443,11 +483,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "redirectUri"})
-    @Test
-    public void requestUserInfoInsufficientScope(final String authorizePath,
-                                                 final String userId, final String userSecret,
-                                                 final String clientId, final String redirectUri) throws Exception {
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestUserInfoInsufficientScope(final String authorizePath, final String userId, final String userSecret,
+                                                 final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 Method.GET, authorizePath) {
 
@@ -457,13 +498,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 List<ResponseType> responseTypes = new ArrayList<ResponseType>();
                 responseTypes.add(ResponseType.TOKEN);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("picture");
+                List<String> scopes = Arrays.asList("picture");
                 String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -488,14 +528,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        assertNotNull(params.get("access_token"), "The access token is null");
-                        assertNotNull(params.get("state"), "The state is null");
-                        assertNotNull(params.get("token_type"), "The token type is null");
-                        assertNotNull(params.get("expires_in"), "The expires in value is null");
-                        assertNotNull(params.get("scope"), "The scope must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
                         assertNull(params.get("refresh_token"), "The refresh_token must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                        accessToken2 = params.get("access_token");
+                        accessToken2 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -544,12 +585,13 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
-    @Test
-    public void requestUserInfoAdditionalClaims(final String authorizePath,
-                                                final String userId, final String userSecret,
-                                                final String clientId, final String clientSecret,
+    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
+    @Test(dependsOnMethods = "dynamicClientRegistration")
+    public void requestUserInfoAdditionalClaims(final String authorizePath, final String userId, final String userSecret,
                                                 final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 Method.GET, authorizePath) {
 
@@ -559,16 +601,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 List<ResponseType> responseTypes = new ArrayList<ResponseType>();
                 responseTypes.add(ResponseType.TOKEN);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
                 String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState("af0ifjsldkj");
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -602,14 +640,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        assertNotNull(params.get("access_token"), "The access token is null");
-                        assertNotNull(params.get("state"), "The state is null");
-                        assertNotNull(params.get("token_type"), "The token type is null");
-                        assertNotNull(params.get("expires_in"), "The expires in value is null");
-                        assertNotNull(params.get("scope"), "The scope must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
                         assertNull(params.get("refresh_token"), "The refresh_token must be null");
+                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                        accessToken3 = params.get("access_token");
+                        accessToken3 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -731,6 +770,9 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestUserInfoHS256Step1")
     public void requestUserInfoHS256Step2(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -740,7 +782,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId1, scopes, redirectUri, nonce);
@@ -778,11 +819,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                    accessToken5 = params.get("access_token");
+                    accessToken5 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -897,6 +939,9 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestUserInfoHS384Step1")
     public void requestUserInfoHS384Step2(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
+
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -906,7 +951,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId2, scopes, redirectUri, nonce);
@@ -944,11 +988,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                    accessToken6 = params.get("access_token");
+                    accessToken6 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
@@ -1063,6 +1108,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestUserInfoHS512Step1")
     public void requestUserInfoHS512Step2(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+
+        final String state = UUID.randomUUID().toString();
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -1072,7 +1119,6 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId3, scopes, redirectUri, nonce);
@@ -1110,11 +1156,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                    accessToken7 = params.get("access_token");
+                    accessToken7 = params.get(AuthorizeResponseParam.ACCESS_TOKEN);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");

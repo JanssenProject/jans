@@ -7,7 +7,6 @@
 package org.xdi.oxauth.model.token;
 
 import org.apache.commons.lang.StringUtils;
-import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
@@ -35,7 +34,6 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AttributeService;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
@@ -51,7 +49,7 @@ import java.util.*;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version 0.9 March 11, 2015
  */
 public class IdTokenFactory {
 
@@ -91,15 +89,8 @@ public class IdTokenFactory {
         jwt.getClaims().setExpirationTime(expiration);
         jwt.getClaims().setIssuedAt(issuedAt);
 
-        if (authorizationGrant.getUserDn() != null) {
-            GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(JwtClaimName.SUBJECT_IDENTIFIER);
+        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
-            if (gluuAttribute != null) {
-                String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
-
-                jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(ldapClaimName));
-            }
-        }
         // TODO: acr
         //if (authenticationContextClassReference != null) {
         //    jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authenticationContextClassReference);
@@ -190,15 +181,8 @@ public class IdTokenFactory {
         jwe.getClaims().setExpirationTime(expiration);
         jwe.getClaims().setIssuedAt(issuedAt);
 
-        if (authorizationGrant.getUserDn() != null) {
-            GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(JwtClaimName.SUBJECT_IDENTIFIER);
+        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
-            if (gluuAttribute != null) {
-                String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
-
-                jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute(ldapClaimName));
-            }
-        }
         // TODO: acr
         //if (authenticationContextClassReference != null) {
         //    jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authenticationContextClassReference);
