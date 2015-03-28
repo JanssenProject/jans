@@ -45,10 +45,7 @@ public class KeyGenerator {
 	private static void installBCProvider() {
 		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 		if (provider == null) {
-			System.out.println("Adding Bouncy Castle Provider");
 			Security.addProvider(new BouncyCastleProvider());
-		} else {
-			System.out.println("Bouncy Castle Provider was added already");
 		}
 	}
 
