@@ -1,0 +1,137 @@
+dn: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: gluuAttribute
+objectClass: top
+description: oxAuth Client Application Type
+displayName: oxAuth Client Application Type
+gluuAttributeName: oxAuthAppType
+gluuAttributeOrigin: oxAuthClient
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuLdapAttributeName: oxAuthAppType
+gluuStatus: active
+inum: %(inumOrg)s!0005!18CC
+urn: urn:gluu:dir:attribute-def:oxAuthAppType
+
+dn: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: gluuAttribute
+objectClass: top
+description: oxAuth Client ID Token Signed Response Algorithm
+displayName: oxAuth Client ID Token Signed Response Algorithm
+gluuAttributeName: oxAuthIdTokenSignedResponseAlg
+gluuAttributeOrigin: oxAuthClient
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuLdapAttributeName: oxAuthIdTokenSignedResponseAlg
+gluuStatus: active
+inum: %(inumOrg)s!0005!18CD
+urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
+
+dn: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: gluuAttribute
+objectClass: top
+description: oxAuth Client Redirect URI
+displayName: oxAuth Client Redirect URI
+gluuAttributeName: oxAuthRedirectURI
+gluuAttributeOrigin: oxAuthClient
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuLdapAttributeName: oxAuthRedirectURI
+gluuStatus: active
+inum: %(inumOrg)s!0005!18CE
+urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
+
+dn: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: gluuAttribute
+objectClass: top
+description: oxAuth Client Scope
+displayName: oxAuth Client Scope
+gluuAttributeName: oxAuthScope
+gluuAttributeOrigin: oxAuthClient
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuLdapAttributeName: oxAuthScope
+gluuStatus: active
+inum: %(inumOrg)s!0005!18CF
+urn: urn:gluu:dir:attribute-def:oxAuthScope
+
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthCustomScope
+objectClass: top
+defaultScope: true
+description: Client Info
+displayName: clientinfo
+inum: %(inumOrg)s!0009!341A
+oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: gluuPerson
+objectClass: ox-%(inumOrgFN)s
+inum: %(inumOrg)s!0000!B1F3.AEAE.B798
+displayName: oxAuth Test User
+givenName: Test
+gluuStatus: active
+memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+sn: User
+uid: test_user
+mail: test_user@test.org
+userPassword: test_user_password
+
+dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+changetype: modify
+add: member
+member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0008!FF81!2D39,ou=clients,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthClient
+displayName: oxAuth Test Client (don't remove)
+inum: %(inumOrg)s!0008!FF81!2D39
+oxAuthAppType: web
+oxAuthClientSecret: KBvtRlZyEQ/ebFGy8/JGi0Nh3Qxasmn+dqU0LZPYmR4=
+oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home
+oxAuthRedirectURI: https://client.example.com/cb
+oxAuthRedirectURI: https://client.example.com/cb1
+oxAuthRedirectURI: https://client.example.com/cb2
+oxAuthResponseType: token
+oxAuthResponseType: code
+oxAuthResponseType: id_token
+oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthTokenEndpointAuthMethod: client_secret_basic
+oxAuthTrustedClient: true
+
+dn: inum=%(inumOrg)s!0008!AB77!1A2B,ou=clients,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthClient
+displayName: oxAuth Test Resource Server Client (don't remove)
+inum: %(inumOrg)s!0008!AB77!1A2B
+oxAuthAppType: web
+oxAuthClientSecret: PQzdFt4grVibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
+oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthScope: inum=%(inumOrg)s!0009!6D96,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthTokenEndpointAuthMethod: client_secret_basic
+
+dn: inum=%(inumOrg)s!0008!0068.3E20,ou=clients,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthClient
+displayName: oxAuth Test Requesting Party Client (don't remove)
+inum: %(inumOrg)s!0008!0068.3E20
+oxAuthAppType: web
+oxAuthClientSecret: t9eqhq8kyAibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
+oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthScope: inum=%(inumOrg)s!0009!6D97,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthTokenEndpointAuthMethod: client_secret_basic
+

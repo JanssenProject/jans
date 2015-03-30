@@ -210,6 +210,9 @@ class Setup(object):
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
+        self.oxauth_test_data_ldif = '%s/oxauth-test-data.ldif' % self.outputFolder
+        self.oxauth_test_client_profile = '%s/config-oxauth-test-data.properties' % self.outputFolder
+
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
         self.ldif_files = [self.ldif_base,
@@ -247,7 +250,9 @@ class Setup(object):
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
-                     self.asimba_selector_configuration: True
+                     self.asimba_selector_configuration: True,
+                     self.oxauth_test_data_ldif: False,
+                     self.oxauth_test_client_profile: False,
                      }
 
     def __repr__(self):
