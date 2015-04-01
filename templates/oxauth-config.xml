@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <issuer>https://%(hostname)s</issuer>
-    <login-page>https://%(hostname)s/oxauth/login.seam</login-page>
-    <authorization-page>https://%(hostname)s/oxauth/authorize.seam</authorization-page>
+    <login-page>https://%(hostname)s/oxauth/login</login-page>
+    <authorization-page>https://%(hostname)s/oxauth/authorize</authorization-page>
     <base-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1</base-endpoint>
     <authorization-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/authorize</authorization-endpoint>
     <token-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/token</token-endpoint>
     <userinfo-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/userinfo</userinfo-endpoint>
     <clientinfo-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/clientinfo</clientinfo-endpoint>
-    <check-session-iframe>https://%(hostname)s/oxauth/opiframe.seam</check-session-iframe>
+    <check-session-iframe>https://%(hostname)s/oxauth/opiframe</check-session-iframe>
     <end-session-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session</end-session-endpoint>
     <jwks-uri>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/jwks</jwks-uri>
     <registration-endpoint>https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/register</registration-endpoint>

@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 
-import os
 import os.path
 import Properties
 import random
@@ -210,10 +209,6 @@ class Setup(object):
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
-        self.oxauth_test_data_ldif = '%s/oxauth-test-data.ldif' % self.outputFolder
-        self.oxauth_test_client_profile = '%s/oxauth-test-config-oxauth-test-data.properties' % self.outputFolder
-        self.oxauth_test_sector_identifier = '%s/oxauth-test-sector_identifier.js' % self.outputFolder
-
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
         self.ldif_files = [self.ldif_base,
@@ -251,10 +246,7 @@ class Setup(object):
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
-                     self.asimba_selector_configuration: True,
-                     self.oxauth_test_data_ldif: False,
-                     self.oxauth_test_client_profile: False,
-                     self.oxauth_test_sector_identifier: False,
+                     self.asimba_selector_configuration: True
                      }
 
     def __repr__(self):
@@ -1175,6 +1167,16 @@ class Setup(object):
             self.logIt("Error removing file %s" % fileName, True)
             self.logIt(traceback.format_exc(), True)
 
+    def get_filepaths(self, directory):
+        file_paths = []
+        
+        for root, directories, files in os.walk(directory):
+            for filename in files:
+                # filepath = os.path.join(root, filename)
+                file_paths.append(filename)
+
+        return file_paths
+
     def render_templates(self):
         if self.components['saml']['enabled']: 
             self.oxTrustConfigGeneration = "enabled"
@@ -1192,6 +1194,33 @@ class Setup(object):
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
+
+    def render_test_templates(self):
+        self.logIt("Rendering test templates")
+        
+        testTepmplatesFolder = '%s/test/' % self.templateFolder
+        for templateBase, templateDirectories, templateFiles in os.walk(testTepmplatesFolder):
+            for templateFile in templateFiles:
+                fullPath = '%s/%s' % (templateBase, templateFile)
+                try:
+                    self.logIt("Rendering test template %s" % fullPath)
+                    fn = fullPath[12:] # Remove ./template/ from fullPath
+                    f = open(os.path.join(self.templateFolder, fn))
+                    template_text = f.read()
+                    f.close()
+                    
+                    fullOutputFile = os.path.join(self.outputFolder, fn)
+                    # Create full path to the output file
+                    fullOutputDir = os.path.dirname(fullOutputFile)
+                    if not os.path.exists(fullOutputDir):
+                        os.makedirs(fullOutputDir)
+
+                    newFn = open(fullOutputFile, 'w+')
+                    newFn.write(template_text % self.__dict__)
+                    newFn.close()
+                except:
+                    self.logIt("Error writing test template %s" % fullPath, True)
+                    self.logIt(traceback.format_exc(), True)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
@@ -1461,6 +1490,8 @@ if __name__ == '__main__':
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.render_templates()
+            installObject.render_test_templates()
+            1
             installObject.update_hostname()
             installObject.gen_crypto()
             installObject.configure_httpd()

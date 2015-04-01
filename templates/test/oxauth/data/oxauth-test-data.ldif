@@ -1,3 +1,7 @@
+######################################
+######################################
+# Attributes
+######################################
 dn: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: gluuAttribute
 objectClass: top
@@ -58,19 +62,12 @@ gluuStatus: active
 inum: %(inumOrg)s!0005!18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
 
-dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthCustomScope
-objectClass: top
-defaultScope: true
-description: Client Info
-displayName: clientinfo
-inum: %(inumOrg)s!0009!341A
-oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+######################################
+
+######################################
+######################################
+# Scopes
+######################################
 
 dn: inum=%(inumOrg)s!0009!C17A,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthCustomScope
@@ -88,6 +85,20 @@ oxAuthClaim: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!E999,ou=attributes,o=%(inumOrg)s,o=gluu
 
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthCustomScope
+objectClass: top
+defaultScope: true
+description: Client Info
+displayName: clientinfo
+inum: %(inumOrg)s!0009!341A
+oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+
 dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
 changetype: modify
 replace: defaultScope
@@ -103,12 +114,12 @@ changetype: modify
 add: oxAuthClaim
 oxAuthClaim: inum=%(inumOrg)s!0005!6493,ou=attributes,o=%(inumOrg)s,o=gluu
 
-objectClass: top
-objectClass: oxAuthCustomScope
-displayName: profile
-inum: %(inumOrg)s!0009!43F1
-defaultScope: false
+######################################
 
+######################################
+######################################
+# People
+######################################
 dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
@@ -131,11 +142,23 @@ st: Texas
 stret: 621 East 6th Street
 c: US
 
+######################################
+
+######################################
+######################################
+# Groups
+######################################
 dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 changetype: modify
 add: member
 member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 
+######################################
+
+######################################
+######################################
+# Clients
+######################################
 dn: inum=%(inumOrg)s!0008!FF81!2D39,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxAuthClient
@@ -180,3 +203,104 @@ oxAuthIdTokenSignedResponseAlg: RS256
 oxAuthScope: inum=%(inumOrg)s!0009!6D97,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 
+
+######################################
+######################################
+# Federation
+######################################
+dn: inum=%(inumOrg)s!0008!00F1!0001,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata test 1
+inum: %(inumOrg)s!0008!00F1!0001
+objectClass: oxAuthFederationMetadata
+objectClass: top
+oxAuthFederationMetadataIntervalCheck: 1000
+oxAuthFederationRP: inum=%(inumOrg)s!0008!FFF2!0001,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+oxAuthFederationRP: inum=%(inumOrg)s!0008!FFF2!0002,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+oxAuthFederationRP: inum=%(inumOrg)s!0008!FFF2!0003,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+oxAuthFederationOP: inum=%(inumOrg)s!0008!FFF1!0001,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+oxAuthFederationOP: inum=%(inumOrg)s!0008!FFF1!0002,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0008!00F1!0002,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata test 2
+inum: %(inumOrg)s!0008!00F1!0002
+objectClass: oxAuthFederationMetadata
+objectClass: top
+oxAuthFederationMetadataIntervalCheck: 2000
+
+dn: inum=%(inumOrg)s!0008!00F1!0003,ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata test 3
+inum: %(inumOrg)s!0008!00F1!0003
+objectClass: oxAuthFederationMetadata
+objectClass: top
+oxAuthFederationMetadataIntervalCheck: 3000
+
+dn: inum=%(inumOrg)s!0008!FFF1!0001,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata OP test 1
+inum: %(inumOrg)s!0008!FFF1!0001
+objectClass: oxAuthFederationOP
+objectClass: top
+oxAuthFederationOpDomain: example.com
+oxAuthFederationOpId: example.com/op1
+oxAuthX509PEM: MIIFqTCCBJGgAwIBAgICArswDQYJKoZIhvcNAQEFBQAwVjELMAkGA1UEBhMCVVMxHDAaBgNVBAoT
+oxAuthX509URL: example.com/x509url
+
+dn: inum=%(inumOrg)s!0008!FFF1!0002,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata OP test 2
+inum: %(inumOrg)s!0008!FFF1!0002
+objectClass: oxAuthFederationOP
+objectClass: top
+oxAuthFederationOpDomain: example.com
+oxAuthFederationOpId: example.com/op2
+
+dn: inum=%(inumOrg)s!0008!FFF1!0003,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata OP test 3
+inum: %(inumOrg)s!0008!FFF1!0003
+objectClass: oxAuthFederationOP
+objectClass: top
+oxAuthFederationOpDomain: example.com
+oxAuthFederationOpId: example.com/op3
+
+dn: inum=%(inumOrg)s!0008!FFF1!0004,ou=op,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: %(hostname)s server
+inum: %(inumOrg)s!0008!FFF1!0004
+objectClass: oxAuthFederationOP
+objectClass: top
+oxAuthFederationOpDomain: %(hostname)s
+oxAuthFederationOpId: %(hostname)s
+
+dn: inum=%(inumOrg)s!0008!FFF2!0001,ou=rp,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata RP test 1
+inum: %(inumOrg)s!0008!FFF2!0001
+objectClass: top
+objectClass: oxAuthFederationRP
+oxAuthRedirectURI: https://client.example.com/cb?foo=bar
+oxAuthRedirectURI: https://client.example.com/cb1?foo=bar
+
+dn: inum=%(inumOrg)s!0008!FFF2!0002,ou=rp,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata RP test 2
+inum: %(inumOrg)s!0008!FFF2!0002
+objectClass: top
+objectClass: oxAuthFederationRP
+oxAuthRedirectURI: http://federation.example.com/rp2
+oxAuthX509PEM: MIIFqTCCBJGgAwIBAgICArswDQYJKoZIhvcNAQEFBQAwVjELMAkGA1UEBhMCVVMxHDAaBgNVBAoT
+
+dn: inum=%(inumOrg)s!0008!FFF2!0003,ou=rp,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Federation Metadata RP test 3
+inum: %(inumOrg)s!0008!FFF2!0003
+objectClass: top
+objectClass: oxAuthFederationRP
+oxAuthRedirectURI: http://federation.example.com/rp3
+
+dn: inum=%(inumOrg)s!0008!D06B.16FA,ou=trust,ou=federation,o=%(inumOrg)s,o=gluu
+displayName: Demo (skip authorization)
+inum: %(inumOrg)s!0008!D06B.16FA
+objectClass: oxAuthFederationTrust
+objectClass: top
+oxAuthFederationId: %(inumOrg)s!0008!00F1!0001
+oxAuthFederationMetadataURI: https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/federationmetadata
+oxAuthFederationTrustStatus: inactive_by_checker
+oxAuthRedirectURI: https://client.example.com/cb?foo=bar
+oxAuthReleasedScope: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthSkipAuthorization: true
+
+######################################
