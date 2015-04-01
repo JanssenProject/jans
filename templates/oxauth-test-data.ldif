@@ -93,7 +93,6 @@ displayName: profile
 inum: %(inumOrg)s!0009!43F1
 defaultScope: false
 
-
 dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
@@ -111,6 +110,10 @@ userPassword: test_user_password
 o: Test
 preferredLanguage: en_US
 zoneinfo: America/Chicago
+picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+st: Texas
+stret: 621 East 6th Street
+c: US
 
 dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 changetype: modify

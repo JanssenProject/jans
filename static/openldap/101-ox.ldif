@@ -1439,7 +1439,8 @@ olcObjectClasses: ( 7.9.6.5.8 NAME 'gluuPerson' SUP inetOrgPerson STRUCTURAL MUS
   $ oxTrustNickName $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL
   $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix
   $ oxTrustx509Certificate $ persistentId $ photo1 $ preferredLanguage $ role
-  $ secretAnswer $ secretQuestion $ seeAlso $ sn $ timezone $ transientId $ uid $ userPassword
+  $ secretAnswer $ secretQuestion $ seeAlso $ sn $ timezone $ transientId $ uid $ userPassword $ st
+  $ street
   ) 
   X-ORIGIN 'Gluu created objectclass' )
 olcObjectClasses: ( 3.2.6.1.5 NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
