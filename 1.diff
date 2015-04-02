@@ -1,0 +1,1009 @@
+diff --git a/Client/.gitignore b/Client/.gitignore
+index b83d222..1dab039 100644
+--- a/Client/.gitignore
++++ b/Client/.gitignore
+@@ -1 +1,2 @@
+ /target/
++test-output
+diff --git a/Client/profiles/default/config-oxauth-test-data.properties b/Client/profiles/default/config-oxauth-test-data.properties
+index 3a0a955..48e1cd7 100644
+--- a/Client/profiles/default/config-oxauth-test-data.properties
++++ b/Client/profiles/default/config-oxauth-test-data.properties
+@@ -15,3 +15,5 @@ uma.pat.client.id=@!1111!0008!0001!0001
+ uma.pat.client.secret=11111111-1111-1111-1111-111111111111
+ uma.aat.client.id=@!1111!0008!0001!0002
+ uma.aat.client.secret=11111111-1111-1111-1111-111111111111
++
++federation.metadata.id=@!1111!0008!1111!1111
+diff --git a/Client/src/test/java/org/xdi/oxauth/BaseTest.java b/Client/src/test/java/org/xdi/oxauth/BaseTest.java
+index 8ca80fc..c3a2120 100644
+--- a/Client/src/test/java/org/xdi/oxauth/BaseTest.java
++++ b/Client/src/test/java/org/xdi/oxauth/BaseTest.java
+@@ -14,6 +14,8 @@ import java.io.File;
+ import java.io.FileInputStream;
+ import java.io.FileNotFoundException;
+ import java.io.IOException;
++import java.security.Provider;
++import java.security.Security;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+@@ -32,6 +34,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
+ import org.apache.http.conn.ssl.X509HostnameVerifier;
+ import org.apache.http.impl.client.DefaultHttpClient;
+ import org.apache.http.impl.conn.SingleClientConnManager;
++import org.bouncycastle.jce.provider.BouncyCastleProvider;
+ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+ import org.openqa.selenium.By;
+ import org.openqa.selenium.WebDriver;
+@@ -56,6 +59,7 @@ import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+ import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
+ import org.xdi.oxauth.dev.HostnameVerifierType;
+ import org.xdi.oxauth.model.error.IErrorType;
++import org.xdi.oxauth.model.util.SecurityProviderUtility;
+ import org.xdi.util.StringHelper;
+ 
+ /**
+@@ -91,7 +95,9 @@ public abstract class BaseTest {
+ 	
+ 	@BeforeSuite
+ 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+-		Reporter.log("Invoked init test suite method \n", true);
++    	SecurityProviderUtility.installBCProvider();
++
++    	Reporter.log("Invoked init test suite method \n", true);
+ 
+ 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
+ 		if (StringHelper.isEmpty(propertiesFile)) {
+diff --git a/Client/src/test/resources/testng.properties b/Client/src/test/resources/testng.properties
+index 8e4de75..665e4ea 100644
+--- a/Client/src/test/resources/testng.properties
++++ b/Client/src/test/resources/testng.properties
+@@ -1,6 +1,6 @@
+ ## Developer test ng properties (convenient way to run separate test without suite) ##
+ swdResource=${swd.resource}
+-federationMetadataId=@!1111!0008!00F1!0001
++federationMetadataId=${federation.metadata.id}
+ federationRpDisplayName=Federation RP Test display name
+ federationRpRedirectUri=https://client.example.com/cb?foo=bar
+ federationRpRedirectUris=https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar
+@@ -13,8 +13,8 @@ userInum=${auth.user.inum}
+ userEmail=${auth.user.email}
+ clientId=${auth.client.id}
+ clientSecret=${auth.client.secret}
+-redirectUri=https://${test.server.name}/oxauth-rp/home.seam
+-redirectUris=https://${test.server.name}/oxauth-rp/home.seam https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2
++redirectUri=https://${test.server.name}/oxauth-rp/home
++redirectUris=https://${test.server.name}/oxauth-rp/home https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2
+ postLogoutRedirectUri=https://client.example.com/pl
+ hostnameVerifier=default
+ ## By enabling this block, you require a place to publish files via HTTP or HTTPS
+diff --git a/Client/src/test/resources/testng.properties.old b/Client/src/test/resources/testng.properties.old
+new file mode 100644
+index 0000000..8e4de75
+--- /dev/null
++++ b/Client/src/test/resources/testng.properties.old
+@@ -0,0 +1,58 @@
++## Developer test ng properties (convenient way to run separate test without suite) ##
++swdResource=${swd.resource}
++federationMetadataId=@!1111!0008!00F1!0001
++federationRpDisplayName=Federation RP Test display name
++federationRpRedirectUri=https://client.example.com/cb?foo=bar
++federationRpRedirectUris=https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar
++federationOpDisplayName=Federation OP Test display name
++federationOpId=http://example.com/op1
++federationOpDomain=example.com
++userId=${auth.user.uid}
++userSecret=${auth.user.password}
++userInum=${auth.user.inum}
++userEmail=${auth.user.email}
++clientId=${auth.client.id}
++clientSecret=${auth.client.secret}
++redirectUri=https://${test.server.name}/oxauth-rp/home.seam
++redirectUris=https://${test.server.name}/oxauth-rp/home.seam https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2
++postLogoutRedirectUri=https://client.example.com/pl
++hostnameVerifier=default
++## By enabling this block, you require a place to publish files via HTTP or HTTPS
++#requestFileBasePath=/var/www/html/oxAuthRequestFile
++requestFileBaseUrl=http://localhost/oxAuth
++sectorIdentifierUri=https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js
++
++umaMetaDataUrl=https://${test.server.name}/oxauth/seam/resource/restv1/oxauth/uma-configuration
++umaAmHost=${test.server.name}
++umaUserId=${uma.user.uid}
++umaUserSecret=${uma.user.password}
++umaPatClientId=${uma.pat.client.id}
++umaPatClientSecret=${uma.pat.client.secret}
++umaAatClientId=${uma.aat.client.id}
++umaAatClientSecret=${uma.aat.client.secret}
++umaRedirectUri=https://client.example.com/cb?foo=bar
++
++## Client Resources
++clientJwksUri=https://${test.server.name}/oxauth-client/test/resources/jwks.json
++## RS256
++RS256_modulus=AJpGcIVu7fmQJLHXeAClhXaJD7SvuABjYiPcT9IbKFWGWj51GgD-CxtyrQGXT0ctGEEsXOzMZM40q-V7GR-5qkJ_OalVTTc_EeKAHao45bZPsPHLxvusNfrfpyhc6JjF2TQhoOqxbgMgQ9L6W9q9fSjgzx-tPlD0d3X0GZOEQ_NYGstZWRRBwHgsxA2IRYtwSH-v76yPpxF9poLIWdnBKtKfSr6UY7p1BrLmMm0DdMhjQLn6j4S_eB-p2WyBwObvsLqO6FdClpZFtGr82Km2uinpHvZ6KJ_MUEW1sijPPI3rIGbaUbLtQJwX5GVynAP5qU2qRVkcsrKt-GeNoz6QNLM
++RS256_privateExponent=RkIKAFpyehMRAwTTm8fFriPhSTI1I8ge66HroA3KIpjbBFKkEwue11M0QuM7sXhx8UxYzWaQCfCm0A1tdatCRKJYCivUzHImnPYnjFv5ETvdo2BgMEFPG_86ywD01I5Vyo3-EKPZLAdHnA90QXvGQhWPfieRl6CdvtP5ydqUb39aPazZKzPx4v6hj-7wrrwrQmYq-7li_urR2zhz5HvE_eE66i1xhGTI8VdV9VE2y06Zbzn54qL7kf0nsjvg4X9ERdXv4kkhRwSSc3CExJ-iNbo0n3nQ3KovhpA1FEzd9cwI_2EfLRIvVjJRMTnPHCLmz_8-Htn2Kpi3vV9MWHab8Q
++## RS384
++RS384_modulus=AJ125IzZ0TRSSoVas3jwMWuckyMujoGUUeDd8rLjTSCLlgUb3RiT9MbKfWdeCByme5MZ21lvMu6OmMFn8iDb5erLSBJ8bZFq6ruGIVzU8NI833IahlIO9m6JIR4L_go8Szu-1MYPGUjOKDsxc-Fp3fR-Kb0HFAEEs44t9vL9yMKjNeQeAp7Fo2AukDNEZqvEObP7XWLdJFA-TuAXE1f7o49lMr0y4Tqy2XeDKwfklO0bAnbSryZubRg2E7gjiwaiSYVIFphotLlpCd3N4MU46JjHA2dv1GtIe8749HinwhK1stes3PbZb9Gwm2LyK89iRJ35bCmDLnkwP0rTwTZ2Ul8
++RS384_privateExponent=NYqTtADsTaodhLKOi_TAGSMoNLJD6nOQU7GkMIdxVjugSyRqTU0h0eZQNbGXeIZzRlVobESPQOZjsn-xqNKcnvV4EDEW4HdGUXUOKw6MxC_GmnnCamyEBpnCFQFm4_wUaMA-gQnpQwQ2UcpC6Maindu4PXoGp0H9-75NVdpNRUDHO5xY2Ybp2kVv__sUWCKRLK7JaKRA3iGlXFpLPSy9DvmBjy27z1t_z58_vrPrVset7muMwMTwgfDv-EP3NBH4eTg7_Cy952MuhxaUUsHW85LZuv5t_rcoUF8kfDWcclP3a954lAzCbVjdngpvaShNbiTKAf9-bMQKG66v63W54Q
++## RS512
++RS512_modulus=AKuc75KyKNwteumhyN5Kxa4ipQZrE_ouULtMZmCYI3Y32oCv3wWkgmrprBo-yCK292wfn77dNdZ9h5OoY-6sDVG-OKi9uwXpFcopyqIdsYOrw-4FKHxpr_7b--cH6HRmGlSFKVJpwfvIjD9Mu8S9bhNgnXfbKoYLcANU7Vjtacr3MvX-U406eRXLI9lZNr6ViQxSJw3A7yYMo2XYMYhO-FHGOYeV815q7fJFUMoCUMNSWlCx-pUCVGg0PuCKlOhUGIoLqvuFqUnBNd0hoAJCtmqya4_e3DLNzOgr2HOEbX7kQEjpi0XdyQ0fbFTAYO9TpXT2gldnmOElZ4UE2lX8J6M
++RS512_privateExponent=doYyFGAFxmOG43tAbv63XthAn5kut_hq-6D9iDMrMsfKmlxdLNl81XhDy_CWaxtw8PU6cCj5uQUDsSB4vGuJ224EVc6ML73WtcR9VdAqPOVRsb9QQfUAf4XRibO1gUbPYpaBfpDaUBonesR1XqDyOGHe_9uXl_KoTzTFpEh8a5eCk9mwz85bb08PxQUut5DFdzPPyTi8_k3m7hry97I0TMbHUTiTqjgFpq2ZqSn4KQz77uft1oMwJLvlNHP6Fs25aVYrgAWw1DfTcCDwPAKxXlCD4ZPfGN2LmxZWCYxj1HLVKmQkrjX-FSgvpHs7YUqzJ19whmrTEtODnhWvZhTucQ
++## ES256
++ES256_d=AIiNVUvr6-ChpOv2F7HNXyS2pYuoLF3ZqF2kTP0XquzB
++## ES384
++ES384_d=S5iDyZaSar7cqcCKYFC1VGVKAXmwdOSHRMrwbrEd_WvmIYi3u8PwHFYAmA0PEwLF
++## ES512
++ES512_d=AbedxoxLdftbJpXMYWlcuJkEF6iRotCxYYbH18NyEuOka_vS5dLV6m6Bhx_y_y9NgTQzP5SGzfpkSpgF6JVG7eFL
++
++# Form Interaction
++loginFormUsername = loginForm:username
++loginFormPassword = loginForm:password
++loginFormLoginButton = loginForm:loginButton
++authorizeFormAllowButton = authorizeForm:allowButton
++authorizeFormDoNotAllowButton = authorizeForm:doNotAllowButton
+\ No newline at end of file
+diff --git a/Client/src/test/resources/testng.xml b/Client/src/test/resources/testng.xml
+index bbfccdc..4f537e2 100644
+--- a/Client/src/test/resources/testng.xml
++++ b/Client/src/test/resources/testng.xml
+@@ -242,417 +242,417 @@
+     </test>
+ 
+     <!-- OIC Interop Tests -->
+-    <test name="OC5:FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
++    <test name="OC5. FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.AcceptRequestWithoutRedirectUriWhenOneRegistered"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature" enabled="true">
++    <test name="OC5. FeatureTest-Accept Valid Asymmetric ID Token Signature" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.AcceptValidAsymmetricIdTokenSignature"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Accept Valid Symmetric ID Token Signature" enabled="true">
++    <test name="OC5. FeatureTest-Accept Valid Symmetric ID Token Signature" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.AcceptValidSymmetricIdTokenSignature"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Discover Identifiers using E-Mail Syntax" enabled="true">
++    <test name="OC5. FeatureTest-Can Discover Identifiers using E-Mail Syntax" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingEMailSyntax"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Discover Identifiers using URL Syntax" enabled="true">
++    <test name="OC5. FeatureTest-Can Discover Identifiers using URL Syntax" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingUrlSyntax"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret basic Authentication" enabled="true">
++    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret basic Authentication" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretBasicAuthentication"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret jwt Authentication" enabled="true">
++    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret jwt Authentication" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretJwtAuthentication"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret post Authentication" enabled="true">
++    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret post Authentication" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretPostAuthentication"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Make Access Token Request with private key jwt Authentication" enabled="true">
++    <test name="OC5. FeatureTest-Can Make Access Token Request with private key jwt Authentication" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Provide Encrypted ID Token Response" enabled="true">
++    <test name="OC5. FeatureTest-Can Provide Encrypted ID Token Response" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanProvideEncryptedIdTokenResponse"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Provide Encrypted UserInfo Response" enabled="true">
++    <test name="OC5. FeatureTest-Can Provide Encrypted UserInfo Response" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanProvideEncryptedUserInfoResponse"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Provide Signed UserInfo Response" enabled="true">
++    <test name="OC5. FeatureTest-Can Provide Signed UserInfo Response" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanProvideSignedUserInfoResponse"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Request and Use Claims in id token" enabled="true">
++    <test name="OC5. FeatureTest-Can Request and Use Claims in id token" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanRequestAndUseClaimsInIdToken"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Request and Use Encrypted ID Token Response" enabled="true">
++    <test name="OC5. FeatureTest-Can Request and Use Encrypted ID Token Response" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanRequestAndUseEncryptedIdTokenResponse"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Can Request and Use Signed UserInfo Response" enabled="true">
++    <test name="OC5. FeatureTest-Can Request and Use Signed UserInfo Response" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.CanRequestAndUseSignedUserInfoResponse"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Displays Logo in Login Page" enabled="true">
++    <test name="OC5. FeatureTest-Displays Logo in Login Page" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.DisplaysLogoInLoginPage"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Displays Policy in Login Page" enabled="true">
++    <test name="OC5. FeatureTest-Displays Policy in Login Page" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support WebFinger Discovery" enabled="true">
++    <test name="OC5. FeatureTest-Support WebFinger Discovery" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportWebFingerDiscovery"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Enables Dynamic Registration" enabled="true">
++    <test name="OC5. FeatureTest-Enables Dynamic Registration" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.EnablesDynamicRegistration"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Ignores Extra Query Component in Request" enabled="true">
++    <test name="OC5. FeatureTest-Ignores Extra Query Component in Request" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.IgnoresExtraQueryComponentInRequest"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Includes at hash in ID Token when Implicit Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Includes at hash in ID Token when Implicit Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.IncludesAtHashInIdTokenWhenImplicitFlowUsed"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Preserves Query Parameter in redirect uri" enabled="true">
++    <test name="OC5. FeatureTest-Preserves Query Parameter in redirect uri" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.PreservesQueryParameterInRedirectUri"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Preserves Query Parameter in Registered redirect uri" enabled="true">
++    <test name="OC5. FeatureTest-Preserves Query Parameter in Registered redirect uri" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.PreservesQueryParameterInRegisteredRedirectUri"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
++    <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Providing ID Token with max age Restriction" enabled="true">
++    <test name="OC5. FeatureTest-Providing ID Token with max age Restriction" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithMaxAgeRestriction"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Providing Individually Requested Essential and Voluntary Claims" enabled="true">
++    <test name="OC5. FeatureTest-Providing Individually Requested Essential and Voluntary Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Providing Individually Requested Essential Claims" enabled="true">
++    <test name="OC5. FeatureTest-Providing Individually Requested Essential Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
++    <test name="OC5. FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedVoluntaryClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
++    <test name="OC5. FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.PublishOpenIdConfigurationDiscoveryInformation"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
++    <test name="OC5. FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectInvalidAsymmetricIdTokenSignature"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Invalid Symmetric ID Token Signature" enabled="true">
++    <test name="OC5. FeatureTest-Reject Invalid Symmetric ID Token Signature" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectInvalidSymmetricIdTokenSignature"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject redirect uri Not Matching a Registered redirect uri" enabled="true">
++    <test name="OC5. FeatureTest-Reject redirect uri Not Matching a Registered redirect uri" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectRedirectUriNotMatchingARegisteredRedirectUri"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Registration of redirect uri with Fragment" enabled="true">
++    <test name="OC5. FeatureTest-Reject Registration of redirect uri with Fragment" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectRegistrationOfRedirectUriWithFragment"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Requests Without nonce Using Implicit Flow" enabled="true">
++    <test name="OC5. FeatureTest-Reject Requests Without nonce Using Implicit Flow" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectRequestsWithoutNonceUsingImplicitFlow"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Request Without redirect uri when Multiple Registered" enabled="true">
++    <test name="OC5. FeatureTest-Reject Request Without redirect uri when Multiple Registered" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectRequestWithoutRedirectUriWhenMultipleRegistered"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Reject Request Without response type" enabled="true">
++    <test name="OC5. FeatureTest-Reject Request Without response type" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectRequestWithoutResponseType"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Rejects Incorrect at hash when Implicit Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Rejects Incorrect at hash when Implicit Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectsIncorrectAtHashWhenImplicitFlowUsed"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Rejects Incorrect c hash when Code Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Rejects Incorrect c hash when Code Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectsIncorrectCHashWhenCodeFlowUsed"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Rejects redirect uri when Query Parameter Does Not Match" enabled="true">
++    <test name="OC5. FeatureTest-Rejects redirect uri when Query Parameter Does Not Match" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectsRedirectUriWhenQueryParameterDoesNotMatch"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Rejects Second Use of Access Code" enabled="true">
++    <test name="OC5. FeatureTest-Rejects Second Use of Access Code" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectsSecondUseOfAccessCode"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values" enabled="true">
++    <test name="OC5. FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Requesting UserInfo Claims with OpenID Request Object" enabled="true">
++    <test name="OC5. FeatureTest-Requesting UserInfo Claims with OpenID Request Object" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Requesting UserInfo Claims with scope Values" enabled="true">
++    <test name="OC5. FeatureTest-Requesting UserInfo Claims with scope Values" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithScopeValues"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token" enabled="true">
++    <test name="OC5. FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body" enabled="true">
++    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingFormEncodedClientCredentialsInPostBody"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint using HTTP Basic with POST" enabled="true">
++    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using HTTP Basic with POST" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingHttpBasicWithPost"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs" enabled="true">
++    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs" enabled="true">
++    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support code Response Type" enabled="true">
++    <test name="OC5. FeatureTest-Support code Response Type" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportCodeResponseType"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Combination of code id token token Response Types" enabled="true">
++    <test name="OC5. FeatureTest-Support Combination of code id token token Response Types" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeIdTokenTokenResponseTypes"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Combination of code token Response Types" enabled="true">
++    <test name="OC5. FeatureTest-Support Combination of code token Response Types" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeTokenResponseTypes"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Combination of id token code Response Types" enabled="true">
++    <test name="OC5. FeatureTest-Support Combination of id token code Response Types" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenCodeResponseTypes"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Combination of id token token Response Types" enabled="true">
++    <test name="OC5. FeatureTest-Support Combination of id token token Response Types" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenTokenResponseTypes"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support display value page" enabled="true">
++    <test name="OC5. FeatureTest-Support display value page" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportDisplayValuePage"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support display value popup" enabled="true">
++    <test name="OC5. FeatureTest-Support display value popup" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportDisplayValuePopup"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support id token Response Type" enabled="true">
++    <test name="OC5. FeatureTest-Support id token Response Type" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportIdTokenResponseType"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support prompt value login" enabled="true">
++    <test name="OC5. FeatureTest-Support prompt value login" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportPromptValueLogin"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support prompt value none" enabled="true">
++    <test name="OC5. FeatureTest-Support prompt value none" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportPromptValueNone"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Registration Read" enabled="true">
++    <test name="OC5. FeatureTest-Support Registration Read" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportRegistrationRead"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Request File" enabled="false">
++    <test name="OC5. FeatureTest-Support Request File" enabled="false">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportRequestFile"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support claims Request Specifying sub Value" enabled="false">
++    <test name="OC5. FeatureTest-Support claims Request Specifying sub Value" enabled="false">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportClaimsRequestSpecifyingSubValue"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Requests Containing nonce" enabled="true">
++    <test name="OC5. FeatureTest-Support Requests Containing nonce" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportRequestsContainingNonce"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support Requests Without nonce" enabled="true">
++    <test name="OC5. FeatureTest-Support Requests Without nonce" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportRequestsWithoutNonce"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
++    <test name="OC5. FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportsCombiningClaimsRequestedWithScopeAndRequestObject"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting address Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting address Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingAddressClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting All Basic Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting All Basic Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingAllBasicClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting email Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting email Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingEmailClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting No Specific Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting No Specific Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingNoSpecificClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting phone Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting phone Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingPhoneClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support scope Requesting profile Claims" enabled="true">
++    <test name="OC5. FeatureTest-Support scope Requesting profile Claims" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportScopeRequestingProfileClaims"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Supports Returning Claims in ID Token" enabled="true">
++    <test name="OC5. FeatureTest-Supports Returning Claims in ID Token" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportsReturningClaimsInIdToken"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint" enabled="true">
++    <test name="OC5. FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Support token Response Type" enabled="true">
++    <test name="OC5. FeatureTest-Support token Response Type" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.SupportTokenResponseType"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-UserInfo Endpoint" enabled="true">
++    <test name="OC5. FeatureTest-UserInfo Endpoint" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UserInfoEndpoint"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-UserInfo Endpoint Access with Form-Encoded Body Method" enabled="true">
++    <test name="OC5. FeatureTest-UserInfo Endpoint Access with Form-Encoded Body Method" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithFormEncodedBodyMethod"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-UserInfo Endpoint Access with Header Method" enabled="true">
++    <test name="OC5. FeatureTest-UserInfo Endpoint Access with Header Method" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithHeaderMethod"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Uses Asymmetric ID Token Signatures" enabled="true">
++    <test name="OC5. FeatureTest-Uses Asymmetric ID Token Signatures" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UsesAsymmetricIdTokenSignatures"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Uses Discovery" enabled="true">
++    <test name="OC5. FeatureTest-Uses Discovery" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UsesDiscovery"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Uses Dynamic Registration" enabled="true">
++    <test name="OC5. FeatureTest-Uses Dynamic Registration" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UsesDynamicRegistration"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Uses Symmetric ID Token Signatures" enabled="true">
++    <test name="OC5. FeatureTest-Uses Symmetric ID Token Signatures" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.UsesSymmetricIdTokenSignatures"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Verifies Correct at hash when Implicit Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Verifies Correct at hash when Implicit Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.VerifiesCorrectAtHashWhenImplicitFlowUsed"/>
+         </classes>
+     </test>
+-    <test name="OC5:FeatureTest-Verifies Correct c hash when Code Flow Used" enabled="true">
++    <test name="OC5. FeatureTest-Verifies Correct c hash when Code Flow Used" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.interop.VerifiesCorrectCHashWhenCodeFlowUsed"/>
+         </classes>
+diff --git a/Model/src/main/java/org/xdi/oxauth/model/util/SecurityProviderUtility.java b/Model/src/main/java/org/xdi/oxauth/model/util/SecurityProviderUtility.java
+new file mode 100644
+index 0000000..d87bcef
+--- /dev/null
++++ b/Model/src/main/java/org/xdi/oxauth/model/util/SecurityProviderUtility.java
+@@ -0,0 +1,29 @@
++/*
++ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
++ *
++ * Copyright (c) 2014, Gluu
++ */
++
++package org.xdi.oxauth.model.util;
++
++import java.security.Provider;
++import java.security.Security;
++
++import org.apache.log4j.Logger;
++import org.bouncycastle.jce.provider.BouncyCastleProvider;
++
++public class SecurityProviderUtility {
++
++	private static final Logger log = Logger.getLogger(JwtUtil.class);
++
++	public static void installBCProvider() {
++		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
++		if (provider == null) {
++			log.info("Adding Bouncy Castle Provider");
++			Security.addProvider(new BouncyCastleProvider());
++		} else {
++			log.info("Bouncy Castle Provider was added already");
++		}
++	}
++
++}
+diff --git a/Server/conf/oxauth-config.xml b/Server/conf/oxauth-config.xml
+index 03f1837..a14154d 100644
+--- a/Server/conf/oxauth-config.xml
++++ b/Server/conf/oxauth-config.xml
+@@ -259,7 +259,7 @@
+ 
+     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
+ 
+-    <organization-inum>@!1111</organization-inum>
++    <organization-inum>${config.oxauth.organization}</organization-inum>
+     <oxID>https://${server.name}/oxid/service/gluu/inum</oxID>
+ 
+     <dynamic-registration-enabled>true</dynamic-registration-enabled>
+@@ -290,11 +290,11 @@
+     <client-auth-filters>
+         <client-auth-filter>
+             <filter>myCustomAttr1={0}</filter>
+-            <base-dn>ou=clients,o=@!1111,o=gluu</base-dn>
++            <base-dn>ou=clients,o=${config.oxauth.organization},o=gluu</base-dn>
+         </client-auth-filter>
+         <!--client-auth-filter>
+             <filter>(&amp;(myCustomAttr1={0})(myCustomAttr2={0}))</filter>
+-            <base-dn>ou=clients,o=@!1111,o=gluu</base-dn>
++            <base-dn>ou=clients,o=${config.oxauth.organization},o=gluu</base-dn>
+         </client-auth-filter-->
+     </client-auth-filters>
+ 
+diff --git a/Server/conf/oxauth-static-conf.json b/Server/conf/oxauth-static-conf.json
+index 50099a7..5f257ad 100644
+--- a/Server/conf/oxauth-static-conf.json
++++ b/Server/conf/oxauth-static-conf.json
+@@ -1,19 +1,19 @@
+ {
+     "baseDn": {
+         "appliance": "ou=appliances,o=gluu",
+-        "people": "ou=people,o=@!1111,o=gluu",
+-        "groups": "ou=groups,o=@!1111,o=gluu",
+-        "clients": "ou=clients,o=@!1111,o=gluu",
+-        "scopes": "ou=scopes,o=@!1111,o=gluu",
+-        "attributes": "ou=attributes,o=@!1111,o=gluu",
+-        "sessionId": "ou=session,o=@!1111,o=gluu",
+-        "scripts": "ou=scripts,o=@!1111,o=gluu",
+-        "federationMetadata": "ou=metadata,ou=federation,o=@!1111,o=gluu",
+-        "federationRP": "ou=rp,ou=federation,o=@!1111,o=gluu",
+-        "federationOP": "ou=op,ou=federation,o=@!1111,o=gluu",
+-        "federationRequest": "ou=request,ou=federation,o=@!1111,o=gluu",
+-        "federationTrust": "ou=trust,ou=federation,o=@!1111,o=gluu",
+-        "umaBase": "ou=uma,o=@!1111,o=gluu",
+-        "umaPolicy": "ou=policies,ou=uma,o=@!1111,o=gluu"
++        "people": "ou=people,o=${config.oxauth.organization},o=gluu",
++        "groups": "ou=groups,o=${config.oxauth.organization},o=gluu",
++        "clients": "ou=clients,o=${config.oxauth.organization},o=gluu",
++        "scopes": "ou=scopes,o=${config.oxauth.organization},o=gluu",
++        "attributes": "ou=attributes,o=${config.oxauth.organization},o=gluu",
++        "sessionId": "ou=session,o=${config.oxauth.organization},o=gluu",
++        "scripts": "ou=scripts,o=${config.oxauth.organization},o=gluu",
++        "federationMetadata": "ou=metadata,ou=federation,o=${config.oxauth.organization},o=gluu",
++        "federationRP": "ou=rp,ou=federation,o=${config.oxauth.organization},o=gluu",
++        "federationOP": "ou=op,ou=federation,o=${config.oxauth.organization},o=gluu",
++        "federationRequest": "ou=request,ou=federation,o=${config.oxauth.organization},o=gluu",
++        "federationTrust": "ou=trust,ou=federation,o=${config.oxauth.organization},o=gluu",
++        "umaBase": "ou=uma,o=${config.oxauth.organization},o=gluu",
++        "umaPolicy": "ou=policies,ou=uma,o=${config.oxauth.organization},o=gluu"
+     }
+ }
+\ No newline at end of file
+diff --git a/Server/profiles/default/config-oxauth-test-data.properties b/Server/profiles/default/config-oxauth-test-data.properties
+index f12c981..817193e 100644
+--- a/Server/profiles/default/config-oxauth-test-data.properties
++++ b/Server/profiles/default/config-oxauth-test-data.properties
+@@ -17,5 +17,9 @@ uma.pat.client.secret=11111111-1111-1111-1111-111111111111
+ uma.aat.client.id=@!1111!0008!0001!0002
+ uma.aat.client.secret=11111111-1111-1111-1111-111111111111
+ 
++federation.metadata.id=@!1111!0008!1111!1111
++
+ contact.email.1=test_user@example.org
+ contact.email.2=test_user_2@example.org
++
++test.keep.clients=@!1111!0008!0001!0001, @!1111!0008!0001!0002
+diff --git a/Server/profiles/default/config-oxauth-test.properties b/Server/profiles/default/config-oxauth-test.properties
+index 791dff4..d643532 100644
+--- a/Server/profiles/default/config-oxauth-test.properties
++++ b/Server/profiles/default/config-oxauth-test.properties
+@@ -2,6 +2,7 @@ server.name=localhost:8443
+ 
+ config.oxauth.issuer=https://localhost:8443
+ config.oxauth.contextPath=https://localhost:8443
++config.oxauth.organization=@!1111
+ config.oxauth.appliance=@!1111!0002!0001
+ config.oxauth.salt=123456789012345678901234567890
+ 
+diff --git a/Server/profiles/default/config-oxauth.properties b/Server/profiles/default/config-oxauth.properties
+index 02de4b4..e3b33bc 100644
+--- a/Server/profiles/default/config-oxauth.properties
++++ b/Server/profiles/default/config-oxauth.properties
+@@ -2,6 +2,7 @@ server.name=localhost:8443
+ 
+ config.oxauth.issuer=https://localhost:8443
+ config.oxauth.contextPath=https://localhost:8443
++config.oxauth.organization=@!1111
+ config.oxauth.appliance=@!1111!0002!0001
+ config.oxauth.salt=123456789012345678901234567890
+ 
+diff --git a/Server/src/main/java/org/xdi/oxauth/service/AppInitializer.java b/Server/src/main/java/org/xdi/oxauth/service/AppInitializer.java
+index 188a71e..8b689fd 100644
+--- a/Server/src/main/java/org/xdi/oxauth/service/AppInitializer.java
++++ b/Server/src/main/java/org/xdi/oxauth/service/AppInitializer.java
+@@ -43,6 +43,7 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
+ import org.xdi.oxauth.model.appliance.GluuAppliance;
+ import org.xdi.oxauth.model.config.ConfigurationFactory;
+ import org.xdi.oxauth.model.config.oxIDPAuthConf;
++import org.xdi.oxauth.model.util.SecurityProviderUtility;
+ import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
+ import org.xdi.oxauth.util.FileConfiguration;
+ import org.xdi.oxauth.util.ServerUtil;
+@@ -94,7 +95,7 @@ public class AppInitializer {
+ 
+     @Create
+     public void createApplicationComponents() {
+-    	installBCProvider();
++    	SecurityProviderUtility.installBCProvider();
+ 
+     	createStringEncrypter();
+ 
+@@ -114,16 +115,6 @@ public class AppInitializer {
+         CustomScriptManagerMigrator.instance().migrateOldConfigurations();
+     }
+ 
+-	private void installBCProvider() {
+-		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+-		if (provider == null) {
+-			log.info("Adding Bouncy Castle Provider");
+-			Security.addProvider(new BouncyCastleProvider());
+-		} else {
+-			log.info("Bouncy Castle Provider was added already");
+-		}
+-	}
+-
+ 	private void createStringEncrypter() {
+ 		String encodeSalt = ConfigurationFactory.loadCryptoConfigurationSalt();
+     	
+diff --git a/Server/src/main/java/org/xdi/oxauth/util/KeyGenerator.java b/Server/src/main/java/org/xdi/oxauth/util/KeyGenerator.java
+index 40c6911..a92c0f3 100644
+--- a/Server/src/main/java/org/xdi/oxauth/util/KeyGenerator.java
++++ b/Server/src/main/java/org/xdi/oxauth/util/KeyGenerator.java
+@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
+ import org.xdi.oxauth.model.crypto.Key;
+ import org.xdi.oxauth.model.crypto.KeyFactory;
+ import org.xdi.oxauth.model.crypto.signature.*;
++import org.xdi.oxauth.model.util.SecurityProviderUtility;
+ 
+ import java.security.Provider;
+ import java.security.Security;
+@@ -24,7 +25,7 @@ import java.util.UUID;
+ public class KeyGenerator {
+ 
+     public static void main(String[] args) throws Exception {
+-    	installBCProvider();
++    	SecurityProviderUtility.installBCProvider();
+ 
+     	JSONArray keys = new JSONArray();
+ 
+@@ -42,13 +43,6 @@ public class KeyGenerator {
+         System.out.println(jsonObject.toString(4).replace("\\/", "/"));
+     }
+ 
+-	private static void installBCProvider() {
+-		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+-		if (provider == null) {
+-			Security.addProvider(new BouncyCastleProvider());
+-		}
+-	}
+-
+     public static JSONObject generateRS256Keys(Long expirationTime) throws Exception {
+         KeyFactory<RSAPrivateKey, RSAPublicKey> keyFactory = new RSAKeyFactory(
+                 SignatureAlgorithm.RS256,
+diff --git a/Server/src/main/webapp/opiframe.page.xml b/Server/src/main/webapp/opiframe.page.xml
+new file mode 100644
+index 0000000..7384f4f
+--- /dev/null
++++ b/Server/src/main/webapp/opiframe.page.xml
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<page xmlns="http://jboss.com/products/seam/pages"
++      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++      xsi:schemaLocation="http://jboss.com/products/seam/pages http://jboss.com/products/seam/pages-2.2.xsd"
++	  view-id="/opiframe.xhtml">
++    
++    <rewrite pattern="/opiframe" />
++</page>
+diff --git a/Server/src/test/java/org/xdi/oxauth/comp/ConfigurationTest.java b/Server/src/test/java/org/xdi/oxauth/comp/ConfigurationTest.java
+index 2848306..4ee87a2 100644
+--- a/Server/src/test/java/org/xdi/oxauth/comp/ConfigurationTest.java
++++ b/Server/src/test/java/org/xdi/oxauth/comp/ConfigurationTest.java
+@@ -31,13 +31,6 @@ import org.xdi.oxauth.util.ServerUtil;
+ 
+ public class ConfigurationTest extends BaseComponentTestAdapter {
+ 
+-//    private final String m_configurationDn;
+-
+-    @Parameters(value = "configurationDn")
+-    public ConfigurationTest(String p_configurationDn) {
+-//        m_configurationDn = p_configurationDn;
+-    }
+-
+     /*
+     Configuration must be present, otherwise server will not start normally... There is fallback configuration from
+     file but server will not work as expected in cluster.`
+diff --git a/Server/src/test/resources/testng.properties b/Server/src/test/resources/testng.properties
+index 1f9769b..17d80c0 100644
+--- a/Server/src/test/resources/testng.properties
++++ b/Server/src/test/resources/testng.properties
+@@ -26,14 +26,13 @@ audience=https://localhost:8443/seam/resource/restv1/oxauth/token
+ requestFileBasePath=/var/www/html/oxAuth
+ requestFileBaseUrl=http://localhost/oxAuth
+ sectorIdentifierUri=https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js
+-federationMetadataId=@!1111!0008!00F1!0001
++federationMetadataId=${federation.metadata.id}
+ federationRpDisplayName=Federation RP Test display name
+ federationRpRedirectUri=https://client.example.com/cb?foo=bar
+ federationRpRedirectUris=https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar
+ federationOpDisplayName=Federation OP Test display name
+ federationOpId=http://example.com/op1
+ federationOpDomain=example.com
+-configurationDn=ou=testConf,o=@!1111,o=gluu
+ 
+ ## UMA
+ umaConfigurationPath=/restv1/oxauth/uma-configuration
+diff --git a/Server/src/test/resources/testng.xml b/Server/src/test/resources/testng.xml
+index 60379f8..2779928 100644
+--- a/Server/src/test/resources/testng.xml
++++ b/Server/src/test/resources/testng.xml
+@@ -207,47 +207,47 @@
+         </classes>
+     </test>
+ 
+-    <test name="UMA : configuration test" enabled="true">
++    <test name="UMA. Configuration test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : obtain AAT test" enabled="true">
++    <test name="UMA. Obtain AAT test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : obtain PAT test" enabled="true">
++    <test name="UMA. Obtain PAT test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : obtain RPT test" enabled="true">
++    <test name="UMA. Obtain RPT test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.ObtainRptWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : register resource set test" enabled="true">
++    <test name="UMA. Register resource set test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : register permission test" enabled="true">
++    <test name="UMA. Register permission test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : Workflow test" enabled="true">
++    <test name="UMA. Workflow test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : debug content test" enabled="true">
++    <test name="UMA. Debug content test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.DebugContentEncodingTest"/>
+         </classes>
+     </test>
+-    <test name="UMA : scope test" enabled="true">
++    <test name="UMA. Scope test" enabled="true">
+         <classes>
+             <class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest"/>
+         </classes>
+@@ -272,8 +272,8 @@
+             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
+         </classes>
+     </test>
+-    <test name="Remove unused clients test" enabled="true">
+-        <parameter name="usedClients" value="@!1111!0008!FF81!2D39, @!1111!0008!FF81!2DFF, @!1111!0008!0068.3E20, @!1111!0008!C2EB!75F1, @!1111!0008!2A19!9A70, @!1111!0008!7119!0560, @!1111!0008!45C0!BE6E, @!1111!0008!92C1!D277, @!1111!0008!0336!1008, @!1111!0008!A64C!475C, @!1111!0008!31FD!E7E7, @!1111!0008!2D7F!97C2, @!1111!0008!FF81!2D40"/>
++    <test name="Remove unused clients test" enabled="false">
++        <parameter name="usedClients" value="test.keep.clients"/>
+         <classes>
+             <class name="org.xdi.oxauth.comp.CleanUpClientTest"/>
+         </classes>
+@@ -305,20 +305,19 @@
+     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
+     <parameter name="audience" value="https://localhost:8443/seam/resource/restv1/oxauth/token"/>
+     <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js"/>
+-    <parameter name="federationMetadataId" value="@!1111!0008!00F1!0001"/>
++    <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
+     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
+     <parameter name="federationRpRedirectUri" value="https://client.example.com/cb?foo=bar"/>
+     <parameter name="federationRpRedirectUris" value="https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar"/>
+     <parameter name="federationOpDisplayName" value="Federation OP Test display name"/>
+     <parameter name="federationOpId" value="http://example.com/op1"/>
+     <parameter name="federationOpDomain" value="example.com"/>
+-    <parameter name="configurationDn" value="ou=testConf,o=@!1111,o=gluu"/>
+     <!-- By enabling this block, you require a place to publish files via HTTP or HTTPS-->
+     <!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/>-->
+     <!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/>-->
+ 
+     <!-- UMA -->
+-    <parameter name="umaConfigurationUrl" value="/restv1/oxauth/uma-configuration"/>
++    <parameter name="umaConfigurationPath" value="/restv1/oxauth/uma-configuration"/>
+     <parameter name="umaRegisterResourcePath" value="/restv1/host/rsrc/resource_set"/>
+     <parameter name="umaScopePath" value="/restv1/uma/scopes"/>
+     <parameter name="umaPermissionPath" value="/restv1/host/rsrc_pr"/>
