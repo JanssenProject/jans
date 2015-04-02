@@ -139,8 +139,9 @@ preferredLanguage: en_US
 zoneinfo: America/Chicago
 picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
 st: Texas
-stret: 621 East 6th Street
+street: 621 East 6th Street
 c: US
+l: Austin
 
 ######################################
 

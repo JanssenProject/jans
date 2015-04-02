@@ -2011,7 +2011,7 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
   $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture
   $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified
   $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion
-  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street )
+  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuGroup-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
