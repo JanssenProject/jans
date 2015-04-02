@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -56,6 +59,7 @@ import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.error.IErrorType;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
 
 /**
@@ -91,7 +95,9 @@ public abstract class BaseTest {
 	
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-		Reporter.log("Invoked init test suite method \n", true);
+    	SecurityProviderUtility.installBCProvider();
+
+    	Reporter.log("Invoked init test suite method \n", true);
 
 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {

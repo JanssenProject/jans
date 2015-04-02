@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <title>TestNG reports</title>
+
+    <link type="text/css" href="testng-reports.css" rel="stylesheet" />  
+    <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="testng-reports.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      var suiteTableInitFunctions = new Array();
+      var suiteTableData = new Array();
+    </script>
+    <!--
+      <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+     -->
+  </head>
+
+  <body>
+    <div class="top-banner-root">
+      <span class="top-banner-title-font">Test results</span>
+      <br/>
+      <span class="top-banner-font-1">1 suite, 1 failed test</span>
+    </div> <!-- top-banner-root -->
+    <div class="navigator-root">
+      <div class="navigator-suite-header">
+        <span>All suites</span>
+        <a href="#" class="collapse-all-link" title="Collapse/expand all the suites">
+          <img class="collapse-all-icon" src="collapseall.gif">
+          </img> <!-- collapse-all-icon -->
+        </a> <!-- collapse-all-link -->
+      </div> <!-- navigator-suite-header -->
+      <div class="suite">
+        <div class="rounded-window">
+          <div class="suite-header light-rounded-window-top">
+            <a href="#" class="navigator-link" panel-name="suite-Default_suite">
+              <span class="suite-name border-failed">Default suite</span>
+            </a> <!-- navigator-link -->
+          </div> <!-- suite-header light-rounded-window-top -->
+          <div class="navigator-suite-content">
+            <div class="suite-section-title">
+              <span>Info</span>
+            </div> <!-- suite-section-title -->
+            <div class="suite-section-content">
+              <ul>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="test-xml-Default_suite">
+                    <span>C:\Users\Yuriy Movchan\AppData\Local\Temp\testng-eclipse--1427647273\testng-customsuite.xml</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="testlist-Default_suite">
+                    <span class="test-stats">1 test</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="group-Default_suite">
+                    <span>0 groups</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="times-Default_suite">
+                    <span>Times</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="reporter-Default_suite">
+                    <span>Reporter output</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="ignored-methods-Default_suite">
+                    <span>Ignored methods</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="chronological-Default_suite">
+                    <span>Chronological view</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+              </ul>
+            </div> <!-- suite-section-content -->
+            <div class="result-section">
+              <div class="suite-section-title">
+                <span>Results</span>
+              </div> <!-- suite-section-title -->
+              <div class="suite-section-content">
+                <ul>
+                  <li>
+                    <span class="method-stats">1 method, 1 failed,   </span>
+                  </li>
+                  <li>
+                    <span class="method-list-title failed">Failed methods</span>
+                    <span class="show-or-hide-methods failed">
+                      <a href="#" panel-name="suite-Default_suite" class="hide-methods failed suite-Default_suite"> (hide)</a> <!-- hide-methods failed suite-Default_suite -->
+                      <a href="#" panel-name="suite-Default_suite" class="show-methods failed suite-Default_suite"> (show)</a> <!-- show-methods failed suite-Default_suite -->
+                    </span>
+                    <div class="method-list-content failed suite-Default_suite">
+                      <span>
+                        <img width="3%" src="failed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject" hash-for-method="requestingUserInfoClaimsWithOpenIdRequestObject(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp...)">requestingUserInfoClaimsWithOpenIdRequestObject(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp...)</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                    </div> <!-- method-list-content failed suite-Default_suite -->
+                  </li>
+                </ul>
+              </div> <!-- suite-section-content -->
+            </div> <!-- result-section -->
+          </div> <!-- navigator-suite-content -->
+        </div> <!-- rounded-window -->
+      </div> <!-- suite -->
+    </div> <!-- navigator-root -->
+    <div class="wrapper">
+      <div class="main-panel-root">
+        <div panel-name="suite-Default_suite" class="panel Default_suite">
+          <div class="suite-Default_suite-class-failed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="failed.png"/>
+              <span class="class-name">org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="requestingUserInfoClaimsWithOpenIdRequestObject(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp...)">
+                  </a> <!-- requestingUserInfoClaimsWithOpenIdRequestObject(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp...) -->
+                  <span class="method-name">requestingUserInfoClaimsWithOpenIdRequestObject</span>
+                  <span class="parameters">(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp/home https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2)</span>
+                  <div class="stack-trace">java.lang.AssertionError: expected object to not be null
+	at org.testng.Assert.fail(Assert.java:94)
+	at org.testng.Assert.assertNotNull(Assert.java:404)
+	at org.testng.Assert.assertNotNull(Assert.java:389)
+	at org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject.requestingUserInfoClaimsWithOpenIdRequestObject(RequestingUserInfoClaimsWithOpenIdRequestObject.java:121)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:84)
+	at org.testng.internal.Invoker.invokeMethod(Invoker.java:714)
+	at org.testng.internal.Invoker.invokeTestMethod(Invoker.java:901)
+	at org.testng.internal.Invoker.invokeTestMethods(Invoker.java:1231)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:127)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:111)
+	at org.testng.TestRunner.privateRun(TestRunner.java:767)
+	at org.testng.TestRunner.run(TestRunner.java:617)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:334)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:329)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:291)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:240)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:86)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1224)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1149)
+	at org.testng.TestNG.run(TestNG.java:1057)
+	at org.testng.remote.RemoteTestNG.run(RemoteTestNG.java:111)
+	at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:204)
+	at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:175)
+
+</div> <!-- stack-trace -->
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Default_suite-class-failed -->
+        </div> <!-- panel Default_suite -->
+        <div panel-name="test-xml-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">C:\Users\Yuriy Movchan\AppData\Local\Temp\testng-eclipse--1427647273\testng-customsuite.xml</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE suite SYSTEM &quot;http://testng.org/testng-1.0.dtd&quot;&gt;
+&lt;suite name=&quot;Default suite&quot;&gt;
+  &lt;parameter name=&quot;umaUserId&quot; value=&quot;test_user&quot;/&gt;
+  &lt;parameter name=&quot;ES256_d&quot; value=&quot;AIiNVUvr6-ChpOv2F7HNXyS2pYuoLF3ZqF2kTP0XquzB&quot;/&gt;
+  &lt;parameter name=&quot;umaUserSecret&quot; value=&quot;test_user_password&quot;/&gt;
+  &lt;parameter name=&quot;redirectUris&quot; value=&quot;https://c65.gluu.info/oxauth-rp/home https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2&quot;/&gt;
+  &lt;parameter name=&quot;RS384_privateExponent&quot; value=&quot;NYqTtADsTaodhLKOi_TAGSMoNLJD6nOQU7GkMIdxVjugSyRqTU0h0eZQNbGXeIZzRlVobESPQOZjsn-xqNKcnvV4EDEW4HdGUXUOKw6MxC_GmnnCamyEBpnCFQFm4_wUaMA-gQnpQwQ2UcpC6Maindu4PXoGp0H9-75NVdpNRUDHO5xY2Ybp2kVv__sUWCKRLK7JaKRA3iGlXFpLPSy9DvmBjy27z1t_z58_vrPrVset7muMwMTwgfDv-EP3NBH4eTg7_Cy952MuhxaUUsHW85LZuv5t_rcoUF8kfDWcclP3a954lAzCbVjdngpvaShNbiTKAf9-bMQKG66v63W54Q&quot;/&gt;
+  &lt;parameter name=&quot;userEmail&quot; value=&quot;test_user@test.org&quot;/&gt;
+  &lt;parameter name=&quot;userInum&quot; value=&quot;@!7484.28A7.2B70.2F80!0001!2E63.AA9E!0000!B1F3.AEAE.B798&quot;/&gt;
+  &lt;parameter name=&quot;federationRpDisplayName&quot; value=&quot;Federation RP Test display name&quot;/&gt;
+  &lt;parameter name=&quot;RS512_privateExponent&quot; value=&quot;doYyFGAFxmOG43tAbv63XthAn5kut_hq-6D9iDMrMsfKmlxdLNl81XhDy_CWaxtw8PU6cCj5uQUDsSB4vGuJ224EVc6ML73WtcR9VdAqPOVRsb9QQfUAf4XRibO1gUbPYpaBfpDaUBonesR1XqDyOGHe_9uXl_KoTzTFpEh8a5eCk9mwz85bb08PxQUut5DFdzPPyTi8_k3m7hry97I0TMbHUTiTqjgFpq2ZqSn4KQz77uft1oMwJLvlNHP6Fs25aVYrgAWw1DfTcCDwPAKxXlCD4ZPfGN2LmxZWCYxj1HLVKmQkrjX-FSgvpHs7YUqzJ19whmrTEtODnhWvZhTucQ&quot;/&gt;
+  &lt;parameter name=&quot;loginFormLoginButton&quot; value=&quot;loginForm:loginButton&quot;/&gt;
+  &lt;parameter name=&quot;sectorIdentifierUri&quot; value=&quot;https://c65.gluu.info/oxauth-client/test/resources/sector_identifier.js&quot;/&gt;
+  &lt;parameter name=&quot;federationOpDisplayName&quot; value=&quot;Federation OP Test display name&quot;/&gt;
+  &lt;parameter name=&quot;hostnameVerifier&quot; value=&quot;default&quot;/&gt;
+  &lt;parameter name=&quot;federationOpId&quot; value=&quot;http://example.com/op1&quot;/&gt;
+  &lt;parameter name=&quot;loginFormPassword&quot; value=&quot;loginForm:password&quot;/&gt;
+  &lt;parameter name=&quot;userId&quot; value=&quot;test_user&quot;/&gt;
+  &lt;parameter name=&quot;federationRpRedirectUri&quot; value=&quot;https://client.example.com/cb?foo=bar&quot;/&gt;
+  &lt;parameter name=&quot;requestFileBaseUrl&quot; value=&quot;http://localhost/oxAuth&quot;/&gt;
+  &lt;parameter name=&quot;umaPatClientId&quot; value=&quot;@!7484.28A7.2B70.2F80!0001!2E63.AA9E!0008!AB77!1A2B&quot;/&gt;
+  &lt;parameter name=&quot;authorizeFormDoNotAllowButton&quot; value=&quot;authorizeForm:doNotAllowButton&quot;/&gt;
+  &lt;parameter name=&quot;redirectUri&quot; value=&quot;https://c65.gluu.info/oxauth-rp/home&quot;/&gt;
+  &lt;parameter name=&quot;umaMetaDataUrl&quot; value=&quot;https://c65.gluu.info/oxauth/seam/resource/restv1/oxauth/uma-configuration&quot;/&gt;
+  &lt;parameter name=&quot;RS512_modulus&quot; value=&quot;AKuc75KyKNwteumhyN5Kxa4ipQZrE_ouULtMZmCYI3Y32oCv3wWkgmrprBo-yCK292wfn77dNdZ9h5OoY-6sDVG-OKi9uwXpFcopyqIdsYOrw-4FKHxpr_7b--cH6HRmGlSFKVJpwfvIjD9Mu8S9bhNgnXfbKoYLcANU7Vjtacr3MvX-U406eRXLI9lZNr6ViQxSJw3A7yYMo2XYMYhO-FHGOYeV815q7fJFUMoCUMNSWlCx-pUCVGg0PuCKlOhUGIoLqvuFqUnBNd0hoAJCtmqya4_e3DLNzOgr2HOEbX7kQEjpi0XdyQ0fbFTAYO9TpXT2gldnmOElZ4UE2lX8J6M&quot;/&gt;
+  &lt;parameter name=&quot;RS384_modulus&quot; value=&quot;AJ125IzZ0TRSSoVas3jwMWuckyMujoGUUeDd8rLjTSCLlgUb3RiT9MbKfWdeCByme5MZ21lvMu6OmMFn8iDb5erLSBJ8bZFq6ruGIVzU8NI833IahlIO9m6JIR4L_go8Szu-1MYPGUjOKDsxc-Fp3fR-Kb0HFAEEs44t9vL9yMKjNeQeAp7Fo2AukDNEZqvEObP7XWLdJFA-TuAXE1f7o49lMr0y4Tqy2XeDKwfklO0bAnbSryZubRg2E7gjiwaiSYVIFphotLlpCd3N4MU46JjHA2dv1GtIe8749HinwhK1stes3PbZb9Gwm2LyK89iRJ35bCmDLnkwP0rTwTZ2Ul8&quot;/&gt;
+  &lt;parameter name=&quot;federationMetadataId&quot; value=&quot;@!7484.28A7.2B70.2F80!0001!2E63.AA9E!0008!00F1!0001&quot;/&gt;
+  &lt;parameter name=&quot;loginFormUsername&quot; value=&quot;loginForm:username&quot;/&gt;
+  &lt;parameter name=&quot;federationRpRedirectUris&quot; value=&quot;https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar&quot;/&gt;
+  &lt;parameter name=&quot;umaAatClientId&quot; value=&quot;@!7484.28A7.2B70.2F80!0001!2E63.AA9E!0008!0068.3E20&quot;/&gt;
+  &lt;parameter name=&quot;umaPatClientSecret&quot; value=&quot;oxauth_pat_client_test_password&quot;/&gt;
+  &lt;parameter name=&quot;swdResource&quot; value=&quot;acct:test_user@c65.gluu.info&quot;/&gt;
+  &lt;parameter name=&quot;authorizeFormAllowButton&quot; value=&quot;authorizeForm:allowButton&quot;/&gt;
+  &lt;parameter name=&quot;ES512_d&quot; value=&quot;AbedxoxLdftbJpXMYWlcuJkEF6iRotCxYYbH18NyEuOka_vS5dLV6m6Bhx_y_y9NgTQzP5SGzfpkSpgF6JVG7eFL&quot;/&gt;
+  &lt;parameter name=&quot;clientSecret&quot; value=&quot;oxauth_client_test_password&quot;/&gt;
+  &lt;parameter name=&quot;clientId&quot; value=&quot;@!7484.28A7.2B70.2F80!0001!2E63.AA9E!0008!FF81!2D39&quot;/&gt;
+  &lt;parameter name=&quot;RS256_privateExponent&quot; value=&quot;RkIKAFpyehMRAwTTm8fFriPhSTI1I8ge66HroA3KIpjbBFKkEwue11M0QuM7sXhx8UxYzWaQCfCm0A1tdatCRKJYCivUzHImnPYnjFv5ETvdo2BgMEFPG_86ywD01I5Vyo3-EKPZLAdHnA90QXvGQhWPfieRl6CdvtP5ydqUb39aPazZKzPx4v6hj-7wrrwrQmYq-7li_urR2zhz5HvE_eE66i1xhGTI8VdV9VE2y06Zbzn54qL7kf0nsjvg4X9ERdXv4kkhRwSSc3CExJ-iNbo0n3nQ3KovhpA1FEzd9cwI_2EfLRIvVjJRMTnPHCLmz_8-Htn2Kpi3vV9MWHab8Q&quot;/&gt;
+  &lt;parameter name=&quot;umaRedirectUri&quot; value=&quot;https://client.example.com/cb?foo=bar&quot;/&gt;
+  &lt;parameter name=&quot;clientJwksUri&quot; value=&quot;https://c65.gluu.info/oxauth-client/test/resources/jwks.json&quot;/&gt;
+  &lt;parameter name=&quot;umaAmHost&quot; value=&quot;c65.gluu.info&quot;/&gt;
+  &lt;parameter name=&quot;ES384_d&quot; value=&quot;S5iDyZaSar7cqcCKYFC1VGVKAXmwdOSHRMrwbrEd_WvmIYi3u8PwHFYAmA0PEwLF&quot;/&gt;
+  &lt;parameter name=&quot;userSecret&quot; value=&quot;test_user_password&quot;/&gt;
+  &lt;parameter name=&quot;umaAatClientSecret&quot; value=&quot;oxauth_aat_client_test_password&quot;/&gt;
+  &lt;parameter name=&quot;postLogoutRedirectUri&quot; value=&quot;https://client.example.com/pl&quot;/&gt;
+  &lt;parameter name=&quot;federationOpDomain&quot; value=&quot;example.com&quot;/&gt;
+  &lt;parameter name=&quot;RS256_modulus&quot; value=&quot;AJpGcIVu7fmQJLHXeAClhXaJD7SvuABjYiPcT9IbKFWGWj51GgD-CxtyrQGXT0ctGEEsXOzMZM40q-V7GR-5qkJ_OalVTTc_EeKAHao45bZPsPHLxvusNfrfpyhc6JjF2TQhoOqxbgMgQ9L6W9q9fSjgzx-tPlD0d3X0GZOEQ_NYGstZWRRBwHgsxA2IRYtwSH-v76yPpxF9poLIWdnBKtKfSr6UY7p1BrLmMm0DdMhjQLn6j4S_eB-p2WyBwObvsLqO6FdClpZFtGr82Km2uinpHvZ6KJ_MUEW1sijPPI3rIGbaUbLtQJwX5GVynAP5qU2qRVkcsrKt-GeNoz6QNLM&quot;/&gt;
+  &lt;test verbose=&quot;2&quot; name=&quot;Default test&quot;&gt;
+    &lt;classes&gt;
+      &lt;class name=&quot;org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject&quot;/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt; &lt;!-- Default test --&gt;
+&lt;/suite&gt; &lt;!-- Default suite --&gt;
+            </pre>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="testlist-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Tests for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <ul>
+              <li>
+                <span class="test-name">Default test (1 class)</span>
+              </li>
+            </ul>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="group-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Groups for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="times-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Times for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="times-div">
+              <script type="text/javascript">
+suiteTableInitFunctions.push('tableData_Default_suite');
+function tableData_Default_suite() {
+var data = new google.visualization.DataTable();
+data.addColumn('number', 'Number');
+data.addColumn('string', 'Method');
+data.addColumn('string', 'Class');
+data.addColumn('number', 'Time (ms)');
+data.addRows(1);
+data.setCell(0, 0, 0)
+data.setCell(0, 1, 'requestingUserInfoClaimsWithOpenIdRequestObject')
+data.setCell(0, 2, 'org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject')
+data.setCell(0, 3, 16273);
+window.suiteTableData['Default_suite']= { tableData: data, tableDiv: 'times-div-Default_suite'}
+return data;
+}
+              </script>
+              <span class="suite-total-time">Total running time: 16 seconds</span>
+              <div id="times-div-Default_suite">
+              </div> <!-- times-div-Default_suite -->
+            </div> <!-- times-div -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="reporter-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Reporter output for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="ignored-methods-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">0 ignored methods</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="chronological-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Methods in chronological order</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject</div> <!-- chronological-class-name -->
+              <div class="configuration-suite before">
+                <span class="method-name">initTestSuite(org.testng.TestRunner@5a78cf3a)</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- configuration-suite before -->
+              <div class="configuration-test before">
+                <span class="method-name">discovery(org.testng.TestRunner@5a78cf3a)</span>
+                <span class="method-start">546 ms</span>
+              </div> <!-- configuration-test before -->
+              <div class="test-method">
+                <img src="failed.png">
+                </img>
+                <span class="method-name">requestingUserInfoClaimsWithOpenIdRequestObject(test_user, test_user_password, https://c65.gluu.info/oxauth-rp/home, https://c65.gluu.info/oxauth-rp...)</span>
+                <span class="method-start">1915 ms</span>
+              </div> <!-- test-method -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+      </div> <!-- main-panel-root -->
+    </div> <!-- wrapper -->
+  </body>
+</html>
