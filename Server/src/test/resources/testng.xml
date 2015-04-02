@@ -207,47 +207,47 @@
         </classes>
     </test>
 
-    <test name="UMA : configuration test" enabled="true">
+    <test name="UMA. Configuration test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest"/>
         </classes>
     </test>
-    <test name="UMA : obtain AAT test" enabled="true">
+    <test name="UMA. Obtain AAT test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest"/>
         </classes>
     </test>
-    <test name="UMA : obtain PAT test" enabled="true">
+    <test name="UMA. Obtain PAT test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest"/>
         </classes>
     </test>
-    <test name="UMA : obtain RPT test" enabled="true">
+    <test name="UMA. Obtain RPT test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.ObtainRptWSTest"/>
         </classes>
     </test>
-    <test name="UMA : register resource set test" enabled="true">
+    <test name="UMA. Register resource set test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest"/>
         </classes>
     </test>
-    <test name="UMA : register permission test" enabled="true">
+    <test name="UMA. Register permission test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest"/>
         </classes>
     </test>
-    <test name="UMA : Workflow test" enabled="true">
+    <test name="UMA. Workflow test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest"/>
         </classes>
     </test>
-    <test name="UMA : debug content test" enabled="true">
+    <test name="UMA. Debug content test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.DebugContentEncodingTest"/>
         </classes>
     </test>
-    <test name="UMA : scope test" enabled="true">
+    <test name="UMA. Scope test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest"/>
         </classes>
@@ -272,8 +272,8 @@
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
         </classes>
     </test>
-    <test name="Remove unused clients test" enabled="true">
-        <parameter name="usedClients" value="@!1111!0008!FF81!2D39, @!1111!0008!FF81!2DFF, @!1111!0008!0068.3E20, @!1111!0008!C2EB!75F1, @!1111!0008!2A19!9A70, @!1111!0008!7119!0560, @!1111!0008!45C0!BE6E, @!1111!0008!92C1!D277, @!1111!0008!0336!1008, @!1111!0008!A64C!475C, @!1111!0008!31FD!E7E7, @!1111!0008!2D7F!97C2, @!1111!0008!FF81!2D40"/>
+    <test name="Remove unused clients test" enabled="false">
+        <parameter name="usedClients" value="test.keep.clients"/>
         <classes>
             <class name="org.xdi.oxauth.comp.CleanUpClientTest"/>
         </classes>
@@ -305,20 +305,19 @@
     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
     <parameter name="audience" value="https://localhost:8443/seam/resource/restv1/oxauth/token"/>
     <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js"/>
-    <parameter name="federationMetadataId" value="@!1111!0008!00F1!0001"/>
+    <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
     <parameter name="federationRpRedirectUri" value="https://client.example.com/cb?foo=bar"/>
     <parameter name="federationRpRedirectUris" value="https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar"/>
     <parameter name="federationOpDisplayName" value="Federation OP Test display name"/>
     <parameter name="federationOpId" value="http://example.com/op1"/>
     <parameter name="federationOpDomain" value="example.com"/>
-    <parameter name="configurationDn" value="ou=testConf,o=@!1111,o=gluu"/>
     <!-- By enabling this block, you require a place to publish files via HTTP or HTTPS-->
     <!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/>-->
     <!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/>-->
 
     <!-- UMA -->
-    <parameter name="umaConfigurationUrl" value="/restv1/oxauth/uma-configuration"/>
+    <parameter name="umaConfigurationPath" value="/restv1/oxauth/uma-configuration"/>
     <parameter name="umaRegisterResourcePath" value="/restv1/host/rsrc/resource_set"/>
     <parameter name="umaScopePath" value="/restv1/uma/scopes"/>
     <parameter name="umaPermissionPath" value="/restv1/host/rsrc_pr"/>
