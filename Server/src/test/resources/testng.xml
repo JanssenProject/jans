@@ -272,8 +272,7 @@
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
         </classes>
     </test>
-    <test name="Remove unused clients test" enabled="false">
-        <parameter name="usedClients" value="test.keep.clients"/>
+    <test name="Remove unused clients test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.comp.CleanUpClientTest"/>
         </classes>
@@ -336,6 +335,8 @@
 
     <parameter name="contactEmail1" value="${contact.email.1}"/>
     <parameter name="contactEmail2" value="${contact.email.2}"/>
+
+    <parameter name="usedClients" value="${test.keep.clients}"/>
 
     <!-- Client Resources -->
     <parameter name="clientJwksUri" value="https://${test.server.name}/oxauth-client/test/resources/jwks.json"/>
