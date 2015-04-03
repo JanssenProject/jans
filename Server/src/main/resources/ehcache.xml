@@ -115,7 +115,7 @@
            memoryStoreEvictionPolicy="LRU"/>
 
     <cache name="AttributeCache"
-           maxElementsInMemory="10"
+           maxElementsInMemory="100"
            eternal="false"
            overflowToDisk="false"
            timeToIdleSeconds="100"
