@@ -10,7 +10,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: inum
-oxAuthClaimName: sub
+oxAuthClaimName: inum
 gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
 objectClass: top
@@ -237,7 +237,6 @@ urn: urn:gluu:dir:attribute-def:memberOf
 
 dn: inum=%(inumOrg)s!0005!A901,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Time zone info
-gluuAttributeName: timezone
 gluuAttributeName: zoneinfo
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
@@ -338,6 +337,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: iname
+oxAuthClaimName: iname
 gluuStatus: active
 inum: %(inumOrg)s!0005!5CA2
 objectClass: top
@@ -543,6 +543,7 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuLdapAttributeName: o
+oxAuthClaimName: o
 gluuStatus: active
 inum: %(inumOrg)s!0005!D03E
 objectClass: top
