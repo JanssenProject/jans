@@ -1,4 +1,4 @@
-[ "https://idevforce.com",
+[ "https://www.gluu.org",
     "https://localhost:8443/oxauth-rp/home",
     "https://%(hostname)s/oxauth-rp/home",
     "https://client.example.org/callback",
