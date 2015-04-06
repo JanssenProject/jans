@@ -8,24 +8,32 @@ package org.xdi.oxauth.service;
 
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
+import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.service.CacheService;
 
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version 0.9 March 27, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("attributeService")
 @AutoCreate
 public class AttributeService extends org.xdi.service.AttributeService {
+
+    private static final String CACHE_ATTRIBUTE = "AttributeCache";
+
+    @Logger
+    private Log log;
+
+    @In
+    private CacheService cacheService;
 
     /**
      * Get AttributeService instance
@@ -46,8 +54,17 @@ public class AttributeService extends org.xdi.service.AttributeService {
      *
      * @return GluuAttribute
      */
-    public GluuAttribute getScopeByDn(String dn) {
-        return getLdapEntryManager().find(GluuAttribute.class, dn);
+    public GluuAttribute getAttributeByDn(String dn) {
+        GluuAttribute gluuAttribute = (GluuAttribute) cacheService.get(CACHE_ATTRIBUTE, dn);
+
+        if (gluuAttribute == null) {
+            gluuAttribute = getLdapEntryManager().find(GluuAttribute.class, dn);
+            cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute);
+        } else {
+            log.trace("Get attribute from cache by Dn '{0}'", dn);
+        }
+
+        return gluuAttribute;
     }
 
     public GluuAttribute getByLdapName(String name) {

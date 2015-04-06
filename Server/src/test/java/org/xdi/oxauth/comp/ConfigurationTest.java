@@ -31,13 +31,6 @@ import org.xdi.oxauth.util.ServerUtil;
 
 public class ConfigurationTest extends BaseComponentTestAdapter {
 
-//    private final String m_configurationDn;
-
-    @Parameters(value = "configurationDn")
-    public ConfigurationTest(String p_configurationDn) {
-//        m_configurationDn = p_configurationDn;
-    }
-
     /*
     Configuration must be present, otherwise server will not start normally... There is fallback configuration from
     file but server will not work as expected in cluster.`

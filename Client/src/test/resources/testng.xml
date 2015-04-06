@@ -242,417 +242,417 @@
     </test>
 
     <!-- OIC Interop Tests -->
-    <test name="OC5:FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
+    <test name="OC5. FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.AcceptRequestWithoutRedirectUriWhenOneRegistered"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature" enabled="true">
+    <test name="OC5. FeatureTest-Accept Valid Asymmetric ID Token Signature" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.AcceptValidAsymmetricIdTokenSignature"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Accept Valid Symmetric ID Token Signature" enabled="true">
+    <test name="OC5. FeatureTest-Accept Valid Symmetric ID Token Signature" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.AcceptValidSymmetricIdTokenSignature"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Discover Identifiers using E-Mail Syntax" enabled="true">
+    <test name="OC5. FeatureTest-Can Discover Identifiers using E-Mail Syntax" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingEMailSyntax"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Discover Identifiers using URL Syntax" enabled="true">
+    <test name="OC5. FeatureTest-Can Discover Identifiers using URL Syntax" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanDiscoverIdentifiersUsingUrlSyntax"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret basic Authentication" enabled="true">
+    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret basic Authentication" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretBasicAuthentication"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret jwt Authentication" enabled="true">
+    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret jwt Authentication" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretJwtAuthentication"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Make Access Token Request with client secret post Authentication" enabled="true">
+    <test name="OC5. FeatureTest-Can Make Access Token Request with client secret post Authentication" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithClientSecretPostAuthentication"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Make Access Token Request with private key jwt Authentication" enabled="true">
+    <test name="OC5. FeatureTest-Can Make Access Token Request with private key jwt Authentication" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Provide Encrypted ID Token Response" enabled="true">
+    <test name="OC5. FeatureTest-Can Provide Encrypted ID Token Response" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanProvideEncryptedIdTokenResponse"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Provide Encrypted UserInfo Response" enabled="true">
+    <test name="OC5. FeatureTest-Can Provide Encrypted UserInfo Response" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanProvideEncryptedUserInfoResponse"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Provide Signed UserInfo Response" enabled="true">
+    <test name="OC5. FeatureTest-Can Provide Signed UserInfo Response" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanProvideSignedUserInfoResponse"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Request and Use Claims in id token" enabled="true">
+    <test name="OC5. FeatureTest-Can Request and Use Claims in id token" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanRequestAndUseClaimsInIdToken"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Request and Use Encrypted ID Token Response" enabled="true">
+    <test name="OC5. FeatureTest-Can Request and Use Encrypted ID Token Response" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanRequestAndUseEncryptedIdTokenResponse"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Can Request and Use Signed UserInfo Response" enabled="true">
+    <test name="OC5. FeatureTest-Can Request and Use Signed UserInfo Response" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.CanRequestAndUseSignedUserInfoResponse"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Displays Logo in Login Page" enabled="true">
+    <test name="OC5. FeatureTest-Displays Logo in Login Page" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.DisplaysLogoInLoginPage"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Displays Policy in Login Page" enabled="true">
+    <test name="OC5. FeatureTest-Displays Policy in Login Page" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support WebFinger Discovery" enabled="true">
+    <test name="OC5. FeatureTest-Support WebFinger Discovery" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportWebFingerDiscovery"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Enables Dynamic Registration" enabled="true">
+    <test name="OC5. FeatureTest-Enables Dynamic Registration" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.EnablesDynamicRegistration"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Ignores Extra Query Component in Request" enabled="true">
+    <test name="OC5. FeatureTest-Ignores Extra Query Component in Request" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.IgnoresExtraQueryComponentInRequest"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Includes at hash in ID Token when Implicit Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Includes at hash in ID Token when Implicit Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.IncludesAtHashInIdTokenWhenImplicitFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Preserves Query Parameter in redirect uri" enabled="true">
+    <test name="OC5. FeatureTest-Preserves Query Parameter in redirect uri" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.PreservesQueryParameterInRedirectUri"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Preserves Query Parameter in Registered redirect uri" enabled="true">
+    <test name="OC5. FeatureTest-Preserves Query Parameter in Registered redirect uri" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.PreservesQueryParameterInRegisteredRedirectUri"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
+    <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Providing ID Token with max age Restriction" enabled="true">
+    <test name="OC5. FeatureTest-Providing ID Token with max age Restriction" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithMaxAgeRestriction"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Providing Individually Requested Essential and Voluntary Claims" enabled="true">
+    <test name="OC5. FeatureTest-Providing Individually Requested Essential and Voluntary Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Providing Individually Requested Essential Claims" enabled="true">
+    <test name="OC5. FeatureTest-Providing Individually Requested Essential Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedEssentialClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
+    <test name="OC5. FeatureTest-Providing Individually Requested Voluntary Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIndividuallyRequestedVoluntaryClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
+    <test name="OC5. FeatureTest-Publish openid-configuration Discovery Information" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.PublishOpenIdConfigurationDiscoveryInformation"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
+    <test name="OC5. FeatureTest-Reject Invalid Asymmetric ID Token Signature" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectInvalidAsymmetricIdTokenSignature"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Invalid Symmetric ID Token Signature" enabled="true">
+    <test name="OC5. FeatureTest-Reject Invalid Symmetric ID Token Signature" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectInvalidSymmetricIdTokenSignature"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject redirect uri Not Matching a Registered redirect uri" enabled="true">
+    <test name="OC5. FeatureTest-Reject redirect uri Not Matching a Registered redirect uri" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectRedirectUriNotMatchingARegisteredRedirectUri"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Registration of redirect uri with Fragment" enabled="true">
+    <test name="OC5. FeatureTest-Reject Registration of redirect uri with Fragment" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectRegistrationOfRedirectUriWithFragment"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Requests Without nonce Using Implicit Flow" enabled="true">
+    <test name="OC5. FeatureTest-Reject Requests Without nonce Using Implicit Flow" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectRequestsWithoutNonceUsingImplicitFlow"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Request Without redirect uri when Multiple Registered" enabled="true">
+    <test name="OC5. FeatureTest-Reject Request Without redirect uri when Multiple Registered" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectRequestWithoutRedirectUriWhenMultipleRegistered"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Reject Request Without response type" enabled="true">
+    <test name="OC5. FeatureTest-Reject Request Without response type" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectRequestWithoutResponseType"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Rejects Incorrect at hash when Implicit Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Rejects Incorrect at hash when Implicit Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectsIncorrectAtHashWhenImplicitFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Rejects Incorrect c hash when Code Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Rejects Incorrect c hash when Code Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectsIncorrectCHashWhenCodeFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Rejects redirect uri when Query Parameter Does Not Match" enabled="true">
+    <test name="OC5. FeatureTest-Rejects redirect uri when Query Parameter Does Not Match" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectsRedirectUriWhenQueryParameterDoesNotMatch"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Rejects Second Use of Access Code" enabled="true">
+    <test name="OC5. FeatureTest-Rejects Second Use of Access Code" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectsSecondUseOfAccessCode"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values" enabled="true">
+    <test name="OC5. FeatureTest-Rejects Sector Identifier Not Containing Registered redirect uri Values" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Requesting UserInfo Claims with OpenID Request Object" enabled="true">
+    <test name="OC5. FeatureTest-Requesting UserInfo Claims with OpenID Request Object" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithOpenIdRequestObject"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Requesting UserInfo Claims with scope Values" enabled="true">
+    <test name="OC5. FeatureTest-Requesting UserInfo Claims with scope Values" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.RequestingUserInfoClaimsWithScopeValues"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token" enabled="true">
+    <test name="OC5. FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body" enabled="true">
+    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using Form-Encoded Client Credentials in POST Body" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingFormEncodedClientCredentialsInPostBody"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint using HTTP Basic with POST" enabled="true">
+    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint using HTTP Basic with POST" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointUsingHttpBasicWithPost"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs" enabled="true">
+    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs" enabled="true">
+    <test name="OC5. FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support code Response Type" enabled="true">
+    <test name="OC5. FeatureTest-Support code Response Type" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportCodeResponseType"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Combination of code id token token Response Types" enabled="true">
+    <test name="OC5. FeatureTest-Support Combination of code id token token Response Types" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeIdTokenTokenResponseTypes"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Combination of code token Response Types" enabled="true">
+    <test name="OC5. FeatureTest-Support Combination of code token Response Types" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportCombinationOfCodeTokenResponseTypes"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Combination of id token code Response Types" enabled="true">
+    <test name="OC5. FeatureTest-Support Combination of id token code Response Types" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenCodeResponseTypes"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Combination of id token token Response Types" enabled="true">
+    <test name="OC5. FeatureTest-Support Combination of id token token Response Types" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportCombinationOfIdTokenTokenResponseTypes"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support display value page" enabled="true">
+    <test name="OC5. FeatureTest-Support display value page" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportDisplayValuePage"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support display value popup" enabled="true">
+    <test name="OC5. FeatureTest-Support display value popup" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportDisplayValuePopup"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support id token Response Type" enabled="true">
+    <test name="OC5. FeatureTest-Support id token Response Type" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportIdTokenResponseType"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support prompt value login" enabled="true">
+    <test name="OC5. FeatureTest-Support prompt value login" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportPromptValueLogin"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support prompt value none" enabled="true">
+    <test name="OC5. FeatureTest-Support prompt value none" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportPromptValueNone"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Registration Read" enabled="true">
+    <test name="OC5. FeatureTest-Support Registration Read" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportRegistrationRead"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Request File" enabled="false">
+    <test name="OC5. FeatureTest-Support Request File" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportRequestFile"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support claims Request Specifying sub Value" enabled="false">
+    <test name="OC5. FeatureTest-Support claims Request Specifying sub Value" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportClaimsRequestSpecifyingSubValue"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Requests Containing nonce" enabled="true">
+    <test name="OC5. FeatureTest-Support Requests Containing nonce" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportRequestsContainingNonce"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support Requests Without nonce" enabled="true">
+    <test name="OC5. FeatureTest-Support Requests Without nonce" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportRequestsWithoutNonce"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
+    <test name="OC5. FeatureTest-Supports Combining Claims Requested with scope and Request Object" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportsCombiningClaimsRequestedWithScopeAndRequestObject"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting address Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting address Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingAddressClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting All Basic Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting All Basic Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingAllBasicClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting email Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting email Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingEmailClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting No Specific Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting No Specific Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingNoSpecificClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting phone Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting phone Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingPhoneClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support scope Requesting profile Claims" enabled="true">
+    <test name="OC5. FeatureTest-Support scope Requesting profile Claims" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportScopeRequestingProfileClaims"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Supports Returning Claims in ID Token" enabled="true">
+    <test name="OC5. FeatureTest-Supports Returning Claims in ID Token" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportsReturningClaimsInIdToken"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint" enabled="true">
+    <test name="OC5. FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Support token Response Type" enabled="true">
+    <test name="OC5. FeatureTest-Support token Response Type" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.SupportTokenResponseType"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-UserInfo Endpoint" enabled="true">
+    <test name="OC5. FeatureTest-UserInfo Endpoint" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UserInfoEndpoint"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-UserInfo Endpoint Access with Form-Encoded Body Method" enabled="true">
+    <test name="OC5. FeatureTest-UserInfo Endpoint Access with Form-Encoded Body Method" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithFormEncodedBodyMethod"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-UserInfo Endpoint Access with Header Method" enabled="true">
+    <test name="OC5. FeatureTest-UserInfo Endpoint Access with Header Method" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UserInfoEndpointAccessWithHeaderMethod"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Uses Asymmetric ID Token Signatures" enabled="true">
+    <test name="OC5. FeatureTest-Uses Asymmetric ID Token Signatures" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UsesAsymmetricIdTokenSignatures"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Uses Discovery" enabled="true">
+    <test name="OC5. FeatureTest-Uses Discovery" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UsesDiscovery"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Uses Dynamic Registration" enabled="true">
+    <test name="OC5. FeatureTest-Uses Dynamic Registration" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UsesDynamicRegistration"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Uses Symmetric ID Token Signatures" enabled="true">
+    <test name="OC5. FeatureTest-Uses Symmetric ID Token Signatures" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.UsesSymmetricIdTokenSignatures"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Verifies Correct at hash when Implicit Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Verifies Correct at hash when Implicit Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.VerifiesCorrectAtHashWhenImplicitFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5:FeatureTest-Verifies Correct c hash when Code Flow Used" enabled="true">
+    <test name="OC5. FeatureTest-Verifies Correct c hash when Code Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.VerifiesCorrectCHashWhenCodeFlowUsed"/>
         </classes>
