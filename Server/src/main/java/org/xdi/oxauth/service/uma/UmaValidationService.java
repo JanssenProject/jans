@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -30,7 +22,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
@@ -38,6 +30,13 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.util.StringHelper;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -113,15 +112,15 @@ public class UmaValidationService {
    	}
 
 
-    public void validateAuthorizationWithProtectScope(String authorization) {
-        validateAuthorization(authorization, UmaScopeType.PROTECTION);
+    public AuthorizationGrant validateAuthorizationWithProtectScope(String authorization) {
+        return validateAuthorization(authorization, UmaScopeType.PROTECTION);
     }
 
-    public void validateAuthorizationWithAuthScope(String authorization) {
-        validateAuthorization(authorization, UmaScopeType.AUTHORIZATION);
+    public AuthorizationGrant validateAuthorizationWithAuthScope(String authorization) {
+        return validateAuthorization(authorization, UmaScopeType.AUTHORIZATION);
     }
 
-    private void validateAuthorization(String authorization, UmaScopeType umaScopeType) {
+    private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
         log.trace("Validate authorization: {0}", authorization);
         if (StringHelper.isEmpty(authorization)) {
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
@@ -162,6 +161,7 @@ public class UmaValidationService {
             throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_CLIENT_SCOPE)).build());
         }
+        return authorizationGrant;
     }
 
     public void validateRPT(UmaRPT requesterPermissionToken) {
@@ -180,26 +180,23 @@ public class UmaValidationService {
     public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
    		if (resourceSetPermission == null) {
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUESTER_TICKET)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
 
    		resourceSetPermission.checkExpired();
    		if (!resourceSetPermission.isValid()) {
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_REQUESTER_TICKET)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_TICKET)).build());
    		}
    	}
 
-    public void validateResourceSet(String authorization, ResourceSetPermissionRequest resourceSetPermissionRequest) {
+    public void validateResourceSet(RegisterPermissionRequest resourceSetPermissionRequest) {
    		String resourceSetId = resourceSetPermissionRequest.getResourceSetId();
    		if (StringHelper.isEmpty(resourceSetId)) {
    			log.error("Resource set id is empty");
    			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
-
-//   		String patToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-//   		AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(patToken);
 
    		ResourceSet resourceSet;
    		try {
