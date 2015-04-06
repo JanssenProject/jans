@@ -5,9 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.RptStatusRequest;
-import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RptStatusParams;
@@ -33,12 +32,10 @@ public class RptStatusOperation extends BaseOperation {
         try {
             final RptStatusParams params = asParams(RptStatusParams.class);
             if (params != null) {
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
                 final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, HttpService.getInstance().getClientExecutor());
 
-                final RptStatusRequest request = new RptStatusRequest();
-                request.setRpt(params.getRpt());
-                final RptStatusResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), request);
+                final RptIntrospectionResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), params.getRpt(), "");
 
                 if (statusResponse != null) {
                     final RptStatusOpResponse opResponse = new RptStatusOpResponse();

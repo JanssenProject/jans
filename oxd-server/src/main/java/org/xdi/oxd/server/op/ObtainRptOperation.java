@@ -4,10 +4,10 @@ import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
+import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ObtainRptParams;
@@ -35,12 +35,12 @@ public class ObtainRptOperation extends BaseOperation {
             final ObtainRptParams params = asParams(ObtainRptParams.class);
             if (params != null) {
                 final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(umaDiscoveryUrl);
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(umaDiscoveryUrl);
                 if (umaDiscovery != null) {
-                    final RequesterPermissionTokenService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(umaDiscovery, HttpService.getInstance().getClientExecutor());
-                    final RequesterPermissionTokenResponse rptResponse = rptService.getRequesterPermissionToken("Bearer " + params.getAat(), params.getAmHost());
-                    if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getToken())) {
-                        final String rpt = rptResponse.getToken();
+                    final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                    final RPTResponse rptResponse = rptService.createRPT("Bearer " + params.getAat(), params.getAmHost());
+                    if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
+                        final String rpt = rptResponse.getRpt();
                         LOG.debug("RPT is successfully obtained from AS. RPT: {}", rpt);
                         final ObtainRptOpResponse r = new ObtainRptOpResponse();
                         r.setRptToken(rpt);

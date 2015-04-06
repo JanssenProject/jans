@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterResourceParams;
@@ -33,20 +33,18 @@ public class RegisterResourceOperation extends BaseOperation {
         try {
             final RegisterResourceParams params = asParams(RegisterResourceParams.class);
             if (params != null) {
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
                 final ResourceSetRegistrationService registrationService = UmaClientFactory.instance().createResourceSetRegistrationService(umaDiscovery, HttpService.getInstance().getClientExecutor());
 
                 final ResourceSet resourceSet = new ResourceSet();
                 resourceSet.setName(params.getName());
                 resourceSet.setScopes(params.getScopes());
 
-                final String id = String.valueOf(System.currentTimeMillis()); // most probably oxauth will ignore this id and will generate own one
-                final ResourceSetStatus addResponse = registrationService.addResourceSet("Bearer " + params.getPatToken(), id, resourceSet);
+                final ResourceSetStatus addResponse = registrationService.addResourceSet("Bearer " + params.getPatToken(), resourceSet);
 
                 if (addResponse != null) {
                     final RegisterResourceOpResponse opResponse = new RegisterResourceOpResponse();
                     opResponse.setId(addResponse.getId());
-                    opResponse.setRev(addResponse.getRev());
                     return okResponse(opResponse);
                 } else {
                     LOG.error("No response on addResourceSet call from OP.");

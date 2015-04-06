@@ -2,15 +2,21 @@ package org.xdi.oxd.client;
 
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.Assert;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.ClientUtils;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -86,21 +92,21 @@ public class TestUtils {
     public static String obtainRpt(String p_aat, String p_umaDiscoveryUrl, String p_amHost) {
         Assert.assertNotNull(p_aat);
 
-        final MetadataConfiguration discovery = UmaClientFactory.instance().createMetaDataConfigurationService(p_umaDiscoveryUrl).getMetadataConfiguration();
-        final RequesterPermissionTokenService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery);
+        final UmaConfiguration discovery = UmaClientFactory.instance().createMetaDataConfigurationService(p_umaDiscoveryUrl).getMetadataConfiguration();
+        final CreateRptService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery);
 
         // Get requester permission token
-        RequesterPermissionTokenResponse requesterPermissionTokenResponse = null;
+        RPTResponse rptResponse = null;
         try {
-            requesterPermissionTokenResponse = requesterPermissionTokenService.getRequesterPermissionToken("Bearer " + p_aat, p_amHost);
+            rptResponse = requesterPermissionTokenService.createRPT("Bearer " + p_aat, p_amHost);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        Assert.assertNotNull(requesterPermissionTokenResponse);
+        Assert.assertNotNull(rptResponse);
 
-        return requesterPermissionTokenResponse.getToken();
+        return rptResponse.getRpt();
     }
 
     public static ObtainPatOpResponse obtainPat(CommandClient p_commandClient,

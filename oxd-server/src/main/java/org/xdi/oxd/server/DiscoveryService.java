@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,7 +24,7 @@ public class DiscoveryService {
     private static final Logger LOG = LoggerFactory.getLogger(DiscoveryService.class);
 
     private final ConcurrentMap<String, OpenIdConfigurationResponse> m_map = new ConcurrentHashMap<String, OpenIdConfigurationResponse>();
-    private final ConcurrentMap<String, MetadataConfiguration> m_umaMap = new ConcurrentHashMap<String, MetadataConfiguration>();
+    private final ConcurrentMap<String, UmaConfiguration> m_umaMap = new ConcurrentHashMap<String, UmaConfiguration>();
 
     /**
      * Singleton
@@ -62,14 +62,14 @@ public class DiscoveryService {
         return null;
     }
 
-    public MetadataConfiguration getUmaDiscovery(String p_umaDiscoveryUrl) {
+    public UmaConfiguration getUmaDiscovery(String p_umaDiscoveryUrl) {
         try {
             if (StringUtils.isNotBlank(p_umaDiscoveryUrl)) {
-                final MetadataConfiguration r = m_umaMap.get(p_umaDiscoveryUrl);
+                final UmaConfiguration r = m_umaMap.get(p_umaDiscoveryUrl);
                 if (r != null) {
                     return r;
                 }
-                final MetadataConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
+                final UmaConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
                         p_umaDiscoveryUrl, HttpService.getInstance().getClientExecutor()).getMetadataConfiguration();
                 LOG.trace("Uma discovery response: {} ", response);
                 m_umaMap.put(p_umaDiscoveryUrl, response);

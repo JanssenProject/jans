@@ -1,14 +1,15 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.AuthorizationRequestService;
+import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.ClaimToken;
+import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
@@ -17,6 +18,9 @@ import org.xdi.oxd.common.params.AuthorizeRptParams;
 import org.xdi.oxd.server.DiscoveryService;
 import org.xdi.oxd.server.HttpService;
 import org.xdi.oxd.server.Utils;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,16 +42,20 @@ public class AuthorizeRptOperation extends BaseOperation {
             if (params != null && CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {
 
                 final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(umaDiscoveryUrl);
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(umaDiscoveryUrl);
                 if (umaDiscovery != null) {
+                    ClaimTokenList tokenList = new ClaimTokenList();
+                    for (Map.Entry<String, List<String>> claim : params.getClaims().entrySet()) {
+                        tokenList.add(new ClaimToken(claim.getKey(), claim.getValue() != null && !claim.getValue().isEmpty() ? claim.getValue().get(0) : ""));
+                    }
+
                     final RptAuthorizationRequest authorizationRequest = new RptAuthorizationRequest(params.getRptToken(), params.getTicket());
-                    authorizationRequest.setClaims(params.getClaims());
+                    authorizationRequest.setClaims(tokenList);
 
                     LOG.debug("Try to authorize RPT with ticket: {}...", params.getTicket());
-                    final AuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, HttpService.getInstance().getClientExecutor());
-                    final ClientResponse<AuthorizationResponse> clientAuthorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
+                    final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                    final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
                             "Bearer " + params.getAatToken(), params.getAmHost(), authorizationRequest);
-                    final AuthorizationResponse authorizationResponse = clientAuthorizationResponse.getEntity();
                     if (authorizationResponse != null) {
                         LOG.trace("RPT is authorized. RPT: {} ", params.getRptToken());
                         // authorized

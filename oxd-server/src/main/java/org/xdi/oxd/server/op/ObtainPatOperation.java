@@ -3,19 +3,12 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.ClientUtils;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
@@ -52,7 +45,7 @@ public class ObtainPatOperation extends BaseOperation {
             final ObtainPatParams params = asParams(ObtainPatParams.class);
             if (params != null) {
                 final OpenIdConfigurationResponse discovery = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
                 if (discovery != null && umaDiscovery != null) {
                     final ObtainPatOpResponse r;
                     if (useClientAuthentication()) {

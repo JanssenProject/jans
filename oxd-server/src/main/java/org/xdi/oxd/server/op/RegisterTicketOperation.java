@@ -3,11 +3,11 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.ResourceSetPermissionRegistrationService;
+import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterPermissionTicketParams;
@@ -33,16 +33,16 @@ public class RegisterTicketOperation extends BaseOperation {
         try {
             final RegisterPermissionTicketParams params = asParams(RegisterPermissionTicketParams.class);
             if (params != null) {
-                final MetadataConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                final ResourceSetPermissionRegistrationService registrationService = UmaClientFactory.instance().
+                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final PermissionRegistrationService registrationService = UmaClientFactory.instance().
                         createResourceSetPermissionRegistrationService(umaDiscovery, HttpService.getInstance().getClientExecutor());
 
-                final ResourceSetPermissionRequest request = new ResourceSetPermissionRequest();
+                final RegisterPermissionRequest request = new RegisterPermissionRequest();
                 request.setResourceSetId(params.getResourceSetId());
                 request.setScopes(params.getScopes());
 
                 final ResourceSetPermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
-                        "Bearer " + params.getPatToken(), params.getAmHost(), params.getRsHost(), request);
+                        "Bearer " + params.getPatToken(), params.getAmHost(), request);
 
                 if (ticketResponse != null) {
                     final RegisterPermissionTicketOpResponse opResponse = new RegisterPermissionTicketOpResponse();
