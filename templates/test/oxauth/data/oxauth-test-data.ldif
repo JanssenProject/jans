@@ -179,6 +179,7 @@ oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
@@ -190,6 +191,8 @@ inum: %(inumOrg)s!0008!AB77!1A2B
 oxAuthAppType: web
 oxAuthClientSecret: PQzdFt4grVibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
 oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthResponseType: code
+oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!6D96,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 
