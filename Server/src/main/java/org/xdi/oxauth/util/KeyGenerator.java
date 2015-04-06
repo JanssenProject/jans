@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
 import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import java.security.Provider;
 import java.security.Security;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class KeyGenerator {
 
     public static void main(String[] args) throws Exception {
-    	installBCProvider();
+    	SecurityProviderUtility.installBCProvider();
 
     	JSONArray keys = new JSONArray();
 
@@ -41,13 +42,6 @@ public class KeyGenerator {
 
         System.out.println(jsonObject.toString(4).replace("\\/", "/"));
     }
-
-	private static void installBCProvider() {
-		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-		if (provider == null) {
-			Security.addProvider(new BouncyCastleProvider());
-		}
-	}
 
     public static JSONObject generateRS256Keys(Long expirationTime) throws Exception {
         KeyFactory<RSAPrivateKey, RSAPublicKey> keyFactory = new RSAKeyFactory(

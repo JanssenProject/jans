@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.clientinfo.ws.rs;
 
-import java.util.Set;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.annotations.In;
@@ -29,10 +23,16 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Set;
+
 /**
  * Provides interface for Client Info REST web services
  *
- * @author Javier Rojas Blum Date: 07.19.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 March 27, 2015
  */
 @Name("requestClientInfoRestWebService")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
@@ -104,7 +104,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
                 if (scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
-                        GluuAttribute attribute = attributeService.getScopeByDn(claimDn);
+                        GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
                         String attributeName = attribute.getName();
                         Object attributeValue = client.getAttribute(attribute.getName());
