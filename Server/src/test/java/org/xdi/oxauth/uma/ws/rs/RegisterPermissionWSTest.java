@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -21,7 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.TUma;
@@ -30,6 +22,12 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -66,7 +64,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
@@ -77,7 +75,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"testRegisterPermission"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermissionWithInvalidResourceSet(final String umaAmHost, String umaHost) {
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(m_resourceSet.getId() + "x");
 
         final String path = m_umaPermissionPath + "/" + umaHost + "/";
@@ -127,7 +125,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResourceSet"})
     public void cleanUp() {
         if (m_resourceSet != null) {
-            TUma.deleteResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSet.getId(), m_resourceSet.getRev());
+            TUma.deleteResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSet.getId());
         }
     }
 }

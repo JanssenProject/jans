@@ -6,20 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -37,8 +23,17 @@ import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -278,8 +273,8 @@ class TTokenRequest {
         }.run();
     }
 
-    public RequesterPermissionTokenResponse requestRpt(final Token p_aat, final String p_rptPath, final String p_umaAmHost) {
-        final Holder<RequesterPermissionTokenResponse> h = new Holder<RequesterPermissionTokenResponse>();
+    public RPTResponse requestRpt(final Token p_aat, final String p_rptPath, final String p_umaAmHost) {
+        final Holder<RPTResponse> h = new Holder<RPTResponse>();
 
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_rptPath) {
@@ -306,7 +301,7 @@ class TTokenRequest {
                             tokenResponse = jsonObj.get("requesterPermissionTokenResponse").toString();
                         }
                         System.out.println("Token response = " + tokenResponse);
-                        RequesterPermissionTokenResponse result = ServerUtil.createJsonMapper().readValue(tokenResponse, RequesterPermissionTokenResponse.class);
+                        RPTResponse result = ServerUtil.createJsonMapper().readValue(tokenResponse, RPTResponse.class);
                         UmaTestUtil.assert_(result);
 
                         h.setT(result);
@@ -326,8 +321,8 @@ class TTokenRequest {
         return h.getT();
     }
 
-    public RptStatusResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final RptStatusRequest p_request) {
-        final Holder<RptStatusResponse> h = new Holder<RptStatusResponse>();
+    public RptIntrospectionResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost, final Token p_aat, final String rpt) {
+        final Holder<RptIntrospectionResponse> h = new Holder<RptIntrospectionResponse>();
 
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_umaRptStatusPath) {
@@ -336,18 +331,19 @@ class TTokenRequest {
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                     super.prepareRequest(request);
 
-                    request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
                     request.addHeader("Authorization", "Bearer " + p_aat.getAccessToken());
 //                    request.addHeader("Host", p_umaAmHost);
 
-                    try {
-                        final String json = ServerUtil.createJsonMapper().writeValueAsString(p_request);
-                        request.setContent(Util.getBytes(json));
-                        request.setContentType(UmaConstants.JSON_MEDIA_TYPE);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        fail();
-                    }
+                    request.addParameter("token", rpt);
+//                    try {
+//                        final String json = ServerUtil.createJsonMapper().writeValueAsString(rpt);
+//                        request.setContent(Util.getBytes(json));
+//                        request.setContentType(UmaConstants.JSON_MEDIA_TYPE);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        fail();
+//                    }
                 }
 
                 @Override
@@ -357,7 +353,7 @@ class TTokenRequest {
 
                     assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
                     try {
-                        final RptStatusResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), RptStatusResponse.class);
+                        final RptIntrospectionResponse result = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), RptIntrospectionResponse.class);
                         Assert.assertNotNull(result);
 
                         h.setT(result);

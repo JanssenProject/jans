@@ -7,9 +7,7 @@
 package org.xdi.oxauth.ws.rs;
 
 import junit.framework.Assert;
-
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.core.BaseClientResponse;
 import org.testng.annotations.BeforeClass;
@@ -17,16 +15,16 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.IdClient;
-import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
+import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
@@ -39,7 +37,7 @@ public class IdGenWsHttpTest extends BaseTest {
 
     protected Token m_aat;
     protected String m_rpt;
-    protected MetadataConfiguration m_metadataConfiguration;
+    protected UmaConfiguration m_metadataConfiguration;
     protected String m_umaAmHost;
 
     @BeforeClass
@@ -54,19 +52,19 @@ public class IdGenWsHttpTest extends BaseTest {
         m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(m_aat);
 
-        final RequesterPermissionTokenService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);
+        final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(m_metadataConfiguration);
 
         // Get requester permission token
-        RequesterPermissionTokenResponse requesterPermissionTokenResponse = null;
+        RPTResponse requesterPermissionTokenResponse = null;
         try {
-            requesterPermissionTokenResponse = rptService.getRequesterPermissionToken("Bearer " + m_aat.getAccessToken(), umaAmHost);
+            requesterPermissionTokenResponse = rptService.createRPT("Bearer " + m_aat.getAccessToken(), umaAmHost);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
         UmaTestUtil.assert_(requesterPermissionTokenResponse);
-        m_rpt = requesterPermissionTokenResponse.getToken();
+        m_rpt = requesterPermissionTokenResponse.getRpt();
     }
 
     //    @Test(dependsOnMethods = {"init"})
@@ -100,7 +98,7 @@ public class IdGenWsHttpTest extends BaseTest {
 
     private void authorizeRpt(String p_ticket) {
         // Authorize RPT token to access permission ticket
-        ClientResponse<AuthorizationResponse> authorizationResponse = null;
+        RptAuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(m_rpt, p_ticket);
             authorizationResponse = UmaClientFactory.instance().createAuthorizationRequestService(m_metadataConfiguration).requestRptPermissionAuthorization(

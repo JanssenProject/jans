@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -22,16 +17,20 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.oxauth.uma.ws.rs.ResourceSetPermissionRegistrationRestWebServiceImpl;
+import org.xdi.oxauth.uma.ws.rs.PermissionRegistrationWS;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
+
+import javax.ws.rs.core.Response;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -119,15 +118,15 @@ public class PermissionService {
     }
 
     private String registerPermission(UmaRPT p_rpt, ResourceSet p_resource, List<RsScopeType> p_scopes) {
-        final Date expirationDate = ResourceSetPermissionRegistrationRestWebServiceImpl.rptExpirationDate();
+        final Date expirationDate = PermissionRegistrationWS.rptExpirationDate();
 
-        final ResourceSetPermissionRequest r = new ResourceSetPermissionRequest();
+        final RegisterPermissionRequest r = new RegisterPermissionRequest();
         r.setResourceSetId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 
         final String host = ConfigurationFactory.getConfiguration().getIssuer();
         final ResourceSetPermission permission = resourceSetPermissionManager.createResourceSetPermission(
-                host, host, r, expirationDate);
+                host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
         permission.setScopeDns(umaRsResourceService.getScopeDns(p_scopes));
         final Client client = ClientService.instance().getClient(p_rpt.getClientId());
