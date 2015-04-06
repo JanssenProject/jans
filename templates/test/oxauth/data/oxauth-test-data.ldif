@@ -191,9 +191,10 @@ inum: %(inumOrg)s!0008!AB77!1A2B
 oxAuthAppType: web
 oxAuthClientSecret: PQzdFt4grVibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
 oxAuthIdTokenSignedResponseAlg: RS256
+oxAuthRedirectURI: https://client.example.com/cb
 oxAuthResponseType: code
 oxAuthResponseType: id_token
-oxAuthScope: inum=%(inumOrg)s!0009!6D96,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 
 dn: inum=%(inumOrg)s!0008!0068.3E20,ou=clients,o=%(inumOrg)s,o=gluu
@@ -204,9 +205,13 @@ inum: %(inumOrg)s!0008!0068.3E20
 oxAuthAppType: web
 oxAuthClientSecret: t9eqhq8kyAibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
 oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D97,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthRedirectURI: https://client.example.com/cb
+oxAuthResponseType: code
+oxAuthResponseType: id_token
+oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 
+######################################
 
 ######################################
 ######################################
@@ -306,5 +311,22 @@ oxAuthFederationTrustStatus: inactive_by_checker
 oxAuthRedirectURI: https://client.example.com/cb?foo=bar
 oxAuthReleasedScope: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthSkipAuthorization: true
+
+######################################
+
+######################################
+######################################
+# UMA
+######################################
+dn: inum=%(inumOrg)s!B6EA.B301,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthUmaScopeDescription
+objectClass: top
+displayName: Add/Edit
+inum: %(inumOrg)s!B6EA.B301
+owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=peop
+ le,o=%(inumOrg)s,o=gluu
+oxId: modify
+oxRevision: 0
+oxType: internal
 
 ######################################
