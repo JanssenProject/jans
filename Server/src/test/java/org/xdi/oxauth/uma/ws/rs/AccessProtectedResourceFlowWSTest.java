@@ -50,10 +50,10 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 
     @Test(dependsOnMethods = "init_1")
     @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
+            "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
     public void init_2(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                       String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+                       String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
+        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
         UmaTestUtil.assert_(m_aat);
     }
 
