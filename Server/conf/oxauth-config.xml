@@ -259,7 +259,7 @@
 
     <oxOpenIDConnectVersion>openidconnect-1.0</oxOpenIDConnectVersion>
 
-    <organization-inum>@!1111</organization-inum>
+    <organization-inum>${config.oxauth.organization}</organization-inum>
     <oxID>https://${server.name}/oxid/service/gluu/inum</oxID>
 
     <dynamic-registration-enabled>true</dynamic-registration-enabled>
@@ -290,11 +290,11 @@
     <client-auth-filters>
         <client-auth-filter>
             <filter>myCustomAttr1={0}</filter>
-            <base-dn>ou=clients,o=@!1111,o=gluu</base-dn>
+            <base-dn>ou=clients,o=${config.oxauth.organization},o=gluu</base-dn>
         </client-auth-filter>
         <!--client-auth-filter>
             <filter>(&amp;(myCustomAttr1={0})(myCustomAttr2={0}))</filter>
-            <base-dn>ou=clients,o=@!1111,o=gluu</base-dn>
+            <base-dn>ou=clients,o=${config.oxauth.organization},o=gluu</base-dn>
         </client-auth-filter-->
     </client-auth-filters>
 

@@ -65,7 +65,7 @@ import java.util.List;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version 0.9 March 27, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -207,7 +207,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
+                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getGluuLdapAttributeName();
@@ -308,7 +308,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
+                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getGluuLdapAttributeName();
@@ -398,7 +398,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 if (scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
-                        GluuAttribute gluuAttribute = attributeService.getScopeByDn(claimDn);
+                        GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getGluuLdapAttributeName();
