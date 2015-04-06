@@ -115,6 +115,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
         final RptAuthorizationRequest request = new RptAuthorizationRequest();
         request.setRpt(m_rpt.getRpt());
         request.setTicket(m_ticket.getTicket());
+        request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
         final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
         assertNotNull(response, "Token response status is null");
