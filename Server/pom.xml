@@ -631,6 +631,11 @@
             <artifactId>testng</artifactId>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.el</groupId>
             <artifactId>el-api</artifactId>
         </dependency>
