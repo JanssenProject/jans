@@ -78,9 +78,12 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
         request.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(this.authorizationEndpoint);
-        authorizeClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
+//        authorizeClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
         authorizeClient.setRequest(request);
         AuthorizationResponse response = authorizeClient.exec();
+        showClient(authorizeClient);
+        System.out.println(this.authorizationEndpoint);
+        System.out.println(response);
 
         assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getAccessToken(), "The access token is null");
@@ -99,8 +102,10 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
         }, new AllowAllHostnameVerifier());
 
         SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", 8080, PlainSocketFactory.getSocketFactory()));
+        registry.register(new Scheme("https", 443, sf));
         registry.register(new Scheme("https", 8443, sf));
+        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        registry.register(new Scheme("http", 8080, PlainSocketFactory.getSocketFactory()));
         ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
         return new DefaultHttpClient(ccm);
     }
