@@ -81,9 +81,6 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
 //        authorizeClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
         authorizeClient.setRequest(request);
         AuthorizationResponse response = authorizeClient.exec();
-        showClient(authorizeClient);
-        System.out.println(this.authorizationEndpoint);
-        System.out.println(response);
 
         assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getAccessToken(), "The access token is null");
