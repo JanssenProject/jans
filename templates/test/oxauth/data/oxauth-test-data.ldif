@@ -362,7 +362,7 @@ oxType: internal
 dn: inum=%(inumOrg)s!F366.715A,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthUmaResourceSet
 objectClass: top
-displayName: generate_id
+displayName: internal_generate_id
 inum: %(inumOrg)s!F366.715A
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxFaviconImage: http://example.com/generate_id_icon.png
