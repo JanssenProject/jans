@@ -75,12 +75,9 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"testRegisterPermission"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermissionWithInvalidResourceSet(final String umaAmHost, String umaHost) {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
-        r.setResourceSetId(m_resourceSet.getId() + "x");
-
-        final String path = m_umaPermissionPath + "/" + umaHost + "/";
+        final String path = m_umaPermissionPath;
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.PUT, path) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, path) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -91,6 +88,9 @@ public class RegisterPermissionWSTest extends BaseTest {
                     request.addHeader("Host", umaAmHost);
 
                     try {
+                        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+                        r.setResourceSetId(m_resourceSet.getId() + "x");
+
                         final String json = ServerUtil.createJsonMapper().writeValueAsString(r);
                         request.setContent(Util.getBytes(json));
                         request.setContentType(UmaConstants.JSON_MEDIA_TYPE);
