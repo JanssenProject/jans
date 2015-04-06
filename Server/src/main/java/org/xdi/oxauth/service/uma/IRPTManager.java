@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-import java.util.List;
-
 import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,4 +35,6 @@ public interface IRPTManager {
     public ResourceSetPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId);
 
     public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt);
+
+    UmaRPT createRPT(String authorization, String amHost);
 }

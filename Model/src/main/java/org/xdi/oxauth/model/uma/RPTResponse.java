@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.model.uma;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Requester permission token
@@ -25,30 +25,30 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 @JsonPropertyOrder({ "rpt" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
-public class RequesterPermissionTokenResponse {
+public class RPTResponse {
 
-	private String token;
+	private String rpt;
 
-	public RequesterPermissionTokenResponse() {
+	public RPTResponse() {
     }
 
-	public RequesterPermissionTokenResponse(String token) {
-		this.token = token;
+	public RPTResponse(String token) {
+		this.rpt = token;
 	}
 
     @JsonProperty(value = "rpt")
 	@XmlElement(name = "rpt")
-	public String getToken() {
-		return token;
+	public String getRpt() {
+		return rpt;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
+	public void setRpt(String rpt) {
+		this.rpt = rpt;
 	}
 
 	@Override
 	public String toString() {
-		return "RequesterPermissionTokenResponse [token=" + token + "]";
+		return "RPTResponse [rpt=" + rpt + "]";
 	}
 
 }

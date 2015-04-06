@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -24,12 +14,18 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
-import org.xdi.oxauth.model.uma.VersionedResourceSet;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * Test cases for the registering UMA resource set description flow (HTTP)
@@ -38,16 +34,15 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
  */
 public class RegisterResourceSetFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
     protected Token m_pat;
 
     protected String resourceSetId;
-    protected String resourceVersion;
 
     public RegisterResourceSetFlowHttpTest() {
     }
 
-    public RegisterResourceSetFlowHttpTest(MetadataConfiguration metadataConfiguration) {
+    public RegisterResourceSetFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 
@@ -80,8 +75,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
             resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            String id = String.valueOf(System.currentTimeMillis());
-            resourceSetStatus = resourceSetRegistrationService.addResourceSet("Bearer " + m_pat.getAccessToken(), id, resourceSet);
+            resourceSetStatus = resourceSetRegistrationService.addResourceSet("Bearer " + m_pat.getAccessToken(), resourceSet);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -90,8 +84,6 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         UmaTestUtil.assert_(resourceSetStatus);
 
         this.resourceSetId = resourceSetStatus.getId();
-        this.resourceVersion = resourceSetStatus.getRev();
-        assertEquals(this.resourceVersion, "1", "Resource set description revision is not 1");
     }
 
     /**
@@ -111,19 +103,15 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
             resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceVersion, this.resourceSetId, resourceSet);
+            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceSetId, resourceSet);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
         assertNotNull(resourceSetStatus, "Resource set status is null");
-
         this.resourceSetId = resourceSetStatus.getId();
-        this.resourceVersion = resourceSetStatus.getRev();
         assertNotNull(this.resourceSetId, "Resource set description id is null");
-        assertNotNull(this.resourceVersion, "Resource set description revision is null");
-        assertEquals(this.resourceVersion, "2", "Resource set description revision is not 2");
     }
 
     /**
@@ -143,7 +131,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
             resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceVersion, this.resourceSetId + "1", resourceSet);
+            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceSetId, resourceSet);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.NOT_FOUND.getStatusCode(), "Unexpected response status");
@@ -169,7 +157,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
             resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken() + "_invalid", this.resourceVersion, this.resourceSetId + "_invalid", resourceSet);
+            resourceSetStatus = resourceSetRegistrationService.updateResourceSet("Bearer " + m_pat.getAccessToken() + "_invalid", this.resourceSetId + "_invalid", resourceSet);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
@@ -188,7 +176,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Get list of resource set descriptions
-        VersionedResourceSet resourceSets = null;
+        ResourceSetWithId resourceSets = null;
         try {
             resourceSets = resourceSetRegistrationService.getResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceSetId);
         } catch (ClientResponseFailure ex) {
@@ -233,7 +221,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         // Delete resource set description
         boolean deleted = false;
         try {
-            resourceSetRegistrationService.deleteResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceVersion, this.resourceSetId);
+            resourceSetRegistrationService.deleteResourceSet("Bearer " + m_pat.getAccessToken(), this.resourceSetId);
             deleted = true;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));

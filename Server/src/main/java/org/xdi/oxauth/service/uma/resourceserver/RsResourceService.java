@@ -61,7 +61,7 @@ public class RsResourceService {
 
                 // skip first element
                 for (int i = 1; i < size; i++) {
-                    resourceSetService.removeResourceSet(ldapResourceSets.get(i));
+                    resourceSetService.remove(ldapResourceSets.get(i));
                 }
             }
             return first;
