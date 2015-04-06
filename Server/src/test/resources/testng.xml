@@ -322,7 +322,7 @@
     <parameter name="umaPermissionPath" value="/restv1/host/rsrc_pr"/>
     <parameter name="umaPermissionAuthorizationPath" value="/restv1/requester/perm"/>
     <parameter name="umaRptPath" value="/restv1/requester/rpt"/>
-    <parameter name="umaRptStatusPath" value="/restv1/host/status"/>
+    <parameter name="umaRptStatusPath" value="/restv1/rpt/status"/>
     <parameter name="umaAmHost" value="localhost"/>
     <parameter name="umaHost" value="photoz.example.com"/>
     <parameter name="umaUserId" value="${uma.user.uid}"/>

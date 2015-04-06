@@ -22,8 +22,8 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.TUma;
@@ -39,7 +39,7 @@ import org.xdi.oxauth.util.ServerUtil;
 public class IdGenRestWSEmbeddedTest extends BaseTest {
 
     private Token m_aat;
-    private RequesterPermissionTokenResponse m_rpt;
+    private RPTResponse m_rpt;
     private final Holder<ResourceSetPermissionTicket> m_ticketH = new Holder<ResourceSetPermissionTicket>();
 
     @Test
@@ -69,7 +69,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
                 request.addHeader("Accept", "application/json");
-                request.addHeader("Authorization", "Bearer " + m_rpt.getToken());
+                request.addHeader("Authorization", "Bearer " + m_rpt.getRpt());
             }
 
             @Override
@@ -94,10 +94,10 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
     @Parameters({"umaPermissionAuthorizationPath", "umaAmHost"})
     public void authorizeRpt(String umaPermissionAuthorizationPath, String umaAmHost) {
         final RptAuthorizationRequest request = new RptAuthorizationRequest();
-        request.setRpt(m_rpt.getToken());
+        request.setRpt(m_rpt.getRpt());
         request.setTicket(m_ticketH.getT().getTicket());
 
-        final AuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
+        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
         assertNotNull(response, "Token response status is null");
     }
 
@@ -113,7 +113,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
                 request.addHeader("Accept", "application/json");
-                request.addHeader("Authorization", "Bearer " + m_rpt.getToken());
+                request.addHeader("Authorization", "Bearer " + m_rpt.getRpt());
             }
 
             @Override
@@ -145,7 +145,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
                 request.addHeader("Accept", "text/plain");
-                request.addHeader("Authorization", "Bearer " + m_rpt.getToken());
+                request.addHeader("Authorization", "Bearer " + m_rpt.getRpt());
             }
 
             @Override

@@ -6,17 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -29,25 +19,41 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetWithId;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.VersionedResourceSet;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetService;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
+ * This AM's endpoint is part of resource set registration API.
+ * <p/>
+ * The host uses the RESTful API at the AM's resource set registration endpoint
+ * to create, read, update, and delete resource set descriptions, along with
+ * listing groups of such descriptions. The host MUST use its valid PAT obtained
+ * previously to gain access to this endpoint. The resource set registration API
+ * is a subset of the protection API.
+ *
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
  *         Date: 10/03/2012
  */
 @Name("resourceSetRegistrationRestWebService")
-public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetRegistrationRestWebService {
-
-    private static final String STATUS_CREATED = "created";
-    private static final String STATUS_UPDATED = "updated";
+@Path("/host/rsrc/resource_set")
+@Api(value = "/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
+public class ResourceSetRegistrationWS {
 
     @Logger
     private Log log;
@@ -70,27 +76,37 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
     @In
     private ScopeService umaScopeService;
 
-    public Response putResourceSet(String authorization, String rsver, String rsid, ResourceSet resourceSet) {
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response createResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet) {
         try {
-
-            final boolean isCreate = StringHelper.isEmpty(rsver); // otherwise modify
-            if (isCreate) {
-                final String ignoredId = rsid;
-                // generate new (own) id instead of using id provided by resource server. It's error prone approach as it forth
-                // AM check whether such id already exist (the same RS may call registration endpoint with the same id).
-                // In addition internally resource sets stored under the same ou which may lead to conflicts between different RSs.
-                // To avoid all this problems it was decided to use own id and return it in response.
-                // (luckily there is id field in response, copy from spec : "_id": (id of created resource set).
-                rsid = generatedId();
-                log.trace("Try to create resource set, provided id (ignored): {0}, id: {1}", ignoredId, rsid);
-            } else {
-                log.trace("Try to modify resource set, id: {0}", rsid);
-            }
-
+            String id = generatedId();
+            log.trace("Try to create resource set, id: {0}", id);
 
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            return putResourceSetImpl(Response.Status.CREATED, authorization, id, resourceSet);
+        } catch (Exception ex) {
+            log.error("Exception during resource creation", ex);
+            if (ex instanceof WebApplicationException) {
+                throw (WebApplicationException) ex;
+            }
 
-            return putResourceSetImpl(authorization, rsver, rsid, resourceSet);
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+        }
+    }
+
+    @PUT
+    @Path("{rsid}")
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response updateResourceSet(@HeaderParam("Authorization") String authorization,
+                                      @PathParam("rsid") String rsid, ResourceSet resourceSet) {
+        try {
+            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+
+            return putResourceSetImpl(Response.Status.NO_CONTENT, authorization, rsid, resourceSet);
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
@@ -107,7 +123,10 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         return String.valueOf(System.currentTimeMillis());
     }
 
-    public Response getResourceSet(String authorization, String rsid) {
+    @GET
+    @Path("{rsid}")
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response getResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -132,14 +151,14 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
 
             ldapResourceSet = ldapResourceSets.get(0);
 
-            final VersionedResourceSet versionedResourceSet = new VersionedResourceSet();
+            final ResourceSetWithId resourceSetWithId = new ResourceSetWithId();
 
-            BeanUtils.copyProperties(versionedResourceSet, ldapResourceSet);
-            versionedResourceSet.setScopes(umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes()));
+            BeanUtils.copyProperties(resourceSetWithId, ldapResourceSet);
+            resourceSetWithId.setId(ldapResourceSet.getId());
+            resourceSetWithId.setScopes(umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes()));
 
             final ResponseBuilder builder = Response.ok();
-            builder.entity(ServerUtil.asJson(versionedResourceSet)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
-            builder.tag(new EntityTag(versionedResourceSet.getRev()));
+            builder.entity(ServerUtil.asJson(resourceSetWithId)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
 
             return builder.build();
         } catch (Exception ex) {
@@ -162,7 +181,9 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
      * @param p_scope       scope of resource set for additional filtering, can blank string.
      * @return resource set ids.
      */
-    public List<String> getResourceSetList(String authorization, String p_scope) {
+    @GET
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public List<String> getResourceSetList(@HeaderParam("Authorization") String authorization, @QueryParam("scope") String p_scope) {
         try {
             log.trace("Getting resource set descriptions.");
 
@@ -195,16 +216,18 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
                 return result;
             }
         } catch (Exception ex) {
-            log.error("Exception happened", ex);
+            log.error("Exception happened on getResourceSetList()", ex);
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             }
         }
         throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                           .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
-    public Response deleteResourceSet(String authorization, String rsver, String rsid) {
+    @DELETE
+    @Path("{rsid}")
+    public Response deleteResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -219,17 +242,16 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
             final org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
             ldapResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
             ldapResourceSet.setId(rsid);
-            ldapResourceSet.setRev(rsver);
 
             List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
                     .findResourceSets(ldapResourceSet);
-            if (ldapResourceSets.size() != 1) {
-                log.error("Specified resource set description isn't exist");
+            if (ldapResourceSets.isEmpty()) {
+                log.error("Specified resource set description doesn't exist");
                 throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
             }
 
-            resourceSetService.removeResourceSet(ldapResourceSets.get(0));
+            resourceSetService.remove(ldapResourceSets);
 
             return Response.status(Response.Status.NO_CONTENT).build();
         } catch (Exception ex) {
@@ -243,9 +265,9 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         }
     }
 
-    private Response putResourceSetImpl(String authorization, String rsver, String rsid,
+    private Response putResourceSetImpl(Response.Status status, String authorization, String rsid,
                                         ResourceSet resourceSet) throws IllegalAccessException, InvocationTargetException, IOException {
-        log.trace("putResourceSetImpl, rsid: {0}, rsver: {1}", rsid, rsver);
+        log.trace("putResourceSetImpl, rsid: {0}, status:", rsid, status.name());
         String patToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(patToken);
 
@@ -254,31 +276,26 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         String clientDn = authorizationGrant.getClientDn();
 
         final String resourceSetDn;
-        final String status;
-        if (StringHelper.isEmpty(rsver)) {
+
+        if (status == Response.Status.CREATED) {
             resourceSetDn = addResourceSet(rsid, resourceSet, userDn, clientInum, clientDn);
-            status = STATUS_CREATED;
         } else {
-            resourceSetDn = updateResourceSet(rsver, rsid, resourceSet, authorizationGrant, clientDn);
-            status = STATUS_UPDATED;
+            resourceSetDn = updateResourceSet(rsid, resourceSet, authorizationGrant, clientDn);
         }
 
         // Load resource set description
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapUpdatedResourceSet = resourceSetService
                 .getResourceSetByDn(resourceSetDn);
         ResourceSetStatus resourceSetStatus = new ResourceSetStatus();
-        resourceSetStatus.setStatus(status);
+
 
         BeanUtils.copyProperties(resourceSetStatus, ldapUpdatedResourceSet);
 
         // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
         final String entity = ServerUtil.asJson(resourceSetStatus);
 
-        final ResponseBuilder builder = Response.status(Response.Status.CREATED);
+        final ResponseBuilder builder = Response.status(status);
         builder.entity(entity);
-
-        EntityTag tag = new EntityTag(ldapUpdatedResourceSet.getRev());
-        builder.tag(tag);
 
         return builder.build();
     }
@@ -311,21 +328,20 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         return resourceSetDn;
     }
 
-    private String updateResourceSet(String rsver, String rsid, ResourceSet resourceSet,
+    private String updateResourceSet(String rsid, ResourceSet resourceSet,
                                      AuthorizationGrant authorizationGrant, String clientDn) throws IllegalAccessException, InvocationTargetException {
-        log.debug("Updating resource set description: '{0}'. Version: '{1}'", rsid, rsver);
+        log.debug("Updating resource set description: '{0}'.", rsid);
 
         prepareResourceSetsBranch();
 
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
         ldapResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
         ldapResourceSet.setId(rsid);
-        ldapResourceSet.setRev(rsver);
 
         List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
                 .findResourceSets(ldapResourceSet);
         if (ldapResourceSets.size() != 1) {
-            log.error("Specified resource set description isn't exist");
+            log.error("Specified resource set description doesn't exist");
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
         }
@@ -339,18 +355,19 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         final List<String> scopeDNs = umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resourceSet.getScopes());
         ldapResourceSet.setScopes(scopeDNs);
 
-        // Increase revision
-        int currRev = StringHelper.toInteger(rsver, -1);
-        if (currRev == -1) {
-            log.error("Failed to parse revision number: '{0}'", currRev);
-            throw new WebApplicationException(Response.status(Response.Status.PRECONDITION_FAILED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.PRECONDITION_FAILED)).build());
-        }
-
-        ldapResourceSet.setRev(String.valueOf(++currRev));
+        ldapResourceSet.setRev(String.valueOf(incrementRev(ldapResourceSet.getRev())));
         resourceSetService.updateResourceSet(ldapResourceSet);
 
         return resourceSetDn;
+    }
+
+    private int incrementRev(String rev) {
+        try {
+            return Integer.parseInt(rev) + 1;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return 1; // fallback
     }
 
     private void prepareResourceSetsBranch() {
@@ -358,6 +375,20 @@ public class ResourceSetRegistrationRestWebServiceImpl implements ResourceSetReg
         if (!resourceSetService.containsBranch()) {
             resourceSetService.addBranch();
         }
+    }
+
+
+    @HEAD
+    public Response unsupportedHeadMethod() {
+        log.error("HEAD method is not allowed");
+        throw new WebApplicationException(Response.status(405).entity("HEAD Method Not Allowed").build());
+    }
+
+    @OPTIONS
+    public Response unsupportedOptionsMethod() {
+        log.error("OPTIONS method is not allowed");
+        throw new WebApplicationException(Response.status(405).entity("OPTIONS Method Not Allowed").build());
+
     }
 
 }

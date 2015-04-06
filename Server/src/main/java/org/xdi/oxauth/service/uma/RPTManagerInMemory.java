@@ -6,6 +6,11 @@
 
 package org.xdi.oxauth.service.uma;
 
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.util.ServerUtil;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,11 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Movchan
@@ -87,6 +87,11 @@ public class RPTManagerInMemory extends AbstractRPTManager implements Serializab
             }
         }
         return result;
+    }
+
+    @Override
+    public UmaRPT createRPT(String authorization, String amHost) {
+        throw new UnsupportedOperationException(); // we don't need to support this method in delegated object
     }
 
     @Override

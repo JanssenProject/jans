@@ -6,33 +6,54 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import com.wordnik.swagger.annotations.Api;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
- * @author Yuriy Movchan Date: 10/18/2012
+ * The endpoint at which the host registers permissions that it anticipates a
+ * requester will shortly be asking for from the AM. This AM's endpoint is part
+ * of resource set registration API.
+ * <p/>
+ * In response to receiving an access request accompanied by an RPT that is
+ * invalid or has insufficient authorization data, the host SHOULD register a
+ * permission with the AM that would be sufficient for the type of access
+ * sought. The AM returns a permission ticket for the host to give to the
+ * requester in its response.
+ *
+ * @author Yuriy Zabrovarnyy
  */
 @Name("resourceSetPermissionRegistrationRestWebService")
-public class ResourceSetPermissionRegistrationRestWebServiceImpl implements ResourceSetPermissionRegistrationRestWebService {
+@Path("/host/rsrc_pr")
+@Api(value = "/host/rsrc_pr", description = "The endpoint at which the host registers permissions that it anticipates a " +
+        " requester will shortly be asking for from the AM. This AM's endpoint is part " +
+        " of resource set registration API.")
+public class PermissionRegistrationWS {
 
     public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
 
@@ -44,19 +65,23 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
     private ResourceSetPermissionManager resourceSetPermissionManager;
     @In
     private ErrorResponseFactory errorResponseFactory;
-    //	@In
-//	private AuthorizationGrantList authorizationGrantList;
     @In
     private UmaValidationService umaValidationService;
 
-    public Response registerResourceSetPermission(HttpServletRequest request, String authorization, String amHost, String host, ResourceSetPermissionRequest resourceSetPermissionRequest) {
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response registerResourceSetPermission(@Context HttpServletRequest request,
+                                                  @HeaderParam("Authorization") String authorization,
+                                                  @HeaderParam("Host") String amHost,
+                                                  RegisterPermissionRequest resourceSetPermissionRequest) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            String validatedHost = umaValidationService.validateHost(host);
-            umaValidationService.validateResourceSet(authorization, resourceSetPermissionRequest);
+            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.validateResourceSet(resourceSetPermissionRequest);
 
-            return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, validatedHost, resourceSetPermissionRequest);
+            return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, resourceSetPermissionRequest);
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -68,8 +93,8 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
         }
     }
 
-    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, String validatedHost, ResourceSetPermissionRequest resourceSetPermissionRequest) {
-        final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, validatedHost, resourceSetPermissionRequest, rptExpirationDate());
+    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, RegisterPermissionRequest resourceSetPermissionRequest) {
+        final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
         resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
         return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions);
@@ -90,8 +115,7 @@ public class ResourceSetPermissionRegistrationRestWebServiceImpl implements Reso
                                                                 ResourceSetPermission resourceSetPermissions) {
         ResponseBuilder builder = Response.status(Response.Status.CREATED);
 
-        ResourceSetPermissionTicket resourceSetPermissionTiket = new ResourceSetPermissionTicket(resourceSetPermissions.getTicket());
-        builder.entity(resourceSetPermissionTiket);
+        builder.entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket()));
 
         // Add location
         StringBuffer location = request.getRequestURL().append("/").append(resourceSetPermissions.getConfigurationCode());

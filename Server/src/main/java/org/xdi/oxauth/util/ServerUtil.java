@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.ws.rs.core.CacheControl;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -28,11 +18,20 @@ import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.CustomAttribute;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.Util;
+
+import javax.ws.rs.core.CacheControl;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -53,6 +52,11 @@ public class ServerUtil {
             LOG.trace(e.getMessage(), e);
             return "";
         }
+    }
+
+    public static String asPrettyJson(Object p_object) throws IOException {
+        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
     }
 
     public static String asJson(Object p_object) throws IOException {
@@ -146,9 +150,9 @@ public class ServerUtil {
         });
     }
 
-    public static ResourceSetPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
+    public static RegisterPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
         if (p_permission != null) {
-            final ResourceSetPermissionRequest result = new ResourceSetPermissionRequest();
+            final RegisterPermissionRequest result = new RegisterPermissionRequest();
             result.setResourceSetId(p_permission.getResourceSetId());
             result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
             result.setExpiresAt(p_permission.getExpirationDate());

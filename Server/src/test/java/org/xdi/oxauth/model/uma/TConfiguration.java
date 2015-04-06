@@ -26,14 +26,14 @@ import org.xdi.oxauth.util.ServerUtil;
 class TConfiguration {
 
     private final BaseTest m_baseTest;
-    private MetadataConfiguration m_configuration = null;
+    private UmaConfiguration m_configuration = null;
 
     public TConfiguration(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
         m_baseTest = p_baseTest;
     }
 
-    public MetadataConfiguration getConfiguration(final String umaConfigurationPath) {
+    public UmaConfiguration getConfiguration(final String umaConfigurationPath) {
         if (m_configuration == null) {
             try {
                 configuration(umaConfigurationPath);
@@ -62,7 +62,7 @@ class TConfiguration {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 try {
-                    m_configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), MetadataConfiguration.class);
+                    m_configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), UmaConfiguration.class);
                     UmaTestUtil.assert_(m_configuration);
                 } catch (IOException e) {
                     e.printStackTrace();

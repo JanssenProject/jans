@@ -82,8 +82,14 @@ public class ResourceSetService {
      *
      * @param resourceSet resourceSet
      */
-    public void removeResourceSet(ResourceSet resourceSet) {
+    public void remove(ResourceSet resourceSet) {
         ldapEntryManager.remove(resourceSet);
+    }
+
+    public void remove(List<ResourceSet> resourceSet) {
+        for (ResourceSet resource : resourceSet) {
+            remove(resource);
+        }
     }
 
     /**
