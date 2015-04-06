@@ -6,7 +6,7 @@
   <parameter name="port" value="8098"/>
   <parameter name="discoveryUrl" value="https://seed.gluu.org/.well-known/openid-configuration"/>
   <parameter name="umaDiscoveryUrl" value="https://seed.gluu.org/.well-known/uma-configuration"/>
-  <parameter name="redirectUrl" value="https://seed.gluu.org/oxauth-rp/home.seam?foo=bar"/>
+  <parameter name="redirectUrl" value="https://client.example.com/cb"/>
   <parameter name="clientName" value="oxD Client"/>
   <parameter name="userId" value="mike"/>
   <parameter name="userSecret" value="secret"/>

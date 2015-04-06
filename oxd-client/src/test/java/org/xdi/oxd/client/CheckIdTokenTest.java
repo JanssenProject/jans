@@ -22,10 +22,10 @@ import java.util.Map;
 
 public class CheckIdTokenTest {
 
-    @Parameters({"host", "port", "discoveryUrl", "umaDiscoveryUrl", "redirectUrl",
+    @Parameters({"host", "port", "discoveryUrl", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String discoveryUrl, String umaDiscoveryUrl, String redirectUrl,
+    public void test(String host, int port, String discoveryUrl, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {
@@ -59,7 +59,7 @@ public class CheckIdTokenTest {
             Assert.assertNotNull(checkR.getClaims());
 
             final Map<String, List<String>> claims = checkR.getClaims();
-            assertClaim(claims, "sub");
+            assertClaim(claims, "aud");
             assertClaim(claims, "iss");
         } finally {
             CommandClient.closeQuietly(client);
