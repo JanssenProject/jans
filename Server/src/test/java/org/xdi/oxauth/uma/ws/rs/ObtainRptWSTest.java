@@ -25,10 +25,10 @@ public class ObtainRptWSTest extends BaseTest {
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri", "umaRegisterResourcePath"})
+            "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
     public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                     String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
-        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+                     String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
+        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
     }
 
     @Test(dependsOnMethods = "init")
