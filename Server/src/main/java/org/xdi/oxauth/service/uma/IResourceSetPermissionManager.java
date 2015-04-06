@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-
-import org.xdi.oxauth.model.uma.ResourceSetPermissionRequest;
+import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,7 +24,7 @@ public interface IResourceSetPermissionManager {
 
     public String getResourceSetPermissionTicketByConfigurationCode(String configurationCode, String clientDn);
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, String host, ResourceSetPermissionRequest resourceSetPermissionRequest, Date expirationDate);
+    public ResourceSetPermission createResourceSetPermission(String amHost, RegisterPermissionRequest resourceSetPermissionRequest, Date expirationDate);
 
     public void deleteResourceSetPermission(String resourceSetPermissionTicket);
 

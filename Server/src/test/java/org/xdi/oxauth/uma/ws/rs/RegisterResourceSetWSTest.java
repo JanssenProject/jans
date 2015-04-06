@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -20,6 +14,11 @@ import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -45,7 +44,6 @@ public class RegisterResourceSetWSTest extends BaseTest {
     public void testRegisterResourceSet() throws Exception {
         m_resourceSetStatus = TUma.registerResourceSet(this, m_pat, m_umaRegisterResourcePath, UmaTestUtil.createResourceSet());
         UmaTestUtil.assert_(m_resourceSetStatus);
-        assertEquals(m_resourceSetStatus.getRev(), "1", "Resource set description revision is not 1");
     }
 
     @Test(dependsOnMethods = {"testRegisterResourceSet"})
@@ -55,12 +53,8 @@ public class RegisterResourceSetWSTest extends BaseTest {
         resourceSet.setIconUri("http://www.example.com/icons/flower.png");
         resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-        final ResourceSetStatus status = TUma.modifyResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId(),
-                m_resourceSetStatus.getRev(), resourceSet);
+        final ResourceSetStatus status = TUma.modifyResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId(), resourceSet);
         UmaTestUtil.assert_(status);
-        assertEquals(status.getRev(), "2", "Resource set description revision is not 2");
-
-        m_resourceSetStatus.setRev(status.getRev());
     }
 
     /**
@@ -79,6 +73,6 @@ public class RegisterResourceSetWSTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testGetResourceSets"})
     public void testDeleteResourceSet() throws Exception {
-        TUma.deleteResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId(), m_resourceSetStatus.getRev());
+        TUma.deleteResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId());
     }
 }

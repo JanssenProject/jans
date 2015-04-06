@@ -29,7 +29,7 @@ import org.xdi.oxauth.model.uma.persistence.InternalExternal;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
-import org.xdi.oxauth.uma.ws.rs.MetaDataConfigurationRestWebServiceImpl;
+import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
 import org.xdi.oxauth.util.ServerUtil;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -263,7 +263,7 @@ public class ScopeService {
     }
 
     private static String getScopeEndpoint() {
-        return ConfigurationFactory.getConfiguration().getBaseEndpoint() + MetaDataConfigurationRestWebServiceImpl.UMA_SCOPES_SUFFIX;
+        return ConfigurationFactory.getConfiguration().getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
     }
 
     private Filter createAnyFilterByUrls(List<String> p_scopeUrls) {

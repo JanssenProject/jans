@@ -6,26 +6,23 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.AuthorizationRequestService;
+import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.AuthorizationResponse;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptStatusRequest;
-import org.xdi.oxauth.model.uma.RptStatusResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import static org.testng.Assert.*;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -34,7 +31,7 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
  */
 public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
 
     protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 
@@ -42,7 +39,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
 
     protected RptStatusService rptStatusService;
-    protected AuthorizationRequestService rptPermissionAuthorizationService;
+    protected RptAuthorizationRequestService rptPermissionAuthorizationService;
 
     protected Token m_aat;
     protected Token m_pat;
@@ -138,12 +135,11 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         String resourceSetId = umaRegisterResourceSetFlowHttpTest.resourceSetId;
 
         // Determine RPT token to status
-        RptStatusResponse tokenStatusResponse = null;
+        RptIntrospectionResponse tokenStatusResponse = null;
         try {
-            RptStatusRequest tokenStatusRequest = new RptStatusRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, resourceSetId);
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + m_pat.getAccessToken(),
-                    tokenStatusRequest);
+                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
 //			assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
@@ -186,9 +182,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         showTitle("testRequesterAsksForAuthorization");
 
         // Authorize RPT token to access permission ticket
-        ClientResponse<AuthorizationResponse> authorizationResponse = null;
+        RptAuthorizationResponse authorizationResponse = null;
         try {
             RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
+
             authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(
                     "Bearer " + m_aat.getAccessToken(),
                     umaAmHost,
@@ -220,15 +217,12 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void testHostDetermineRptStatus2(final String umaAmHost) throws Exception {
         showTitle("testHostDetermineRptStatus2");
 
-        String resourceSetId = umaRegisterResourceSetFlowHttpTest.resourceSetId;
-
         // Determine RPT token to status
-        RptStatusResponse tokenStatusResponse = null;
+        RptIntrospectionResponse tokenStatusResponse = null;
         try {
-            RptStatusRequest tokenStatusRequest = new RptStatusRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, resourceSetId);
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + m_pat.getAccessToken(),
-                    tokenStatusRequest);
+                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;

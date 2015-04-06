@@ -17,13 +17,16 @@ import org.jboss.seam.log.Logging;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,12 +49,22 @@ public class AuthorizationContext {
     private final Map<String, List<String>> m_claims;
 
     public AuthorizationContext(UmaRPT p_rpt, ResourceSetPermission p_permission, IAuthorizationGrant p_grant,
-                                HttpServletRequest p_httpRequest, Map<String, List<String>> p_claims) {
+                                HttpServletRequest p_httpRequest, List<ClaimToken> claims) {
         m_rpt = p_rpt;
         m_permission = p_permission;
         m_grant = p_grant;
         m_httpRequest = p_httpRequest;
-        m_claims = p_claims;
+        m_claims = new HashMap<String, List<String>>();
+        if (claims != null) {
+            for (ClaimToken claim : claims) {
+                List<String> strings = m_claims.get(claim.getFormat());
+                if (strings == null) {
+                    strings = new ArrayList<String>();
+                }
+                strings.add(claim.getToken());
+                m_claims.put(claim.getFormat(), strings);
+            }
+        }
     }
 
     public Log getLog() {
