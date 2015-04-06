@@ -6,23 +6,22 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.RequesterPermissionTokenService;
+import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
-import org.xdi.oxauth.model.uma.RequesterPermissionTokenResponse;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import javax.ws.rs.core.Response;
+
+import static org.testng.Assert.*;
 
 /**
  * Test cases for the obtaining UMA requester permission token flow (HTTP)
@@ -31,7 +30,7 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
  */
 public class ObtainRptTokenFlowHttpTest extends BaseTest {
 
-    protected MetadataConfiguration metadataConfiguration;
+    protected UmaConfiguration metadataConfiguration;
 
     protected Token m_aat;
     protected String rptToken;
@@ -39,7 +38,7 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
     public ObtainRptTokenFlowHttpTest() {
     }
 
-    public ObtainRptTokenFlowHttpTest(MetadataConfiguration metadataConfiguration) {
+    public ObtainRptTokenFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 
@@ -63,12 +62,12 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
     public void testObtainRptTokenFlow(final String umaAmHost) throws Exception {
         showTitle("testObtainRptTokenFlow");
 
-        RequesterPermissionTokenService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(this.metadataConfiguration);
+        CreateRptService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(this.metadataConfiguration);
 
         // Get requester permission token
-        RequesterPermissionTokenResponse requesterPermissionTokenResponse = null;
+        RPTResponse requesterPermissionTokenResponse = null;
         try {
-            requesterPermissionTokenResponse = requesterPermissionTokenService.getRequesterPermissionToken("Bearer " + m_aat.getAccessToken(), umaAmHost);
+            requesterPermissionTokenResponse = requesterPermissionTokenService.createRPT("Bearer " + m_aat.getAccessToken(), umaAmHost);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -76,7 +75,7 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
 
         UmaTestUtil.assert_(requesterPermissionTokenResponse);
 
-        this.rptToken = requesterPermissionTokenResponse.getToken();
+        this.rptToken = requesterPermissionTokenResponse.getRpt();
     }
 
     /**
@@ -87,12 +86,12 @@ public class ObtainRptTokenFlowHttpTest extends BaseTest {
     public void testObtainRptTokenFlowWithInvalidAat(final String umaAmHost) throws Exception {
         showTitle("testObtainRptTokenFlowWithInvalidAat");
 
-        RequesterPermissionTokenService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(this.metadataConfiguration);
+        CreateRptService requesterPermissionTokenService = UmaClientFactory.instance().createRequesterPermissionTokenService(this.metadataConfiguration);
 
         // Get requester permission token
-        RequesterPermissionTokenResponse requesterPermissionTokenResponse = null;
+        RPTResponse requesterPermissionTokenResponse = null;
         try {
-            requesterPermissionTokenResponse = requesterPermissionTokenService.getRequesterPermissionToken("Bearer " + m_aat.getAccessToken() + "_invalid", umaAmHost);
+            requesterPermissionTokenResponse = requesterPermissionTokenService.createRPT("Bearer " + m_aat.getAccessToken() + "_invalid", umaAmHost);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");

@@ -8,7 +8,7 @@ package org.xdi.oxauth.client.uma;
 
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.xdi.oxauth.model.uma.MetadataConfiguration;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 
 /**
  * Helper class which creates proxy UMA resource set description service
@@ -26,55 +26,55 @@ public class UmaClientFactory {
         return instance;
     }
 
-    public ResourceSetRegistrationService createResourceSetRegistrationService(MetadataConfiguration metadataConfiguration) {
+    public ResourceSetRegistrationService createResourceSetRegistrationService(UmaConfiguration metadataConfiguration) {
         return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceSetRegistrationEndpoint());
     }
 
-    public ResourceSetRegistrationService createResourceSetRegistrationService(MetadataConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public ResourceSetRegistrationService createResourceSetRegistrationService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceSetRegistrationEndpoint(), clientExecutor);
     }
 
-    public RequesterPermissionTokenService createRequesterPermissionTokenService(MetadataConfiguration metadataConfiguration) {
-        return ProxyFactory.create(RequesterPermissionTokenService.class, metadataConfiguration.getRptEndpoint());
+    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration) {
+        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint());
     }
 
-    public RequesterPermissionTokenService createRequesterPermissionTokenService(MetadataConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(RequesterPermissionTokenService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
+    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
     }
 
-    public ResourceSetPermissionRegistrationService createResourceSetPermissionRegistrationService(MetadataConfiguration metadataConfiguration) {
-        return ProxyFactory.create(ResourceSetPermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint());
+    public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration) {
+        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint());
     }
 
-    public ResourceSetPermissionRegistrationService createResourceSetPermissionRegistrationService(MetadataConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(ResourceSetPermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint(), clientExecutor);
+    public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint(), clientExecutor);
     }
 
-    public RptStatusService createRptStatusService(MetadataConfiguration metadataConfiguration) {
+    public RptStatusService createRptStatusService(UmaConfiguration metadataConfiguration) {
         return ProxyFactory.create(RptStatusService.class, metadataConfiguration.getIntrospectionEndpoint());
     }
 
-    public RptStatusService createRptStatusService(MetadataConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public RptStatusService createRptStatusService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(RptStatusService.class, metadataConfiguration.getIntrospectionEndpoint(), clientExecutor);
     }
 
-    public AuthorizationRequestService createAuthorizationRequestService(MetadataConfiguration metadataConfiguration) {
-        return ProxyFactory.create(AuthorizationRequestService.class, metadataConfiguration.getAuthorizationRequestEndpoint());
+    public RptAuthorizationRequestService createAuthorizationRequestService(UmaConfiguration metadataConfiguration) {
+        return ProxyFactory.create(RptAuthorizationRequestService.class, metadataConfiguration.getAuthorizationEndpoint());
     }
 
-    public AuthorizationRequestService createAuthorizationRequestService(MetadataConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(AuthorizationRequestService.class, metadataConfiguration.getAuthorizationRequestEndpoint(), clientExecutor);
+    public RptAuthorizationRequestService createAuthorizationRequestService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(RptAuthorizationRequestService.class, metadataConfiguration.getAuthorizationEndpoint(), clientExecutor);
     }
 
-    public MetaDataConfigurationService createMetaDataConfigurationService(String umaMetaDataUri) {
-        return ProxyFactory.create(MetaDataConfigurationService.class, umaMetaDataUri);
+    public UmaConfigurationService createMetaDataConfigurationService(String umaMetaDataUri) {
+        return ProxyFactory.create(UmaConfigurationService.class, umaMetaDataUri);
     }
 
-    public MetaDataConfigurationService createMetaDataConfigurationService(String umaMetaDataUri, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(MetaDataConfigurationService.class, umaMetaDataUri, clientExecutor);
+    public UmaConfigurationService createMetaDataConfigurationService(String umaMetaDataUri, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaConfigurationService.class, umaMetaDataUri, clientExecutor);
     }
 
-    public ScopeService createScopeService(MetadataConfiguration p_configuration) {
+    public ScopeService createScopeService(UmaConfiguration p_configuration) {
         return createScopeService(p_configuration.getScopeEndpoint());
     }
 

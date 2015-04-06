@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.xdi.oxauth.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.xdi.oxauth.model.error.IErrorType;
 
 /**
  * Error codes for UMA error responses.
@@ -99,12 +99,12 @@ public enum UmaErrorResponseType implements IErrorType {
 	/**
 	 * The provided ticket was not found at the AM.
 	 */
-	INVALID_REQUESTER_TICKET("invalid_requester_ticket"),
+	INVALID_TICKET("invalid_ticket"),
 	
 	/**
 	 * The provided ticket has expired.
 	 */
-	EXPIRED_REQUESTER_TICKET("expired_requester_ticket"),
+	EXPIRED_TICKET("expired_ticket"),
 	
 	/**
 	 * The requester is definitively not authorized for this permission according to user policy.

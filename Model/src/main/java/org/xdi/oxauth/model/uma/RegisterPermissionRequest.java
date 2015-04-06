@@ -6,15 +6,16 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Resource set that needs protection by registering a resource set description
@@ -27,20 +28,22 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
-@JsonPropertyOrder({"resource_set_id", "scopes", "expires_at"})
-//@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({"resource_set_id", "scopes", "exp", "iat", "nbf"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
-public class ResourceSetPermissionRequest {
+public class RegisterPermissionRequest implements Serializable {
 
     private String resourceSetId;
     private List<String> scopes;
     private Date expiresAt;
+    private Date issuedAt;
+    private Date nbf;
 
-    public ResourceSetPermissionRequest() {
+    public RegisterPermissionRequest() {
     }
 
-    public ResourceSetPermissionRequest(String p_resourceSetId, List<String> p_scopes) {
+    public RegisterPermissionRequest(String p_resourceSetId, List<String> p_scopes) {
         resourceSetId = p_resourceSetId;
         scopes = p_scopes;
     }
@@ -55,6 +58,26 @@ public class ResourceSetPermissionRequest {
         this.resourceSetId = resourceSetId;
     }
 
+    @JsonProperty(value = "nbf")
+       @XmlElement(name = "nbf")
+    public Date getNbf() {
+        return nbf;
+    }
+
+    public void setNbf(Date nbf) {
+        this.nbf = nbf;
+    }
+
+    @JsonProperty(value = "iat")
+    @XmlElement(name = "iat")
+    public Date getIssuedAt() {
+        return issuedAt;
+    }
+
+    public void setIssuedAt(Date issuedAt) {
+        this.issuedAt = issuedAt;
+    }
+
     @JsonProperty(value = "scopes")
     @XmlElement(name = "scopes")
     public List<String> getScopes() {
@@ -65,8 +88,8 @@ public class ResourceSetPermissionRequest {
         this.scopes = scopes;
     }
 
-    @JsonProperty(value = "expires_at")
-    @XmlElement(name = "expires_at")
+    @JsonProperty(value = "exp")
+    @XmlElement(name = "exp")
     public Date getExpiresAt() {
         return expiresAt != null ? new Date(expiresAt.getTime()) : null;
     }
@@ -82,6 +105,7 @@ public class ResourceSetPermissionRequest {
         sb.append("{resourceSetId='").append(resourceSetId).append('\'');
         sb.append(", scopes=").append(scopes);
         sb.append(", expiresAt=").append(expiresAt);
+        sb.append(", nbf=").append(nbf);
         sb.append('}');
         return sb.toString();
     }

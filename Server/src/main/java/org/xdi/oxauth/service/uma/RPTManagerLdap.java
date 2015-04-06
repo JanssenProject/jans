@@ -6,11 +6,8 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -21,8 +18,10 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -130,6 +129,11 @@ public class RPTManagerLdap extends AbstractRPTManager {
             LOG.error(e.getMessage(), e);
         }
         return result;
+    }
+
+    @Override
+    public UmaRPT createRPT(String authorization, String amHost) {
+       throw new UnsupportedOperationException("We don't need this method implementation in delegated manager");
     }
 
     @Override

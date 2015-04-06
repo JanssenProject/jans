@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.uma;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,12 +43,12 @@ public class TUma {
         return r.newTokenByRefreshToken(tokenPath, p_oldToken, umaClientId, umaClientSecret);
     }
 
-    public static RequesterPermissionTokenResponse requestRpt(BaseTest p_test, Token p_aat, String p_rptPath, String umaAmHost) {
+    public static RPTResponse requestRpt(BaseTest p_test, Token p_aat, String p_rptPath, String umaAmHost) {
         final TTokenRequest r = new TTokenRequest(p_test);
         return r.requestRpt(p_aat, p_rptPath, umaAmHost);
     }
 
-    public static MetadataConfiguration requestConfiguration(BaseTest p_test, final String configurationPath) {
+    public static UmaConfiguration requestConfiguration(BaseTest p_test, final String configurationPath) {
         final TConfiguration c = new TConfiguration(p_test);
         return c.getConfiguration(configurationPath);
     }
@@ -59,9 +59,9 @@ public class TUma {
     }
 
     public static ResourceSetStatus modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
-                                                      final String p_rsid, final String p_rev, ResourceSet p_resourceSet) {
+                                                      final String p_rsid, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
-        return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_rev, p_resourceSet);
+        return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
     }
 
     public static List<String> getResourceSetList(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath) {
@@ -69,23 +69,23 @@ public class TUma {
         return s.getResourceSetList(p_pat, p_umaRegisterResourcePath);
     }
 
-    public static void deleteResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, String p_id, String p_rev) {
+    public static void deleteResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
-        s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id, p_rev);
+        s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id);
     }
 
     public static ResourceSetPermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,
-                                                                ResourceSetPermissionRequest p_request, String p_umaPermissionPath) {
+                                                                RegisterPermissionRequest p_request, String p_umaPermissionPath) {
         final TRegisterPermission p = new TRegisterPermission(p_test);
         return p.registerPermission(p_pat, p_umaAmHost, p_umaHost, p_request, p_umaPermissionPath);
     }
 
-    public static RptStatusResponse requestRptStatus(BaseTest p_test, String p_umaRptStatusPath, String p_umaAmHost, Token p_aat, RptStatusRequest p_request) {
+    public static RptIntrospectionResponse requestRptStatus(BaseTest p_test, String p_umaRptStatusPath, String p_umaAmHost, Token p_aat, String rpt) {
         final TTokenRequest r = new TTokenRequest(p_test);
-        return r.requestRptStatus(p_umaRptStatusPath, p_umaAmHost, p_aat, p_request);
+        return r.requestRptStatus(p_umaRptStatusPath, p_umaAmHost, p_aat, rpt);
     }
 
-    public static AuthorizationResponse requestAuthorization(BaseTest p_test, String p_umaPermissionAuthorizationPath, String p_umaAmHost, Token p_aat, RptAuthorizationRequest p_request) {
+    public static RptAuthorizationResponse requestAuthorization(BaseTest p_test, String p_umaPermissionAuthorizationPath, String p_umaAmHost, Token p_aat, RptAuthorizationRequest p_request) {
         final TAuthorization t = new TAuthorization(p_test);
         return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_umaAmHost, p_aat, p_request);
     }
