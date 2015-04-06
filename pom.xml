@@ -5,7 +5,7 @@
   <groupId>org.xdi</groupId>
   <artifactId>oxd</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.5-master-SNAPSHOT</version>
   <name>oxD</name>
   <url>http://ox.gluu.org</url>
 
@@ -16,7 +16,7 @@
     <jackson.version>1.9.9</jackson.version>
     <slf4j.version>1.4.2</slf4j.version>
     <httpcomponents.version>4.1.2</httpcomponents.version>
-    <oxauth.version>1.0RC3-SNAPSHOT</oxauth.version>
+    <oxauth.version>3.0.0-SNAPSHOT</oxauth.version>
     <!--<resteasy.version>3.0.8.Final</resteasy.version>-->
     <resteasy.version>2.3.4.Final</resteasy.version>
     <licensing.version>1.1.0</licensing.version>
