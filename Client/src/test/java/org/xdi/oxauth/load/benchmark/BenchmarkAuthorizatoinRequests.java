@@ -29,7 +29,6 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -54,15 +53,20 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
     // Caused by: LDAPSearchException(resultCode=80 (other), numEntries=0, numReferences=0, errorMessage='Database exception: (JE 4.1.10) JAVA_ERROR: Java Error occurred, recovery may not be possible.')
     // http://ox.gluu.org/doku.php?id=oxauth:profiling#obtain_access_token_-_2000_invocations_within_200_concurrent_threads
     @Parameters({"userId", "userSecret", "redirectUri", "clientId"})
-    @Test(invocationCount = 2000, threadPoolSize = 10)
-//    @Test
-    public void testAuthentication(final String userId, final String userSecret, String redirectUri, String clientId) throws Exception {
+    @Test(invocationCount = 1000, threadPoolSize = 10)
+    public void testAuthorization1(final String userId, final String userSecret, String redirectUri, String clientId) throws Exception {
+        testAuthorizationImpl(userId, userSecret, redirectUri, clientId);
+    }
 
-        // hardcode -> we don't want to loose time on discover call
-//        String authorizationEndpoint = "https://pcy28751:8443/oxauth/seam/resource/restv1/oxauth/authorize";
-//        String authorizationEndpoint = "https://localhost:8443/seam/resource/restv1/oxauth/authorize";
+    @Parameters({"userId", "userSecret", "redirectUri", "clientId"})
+    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = { "testAuthorization1" })
+    public void testAuthorization2(final String userId, final String userSecret, String redirectUri, String clientId) throws Exception {
+        testAuthorizationImpl(userId, userSecret, redirectUri, clientId);
+    }
 
-        final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+	private void testAuthorizationImpl(final String userId,
+			final String userSecret, String redirectUri, String clientId) {
+		final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(ResponseType.TOKEN);
         responseTypes.add(ResponseType.ID_TOKEN);
 
@@ -88,7 +92,7 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
         assertNotNull(response.getTokenType(), "The token type is null");
         assertNotNull(response.getExpiresIn(), "The expires in value is null");
         assertNotNull(response.getScope(), "The scope must be null");
-    }
+	}
 
     public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
         SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
