@@ -39,12 +39,12 @@ public class BenchmarkTestListener implements ITestListener {
 
 	@Override
 	public void onStart(ITestContext context) {
-		Reporter.log("Test '" + context.getName() + "' started ...");
+		Reporter.log("Test '" + context.getName() + "' started ...", true);
 	}
 
 	@Override
 	public void onFinish(ITestContext context) {
         final long takes = (context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000;
-        Reporter.log("Test '" + context.getName() + "' finished in " + takes + " seconds");
+        Reporter.log("Test '" + context.getName() + "' finished in " + takes + " seconds", true);
 	}
 }
