@@ -24,8 +24,8 @@ public class BenchmarkTestListener implements ITestListener {
 	@Override
 	public void onTestSuccess(ITestResult result) {
 		final long takes = (result.getEndMillis() - result.getStartMillis()) /  1000;
-		Reporter.log("Attributes: " + result.getAttributeNames());
-		Reporter.log("Attributes invocationCount: " + result.getAttribute("invocationCount"));
+		Reporter.log("Attributes: " + result.getAttributeNames(), true);
+		Reporter.log("Attributes invocationCount: " + result.getAttribute("invocationCount"), true);
 		Reporter.log("Test '" + result.getName() + "' finidhed in " + takes + " seconds", true);
 	}
 
@@ -48,6 +48,11 @@ public class BenchmarkTestListener implements ITestListener {
 
 	@Override
 	public void onFinish(ITestContext context) {
+		Reporter.log("" + context, true);
+		Reporter.log("" + context.getPassedConfigurations(), true);
+		Reporter.log("" + context.getAllTestMethods(), true);
+		Reporter.log("" + context.getPassedConfigurations().getAllMethods(), true);
+		Reporter.log("" + context.getPassedConfigurations().getAllResults(), true);
         final long takes = (context.getEndDate().getTime() - context.getStartDate().getTime()) / 1000;
         Reporter.log("Test '" + context.getName() + "' finished in " + takes + " seconds", true);
 	}
