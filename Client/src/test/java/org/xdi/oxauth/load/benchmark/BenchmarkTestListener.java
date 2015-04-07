@@ -23,6 +23,10 @@ public class BenchmarkTestListener implements ITestListener {
 
 	@Override
 	public void onTestSuccess(ITestResult result) {
+		final long takes = (result.getEndMillis() - result.getStartMillis()) /  1000;
+		Reporter.log("Attributes: " + result.getAttributeNames());
+		Reporter.log("Attributes invocationCount: " + result.getAttribute("invocationCount"));
+		Reporter.log("Test '" + result.getName() + "' finidhed in " + takes + " seconds", true);
 	}
 
 	@Override
