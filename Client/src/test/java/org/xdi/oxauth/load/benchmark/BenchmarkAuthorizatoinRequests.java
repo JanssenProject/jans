@@ -40,12 +40,12 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 
 /**
- * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
+ * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/07/2014
  */
 
-@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
+@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class })
 public class BenchmarkAuthorizatoinRequests extends BaseTest {
 
 
