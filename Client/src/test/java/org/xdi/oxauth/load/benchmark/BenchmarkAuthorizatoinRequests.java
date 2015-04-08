@@ -64,6 +64,12 @@ public class BenchmarkAuthorizatoinRequests extends BaseTest {
         testAuthorizationImpl(userId, userSecret, redirectUri, clientId);
     }
 
+    @Parameters({"userId", "userSecret", "redirectUri", "clientId"})
+    @Test(invocationCount = 1000, threadPoolSize = 1, dependsOnMethods = { "testAuthorization2" })
+    public void testAuthorization3(final String userId, final String userSecret, String redirectUri, String clientId) throws Exception {
+        testAuthorizationImpl(userId, userSecret, redirectUri, clientId);
+    }
+
 	private void testAuthorizationImpl(final String userId,
 			final String userSecret, String redirectUri, String clientId) {
 		final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
