@@ -45,22 +45,21 @@ public class BenchmarkRequestAuthorizatoin extends BaseTest {
 	private String redirectUri;
 
 	@Parameters({"userId", "userSecret", "redirectUris"})
-    @Test(invocationCount = 1000, threadPoolSize = 10)
     @BeforeClass
     public void registerClient(final String userId, final String userSecret, String redirectUris) throws Exception {
         Reporter.log("Register client", true);
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<String> redirectUrisList = StringUtils.spaceSeparatedToList(redirectUris);
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
+        		redirectUrisList);
         registerRequest.setResponseTypes(responseTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
-        showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
@@ -69,7 +68,7 @@ public class BenchmarkRequestAuthorizatoin extends BaseTest {
         assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         this.clientId = registerResponse.getClientId();
-        this.redirectUri = registerResponse.getRegistrationClientUri();
+        this.redirectUri = redirectUrisList.get(0);
     }
 
 
