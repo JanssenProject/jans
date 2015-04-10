@@ -2,10 +2,17 @@
 
 <suite name="oxAuthClientBenchamrk" parallel="false">
 
-    <!-- Authorization Benchamrk test -->
-    <test name="Authorization Benchamrk tests" enabled="true">
+    <!-- Authorization Benchmark test -->
+    <test name="Authorization Benchmark tests" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.load.benchmark.BenchmarkAuthorizatoinRequests"/>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAuthorizatoin"/>
+        </classes>
+    </test>
+
+    <!-- Access Token Benchmark test -->
+    <test name="Access Token Benchmark test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAccessToken"/>
         </classes>
     </test>
 
