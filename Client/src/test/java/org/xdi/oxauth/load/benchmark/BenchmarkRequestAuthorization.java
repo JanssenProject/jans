@@ -49,11 +49,10 @@ public class BenchmarkRequestAuthorization extends BaseTest {
     public void registerClient(final String userId, final String userSecret, String redirectUris) throws Exception {
         Reporter.log("Register client", true);
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
         List<String> redirectUrisList = StringUtils.spaceSeparatedToList(redirectUris);
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
-        		redirectUrisList);
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app", redirectUrisList);
         registerRequest.setResponseTypes(responseTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -91,31 +90,30 @@ public class BenchmarkRequestAuthorization extends BaseTest {
     }
 
 	private void testAuthorizationImpl(final String userId, final String userSecret, String redirectUri, String clientId) {
-		final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-        responseTypes.add(ResponseType.TOKEN);
-        responseTypes.add(ResponseType.ID_TOKEN);
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
         String state = "af0ifjsldkj";
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
-        request.setState(state);
-        request.setNonce(nonce);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+
+        authorizationRequest.setState(state);
+        authorizationRequest.setNonce(nonce);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(this.authorizationEndpoint);
-        authorizeClient.setRequest(request);
+        authorizeClient.setRequest(authorizationRequest);
         AuthorizationResponse response = authorizeClient.exec();
 
+        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getCode(), "The authorization code is null");
-        assertNotNull(response.getAccessToken(), "The access token is null");
+        assertNotNull(response.getIdToken(), "The id_token is null");
         assertNotNull(response.getState(), "The state is null");
-        assertNotNull(response.getTokenType(), "The token type is null");
-        assertNotNull(response.getExpiresIn(), "The expires in value is null");
-        assertNotNull(response.getScope(), "The scope must be null");
+        assertNotNull(response.getScope(), "The scope is null");
 	}
 
 }

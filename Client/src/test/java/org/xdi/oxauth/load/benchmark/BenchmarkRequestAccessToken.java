@@ -47,8 +47,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -89,8 +88,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         String scope = "openid";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope,
-                clientId, clientSecret);
+        TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope, clientId, clientSecret);
 
         assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
         assertNotNull(response1.getEntity(), "The entity is null");
