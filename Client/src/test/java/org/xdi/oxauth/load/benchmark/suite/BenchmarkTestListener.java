@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.load.benchmark;
+package org.xdi.oxauth.load.benchmark.suite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
