@@ -5,7 +5,7 @@
     <!-- Authorization Benchmark test -->
     <test name="Authorization Benchmark tests" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAuthorizatoin"/>
+            <class name="org.xdi.oxauth.load.benchmark.BenchmarkRequestAuthorization"/>
         </classes>
     </test>
 
