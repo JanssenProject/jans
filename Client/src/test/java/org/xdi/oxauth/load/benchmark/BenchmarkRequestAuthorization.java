@@ -39,7 +39,7 @@ import org.xdi.oxauth.model.util.StringUtils;
  */
 
 @Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class })
-public class BenchmarkRequestAuthorizatoin extends BaseTest {
+public class BenchmarkRequestAuthorization extends BaseTest {
 
     private String clientId;
 	private String redirectUri;
@@ -96,7 +96,7 @@ public class BenchmarkRequestAuthorizatoin extends BaseTest {
         responseTypes.add(ResponseType.ID_TOKEN);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String state = "STATE_XYZ";
+        String state = "af0ifjsldkj";
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -110,7 +110,7 @@ public class BenchmarkRequestAuthorizatoin extends BaseTest {
         authorizeClient.setRequest(request);
         AuthorizationResponse response = authorizeClient.exec();
 
-        assertNotNull(response.getLocation(), "The location is null");
+        assertNotNull(response.getCode(), "The authorization code is null");
         assertNotNull(response.getAccessToken(), "The access token is null");
         assertNotNull(response.getState(), "The state is null");
         assertNotNull(response.getTokenType(), "The token type is null");
