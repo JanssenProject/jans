@@ -41,7 +41,6 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 	private String clientSecret;
 
 	@Parameters({"userId", "userSecret", "redirectUris"})
-    @Test(invocationCount = 1000, threadPoolSize = 10)
     @BeforeClass
     public void registerClient(final String userId, final String userSecret, String redirectUris) throws Exception {
         Reporter.log("Register client", true);
@@ -56,7 +55,6 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
-        showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
