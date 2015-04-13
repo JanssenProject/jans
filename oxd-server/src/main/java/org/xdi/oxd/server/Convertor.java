@@ -25,9 +25,9 @@ public class Convertor {
             r.setClientSecret(response.getClientSecret());
             r.setRegistrationAccessToken(response.getRegistrationAccessToken());
             r.setRegistrationClientUri(response.getRegistrationClientUri());
-            r.setClientIdIssuedAt(response.getClientIdIssuedAt() != null ? response.getClientIdIssuedAt().getTime() : 0);
+            r.setClientIdIssuedAt(response.getClientIdIssuedAt() != null ? response.getClientIdIssuedAt().getTime() / 1000 : 0);
             r.setClientSecretExpiresAt(response.getClientSecretExpiresAt() != null ?
-                    response.getClientSecretExpiresAt().getTime() : 0);
+                    response.getClientSecretExpiresAt().getTime() / 1000 : 0);
             return r;
         }
         return null;

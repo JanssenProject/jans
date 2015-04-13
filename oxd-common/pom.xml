@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-common</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.5-master-SNAPSHOT</version>
+    <version>1.0.6-master-SNAPSHOT</version>
     <name>oxD Common</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>1.0.5-master-SNAPSHOT</version>
+        <version>1.0.6-master-SNAPSHOT</version>
     </parent>
 
     <build>
