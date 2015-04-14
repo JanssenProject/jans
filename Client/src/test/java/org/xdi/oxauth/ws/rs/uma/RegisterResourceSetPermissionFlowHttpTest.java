@@ -15,12 +15,13 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -72,13 +73,17 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     @Parameters({"umaAmHost"})
     public void testRegisterResourceSetPermission(final String umaAmHost) throws Exception {
         showTitle("testRegisterResourceSetPermission");
+        registerResourceSetPermission(umaAmHost, this.umaRegisterResourceSetFlowHttpTest.resourceSetId, Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+    }
 
-        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
+    public String registerResourceSetPermission(final String umaAmHost, String resourceSetId, List<String> scopes) throws Exception {
+        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().
+                createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
         RegisterPermissionRequest resourceSetPermissionRequest = new RegisterPermissionRequest();
-        resourceSetPermissionRequest.setResourceSetId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId);
-        resourceSetPermissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+        resourceSetPermissionRequest.setResourceSetId(resourceSetId);
+        resourceSetPermissionRequest.setScopes(scopes);
 
         ResourceSetPermissionTicket t = null;
         try {
@@ -91,6 +96,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
 
         UmaTestUtil.assert_(t);
         this.ticketForFullAccess = t.getTicket();
+        return t.getTicket();
     }
 
     /**

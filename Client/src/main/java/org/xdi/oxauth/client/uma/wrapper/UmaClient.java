@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.AuthorizationResponse;
 import org.xdi.oxauth.client.AuthorizeClient;
@@ -22,6 +19,10 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,33 +39,37 @@ public class UmaClient {
         return request(authorizeUrl, tokenUrl, umaUserId, umaUserSecret, umaClientId, umaClientSecret, umaRedirectUri, UmaScopeType.AUTHORIZATION);
     }
 
-    public static Token requestAat(final String tokenUrl, final String umaClientId, final String umaClientSecret) throws Exception {
-    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.AUTHORIZATION);
+    public static Token requestAat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
+    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.AUTHORIZATION, scopeArray);
     }
 
 	@Deprecated
     public static Token requestPat(final String authorizeUrl, final String tokenUrl,
                                    final String umaUserId, final String umaUserSecret,
                                    final String umaClientId, final String umaClientSecret,
-                                   final String umaRedirectUri) throws Exception {
-        return request(authorizeUrl, tokenUrl, umaUserId, umaUserSecret, umaClientId, umaClientSecret, umaRedirectUri, UmaScopeType.PROTECTION);
+                                   final String umaRedirectUri, String... scopeArray) throws Exception {
+        return request(authorizeUrl, tokenUrl, umaUserId, umaUserSecret, umaClientId, umaClientSecret, umaRedirectUri, UmaScopeType.PROTECTION, scopeArray);
     }
 
-    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret) throws Exception {
-    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION);
+    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
+    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, scopeArray);
     }
 
 	@Deprecated
     public static Token request(final String authorizeUrl, final String tokenUrl,
                                 final String umaUserId, final String umaUserSecret,
                                 final String umaClientId, final String umaClientSecret,
-                                final String umaRedirectUri, UmaScopeType p_type) throws Exception {
+                                final String umaRedirectUri, UmaScopeType p_type, String... scopeArray) throws Exception {
         // 1. Request authorization and receive the authorization code.
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         responseTypes.add(ResponseType.CODE);
         responseTypes.add(ResponseType.ID_TOKEN);
+
         List<String> scopes = new ArrayList<String>();
         scopes.add(p_type.getValue());
+        if (scopeArray != null && scopeArray.length > 0) {
+            scopes.addAll(Arrays.asList(scopeArray));
+        }
 
         String state = "af0ifjsldkj";
 
@@ -109,11 +114,18 @@ public class UmaClient {
         return null;
     }
 
-    public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType) throws Exception {
+    public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType, String... scopeArray) throws Exception {
     	String umaScope = scopeType.getValue();
 
+        String scope = umaScope;
+        if (scopeArray != null && scopeArray.length > 0) {
+            for (String s : scopeArray) {
+                scope = scope + " " + s;
+            }
+        }
+
     	TokenClient tokenClient = new TokenClient(tokenUrl);
-        TokenResponse response = tokenClient.execClientCredentialsGrant(umaScope, umaClientId, umaClientSecret);
+        TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
 
         if (response.getStatus() == 200) {
             final String patToken = response.getAccessToken();
