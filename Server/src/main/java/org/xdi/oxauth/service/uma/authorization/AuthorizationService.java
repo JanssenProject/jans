@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -29,7 +23,13 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.PythonService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,10 +42,10 @@ public class AuthorizationService {
 
     @Logger
     private Log log;
-    
+
     @In
     private ScopeService umaScopeService;
-    
+
     @In
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
 
@@ -74,32 +74,46 @@ public class AuthorizationService {
     }
 
     private Set<String> getAuthorizationPolicies(List<ScopeDescription> scopes) {
-    	HashSet<String> result = new HashSet<String>();
-    	
-    	for (ScopeDescription scope : scopes)  {
-    		List<String> authorizationPolicies = scope.getAuthorizationPolicies(); 
-    		if (authorizationPolicies != null) {
-    			result.addAll(authorizationPolicies);
-    		}
-    	}
-    	
-		return result;
-	}
+        HashSet<String> result = new HashSet<String>();
 
-	private boolean applyPolicy(String authorizationPolicyDn, AuthorizationContext authorizationContext) {
+        for (ScopeDescription scope : scopes) {
+            List<String> authorizationPolicies = scope.getAuthorizationPolicies();
+            if (authorizationPolicies != null) {
+                result.addAll(authorizationPolicies);
+            }
+        }
+
+        return result;
+    }
+
+    private boolean applyPolicy(String authorizationPolicyDn, AuthorizationContext authorizationContext) {
         log.trace("Apply policy dn: '{0}' ...", authorizationPolicyDn);
 
         final CustomScriptConfiguration customScriptConfiguration = externalUmaAuthorizationPolicyService.getAuthorizationPolicyByDn(authorizationPolicyDn);
         if (customScriptConfiguration != null) {
-        	final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
-			log.trace("Policy '{0}' result: {1}", authorizationPolicyDn, result);
-			
-			return result;
+            final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
+            log.trace("Policy '{0}' result: {1}", authorizationPolicyDn, result);
+
+            // if false check whether "need_info" objects are set, if yes then throw WebApplicationException directly here
+            if (!result) {
+                if (authorizationContext.getNeedInfoAuthenticationContext() != null || authorizationContext.getNeedInfoRequestingPartyClaims() != null) {
+                    final String jsonEntity = NeedInfoResponseBuilder.entityForResponse(
+                            authorizationContext.getNeedInfoAuthenticationContext(), authorizationContext.getNeedInfoRequestingPartyClaims());
+                    throwForbiddenException(jsonEntity);
+                }
+
+            }
+            return result;
         } else {
-            log.error("Unable to load cusom script dn: '{0}'", authorizationPolicyDn);
+            log.error("Unable to load custom script dn: '{0}'", authorizationPolicyDn);
         }
 
         return false;
+    }
+
+    private static void throwForbiddenException(String entity) {
+        throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
+                .entity(entity).build());
     }
 
     public static AuthorizationService instance() {

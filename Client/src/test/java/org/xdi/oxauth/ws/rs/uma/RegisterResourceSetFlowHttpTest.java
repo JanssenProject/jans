@@ -64,7 +64,10 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
     @Test
     public void testRegisterResourceSet() throws Exception {
         showTitle("testRegisterResourceSet");
+        registerResourceSet(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+    }
 
+    public String registerResourceSet(List<String> scopes) throws Exception {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Add resource set description
@@ -73,7 +76,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
             ResourceSet resourceSet = new ResourceSet();
             resourceSet.setName("Photo Album");
             resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-            resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            resourceSet.setScopes(scopes);
 
             resourceSetStatus = resourceSetRegistrationService.addResourceSet("Bearer " + m_pat.getAccessToken(), resourceSet);
         } catch (ClientResponseFailure ex) {
@@ -84,6 +87,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         UmaTestUtil.assert_(resourceSetStatus);
 
         this.resourceSetId = resourceSetStatus.getId();
+        return this.resourceSetId;
     }
 
     /**
