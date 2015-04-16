@@ -368,10 +368,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		if (AuthenticationScriptUsageType.SERVICE.equals(usageType) && AuthenticationScriptUsageType.SERVICE.equals(externalAuthenticatorUsageType)) {
 			return true;
 		}
-
-		if (AuthenticationScriptUsageType.LOGOUT.equals(usageType) && AuthenticationScriptUsageType.LOGOUT.equals(externalAuthenticatorUsageType)) {
-			return true;
-		}
 		
 		return false;
 	}
