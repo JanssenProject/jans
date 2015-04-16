@@ -47,6 +47,8 @@ public class AuthorizationContext {
     private final IAuthorizationGrant m_grant;
     private final HttpServletRequest m_httpRequest;
     private final Map<String, List<String>> m_claims;
+    private NeedInfoAuthenticationContext needInfoAuthenticationContext;
+    private NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims;
 
     public AuthorizationContext(UmaRPT p_rpt, ResourceSetPermission p_permission, IAuthorizationGrant p_grant,
                                 HttpServletRequest p_httpRequest, List<ClaimToken> claims) {
@@ -156,5 +158,21 @@ public class AuthorizationContext {
             }
         }
         return "";
+    }
+
+    public NeedInfoAuthenticationContext getNeedInfoAuthenticationContext() {
+        return needInfoAuthenticationContext;
+    }
+
+    public void setNeedInfoAuthenticationContext(NeedInfoAuthenticationContext needInfoAuthenticationContext) {
+        this.needInfoAuthenticationContext = needInfoAuthenticationContext;
+    }
+
+    public NeedInfoRequestingPartyClaims getNeedInfoRequestingPartyClaims() {
+        return needInfoRequestingPartyClaims;
+    }
+
+    public void setNeedInfoRequestingPartyClaims(NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims) {
+        this.needInfoRequestingPartyClaims = needInfoRequestingPartyClaims;
     }
 }
