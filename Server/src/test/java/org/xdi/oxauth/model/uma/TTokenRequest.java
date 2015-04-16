@@ -148,6 +148,13 @@ class TTokenRequest {
                                           final String userId, final String userSecret,
                                           final String umaClientId, final String umaRedirectUri,
                                           final UmaScopeType p_scopeType) throws Exception {
+        requestAuthorizationCode(authorizePath, userId, userSecret, umaClientId, umaRedirectUri, p_scopeType.getValue());
+    }
+
+    private void requestAuthorizationCode(final String authorizePath,
+                                          final String userId, final String userSecret,
+                                          final String umaClientId, final String umaRedirectUri,
+                                          final String p_scopeType) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
@@ -159,7 +166,7 @@ class TTokenRequest {
                 responseTypes.add(ResponseType.ID_TOKEN);
 
                 List<String> scopes = new ArrayList<String>();
-                scopes.add(p_scopeType.getValue());
+                scopes.add(p_scopeType);
 
                 String state = "af0ifjsldkj";
 
