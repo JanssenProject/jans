@@ -78,7 +78,7 @@ class PersonAuthentication(PersonAuthenticationType):
             authn.set_credentials()
 
             # Validate request
-            http_client = httpService.getHttpsClientTrustAll();
+            http_client = httpService.getHttpsClientDefaulTrustStore();
             auth_data = httpService.encodeBase64(authn.api_id + ":" + authn.api_key)
             http_response = httpService.executePost(http_client, authn.helper_server + "/validate", auth_data, request, ContentType.APPLICATION_JSON)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
