@@ -96,6 +96,7 @@ public class HttpService implements Serializable {
 	    }
 	}
 
+	@Deprecated
 	public HttpClient getHttpsClientDefaulTrustStore() {
 	    try {
 	        PlainSocketFactory psf = PlainSocketFactory.getSocketFactory();
