@@ -589,7 +589,7 @@ urn: urn:mace:dir:attribute-def:title
 
 dn: inum=%(inumOrg)s!0005!4502,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Vehicle Licence Plate Number
-displayName: Licencse Plate
+displayName: License Plate
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: carLicense
