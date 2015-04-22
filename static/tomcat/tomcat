@@ -33,7 +33,7 @@ WRAPPER_CONF="/opt/tomcat/conf/gluuTomcatWrapper.conf"
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="/var/run/"
+PIDDIR="/var/run/tomcat"
 
 # FIXED_COMMAND tells the script to use a hard coded action rather than
 # expecting the first parameter of the command line to be the command.
