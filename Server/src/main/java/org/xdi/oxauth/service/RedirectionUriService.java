@@ -6,31 +6,27 @@
 
 package org.xdi.oxauth.service;
 
-import java.net.ConnectException;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ws.rs.HttpMethod;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.model.registration.Client;
 
+import javax.ws.rs.HttpMethod;
+import java.net.ConnectException;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * @author Javier Rojas Date: 09.26.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 April 27, 2015
  */
 @Name("redirectionUriService")
 @Scope(ScopeType.STATELESS)
@@ -43,7 +39,7 @@ public class RedirectionUriService {
     @In
     private ClientService clientService;
 
-    public String validateRedirectionUri(String clientIdentifier, String completeUri) {
+    public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
         try {
             Client client = clientService.getClient(clientIdentifier);
 
@@ -70,19 +66,15 @@ public class RedirectionUriService {
                     }
                 }
 
-                if (StringUtils.isNotBlank(completeUri)) {
-                    String oldCompleteUri = completeUri;
-                    String redirectionUri = removeParams(completeUri);
-
-                    log.debug("Validating redirection URI: clientIdentifier = {0}, oldCompleteUri = {1} => redirectionUri = {2}, found = {3}",
-                            clientIdentifier, oldCompleteUri, redirectionUri,
-                            redirectUris.length);
+                if (StringUtils.isNotBlank(redirectionUri)) {
+                    log.debug("Validating redirection URI: clientIdentifier = {0}, redirectionUri = {1}, found = {2}",
+                            clientIdentifier, redirectionUri, redirectUris.length);
 
                     for (String uri : redirectUris) {
                         log.debug("Comparing {0} == {1}?", uri, redirectionUri);
-                        if ((removeParams(uri).equals(redirectionUri) && getParams(uri).size() == 0) ||
-                                (removeParams(uri).equals(redirectionUri) && getParams(uri).size() > 0 && compareParams(completeUri, uri))) {
-                            return completeUri;
+                        if ((uri.equals(redirectionUri) && getParams(uri).size() == 0) ||
+                                uri.equals(redirectionUri) && getParams(uri).size() > 0 && compareParams(redirectionUri, uri)) {
+                            return redirectionUri;
                         }
                     }
                 } else {
@@ -132,16 +124,6 @@ public class RedirectionUriService {
         }
 
         return null;
-    }
-
-    private String removeParams(String uri) {
-        if (uri != null) {
-            int paramsIndex = uri.indexOf("?");
-            if (paramsIndex != -1) {
-                return uri.substring(0, paramsIndex);
-            }
-        }
-        return uri;
     }
 
     private Map<String, String> getParams(String uri) {
