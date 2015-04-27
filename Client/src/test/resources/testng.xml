@@ -352,11 +352,6 @@
             <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
         </classes>
     </test>
-    <test name="OC5. FeatureTest-Preserves Query Parameter in redirect uri" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.interop.PreservesQueryParameterInRedirectUri"/>
-        </classes>
-    </test>
     <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
