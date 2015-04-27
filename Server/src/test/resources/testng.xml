@@ -298,7 +298,7 @@
     <parameter name="userEmail" value="${auth.user.email}"/>
     <parameter name="clientId" value="${auth.client.id}"/>
     <parameter name="clientSecret" value="${auth.client.secret}"/>
-    <parameter name="redirectUri" value="https://client.example.com/cb?foo=bar"/>
+    <parameter name="redirectUri" value="https://client.example.com/cb"/>
     <parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2"/>
     <parameter name="postLogoutRedirectUri" value="https://client.example.com/pl"/>
     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
