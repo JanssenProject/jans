@@ -6,21 +6,19 @@
 
 package org.xdi.oxauth.model.util;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 /**
- * @author Javier Rojas Blum Date: 08.10.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 April 27, 2015
  */
 public class StringUtils {
 
@@ -130,7 +128,8 @@ public class StringUtils {
 
     public static Date parseSilently(String p_string) {
         try {
-            return new Date(Long.parseLong(p_string));
+            SimpleDateFormat parser = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+            return parser.parse(p_string);
         } catch (Exception e) {
             return null;
         }

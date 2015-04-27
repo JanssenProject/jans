@@ -57,7 +57,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version 0.9 March 11, 2015
+ * @version 0.9 April 27, 2015
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -174,7 +174,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder.entity(jsonObject.toString(4).replace("\\/", "/"));
                     }
                 } else {
-                    log.trace("Client parameters are invalid, retunds invalid_request error.");
+                    log.trace("Client parameters are invalid, returns invalid_request error.");
                     builder = Response.status(Response.Status.BAD_REQUEST).
                             entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
                 }
