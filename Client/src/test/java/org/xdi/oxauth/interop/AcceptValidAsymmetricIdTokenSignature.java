@@ -33,12 +33,12 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 6, 2015
+ * @version 0.9 April 27, 2015
  */
 public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
-    //@Test
+    @Test
     public void acceptValidAsymmetricIdTokenSignatureRS256(final String redirectUris, final String userId,
                                                            final String userSecret, final String redirectUri) throws Exception {
         showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature RS256");
