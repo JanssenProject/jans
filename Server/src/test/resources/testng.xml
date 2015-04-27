@@ -306,8 +306,8 @@
     <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js"/>
     <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
-    <parameter name="federationRpRedirectUri" value="https://client.example.com/cb?foo=bar"/>
-    <parameter name="federationRpRedirectUris" value="https://client.example.com/cb?foo=bar https://client.example.com/cb1?foo=bar"/>
+    <parameter name="federationRpRedirectUri" value="https://client.example.com/cb"/>
+    <parameter name="federationRpRedirectUris" value="https://client.example.com/cb https://client.example.com/cb1?foo=bar"/>
     <parameter name="federationOpDisplayName" value="Federation OP Test display name"/>
     <parameter name="federationOpId" value="http://example.com/op1"/>
     <parameter name="federationOpDomain" value="example.com"/>
@@ -331,7 +331,7 @@
     <parameter name="umaPatClientSecret" value="${uma.pat.client.secret}"/>
     <parameter name="umaAatClientId" value="${uma.aat.client.id}"/>
     <parameter name="umaAatClientSecret" value="${uma.aat.client.secret}"/>
-    <parameter name="umaRedirectUri" value="https://client.example.com/cb?foo=bar"/>
+    <parameter name="umaRedirectUri" value="https://client.example.com/cb"/>
 
     <parameter name="contactEmail1" value="${contact.email.1}"/>
     <parameter name="contactEmail2" value="${contact.email.2}"/>
