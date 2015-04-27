@@ -38,6 +38,7 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -55,7 +56,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version 0.9 April 27, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpointt")
@@ -108,11 +109,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders, HttpServletRequest httpRequest,
-            SecurityContext securityContext) {
+            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders,
+            HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
-                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri, requestSessionId,
-                sessionId, accessToken, authLevel, authMode, HttpMethod.GET, originHeaders, httpRequest, securityContext);
+                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
+                requestSessionId, sessionId, accessToken, authLevel, authMode, HttpMethod.GET, originHeaders,
+                httpRequest, httpResponse, securityContext);
     }
 
     @Override
@@ -120,11 +122,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders, HttpServletRequest httpRequest,
-            SecurityContext securityContext) {
+            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders,
+            HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
-                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri, requestSessionId,
-                sessionId, accessToken, authLevel, authMode, HttpMethod.POST, originHeaders, httpRequest, securityContext);
+                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
+                requestSessionId, sessionId, accessToken, authLevel, authMode, HttpMethod.POST, originHeaders,
+                httpRequest, httpResponse, securityContext);
     }
 
     public Response requestAuthorization(
@@ -132,7 +135,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
             String sessionId, String accessToken, String authLevel, String authMode, String method, String originHeaders,
-            HttpServletRequest httpRequest, SecurityContext securityContext) {
+            HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
         // ATTENTION : please do not add more parameter in this debug method because it will not work with Seam 2.2.2.Final ,
@@ -367,11 +370,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
                                     } else {
                                         if (prompts.contains(Prompt.LOGIN)) {
-                                            identity.logout();
-                                            user = null;
-                                            sessionUser.setUserDn(null);
-                                            sessionUser.setAuthenticationTime(null);
-                                            //sessionUser.setPermissionGranted(false);
+                                            endSession(sessionId, httpRequest, httpResponse);
                                             prompts.remove(Prompt.LOGIN);
                                         }
 
@@ -388,11 +387,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
 
                                 if (prompts.contains(Prompt.LOGIN)) {
-                                    identity.logout();
-                                    user = null;
-                                    sessionUser.setUserDn(null);
-                                    sessionUser.setAuthenticationTime(null);
-                                    //sessionUser.setPermissionGranted(false);
+                                    endSession(sessionId, httpRequest, httpResponse);
                                     prompts.remove(Prompt.LOGIN);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
@@ -432,11 +427,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     validAuthenticationMaxAge = userAuthenticationTime.after(now);
                                 }
                                 if (!validAuthenticationMaxAge) {
-                                    identity.logout();
-                                    user = null;
-                                    sessionUser.setUserDn(null);
-                                    sessionUser.setAuthenticationTime(null);
-                                    //sessionUser.setPermissionGranted(false);
+                                    endSession(sessionId, httpRequest, httpResponse);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
@@ -497,7 +488,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
                                         Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
-                                        IdToken idToken = authorizationGrant.createIdToken(nonce, authorizationCode, newAccessToken, idTokenClaims, authorizationGrant.getAuthLevel(), authorizationGrant.getAuthMode());
+                                        IdToken idToken = authorizationGrant.createIdToken(
+                                                nonce, authorizationCode, newAccessToken, idTokenClaims,
+                                                authorizationGrant.getAuthLevel(), authorizationGrant.getAuthMode());
 
                                         redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
                                     }
@@ -709,5 +702,31 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return claims;
+    }
+
+    private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        identity.logout();
+        sessionUser.setUserDn(null);
+        sessionUser.setAuthenticationTime(null);
+
+
+        String id = sessionId;
+        if (StringHelper.isEmpty(id)) {
+            id = sessionIdService.getSessionIdFromCookie(httpRequest);
+        }
+
+        if (StringHelper.isNotEmpty(id)) {
+            SessionId ldapSessionId = sessionIdService.getSessionId(id);
+            if (ldapSessionId != null) {
+                boolean result = sessionIdService.remove(ldapSessionId);
+                if (!result) {
+                    log.error("Failed to remove session_id '{0}' from LDAP", id);
+                }
+            } else {
+                log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+            }
+        }
+
+        sessionIdService.removeSessionIdCookie(httpResponse);
     }
 }

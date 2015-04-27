@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
@@ -21,10 +15,17 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Map;
+
 /**
  * Base class for all the types of authorization grant.
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 April 27, 2015
  */
 
 public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
@@ -119,7 +120,8 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+                                 Map<String, String> claims, String authLevel, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         if (getIdToken() == null) {
             IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, claims);
             setIdToken(idToken);
@@ -132,7 +134,8 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
     }
 
     public static IdToken createIdToken(IAuthorizationGrant p_grant, String nonce, AuthorizationCode authorizationCode,
-                                        AccessToken accessToken, Map<String, String> claims) throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException {
+                                        AccessToken accessToken, Map<String, String> claims)
+            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException {
         final Client grantClient = p_grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {

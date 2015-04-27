@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -23,11 +16,14 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.*;
+
 /**
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version 0.9 April 27, 2015
  */
 public class AuthorizationGrant implements IAuthorizationGrant {
 
@@ -139,7 +135,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      *
      * @param refreshTokenCode The code of the refresh token.
      * @return The refresh token instance or
-     *         <code>null</code> if not found.
+     * <code>null</code> if not found.
      */
     @Override
     public RefreshToken getRefreshToken(String refreshTokenCode) {
@@ -152,7 +148,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      *
      * @param tokenCode The code of the access token.
      * @return The access token instance or
-     *         <code>null</code> if not found.
+     * <code>null</code> if not found.
      */
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
