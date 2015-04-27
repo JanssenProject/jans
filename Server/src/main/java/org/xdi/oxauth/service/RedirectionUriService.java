@@ -71,7 +71,7 @@ public class RedirectionUriService {
                             clientIdentifier, redirectionUri, redirectUris.length);
 
                     for (String uri : redirectUris) {
-                        log.debug("Comparing {0} == {1}?", uri, redirectionUri);
+                        log.debug("Comparing {0} == {1}", uri, redirectionUri);
                         if ((uri.equals(redirectionUri) && getParams(uri).size() == 0) ||
                                 uri.equals(redirectionUri) && getParams(uri).size() > 0 && compareParams(redirectionUri, uri)) {
                             return redirectionUri;
@@ -110,7 +110,7 @@ public class RedirectionUriService {
                         clientId, postLogoutRedirectUri);
 
                 for (String uri : postLogoutRedirectUris) {
-                    log.debug("Comparing {0} == {1}?", uri, postLogoutRedirectUri);
+                    log.debug("Comparing {0} == {1}", uri, postLogoutRedirectUri);
                     if (uri.equals(postLogoutRedirectUri)) {
                         return postLogoutRedirectUri;
                     }
