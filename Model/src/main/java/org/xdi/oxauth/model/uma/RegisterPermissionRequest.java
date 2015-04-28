@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.model.uma;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
@@ -32,9 +34,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
+@ApiModel(value = "Register permission request.")
 public class RegisterPermissionRequest implements Serializable {
 
+    @ApiModelProperty(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered."
+                  , required = true)
     private String resourceSetId;
+    @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource set. Each scope identifier MUST correspond to a scope that was registered by this resource server for the referenced resource set."
+                  , required = true)
     private List<String> scopes;
     private Date expiresAt;
     private Date issuedAt;
