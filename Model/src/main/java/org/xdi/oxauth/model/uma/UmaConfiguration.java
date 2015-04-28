@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.uma;
 
+import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
@@ -44,6 +45,7 @@ import java.util.Arrays;
         "user_endpoint"
 })
 @XmlRootElement
+@ApiModel(value = "UMA Configuration")
 public class UmaConfiguration {
 
     @ApiModelProperty(value = "The version of the UMA core protocol to which this authorization server conforms. The value MUST be the string \"1.0\"."
@@ -90,7 +92,7 @@ public class UmaConfiguration {
             required = true)
     private String userEndpoint;
 
-    @ApiModelProperty(value = "",
+    @ApiModelProperty(value = "The endpoint URI at which the resource server introspects an RPT presented to it by a client. Usage of this endpoint is defined by [OAuth-introspection] and Section 3.3.1. A valid PAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String resourceSetRegistrationEndpoint;
 
@@ -106,7 +108,7 @@ public class UmaConfiguration {
             required = true)
     private String rptEndpoint;
 
-    @ApiModelProperty(value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
+    @ApiModelProperty( value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String authorizationEndpoint;
 
@@ -124,6 +126,8 @@ public class UmaConfiguration {
         return requestingPartyClaimsEndpoint;
     }
 
+    @ApiModelProperty(value = "The endpoint URI at which the authorization server interacts with the end-user requesting party to gather claims. If this property is absent, the authorization server does not interact with the end-user requesting party for claims gathering.",
+            required = false)
     public void setRequestingPartyClaimsEndpoint(String requestingPartyClaimsEndpoint) {
         this.requestingPartyClaimsEndpoint = requestingPartyClaimsEndpoint;
     }
