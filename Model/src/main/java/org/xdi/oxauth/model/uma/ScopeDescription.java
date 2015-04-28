@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.model.uma;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A scope is a bounded extent of access that is possible to perform on a
@@ -24,9 +26,15 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "name", "icon_uri" })
 @XmlRootElement()
+@ApiModel(value = "A scope description is a JSON document")
 public class ScopeDescription {
 
+    @ApiModelProperty(value = "A human-readable string describing some scope (extent) of access. This name MAY be used by the authorization server in any user interface it presents to the resource owner."
+                 , required = true)
 	private String name;
+
+    @ApiModelProperty(value = "A URI for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner."
+                 , required = false)
 	private String iconUri;
 
     @JsonProperty(value = "name")
