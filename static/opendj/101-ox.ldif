@@ -861,12 +861,6 @@ attributeTypes: ( oxAuthClientURI-oid NAME 'oxAuthClientURI'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAuthClientUserGroup-oid NAME 'oxAuthClientUserGroup'
-  DESC 'oxAuth Client User group'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthConfCustomAuthMethod-oid NAME 'oxAuthConfCustomAuthMethod'
   DESC 'Custom authentication method'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2102,7 +2096,7 @@ objectclasses: ( oxNode-oid NAME 'oxNode' SUP top STRUCTURAL MUST objectclass MA
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthClient-oid NAME 'oxAuthClient' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedPerson $ displayName $ inum $ oxAuthAppType $ oxAuthClientIdIssuedAt
-  $ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthClientURI $ oxAuthClientUserGroup
+  $ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthClientURI
   $ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthFederationId
   $ oxAuthFederationMetadataURI $ oxAuthSubjectIdentifier $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg
   $ oxAuthIdTokenEncryptedResponseEnc $ oxAuthIdTokenSignedResponseAlg
