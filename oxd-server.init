@@ -17,7 +17,7 @@ start () {
 }
 stop () {
 	echo -n $"Stopping $prog: "
-	killproc -p ${pidfile} ${script} 
+	killproc -p ${pidfile} ${script} -TERM
 	RETVAL=$?
 	echo
 	if [ $RETVAL -eq 0 ] ; then
