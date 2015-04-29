@@ -1,26 +1,23 @@
 #! /bin/sh
 
-# Standard LSB functions
-#. /lib/lsb/init-functions
-
 # Source function library.
 . /etc/init.d/functions
 
 prog="oxd-server"
 script="/opt/oxd-server/bin/oxd-start.sh"
-pidfile=${PIDFILE-/var/run/oxd-server/oxd-server.pid}
-lockfile=${LOCKFILE-/var/lock/subsys/oxd-server}
+pidfile="/var/run/oxd-server/oxd-server.pid"
+lockfile="/var/lock/subsys/oxd-server"
 
 start () {
 	echo -n $"Starting $prog: "
-	daemon --pidfile ${pidfile} ${script}
+	daemon --pidfile ${pidfile} ${script} &
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch ${lockfile}
 }
 stop () {
 	echo -n $"Stopping $prog: "
-	killproc -p ${pidfile} ${script}
+	killproc -p ${pidfile} ${script} 
 	RETVAL=$?
 	echo
 	if [ $RETVAL -eq 0 ] ; then
