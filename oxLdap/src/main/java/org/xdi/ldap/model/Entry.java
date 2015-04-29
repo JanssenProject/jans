@@ -15,7 +15,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
  * 
  * @author Yuriy Movchan Date: 07/10/2010
  */
-public class Entry implements Serializable {
+public class Entry implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = 6602706707181973761L;
 
