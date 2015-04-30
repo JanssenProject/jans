@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@ 
+#include /usr/share/cdbs/1/rules/debhelper.mk
+#include /usr/share/cdbs/1/class/maven.mk
+
+#JAVA_HOME            := /usr/lib/jvm/default-java
+#DEB_MAVEN_BUILD_TARGET   := clean package -Dmaven.test.skip=true
+
+
+#clean::
+#	mh_clean
+override_dh_auto_build:
+		mvn clean package -Dmaven.test.skip=true
+#override_dh_auto_install:
+#		mkdir -p $(CURDIR)/debian/usr/lib64/${PACKAGENAME}-${VERSION}/
+#		cp -r * $(CURDIR)/debian/usr/lib64/${PACKAGENAME}-${VERSION}/

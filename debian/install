@@ -1,0 +1,15 @@
+oxd-server/src/main/resources/configuration.json /opt/oxd-server/conf/
+oxd-server/src/main/resources/log4j.xml /opt/oxd-server/conf/
+oxd-server/src/main/bin/oxd-start.sh /opt/oxd-server/bin/
+
+LICENSE /opt/oxd-server/
+README.md /opt/oxd-server/
+
+oxd-client/target/oxd-client.jar /opt/oxd-server/lib/
+oxd-common/target/oxd-common.jar /opt/oxd-server/lib/
+oxd-license-client/target/oxd-license-client.jar /opt/oxd-server/lib/
+oxd-ping/target/oxd-ping-jar-with-dependencies.jar /opt/oxd-server/lib/
+oxd-server/target/oxd-server-jar-with-dependencies.jar /opt/oxd-server/lib/
+
+oxd-license-server/target/oxd-license-server.war /opt/oxd-server/lib/
+oxd-license-admin/target/oxd-license-admin.war /opt/oxd-server/lib/
