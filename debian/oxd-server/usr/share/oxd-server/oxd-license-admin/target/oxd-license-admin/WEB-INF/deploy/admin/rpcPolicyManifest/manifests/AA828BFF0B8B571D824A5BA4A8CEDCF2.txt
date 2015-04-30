@@ -1,2 +1,0 @@
-serviceClass: org.xdi.oxd.license.admin.client.service.AdminService
-path: 4E4C93F5C28080A829EDE96D916E0004.gwt.rpc

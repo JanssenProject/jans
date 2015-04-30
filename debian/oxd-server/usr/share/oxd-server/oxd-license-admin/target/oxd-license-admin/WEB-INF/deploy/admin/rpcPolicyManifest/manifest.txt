@@ -1,3 +1,0 @@
-# Module admin
-# RPC service class, partial path of RPC policy file
-org.xdi.oxd.license.admin.client.service.AdminService, 4E4C93F5C28080A829EDE96D916E0004.gwt.rpc
