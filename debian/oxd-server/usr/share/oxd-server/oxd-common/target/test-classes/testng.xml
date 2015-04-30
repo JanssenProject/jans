@@ -1,4 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
-<suite name="oxD Common module Suite" parallel="tests">
-</suite>
