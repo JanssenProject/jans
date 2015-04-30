@@ -16,10 +16,10 @@
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt:/opt/oxd-server:/opt/oxd-server/bin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="oxd-server"
 NAME=oxd-server
-DAEMON=/opt/oxd-server/bin/oxd-start.sh
+DAEMON=/usr/sbin/oxd-server
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

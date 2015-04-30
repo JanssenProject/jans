@@ -10,6 +10,8 @@ oxd-common/target/oxd-common.jar /opt/oxd-server/lib/
 oxd-license-client/target/oxd-license-client.jar /opt/oxd-server/lib/
 oxd-ping/target/oxd-ping-jar-with-dependencies.jar /opt/oxd-server/lib/
 oxd-server/target/oxd-server-jar-with-dependencies.jar /opt/oxd-server/lib/
+oxd-license-server/target/oxd-license-server/WEB-INF/lib/bcprov-jdk15on-1.51.jar /opt/oxd-server/lib/
+oxd-license-server/target/oxd-license-server/WEB-INF/lib/resteasy-jaxrs-2.3.4.Final.jar /opt/oxd-server/lib/
 
 oxd-license-server/target/oxd-license-server.war /opt/oxd-server/lib/
 oxd-license-admin/target/oxd-license-admin.war /opt/oxd-server/lib/

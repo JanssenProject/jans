@@ -1,0 +1,12 @@
+Package: oxd-server
+Version: 1.0.6-1
+Architecture: all
+Maintainer: Adrian Alves <adrian@gluu.org>
+Installed-Size: 278301
+Depends: default-jdk
+Section: unknown
+Priority: optional
+Homepage: http://www.gluu.org
+Description: plugins for OpenID and UMA
+ oxd - OpenID Connect and UMA plugins for
+ Apache and nginx web containers

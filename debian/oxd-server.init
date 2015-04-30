@@ -15,10 +15,10 @@
 
 # Do NOT "set -e"
 
-PATH=/sbin:/usr/sbin:/bin:/usr/bin:/opt:/opt/oxd-server:/opt/oxd-server/bin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="oxd-server"
 NAME=oxd-server
-DAEMON=/opt/oxd-server/bin/oxd-start.sh
+DAEMON=/opt/bin/oxd-start.sh
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
@@ -73,7 +73,7 @@ case "$1" in
   status)
 	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
 	;;
-  restart|force-reload)
+  restart
 	log_daemon_msg "Restarting $DESC" "$NAME"
 	do_stop
 	case "$?" in
@@ -86,12 +86,13 @@ case "$1" in
 		esac
 		;;
 	  *)
+		# Failed to stop
 		log_end_msg 1
 		;;
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart}" >&2
 	exit 3
 	;;
 esac
