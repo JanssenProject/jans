@@ -66,7 +66,7 @@ public class ProcessHelper {
 					streamHandler);
 			log.debug(String.format("Successfully start process %s", commandLine.toString()));
 		} catch (Exception ex) {
-			log.error(String.format("Problem during starting process %s", commandLine.toString()), ex);
+			log.trace(String.format("Problem during starting process %s", commandLine.toString()), ex);
 			ex.printStackTrace();
 			return false;
 		}
