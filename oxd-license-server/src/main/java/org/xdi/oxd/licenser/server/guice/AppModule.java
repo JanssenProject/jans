@@ -22,6 +22,7 @@ import org.xdi.oxd.licenser.server.ws.GenerateLicenseWS;
 import org.xdi.util.Util;
 import org.xdi.util.properties.FileConfiguration;
 import org.xdi.util.security.PropertiesDecrypter;
+import org.xdi.util.security.StringEncrypter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,9 +51,9 @@ public class AppModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public LdapEntryManager provideLdapManager() {
+    public LdapEntryManager provideLdapManager() throws StringEncrypter.EncryptionException {
         final FileConfiguration fileConfiguration = ConfigurationFactory.getLdapConfiguration();
-        final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties());
+        final Properties props = PropertiesDecrypter.decryptProperties(StringEncrypter.defaultInstance(), fileConfiguration.getProperties());
         final LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(props);
         return new LdapEntryManager(new OperationsFacade(connectionProvider));
     }
