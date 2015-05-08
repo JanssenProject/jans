@@ -10,8 +10,6 @@ package org.xdi.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -29,18 +27,19 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
  * @author Oleksiy Tataryn
  * @author Yuriy Movchan Date: 01/06/2015
  */
-public  @Data class AttributeService {
+public class AttributeService {
+
 	@Logger
-	private Log log;
+	protected Log log;
 
 	@In
-    private LdapEntryManager ldapEntryManager;
+    protected LdapEntryManager ldapEntryManager;
 	
 	@In
-	private SchemaService schemaService;
+	protected SchemaService schemaService;
 
 	@In
-	private CacheService cacheService;
+	protected CacheService cacheService;
 	
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
     	  String[] targetArray = new String[] { attributeValue };
