@@ -7,6 +7,9 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -50,6 +53,12 @@ public class CreateRptWS {
 
     @POST
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @ApiOperation(value = "The endpoint at which the requester asks the AM to issue an RPT",
+            produces = UmaConstants.JSON_MEDIA_TYPE,
+            notes = "The endpoint at which the requester asks the AM to issue an RPT")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized")
+    })
     public Response getRequesterPermissionToken(@HeaderParam("Authorization") String authorization,
                                                 @HeaderParam("Host") String amHost) {
         try {
