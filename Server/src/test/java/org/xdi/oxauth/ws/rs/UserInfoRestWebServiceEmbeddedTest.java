@@ -45,7 +45,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 23, 2015
+ * @version 0.9 April 27, 2015
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -815,7 +815,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 try {
                     URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getQuery(), "Query string is null");
+                    assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
@@ -984,7 +984,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 try {
                     URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getQuery(), "Query string is null");
+                    assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
@@ -1152,7 +1152,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                 try {
                     URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getQuery(), "Query string is null");
+                    assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 

@@ -24,7 +24,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * Provides interface for JWK REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 25, 2015
+ * @version 0.9 April 27, 2015
  */
 @Name("requestJwkRestWebService")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
@@ -83,7 +83,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
                         jsonKeyValue.put(Y, jsonWebKey.getPublicKey().getY());
                     }
                     if (jsonWebKey.getCertificateChain() != null) {
-                        jsonKeyValue.put(X5C, new JSONArray(jsonWebKey.getCertificateChain()));
+                        //jsonKeyValue.put(X5C, new JSONArray(jsonWebKey.getCertificateChain()));
                     }
 
                     keys.put(jsonKeyValue);
