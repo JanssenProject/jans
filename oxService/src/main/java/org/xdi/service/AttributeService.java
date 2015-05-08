@@ -45,7 +45,7 @@ public  @Data class AttributeService {
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
     	  String[] targetArray = new String[] { attributeValue };
     	  Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
-    	  List<GluuAttribute> result = getLdapEntryManager().findEntries(baseDn, GluuAttribute.class, filter, 0);
+    	  List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter, 0);
     	  return result;
     }
     
@@ -72,7 +72,7 @@ public  @Data class AttributeService {
 	}
 
 	protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
-		List<GluuAttribute> attributeList = getLdapEntryManager().findEntries(baseDn, GluuAttribute.class, null);
+		List<GluuAttribute> attributeList = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, null);
 
 		return attributeList;
 	}
