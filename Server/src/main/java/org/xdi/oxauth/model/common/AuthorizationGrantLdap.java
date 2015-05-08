@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -25,10 +17,15 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version 0.9 April 27, 2015
  */
 
 public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
@@ -65,7 +62,7 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 //        executorService.execute(new Runnable() {
 //            @Override
 //            public void run() {
-                saveImpl();
+        saveImpl();
 //            }
 //        });
     }
@@ -98,9 +95,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public AccessToken createAccessToken() {
         try {
             final AccessToken accessToken = super.createAccessToken();
-        	if (accessToken.getExpiresIn() > 0) {
-        		persist(asToken(accessToken));
-        	}
+            if (accessToken.getExpiresIn() > 0) {
+                persist(asToken(accessToken));
+            }
             return accessToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
@@ -112,9 +109,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public AccessToken createLongLivedAccessToken() {
         try {
             final AccessToken accessToken = super.createLongLivedAccessToken();
-        	if (accessToken.getExpiresIn() > 0) {
-        		persist(asToken(accessToken));
-        	}
+            if (accessToken.getExpiresIn() > 0) {
+                persist(asToken(accessToken));
+            }
             return accessToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
@@ -136,15 +133,16 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+                                 Map<String, String> claims, String authLevel, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode, accessToken, claims);
-        	if (idToken.getExpiresIn() > 0) {
+            if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
                 tokenLdap.setAuthLevel(authLevel);
                 tokenLdap.setAuthMode(authMode);
                 persist(tokenLdap);
-        	}
+            }
 
             // is it really neccessary to propagate to all tokens?
             setAuthLevel(authLevel);

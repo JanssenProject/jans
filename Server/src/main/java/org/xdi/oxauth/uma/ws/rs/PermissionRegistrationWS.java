@@ -7,6 +7,10 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -50,9 +54,11 @@ import java.util.Date;
  */
 @Name("resourceSetPermissionRegistrationRestWebService")
 @Path("/host/rsrc_pr")
-@Api(value = "/host/rsrc_pr", description = "The endpoint at which the host registers permissions that it anticipates a " +
-        " requester will shortly be asking for from the AM. This AM's endpoint is part " +
-        " of resource set registration API.")
+@Api(value = "/host/rsrc_pr", description = "The resource server uses the protection API's permission registration endpoint to register a requested permission with the authorization server that would suffice for the client's access attempt. The authorization server returns a permission ticket for the resource server to give to the client in its response. The PAT provided in the API request implicitly identifies the resource owner (\"subject\") to which the permission applies.\n" +
+        "\n" +
+        "Note: The resource server is free to choose the extent of the requested permission that it registers, as long as it minimally suffices for the access attempted by the client. For example, it can choose to register a permission that covers several scopes or a resource set that is greater in extent than the specific resource that the client attempted to access. Likewise, the authorization server is ultimately free to choose to partially fulfill the elements of a permission request based on incomplete satisfaction of policy criteria, or not to fulfill the request.\n" +
+        "\n" +
+        "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
 public class PermissionRegistrationWS {
 
     public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
@@ -71,9 +77,18 @@ public class PermissionRegistrationWS {
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @ApiOperation(value = "Registers permission using the POST method",
+            consumes = UmaConstants.JSON_MEDIA_TYPE,
+            produces = UmaConstants.JSON_MEDIA_TYPE,
+            notes = "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Bad Request"),
+    })
     public Response registerResourceSetPermission(@Context HttpServletRequest request,
                                                   @HeaderParam("Authorization") String authorization,
                                                   @HeaderParam("Host") String amHost,
+                                                  @ApiParam(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
                                                   RegisterPermissionRequest resourceSetPermissionRequest) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);

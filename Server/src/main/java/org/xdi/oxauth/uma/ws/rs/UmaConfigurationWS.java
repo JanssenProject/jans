@@ -8,6 +8,8 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -34,7 +36,7 @@ import javax.ws.rs.core.Response;
  */
 @Name("umaMetaDataConfigurationRestWebService")
 @Path("/oxauth/uma-configuration")
-@Api(value = "/oxauth/uma-configuration", description = "The authorization server endpiont that provides configuration data in a JSON [RFC4627] document that resides in an /uma-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
+@Api(value = "/.well-known/uma-configuration", description = "The authorization server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/uma-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
 public class UmaConfigurationWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
@@ -50,6 +52,9 @@ public class UmaConfigurationWS {
             value = "Provides configuration data as json document. It contains options and endpoints supported by the authorization server.",
             response = UmaConfiguration.class
     )
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = "Failed to build Uma configuration json object.")
+    })
     public Response getConfiguration() {
         try {
             final Configuration configuration = ConfigurationFactory.getConfiguration();
