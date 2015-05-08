@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -20,10 +13,13 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.*;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version 0.9 April 27, 2015
  */
 
 public interface IAuthorizationGrant {

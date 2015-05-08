@@ -7,6 +7,10 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -52,7 +56,7 @@ import java.util.List;
  */
 @Name("resourceSetRegistrationRestWebService")
 @Path("/host/rsrc/resource_set")
-@Api(value = "/host/rsrc/resource_set", description = "Resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
+@Api(value = "/host/rsrc/resource_set", description = "The resource server uses the RESTful API at the authorization server's resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public class ResourceSetRegistrationWS {
 
     @Logger
@@ -79,7 +83,16 @@ public class ResourceSetRegistrationWS {
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public Response createResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet) {
+    @ApiOperation(value = "Adds a new resource set description using the POST method",
+            notes = "Adds a new resource set description using the POST method. If the request is successful, the authorization server MUST respond with a status message that includes an _id property.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
+    public Response createResourceSet(
+            @HeaderParam("Authorization")
+            String authorization,
+            @ApiParam(value = "Resource set description", required = true)
+            ResourceSet resourceSet) {
         try {
             String id = generatedId();
             log.trace("Try to create resource set, id: {0}", id);
@@ -101,8 +114,17 @@ public class ResourceSetRegistrationWS {
     @Path("{rsid}")
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @ApiOperation(value = "Updates a previously registered resource set description using the PUT method",
+            notes = "Updates a previously registered resource set description using the PUT method. If the request is successful, the authorization server MUST respond with a status message that includes an \"_id\" property.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
     public Response updateResourceSet(@HeaderParam("Authorization") String authorization,
-                                      @PathParam("rsid") String rsid, ResourceSet resourceSet) {
+                                      @PathParam("rsid")
+                                      @ApiParam(value = "Resource set description ID", required = true)
+                                      String rsid,
+                                      @ApiParam(value = "Resource set description JSON object", required = true)
+                                      ResourceSet resourceSet) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -126,7 +148,18 @@ public class ResourceSetRegistrationWS {
     @GET
     @Path("{rsid}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public Response getResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
+    @ApiOperation(value = "Reads a previously registered resource set description using the GET method.",
+            notes = "Reads a previously registered resource set description using the GET method. If the request is successful, the authorization server MUST respond with a status message that includes a body containing the referenced resource set description, along with an \"_id\" property.",
+            response = ResourceSet.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
+    public Response getResourceSet(
+            @HeaderParam("Authorization")
+            String authorization,
+            @PathParam("rsid")
+            @ApiParam(value = "Resource set description object ID", required = true)
+            String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -183,7 +216,20 @@ public class ResourceSetRegistrationWS {
      */
     @GET
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public List<String> getResourceSetList(@HeaderParam("Authorization") String authorization, @QueryParam("scope") String p_scope) {
+    @ApiOperation(value = "Lists all previously registered resource set identifiers for this user using the GET method.",
+            notes = "Lists all previously registered resource set identifiers for this user using the GET method. The authorization server MUST return the list in the form of a JSON array of {rsid} string values.\n" +
+                    "\n" +
+                    "The resource server uses this method as a first step in checking whether its understanding of protected resources is in full synchronization with the authorization server's understanding.",
+            response = ResourceSet.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized"),
+    })
+    public List<String> getResourceSetList(
+            @HeaderParam("Authorization")
+            String authorization,
+            @QueryParam("scope")
+            @ApiParam(value = "Scope uri", required = false)
+            String p_scope) {
         try {
             log.trace("Getting resource set descriptions.");
 
@@ -227,7 +273,18 @@ public class ResourceSetRegistrationWS {
 
     @DELETE
     @Path("{rsid}")
-    public Response deleteResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid) {
+    @ApiOperation(value = "Deletes a previously registered resource set description using the DELETE method.",
+            notes = "Deletes a previously registered resource set description using the DELETE method, thereby removing it from the authorization server's protection regime.",
+            response = ResourceSet.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized")
+    })
+    public Response deleteResourceSet(
+            @HeaderParam("Authorization")
+            String authorization,
+            @PathParam("rsid")
+            @ApiParam(value = "Resource set description ID", required = true)
+            String rsid) {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
@@ -379,16 +436,17 @@ public class ResourceSetRegistrationWS {
 
 
     @HEAD
+    @ApiOperation(value = "Not allowed")
     public Response unsupportedHeadMethod() {
         log.error("HEAD method is not allowed");
         throw new WebApplicationException(Response.status(405).entity("HEAD Method Not Allowed").build());
     }
 
     @OPTIONS
+    @ApiOperation(value = "Not allowed")
     public Response unsupportedOptionsMethod() {
         log.error("OPTIONS method is not allowed");
         throw new WebApplicationException(Response.status(405).entity("OPTIONS Method Not Allowed").build());
-
     }
 
 }
