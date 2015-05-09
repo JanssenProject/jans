@@ -1,0 +1,5 @@
+# Automatically added by dh_installinit
+if [ -x "/etc/init.d/oxd-server" ] || [ -e "/etc/init/oxd-server.conf" ]; then
+	invoke-rc.d oxd-server stop || exit $?
+fi
+# End automatically added section

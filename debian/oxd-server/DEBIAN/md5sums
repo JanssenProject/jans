@@ -1,0 +1,16 @@
+519e9ffab4e667fe8459917db4ad9dd8  opt/oxd-server/bin/oxd-start.sh
+743b86509e5dfc03055693e7d6ca5544  opt/oxd-server/conf/configuration.json
+035ed4b18f1bb7be73922174a87aa407  opt/oxd-server/conf/log4j.xml
+b202b2dde200e0d1b714f6e867e29ee4  opt/oxd-server/lib/bcprov-jdk15on-1.51.jar
+10b7034344a825435073f6ed46c9d4c1  opt/oxd-server/lib/oxd-client.jar
+e4f36b58fa4e754ca5f513fd1f50635b  opt/oxd-server/lib/oxd-common.jar
+790aad0697f4e1ed16df64b5748801b8  opt/oxd-server/lib/oxd-license-admin.war
+c0c65d9483eebb0fee9ea40e7de065b3  opt/oxd-server/lib/oxd-license-client.jar
+48c4f9c40ebf11bc36de5d34625c3026  opt/oxd-server/lib/oxd-license-server.war
+c5e2726cf584d2627280e366ebec02a6  opt/oxd-server/lib/oxd-ping-jar-with-dependencies.jar
+1d612ca45dee1bcd1af0459bf2c6676e  opt/oxd-server/lib/oxd-server-jar-with-dependencies.jar
+02e577ccda4b041b9484ef0f7e48e08f  opt/oxd-server/lib/resteasy-jaxrs-2.3.4.Final.jar
+d6c08fafe12674de0bcb8c16080262c3  usr/share/doc/oxd-server/LICENSE
+bf7ac849af3866a91bb85197aebe9c38  usr/share/doc/oxd-server/README.md
+2dd9651a2aca23afa65b5750c43910c5  usr/share/doc/oxd-server/changelog.Debian.gz
+8a194c9f15315bfd620918a0f8b9d751  usr/share/doc/oxd-server/copyright

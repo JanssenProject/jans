@@ -2,20 +2,17 @@ Source: oxd-server
 Section: unknown
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
-Build-Depends: debhelper (>= 8.0.0),
-#	       cdbs,
+Build-Depends: debhelper (>= 9.0.0),
 	       default-jdk,
-#               maven-debian-helper,
-#               maven-repo-helper,
                maven
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 #Vcs-Git: git://git.debian.org/collab-maint/oxd-server.git
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/oxd-server.git;a=summary
 
 Package: oxd-server
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, default-jdk
+Depends: ${misc:Depends}, default-jdk
 Description: plugins for OpenID and UMA
  oxd - OpenID Connect and UMA plugins for
  Apache and nginx web containers
