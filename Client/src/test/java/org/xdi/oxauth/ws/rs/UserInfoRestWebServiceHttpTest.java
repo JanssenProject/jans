@@ -110,6 +110,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris"})
