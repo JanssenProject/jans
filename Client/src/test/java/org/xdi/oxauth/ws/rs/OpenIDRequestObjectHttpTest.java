@@ -127,6 +127,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
@@ -208,6 +209,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
@@ -784,6 +786,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES384_d"})
@@ -870,6 +873,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES512_d"})
@@ -1298,6 +1302,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES384_d"})
@@ -1383,6 +1388,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES512_d"})
@@ -2059,6 +2065,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
@@ -2148,6 +2155,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
@@ -2238,6 +2246,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
@@ -2329,6 +2338,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
@@ -2411,6 +2421,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
@@ -2493,5 +2504,6 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 }
