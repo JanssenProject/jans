@@ -37,7 +37,7 @@ displayName: phone
 inum: %(inumOrg)s!0009!D491
 description: Your phone number
 defaultScope: false
-oxAuthClaim: inum=%(inumOrg)s!0005!570B,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
