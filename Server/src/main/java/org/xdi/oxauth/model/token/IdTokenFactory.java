@@ -49,7 +49,7 @@ import java.util.*;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version 0.9 May 18, 2015
  */
 public class IdTokenFactory {
 
@@ -215,7 +215,7 @@ public class IdTokenFactory {
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-            PublicKey publicKey = JwtUtil.getPublicKey(authorizationGrant.getClient().getJwksUri(), SignatureAlgorithm.RS256, null);
+            PublicKey publicKey = JwtUtil.getPublicKey(authorizationGrant.getClient().getJwksUri(), null, SignatureAlgorithm.RS256, null);
             if (publicKey != null && publicKey instanceof RSAPublicKey) {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, (RSAPublicKey) publicKey);
                 jwe = jweEncrypter.encrypt(jwe);

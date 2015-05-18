@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -25,10 +18,17 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
  *
- * @author Javier Rojas Blum Date: 11.30.2011
+ * @author Javier Rojas Blum
+ * @version 0.9 May 18, 2015
  */
 public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse> {
 
@@ -149,7 +149,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                         getResponse().setClaims(jwe.getClaims().toMap());
                     } else {
                         Jwt jwt = Jwt.parse(entity);
-                        JwsValidator jwtValidator = new JwsValidator(jwt, sharedKey, jwksUri);
+                        JwsValidator jwtValidator = new JwsValidator(jwt, sharedKey, jwksUri, null);
                         if (jwtValidator.validateSignature()) {
                             getResponse().setClaims(jwt.getClaims().toMap());
                         }

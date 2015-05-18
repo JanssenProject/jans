@@ -11,27 +11,21 @@ import org.xdi.oxauth.model.error.IErrorType;
 /**
  * Error codes for register error responses.
  *
- * @author Javier Rojas Blum Date: 01.17.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 May 18, 2015
  */
 public enum RegisterErrorResponseType implements IErrorType {
 
-    /**
-     * The value of client_id is invalid.
-     */
-    INVALID_CLIENT_ID("invalid_client_id"),
     /**
      * Value of one or more redirect_uris is invalid.
      */
     INVALID_REDIRECT_URI("invalid_redirect_uri"),
     /**
-     * The value of one of the configuration parameters is invalid.
+     * The value of one of the Client Metadata fields is invalid and the server has rejected this request.
+     * Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter
+     * of a Client's Metadata.
      */
-    INVALID_CONFIGURATION_PARAMETER("invalid_configuration_parameter"),
-    /**
-     * The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the
-     * same parameter, uses more than one method for including an access token, or is otherwise malformed.
-     */
-    INVALID_REQUEST("invalid_request"),
+    INVALID_CLIENT_METADATA("invalid_client_metadata"),
     /**
      * The access token provided is expired, revoked, malformed, or invalid for other reasons.
      */
@@ -52,7 +46,7 @@ public enum RegisterErrorResponseType implements IErrorType {
      *
      * @param param The parameter to be match.
      * @return The <code>enumeration</code> if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     public static RegisterErrorResponseType fromString(String param) {
         if (param != null) {
