@@ -6,46 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_ID;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_URL;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -60,12 +20,18 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterRequestParam;
 
+import javax.ws.rs.core.MediaType;
+import java.util.*;
+
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
+
 /**
  * Represents a register request to send to the authorization server.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.1, 12.20.2011
+ * @version 0.9 May 18, 2015
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -82,6 +48,7 @@ public class RegisterRequest extends BaseRequest {
     private String policyUri;
     private String tosUri;
     private String jwksUri;
+    private String jwks;
     private String sectorIdentifierUri;
     private SubjectType subjectType;
     private SignatureAlgorithm requestObjectSigningAlg;
@@ -399,6 +366,36 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as
+     * the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference.
+     * This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri
+     * parameter, for instance, by native applications that might not have a location to host the contents of the JWK
+     * Set. If a Client can use jwks_uri, it must not use jwks.
+     * One significant downside of jwks is that it does not enable key rotation (which jwks_uri does, as described in
+     * Section 10 of OpenID Connect Core 1.0). The jwks_uri and jwks parameters must not be used together.
+     *
+     * @return The Client's JSON Web Key Set (JWK) document.
+     */
+    public String getJwks() {
+        return jwks;
+    }
+
+    /**
+     * Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as
+     * the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference.
+     * This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri
+     * parameter, for instance, by native applications that might not have a location to host the contents of the JWK
+     * Set. If a Client can use jwks_uri, it must not use jwks.
+     * One significant downside of jwks is that it does not enable key rotation (which jwks_uri does, as described in
+     * Section 10 of OpenID Connect Core 1.0). The jwks_uri and jwks parameters must not be used together.
+     *
+     * @param jwks The Client's JSON Web Key Set (JWK) document.
+     */
+    public void setJwks(String jwks) {
+        this.jwks = jwks;
+    }
+
+    /**
      * Returns the URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
      * The URL references a file with a single JSON array of redirect_uri values.
      *
@@ -642,7 +639,7 @@ public class RegisterRequest extends BaseRequest {
      * been performed.
      *
      * @return The URLs supplied by the RP to request that the user be redirected to this location after a logout has
-     *         been performed.
+     * been performed.
      */
     public List<String> getPostLogoutRedirectUris() {
         return postLogoutRedirectUris;
@@ -770,6 +767,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
+        }
+        if (StringUtils.isNotBlank(jwks)) {
+            parameters.put(JWKS.toString(), jwks);
         }
         if (StringUtils.isNotBlank(sectorIdentifierUri)) {
             parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
@@ -959,6 +959,7 @@ public class RegisterRequest extends BaseRequest {
         result.setPolicyUri(requestObject.optString(POLICY_URI.toString()));
         result.setTosUri(requestObject.optString(TOS_URI.toString()));
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
+        result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(requestObject.has(SUBJECT_TYPE.toString()) ?
                 SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : SubjectType.PUBLIC);
@@ -1006,6 +1007,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
+        }
+        if (StringUtils.isNotBlank(jwks)) {
+            parameters.put(JWKS_URI.toString(), jwks);
         }
         if (StringUtils.isNotBlank(sectorIdentifierUri)) {
             parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);

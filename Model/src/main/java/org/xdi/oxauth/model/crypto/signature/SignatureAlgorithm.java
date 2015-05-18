@@ -6,9 +6,11 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
+import org.xdi.oxauth.model.jwt.JwtType;
+
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version 0.9 May 18, 2015
  */
 public enum SignatureAlgorithm {
 
@@ -27,12 +29,14 @@ public enum SignatureAlgorithm {
     private final String family;
     private final String algorithm;
     private final String curve;
+    private final JwtType jwtType;
 
     private SignatureAlgorithm(String name, String family, String algorithm, String curve) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
         this.curve = curve;
+        this.jwtType = JwtType.JWS;
     }
 
     private SignatureAlgorithm(String name, String family, String algorithm) {
@@ -40,6 +44,7 @@ public enum SignatureAlgorithm {
         this.family = family;
         this.algorithm = algorithm;
         this.curve = null;
+        this.jwtType = JwtType.JWS;
     }
 
     private SignatureAlgorithm(String name) {
@@ -47,6 +52,7 @@ public enum SignatureAlgorithm {
         this.family = null;
         this.algorithm = null;
         this.curve = null;
+        this.jwtType = JwtType.JWT;
     }
 
     public String getName() {
@@ -63,6 +69,10 @@ public enum SignatureAlgorithm {
 
     public String getCurve() {
         return curve;
+    }
+
+    public JwtType getJwtType() {
+        return jwtType;
     }
 
     public static SignatureAlgorithm fromName(String name) {
