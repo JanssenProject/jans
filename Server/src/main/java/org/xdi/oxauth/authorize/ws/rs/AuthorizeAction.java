@@ -154,13 +154,7 @@ public class AuthorizeAction {
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-            	List<String> acrValuesList = null;
-            	try {
-					acrValuesList = Util.jsonArrayStringAsList(this.acrValues);
-				} catch (JSONException ex) {
-					invalidRequest();
-					return;
-				}
+                List<String> acrValuesList = Util.splittedStringAsList(acrValues, " ");
             	
             	CustomScriptConfiguration customScriptConfiguration;
             	
