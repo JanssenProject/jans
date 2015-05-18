@@ -56,10 +56,10 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version 0.9 May 18, 2015
  */
 @Name("requestAuthorizationRestWebService")
-@Api(value = "/oxauth/authorize", description = "Authorization Endpointt")
+@Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Logger
@@ -290,7 +290,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     } else if (!jwtAuthorizationRequest.getPrompts().isEmpty() && !prompts.isEmpty()
                                             && !jwtAuthorizationRequest.getPrompts().containsAll(prompts)) {
                                         throw new InvalidJwtException("The prompt parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
+                                    } else if (jwtAuthorizationRequest.getIdTokenMember() != null
+                                            && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
                                             && !jwtAuthorizationRequest.getIdTokenMember().getMaxAge().equals(maxAge)) {
                                         throw new InvalidJwtException("The maxAge parameter is not the same in the JWT");
                                     }
@@ -413,6 +414,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 if (maxAge != null) {
                                     authenticationMaxAge = maxAge;
                                 } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
+                                        && jwtAuthorizationRequest.getIdTokenMember() != null
                                         && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
                                     authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
                                 }
