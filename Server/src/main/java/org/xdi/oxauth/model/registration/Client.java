@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version 0.9 May 18, 2015
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -85,6 +85,9 @@ public class Client {
 
     @LdapAttribute(name = "oxAuthJwksURI")
     private String jwksUri;
+
+    @LdapAttribute(name = "oxAuthJwks")
+    private String jwks;
 
     @LdapAttribute(name = "oxAuthSectorIdentifierURI")
     private String sectorIdentifierUri;
@@ -517,6 +520,36 @@ public class Client {
      */
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    /**
+     * Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as
+     * the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference.
+     * This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri
+     * parameter, for instance, by native applications that might not have a location to host the contents of the JWK
+     * Set. If a Client can use jwks_uri, it must not use jwks.
+     * One significant downside of jwks is that it does not enable key rotation (which jwks_uri does, as described in
+     * Section 10 of OpenID Connect Core 1.0). The jwks_uri and jwks parameters must not be used together.
+     *
+     * @return The Client's JSON Web Key Set (JWK) document.
+     */
+    public String getJwks() {
+        return jwks;
+    }
+
+    /**
+     * Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as
+     * the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference.
+     * This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri
+     * parameter, for instance, by native applications that might not have a location to host the contents of the JWK
+     * Set. If a Client can use jwks_uri, it must not use jwks.
+     * One significant downside of jwks is that it does not enable key rotation (which jwks_uri does, as described in
+     * Section 10 of OpenID Connect Core 1.0). The jwks_uri and jwks parameters must not be used together.
+     *
+     * @param jwks The Client's JSON Web Key Set (JWK) document.
+     */
+    public void setJwks(String jwks) {
+        this.jwks = jwks;
     }
 
     /**

@@ -51,7 +51,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 20, 2015
+ * @version 0.9 May 18, 2015
  */
 public class JwtAuthorizationRequest {
 
@@ -366,7 +366,7 @@ public class JwtAuthorizationRequest {
             } else {
                 if (client.getJwksUri() != null) {
                     // Public Key
-                    PublicKey publicKey = JwtUtil.getPublicKey(client.getJwksUri(), signatureAlgorithm, keyId);
+                    PublicKey publicKey = JwtUtil.getPublicKey(client.getJwksUri(), null, signatureAlgorithm, keyId);
                     if (publicKey == null) {
                         throw new InvalidJwtException("Cannot retrieve the JWK file");
                     }

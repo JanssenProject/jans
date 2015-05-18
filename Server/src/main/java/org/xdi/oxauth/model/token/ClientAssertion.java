@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -24,8 +21,12 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.security.StringEncrypter;
 
+import java.util.Date;
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 04.13.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 May 18, 2015
  */
 public class ClientAssertion {
 
@@ -88,13 +89,17 @@ public class ClientAssertion {
                                 AuthenticationMethod authenticationMethod = client.getAuthenticationMethod();
                                 SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getAlgorithm();
 
+                                if (jwtType == null && signatureAlgorithm != null) {
+                                    jwtType = signatureAlgorithm.getJwtType();
+                                }
+
                                 if (jwtType == JwtType.JWS && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
                                         ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && signatureAlgorithm.getFamily().equals("HMAC"))
                                                 || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (signatureAlgorithm.getFamily().equals("RSA") || signatureAlgorithm.getFamily().equals("EC"))))) {
                                     clientSecret = client.getClientSecret();
 
                                     // Validate the crypto segment
-                                    JwsValidator jwtValidator = new JwsValidator(jwt, clientSecret, client.getJwksUri());
+                                    JwsValidator jwtValidator = new JwsValidator(jwt, clientSecret, client.getJwksUri(), client.getJwks());
                                     if (jwtValidator.validateSignature()) {
                                         result = true;
                                     } else {
