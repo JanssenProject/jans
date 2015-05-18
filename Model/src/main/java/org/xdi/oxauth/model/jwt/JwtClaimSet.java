@@ -6,15 +6,6 @@
 
 package org.xdi.oxauth.model.jwt;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -22,8 +13,13 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.util.*;
+
 /**
- * @author Javier Rojas Blum Date: 11.09.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 May 18, 2015
  */
 public abstract class JwtClaimSet {
 
@@ -91,6 +87,14 @@ public abstract class JwtClaimSet {
                 return new Date(date);
             } else if (claim instanceof Long) {
                 return new Date((Long) claim * 1000);
+            } else if (claim instanceof Double) {
+                final double c = (Double) claim;
+                final BigDecimal bigDecimal = new BigDecimal(c);
+
+                long claimLong = bigDecimal.longValue();
+                claimLong = claimLong * 1000;
+
+                return new Date(claimLong);
             } else {
                 return null;
             }

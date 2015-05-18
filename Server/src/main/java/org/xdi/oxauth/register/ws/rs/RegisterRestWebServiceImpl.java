@@ -57,7 +57,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version 0.9 April 27, 2015
+ * @version 0.9 May 18, 2015
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -176,7 +176,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 } else {
                     log.trace("Client parameters are invalid, returns invalid_request error.");
                     builder = Response.status(Response.Status.BAD_REQUEST).
-                            entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
+                            entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                 }
             } else {
                 builder = Response.status(Response.Status.BAD_REQUEST).
@@ -199,7 +199,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     public Response.ResponseBuilder internalErrorResponse() {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
     }
 
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
@@ -247,6 +248,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         if (StringUtils.isNotBlank(p_request.getJwksUri())) {
             p_client.setJwksUri(p_request.getJwksUri());
+        }
+        if (StringUtils.isNotBlank(p_request.getJwks())) {
+            p_client.setJwks(p_request.getJwks());
         }
         if (p_request.getSubjectType() != null) {
             p_client.setSubjectType(p_request.getSubjectType().toString());
@@ -336,7 +340,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             log.debug("Client UPDATE : parameters are invalid. Returns BAD_REQUEST response.");
             return Response.status(Response.Status.BAD_REQUEST).
-                    entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST)).build();
+                    entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -364,9 +368,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN));
                     }
                 } else {
-                    log.trace("Client parameters are invalid, returns invalid_request error.");
+                    log.trace("Client parameters are invalid.");
                     builder = Response.status(Response.Status.BAD_REQUEST);
-                    builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
+                    builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                 }
             } else {
                 builder = Response.status(Response.Status.BAD_REQUEST);
@@ -374,11 +378,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         } catch (JSONException e) {
             builder = Response.status(500);
-            builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
+            builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
             log.error(e.getMessage(), e);
         } catch (StringEncrypter.EncryptionException e) {
             builder = Response.status(500);
-            builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REQUEST));
+            builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
             log.error(e.getMessage(), e);
         }
 
@@ -420,6 +424,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS_URI.toString(), client.getJwksUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), client.getJwks());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SECTOR_IDENTIFIER_URI.toString(), client.getSectorIdentifierUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SUBJECT_TYPE.toString(), client.getSubjectType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());

@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 03/22/2013
+ * @version 0.9 May 18, 2015
  */
 
 public enum RegisterRequestParam {
@@ -88,6 +88,17 @@ public enum RegisterRequestParam {
      * responses to the Client.
      */
     JWKS_URI("jwks_uri"),
+
+    /**
+     * Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as
+     * the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference.
+     * This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri
+     * parameter, for instance, by native applications that might not have a location to host the contents of the JWK
+     * Set. If a Client can use jwks_uri, it must not use jwks.
+     * One significant downside of jwks is that it does not enable key rotation (which jwks_uri does, as described in
+     * Section 10 of OpenID Connect Core 1.0). The jwks_uri and jwks parameters must not be used together.
+     */
+    JWKS("jwks"),
 
     /**
      * URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
