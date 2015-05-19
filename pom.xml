@@ -97,11 +97,23 @@
         <groupId>org.xdi</groupId>
         <artifactId>oxauth-client</artifactId>
         <version>${oxauth.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.10</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth-model</artifactId>
         <version>${oxauth.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.10</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.xdi</groupId>
