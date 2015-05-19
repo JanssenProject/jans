@@ -398,7 +398,7 @@ displayName: Nickname
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: nickname
-gluuLdapAttributeName: middleName
+gluuLdapAttributeName: nickname
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
