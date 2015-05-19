@@ -4,7 +4,7 @@
  * Copyright (c) 2015, Gluu
  */
 
-package org.xdi.oxauth.model.exception;
+package org.xdi.oxauth.model.fido.u2f.exception;
 
 /**
  * @author Yuriy Movchan Date: 05/13/2015

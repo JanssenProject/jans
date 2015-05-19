@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.xdi.oxauth.model.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.util.Base64Util;
 
 /**

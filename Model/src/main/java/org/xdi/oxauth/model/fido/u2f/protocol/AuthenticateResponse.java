@@ -11,7 +11,7 @@ import java.io.Serializable;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.oxauth.model.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 
 /**
  * FIDO U2F device authentication response
