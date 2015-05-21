@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.fido.u2f.protocol;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxauth.model.fido.u2f.U2fConstants;
 
@@ -51,8 +50,7 @@ public class AuthenticateRequest implements Serializable {
 	@JsonProperty
 	private final String keyHandle;
 
-	public AuthenticateRequest(@JsonProperty("challenge") String challenge, @JsonProperty("appId") String appId,
-			@JsonProperty("keyHandle") String keyHandle) {
+	public AuthenticateRequest(@JsonProperty("challenge") String challenge, @JsonProperty("appId") String appId, @JsonProperty("keyHandle") String keyHandle) {
 		this.challenge = challenge;
 		this.appId = appId;
 		this.keyHandle = keyHandle;
@@ -70,16 +68,11 @@ public class AuthenticateRequest implements Serializable {
 		return appId;
 	}
 
-	@JsonIgnore
-	public String getRequestId() {
-		return challenge;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("AuthenticateRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=")
-				.append(appId).append(", keyHandle=").append(keyHandle).append("]");
+		builder.append("AuthenticateRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=").append(appId)
+				.append(", keyHandle=").append(keyHandle).append("]");
 		return builder.toString();
 	}
 

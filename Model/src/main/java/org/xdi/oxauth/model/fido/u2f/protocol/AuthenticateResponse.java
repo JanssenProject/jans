@@ -19,7 +19,9 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
-@IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
+@IgnoreMediaTypes("application/*+json")
+// try to ignore jettison as it's recommended here:
+// http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticateResponse implements Serializable {
 
@@ -70,8 +72,8 @@ public class AuthenticateResponse implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData)
-				.append(", keyHandle=").append(keyHandle).append("]");
+		builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData).append(", keyHandle=")
+				.append(keyHandle).append("]");
 		return builder.toString();
 	}
 

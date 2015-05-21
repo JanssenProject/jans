@@ -55,8 +55,8 @@ public class RegisterRequestMessage implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RegisterRequestMessage [authenticateRequests=").append(authenticateRequests).append(", registerRequests=")
-				.append(registerRequests).append("]");
+		builder.append("RegisterRequestMessage [authenticateRequests=").append(authenticateRequests).append(", registerRequests=").append(registerRequests)
+				.append("]");
 		return builder.toString();
 	}
 
