@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.io.IOException;
+
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -18,9 +20,9 @@ import org.xdi.oxauth.crypto.signature.SignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
-import org.xdi.oxauth.model.fido.u2f.message.util.ByteInputStream;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.util.io.ByteDataInputStream;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -43,9 +45,11 @@ public class RawAuthenticationService {
 	private SignatureVerification signatureVerification = new BouncyCastleSignatureVerification();
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {
-		ByteInputStream bis = new ByteInputStream(Base64Util.base64urldecode(rawDataBase64));
+		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));
 		try {
-			return new RawAuthenticateResponse(bis.readSigned(), bis.readInteger(), bis.readAll());
+			return new RawAuthenticateResponse(bis.readSigned(), bis.readInt(), bis.readAll());
+		} catch (IOException ex) {
+			throw new BadInputException("Failed to parse RAW authenticate response", ex);
 		} finally {
 			IOUtils.closeQuietly(bis);
 		}

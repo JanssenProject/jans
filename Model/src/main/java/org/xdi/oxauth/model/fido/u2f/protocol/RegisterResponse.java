@@ -19,7 +19,9 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
-@IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
+@IgnoreMediaTypes("application/*+json")
+// try to ignore jettison as it's recommended here:
+// http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterResponse implements Serializable {
 
@@ -40,8 +42,7 @@ public class RegisterResponse implements Serializable {
 	@JsonIgnore
 	private transient ClientData clientDataRef;
 
-	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData)
-			throws BadInputException {
+	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData) throws BadInputException {
 		this.registrationData = registrationData;
 		this.clientData = clientData;
 		this.clientDataRef = new ClientData(clientData);
@@ -63,8 +64,8 @@ public class RegisterResponse implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RegisterResponse [registrationData=").append(registrationData).append(", clientData=").append(clientData)
-				.append(", clientDataRef=").append(clientDataRef).append("]");
+		builder.append("RegisterResponse [registrationData=").append(registrationData).append(", clientData=").append(clientData).append(", clientDataRef=")
+				.append(clientDataRef).append("]");
 		return builder.toString();
 	}
 

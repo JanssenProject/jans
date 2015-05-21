@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.fido.u2f.protocol;
 
 import java.io.Serializable;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -28,8 +29,7 @@ public class RegisterStatus implements Serializable {
 	@JsonProperty
 	private final String challenge;
 
-	public RegisterStatus(@JsonProperty("status") String status, @JsonProperty("challenge") String challenge)
-			throws BadInputException {
+	public RegisterStatus(@JsonProperty("status") String status, @JsonProperty("challenge") String challenge) throws BadInputException {
 		this.status = status;
 		this.challenge = challenge;
 	}
@@ -39,6 +39,11 @@ public class RegisterStatus implements Serializable {
 	}
 
 	public String getChallenge() {
+		return challenge;
+	}
+
+	@JsonIgnore
+	public String getRequestId() {
 		return challenge;
 	}
 
