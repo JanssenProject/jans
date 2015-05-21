@@ -96,9 +96,6 @@ public class RequestingUserInfoClaimsWithScopeValues extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
     }
 }
