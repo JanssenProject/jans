@@ -29,7 +29,7 @@ public class RegisterRequestMessage implements Serializable {
 	@JsonProperty
 	private final List<RegisterRequest> registerRequests;
 
-	private RegisterRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests,
+	public RegisterRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests,
 			@JsonProperty("registerRequests") List<RegisterRequest> registerRequests) {
 		this.authenticateRequests = authenticateRequests;
 		this.registerRequests = registerRequests;
@@ -43,7 +43,7 @@ public class RegisterRequestMessage implements Serializable {
 		return Collections.unmodifiableList(registerRequests);
 	}
 
-	public RegisterRequest getRegisterRequest(RegisterResponse response) {
+	public RegisterRequest getRegisterRequest() {
 		return Util.firstItem(registerRequests);
 	}
 

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 
 /**
@@ -18,6 +19,7 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
+@IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticateResponse implements Serializable {
 

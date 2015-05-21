@@ -40,6 +40,11 @@ public class AuthenticateRequestMessage implements Serializable {
 		return Util.firstItem(authenticateRequests).getChallenge();
 	}
 
+	@JsonIgnore
+	public String getAppId() {
+		return Util.firstItem(authenticateRequests).getAppId();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
