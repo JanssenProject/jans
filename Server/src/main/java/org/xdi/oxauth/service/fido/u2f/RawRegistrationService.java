@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.io.IOException;
 import java.security.cert.CertificateException;
 
 import org.apache.commons.io.IOUtils;
@@ -22,9 +23,9 @@ import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.xdi.oxauth.model.fido.u2f.message.util.ByteInputStream;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.util.io.ByteDataInputStream;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -50,14 +51,16 @@ public class RawRegistrationService {
 	private SignatureVerification signatureVerification = new BouncyCastleSignatureVerification();
 
 	public RawRegisterResponse parseRawRegisterResponse(String rawDataBase64) throws BadInputException {
-		ByteInputStream bis = new ByteInputStream(Base64Util.base64urldecode(rawDataBase64));
+		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));
 		try {
-			byte reservedByte = bis.readSigned();
-			if (reservedByte != REGISTRATION_RESERVED_BYTE_VALUE) {
-				throw new BadInputException("Incorrect value of reserved byte. Expected: " + REGISTRATION_RESERVED_BYTE_VALUE + ". Was: " + reservedByte);
-			}
 			try {
+				byte reservedByte = bis.readSigned();
+				if (reservedByte != REGISTRATION_RESERVED_BYTE_VALUE) {
+					throw new BadInputException("Incorrect value of reserved byte. Expected: " + REGISTRATION_RESERVED_BYTE_VALUE + ". Was: " + reservedByte);
+				}
 				return new RawRegisterResponse(bis.read(65), bis.read(bis.readUnsigned()), CertificateParser.parseDer(bis), bis.readAll());
+			} catch (IOException ex) {
+				throw new BadInputException("Failed to parse RAW register response", ex);
 			} catch (CertificateException e) {
 				throw new BadInputException("Malformed attestation certificate", e);
 			}

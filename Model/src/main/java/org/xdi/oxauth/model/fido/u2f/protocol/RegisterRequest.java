@@ -64,8 +64,7 @@ public class RegisterRequest implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RegisterRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=")
-				.append(appId).append("]");
+		builder.append("RegisterRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=").append(appId).append("]");
 		return builder.toString();
 	}
 

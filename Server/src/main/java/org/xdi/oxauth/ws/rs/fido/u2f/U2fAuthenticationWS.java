@@ -28,7 +28,7 @@ import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticationStatus;
+import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.xdi.oxauth.service.fido.u2f.AuthenticationService;
@@ -105,7 +105,7 @@ public class U2fAuthenticationWS {
         	String appId = authenticateRequestMessage.getAppId();
         	deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
 
-        	AuthenticationStatus authenticationStatus = new AuthenticationStatus(Constants.RESULT_SUCCESS, requestId);
+        	AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
 
         	// convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asJson(authenticationStatus);

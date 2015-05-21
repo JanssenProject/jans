@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2014, Gluu
  */
+
 package org.xdi.oxauth.model.fido.u2f.message;
 
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
