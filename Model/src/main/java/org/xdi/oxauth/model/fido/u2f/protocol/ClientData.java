@@ -61,6 +61,10 @@ public class ClientData implements Serializable {
 		return data.get(key).asText();
 	}
 
+	public String getRawClientData() {
+		return rawClientData;
+	}
+
 	@Override
 	public String toString() {
 		return rawClientData;
