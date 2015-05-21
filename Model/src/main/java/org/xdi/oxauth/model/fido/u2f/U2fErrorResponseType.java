@@ -28,7 +28,28 @@ public enum U2fErrorResponseType implements IErrorType {
 	 * The FIDO U2F server is currently unable to handle the request due to a
 	 * temporary overloading or maintenance of the server.
 	 */
-	TEMPORARILY_UNAVAILABLE("temporarily_unavailable");
+	TEMPORARILY_UNAVAILABLE("temporarily_unavailable"),
+
+	/**
+	 * The user has no registered devices needed to build authentication request.
+	 */
+	NO_ELIGABLE_DEVICES("no_eligable_devices"),
+
+	/**
+	 * The registered device was compromised.
+	 */
+	DEVICE_COMPROMISED("device_compromised"),
+
+	/**
+	 * The authentication or registration session was expired
+	 */
+	SESSION_EXPIRED("session_expired"),
+	
+	/**
+	 * The authentication or registration response contains invalid data or signature.
+	 */
+	INVALID_RESPONSE("invalid_response");
+	
 
 	private static Map<String, U2fErrorResponseType> lookup = new HashMap<String, U2fErrorResponseType>();
 
