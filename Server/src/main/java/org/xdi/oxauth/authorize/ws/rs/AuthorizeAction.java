@@ -154,15 +154,9 @@ public class AuthorizeAction {
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-            	List<String> acrValuesList = null;
-            	try {
-					acrValuesList = Util.jsonArrayStringAsList(this.acrValues);
-				} catch (JSONException ex) {
-					invalidRequest();
-					return;
-				}
-            	
-            	CustomScriptConfiguration customScriptConfiguration;
+                List<String> acrValuesList = acrValuesList();
+
+                CustomScriptConfiguration customScriptConfiguration;
             	
             	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
                 	customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
@@ -251,6 +245,19 @@ public class AuthorizeAction {
                     invalidRequest();
                 }
             }
+        }
+    }
+
+    /**
+     * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
+     * sent it to us as json array. So we try both.
+     * @return acr value list
+     */
+    private List<String> acrValuesList() {
+        try {
+            return Util.jsonArrayStringAsList(this.acrValues);
+        } catch (JSONException ex) {
+            return Util.splittedStringAsList(acrValues, " ");
         }
     }
 
