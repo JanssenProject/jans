@@ -38,11 +38,17 @@ public class U2fConfiguration {
 	@JsonProperty(value = "registration_finish_endpoint")
 	private String registrationFinishEndpoint;
 
+	@JsonProperty(value = "registration_status_endpoint")
+	private String registrationStatusEndpoint;
+
 	@JsonProperty(value = "authentication_start_endpoint")
 	private String authenticationStartEndpoint;
 
 	@JsonProperty(value = "authentication_finish_endpoint")
 	private String authenticationFinishEndpoint;
+
+	@JsonProperty(value = "authentication_status_endpoint")
+	private String authenticationStatusEndpoint;
 
 	public String getVersion() {
 		return version;
@@ -76,6 +82,14 @@ public class U2fConfiguration {
 		this.registrationFinishEndpoint = registrationFinishEndpoint;
 	}
 
+	public String getRegistrationStatusEndpoint() {
+		return registrationStatusEndpoint;
+	}
+
+	public void setRegistrationStatusEndpoint(String registrationStatusEndpoint) {
+		this.registrationStatusEndpoint = registrationStatusEndpoint;
+	}
+
 	public String getAuthenticationStartEndpoint() {
 		return authenticationStartEndpoint;
 	}
@@ -90,6 +104,14 @@ public class U2fConfiguration {
 
 	public void setAuthenticationFinishEndpoint(String authenticationFinishEndpoint) {
 		this.authenticationFinishEndpoint = authenticationFinishEndpoint;
+	}
+
+	public String getAuthenticationStatusEndpoint() {
+		return authenticationStatusEndpoint;
+	}
+
+	public void setAuthenticationStatusEndpoint(String authenticationStatusEndpoint) {
+		this.authenticationStatusEndpoint = authenticationStatusEndpoint;
 	}
 
 	@Override

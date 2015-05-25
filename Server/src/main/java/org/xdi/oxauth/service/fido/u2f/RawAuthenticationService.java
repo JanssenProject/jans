@@ -11,12 +11,12 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
-import org.xdi.oxauth.crypto.signature.SignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
@@ -42,7 +42,8 @@ public class RawAuthenticationService {
 	@Logger
 	private Log log;
 
-	private SignatureVerification signatureVerification = new BouncyCastleSignatureVerification();
+	@In(value = "bouncyCastleSignatureVerification")
+	private BouncyCastleSignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {
 		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));
