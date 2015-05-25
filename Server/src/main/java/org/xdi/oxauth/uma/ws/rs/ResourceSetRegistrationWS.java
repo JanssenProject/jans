@@ -86,7 +86,7 @@ public class ResourceSetRegistrationWS {
     @ApiOperation(value = "Adds a new resource set description using the POST method",
             notes = "Adds a new resource set description using the POST method. If the request is successful, the authorization server MUST respond with a status message that includes an _id property.")
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized")
     })
     public Response createResourceSet(
             @HeaderParam("Authorization")
