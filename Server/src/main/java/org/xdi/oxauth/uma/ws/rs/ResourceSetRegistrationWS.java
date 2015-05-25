@@ -117,7 +117,7 @@ public class ResourceSetRegistrationWS {
     @ApiOperation(value = "Updates a previously registered resource set description using the PUT method",
             notes = "Updates a previously registered resource set description using the PUT method. If the request is successful, the authorization server MUST respond with a status message that includes an \"_id\" property.")
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized")
     })
     public Response updateResourceSet(@HeaderParam("Authorization") String authorization,
                                       @PathParam("rsid")
@@ -152,7 +152,7 @@ public class ResourceSetRegistrationWS {
             notes = "Reads a previously registered resource set description using the GET method. If the request is successful, the authorization server MUST respond with a status message that includes a body containing the referenced resource set description, along with an \"_id\" property.",
             response = ResourceSet.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized")
     })
     public Response getResourceSet(
             @HeaderParam("Authorization")
@@ -222,7 +222,7 @@ public class ResourceSetRegistrationWS {
                     "The resource server uses this method as a first step in checking whether its understanding of protected resources is in full synchronization with the authorization server's understanding.",
             response = ResourceSet.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Unauthorized")
     })
     public List<String> getResourceSetList(
             @HeaderParam("Authorization")
