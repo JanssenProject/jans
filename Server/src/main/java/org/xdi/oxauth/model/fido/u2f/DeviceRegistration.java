@@ -41,8 +41,7 @@ public class DeviceRegistration implements Serializable {
 	private boolean compromised;
 
 	public DeviceRegistration(@JsonProperty("keyHandle") String keyHandle, @JsonProperty("publicKey") String publicKey,
-			@JsonProperty("attestationCert") String attestationCert, @JsonProperty("counter") long counter,
-			@JsonProperty("compromised") boolean compromised) {
+			@JsonProperty("attestationCert") String attestationCert, @JsonProperty("counter") long counter, @JsonProperty("compromised") boolean compromised) {
 		this.keyHandle = keyHandle;
 		this.publicKey = publicKey;
 		this.attestationCert = attestationCert;
@@ -99,9 +98,8 @@ public class DeviceRegistration implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceRegistration [keyHandle=").append(keyHandle).append(", publicKey=").append(publicKey)
-				.append(", attestationCert=").append(attestationCert).append(", counter=").append(counter).append(", compromised=")
-				.append(compromised).append("]");
+		builder.append("DeviceRegistration [keyHandle=").append(keyHandle).append(", publicKey=").append(publicKey).append(", attestationCert=")
+				.append(attestationCert).append(", counter=").append(counter).append(", compromised=").append(compromised).append("]");
 		return builder.toString();
 	}
 

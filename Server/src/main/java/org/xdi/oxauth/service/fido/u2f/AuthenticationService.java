@@ -20,7 +20,6 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
-import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
@@ -58,7 +57,8 @@ public class AuthenticationService {
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
-	private ChallengeGenerator challengeGenerator = new RandomChallengeGenerator();
+	@In(value = "randomChallengeGenerator")
+	private ChallengeGenerator challengeGenerator;
 
 	private final Map<String, AuthenticateRequestMessage> requestStorage = new HashMap<String, AuthenticateRequestMessage>();
 
@@ -110,26 +110,11 @@ public class AuthenticationService {
 			throws BadInputException, DeviceCompromisedException {
 		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(requestMessage.getAppId(), userName);
 
-		return finishAuthentication(requestMessage, response, deviceRegistrations, null);
+		return finishAuthentication(requestMessage, response, deviceRegistrations, userName, null);
 	}
 
-	/**
-	 * Finishes a previously started high-level authentication.
-	 *
-	 * @param requestMessage
-	 *            the AuthenticateRequestMessage created by calling
-	 *            startAuthentication
-	 * @param response
-	 *            the response from the device/client.
-	 * @param devices
-	 *            the devices currently registered to the user.
-	 * @param facets
-	 *            A list of valid facets to verify against.
-	 * @return The (updated) DeviceRegistration that was authenticated against.
-	 * @throws org.xdi.oxauth.model.fido.u2f.exception.BadInputException
-	 */
 	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response,
-			List<DeviceRegistration> deviceRegistrations, Set<String> facets) throws BadInputException, DeviceCompromisedException {
+			List<DeviceRegistration> deviceRegistrations, String userName, Set<String> facets) throws BadInputException, DeviceCompromisedException {
 		final AuthenticateRequest request = getAuthenticateRequest(requestMessage, response);
 
 		DeviceRegistration usedDeviceRegistration = null;
@@ -157,7 +142,7 @@ public class AuthenticationService {
 		rawAuthenticateResponse.checkUserPresence();
 		usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
-		deviceRegistrationService.updateDeviceRegistration(usedDeviceRegistration);
+		deviceRegistrationService.updateDeviceRegistration(userName, usedDeviceRegistration);
 
 		return usedDeviceRegistration;
 	}

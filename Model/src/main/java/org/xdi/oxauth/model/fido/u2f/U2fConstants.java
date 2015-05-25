@@ -15,6 +15,4 @@ public class U2fConstants {
 
 	public static final String U2F_PROTOCOL_VERSION = "U2F_V2";
 
-	public static final int U2F_MAX_RESPONSE_SIZE = 20000;
-
 }
