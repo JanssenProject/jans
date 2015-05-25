@@ -83,7 +83,7 @@ public class PermissionRegistrationWS {
             notes = "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 400, message = "Bad Request")
     })
     public Response registerResourceSetPermission(@Context HttpServletRequest request,
                                                   @HeaderParam("Authorization") String authorization,
