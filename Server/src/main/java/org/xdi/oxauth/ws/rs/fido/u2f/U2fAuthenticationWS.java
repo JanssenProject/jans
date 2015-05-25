@@ -23,14 +23,11 @@ import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.xdi.oxauth.service.fido.u2f.AuthenticationService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -47,88 +44,86 @@ import com.wordnik.swagger.annotations.Api;
 @Name("u2fAuthenticationRestWebService")
 public class U2fAuthenticationWS {
 
-    @Logger
-    private Log log;
+	@Logger
+	private Log log;
 
-    @In
-    private ErrorResponseFactory errorResponseFactory;
+	@In
+	private ErrorResponseFactory errorResponseFactory;
 
-    @In
-    private AuthenticationService authenticationService;
+	@In
+	private AuthenticationService authenticationService;
 
-    @In
-    private DeviceRegistrationService deviceRegistrationService;
+	@In
+	private DeviceRegistrationService deviceRegistrationService;
 
-    @GET
-    @Produces({"application/json"})
-    @Path("/start")
-    public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId) {
-        try {
-        	AuthenticateRequestMessage authenticateRequestMessage = authenticationService.buildAuthenticateRequestMessage(appId, userName);
-        	authenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage);
+	@GET
+	@Produces({ "application/json" })
+	@Path("/start")
+	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId) {
+		try {
+			AuthenticateRequestMessage authenticateRequestMessage = authenticationService.buildAuthenticateRequestMessage(appId, userName);
+			authenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage);
 
-            // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-            final String entity = ServerUtil.asJson(null);
+			// convert manually to avoid possible conflict between resteasy
+			// providers, e.g. jettison, jackson
+			final String entity = ServerUtil.asJson(null);
 
-            return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
-        } catch (Exception ex) {
-            log.error("Exception happened", ex);
-            if (ex instanceof WebApplicationException) {
-                throw (WebApplicationException) ex;
-            }
-            
-            if (ex instanceof NoEligableDevicesException) {
-                throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.NO_ELIGABLE_DEVICES)).build());
-            }
+			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
+		} catch (Exception ex) {
+			log.error("Exception happened", ex);
+			if (ex instanceof WebApplicationException) {
+				throw (WebApplicationException) ex;
+			}
 
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
-        }
-    }
+			if (ex instanceof NoEligableDevicesException) {
+				throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
+						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.NO_ELIGABLE_DEVICES)).build());
+			}
 
+			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
+		}
+	}
 
-    @POST
-    @Path("/finish")
-    public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") AuthenticateResponse authenticateResponse) {
-        try {
-        	String requestId = authenticateResponse.getRequestId();
-        	AuthenticateRequestMessage authenticateRequestMessage = authenticationService.getAuthenticationRequestMessage(requestId);
-        	if (authenticateRequestMessage == null) {
-                throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
-        	}
-        	authenticationService.removeAuthenticationRequestMessage(requestId);
-        	
-        	DeviceRegistration deviceRegistration = authenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
-        	
-        	String appId = authenticateRequestMessage.getAppId();
-        	deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
+	@POST
+	@Path("/finish")
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") AuthenticateResponse authenticateResponse) {
+		try {
+			String requestId = authenticateResponse.getRequestId();
+			AuthenticateRequestMessage authenticateRequestMessage = authenticationService.getAuthenticationRequestMessage(requestId);
+			if (authenticateRequestMessage == null) {
+				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
+						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
+			}
+			authenticationService.removeAuthenticationRequestMessage(requestId);
 
-        	AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
+			authenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
 
-        	// convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-            final String entity = ServerUtil.asJson(authenticationStatus);
+			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
 
-            return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
-        } catch (Exception ex) {
-            log.error("Exception happened", ex);
-            if (ex instanceof WebApplicationException) {
-                throw (WebApplicationException) ex;
-            }
+			// convert manually to avoid possible conflict between resteasy
+			// providers, e.g. jettison, jackson
+			final String entity = ServerUtil.asJson(authenticationStatus);
 
-            if (ex instanceof BadInputException) {
-                throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.INVALID_RESPONSE)).build());
-            }
+			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
+		} catch (Exception ex) {
+			log.error("Exception happened", ex);
+			if (ex instanceof WebApplicationException) {
+				throw (WebApplicationException) ex;
+			}
 
-            if (ex instanceof DeviceCompromisedException) {
-                throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.DEVICE_COMPROMISED)).build());
-            }
+			if (ex instanceof BadInputException) {
+				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
+						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.INVALID_REQUEST)).build());
+			}
 
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
-        }
-    }
+			if (ex instanceof DeviceCompromisedException) {
+				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
+						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.DEVICE_COMPROMISED)).build());
+			}
+
+			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
+		}
+	}
 }

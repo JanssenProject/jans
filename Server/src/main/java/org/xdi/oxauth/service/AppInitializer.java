@@ -237,28 +237,6 @@ public class AppInitializer {
 		return ldapAuthEntryManager;
 	}
 
-	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-	public SmtpConfiguration createSmtpConfiguration() {
-		GluuAppliance appliance = applianceService.getAppliance();
-		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();
-		
-		if (smtpConfiguration == null) {
-			return null;
-		}
-
-		String password = smtpConfiguration.getPassword();
-		if (StringHelper.isNotEmpty(password)) {
-			try {
-				EncryptionService securityService = EncryptionService.instance();
-				smtpConfiguration.setPasswordDecrypted(securityService.decrypt(password));
-			} catch (EncryptionException ex) {
-				log.error("Failed to decript SMTP user password", ex);
-			}
-		}
-		
-		return smtpConfiguration;
-	}
-
     private void createConnectionProvider() {
         this.ldapConfig =  ConfigurationFactory.getLdapConfiguration();
 

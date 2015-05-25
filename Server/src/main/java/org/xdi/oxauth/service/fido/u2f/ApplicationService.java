@@ -26,8 +26,6 @@ import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
 @AutoCreate
 public class ApplicationService {
 
-	public static final String DISABLE_INSTRUCTIONS = "To disable this check, instantiate the U2F object using U2F.withoutAppIdValidation()";
-
 	private boolean validateApplication = true;
 
 	public boolean isValidateApplication() {
@@ -39,17 +37,17 @@ public class ApplicationService {
 	 * be incompatible with the U2F specification or any major U2F Client
 	 * implementation.
 	 *
-	 * @param appId
-	 *            the App ID to be validated
+	 * @param appId the App ID to be validated
 	 */
 	public void checkIsValid(String appId) {
 		if (!appId.contains(":")) {
-			throw new BadConfigurationException("App ID does not look like a valid facet or URL. Web facets must start with 'https://'. "
-					+ DISABLE_INSTRUCTIONS);
+			throw new BadConfigurationException("App ID does not look like a valid facet or URL. Web facets must start with 'https://'.");
 		}
+
 		if (appId.startsWith("http:")) {
-			throw new BadConfigurationException("HTTP is not supported for App IDs (by Chrome). Use HTTPS instead. " + DISABLE_INSTRUCTIONS);
+			throw new BadConfigurationException("HTTP is not supported for App IDs. Use HTTPS instead.");
 		}
+
 		if (appId.startsWith("https://")) {
 			URI url = checkValidUrl(appId);
 			checkPathIsNotSlash(url);
@@ -60,8 +58,7 @@ public class ApplicationService {
 	private void checkPathIsNotSlash(URI url) {
 		if ("/".equals(url.getPath())) {
 			throw new BadConfigurationException(
-					"The path of the URL set as App ID is '/'. This is probably not what you want -- remove the trailing slash of the App ID URL. "
-							+ DISABLE_INSTRUCTIONS);
+					"The path of the URL set as App ID is '/'. This is probably not what you want -- remove the trailing slash of the App ID URL.");
 		}
 	}
 
@@ -77,8 +74,7 @@ public class ApplicationService {
 
 	private void checkNotIpAddress(URI url) {
 		if (InetAddressUtility.isIpAddress(url.getAuthority()) || (url.getHost() != null && InetAddressUtility.isIpAddress(url.getHost()))) {
-			throw new BadConfigurationException("App ID must not be an IP-address, since it is not supported (by Chrome). Use a host name instead. "
-					+ DISABLE_INSTRUCTIONS);
+			throw new BadConfigurationException("App ID must not be an IP-address, since it is not supported. Use a host name instead.");
 		}
 	}
 }

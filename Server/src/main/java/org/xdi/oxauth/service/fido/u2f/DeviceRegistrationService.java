@@ -6,9 +6,10 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -40,6 +41,8 @@ public class DeviceRegistrationService {
 	@Logger
 	private Log log;
 
+	private HashMap<String, List<DeviceRegistration>> devices = new HashMap<String, List<DeviceRegistration>>();
+
 	public void addBranch(final String userName) {
 		SimpleBranch branch = new SimpleBranch();
 		branch.setOrganizationalUnitName("device_registration");
@@ -49,130 +52,33 @@ public class DeviceRegistrationService {
 	}
 
 	public List<DeviceRegistration> findUserDeviceRegistrations(String appId, String userName) {
-		// TODO Auto-generated method stub
-		return null;
+		return devices.get(userName);
 	}
 
 	public void addUserDeviceRegistration(String userName, String appId, DeviceRegistration deviceRegistration) {
-		// TODO Auto-generated method stub
+		List<DeviceRegistration> userDevices = devices.get(userName);
+		if (userDevices == null) {
+			userDevices = new ArrayList<DeviceRegistration>();
+			devices.put(userName, userDevices);
+		}
 
+		userDevices.add(deviceRegistration);
 	}
 
-	public void updateDeviceRegistration(DeviceRegistration usedDeviceRegistration) {
-		// TODO Auto-generated method stub
+	public void updateDeviceRegistration(String userName, DeviceRegistration usedDeviceRegistration) {
+		List<DeviceRegistration> userDevices = devices.get(userName);
+		if (userDevices != null) {
+			for (Iterator<DeviceRegistration> it = userDevices.iterator(); it.hasNext();) {
+				DeviceRegistration userDevice = (DeviceRegistration) it.next();
+				if (userDevice.getKeyHandle() == usedDeviceRegistration.getKeyHandle()) {
+					it.remove();
+					break;
+				}
+			}
 
+			userDevices.add(usedDeviceRegistration);
+		}
 	}
-
-	// /**
-	// * Add new resource set description entry
-	// *
-	// * @param resourceSet resourceSet
-	// */
-	// public void addResourceSet(ResourceSet resourceSet) {
-	// validate(resourceSet);
-	// ldapEntryManager.persist(resourceSet);
-	// }
-	//
-	// public void validate(ResourceSet resourceSet) {
-	// Preconditions.checkArgument(StringUtils.isNotBlank(resourceSet.getName()),
-	// "Name is required for resource set.");
-	// Preconditions.checkArgument(resourceSet.getScopes() != null &&
-	// !resourceSet.getScopes().isEmpty(),
-	// "Scope must be specified for resource set.");
-	// }
-	//
-	// /**
-	// * Update resource set description entry
-	// *
-	// * @param resourceSet resourceSet
-	// */
-	// public void updateResourceSet(ResourceSet resourceSet) {
-	// validate(resourceSet);
-	// ldapEntryManager.merge(resourceSet);
-	// }
-	//
-	// /**
-	// * Remove resource set description entry
-	// *
-	// * @param resourceSet resourceSet
-	// */
-	// public void remove(ResourceSet resourceSet) {
-	// ldapEntryManager.remove(resourceSet);
-	// }
-	//
-	// public void remove(List<ResourceSet> resourceSet) {
-	// for (ResourceSet resource : resourceSet) {
-	// remove(resource);
-	// }
-	// }
-	//
-	// /**
-	// * Get all resource set descriptions
-	// *
-	// * @return List of resource set descriptions
-	// */
-	// public List<ResourceSet> getAllResourceSets(String...
-	// ldapReturnAttributes) {
-	// return ldapEntryManager.findEntries(getBaseDnForResourceSet(),
-	// ResourceSet.class, ldapReturnAttributes, null);
-	// }
-	//
-	// /**
-	// * Get all resource set descriptions
-	// *
-	// * @return List of resource set descriptions
-	// */
-	// public List<ResourceSet> getResourceSetsByAssociatedClient(String
-	// p_associatedClientDn) {
-	// try {
-	// if (StringUtils.isNotBlank(p_associatedClientDn)) {
-	// final Filter filter =
-	// Filter.create(String.format("&(oxAssociatedClient=%s)",
-	// p_associatedClientDn));
-	// return ldapEntryManager.findEntries(getBaseDnForResourceSet(),
-	// ResourceSet.class, filter);
-	// }
-	// } catch (Exception e) {
-	// log.error(e.getMessage(), e);
-	// }
-	// return Collections.emptyList();
-	// }
-	//
-	// /**
-	// * Get resource set descriptions by example
-	// *
-	// * @param resourceSet ResourceSet
-	// * @return ResourceSet which conform example
-	// */
-	// public List<ResourceSet> findResourceSets(ResourceSet resourceSet) {
-	// return ldapEntryManager.findEntries(resourceSet);
-	// }
-	//
-	// public boolean containsBranch() {
-	// return ldapEntryManager.contains(SimpleBranch.class,
-	// getDnForResourceSet(null));
-	// }
-	//
-	// /**
-	// * Check if LDAP server contains resource set description with specified
-	// attributes
-	// *
-	// * @return True if resource set description with specified attributes
-	// exist
-	// */
-	// public boolean containsResourceSet(ResourceSet resourceSet) {
-	// return ldapEntryManager.contains(resourceSet);
-	// }
-	//
-	// /**
-	// * Get resource set description by DN
-	// *
-	// * @param dn Resource set description DN
-	// * @return Resource set description
-	// */
-	// public ResourceSet getResourceSetByDn(String dn) {
-	// return ldapEntryManager.find(ResourceSet.class, dn);
-	// }
 
 	/**
 	 * Build DN string for resource set description
