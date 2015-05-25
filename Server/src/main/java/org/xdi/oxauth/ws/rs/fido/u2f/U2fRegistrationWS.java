@@ -19,10 +19,8 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
@@ -109,7 +107,7 @@ public class U2fRegistrationWS {
 
 			if (ex instanceof BadInputException) {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.INVALID_RESPONSE)).build());
+						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.INVALID_REQUEST)).build());
 			}
 
 			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)

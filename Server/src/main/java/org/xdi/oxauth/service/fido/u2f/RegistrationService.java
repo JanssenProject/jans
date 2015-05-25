@@ -20,7 +20,6 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
-import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -30,7 +29,7 @@ import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 
 /**
  * Provides operations with U2F registration requests
@@ -60,7 +59,8 @@ public class RegistrationService {
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
-	private ChallengeGenerator challengeGenerator = new RandomChallengeGenerator();
+	@In(value = "randomChallengeGenerator")
+	private ChallengeGenerator challengeGenerator;
 
 	private final Map<String, RegisterRequestMessage> requestStorage = new HashMap<String, RegisterRequestMessage>();
 
@@ -96,40 +96,28 @@ public class RegistrationService {
 	}
 
 	public RegisterRequest startRegistration(String appId, byte[] challenge) {
-		return new RegisterRequest(JwtUtil.base64urlencode(challenge), appId);
+		return new RegisterRequest(Base64Util.base64urlencode(challenge), appId);
 	}
 
 	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName) throws BadInputException {
-		return finishRegistration(requestMessage, response, null, userName);
+		return finishRegistration(requestMessage, response, userName, null);
 	}
 
-	/**
-	 * Finishes a previously started high-level registration.
-	 *
-	 * @param registerRequestMessage
-	 *            the RegisterRequestMessage created by calling
-	 *            startRegistration
-	 * @param response
-	 *            The response from the device/client.
-	 * @param facets
-	 *            A list of valid facets to verify against.
-	 * @return a DeviceRegistration object, holding information about the
-	 *         registered device. Servers should persist this.
-	 * @throws org.xdi.oxauth.model.fido.u2f.exception.BadInputException
-	 */
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, Set<String> facets, String userName) throws BadInputException {
+	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName, Set<String> facets)
+			throws BadInputException {
 		RegisterRequest request = requestMessage.getRegisterRequest();
+		String appId = request.getAppId();
+
 		ClientData clientData = response.getClientData();
 		clientDataValidationService.checkContent(clientData, RawRegistrationService.REGISTER_TYPE, request.getChallenge(), facets);
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
-		rawRegistrationService.checkSignature(request.getAppId(), clientData, rawRegisterResponse);
+		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
 		DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
-    	
-    	String appId = requestMessage.getRegisterRequest().getAppId();
-    	deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
 
-    	return deviceRegistration;
+		deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
+
+		return deviceRegistration;
 	}
 
 	public void storeRegistrationRequestMessage(RegisterRequestMessage requestMessage) {
