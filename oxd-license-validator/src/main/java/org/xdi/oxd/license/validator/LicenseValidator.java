@@ -41,7 +41,7 @@ public class LicenseValidator {
             final String subject = decryptedLicense.getSubject();
 //            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
 
-            System.out.println("Metadata: " + subject);
+            System.out.println(subject);
         } catch (InvalidLicenseException e) {
             System.out.println("License is invalid.");
         } catch (Exception e) {
