@@ -70,10 +70,19 @@ public class RedirectionUriService {
                     log.debug("Validating redirection URI: clientIdentifier = {0}, redirectionUri = {1}, found = {2}",
                             clientIdentifier, redirectionUri, redirectUris.length);
 
+                    final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
+
                     for (String uri : redirectUris) {
                         log.debug("Comparing {0} == {1}", uri, redirectionUri);
-                        if ((uri.equals(redirectionUri) && getParams(uri).size() == 0) ||
-                                uri.equals(redirectionUri) && getParams(uri).size() > 0 && compareParams(redirectionUri, uri)) {
+                        if (uri.equals(redirectionUri)) { // compare complete uri
+                            return redirectionUri;
+                        }
+
+                        String uriWithoutParams = uriWithoutParams(uri);
+                        final Map<String, String> params = getParams(uri);
+
+                        if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
+                                uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
                             return redirectionUri;
                         }
                     }
@@ -137,6 +146,16 @@ public class RedirectionUriService {
             }
         }
         return params;
+    }
+
+    private String uriWithoutParams(String uri) {
+        if (uri != null) {
+            int paramsIndex = uri.indexOf("?");
+            if (paramsIndex != -1) {
+                return uri.substring(0, paramsIndex);
+            }
+        }
+        return uri;
     }
 
     private boolean compareParams(String uri1, String uri2) {
