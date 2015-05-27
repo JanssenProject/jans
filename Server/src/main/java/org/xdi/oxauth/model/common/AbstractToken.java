@@ -6,16 +6,16 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.token.HandleTokenFactory;
+import org.xdi.oxauth.model.util.JwtUtil;
+
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.JwtUtil;
 
 /**
  * <p>
@@ -41,9 +41,6 @@ public abstract class AbstractToken {
     private Date expirationDate;
     private boolean revoked;
     private boolean expired;
-
-    @LdapAttribute(name = "oxAuthenticationLevel")
-    private String authLevel;
 
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
@@ -190,24 +187,6 @@ public abstract class AbstractToken {
     public synchronized void setExpired(boolean expired) {
         this.expired = expired;
     }
-
-    /**
-     * Returns the authentication level.
-     *
-     * @return The authentication level.
-     */
-    public String getAuthLevel() {
-		return authLevel;
-	}
-
-    /**
-     * Sets the authentication level.
-     *
-     * @param authLevel The authentication level.
-     */
-	public void setAuthLevel(String authLevel) {
-		this.authLevel = authLevel;
-	}
 
     /**
      * Returns the authentication mode.

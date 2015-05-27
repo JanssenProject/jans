@@ -79,7 +79,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authMode, String authLevel)
+                                 Map<String, String> claims, String acrValues)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
@@ -235,22 +235,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public String getAuthLevel() {
-        return m_grant.getAuthLevel();
+    public String getAcrValues() {
+        return m_grant.getAcrValues();
     }
 
     @Override
-    public void setAuthLevel(String authLevel) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
-    }
-
-    @Override
-    public String getAuthMode() {
-        return m_grant.getAuthMode();
-    }
-
-    @Override
-    public void setAuthMode(String authMode) {
+    public void setAcrValues(String authMode) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 

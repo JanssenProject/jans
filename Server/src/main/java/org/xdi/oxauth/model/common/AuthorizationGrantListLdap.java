@@ -6,12 +6,9 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.RDN;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
@@ -26,9 +23,11 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.RDN;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -200,7 +199,6 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
 
                 final String grantId = tokenLdap.getGrantId();
                 final String jwtRequest = tokenLdap.getJwtRequest();
-                final String authLevel = tokenLdap.getAuthLevel();
                 final String authMode = tokenLdap.getAuthMode();
 
                 result.setNonce(nonce);
@@ -218,8 +216,7 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
                     }
                 }
 
-                result.setAuthLevel(authLevel);
-                result.setAuthMode(authMode);
+                result.setAcrValues(authMode);
 
                 if (tokenLdap.getTokenTypeEnum() != null) {
                     switch (tokenLdap.getTokenTypeEnum()) {
