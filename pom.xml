@@ -38,6 +38,7 @@
     <module>oxd-license-server</module>
     <module>oxd-license-client</module>
     <module>oxd-license-admin</module>
+    <module>oxd-license-validator</module>
   </modules>
 
   <repositories>
