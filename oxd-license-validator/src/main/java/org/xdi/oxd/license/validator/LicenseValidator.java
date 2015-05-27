@@ -4,9 +4,13 @@ import com.google.common.base.Preconditions;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.exception.InvalidLicenseException;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.xdi.oxd.license.client.Jackson;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
+
+import java.io.IOException;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -17,7 +21,7 @@ public class LicenseValidator {
 
     private static final String ARGUMENTS_MESSAGE = "java org.xdi.oxd.license.validator.LicenseValidator <license> <public key> <public password> <license password>";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("Validator expects: " + ARGUMENTS_MESSAGE);
         Preconditions.checkArgument(args.length == 4, "Please specify arguments for program as following: " + ARGUMENTS_MESSAGE);
 
@@ -28,7 +32,8 @@ public class LicenseValidator {
         validate(publicKey, publicPassword, licensePassword, license);
     }
 
-    public static void validate(String publicKey, String publicPassword, String licensePassword, String license) {
+    public static void validate(String publicKey, String publicPassword, String licensePassword, String license) throws IOException {
+        Output output = new Output();
         try {
             final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(license);
 
@@ -36,17 +41,18 @@ public class LicenseValidator {
 
             ALicense decryptedLicense = manager.decryptAndVerifyLicense(signedLicense);// DECRYPT signed license
             manager.validateLicense(decryptedLicense);
-            System.out.println("License is valid!");
+            output.setValid(true);
 
             final String subject = decryptedLicense.getSubject();
-//            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
+            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
+            output.setMetadata(metadata);
 
-            System.out.println(subject);
         } catch (InvalidLicenseException e) {
-            System.out.println("License is invalid.");
+            //System.out.println("License is invalid.");
         } catch (Exception e) {
             System.out.println("Something bad happens: " + e.getMessage());
             System.out.println(ExceptionUtils.getFullStackTrace(e));
         }
+        System.out.println(Jackson.asJsonSilently(output));
     }
 }
