@@ -91,12 +91,6 @@ public class AuthorizeAction {
     @In("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
 
-    @RequestParameter("auth_level")
-    private String authLevel;
-
-    @RequestParameter("auth_mode")
-    private String authMode;
-
     @In
     private Identity identity;
 
@@ -160,21 +154,17 @@ public class AuthorizeAction {
             	
             	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
                 	customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
-            	} else {
-            		customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, 1, this.authLevel, this.authMode);
             	}
 
                 if (customScriptConfiguration == null) {
-                    log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, auth_mode: {1}, auth_level: {2}", 1, authMode, authLevel);
+                    log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
                     permissionDenied();
                     return;
                 }
 
-                this.authMode = customScriptConfiguration.getName();
-                this.authLevel = Integer.toString(customScriptConfiguration.getLevel());
+                String authMode = customScriptConfiguration.getName();
 
-                requestParameterMap.put("auth_mode", this.authMode);
-                requestParameterMap.put("auth_level", this.authLevel);
+                requestParameterMap.put("acr_values", authMode);
                 requestParameterMap.put("auth_step", Integer.toString(1));
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
