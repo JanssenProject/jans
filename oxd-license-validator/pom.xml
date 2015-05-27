@@ -100,7 +100,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>org.xdi.oxd.ping.Ping</mainClass>
+                                    <mainClass>org.xdi.oxd.license.validator.LicenseValidator</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -119,7 +119,7 @@
                         <!--<configuration>-->
                             <!--<archive>-->
                                 <!--<manifest>-->
-                                    <!--<mainClass>org.xdi.oxd.ping.Ping</mainClass>-->
+                                    <!--<mainClass>org.xdi.oxd.license.validator.LicenseValidator</mainClass>-->
                                 <!--</manifest>-->
                             <!--</archive>-->
                             <!--<descriptors>-->
