@@ -87,8 +87,7 @@ public class IntrospectionWebService {
                                 response.setActive(tokenToIntrospect.isValid());
                                 response.setExpiresAt(tokenToIntrospect.getExpirationDate());
                                 response.setIssuedAt(tokenToIntrospect.getCreationDate());
-                                response.setAuthLevel(tokenToIntrospect.getAuthLevel());
-                                response.setAuthMode(tokenToIntrospect.getAuthMode());
+                                response.setAcrValues(tokenToIntrospect.getAuthMode());
                             }
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();

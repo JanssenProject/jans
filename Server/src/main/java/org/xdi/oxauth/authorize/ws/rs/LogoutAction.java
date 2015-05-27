@@ -88,7 +88,7 @@ public class LogoutAction {
 			return false;
 		}
 
-		String authMode = authorizationGrant.getAuthMode();
+		String authMode = authorizationGrant.getAcrValues();
 		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(authMode);
 		if (isExternalAuthenticatorLogoutPresent) {
 			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", authMode);

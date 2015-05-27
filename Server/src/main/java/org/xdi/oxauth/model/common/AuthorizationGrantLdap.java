@@ -77,8 +77,7 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
                 for (TokenLdap t : grants) {
                     t.setNonce(nonce);
                     t.setScope(scopes);
-                    t.setAuthLevel(getAuthLevel());
-                    t.setAuthMode(getAuthMode());
+                    t.setAuthMode(getAcrValues());
                     t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
 
                     final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
@@ -133,20 +132,18 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode)
+                                 Map<String, String> claims, String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode, accessToken, claims);
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
-                tokenLdap.setAuthLevel(authLevel);
                 tokenLdap.setAuthMode(authMode);
                 persist(tokenLdap);
             }
 
             // is it really neccessary to propagate to all tokens?
-            setAuthLevel(authLevel);
-            setAuthMode(authMode);
+            setAcrValues(authMode);
             save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
@@ -209,7 +206,6 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
         result.setTokenCode(p_token.getCode());
         result.setUserId(getUserId());
         result.setScope(getScopesAsString());
-        result.setAuthLevel(p_token.getAuthLevel());
         result.setAuthMode(p_token.getAuthMode());
         result.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
 

@@ -91,10 +91,9 @@ public class IdTokenFactory {
 
         jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
-        // TODO: acr
-        //if (authenticationContextClassReference != null) {
-        //    jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authenticationContextClassReference);
-        //}
+        if (authorizationGrant.getAcrValues() != null) {
+            jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
+        }
         if (StringUtils.isNotBlank(nonce)) {
             jwt.getClaims().setClaim(JwtClaimName.NONCE, nonce);
         }
@@ -113,8 +112,7 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.getConfiguration().getOxOpenIdConnectVersion());
 
         if (claims != null) {
-            for (Iterator<String> it = claims.keySet().iterator(); it.hasNext(); ) {
-                String key = it.next();
+            for (String key : claims.keySet()) {
                 String value = claims.get(key);
                 jwt.getClaims().setClaim(key, value);
             }
@@ -183,10 +181,9 @@ public class IdTokenFactory {
 
         jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
-        // TODO: acr
-        //if (authenticationContextClassReference != null) {
-        //    jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authenticationContextClassReference);
-        //}
+        if (authorizationGrant.getAcrValues() != null) {
+            jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
+        }
         if (StringUtils.isNotBlank(nonce)) {
             jwe.getClaims().setClaim(JwtClaimName.NONCE, nonce);
         }

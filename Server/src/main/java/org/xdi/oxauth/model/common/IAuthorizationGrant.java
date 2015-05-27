@@ -43,7 +43,7 @@ public interface IAuthorizationGrant {
     public RefreshToken createRefreshToken();
 
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode)
+                                 Map<String, String> claims, String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException;
 
     public RefreshToken getRefreshToken(String refreshTokenCode);
@@ -106,13 +106,9 @@ public interface IAuthorizationGrant {
 
     public void setAccessTokens(List<AccessToken> accessTokens);
 
-    public String getAuthLevel();
+    public String getAcrValues();
 
-    public void setAuthLevel(String authLevel);
-
-    public String getAuthMode();
-
-    public void setAuthMode(String authMode);
+    public void setAcrValues(String authMode);
 
     /**
      * Saves changes asynchronously
