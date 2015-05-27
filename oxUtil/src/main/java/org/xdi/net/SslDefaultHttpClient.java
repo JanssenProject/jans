@@ -44,6 +44,8 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
 	
 	private boolean useTrustManager = false;
 	private boolean useKeyManager = false;
+	 
+	public SslDefaultHttpClient() {}
 
 	public SslDefaultHttpClient(TrustManager trustManager) {
         this.trustManagers = new TrustManager[] { trustManager };
@@ -71,7 +73,7 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
         
         this.useKeyManager = StringHelper.isNotEmpty(keyStoreType) && StringHelper.isNotEmpty(keyStorePath) && StringHelper.isNotEmpty(keyStorePassword);
     }
- 
+
 	@Override
     protected ClientConnectionManager createClientConnectionManager() {
         SchemeRegistry registry = new SchemeRegistry();
@@ -105,6 +107,8 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
         } catch (Exception ex) {
             throw new IllegalArgumentException("Failed to load keystore", ex);
         }
+        
+        
     }
 
 	private TrustManager[] getTrustManagers() throws Exception {
