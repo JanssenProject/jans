@@ -39,6 +39,8 @@ public class AppModule extends AbstractModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(AppModule.class);
 
+    private static final String ENCRYPTION_KEY = "123456789012345678901234567890";
+
     @Override
     protected void configure() {
         bind(KeyPairService.class);
@@ -53,7 +55,7 @@ public class AppModule extends AbstractModule {
     @Singleton
     public LdapEntryManager provideLdapManager() throws StringEncrypter.EncryptionException {
         final FileConfiguration fileConfiguration = ConfigurationFactory.getLdapConfiguration();
-        final Properties props = PropertiesDecrypter.decryptProperties(StringEncrypter.defaultInstance(), fileConfiguration.getProperties());
+        final Properties props = PropertiesDecrypter.decryptProperties(StringEncrypter.instance(ENCRYPTION_KEY), fileConfiguration.getProperties());
         final LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(props);
         return new LdapEntryManager(new OperationsFacade(connectionProvider));
     }
