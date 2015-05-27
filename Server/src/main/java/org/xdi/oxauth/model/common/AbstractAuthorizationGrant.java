@@ -6,16 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -26,6 +16,16 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.ScopeService;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -51,8 +51,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private AuthorizationCode authorizationCode;
     private String nonce;
 
-    private String authLevel;
-    private String authMode;
+    private String acrValues;
 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
@@ -183,20 +182,12 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         return user;
     }
 
-    public String getAuthLevel() {
-        return authLevel;
+    public String getAcrValues() {
+        return acrValues;
     }
 
-    public void setAuthLevel(String authLevel) {
-        this.authLevel = authLevel;
-    }
-
-    public String getAuthMode() {
-        return authMode;
-    }
-
-    public void setAuthMode(String authMode) {
-        this.authMode = authMode;
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
     }
 
     /**
@@ -259,8 +250,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         int lifetime = ConfigurationFactory.getConfiguration().getShortLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
-        accessToken.setAuthLevel(getAuthLevel());
-        accessToken.setAuthMode(getAuthMode());
+        accessToken.setAuthMode(getAcrValues());
 
         return accessToken;
     }
@@ -270,8 +260,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         int lifetime = ConfigurationFactory.getConfiguration().getLongLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
-        accessToken.setAuthLevel(getAuthLevel());
-        accessToken.setAuthMode(getAuthMode());
+        accessToken.setAuthMode(getAcrValues());
 
         return accessToken;
     }
@@ -281,8 +270,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         int lifetime = ConfigurationFactory.getConfiguration().getRefreshTokenLifetime();
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
-        refreshToken.setAuthLevel(getAuthLevel());
-        refreshToken.setAuthMode(getAuthMode());
+        refreshToken.setAuthMode(getAcrValues());
 
         return refreshToken;
     }

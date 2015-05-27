@@ -109,11 +109,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders,
+            String sessionId, String accessToken, String originHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, authLevel, authMode, HttpMethod.GET, originHeaders,
+                requestSessionId, sessionId, accessToken, HttpMethod.GET, originHeaders,
                 httpRequest, httpResponse, securityContext);
     }
 
@@ -122,11 +122,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String authLevel, String authMode, String originHeaders,
+            String sessionId, String accessToken, String originHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, authLevel, authMode, HttpMethod.POST, originHeaders,
+                requestSessionId, sessionId, accessToken, HttpMethod.POST, originHeaders,
                 httpRequest, httpResponse, securityContext);
     }
 
@@ -134,7 +134,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String authLevel, String authMode, String method, String originHeaders,
+            String sessionId, String accessToken, String method, String originHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
@@ -147,7 +147,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 state, request, securityContext.isSecure(), requestSessionId, sessionId);
 
         log.debug("Attempting to request authorization: "
-                + "acrValues = {0}, amrValues = {1}, authLevel = {2}, authMode = {3}, originHeaders = {4}", acrValuesStr, amrValuesStr, authLevel, authMode, originHeaders);
+                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}", acrValuesStr, amrValuesStr, originHeaders);
 
         ResponseBuilder builder = Response.ok();
 
@@ -446,8 +446,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
 
                                         // Store authentication level and mode
-                                        authorizationGrant.setAuthLevel(authLevel);
-                                        authorizationGrant.setAuthMode(authMode);
+                                        authorizationGrant.setAcrValues(acrValuesStr);
                                         authorizationGrant.save(); // call save after object modification!!!
 
                                         authorizationCode = authorizationGrant.getAuthorizationCode();
@@ -464,8 +463,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
 
                                             // Store authentication level and mode
-                                            authorizationGrant.setAuthLevel(authLevel);
-                                            authorizationGrant.setAuthMode(authMode);
+                                            authorizationGrant.setAcrValues(acrValuesStr);
                                             authorizationGrant.save(); // call save after object modification!!!
                                         }
                                         newAccessToken = authorizationGrant.createAccessToken();
@@ -482,22 +480,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
 
-                                            // Store authentication level and mode
-                                            authorizationGrant.setAuthLevel(authLevel);
-                                            authorizationGrant.setAuthMode(authMode);
+                                            // Store authentication acr values
+                                            authorizationGrant.setAcrValues(acrValuesStr);
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
                                         Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken, idTokenClaims,
-                                                authorizationGrant.getAuthLevel(), authorizationGrant.getAuthMode());
+                                                nonce, authorizationCode, newAccessToken, idTokenClaims, authorizationGrant.getAcrValues());
 
                                         redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
                                     }
 
-                                    if (authorizationGrant != null && StringHelper.isNotEmpty(authLevel) && StringHelper.isNotEmpty(authMode)) {
-                                        redirectUriResponse.addResponseParameter("auth_level", authLevel);
-                                        redirectUriResponse.addResponseParameter("auth_mode", authMode);
+                                    if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
+                                        redirectUriResponse.addResponseParameter("acr_values", acrValuesStr);
                                     }
 
                                     //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
@@ -680,8 +675,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         }
 
-        if (authorizationGrant.getAuthMode() != null) {
-            claims.put(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, authorizationGrant.getAuthMode());
+        if (authorizationGrant.getAcrValues() != null) {
+            claims.put(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, authorizationGrant.getAcrValues());
         }
 
         if (authorizationGrant.getJwtAuthorizationRequest() != null
@@ -694,7 +689,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
 
                     Object attribute = user.getAttribute(ldapClaimName, optional);
-                    if (claim != null && attribute != null) {
+                    if (attribute != null) {
                         claims.put(claim.getName(), attribute.toString());
                     }
                 }

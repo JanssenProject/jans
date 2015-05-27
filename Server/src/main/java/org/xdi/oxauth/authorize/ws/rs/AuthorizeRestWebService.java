@@ -77,7 +77,6 @@ public interface AuthorizeRestWebService {
      * @param sessionId
      * @param accessToken
      * @param authLevel
-     * @param authMode
      * @param httpRequest
      * @param securityContext  An injectable interface that provides access to security
      *                         related information.
@@ -197,12 +196,6 @@ public interface AuthorizeRestWebService {
             @QueryParam("access_token")
             @ApiParam(value = "Access token", required = false)
             String accessToken,
-            @QueryParam("auth_level")
-            @ApiParam(value = "The minimum authentication level of authentication plugin", required = false)
-            String authLevel,
-            @QueryParam("auth_mode")
-            @ApiParam(value = "The name of authentication plugin", required = false)
-            String authMode,
             @QueryParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
             String originHeaders,
@@ -280,12 +273,6 @@ public interface AuthorizeRestWebService {
             @FormParam("access_token")
             @ApiParam(value = "Access token", required = false)
             String accessToken,
-            @FormParam("auth_level")
-            @ApiParam(value = "The minimum authentication level of authentication plugin", required = false)
-            String authLevel,
-            @FormParam("auth_mode")
-            @ApiParam(value = "The name of authentication plugin", required = false)
-            String authMode,
             @FormParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
             String originHeaders,

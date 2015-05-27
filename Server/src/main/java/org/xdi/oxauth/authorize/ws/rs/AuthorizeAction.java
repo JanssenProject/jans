@@ -150,7 +150,7 @@ public class AuthorizeAction {
             if (useExternalAuthenticator) {
                 List<String> acrValuesList = acrValuesList();
 
-                CustomScriptConfiguration customScriptConfiguration;
+                CustomScriptConfiguration customScriptConfiguration = null;
             	
             	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
                 	customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
