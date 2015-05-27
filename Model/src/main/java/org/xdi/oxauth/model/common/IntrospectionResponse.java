@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.Date;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,10 +27,8 @@ public class IntrospectionResponse {
     private Date expiresAt;
     @JsonProperty(value = "iat")
     private Date issuedAt;
-    @JsonProperty(value = "auth_mode")
-    private String authMode;
-    @JsonProperty(value = "auth_level")
-    private String authLevel;
+    @JsonProperty(value = "acr_values")
+    private String acrValues;
 
     public IntrospectionResponse() {
     }
@@ -39,20 +37,12 @@ public class IntrospectionResponse {
         m_active = p_active;
     }
 
-    public String getAuthMode() {
-        return authMode;
+    public String getAcrValues() {
+        return acrValues;
     }
 
-    public void setAuthMode(String p_authMode) {
-        authMode = p_authMode;
-    }
-
-    public String getAuthLevel() {
-        return authLevel;
-    }
-
-    public void setAuthLevel(String p_authLevel) {
-        authLevel = p_authLevel;
+    public void setAcrValues(String p_authMode) {
+        acrValues = p_authMode;
     }
 
     public boolean isActive() {

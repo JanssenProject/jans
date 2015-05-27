@@ -120,7 +120,7 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode)
+                                 Map<String, String> claims, String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         if (getIdToken() == null) {
             IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, claims);

@@ -104,12 +104,8 @@ public class AuthorizationContext {
         return m_grant;
     }
 
-    public String getAuthLevel() {
-        return m_grant.getAuthLevel();
-    }
-
     public String getAuthMode() {
-        return m_grant.getAuthMode();
+        return m_grant.getAcrValues();
     }
 
     public String getClientClaim(String p_claimName) {

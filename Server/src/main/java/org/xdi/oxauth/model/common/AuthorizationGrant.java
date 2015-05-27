@@ -125,8 +125,8 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
-        return grant.createIdToken(nonce, authorizationCode, accessToken, claims, authLevel, authMode);
+                                 Map<String, String> claims, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+        return grant.createIdToken(nonce, authorizationCode, accessToken, claims, authMode);
     }
 
     /**
@@ -352,19 +352,8 @@ public class AuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public void setAuthLevel(String authLevel) {
-        grant.setAuthLevel(authLevel);
-    }
-
-    @Override
-    public String getAuthLevel() {
-        return grant.getAuthLevel();
-
-    }
-
-    @Override
-    public void setAuthMode(String authMode) {
-        grant.setAuthMode(authMode);
+    public void setAcrValues(String authMode) {
+        grant.setAcrValues(authMode);
     }
 
     /**
@@ -376,8 +365,8 @@ public class AuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public String getAuthMode() {
-        return grant.getAuthMode();
+    public String getAcrValues() {
+        return grant.getAcrValues();
     }
 
 }

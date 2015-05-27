@@ -130,7 +130,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, authorizationCodeGrant.getAuthLevel(), authorizationCodeGrant.getAuthMode());
+                                    nonce, null, accToken, null, authorizationCodeGrant.getAcrValues());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -169,8 +169,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (authorizationGrant.getScopes().contains("openid")) {
                             idToken = authorizationGrant.createIdToken(
-                                    null, null, null, null, authorizationGrant.getAuthLevel(),
-                                    authorizationGrant.getAuthMode());
+                                    null, null, null, null,
+                                    authorizationGrant.getAcrValues());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -194,8 +194,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, null, clientCredentialsGrant.getAuthLevel(),
-                                clientCredentialsGrant.getAuthMode());
+                                null, null, null, null, clientCredentialsGrant.getAcrValues());
                     }
 
                     builder.entity(getJSonResponse(accessToken,
@@ -232,8 +231,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant.getAuthLevel(),
-                                    resourceOwnerPasswordCredentialsGrant.getAuthMode());
+                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant.getAcrValues());
                         }
 
                         builder.entity(getJSonResponse(accessToken,
