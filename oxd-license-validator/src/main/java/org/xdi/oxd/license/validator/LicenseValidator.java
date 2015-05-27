@@ -4,8 +4,6 @@ import com.google.common.base.Preconditions;
 import net.nicholaswilliams.java.licensing.SignedLicense;
 import net.nicholaswilliams.java.licensing.exception.InvalidLicenseException;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.xdi.oxd.license.client.Jackson;
-import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
@@ -41,9 +39,9 @@ public class LicenseValidator {
             System.out.println("License is valid!");
 
             final String subject = decryptedLicense.getSubject();
-            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
+//            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
 
-            System.out.println("Metadata: " + metadata);
+            System.out.println("Metadata: " + subject);
         } catch (InvalidLicenseException e) {
             System.out.println("License is invalid.");
         } catch (Exception e) {
