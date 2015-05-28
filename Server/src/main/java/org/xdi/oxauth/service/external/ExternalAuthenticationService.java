@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -26,6 +20,12 @@ import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -269,11 +269,12 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		List<String> authModes = new ArrayList<String>();
 
 		for (String acrValue : acrValues) {
+            String authMode = acrValue; // handle case when acr doesn't start https://schema.gluu.org/openid/acr/method/ prefix
 			if (StringHelper.isNotEmpty(acrValue) && StringHelper.toLowerCase(acrValue).startsWith(ACR_METHOD_PREFIX)) {
-				String authMode = acrValue.substring(ACR_METHOD_PREFIX.length());
-				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(authMode))) {
-					authModes.add(authMode);
-				}
+                authMode = acrValue.substring(ACR_METHOD_PREFIX.length());
+                				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(authMode))) {
+                					authModes.add(authMode);
+                				}
 			}
 		}
 		
