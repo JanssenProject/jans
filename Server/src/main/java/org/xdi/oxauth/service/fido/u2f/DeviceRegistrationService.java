@@ -30,7 +30,8 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-@Scope(ScopeType.STATELESS)
+//@Scope(ScopeType.STATELESS)
+@Scope(ScopeType.APPLICATION)
 @Name("deviceRegistrationService")
 @AutoCreate
 public class DeviceRegistrationService {
@@ -52,7 +53,13 @@ public class DeviceRegistrationService {
 	}
 
 	public List<DeviceRegistration> findUserDeviceRegistrations(String appId, String userName) {
-		return devices.get(userName);
+		List<DeviceRegistration> userDevices = devices.get(userName);
+		
+		if (userDevices == null) {
+			return new ArrayList<DeviceRegistration>(0);
+		}
+		
+		return userDevices;
 	}
 
 	public void addUserDeviceRegistration(String userName, String appId, DeviceRegistration deviceRegistration) {

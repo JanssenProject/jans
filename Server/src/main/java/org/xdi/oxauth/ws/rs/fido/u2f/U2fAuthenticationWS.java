@@ -51,22 +51,21 @@ public class U2fAuthenticationWS {
 	private ErrorResponseFactory errorResponseFactory;
 
 	@In
-	private AuthenticationService authenticationService;
+	private AuthenticationService u2fAuthenticationService;
 
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
 	@GET
 	@Produces({ "application/json" })
-	@Path("/start")
 	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId) {
 		try {
-			AuthenticateRequestMessage authenticateRequestMessage = authenticationService.buildAuthenticateRequestMessage(appId, userName);
-			authenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage);
+			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, userName);
+			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
-			final String entity = ServerUtil.asJson(null);
+			final String entity = ServerUtil.asJson(authenticateRequestMessage);
 
 			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
 		} catch (Exception ex) {
@@ -86,18 +85,20 @@ public class U2fAuthenticationWS {
 	}
 
 	@POST
-	@Path("/finish")
-	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") AuthenticateResponse authenticateResponse) {
+	@Produces({ "application/json" })
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
 		try {
+			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
+
 			String requestId = authenticateResponse.getRequestId();
-			AuthenticateRequestMessage authenticateRequestMessage = authenticationService.getAuthenticationRequestMessage(requestId);
+			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.getAuthenticationRequestMessage(requestId);
 			if (authenticateRequestMessage == null) {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
-			authenticationService.removeAuthenticationRequestMessage(requestId);
+			u2fAuthenticationService.removeAuthenticationRequestMessage(requestId);
 
-			authenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
+			u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
 
