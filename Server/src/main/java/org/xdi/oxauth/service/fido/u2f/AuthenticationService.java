@@ -38,7 +38,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 05/19/2015
  */
 @Scope(ScopeType.STATELESS)
-@Name("authenticationService")
+@Name("u2fAuthenticationService")
 @AutoCreate
 public class AuthenticationService {
 
@@ -99,7 +99,7 @@ public class AuthenticationService {
 	}
 
 	public AuthenticateRequest startAuthentication(String appId, DeviceRegistration device, byte[] challenge) throws DeviceCompromisedException {
-		if (!device.isCompromised()) {
+		if (device.isCompromised()) {
 			throw new DeviceCompromisedException(device, "Device has been marked as compromised, cannot authenticate");
 		}
 

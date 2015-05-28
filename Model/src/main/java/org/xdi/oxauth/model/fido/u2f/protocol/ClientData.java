@@ -27,7 +27,7 @@ public class ClientData implements Serializable {
 	private static final String CHALLENGE_PARAM = "challenge";
 	private static final String ORIGIN_PARAM = "origin";
 
-	private final String type;
+	private final String typ;
 	private final String challenge;
 	private final String origin;
 	private final String rawClientData;
@@ -37,7 +37,7 @@ public class ClientData implements Serializable {
 		this.rawClientData = new String(Base64Util.base64urldecode(clientData));
 		try {
 			this.data = new ObjectMapper().readTree(rawClientData);
-			this.type = getString(TYPE_PARAM);
+			this.typ = getString(TYPE_PARAM);
 			this.challenge = getString(CHALLENGE_PARAM);
 			this.origin = getString(ORIGIN_PARAM);
 		} catch (IOException ex) {
@@ -45,8 +45,8 @@ public class ClientData implements Serializable {
 		}
 	}
 
-	public String getType() {
-		return type;
+	public String getTyp() {
+		return typ;
 	}
 
 	public String getChallenge() {

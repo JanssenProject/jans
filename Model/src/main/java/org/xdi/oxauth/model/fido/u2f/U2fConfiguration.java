@@ -19,8 +19,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * @author Yuriy Movchan Date: 05/13/2015
  */
 @IgnoreMediaTypes("application/*+json")
-@JsonPropertyOrder({ "version", "issuer", "registration_start_endpoint", "registration_end_endpoint", "authentication_start_endpoint",
-		"authentication_end_endpoint" })
+@JsonPropertyOrder({ "version", "issuer", "registration_start", "authentication_start" })
 @ApiModel(value = "FIDO U2F Configuration")
 public class U2fConfiguration {
 
@@ -32,23 +31,11 @@ public class U2fConfiguration {
 	@JsonProperty(value = "issuer")
 	private String issuer;
 
-	@JsonProperty(value = "registration_start_endpoint")
-	private String registrationStartEndpoint;
+	@JsonProperty(value = "registration_endpoint")
+	private String registrationEndpoint;
 
-	@JsonProperty(value = "registration_finish_endpoint")
-	private String registrationFinishEndpoint;
-
-	@JsonProperty(value = "registration_status_endpoint")
-	private String registrationStatusEndpoint;
-
-	@JsonProperty(value = "authentication_start_endpoint")
-	private String authenticationStartEndpoint;
-
-	@JsonProperty(value = "authentication_finish_endpoint")
-	private String authenticationFinishEndpoint;
-
-	@JsonProperty(value = "authentication_status_endpoint")
-	private String authenticationStatusEndpoint;
+	@JsonProperty(value = "authentication_endpoint")
+	private String authenticationEndpoint;
 
 	public String getVersion() {
 		return version;
@@ -66,62 +53,29 @@ public class U2fConfiguration {
 		this.issuer = issuer;
 	}
 
-	public String getRegistrationStartEndpoint() {
-		return registrationStartEndpoint;
+	public String getRegistrationEndpoint() {
+		return registrationEndpoint;
 	}
 
-	public void setRegistrationStartEndpoint(String registrationStartEndpoint) {
-		this.registrationStartEndpoint = registrationStartEndpoint;
+	public void setRegistrationEndpoint(String registrationEndpoint) {
+		this.registrationEndpoint = registrationEndpoint;
 	}
 
-	public String getRegistrationFinishEndpoint() {
-		return registrationFinishEndpoint;
+	public String getAuthenticationEndpoint() {
+		return authenticationEndpoint;
 	}
 
-	public void setRegistrationFinishEndpoint(String registrationFinishEndpoint) {
-		this.registrationFinishEndpoint = registrationFinishEndpoint;
-	}
-
-	public String getRegistrationStatusEndpoint() {
-		return registrationStatusEndpoint;
-	}
-
-	public void setRegistrationStatusEndpoint(String registrationStatusEndpoint) {
-		this.registrationStatusEndpoint = registrationStatusEndpoint;
-	}
-
-	public String getAuthenticationStartEndpoint() {
-		return authenticationStartEndpoint;
-	}
-
-	public void setAuthenticationStartEndpoint(String authenticationStartEndpoint) {
-		this.authenticationStartEndpoint = authenticationStartEndpoint;
-	}
-
-	public String getAuthenticationFinishEndpoint() {
-		return authenticationFinishEndpoint;
-	}
-
-	public void setAuthenticationFinishEndpoint(String authenticationFinishEndpoint) {
-		this.authenticationFinishEndpoint = authenticationFinishEndpoint;
-	}
-
-	public String getAuthenticationStatusEndpoint() {
-		return authenticationStatusEndpoint;
-	}
-
-	public void setAuthenticationStatusEndpoint(String authenticationStatusEndpoint) {
-		this.authenticationStatusEndpoint = authenticationStatusEndpoint;
+	public void setAuthenticationEndpoint(String authenticationEndpoint) {
+		this.authenticationEndpoint = authenticationEndpoint;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("U2fConfiguration [version=").append(version).append(", issuer=").append(issuer)
-				.append(", registrationStartEndpoint=").append(registrationStartEndpoint).append(", registrationFinishEndpoint=")
-				.append(registrationFinishEndpoint).append(", authenticationStartEndpoint=").append(authenticationStartEndpoint)
-				.append(", authenticationFinishEndpoint=").append(authenticationFinishEndpoint).append("]");
+		builder.append("U2fConfiguration [version=").append(version).append(", issuer=").append(issuer).append(", registrationEndpoint=")
+				.append(registrationEndpoint).append(", authenticationEndpoint=").append(authenticationEndpoint).append("]");
 		return builder.toString();
 	}
+
 
 }

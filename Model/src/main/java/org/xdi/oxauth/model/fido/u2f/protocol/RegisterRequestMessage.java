@@ -43,6 +43,7 @@ public class RegisterRequestMessage implements Serializable {
 		return Collections.unmodifiableList(registerRequests);
 	}
 
+	@JsonIgnore
 	public RegisterRequest getRegisterRequest() {
 		return Util.firstItem(registerRequests);
 	}
