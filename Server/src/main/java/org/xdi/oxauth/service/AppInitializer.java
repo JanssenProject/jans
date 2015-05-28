@@ -37,7 +37,6 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
-import org.xdi.model.SmtpConfiguration;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
@@ -106,14 +105,18 @@ public class AppInitializer {
         reloadConfigurationImpl(ldapAuthConfigs);
 
         createAuthConnectionProviders(ldapAuthConfigs);
-        
+
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
-        
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION );
-        CustomScriptManager.instance().init(supportedCustomScriptTypes);
-        CustomScriptManagerMigrator.instance().migrateOldConfigurations();
     }
+
+	@Observer("org.jboss.seam.postInitialization")
+	@Asynchronous
+    public void postInitialization() {
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION );
+		CustomScriptManager.instance().init(supportedCustomScriptTypes);
+        CustomScriptManagerMigrator.instance().migrateOldConfigurations();
+	}
 
 	private void createStringEncrypter() {
 		String encodeSalt = ConfigurationFactory.loadCryptoConfigurationSalt();

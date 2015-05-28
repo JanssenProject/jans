@@ -36,8 +36,10 @@ import org.xdi.oxauth.model.util.Base64Util;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("registrationService")
+@Scope(ScopeType.APPLICATION)
+//@Scope(ScopeType.STATELESS)
+//TODO: Replace after finish
+@Name("u2fRegistrationService")
 @AutoCreate
 public class RegistrationService {
 
@@ -48,7 +50,7 @@ public class RegistrationService {
 	private ApplicationService applicationService;
 
 	@In
-	private AuthenticationService authenticationService;
+	private AuthenticationService u2fAuthenticationService;
 
 	@In
 	private RawRegistrationService rawRegistrationService;
@@ -76,7 +78,7 @@ public class RegistrationService {
 		for (DeviceRegistration device : devices) {
 			if (!device.isCompromised()) {
 				try {
-					AuthenticateRequest authenticateRequest = authenticationService.startAuthentication(appId, device);
+					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, device);
 					authenticateRequests.add(authenticateRequest);
 				} catch (DeviceCompromisedException ex) {
 					log.error("Faield to authenticate device", ex);
