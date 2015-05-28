@@ -52,7 +52,7 @@ public class DeviceRegistrationService {
 		ldapEntryManager.persist(branch);
 	}
 
-	public List<DeviceRegistration> findUserDeviceRegistrations(String appId, String userName) {
+	public List<DeviceRegistration> findUserDeviceRegistrations(String userName, String appId) {
 		List<DeviceRegistration> userDevices = devices.get(userName);
 		
 		if (userDevices == null) {
