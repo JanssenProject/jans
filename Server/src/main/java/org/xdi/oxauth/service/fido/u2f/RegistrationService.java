@@ -74,7 +74,7 @@ public class RegistrationService {
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
 
-		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(appId, userName);
+		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(userName, appId);
 		for (DeviceRegistration device : devices) {
 			if (!device.isCompromised()) {
 				try {

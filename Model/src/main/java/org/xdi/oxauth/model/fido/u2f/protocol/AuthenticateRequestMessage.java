@@ -25,7 +25,9 @@ public class AuthenticateRequestMessage implements Serializable {
 	private static final long serialVersionUID = 5492097239884163697L;
 
 	@JsonProperty
-	private final List<AuthenticateRequest> authenticateRequests;
+	private List<AuthenticateRequest> authenticateRequests;
+
+	public AuthenticateRequestMessage() {}
 
 	public AuthenticateRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests) {
 		this.authenticateRequests = authenticateRequests;
@@ -33,6 +35,10 @@ public class AuthenticateRequestMessage implements Serializable {
 
 	public List<AuthenticateRequest> getAuthenticateRequests() {
 		return Collections.unmodifiableList(authenticateRequests);
+	}
+
+	public void setAuthenticateRequests(List<AuthenticateRequest> authenticateRequests) {
+		this.authenticateRequests = authenticateRequests;
 	}
 
 	@JsonIgnore
