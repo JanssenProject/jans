@@ -37,7 +37,7 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
+@Scope(ScopeType.APPLICATION)
 @Name("u2fAuthenticationService")
 @AutoCreate
 public class AuthenticationService {
@@ -70,7 +70,7 @@ public class AuthenticationService {
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		byte[] challenge = challengeGenerator.generateChallenge();
 
-		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(appId, userName);
+		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(userName, appId);
 		for (DeviceRegistration device : devices) {
 			if (!device.isCompromised()) {
 				AuthenticateRequest request;
@@ -108,7 +108,7 @@ public class AuthenticationService {
 
 	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName)
 			throws BadInputException, DeviceCompromisedException {
-		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(requestMessage.getAppId(), userName);
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userName, requestMessage.getAppId());
 
 		return finishAuthentication(requestMessage, response, deviceRegistrations, userName, null);
 	}
