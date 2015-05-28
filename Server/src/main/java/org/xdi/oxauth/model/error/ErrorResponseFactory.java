@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.error;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
@@ -19,6 +20,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationErrorResponseType;
+import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
@@ -26,6 +28,7 @@ import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaErrorResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 /**
@@ -117,6 +120,8 @@ public class ErrorResponseFactory {
                 list = messages.getUserInfo();
             } else if (type instanceof ValidateTokenErrorResponseType) {
                 list = messages.getValidateToken();
+            } else if (type instanceof U2fErrorResponseType) {
+                list = messages.getFido();
             }
 
             if (list != null) {
@@ -166,6 +171,20 @@ public class ErrorResponseFactory {
         }
 
         return jsonObj.toString();
+    }
+
+
+    public String getJsonErrorResponse(IErrorType type) {
+        final DefaultErrorResponse response = getErrorResponse(type);
+        
+        JsonErrorResponse jsonErrorResponse = new JsonErrorResponse(response);
+
+        try {
+			return ServerUtil.asJson(jsonErrorResponse);
+		} catch (IOException ex) {
+            log.error("Failed to generate error response", ex);
+            return null;
+		}
     }
 
 }

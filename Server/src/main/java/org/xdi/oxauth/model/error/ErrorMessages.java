@@ -50,6 +50,10 @@ public class ErrorMessages {
     @XmlElement(name = "error")
     private List<ErrorMessage> validateToken;
 
+    @XmlElementWrapper(name = "fido")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> fido;
+
     public List<ErrorMessage> getAuthorize() {
         return authorize;
     }
@@ -121,4 +125,13 @@ public class ErrorMessages {
     public void setValidateToken(List<ErrorMessage> p_validateToken) {
         validateToken = p_validateToken;
     }
+
+	public List<ErrorMessage> getFido() {
+		return fido;
+	}
+
+	public void setFido(List<ErrorMessage> fido) {
+		this.fido = fido;
+	}
+
 }
