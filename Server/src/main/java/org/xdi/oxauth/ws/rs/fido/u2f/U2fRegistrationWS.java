@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
@@ -49,18 +50,17 @@ public class U2fRegistrationWS {
 	private ErrorResponseFactory errorResponseFactory;
 
 	@In
-	private RegistrationService registrationService;
+	private RegistrationService u2fRegistrationService;
 
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
 	@GET
 	@Produces({ "application/json" })
-	@Path("/start")
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId) {
 		try {
-			RegisterRequestMessage registerRequestMessage = registrationService.builRegisterRequestMessage(appId, userName);
-			registrationService.storeRegistrationRequestMessage(registerRequestMessage);
+			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userName);
+			u2fRegistrationService.storeRegistrationRequestMessage(registerRequestMessage);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -79,18 +79,20 @@ public class U2fRegistrationWS {
 	}
 
 	@POST
-	@Path("/finish")
-	public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") RegisterResponse registerResponse) {
+	@Produces({ "application/json" })
+	public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
 		try {
+			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
+
 			String requestId = registerResponse.getRequestId();
-			RegisterRequestMessage registerRequestMessage = registrationService.getRegistrationRequestMessage(requestId);
+			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.getRegistrationRequestMessage(requestId);
 			if (registerRequestMessage == null) {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
-			registrationService.removeRegistrationRequestMessage(requestId);
+			u2fRegistrationService.removeRegistrationRequestMessage(requestId);
 
-			registrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
+			u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);
 

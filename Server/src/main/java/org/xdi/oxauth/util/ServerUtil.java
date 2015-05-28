@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.util;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
+import javax.ws.rs.core.CacheControl;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -22,16 +33,8 @@ import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
-
-import javax.ws.rs.core.CacheControl;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -159,5 +162,16 @@ public class ServerUtil {
             return result;
         }
         return null;
+    }
+    
+    public static String getFirstValue(Map<String, String[]> map, String key) {
+    	if (map.containsKey(key)) {
+    		String[] values = map.get(key);
+    		if (ArrayHelper.isNotEmpty(values)) {
+    			return values[0];
+    		}
+    	}
+    	
+    	return null;
     }
 }

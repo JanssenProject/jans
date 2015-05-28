@@ -21,7 +21,8 @@ import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
+//@Scope(ScopeType.STATELESS)
+@Scope(ScopeType.APPLICATION)
 @Name("applicationService")
 @AutoCreate
 public class ApplicationService {

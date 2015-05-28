@@ -34,8 +34,8 @@ public class ClientDataValidationService {
 	private Log log;
 
 	public void checkContent(ClientData clientData, String type, String challenge, Set<String> facets) throws BadInputException {
-		if (!type.equals(clientData.getType())) {
-			throw new BadInputException("Bad clientData: wrong type " + clientData.getType());
+		if (!type.equals(clientData.getTyp())) {
+			throw new BadInputException("Bad clientData: wrong typ " + clientData.getTyp());
 		}
 
 		if (!challenge.equals(clientData.getChallenge())) {

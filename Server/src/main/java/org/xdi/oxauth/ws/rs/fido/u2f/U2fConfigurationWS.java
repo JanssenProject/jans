@@ -58,13 +58,8 @@ public class U2fConfigurationWS {
 			conf.setVersion("1.0");
 			conf.setIssuer(configuration.getIssuer());
 
-			conf.setRegistrationStartEndpoint(baseEndpointUri + "/fido/u2f/registration/start");
-			conf.setRegistrationFinishEndpoint(baseEndpointUri + "/fido/u2f/registration/finish");
-			conf.setRegistrationStatusEndpoint(baseEndpointUri + "/fido/u2f/registration/status");
-
-			conf.setAuthenticationStartEndpoint(baseEndpointUri + "/fido/u2f/authentication/start");
-			conf.setAuthenticationFinishEndpoint(baseEndpointUri + "/fido/u2f/authentication/finish");
-			conf.setAuthenticationStatusEndpoint(baseEndpointUri + "/fido/u2f/authentication/status");
+			conf.setRegistrationEndpoint(baseEndpointUri + "/fido/u2f/registration");
+			conf.setAuthenticationEndpoint(baseEndpointUri + "/fido/u2f/authentication");
 
 			// convert manually to avoid possible conflicts between resteasy
 			// providers, e.g. jettison, jackson
