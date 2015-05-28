@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -14,7 +25,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.log.Log;
@@ -32,23 +42,20 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.FederationDataService;
+import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserGroupService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
@@ -162,9 +169,9 @@ public class AuthorizeAction {
                     return;
                 }
 
-                String authMode = customScriptConfiguration.getName();
+                String acr = customScriptConfiguration.getName();
 
-                requestParameterMap.put("acr_values", authMode);
+                requestParameterMap.put(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, acr);
                 requestParameterMap.put("auth_step", Integer.toString(1));
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
