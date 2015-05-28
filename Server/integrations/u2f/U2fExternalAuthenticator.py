@@ -144,7 +144,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
                     authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), u2f_application_id)
-                    print "!!!!", authenticationRequest
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
