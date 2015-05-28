@@ -6,9 +6,22 @@
 
 package org.xdi.oxauth.util;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
+import javax.ws.rs.core.CacheControl;
+
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
@@ -18,20 +31,13 @@ import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.CustomAttribute;
+import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
-
-import javax.ws.rs.core.CacheControl;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -160,4 +166,16 @@ public class ServerUtil {
         }
         return null;
     }
+    
+    public static String getFirstValue(Map<String, String[]> map, String key) {
+    	if (map.containsKey(key)) {
+    		String[] values = map.get(key);
+    		if (ArrayHelper.isNotEmpty(values)) {
+    			return values[0];
+    		}
+    	}
+    	
+    	return null;
+    }
+
 }
