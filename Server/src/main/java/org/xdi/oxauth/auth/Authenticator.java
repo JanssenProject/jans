@@ -487,7 +487,7 @@ public class Authenticator implements Serializable {
 		}
 
         this.authStep = StringHelper.toInteger(sessionIdAttributes.get("auth_step"), null);
-        this.authAcr = sessionIdAttributes.get("acr");
+        this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
     }
 
     private boolean authenticationFailed() {
