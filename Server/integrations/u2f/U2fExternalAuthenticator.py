@@ -166,21 +166,15 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        if (step == 2):
-            return Arrays.asList("cas2_user_uid")
-        
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("cas2_count_login_steps")):
-            return context.get("cas2_count_login_steps")
-        
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/auth/u2f/register.xhtml"
+            return "/auth/u2f/login.xhtml"
+
         return ""
 
     def logout(self, configurationAttributes, requestParameters):
