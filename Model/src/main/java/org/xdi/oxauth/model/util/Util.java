@@ -9,6 +9,7 @@ package org.xdi.oxauth.model.util;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -116,6 +117,19 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static <T> T firstItem(List<T> items) {
+    	if (items == null) {
+    		return null;
+    	}
+
+    	Iterator<T> iterator = items.iterator();
+    	if (iterator.hasNext()) {
+    		return iterator.next();
+    	}
+        
+        return null;
     }
 
 }
