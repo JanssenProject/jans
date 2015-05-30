@@ -16,7 +16,7 @@ import java.util.Date;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
  */
-@JsonPropertyOrder({"active", "exp", "iat", "auth_mode", "auth_level"})
+@JsonPropertyOrder({"active", "exp", "iat", "acr_values"})
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 public class IntrospectionResponse {
