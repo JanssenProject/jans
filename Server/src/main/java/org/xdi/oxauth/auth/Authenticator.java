@@ -88,12 +88,6 @@ public class Authenticator implements Serializable {
     @In
     private FacesMessages facesMessages;
 
-    @RequestParameter("auth_level")
-    private String authLevel;
-
-    @RequestParameter("auth_mode")
-    private String authMode;
-
     @RequestParameter(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES)
     private String authAcr;
 
@@ -134,10 +128,6 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateImpl(Context context, boolean interactive) {
-        if (!interactive) {
-            setAuthModeFromAcr();
-        }
-
         boolean authenticated = false;
         try {
             if (StringHelper.isNotEmpty(credentials.getUsername()) && StringHelper.isNotEmpty(credentials.getPassword())
@@ -167,12 +157,12 @@ public class Authenticator implements Serializable {
         boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
         if (isServiceUsesExternalAuthenticator) {
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-                    .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
+                    .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
 
             if (customScriptConfiguration == null) {
-                log.error("Failed to get CustomScriptConfiguration. auth_mode: '{0}', auth_level: '{1}'", this.authMode, authLevel);
+                log.error("Failed to get CustomScriptConfiguration. acr: '{0}'", this.authAcr);
             } else {
-                this.authMode = customScriptConfiguration.getCustomScript().getName();
+                this.authAcr = customScriptConfiguration.getCustomScript().getName();
 
                 boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, null, 1);
                 log.info("Authentication result for user '{0}', result: '{1}'", credentials.getUsername(), result);
@@ -212,23 +202,23 @@ public class Authenticator implements Serializable {
 
     	if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
         	initCustomAuthenticatorVariables(sessionIdAttributes);
-        	if ((this.authStep == null) || StringHelper.isEmpty(this.authMode)) {
+        	if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
                 log.error("Failed to determine authentication mode");
         		authenticationFailedSessionInvalid();
                 return false;
             }
 
 		    ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authMode);
+		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
 		    if (customScriptConfiguration == null) {
-		        log.error("Failed to get CustomScriptConfiguration for auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
+		        log.error("Failed to get CustomScriptConfiguration for acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
 		        return false;
 		    }
 
 		    // Check if all previous steps had passed
 	        boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
 	        if (!passedPreviousSteps) {
-		        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
+		        log.error("There are authentication steps not marked as passed. acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
 		        return false;
 	        }
 
@@ -315,13 +305,13 @@ public class Authenticator implements Serializable {
 	private boolean userAuthenticationService() {
 		if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
 		    CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
-		            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authLevel, this.authMode);
+		            .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
 
 		    if (customScriptConfiguration == null) {
-		        log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}', auth_level: '{2}'",
-		        		this.authStep, this.authMode, authLevel);
+		        log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'",
+		        		this.authStep, this.authAcr);
 		    } else {
-		        this.authMode = customScriptConfiguration.getName();
+		        this.authAcr = customScriptConfiguration.getName();
 
 		        boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, null, 1);
 		        log.info("Authentication result for '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
@@ -367,7 +357,7 @@ public class Authenticator implements Serializable {
 		}
 
 		initCustomAuthenticatorVariables(sessionIdAttributes);
-		if (StringHelper.isEmpty(this.authMode)) {
+		if (StringHelper.isEmpty(this.authAcr)) {
 			return Constants.RESULT_SUCCESS;
 		}
 
@@ -376,13 +366,13 @@ public class Authenticator implements Serializable {
 		}
 
 		CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(
-				AuthenticationScriptUsageType.INTERACTIVE, this.authMode);
+				AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
 		if (customScriptConfiguration == null) {
-			log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
+			log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'", this.authStep, this.authAcr);
 			return Constants.RESULT_FAILURE;
 		}
 
-		String currentAuthMode = customScriptConfiguration.getName();
+		String currentauthAcr = customScriptConfiguration.getName();
 
 		customScriptConfiguration = externalAuthenticationService.determineExternalAuthenticatorForWorkflow(
 				AuthenticationScriptUsageType.INTERACTIVE, customScriptConfiguration);
@@ -390,8 +380,8 @@ public class Authenticator implements Serializable {
 			return Constants.RESULT_FAILURE;
 		} else {
 
-		    String determinedAuthMode = customScriptConfiguration.getName();
-			if (!StringHelper.equalsIgnoreCase(currentAuthMode, determinedAuthMode)) {
+		    String determinedauthAcr = customScriptConfiguration.getName();
+			if (!StringHelper.equalsIgnoreCase(currentauthAcr, determinedauthAcr)) {
 				// Redirect user to alternative login workflow
 				String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, this.authStep);
 
@@ -400,18 +390,18 @@ public class Authenticator implements Serializable {
 				}
 
 				CustomScriptConfiguration determinedCustomScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(
-						AuthenticationScriptUsageType.INTERACTIVE, determinedAuthMode);
+						AuthenticationScriptUsageType.INTERACTIVE, determinedauthAcr);
 				if (determinedCustomScriptConfiguration == null) {
-					log.error("Failed to get determined CustomScriptConfiguration. auth_step: '{0}', auth_mode: '{1}'", this.authStep, this.authMode);
+					log.error("Failed to get determined CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'", this.authStep, this.authAcr);
 					return Constants.RESULT_FAILURE;
 				}
 
-				log.debug("Redirect to page: '{0}'. Force to use auth_mode: '{1}'", redirectTo, determinedAuthMode);
+				log.debug("Redirect to page: '{0}'. Force to use acr: '{1}'", redirectTo, determinedauthAcr);
 
-				determinedAuthMode = determinedCustomScriptConfiguration.getName();
+				determinedauthAcr = determinedCustomScriptConfiguration.getName();
 				String determinedAuthLevel = Integer.toString(determinedCustomScriptConfiguration.getLevel());
 
-				sessionIdAttributes.put("auth_mode", determinedAuthMode);
+				sessionIdAttributes.put("acr", determinedauthAcr);
 				sessionIdAttributes.put("auth_level", determinedAuthLevel);
 				sessionIdAttributes.put("auth_step", Integer.toString(1));
 
@@ -433,7 +423,7 @@ public class Authenticator implements Serializable {
 	    // Check if all previous steps had passed
         boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
         if (!passedPreviousSteps) {
-	        log.error("There are authentication steps not marked as passed. auth_mode: '{1}', auth_step: '{0}'", this.authMode, this.authStep);
+	        log.error("There are authentication steps not marked as passed. acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
 	        return Constants.RESULT_FAILURE;
         }
 
@@ -497,8 +487,7 @@ public class Authenticator implements Serializable {
 		}
 
         this.authStep = StringHelper.toInteger(sessionIdAttributes.get("auth_step"), null);
-        this.authMode = sessionIdAttributes.get("auth_mode");
-        this.authLevel = null;
+        this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
     }
 
     private boolean authenticationFailed() {
@@ -513,12 +502,6 @@ public class Authenticator implements Serializable {
         facesMessages.addFromResourceBundle(Severity.ERROR, "login.errorSessionInvalidMessage");
         FacesManager.instance().redirect("/error.xhtml");
 	}
-
-    private void setAuthModeFromAcr() {
-        if (StringHelper.isNotEmpty(this.authAcr)) {
-            this.authMode = this.authAcr;
-        }
-    }
 
 	private void markAuthStepAsPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
         String key = String.format("auth_step_passed_%d", authStep);
