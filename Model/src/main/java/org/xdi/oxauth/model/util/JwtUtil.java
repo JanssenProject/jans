@@ -225,31 +225,11 @@ public class JwtUtil {
     }
 
     public static String base64urlencode(byte[] arg) {
-        String s = Base64.encodeBase64String(arg); // Standard base64 encoder
-        s = s.split("=")[0]; // Remove any trailing '='s
-        s = s.replace('+', '-'); // 62nd char of encoding
-        s = s.replace('/', '_'); // 63rd char of encoding
-        return s;
+    	return Base64Util.base64urlencode(arg);
     }
 
     public static byte[] base64urldecode(String arg) throws IllegalArgumentException {
-        String s = arg;
-        s = s.replace('-', '+'); // 62nd char of encoding
-        s = s.replace('_', '/'); // 63rd char of encoding
-        switch (s.length() % 4) // Pad with trailing '='s
-        {
-            case 0:
-                break; // No pad chars in this case
-            case 2:
-                s += "==";
-                break; // Two pad chars
-            case 3:
-                s += "=";
-                break; // One pad char
-            default:
-                throw new IllegalArgumentException("Illegal base64url string.");
-        }
-        return Base64.decodeBase64(s); // Standard base64 decoder
+    	return Base64Util.base64urldecode(arg);
     }
 
     public static void printAlgorithmsAndProviders() {

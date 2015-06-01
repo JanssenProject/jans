@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -115,6 +114,12 @@ public class HttpService implements Serializable {
 	    	log.error("Failed to create https client", ex);
 	        return new DefaultHttpClient();
 	    }
+	}
+
+	public HttpClient getHttpsClient() {
+		HttpClient httpClient = new SslDefaultHttpClient();
+
+		return httpClient;
 	}
 
 	public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword) {
