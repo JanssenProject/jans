@@ -40,8 +40,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	private static final long serialVersionUID = 7339887464253044927L;
 
-	public final static String ACR_METHOD_PREFIX = "https://schema.gluu.org/openid/acr/method/";
-
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsMapByUsageType;
 	private Map<AuthenticationScriptUsageType, CustomScriptConfiguration> defaultExternalAuthenticators;
 
@@ -231,20 +229,16 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return resultDefaultExternalAuthenticator;
 	}
 
-	public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, int authStep, String authLevel, String authMode) {
+	public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, int authStep, String acr) {
         CustomScriptConfiguration customScriptConfiguration = null;
         if (authStep == 1) {
-            if (StringHelper.isNotEmpty(authMode)) {
-                customScriptConfiguration = getCustomScriptConfiguration(usageType, authMode);
+            if (StringHelper.isNotEmpty(acr)) {
+                customScriptConfiguration = getCustomScriptConfiguration(usageType, acr);
             } else {
-            	if (StringHelper.isNotEmpty(authLevel)) {
-            		customScriptConfiguration = getExternalAuthenticatorByAuthLevel(usageType, StringHelper.toInteger(authLevel));
-            	} else {
-            		customScriptConfiguration = getDefaultExternalAuthenticator(usageType);
-            	}
+           		customScriptConfiguration = getDefaultExternalAuthenticator(usageType);
             }
         } else {
-            customScriptConfiguration = getCustomScriptConfiguration(usageType, authMode);
+            customScriptConfiguration = getCustomScriptConfiguration(usageType, acr);
         }
         
         return customScriptConfiguration;
@@ -269,15 +263,13 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		List<String> authModes = new ArrayList<String>();
 
 		for (String acrValue : acrValues) {
-            String authMode = acrValue; // handle case when acr doesn't start https://schema.gluu.org/openid/acr/method/ prefix
-			if (StringHelper.isNotEmpty(acrValue) && StringHelper.toLowerCase(acrValue).startsWith(ACR_METHOD_PREFIX)) {
-                authMode = acrValue.substring(ACR_METHOD_PREFIX.length());
-                				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(authMode))) {
-                					authModes.add(authMode);
-                				}
+			if (StringHelper.isNotEmpty(acrValue)) {
+				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(acrValue))) {
+					authModes.add(acrValue);
+				}
 			}
 		}
-		
+
 		return authModes;
 	}
 
@@ -339,7 +331,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		List<String> acrValues = new ArrayList<String>();
 
 		for (Entry<String, CustomScriptConfiguration> customScriptConfigurationEntry : this.customScriptConfigurationsNameMap.entrySet()) {
-			String acrValue = ACR_METHOD_PREFIX + customScriptConfigurationEntry.getKey();
+			String acrValue = customScriptConfigurationEntry.getKey();
 			acrValues.add(acrValue);
 		}
 		
