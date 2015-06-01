@@ -6,17 +6,7 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -46,16 +36,19 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserGroupService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
@@ -251,11 +244,18 @@ public class AuthorizeAction {
      * @return acr value list
      */
     private List<String> acrValuesList() {
+        List<String> acrs;
         try {
-            return Util.jsonArrayStringAsList(this.acrValues);
+            acrs = Util.jsonArrayStringAsList(this.acrValues);
         } catch (JSONException ex) {
-            return Util.splittedStringAsList(acrValues, " ");
+            acrs = Util.splittedStringAsList(acrValues, " ");
         }
+
+        // yuriyz : acr value is not mandatory for authorization request, so fallback to basic acr value.
+        if (acrs == null || acrs.isEmpty()) {
+            acrs = Lists.newArrayList("basic");
+        }
+        return acrs;
     }
 
     private SessionId getSession() {
