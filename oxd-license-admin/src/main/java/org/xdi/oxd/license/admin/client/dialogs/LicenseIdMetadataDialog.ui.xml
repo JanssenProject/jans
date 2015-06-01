@@ -2,6 +2,7 @@
 <ui:UiBinder
         xmlns:ui='urn:ui:com.google.gwt.uibinder'
         xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:date="urn:import:com.google.gwt.user.datepicker.client"
         >
 
     <g:VerticalPanel ui:field="dialogContent" width="200px">
@@ -22,14 +23,24 @@
         <g:ListBox ui:field="licenseFeatures" multipleSelect="true" width="300px" visibleItemCount="6"/>
 
         <g:HTML>
-            <h3>Threads count:</h3>
+            <h3>Expiration date:</h3>
         </g:HTML>
-        <g:TextBox ui:field="threadsCount"/>
+        <date:DateBox ui:field="expirationDate"/>
+
+        <g:HTML>
+            <h3>License count limit:</h3>
+        </g:HTML>
+        <g:TextBox ui:field="licenseCountLimit"/>
 
         <g:HTML>
             <h3>Multi-server (not supported yet):</h3>
         </g:HTML>
         <g:CheckBox ui:field="multiServer" checked="false"/>
+
+        <g:HTML>
+            <h3>Java threads count:</h3>
+        </g:HTML>
+        <g:TextBox ui:field="threadsCount"/>
 
         <g:HTMLPanel>
             <br/>

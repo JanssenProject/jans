@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.datepicker.client.DateBox;
 import org.xdi.oxd.license.admin.client.Admin;
 import org.xdi.oxd.license.admin.client.framework.Framework;
 import org.xdi.oxd.license.client.js.Configuration;
@@ -59,6 +60,10 @@ public class LicenseIdMetadataDialog {
     TextBox licenseName;
     @UiField
     ListBox licenseFeatures;
+    @UiField
+    DateBox expirationDate;
+    @UiField
+    TextBox licenseCountLimit;
 
     private final LdapLicenseId licenseId;
     private final boolean isEditMode;
@@ -131,6 +136,8 @@ public class LicenseIdMetadataDialog {
             threadsCount.setValue(Integer.toString(metadataAsObject.getThreadsCount()));
             multiServer.setValue(metadataAsObject.isMultiServer());
             licenseName.setValue(metadataAsObject.getLicenseName());
+            licenseCountLimit.setValue(Integer.toString(metadataAsObject.getLicenseCountLimit()));
+            expirationDate.setValue(metadataAsObject.getExpirationDate());
 
             // select license features
             for (int i = 0; i < licenseFeatures.getItemCount(); i++) {
@@ -153,10 +160,15 @@ public class LicenseIdMetadataDialog {
 
         final Integer numberOfLicenses = numberOfLicenses();
         final Integer threadsCount = threadsCount();
+        final Integer licenseCountLimit = licenseCountLimit();
         final List<String> selectedLicenseFeatures = selectedLicenseFeatures();
 
         if ((numberOfLicenses == null || numberOfLicenses <= 0) && !isEditMode) {
             showError("Unable to parse number of licenses. Please enter integer more then zero.");
+            return false;
+        }
+        if (licenseCountLimit == null || licenseCountLimit < 0) {
+            showError("Unable to parse number of license count limit.");
             return false;
         }
         if (threadsCount == null || threadsCount < 0) {
@@ -182,7 +194,9 @@ public class LicenseIdMetadataDialog {
                 .setLicenseFeatures(selectedLicenseFeatures())
                 .setLicenseName(licenseName.getValue())
                 .setMultiServer(multiServer.getValue())
-                .setThreadsCount(threadsCount());
+                .setThreadsCount(threadsCount())
+                .setLicenseCountLimit(licenseCountLimit())
+                .setExpirationDate(expirationDate.getValue());
     }
 
     public List<String> selectedLicenseFeatures() {
@@ -203,6 +217,10 @@ public class LicenseIdMetadataDialog {
 
     public Integer threadsCount() {
         return Admin.parse(threadsCount.getValue());
+    }
+
+    public Integer licenseCountLimit() {
+        return Admin.parse(licenseCountLimit.getValue());
     }
 
     public void onOk() {
