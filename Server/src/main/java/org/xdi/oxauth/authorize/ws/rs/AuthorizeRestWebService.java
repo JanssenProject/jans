@@ -76,7 +76,6 @@ public interface AuthorizeRestWebService {
      * @param requestSessionId
      * @param sessionId
      * @param accessToken
-     * @param authLevel
      * @param httpRequest
      * @param securityContext  An injectable interface that provides access to security
      *                         related information.
