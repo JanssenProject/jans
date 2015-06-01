@@ -1,15 +1,17 @@
 package org.xdi.oxd.license.client.js;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 06/10/2014
  */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LicenseMetadata implements Serializable {
 
     @JsonProperty(value = "thread_count")
@@ -22,6 +24,10 @@ public class LicenseMetadata implements Serializable {
     private String licenseName;
     @JsonProperty(value = "license_features")
     private List<String> licenseFeatures;
+    @JsonProperty(value = "expiration_date")
+    private Date expirationDate;
+    @JsonProperty(value = "license_count_limit")
+    private int licenseCountLimit;
 
     public LicenseMetadata() {
     }
@@ -77,13 +83,35 @@ public class LicenseMetadata implements Serializable {
         return this;
     }
 
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public LicenseMetadata setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+        return this;
+    }
+
+    public int getLicenseCountLimit() {
+        return licenseCountLimit;
+    }
+
+    public LicenseMetadata setLicenseCountLimit(int licenseCountLimit) {
+        this.licenseCountLimit = licenseCountLimit;
+        return this;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("LicenseMetadata");
-        sb.append("{licenseType=").append(licenseType);
+        sb.append("{expirationDate=").append(expirationDate);
         sb.append(", threadsCount=").append(threadsCount);
         sb.append(", multiServer=").append(multiServer);
+        sb.append(", licenseType=").append(licenseType);
+        sb.append(", licenseName='").append(licenseName).append('\'');
+        sb.append(", licenseFeatures=").append(licenseFeatures);
+        sb.append(", licenseCountLimit=").append(licenseCountLimit);
         sb.append('}');
         return sb.toString();
     }
