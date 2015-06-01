@@ -759,6 +759,8 @@ public abstract class AbstractEntryManager implements EntityManager {
 			attributeValues[0] = propertyValue.toString();
 		} else if (propertyValue instanceof Integer) {
 			attributeValues[0] = propertyValue.toString();
+		} else if (propertyValue instanceof Long) {
+			attributeValues[0] = propertyValue.toString();
 		} else if (propertyValue instanceof Date) {
 			attributeValues[0] = encodeGeneralizedTime((Date) propertyValue);
 		} else if (propertyValue instanceof String[]) {
@@ -785,7 +787,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			attributeValues[0] = convertJsonToString(propertyValue);
 		} else {
 			throw new MappingException(
-					"Entry property '" + propertyName + "' should has getter with String, String[], Boolean, Integer, Date, List, LdapEnum or LdapEnum[] return type or has annotation LdapJsonObject");
+					"Entry property '" + propertyName + "' should has getter with String, String[], Boolean, Integer, Long, Date, List, LdapEnum or LdapEnum[] return type or has annotation LdapJsonObject");
 		}
 
 		if (log.isDebugEnabled()) {
@@ -1009,6 +1011,8 @@ public abstract class AbstractEntryManager implements EntityManager {
 			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Boolean.valueOf(attribute.getValue()));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
 			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Integer.valueOf(attribute.getValue()));
+		} else if (parameterType.equals(Long.class) || parameterType.equals(Long.TYPE)) {
+			propertyValueSetter.set(entry, attribute.getValue() == null ? null : Long.valueOf(attribute.getValue()));
 		} else if (parameterType.equals(Date.class)) {
 			propertyValueSetter.set(entry, decodeGeneralizedTime(attribute.getValue()));
 		} else if (parameterType.equals(String[].class)) {
@@ -1060,7 +1064,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			propertyValueSetter.set(entry, jsonValue);
 		} else {
 			throw new MappingException(
-					"Entry property '" + propertyName + "' should has setter with String, Boolean, Integer, Date, String[], List, LdapEnum or LdapEnum[] parameter type or has annotation LdapJsonObject");
+					"Entry property '" + propertyName + "' should has setter with String, Boolean, Integer, Long, Date, String[], List, LdapEnum or LdapEnum[] parameter type or has annotation LdapJsonObject");
 		}
 	}
 
