@@ -93,26 +93,36 @@ public class UserService {
         return ldapEntryManager.find(User.class, dn);
     }
 
-    public User getUser(String userId) {
-        log.debug("Getting user information from LDAP: userId = {0}", userId);
-        
-        if (StringHelper.isEmpty(userId)) {
-        	return null;
-        }
+	public User getUser(String userId, String... returnAttributes) {
+		log.debug("Getting user information from LDAP: userId = {0}", userId);
 
-        User user = new User();
-        user.setDn(ConfigurationFactory.getBaseDn().getPeople());
-        user.setUserId(userId);
+		if (StringHelper.isEmpty(userId)) {
+			return null;
+		}
 
-        List<User> entries = ldapEntryManager.findEntries(user);
-        log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
+		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
-        if (entries.size() > 0) {
-            return entries.get(0);
-        } else {
-            return null;
-        }
-    }
+		List<User> entries = ldapEntryManager.findEntries(ConfigurationFactory.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
+		log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
+
+		if (entries.size() > 0) {
+			return entries.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	public String getUserInum(String userId) {
+		User user = getUser(userId, "inum");
+		
+		if (user == null) {
+			return null;
+		}
+		
+		String inum = user.getAttribute("inum");
+
+		return inum;
+	}
 
     public User updateUser(User user) {
 		return ldapEntryManager.merge(user);
