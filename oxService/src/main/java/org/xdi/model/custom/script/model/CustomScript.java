@@ -4,7 +4,6 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.model.custom.script.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Transient;
