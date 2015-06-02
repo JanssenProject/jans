@@ -7,10 +7,13 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -21,7 +24,9 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
@@ -30,6 +35,8 @@ import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.UserService;
+import org.xdi.util.StringHelper;
 
 /**
  * Provides operations with U2F registration requests
@@ -48,6 +55,9 @@ public class RegistrationService {
 
 	@In
 	private ApplicationService applicationService;
+
+	@In
+	private UserService userService;
 
 	@In
 	private AuthenticationService u2fAuthenticationService;
@@ -71,14 +81,19 @@ public class RegistrationService {
 			applicationService.checkIsValid(appId);
 		}
 
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
 
-		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(userName, appId);
-		for (DeviceRegistration device : devices) {
-			if (!device.isCompromised()) {
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
+		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
+			if (!deviceRegistration.isCompromised()) {
 				try {
-					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, device);
+					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
 					authenticateRequests.add(authenticateRequest);
 				} catch (DeviceCompromisedException ex) {
 					log.error("Faield to authenticate device", ex);
@@ -107,6 +122,11 @@ public class RegistrationService {
 
 	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName, Set<String> facets)
 			throws BadInputException {
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
 		RegisterRequest request = requestMessage.getRegisterRequest();
 		String appId = request.getAppId();
 
@@ -115,9 +135,18 @@ public class RegistrationService {
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
 		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
-		DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
 
-		deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
+		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+		DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
+		deviceRegistration.setStatus(DeviceRegistrationStatus.ACTIVE);
+		deviceRegistration.setApplication(appId);
+		deviceRegistration.setCreationDate(now);
+
+		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
+		deviceRegistration.setId(deviceRegistrationId);
+		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(deviceRegistrationId, userInum));
+		
+		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
 
 		return deviceRegistration;
 	}
