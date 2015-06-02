@@ -136,8 +136,11 @@ class PersonAuthentication(PersonAuthenticationType):
             # Check if user have registered devices
             deviceRegistrationService = DeviceRegistrationService.instance()
 
+            userInum = user.getAttribute("inum")
+
             authenticationRequest = None
-            deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(user.getUserId(), u2f_application_id)
+
+            deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, u2f_application_id)
             if (deviceRegistrations.size() > 0):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start authentication workflow"
 
