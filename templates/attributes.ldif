@@ -711,7 +711,7 @@ oxAuthClaimName: phone_number
 inum: %(inumOrg)s!0005!0C18
 objectClass: top
 objectClass: gluuAttribute
-urn: urn:mace:dir:attribute-def:homePhone
+urn: urn:mace:dir:attribute-def:phone_number
 
 dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
 description: State or Province
