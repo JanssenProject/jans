@@ -20,12 +20,11 @@ import org.xdi.util.security.StringEncrypter;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 
 public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
@@ -133,10 +132,11 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode)
+                                 String authLevel, String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
-            final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode, accessToken, claims);
+            final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode,
+                    accessToken, getScopes());
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
                 tokenLdap.setAuthLevel(authLevel);

@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.common;
 
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ldap.TokenLdap;
@@ -14,12 +15,15 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
 import java.security.SignatureException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 
 public interface IAuthorizationGrant {
@@ -43,8 +47,9 @@ public interface IAuthorizationGrant {
     public RefreshToken createRefreshToken();
 
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode)
-            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException;
+                                 String authLevel, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
+            InvalidClaimException;
 
     public RefreshToken getRefreshToken(String refreshTokenCode);
 
