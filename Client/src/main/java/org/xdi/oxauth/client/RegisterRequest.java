@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version 0.9 May 18, 2015
+ * @version June 3, 2015
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -847,15 +847,12 @@ public class RegisterRequest extends BaseRequest {
             JSONArray redirectUrisJsonArray = requestObject.getJSONArray(REDIRECT_URIS.toString());
             for (int i = 0; i < redirectUrisJsonArray.length(); i++) {
                 String redirectionUri = redirectUrisJsonArray.getString(i);
-                //int paramsIndex = redirectionUri.indexOf("?");
-                //if (paramsIndex != -1) {
-                //    redirectionUri = redirectionUri.substring(0, paramsIndex);
-                //}
                 redirectUris.add(redirectionUri);
             }
         }
 
-        final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        final Set<ResponseType> responseTypes = new HashSet<ResponseType>();
+        final Set<GrantType> grantTypes = new HashSet<GrantType>();
         if (requestObject.has(RESPONSE_TYPES.toString())) {
             JSONArray responseTypesJsonArray = requestObject.getJSONArray(RESPONSE_TYPES.toString());
             for (int i = 0; i < responseTypesJsonArray.length(); i++) {
@@ -867,14 +864,38 @@ public class RegisterRequest extends BaseRequest {
         } else { // Default
             responseTypes.add(ResponseType.CODE);
         }
-
-        final List<GrantType> grantTypes = new ArrayList<GrantType>();
+        if (responseTypes.contains(ResponseType.CODE)) {
+            grantTypes.add(GrantType.AUTHORIZATION_CODE);
+        }
+        if (responseTypes.contains(ResponseType.ID_TOKEN)
+                || responseTypes.containsAll(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN))) {
+            grantTypes.add(GrantType.IMPLICIT);
+        }
+        if (responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN))
+                || responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.TOKEN))
+                || responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN))) {
+            grantTypes.add(GrantType.AUTHORIZATION_CODE);
+            grantTypes.add(GrantType.IMPLICIT);
+        }
         if (requestObject.has(GRANT_TYPES.toString())) {
             JSONArray grantTypesJsonArray = requestObject.getJSONArray(GRANT_TYPES.toString());
             for (int i = 0; i < grantTypesJsonArray.length(); i++) {
                 GrantType gt = GrantType.fromString(grantTypesJsonArray.getString(i));
                 if (gt != null) {
                     grantTypes.add(gt);
+                    switch (gt) {
+                        case AUTHORIZATION_CODE:
+                            responseTypes.add(ResponseType.CODE);
+                            break;
+                        case IMPLICIT:
+                            responseTypes.add(ResponseType.TOKEN);
+                            responseTypes.add(ResponseType.ID_TOKEN);
+                            break;
+                        case REFRESH_TOKEN:
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         } else { // Default
@@ -946,8 +967,8 @@ public class RegisterRequest extends BaseRequest {
                 SignatureAlgorithm.fromName(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
         result.setScopes(scopes);
-        result.setResponseTypes(responseTypes);
-        result.setGrantTypes(grantTypes);
+        result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
+        result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
         result.setContacts(contacts);

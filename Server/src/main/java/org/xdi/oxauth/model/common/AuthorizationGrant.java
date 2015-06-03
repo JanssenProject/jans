@@ -10,6 +10,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.ldap.TokenLdap;
@@ -17,13 +18,16 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
 import java.security.SignatureException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 public class AuthorizationGrant implements IAuthorizationGrant {
 
@@ -125,8 +129,10 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authLevel, String authMode) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
-        return grant.createIdToken(nonce, authorizationCode, accessToken, claims, authLevel, authMode);
+                                 String authLevel, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
+            InvalidClaimException {
+        return grant.createIdToken(nonce, authorizationCode, accessToken, authLevel, authMode);
     }
 
     /**
