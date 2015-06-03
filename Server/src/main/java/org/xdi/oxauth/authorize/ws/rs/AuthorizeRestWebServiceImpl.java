@@ -17,13 +17,11 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
-import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
@@ -56,7 +54,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version June 3, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -446,6 +444,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 sessionUser.getAuthenticationTime());
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                        authorizationGrant.setScopes(scopes);
 
                                         // Store authentication level and mode
                                         authorizationGrant.setAuthLevel(authLevel);
@@ -464,6 +463,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     sessionUser.getAuthenticationTime());
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                            authorizationGrant.setScopes(scopes);
 
                                             // Store authentication level and mode
                                             authorizationGrant.setAuthLevel(authLevel);
@@ -483,15 +483,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     sessionUser.getAuthenticationTime());
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                            authorizationGrant.setScopes(scopes);
 
                                             // Store authentication level and mode
                                             authorizationGrant.setAuthLevel(authLevel);
                                             authorizationGrant.setAuthMode(authMode);
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
-                                        Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
+                                        //Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken, idTokenClaims,
+                                                nonce, authorizationCode, newAccessToken,
                                                 authorizationGrant.getAuthLevel(), authorizationGrant.getAuthMode());
 
                                         redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
@@ -653,6 +654,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return true;
     }
 
+    /*
     public Map<String, String> getClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
         Map<String, String> claims = new HashMap<String, String>();
 
@@ -704,7 +706,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return claims;
-    }
+    }*/
 
     private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         identity.logout();

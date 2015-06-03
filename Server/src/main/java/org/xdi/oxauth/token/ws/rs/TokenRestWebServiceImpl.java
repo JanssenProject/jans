@@ -41,7 +41,7 @@ import java.util.List;
  * Provides interface for token REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 @Name("requestTokenRestWebService")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -130,7 +130,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, authorizationCodeGrant.getAuthLevel(), authorizationCodeGrant.getAuthMode());
+                                    nonce, null, accToken, authorizationCodeGrant.getAuthLevel(), authorizationCodeGrant.getAuthMode());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -169,7 +169,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (authorizationGrant.getScopes().contains("openid")) {
                             idToken = authorizationGrant.createIdToken(
-                                    null, null, null, null, authorizationGrant.getAuthLevel(),
+                                    null, null, null, authorizationGrant.getAuthLevel(),
                                     authorizationGrant.getAuthMode());
                         }
 
@@ -194,7 +194,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, null, clientCredentialsGrant.getAuthLevel(),
+                                null, null, null, clientCredentialsGrant.getAuthLevel(),
                                 clientCredentialsGrant.getAuthMode());
                     }
 
@@ -232,7 +232,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant.getAuthLevel(),
+                                    null, null, null, resourceOwnerPasswordCredentialsGrant.getAuthLevel(),
                                     resourceOwnerPasswordCredentialsGrant.getAuthMode());
                         }
 
