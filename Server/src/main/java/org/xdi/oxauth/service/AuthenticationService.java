@@ -43,7 +43,6 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
-import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
