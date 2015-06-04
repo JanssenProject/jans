@@ -1479,6 +1479,18 @@ attributeTypes: ( oxDeviceRegistrationConf-oid NAME 'oxDeviceRegistrationConf'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxRequest-oid NAME 'oxRequest'
+  DESC 'oxRequest'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxRequestId-oid NAME 'oxRequestId'
+  DESC 'oxRequestId'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxProxyClientId-oid NAME 'oxProxyClientId'
   DESC 'oxProx client id'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2216,4 +2228,7 @@ objectclasses: ( oxCustomScript-oid NAME 'oxCustomScript' SUP top STRUCTURAL MUS
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxDeviceRegistration-oid NAME 'oxDeviceRegistration' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxId $ oxApplication $ oxDeviceRegistrationConf $ oxCounter $ oxStatus $ creationDate ) 
+  X-ORIGIN 'Gluu created objectclass' )
+objectclasses: ( oxU2fRequest-oid NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
+ ( oxId $ oxRequestId $ oxRequest $ creationDate ) 
   X-ORIGIN 'Gluu created objectclass' )
