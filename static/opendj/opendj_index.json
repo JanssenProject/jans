@@ -41,13 +41,11 @@
 		"index": ["equality"]
 	},
 
-
 	{
 		"attribute": "oxState",
 		"type": "string",
 		"index": ["equality"]
 	},
-
 
 	{
 		"attribute": "oxAuthExpiration",
@@ -57,6 +55,24 @@
 
 	{
 		"attribute": "lastModifiedTime",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "oxApplication",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxRequestId",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "creationDate",
 		"type": "date",
 		"index": ["ordering"]
 	},
