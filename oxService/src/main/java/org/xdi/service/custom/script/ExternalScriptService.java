@@ -47,7 +47,10 @@ public class ExternalScriptService implements Serializable {
 	@Observer(CustomScriptManager.MODIFIED_EVENT_TYPE)
 	public void reload() {
 		// Get actual list of external configurations
-		this.customScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
+		List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
+		addExternalConfigurations(newCustomScriptConfigurations);
+		
+		this.customScriptConfigurations = newCustomScriptConfigurations; 
 		this.customScriptConfigurationsNameMap = buildExternalConfigurationsNameMap(customScriptConfigurations);
 
 		// Determine default configuration
@@ -55,6 +58,9 @@ public class ExternalScriptService implements Serializable {
 		
 		// Allow to executu additional logic
 		reloadExternal();
+	}
+
+	protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
 	}
 
 	protected void reloadExternal() {

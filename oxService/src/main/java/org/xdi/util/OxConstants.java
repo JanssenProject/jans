@@ -30,4 +30,6 @@ public  class OxConstants extends LDAPConstants {
 	public static final String CACHE_ATTRIBUTE_KEY_LIST = "attributeList";
 	public static final String CACHE_ACTIVE_ATTRIBUTE_KEY_LIST = "activeAttributeList";
 	public static final String CACHE_ACTIVE_ATTRIBUTE_NAME = "ActiveAttributeCache";
+
+	public static final String SCRIPT_TYPE_INTERNAL_RESERVED_NAME = "internal";
 }
