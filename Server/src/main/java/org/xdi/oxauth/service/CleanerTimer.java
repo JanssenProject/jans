@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -27,7 +28,9 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 
@@ -57,6 +60,9 @@ public class CleanerTimer {
     private ResourceSetPermissionManager resourceSetPermissionManager;
     @In
     private SessionIdService sessionIdService;
+    
+    @In
+    private RequestService u2fRequestService;
 
     private AtomicBoolean isActive;
 
@@ -92,6 +98,8 @@ public class CleanerTimer {
             Date now = new Date();
             this.rptManager.cleanupRPTs(now);
             this.resourceSetPermissionManager.cleanupResourceSetPermissions(now);
+            
+            processU2fRequests();
         } finally {
             this.isActive.set(false);
         }
@@ -148,4 +156,25 @@ public class CleanerTimer {
 
         log.debug("End Client clean up");
     }
+
+    private void processU2fRequests() {
+        log.debug("Start U2F request clean up");
+
+		Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		calendar.add(Calendar.SECOND, -90);
+        Date expirationDate = calendar.getTime();
+
+        List<RequestMessageLdap> expiredRequestMessage = u2fRequestService.getExpiredRequestMessages(expirationDate);
+        if ((expiredRequestMessage != null) && !expiredRequestMessage.isEmpty()) {
+            for (RequestMessageLdap requestMessageLdap : expiredRequestMessage) {
+                log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                		requestMessageLdap.getRequestId(),
+                		requestMessageLdap.getCreationDate());
+                u2fRequestService.removeRequestMessage(requestMessageLdap);
+            }
+        }
+
+        log.debug("End U2F request clean up");
+    }
+
 }

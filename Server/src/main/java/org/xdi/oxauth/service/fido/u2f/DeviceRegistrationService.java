@@ -36,7 +36,7 @@ public class DeviceRegistrationService {
 
 	@In
 	private LdapEntryManager ldapEntryManager;
-	
+
 	@In
 	private UserService userService;
 
@@ -51,22 +51,22 @@ public class DeviceRegistrationService {
 		ldapEntryManager.persist(branch);
 	}
 
-    public boolean containsBranch(final String userInum) {
-        return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForU2fUserDevices(userInum));
-    }
+	public boolean containsBranch(final String userInum) {
+		return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForU2fUserDevices(userInum));
+	}
 
-    public void prepareBranch(final String userInum) {
-        // Create U2F user device registrations branch if needed
-        if (!containsBranch(userInum)) {
-            addBranch(userInum);
-        }
-    }
+	public void prepareBranch(final String userInum) {
+		// Create U2F user device registrations branch if needed
+		if (!containsBranch(userInum)) {
+			addBranch(userInum);
+		}
+	}
 
 	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String... returnAttributes) {
 		prepareBranch(userInum);
 
-		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
+		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
 
 		return ldapEntryManager.findEntries(baseDnForU2fDevices, DeviceRegistration.class, returnAttributes, appIdFilter);
 	}
