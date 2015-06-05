@@ -66,12 +66,13 @@ public class GenerateLicenseWS {
             }
 
             final Date expiredAt = metadata.getExpirationDate() != null ? metadata.getExpirationDate() : licenseExpirationDate(licenseId);
+            final Date now = new Date();
 
-            if (expiredAt.after(new Date())) {
-                LOG.debug("License ID is expired, licenseId: " + licenseIdStr);
-                               throw new WebApplicationException(
-                                       Response.status(Response.Status.BAD_REQUEST).entity("License ID expires.").
-                                               build());
+            if (!now.before(expiredAt)) {
+                LOG.debug("License ID is expired, licenseId: " + licenseIdStr + ", expiredAt: " + expiredAt + ", now: " + now);
+                throw new WebApplicationException(
+                        Response.status(Response.Status.BAD_REQUEST).entity("License ID expires.").
+                                build());
             }
 
             LicenseGeneratorInput input = new LicenseGeneratorInput();
