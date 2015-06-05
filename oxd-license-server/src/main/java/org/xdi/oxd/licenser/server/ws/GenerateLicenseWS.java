@@ -2,12 +2,15 @@ package org.xdi.oxd.licenser.server.ws;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.license.client.js.LdapLicenseCrypt;
 import org.xdi.oxd.license.client.js.LdapLicenseId;
+import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.licenser.server.LicenseGenerator;
 import org.xdi.oxd.licenser.server.LicenseGeneratorInput;
 import org.xdi.oxd.licenser.server.service.LicenseCryptService;
@@ -24,6 +27,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
@@ -50,15 +54,28 @@ public class GenerateLicenseWS {
         try {
             LdapLicenseId licenseId = getLicenseId(licenseIdStr);
 
-            if (licenseId.getLicensesIssuedCount() > 0 && !licenseId.getForceLicenseUpdate()) {
-                LOG.debug("License was already issued and there is no update");
-                return LicenseResponse.EMPTY;
-            }
-
             LdapLicenseCrypt licenseCrypt = getLicenseCrypt(licenseId.getLicenseCryptDN(), licenseIdStr);
 
+            final LicenseMetadata metadata = Jackson.createJsonMapper().readValue(licenseId.getMetadata(), LicenseMetadata.class);
+
+            if (licenseId.getLicensesIssuedCount() >= metadata.getLicenseCountLimit()) {
+                LOG.debug("License ID count limit exceeded, licenseId: " + licenseIdStr);
+                throw new WebApplicationException(
+                        Response.status(Response.Status.BAD_REQUEST).entity("License ID count limit exceeded.").
+                                build());
+            }
+
+            final Date expiredAt = metadata.getExpirationDate() != null ? metadata.getExpirationDate() : licenseExpirationDate(licenseId);
+
+            if (expiredAt.after(new Date())) {
+                LOG.debug("License ID is expired, licenseId: " + licenseIdStr);
+                               throw new WebApplicationException(
+                                       Response.status(Response.Status.BAD_REQUEST).entity("License ID expires.").
+                                               build());
+            }
+
             LicenseGeneratorInput input = new LicenseGeneratorInput();
-            input.setExpiredAt(licenseExpirationDate(licenseId));
+            input.setExpiredAt(expiredAt);
             input.setCrypt(licenseCrypt);
             input.setMetadata(licenseId.getMetadata());
 
@@ -66,9 +83,15 @@ public class GenerateLicenseWS {
             updateLicenseId(licenseId);
             return licenseResponse;
         } catch (InvalidKeySpecException e) {
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(e);
         } catch (NoSuchAlgorithmException e) {
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(e);
+        } catch (JsonMappingException e) {
+            throw new WebApplicationException(e);
+        } catch (JsonParseException e) {
+            throw new WebApplicationException(e);
+        } catch (IOException e) {
+            throw new WebApplicationException(e);
         }
     }
 
