@@ -722,6 +722,7 @@ class Setup(object):
                        '%s/oxauth.jar' % self.tomcat_user_home_lib]
 
         cmd = " ".join(["/usr/java/latest/bin/java",
+                        "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(requiredJars),
                         "org.xdi.oxauth.util.KeyGenerator"])
