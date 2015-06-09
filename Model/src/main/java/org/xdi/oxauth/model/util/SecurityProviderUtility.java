@@ -16,14 +16,23 @@ public class SecurityProviderUtility {
 
 	private static final Logger log = Logger.getLogger(JwtUtil.class);
 
-	public static void installBCProvider() {
+	public static void installBCProvider(boolean silent) {
 		Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
 		if (provider == null) {
-			log.info("Adding Bouncy Castle Provider");
+			if (!silent) {
+				log.info("Adding Bouncy Castle Provider");
+			}
+
 			Security.addProvider(new BouncyCastleProvider());
 		} else {
-			log.info("Bouncy Castle Provider was added already");
+			if (!silent) {
+				log.info("Bouncy Castle Provider was added already");
+			}
 		}
+	}
+
+	public static void installBCProvider() {
+		installBCProvider(false);
 	}
 
 }
