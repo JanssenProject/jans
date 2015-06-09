@@ -15,11 +15,6 @@ from java.util import Arrays
 import sys
 import java
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
