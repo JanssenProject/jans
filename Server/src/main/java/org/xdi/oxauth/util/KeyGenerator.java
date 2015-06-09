@@ -44,7 +44,7 @@ public class KeyGenerator {
 	}
 
     public static void main(String[] args) throws Exception {
-    	SecurityProviderUtility.installBCProvider();
+    	SecurityProviderUtility.installBCProvider(true);
 
     	JSONArray keys = new JSONArray();
 
