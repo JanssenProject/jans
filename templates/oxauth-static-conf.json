@@ -14,7 +14,7 @@
         "federationRequest":"ou=request,ou=federation,o=%(inumOrg)s,o=gluu",
         "federationTrust":"ou=trust,ou=federation,o=%(inumOrg)s,o=gluu",
         "umaBase":"ou=uma,o=%(inumOrg)s,o=gluu",
-        "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu"
+        "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu",
         "u2fBase":"ou=u2f,o=%(inumOrg)s,o=gluu"
     }
 }
