@@ -251,10 +251,6 @@ public class AuthorizeAction {
             acrs = Util.splittedStringAsList(acrValues, " ");
         }
 
-        // yuriyz : acr value is not mandatory for authorization request, so fallback to basic acr value.
-        if (acrs == null || acrs.isEmpty()) {
-            acrs = Lists.newArrayList("basic");
-        }
         return acrs;
     }
 
