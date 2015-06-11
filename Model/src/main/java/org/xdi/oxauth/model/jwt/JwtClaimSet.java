@@ -19,7 +19,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version Jun 10, 2015
  */
 public abstract class JwtClaimSet {
 
@@ -177,6 +177,10 @@ public abstract class JwtClaimSet {
         claims.put(key, values);
     }
 
+    public void setClaim(String key, JwtSubClaimObject subClaimObject) {
+        claims.put(key, subClaimObject);
+    }
+
     public void removeClaim(String key) {
         claims.remove(key);
     }
@@ -189,6 +193,9 @@ public abstract class JwtClaimSet {
                 if (claim.getValue() instanceof Date) {
                     Date date = (Date) claim.getValue();
                     jsonObject.put(claim.getKey(), date.getTime() / 1000);
+                } else if (claim.getValue() instanceof JwtSubClaimObject) {
+                    JwtSubClaimObject subClaimObject = (JwtSubClaimObject) claim.getValue();
+                    jsonObject.put(subClaimObject.getName(), subClaimObject.toJsonObject());
                 } else {
                     jsonObject.put(claim.getKey(), claim.getValue());
                 }
