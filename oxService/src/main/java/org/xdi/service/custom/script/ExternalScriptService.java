@@ -90,6 +90,10 @@ public class ExternalScriptService implements Serializable {
 	}
 
 	public boolean isEnabled() {
+		if (this.customScriptConfigurations == null) {
+			return false;
+		}
+
 		return this.customScriptConfigurations.size() > 0;
 	}
 
