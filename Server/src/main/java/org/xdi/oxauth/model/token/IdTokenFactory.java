@@ -33,10 +33,7 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.RSASigner;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.jwt.*;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
@@ -56,13 +53,14 @@ import java.util.*;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version Jun 10, 2015
  */
 public class IdTokenFactory {
 
     public static Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                             AuthorizationCode authorizationCode, AccessToken accessToken,
-                                            Set<String> scopes) throws SignatureException, InvalidJwtException, StringEncrypter.EncryptionException, InvalidClaimException {
+                                            Set<String> scopes) throws SignatureException, InvalidJwtException,
+            StringEncrypter.EncryptionException, InvalidClaimException {
         Jwt jwt = new Jwt();
         JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
 
@@ -96,8 +94,6 @@ public class IdTokenFactory {
         jwt.getClaims().setExpirationTime(expiration);
         jwt.getClaims().setIssuedAt(issuedAt);
 
-        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
-
         // TODO: acr
         //if (authenticationContextClassReference != null) {
         //    jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authenticationContextClassReference);
@@ -125,21 +121,46 @@ public class IdTokenFactory {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
 
             if (scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+                if (scope.getIsOxAuthGroupClaims()) {
+                    JwtSubClaimObject groupClaim = new JwtSubClaimObject();
+                    groupClaim.setName(scope.getDisplayName());
 
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
-                    String attributeValue = null;
+                    for (String claimDn : scope.getOxAuthClaims()) {
+                        GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
-                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                        if (ldapName.equals("uid")) {
-                            attributeValue = authorizationGrant.getUser().getUserId();
-                        } else {
-                            attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName());
+                        String claimName = gluuAttribute.getOxAuthClaimName();
+                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                        String attributeValue = null;
+
+                        if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                            if (ldapName.equals("uid")) {
+                                attributeValue = authorizationGrant.getUser().getUserId();
+                            } else {
+                                attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName());
+                            }
+
+                            groupClaim.setClaim(claimName, attributeValue);
                         }
+                    }
 
-                        jwt.getClaims().setClaim(claimName, attributeValue);
+                    jwt.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                } else {
+                    for (String claimDn : scope.getOxAuthClaims()) {
+                        GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+
+                        String claimName = gluuAttribute.getOxAuthClaimName();
+                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                        String attributeValue = null;
+
+                        if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                            if (ldapName.equals("uid")) {
+                                attributeValue = authorizationGrant.getUser().getUserId();
+                            } else {
+                                attributeValue = authorizationGrant.getUser().getAttribute(gluuAttribute.getName());
+                            }
+
+                            jwt.getClaims().setClaim(claimName, attributeValue);
+                        }
                     }
                 }
             }
@@ -172,6 +193,8 @@ public class IdTokenFactory {
                 }
             }
         }
+
+        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         // Signature
         JSONWebKey jwk = null;
