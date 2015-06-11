@@ -35,10 +35,6 @@
     <module>oxd-client</module>
     <module>oxd-server</module>
     <module>oxd-ping</module>
-    <module>oxd-license-server</module>
-    <module>oxd-license-client</module>
-    <module>oxd-license-admin</module>
-    <module>oxd-license-validator</module>
   </modules>
 
   <repositories>
