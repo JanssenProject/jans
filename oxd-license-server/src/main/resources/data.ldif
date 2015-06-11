@@ -1,9 +1,0 @@
-dn: ou=oxLicense,o=@!1111,o=gluu
-objectClass: organizationalUnit
-objectClass: top
-ou: oxLicense
-
-dn: ou=customer,ou=oxLicense,o=@!1111,o=gluu
-objectClass: organizationalUnit
-objectClass: top
-ou: customer
