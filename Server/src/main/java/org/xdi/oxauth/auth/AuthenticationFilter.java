@@ -33,7 +33,6 @@ import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;

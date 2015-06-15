@@ -88,8 +88,6 @@ public class Authenticator implements Serializable {
     @In
     private FacesMessages facesMessages;
 
-//    @RequestParameter(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES)
-    // Don't allow to override acr in request
     private String authAcr;
 
     private Integer authStep;
@@ -157,7 +155,7 @@ public class Authenticator implements Serializable {
     private boolean clientAuthentication(Context context, boolean interactive) {
         boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
         if (isServiceUsesExternalAuthenticator) {
-            CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
+        	CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                     .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
 
             if (customScriptConfiguration == null) {
@@ -201,6 +199,7 @@ public class Authenticator implements Serializable {
 	    Context eventContext = Contexts.getEventContext();
 	    eventContext.set("sessionAttributes", sessionIdAttributes);
 
+	    initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
         if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr)) {
         	initCustomAuthenticatorVariables(sessionIdAttributes);
