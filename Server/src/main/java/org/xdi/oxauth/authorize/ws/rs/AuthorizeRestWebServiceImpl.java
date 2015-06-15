@@ -167,6 +167,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
+        updateSessionUser(scope, clientId, redirectUri, acrValuesStr, amrValuesStr);
+
         try {
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
@@ -550,6 +552,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return builder.build();
+    }
+
+    // #34 - update session attributes with each request
+    // https://github.com/GluuFederation/oxAuth/issues/34
+    private void updateSessionUser(String scope, String clientId, String redirectUri, String acrValuesStr, String amrValuesStr) {
+        if (sessionUser != null && sessionUser.getSessionAttributes() != null && !sessionUser.getSessionAttributes().isEmpty()) {
+            final Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
+            sessionAttributes.put("redirect_uri", redirectUri);
+            sessionAttributes.put("acr_values", acrValuesStr);
+            sessionAttributes.put("amr_values", amrValuesStr);
+            sessionAttributes.put("scope", scope);
+            sessionAttributes.put("client_id", clientId);
+            sessionUser.setSessionAttributes(sessionAttributes);
+            		        	boolean updateResult = sessionIdService.updateSessionId(sessionUser, true, true);
+            		        	if (!updateResult) {
+            						log.debug("Failed to update session entry: '{0}'", sessionUser.getId());            						                                                                                        		        	}
+        }
     }
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
