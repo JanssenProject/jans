@@ -50,6 +50,9 @@ public class BaseDnConfiguration {
     @XmlElement(name = "umaPolicy")
     private String umaPolicy;
 
+    @XmlElement(name = "u2fBase")
+    private String u2fBase;
+
     public String getUmaBase() {
         return umaBase;
     }
@@ -169,4 +172,13 @@ public class BaseDnConfiguration {
     public void setSessionId(String p_sessionId) {
         sessionId = p_sessionId;
     }
+
+	public String getU2fBase() {
+		return u2fBase;
+	}
+
+	public void setU2fBase(String u2fBase) {
+		this.u2fBase = u2fBase;
+	}
+
 }

@@ -6,17 +6,24 @@
 
 package org.xdi.oxauth.util;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.util.UUID;
+
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
-import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
+import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-
-import java.security.Provider;
-import java.security.Security;
-import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
@@ -24,8 +31,20 @@ import java.util.UUID;
  */
 public class KeyGenerator {
 
+	private static final Logger log;
+
+	static {
+		// Add console appender
+		LogManager.getRootLogger().removeAllAppenders();
+
+		ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
+		LogManager.getRootLogger().addAppender(consoleAppender);
+
+		log = Logger.getLogger(KeyGenerator.class);
+	}
+
     public static void main(String[] args) throws Exception {
-    	SecurityProviderUtility.installBCProvider();
+    	SecurityProviderUtility.installBCProvider(true);
 
     	JSONArray keys = new JSONArray();
 

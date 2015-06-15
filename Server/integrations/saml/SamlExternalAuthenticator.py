@@ -134,6 +134,8 @@ class PersonAuthentication(PersonAuthenticationType):
         use_basic_auth = False
         if (saml_allow_basic_login):
             # Detect if user used basic authnetication method
+            credentials = Identity.instance().getCredentials()
+
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
             if (StringHelper.isNotEmpty(user_name) and StringHelper.isNotEmpty(user_password)):
@@ -416,9 +418,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if (step == 1):
             print "Saml. Prepare for step 1"
-
-            print "Saml. Prepare for step 1. Store current request parameters in session because Saml don't pass them via service URI"
-            authenticationService.storeRequestParametersInSession()
             
             httpService = HttpService.instance();
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()

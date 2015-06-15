@@ -23,6 +23,7 @@ import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
@@ -91,13 +92,14 @@ public class U2fAuthenticationWS {
 			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
 
 			String requestId = authenticateResponse.getRequestId();
-			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.getAuthenticationRequestMessage(requestId);
-			if (authenticateRequestMessage == null) {
+			AuthenticateRequestMessageLdap authenticateRequestMessageLdap = u2fAuthenticationService.getAuthenticationRequestMessageByRequestId(requestId);
+			if (authenticateRequestMessageLdap == null) {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
-			u2fAuthenticationService.removeAuthenticationRequestMessage(requestId);
+			u2fAuthenticationService.removeAuthenticationRequestMessage(authenticateRequestMessageLdap);
 
+			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
 			u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
