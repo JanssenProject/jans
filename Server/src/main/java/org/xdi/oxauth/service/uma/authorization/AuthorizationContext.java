@@ -104,7 +104,7 @@ public class AuthorizationContext {
         return m_grant;
     }
 
-    public String getAuthMode() {
+    public String getAcrs() {
         return m_grant.getAcrValues();
     }
 
