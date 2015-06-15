@@ -447,7 +447,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
 
-                                        // Store authentication level and mode
+                                        // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
                                         authorizationGrant.save(); // call save after object modification!!!
 
@@ -464,7 +464,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
 
-                                            // Store authentication level and mode
+                                            // Store acr_values
                                             authorizationGrant.setAcrValues(acrValuesStr);
                                             authorizationGrant.save(); // call save after object modification!!!
                                         }

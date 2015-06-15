@@ -21,7 +21,7 @@ import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-//@Scope(ScopeType.STATELESS)
+// @Scope(ScopeType.STATELESS)
 @Scope(ScopeType.APPLICATION)
 @Name("applicationService")
 @AutoCreate
@@ -38,7 +38,8 @@ public class ApplicationService {
 	 * be incompatible with the U2F specification or any major U2F Client
 	 * implementation.
 	 *
-	 * @param appId the App ID to be validated
+	 * @param appId
+	 *            the App ID to be validated
 	 */
 	public void checkIsValid(String appId) {
 		if (!appId.contains(":")) {
