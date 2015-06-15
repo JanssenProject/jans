@@ -16,9 +16,12 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
+import org.xdi.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 import org.xdi.service.custom.script.ExternalScriptService;
+import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 
 import java.util.ArrayList;
@@ -39,12 +42,32 @@ import java.util.Map.Entry;
 public class ExternalAuthenticationService extends ExternalScriptService {
 
 	private static final long serialVersionUID = 7339887464253044927L;
+	
+	private final CustomScriptConfiguration internalCustomScriptConfiguration;
 
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsMapByUsageType;
 	private Map<AuthenticationScriptUsageType, CustomScriptConfiguration> defaultExternalAuthenticators;
 
 	public ExternalAuthenticationService() {
 		super(CustomScriptType.PERSON_AUTHENTICATION);
+
+		PersonAuthenticationType personAuthenticationType = new InternalDefaultPersonAuthenticationType();
+		CustomScript customScript = new AuthenticationCustomScript() {
+			@Override
+			public AuthenticationScriptUsageType getUsageType() {
+				return AuthenticationScriptUsageType.INTERACTIVE;
+			}
+			
+		};
+		customScript.setName(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+		customScript.setLevel(-1);
+		
+		this.internalCustomScriptConfiguration = new CustomScriptConfiguration(customScript, personAuthenticationType, new HashMap<String, SimpleCustomProperty>(0));
+	}
+
+	@Override
+	protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
+		newCustomScriptConfigurations.add(this.internalCustomScriptConfiguration);
 	}
 
 	@Override
@@ -323,7 +346,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return null;
 	}
 
-	public List<CustomScriptConfiguration> getcustomScriptConfigurationsMap() {
+	public List<CustomScriptConfiguration> getCustomScriptConfigurationsMap() {
 		return new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
 	}
 

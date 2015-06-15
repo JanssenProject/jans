@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -22,16 +19,17 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.service.UserService;
+
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with user U2F devices
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-//@Scope(ScopeType.STATELESS)
-@Scope(ScopeType.APPLICATION)
+@Scope(ScopeType.STATELESS)
 @Name("deviceRegistrationService")
 @AutoCreate
 public class DeviceRegistrationService {
@@ -39,73 +37,72 @@ public class DeviceRegistrationService {
 	@In
 	private LdapEntryManager ldapEntryManager;
 
+	@In
+	private UserService userService;
+
 	@Logger
 	private Log log;
 
-	private HashMap<String, List<DeviceRegistration>> devices = new HashMap<String, List<DeviceRegistration>>();
-
-	public void addBranch(final String userName) {
+	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
-		branch.setOrganizationalUnitName("device_registration");
-		branch.setDn(getDnForResourceSet(null));
+		branch.setOrganizationalUnitName("u2f_devices");
+		branch.setDn(getBaseDnForU2fUserDevices(userInum));
 
 		ldapEntryManager.persist(branch);
 	}
 
-	public List<DeviceRegistration> findUserDeviceRegistrations(String userName, String appId) {
-		List<DeviceRegistration> userDevices = devices.get(userName);
-		
-		if (userDevices == null) {
-			return new ArrayList<DeviceRegistration>(0);
-		}
-		
-		return userDevices;
+	public boolean containsBranch(final String userInum) {
+		return ldapEntryManager.contains(SimpleBranch.class, getBaseDnForU2fUserDevices(userInum));
 	}
 
-	public void addUserDeviceRegistration(String userName, String appId, DeviceRegistration deviceRegistration) {
-		List<DeviceRegistration> userDevices = devices.get(userName);
-		if (userDevices == null) {
-			userDevices = new ArrayList<DeviceRegistration>();
-			devices.put(userName, userDevices);
+	public void prepareBranch(final String userInum) {
+		// Create U2F user device registrations branch if needed
+		if (!containsBranch(userInum)) {
+			addBranch(userInum);
 		}
-
-		userDevices.add(deviceRegistration);
 	}
 
-	public void updateDeviceRegistration(String userName, DeviceRegistration usedDeviceRegistration) {
-		List<DeviceRegistration> userDevices = devices.get(userName);
-		if (userDevices != null) {
-			for (Iterator<DeviceRegistration> it = userDevices.iterator(); it.hasNext();) {
-				DeviceRegistration userDevice = (DeviceRegistration) it.next();
-				if (userDevice.getKeyHandle() == usedDeviceRegistration.getKeyHandle()) {
-					it.remove();
-					break;
-				}
-			}
+	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String... returnAttributes) {
+		prepareBranch(userInum);
 
-			userDevices.add(usedDeviceRegistration);
-		}
+		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
+		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
+
+		return ldapEntryManager.findEntries(baseDnForU2fDevices, DeviceRegistration.class, returnAttributes, appIdFilter);
+	}
+
+	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
+		prepareBranch(userInum);
+
+		ldapEntryManager.persist(deviceRegistration);
+	}
+
+	public void updateDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
+		prepareBranch(userInum);
+
+		ldapEntryManager.merge(deviceRegistration);
 	}
 
 	/**
-	 * Build DN string for resource set description
+	 * Build DN string for U2F user device
 	 */
-	public String getDnForResourceSet(String oxId) {
+	public String getDnForU2fDevice(String oxId, String userInum) {
+		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
 		if (StringHelper.isEmpty(oxId)) {
-			return getBaseDnForResourceSet();
+			return baseDnForU2fDevices;
 		}
-		return String.format("oxId=%s,%s", oxId, getBaseDnForResourceSet());
+		return String.format("oxId=%s,%s", oxId, baseDnForU2fDevices);
 	}
 
-	public String getBaseDnForResourceSet() {
-		final String umaBaseDn = ConfigurationFactory.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
-		return String.format("ou=resource_sets,%s", umaBaseDn);
+	public String getBaseDnForU2fUserDevices(String userInum) {
+		final String userBaseDn = userService.getDnForUser(userInum); // "ou=u2f_devices,inum=1234,ou=people,o=@!1111,o=gluu"
+		return String.format("ou=u2f_devices,%s", userBaseDn);
 	}
 
 	/**
-	 * Get ResourceSetService instance
+	 * Get DeviceRegistrationService instance
 	 *
-	 * @return ResourceSetService instance
+	 * @return DeviceRegistrationService instance
 	 */
 	public static DeviceRegistrationService instance() {
 		return (DeviceRegistrationService) Component.getInstance(DeviceRegistrationService.class);

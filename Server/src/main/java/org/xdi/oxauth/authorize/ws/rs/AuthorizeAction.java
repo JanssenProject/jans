@@ -147,8 +147,8 @@ public class AuthorizeAction {
             String redirectTo = "/login.xhtml";
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-            if (useExternalAuthenticator) {
-                List<String> acrValuesList = acrValuesList();
+            List<String> acrValuesList = acrValuesList();
+            if (useExternalAuthenticator && !acrValuesList.isEmpty()) {
 
                 CustomScriptConfiguration customScriptConfiguration = null;
             	
@@ -251,10 +251,6 @@ public class AuthorizeAction {
             acrs = Util.splittedStringAsList(acrValues, " ");
         }
 
-        // yuriyz : acr value is not mandatory for authorization request, so fallback to basic acr value.
-        if (acrs == null || acrs.isEmpty()) {
-            acrs = Lists.newArrayList("basic");
-        }
         return acrs;
     }
 

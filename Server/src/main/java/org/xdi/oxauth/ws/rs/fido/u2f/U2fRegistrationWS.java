@@ -21,6 +21,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
@@ -60,7 +61,7 @@ public class U2fRegistrationWS {
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId) {
 		try {
 			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userName);
-			u2fRegistrationService.storeRegistrationRequestMessage(registerRequestMessage);
+			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -85,13 +86,14 @@ public class U2fRegistrationWS {
 			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
 
 			String requestId = registerResponse.getRequestId();
-			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.getRegistrationRequestMessage(requestId);
-			if (registerRequestMessage == null) {
+			RegisterRequestMessageLdap registerRequestMessageLdap = u2fRegistrationService.getRegisterRequestMessageByRequestId(requestId);
+			if (registerRequestMessageLdap == null) {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
-			u2fRegistrationService.removeRegistrationRequestMessage(requestId);
+			u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
+			RegisterRequestMessage registerRequestMessage = registerRequestMessageLdap.getRegisterRequestMessage();
 			u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);
