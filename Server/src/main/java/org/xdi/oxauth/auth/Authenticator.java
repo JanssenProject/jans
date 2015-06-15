@@ -88,7 +88,8 @@ public class Authenticator implements Serializable {
     @In
     private FacesMessages facesMessages;
 
-    @RequestParameter(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES)
+//    @RequestParameter(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES)
+    // Don't allow to override acr in request
     private String authAcr;
 
     private Integer authStep;
@@ -200,7 +201,8 @@ public class Authenticator implements Serializable {
 	    Context eventContext = Contexts.getEventContext();
 	    eventContext.set("sessionAttributes", sessionIdAttributes);
 
-    	if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
+        boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
+        if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr)) {
         	initCustomAuthenticatorVariables(sessionIdAttributes);
         	if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
                 log.error("Failed to determine authentication mode");

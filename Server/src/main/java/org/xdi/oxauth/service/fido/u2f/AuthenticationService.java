@@ -7,11 +7,14 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -22,6 +25,8 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
@@ -30,20 +35,26 @@ import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
+
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with U2F authentication request
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.APPLICATION)
+@Scope(ScopeType.STATELESS)
 @Name("u2fAuthenticationService")
 @AutoCreate
-public class AuthenticationService {
+public class AuthenticationService extends RequestService {
 
 	@Logger
 	private Log log;
+
+	@In
+	private LdapEntryManager ldapEntryManager;
 
 	@In
 	private ApplicationService applicationService;
@@ -57,25 +68,31 @@ public class AuthenticationService {
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
+	@In
+	private UserService userService;
+
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
-
-	private final Map<String, AuthenticateRequestMessage> requestStorage = new HashMap<String, AuthenticateRequestMessage>();
 
 	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userName) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
 		}
 
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		byte[] challenge = challengeGenerator.generateChallenge();
 
-		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(userName, appId);
-		for (DeviceRegistration device : devices) {
-			if (!device.isCompromised()) {
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
+		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
+			if (!deviceRegistration.isCompromised()) {
 				AuthenticateRequest request;
 				try {
-					request = startAuthentication(appId, device, challenge);
+					request = startAuthentication(appId, deviceRegistration, challenge);
 					authenticateRequests.add(request);
 				} catch (DeviceCompromisedException ex) {
 					log.error("Faield to authenticate device", ex);
@@ -84,10 +101,10 @@ public class AuthenticationService {
 		}
 
 		if (authenticateRequests.isEmpty()) {
-			if (devices.isEmpty()) {
-				throw new NoEligableDevicesException(devices, "No devices registrered");
+			if (deviceRegistrations.isEmpty()) {
+				throw new NoEligableDevicesException(deviceRegistrations, "No devices registrered");
 			} else {
-				throw new NoEligableDevicesException(devices, "All devices compromised");
+				throw new NoEligableDevicesException(deviceRegistrations, "All devices compromised");
 			}
 		}
 
@@ -103,23 +120,28 @@ public class AuthenticationService {
 			throw new DeviceCompromisedException(device, "Device has been marked as compromised, cannot authenticate");
 		}
 
-		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getKeyHandle());
+		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getDeviceRegistrationConfiguration().getKeyHandle());
 	}
 
 	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName)
 			throws BadInputException, DeviceCompromisedException {
-		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userName, requestMessage.getAppId());
-
-		return finishAuthentication(requestMessage, response, deviceRegistrations, userName, null);
+		return finishAuthentication(requestMessage, response, userName, null);
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response,
-			List<DeviceRegistration> deviceRegistrations, String userName, Set<String> facets) throws BadInputException, DeviceCompromisedException {
+	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName, Set<String> facets)
+			throws BadInputException, DeviceCompromisedException {
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, requestMessage.getAppId());
+
 		final AuthenticateRequest request = getAuthenticateRequest(requestMessage, response);
 
 		DeviceRegistration usedDeviceRegistration = null;
 		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
-			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getKeyHandle())) {
+			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getDeviceRegistrationConfiguration().getKeyHandle())) {
 				usedDeviceRegistration = deviceRegistration;
 				break;
 			}
@@ -138,11 +160,11 @@ public class AuthenticationService {
 
 		RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(response.getSignatureData());
 		rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
-				Base64Util.base64urldecode(usedDeviceRegistration.getPublicKey()));
+				Base64Util.base64urldecode(usedDeviceRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
 		rawAuthenticateResponse.checkUserPresence();
 		usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
-		deviceRegistrationService.updateDeviceRegistration(userName, usedDeviceRegistration);
+		deviceRegistrationService.updateDeviceRegistration(userInum, usedDeviceRegistration);
 
 		return usedDeviceRegistration;
 	}
@@ -162,15 +184,55 @@ public class AuthenticationService {
 	}
 
 	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage) {
-		requestStorage.put(requestMessage.getRequestId(), requestMessage);
+		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+		final String authenticateRequestMessageId = UUID.randomUUID().toString();
+
+		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(requestMessage);
+		authenticateRequestMessageLdap.setCreationDate(now);
+		authenticateRequestMessageLdap.setId(authenticateRequestMessageId);
+		authenticateRequestMessageLdap.setDn(getDnForAuthenticateRequestMessage(authenticateRequestMessageId));
+
+		ldapEntryManager.persist(authenticateRequestMessageLdap);
 	}
 
-	public AuthenticateRequestMessage getAuthenticationRequestMessage(String requestId) {
-		return requestStorage.get(requestId);
+	public AuthenticateRequestMessage getAuthenticationRequestMessage(String oxId) {
+		String requestDn = getDnForAuthenticateRequestMessage(oxId);
+
+		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = ldapEntryManager.find(AuthenticateRequestMessageLdap.class, requestDn);
+		if (authenticateRequestMessageLdap == null) {
+			return null;
+		}
+
+		return authenticateRequestMessageLdap.getAuthenticateRequestMessage();
 	}
 
-	public void removeAuthenticationRequestMessage(String requestId) {
-		requestStorage.remove(requestId);
+	public AuthenticateRequestMessageLdap getAuthenticationRequestMessageByRequestId(String requestId) {
+		String baseDn = getDnForAuthenticateRequestMessage(null);
+		Filter requestIdFilter = Filter.createEqualityFilter("oxRequestId", requestId);
+
+		List<AuthenticateRequestMessageLdap> authenticateRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, AuthenticateRequestMessageLdap.class,
+				requestIdFilter);
+		if ((authenticateRequestMessagesLdap == null) || authenticateRequestMessagesLdap.isEmpty()) {
+			return null;
+		}
+
+		return authenticateRequestMessagesLdap.get(0);
+	}
+
+	public void removeAuthenticationRequestMessage(AuthenticateRequestMessageLdap authenticateRequestMessageLdap) {
+		removeRequestMessage(authenticateRequestMessageLdap);
+	}
+
+	/**
+	 * Build DN string for U2F authentication request
+	 */
+	public String getDnForAuthenticateRequestMessage(String oxId) {
+		final String u2fBaseDn = ConfigurationFactory.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=@!1111,o=gluu
+		if (StringHelper.isEmpty(oxId)) {
+			return String.format("ou=authentication_requests,%s", u2fBaseDn);
+		}
+
+		return String.format("oxid=%s,ou=authentication_requests,%s", oxId, u2fBaseDn);
 	}
 
 }

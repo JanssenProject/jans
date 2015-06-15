@@ -7,11 +7,14 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -21,7 +24,11 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
@@ -30,24 +37,32 @@ import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.UserService;
+import org.xdi.util.StringHelper;
+
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with U2F registration requests
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.APPLICATION)
-//@Scope(ScopeType.STATELESS)
-//TODO: Replace after finish
+@Scope(ScopeType.STATELESS)
 @Name("u2fRegistrationService")
 @AutoCreate
-public class RegistrationService {
+public class RegistrationService extends RequestService {
 
 	@Logger
 	private Log log;
 
 	@In
+	private LdapEntryManager ldapEntryManager;
+
+	@In
 	private ApplicationService applicationService;
+
+	@In
+	private UserService userService;
 
 	@In
 	private AuthenticationService u2fAuthenticationService;
@@ -64,21 +79,24 @@ public class RegistrationService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	private final Map<String, RegisterRequestMessage> requestStorage = new HashMap<String, RegisterRequestMessage>();
-
 	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userName) {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
 		}
 
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
 
-		List<DeviceRegistration> devices = deviceRegistrationService.findUserDeviceRegistrations(userName, appId);
-		for (DeviceRegistration device : devices) {
-			if (!device.isCompromised()) {
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
+		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
+			if (!deviceRegistration.isCompromised()) {
 				try {
-					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, device);
+					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
 					authenticateRequests.add(authenticateRequest);
 				} catch (DeviceCompromisedException ex) {
 					log.error("Faield to authenticate device", ex);
@@ -107,6 +125,11 @@ public class RegistrationService {
 
 	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName, Set<String> facets)
 			throws BadInputException {
+		String userInum = userService.getUserInum(userName);
+		if (StringHelper.isEmpty(userInum)) {
+			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+		}
+
 		RegisterRequest request = requestMessage.getRegisterRequest();
 		String appId = request.getAppId();
 
@@ -115,23 +138,72 @@ public class RegistrationService {
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
 		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
-		DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
 
-		deviceRegistrationService.addUserDeviceRegistration(userName, appId, deviceRegistration);
+		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+		DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
+		deviceRegistration.setStatus(DeviceRegistrationStatus.ACTIVE);
+		deviceRegistration.setApplication(appId);
+		deviceRegistration.setCreationDate(now);
+
+		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
+		deviceRegistration.setId(deviceRegistrationId);
+		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(deviceRegistrationId, userInum));
+
+		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
 
 		return deviceRegistration;
 	}
 
-	public void storeRegistrationRequestMessage(RegisterRequestMessage requestMessage) {
-		requestStorage.put(requestMessage.getRequestId(), requestMessage);
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+		final String registerRequestMessageId = UUID.randomUUID().toString();
+
+		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(requestMessage);
+		registerRequestMessageLdap.setCreationDate(now);
+		registerRequestMessageLdap.setId(registerRequestMessageId);
+		registerRequestMessageLdap.setDn(getDnForRegisterRequestMessage(registerRequestMessageId));
+
+		ldapEntryManager.persist(registerRequestMessageLdap);
 	}
 
-	public RegisterRequestMessage getRegistrationRequestMessage(String requestId) {
-		return requestStorage.get(requestId);
+	public RegisterRequestMessage getRegisterRequestMessage(String oxId) {
+		String requestDn = getDnForRegisterRequestMessage(oxId);
+
+		RegisterRequestMessageLdap registerRequestMessageLdap = ldapEntryManager.find(RegisterRequestMessageLdap.class, requestDn);
+		if (registerRequestMessageLdap == null) {
+			return null;
+		}
+
+		return registerRequestMessageLdap.getRegisterRequestMessage();
 	}
 
-	public void removeRegistrationRequestMessage(String requestId) {
-		requestStorage.remove(requestId);
+	public RegisterRequestMessageLdap getRegisterRequestMessageByRequestId(String requestId) {
+		String baseDn = getDnForRegisterRequestMessage(null);
+		Filter requestIdFilter = Filter.createEqualityFilter("oxRequestId", requestId);
+
+		List<RegisterRequestMessageLdap> registerRequestMessagesLdap = ldapEntryManager.findEntries(baseDn, RegisterRequestMessageLdap.class,
+				requestIdFilter);
+		if ((registerRequestMessagesLdap == null) || registerRequestMessagesLdap.isEmpty()) {
+			return null;
+		}
+
+		return registerRequestMessagesLdap.get(0);
+	}
+
+	public void removeRegisterRequestMessage(RequestMessageLdap registerRequestMessageLdap) {
+		removeRequestMessage(registerRequestMessageLdap);
+	}
+
+	/**
+	 * Build DN string for U2F register request
+	 */
+	public String getDnForRegisterRequestMessage(String oxId) {
+		final String u2fBaseDn = ConfigurationFactory.getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=@!1111,o=gluu
+		if (StringHelper.isEmpty(oxId)) {
+			return String.format("ou=registration_requests,%s", u2fBaseDn);
+		}
+
+		return String.format("oxid=%s,ou=registration_requests,%s", oxId, u2fBaseDn);
 	}
 
 }

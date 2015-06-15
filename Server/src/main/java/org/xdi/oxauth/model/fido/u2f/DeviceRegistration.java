@@ -7,11 +7,14 @@ package org.xdi.oxauth.model.fido.u2f;
 
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.oxauth.crypto.cert.CertificateParser;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.ldap.model.BaseEntry;
 import org.xdi.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.util.Base64Util;
@@ -21,70 +24,106 @@ import org.xdi.oxauth.model.util.Base64Util;
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-public class DeviceRegistration implements Serializable {
+@LdapEntry(sortBy = "creationDate")
+@LdapObjectClass(values = {"top", "oxDeviceRegistration"})
+public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	private static final long serialVersionUID = -4542931562244920584L;
 
-	@JsonProperty
-	private final String keyHandle;
+	@LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
+	private String id;
 
-	@JsonProperty
-	private final String publicKey;
+    @LdapJsonObject
+    @LdapAttribute(name = "oxDeviceRegistrationConf")
+	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
 
-	@JsonProperty
-	private final String attestationCert;
-
-	@JsonProperty
+    @LdapAttribute(name = "oxCounter")
 	private long counter;
 
-	@JsonProperty
-	private boolean compromised;
+    @LdapAttribute(name = "oxStatus")
+	private DeviceRegistrationStatus status;
 
-	public DeviceRegistration(@JsonProperty("keyHandle") String keyHandle, @JsonProperty("publicKey") String publicKey,
-			@JsonProperty("attestationCert") String attestationCert, @JsonProperty("counter") long counter, @JsonProperty("compromised") boolean compromised) {
-		this.keyHandle = keyHandle;
-		this.publicKey = publicKey;
-		this.attestationCert = attestationCert;
+	@LdapAttribute(name = "oxApplication")
+	private String application;
+	
+	@LdapAttribute(name = "creationDate")
+	private Date creationDate;
+	
+	public DeviceRegistration() {}
+
+	public DeviceRegistration(String keyHandle, String publicKey, String attestationCert, long counter, DeviceRegistrationStatus status, String application, Date creationDate) {
+		this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(keyHandle, publicKey, attestationCert);
 		this.counter = counter;
-		this.compromised = compromised;
+		this.status = status;
+		this.application = application;
+		this.creationDate = creationDate;
 	}
 
 	public DeviceRegistration(String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
-		this.keyHandle = keyHandle;
-		this.publicKey = publicKey;
 		try {
-			this.attestationCert = Base64Util.base64urlencode(attestationCert.getEncoded());
+			String attestationCertDecoded = Base64Util.base64urlencode(attestationCert.getEncoded());
+			this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(keyHandle, publicKey, attestationCertDecoded);
 		} catch (CertificateEncodingException e) {
 			throw new BadInputException("Malformed attestation certificate", e);
 		}
+
 		this.counter = counter;
 	}
 
-	public String getKeyHandle() {
-		return keyHandle;
+	public String getId() {
+		return id;
 	}
 
-	public String getPublicKey() {
-		return publicKey;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public X509Certificate getAttestationCertificate() throws CertificateException, NoSuchFieldException {
-		if (attestationCert == null) {
-			throw new NoSuchFieldException();
-		}
-		return CertificateParser.parseDer(Base64Util.base64urldecode(attestationCert));
+	public DeviceRegistrationConfiguration getDeviceRegistrationConfiguration() {
+		return deviceRegistrationConfiguration;
+	}
+
+	public void setDeviceRegistrationConfiguration(DeviceRegistrationConfiguration deviceRegistrationConfiguration) {
+		this.deviceRegistrationConfiguration = deviceRegistrationConfiguration;
 	}
 
 	public long getCounter() {
 		return counter;
 	}
 
+	public void setCounter(long counter) {
+		this.counter = counter;
+	}
+
+	public DeviceRegistrationStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(DeviceRegistrationStatus status) {
+		this.status = status;
+	}
+
+	public String getApplication() {
+		return application;
+	}
+
+	public void setApplication(String application) {
+		this.application = application;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
 	public boolean isCompromised() {
-		return compromised;
+		return DeviceRegistrationStatus.COMPROMISED == this.status;
 	}
 
 	public void markCompromised() {
-		compromised = true;
+		this.status = DeviceRegistrationStatus.COMPROMISED;
 	}
 
 	public void checkAndUpdateCounter(long clientCounter) throws InvalidDeviceCounterException {
@@ -98,8 +137,9 @@ public class DeviceRegistration implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceRegistration [keyHandle=").append(keyHandle).append(", publicKey=").append(publicKey).append(", attestationCert=")
-				.append(attestationCert).append(", counter=").append(counter).append(", compromised=").append(compromised).append("]");
+		builder.append("DeviceRegistration [id=").append(id).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
+				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application).append(", creationDate=")
+				.append(creationDate).append("]");
 		return builder.toString();
 	}
 

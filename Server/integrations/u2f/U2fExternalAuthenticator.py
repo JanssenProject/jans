@@ -11,15 +11,9 @@ from org.xdi.oxauth.model.config import Constants
 from org.jboss.resteasy.client import ClientResponseFailure
 from javax.ws.rs.core import Response
 from java.util import Arrays
-from java.util import HashMap
 
 import sys
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -30,7 +24,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         print "U2F. Initialization. Downloading U2F metadata"
         u2f_server_uri = configurationAttributes.get("u2f_server_uri").getValue2()
-        u2f_server_metadata_uri = u2f_server_uri + "/seam/resource/restv1/oxauth/fido-u2f-configuration"
+        u2f_server_metadata_uri = u2f_server_uri + "/.well-known/fido-u2f-configuration"
 
         metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
         self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
@@ -136,8 +130,11 @@ class PersonAuthentication(PersonAuthenticationType):
             # Check if user have registered devices
             deviceRegistrationService = DeviceRegistrationService.instance()
 
+            userInum = user.getAttribute("inum")
+
             authenticationRequest = None
-            deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(user.getUserId(), u2f_application_id)
+
+            deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, u2f_application_id)
             if (deviceRegistrations.size() > 0):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start authentication workflow"
 

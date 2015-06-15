@@ -15,23 +15,23 @@ public class NoEligableDevicesException extends Exception {
 
 	private static final long serialVersionUID = -7685552584573073454L;
 
-	private final List<? extends DeviceRegistration> devices;
+	private final List<? extends DeviceRegistration> deviceRegistrations;
 
-	public NoEligableDevicesException(List<? extends DeviceRegistration> devices, String message, Throwable cause) {
+	public NoEligableDevicesException(List<? extends DeviceRegistration> deviceRegistrations, String message, Throwable cause) {
 		super(message, cause);
-		this.devices = Collections.unmodifiableList(devices);
+		this.deviceRegistrations = Collections.unmodifiableList(deviceRegistrations);
 	}
 
-	public NoEligableDevicesException(List<? extends DeviceRegistration> devices, String message) {
+	public NoEligableDevicesException(List<? extends DeviceRegistration> deviceRegistrations, String message) {
 		super(message);
-		this.devices = Collections.unmodifiableList(devices);
+		this.deviceRegistrations = Collections.unmodifiableList(deviceRegistrations);
 	}
 
 	public List<? extends DeviceRegistration> getDeviceRegistrations() {
-		return devices;
+		return deviceRegistrations;
 	}
 
 	public boolean hasDevices() {
-		return !devices.isEmpty();
+		return !deviceRegistrations.isEmpty();
 	}
 }
