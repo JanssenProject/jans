@@ -116,7 +116,7 @@ public class SessionIdService {
         Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
         for (Entry<String, String> newRequestParameterEntry : newRequestParameterMap.entrySet()) {
         	String name = newRequestParameterEntry.getKey();
-        	if (StringHelper.equalsIgnoreCase(name, "auth_step")) {
+        	if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
         		currentSessionAttributes.put(name, newRequestParameterEntry.getValue());
         	}
         }
