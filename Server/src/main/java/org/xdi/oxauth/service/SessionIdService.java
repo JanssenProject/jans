@@ -74,9 +74,9 @@ public class SessionIdService {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
-            boolean isAcrChanged = !sessionAttributes.get("acr_values").equals(acrValuesStr);
-            boolean isClientChanged = !sessionAttributes.get("client_id").equals(clientId);
-            boolean isScopeChanged = !sessionAttributes.get("scope").equals(scope);
+            boolean isAcrChanged = acrValuesStr !=null && !acrValuesStr.equals(sessionAttributes.get("acr_values"));
+            boolean isClientChanged = clientId != null && !clientId.equals(sessionAttributes.get("client_id"));
+            boolean isScopeChanged = scope !=null && !scope.equals(sessionAttributes.get("scope"));
             if (isAcrChanged || isClientChanged || isScopeChanged) {
                 session.setState(SessionIdState.UNAUTHENTICATED);
             }
