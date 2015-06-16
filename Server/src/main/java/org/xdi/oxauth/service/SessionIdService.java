@@ -69,7 +69,7 @@ public class SessionIdService {
 
     // #34 - update session attributes with each request
     // https://github.com/GluuFederation/oxAuth/issues/34
-    public void updateSessionIfNeeded(SessionId session, String scope, String clientId, String redirectUri, String acrValuesStr) {
+    public SessionId updateSessionIfNeeded(SessionId session, String scope, String clientId, String redirectUri, String acrValuesStr, HttpServletResponse httpResponse) {
         if (session != null && !session.getSessionAttributes().isEmpty()) {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
@@ -78,13 +78,11 @@ public class SessionIdService {
             boolean isClientChanged = clientId != null && !clientId.equals(sessionAttributes.get("client_id"));
             boolean isScopeChanged = scope !=null && !scope.equals(sessionAttributes.get("scope"));
             if (isAcrChanged || isClientChanged || isScopeChanged) {
-                session.setState(SessionIdState.UNAUTHENTICATED);
+                removeSessionIdCookie(httpResponse);
+                return null; // kill session to force recreation
             }
 
             sessionAttributes.put("redirect_uri", redirectUri);
-            sessionAttributes.put("acr_values", acrValuesStr);
-            sessionAttributes.put("scope", scope);
-            sessionAttributes.put("client_id", clientId);
             session.setSessionAttributes(sessionAttributes);
 
             boolean updateResult = updateSessionId(session, true, true);
@@ -92,6 +90,7 @@ public class SessionIdService {
                 log.debug("Failed to update session entry: '{0}'", session.getId());
             }
         }
+        return session;
     }
 
     public String getSessionIdFromCookie(HttpServletRequest request) {
