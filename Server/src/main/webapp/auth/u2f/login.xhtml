@@ -14,36 +14,40 @@
         var auth_request = ${fido_u2f_authentication_request};
         var register_request = ${fido_u2f_registration_request};
 
+        function startRegistration() {
+            u2f.register(register_request.registerRequests, register_request.authenticateRequests,
+            function(data) {
+                if(data.errorCode) {
+                    alert("U2F failed with error: " + data.errorCode);
+                    return;
+                }
+
+                document.getElementById('tokenResponse').value = JSON.stringify(data);
+                document.getElementById('authMethod').value = 'enroll';
+
+                document.getElementById('u2f_form').submit();
+            });
+        }
+
+        function startAuthentication() {
+            u2f.sign(auth_request.authenticateRequests,
+            function(data) {
+                if(data.errorCode) {
+                    alert("U2F failed with error code: " + data.errorCode);
+                    return;
+                }
+
+                document.getElementById('tokenResponse').value = JSON.stringify(data);
+                document.getElementById('authMethod').value = 'authenticate';
+
+                document.getElementById('u2f_form').submit();
+            });
+        }
+
         if (auth_request != null) {
-	        setTimeout(function() {
-	            u2f.sign(auth_request.authenticateRequests,
-	            function(data) {
-	                if(data.errorCode) {
-	                    alert("U2F failed with error code: " + data.errorCode);
-	                    return;
-	                }
-
-	                document.getElementById('tokenResponse').value = JSON.stringify(data);
-                    document.getElementById('authMethod').value = 'authenticate';
-
-                    document.getElementById('u2f_form').submit();
-	            });
-	        }, 1000);
+            setTimeout(startAuthentication(), 1000);
         } else {
-            setTimeout(function() {
-                u2f.register(register_request.registerRequests, register_request.authenticateRequests,
-                function(data) {
-                    if(data.errorCode) {
-                        alert("U2F failed with error: " + data.errorCode);
-                        return;
-                    }
-
-                    document.getElementById('tokenResponse').value = JSON.stringify(data);
-                    document.getElementById('authMethod').value = 'enroll';
-
-                    document.getElementById('u2f_form').submit();
-                });
-            }, 1000);
+            setTimeout(startRegistration(), 1000);
         }
         </script>
 
@@ -129,6 +133,13 @@
                                             </p>
                                         </s:div>
                                     </div>
+                                </div>
+                                <div class="login-panel">
+                                	<s:fragment rendered="#{fido_u2f_authentication_request != 'null'}">
+                                		<a id="registerU2fDevice" href="#" onclick="startRegistration(); return false;">
+                                			<h:outputText value="Register U2F device" />
+										</a>
+                                	</s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>
