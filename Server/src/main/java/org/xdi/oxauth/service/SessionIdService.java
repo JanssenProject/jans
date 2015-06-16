@@ -8,6 +8,7 @@ package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
@@ -27,15 +28,18 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +62,9 @@ public class SessionIdService {
 
     @In
     private LdapEntryManager ldapEntryManager;
+
+    @In
+    private AuthenticationService authenticationService;
 
     public static SessionIdService instance() {
         if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
@@ -82,6 +89,12 @@ public class SessionIdService {
                 throw new AcrChangedException();
             }
 
+            final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
+            if (!currentSessionAttributes.equals(sessionAttributes)) {
+            	sessionAttributes.putAll(currentSessionAttributes);
+            	sessionAttributes.put("auth_step", "1");
+            }
+
             sessionAttributes.put("redirect_uri", redirectUri);
             session.setSessionAttributes(sessionAttributes);
 
@@ -93,7 +106,26 @@ public class SessionIdService {
         return session;
     }
 
-    public String getSessionIdFromCookie(HttpServletRequest request) {
+    private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
+    	// Clone before replacing new attributes
+    	final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
+
+    	// Update from request
+        final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
+        Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+        for (Entry<String, String> newRequestParameterEntry : newRequestParameterMap.entrySet()) {
+        	String name = newRequestParameterEntry.getKey();
+        	if (StringHelper.equalsIgnoreCase(name, "auth_step")) {
+        		currentSessionAttributes.put(name, newRequestParameterEntry.getValue());
+        	}
+        }
+
+        return currentSessionAttributes;
+	}
+
+
+	public String getSessionIdFromCookie(HttpServletRequest request) {
         try {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
