@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -92,7 +93,17 @@ public class SessionIdService {
             final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
             if (!currentSessionAttributes.equals(sessionAttributes)) {
             	sessionAttributes.putAll(currentSessionAttributes);
+            	
+            	// Reinit login
             	sessionAttributes.put("auth_step", "1");
+            	
+            	for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext();) {
+            		Entry<String, String> currentSessionAttributesEntry = it.next();
+    	        	String name = currentSessionAttributesEntry.getKey();
+    	        	if (name.startsWith("auth_step_passed_")) {
+    	        		it.remove();
+    	        	}
+				}
 
             	session.setSessionAttributes(currentSessionAttributes);
 
@@ -115,10 +126,10 @@ public class SessionIdService {
         	final ExternalContext externalContext = facesContext.getExternalContext();
 	        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
 	        Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
-	        for (Entry<String, String> newRequestParameterEntry : newRequestParameterMap.entrySet()) {
-	        	String name = newRequestParameterEntry.getKey();
+	        for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
+	        	String name = newRequestParameterMapEntry.getKey();
 	        	if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
-	        		currentSessionAttributes.put(name, newRequestParameterEntry.getValue());
+	        		currentSessionAttributes.put(name, newRequestParameterMapEntry.getValue());
 	        	}
 	        }
 
