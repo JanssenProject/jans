@@ -75,10 +75,11 @@ public class SessionIdService {
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
             boolean isAcrChanged = acrValuesStr !=null && !acrValuesStr.equals(sessionAttributes.get("acr_values"));
-            boolean isClientChanged = clientId != null && !clientId.equals(sessionAttributes.get("client_id"));
-            boolean isScopeChanged = scope !=null && !scope.equals(sessionAttributes.get("scope"));
-            if (isAcrChanged || isClientChanged || isScopeChanged) {
+//            boolean isClientChanged = clientId != null && !clientId.equals(sessionAttributes.get("client_id"));
+//            boolean isScopeChanged = scope !=null && !scope.equals(sessionAttributes.get("scope"));
+            if (isAcrChanged /*|| isClientChanged || isScopeChanged()*/) {
                 removeSessionIdCookie(httpResponse);
+                remove(session);
                 return null; // kill session to force recreation
             }
 
