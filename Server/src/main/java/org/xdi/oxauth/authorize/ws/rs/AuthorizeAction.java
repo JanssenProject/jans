@@ -139,8 +139,12 @@ public class AuthorizeAction {
         SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
+        boolean sessionNotNullBeforeUpdate = session != null;
         session = sessionIdService.updateSessionIfNeeded(session, scope, clientId, redirectUri, acrValues,
                 (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse());
+        if (session == null && sessionNotNullBeforeUpdate) { // if session is null then it was killed -> because of parameters changes
+            identity.logout(); // logout identity to force show login page
+        }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
             final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
