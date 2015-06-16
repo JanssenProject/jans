@@ -167,7 +167,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
-        sessionIdService.updateSessionIfNeeded(sessionUser, scope, clientId, redirectUri, acrValuesStr);
+        sessionIdService.updateSessionIfNeeded(sessionUser, scope, clientId, redirectUri, acrValuesStr, httpResponse);
 
         try {
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
