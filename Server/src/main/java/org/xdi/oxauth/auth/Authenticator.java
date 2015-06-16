@@ -34,7 +34,6 @@ import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
@@ -67,9 +66,6 @@ public class Authenticator implements Serializable {
 
     @In
     private OAuthCredentials credentials;
-
-    @In
-    private UserService userService;
 
     @In
     private ClientService clientService;
@@ -463,9 +459,9 @@ public class Authenticator implements Serializable {
         }
 		String p_sessionId = sessionId.getId();
 
-		log.trace("authenticateBySessionId, sessionId = '{0}', session = '{1}', state= '{2}'", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");
+		log.trace("authenticateBySessionId, sessionId = '{0}', session = '{1}', state= '{2}'", p_sessionId, sessionId, sessionId.getState());
 		// IMPORTANT : authenticate by session id only if state of session is authenticated!
-		if (sessionId != null && (SessionIdState.AUTHENTICATED == sessionId.getState())) {
+		if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
 		    final User user = authenticationService.getUserOrRemoveSession(sessionId);
 		    if (user != null) {
 	            try {
