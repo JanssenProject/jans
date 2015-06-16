@@ -68,19 +68,18 @@ public class SessionIdService {
 
 
     // #34 - update session attributes with each request
+    // 1) redirect_uri change -> update session
+    // 2) acr change -> send error
+    // 3) client_id change -> do nothing
     // https://github.com/GluuFederation/oxAuth/issues/34
-    public SessionId updateSessionIfNeeded(SessionId session, String scope, String clientId, String redirectUri, String acrValuesStr, HttpServletResponse httpResponse) {
+    public SessionId updateSessionIfNeeded(SessionId session, String redirectUri, String acrValuesStr) throws AcrChangedException {
         if (session != null && !session.getSessionAttributes().isEmpty()) {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
             boolean isAcrChanged = acrValuesStr !=null && !acrValuesStr.equals(sessionAttributes.get("acr_values"));
-//            boolean isClientChanged = clientId != null && !clientId.equals(sessionAttributes.get("client_id"));
-//            boolean isScopeChanged = scope !=null && !scope.equals(sessionAttributes.get("scope"));
-            if (isAcrChanged /*|| isClientChanged || isScopeChanged()*/) {
-                removeSessionIdCookie(httpResponse);
-                remove(session);
-                return null; // kill session to force recreation
+            if (isAcrChanged) {
+                throw new AcrChangedException();
             }
 
             sessionAttributes.put("redirect_uri", redirectUri);

@@ -41,7 +41,6 @@ import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -139,11 +138,12 @@ public class AuthorizeAction {
         SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
-        boolean sessionNotNullBeforeUpdate = session != null;
-        session = sessionIdService.updateSessionIfNeeded(session, scope, clientId, redirectUri, acrValues,
-                (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse());
-        if (session == null && sessionNotNullBeforeUpdate) { // if session is null then it was killed -> because of parameters changes
-            identity.logout(); // logout identity to force show login page
+        try {
+            session = sessionIdService.updateSessionIfNeeded(session, redirectUri, acrValues);
+        } catch (AcrChangedException e) {
+            log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
+            log.error("Please perform logout in order to be able login with new ACR value.");
+            permissionDenied();
         }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
