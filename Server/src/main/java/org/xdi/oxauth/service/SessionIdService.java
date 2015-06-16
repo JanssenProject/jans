@@ -66,6 +66,34 @@ public class SessionIdService {
         return (SessionIdService) Component.getInstance(SessionIdService.class);
     }
 
+
+    // #34 - update session attributes with each request
+    // https://github.com/GluuFederation/oxAuth/issues/34
+    public void updateSessionIfNeeded(SessionId session, String scope, String clientId, String redirectUri, String acrValuesStr) {
+        if (session != null && !session.getSessionAttributes().isEmpty()) {
+
+            final Map<String, String> sessionAttributes = session.getSessionAttributes();
+
+            boolean isAcrChanged = !sessionAttributes.get("acr_values").equals(acrValuesStr);
+            boolean isClientChanged = !sessionAttributes.get("client_id").equals(clientId);
+            boolean isScopeChanged = !sessionAttributes.get("scope").equals(scope);
+            if (isAcrChanged || isClientChanged || isScopeChanged) {
+                session.setState(SessionIdState.UNAUTHENTICATED);
+            }
+
+            sessionAttributes.put("redirect_uri", redirectUri);
+            sessionAttributes.put("acr_values", acrValuesStr);
+            sessionAttributes.put("scope", scope);
+            sessionAttributes.put("client_id", clientId);
+            session.setSessionAttributes(sessionAttributes);
+
+            boolean updateResult = updateSessionId(session, true, true);
+            if (!updateResult) {
+                log.debug("Failed to update session entry: '{0}'", session.getId());
+            }
+        }
+    }
+
     public String getSessionIdFromCookie(HttpServletRequest request) {
         try {
             final Cookie[] cookies = request.getCookies();

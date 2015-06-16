@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.auth;
 
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -21,7 +13,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.web.RequestParameter;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
@@ -46,6 +37,13 @@ import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Authenticator component
@@ -460,6 +458,9 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateBySessionId(SessionId sessionId) {
+        if (sessionId == null) {
+            return false;
+        }
 		String p_sessionId = sessionId.getId();
 
 		log.trace("authenticateBySessionId, sessionId = '{0}', session = '{1}', state= '{2}'", p_sessionId, sessionId, sessionId != null ? sessionId.getState() : "");

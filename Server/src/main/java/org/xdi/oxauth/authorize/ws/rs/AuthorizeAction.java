@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -139,6 +138,8 @@ public class AuthorizeAction {
         final SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
+        sessionIdService.updateSessionIfNeeded(session, scope, clientId, redirectUri, acrValues);
+
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
             final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
@@ -150,11 +151,7 @@ public class AuthorizeAction {
             List<String> acrValuesList = acrValuesList();
             if (useExternalAuthenticator && !acrValuesList.isEmpty()) {
 
-                CustomScriptConfiguration customScriptConfiguration = null;
-            	
-            	if ((acrValuesList != null) && !acrValuesList.isEmpty()) {
-                	customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
-            	}
+                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
