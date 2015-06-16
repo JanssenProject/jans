@@ -93,35 +93,39 @@ public class SessionIdService {
             if (!currentSessionAttributes.equals(sessionAttributes)) {
             	sessionAttributes.putAll(currentSessionAttributes);
             	sessionAttributes.put("auth_step", "1");
-            }
 
-            sessionAttributes.put("redirect_uri", redirectUri);
-            session.setSessionAttributes(sessionAttributes);
+            	session.setSessionAttributes(currentSessionAttributes);
 
-            boolean updateResult = updateSessionId(session, true, true);
-            if (!updateResult) {
-                log.debug("Failed to update session entry: '{0}'", session.getId());
+                boolean updateResult = updateSessionId(session, true, true);
+                if (!updateResult) {
+                    log.debug("Failed to update session entry: '{0}'", session.getId());
+                }
             }
         }
         return session;
     }
 
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
-    	// Clone before replacing new attributes
-    	final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
-
     	// Update from request
-        final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-        Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
-        for (Entry<String, String> newRequestParameterEntry : newRequestParameterMap.entrySet()) {
-        	String name = newRequestParameterEntry.getKey();
-        	if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
-        		currentSessionAttributes.put(name, newRequestParameterEntry.getValue());
-        	}
-        }
+    	FacesContext facesContext = FacesContext.getCurrentInstance();
+    	if (facesContext != null) {
+        	// Clone before replacing new attributes
+        	final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
-        return currentSessionAttributes;
+        	final ExternalContext externalContext = facesContext.getExternalContext();
+	        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
+	        Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+	        for (Entry<String, String> newRequestParameterEntry : newRequestParameterMap.entrySet()) {
+	        	String name = newRequestParameterEntry.getKey();
+	        	if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
+	        		currentSessionAttributes.put(name, newRequestParameterEntry.getValue());
+	        	}
+	        }
+
+	        return currentSessionAttributes;
+    	} else {
+    		return sessionAttributes;
+    	}
 	}
 
 
