@@ -831,6 +831,12 @@ attributeTypes: ( oxAuthClaim-oid NAME 'oxAuthClaim'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxAuthGroupClaims-oid NAME 'oxAuthGroupClaims'
+  DESC 'oxAuth Group Attribute Claims (true or false)'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthClientId-oid NAME 'oxAuthClientId'
   DESC 'oxAuth Client id'
   SUBSTR caseIgnoreSubstringsMatch
@@ -1035,6 +1041,12 @@ attributeTypes: ( oxAuthInitiateLoginURI-oid NAME 'oxAuthInitiateLoginURI'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthJwksURI-oid NAME 'oxAuthJwksURI'
   DESC 'oxAuth JWKs URI'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxAuthJwks-oid NAME 'oxAuthJwks'
+  DESC 'oxAuth JWKs'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2137,7 +2149,7 @@ objectclasses: ( oxAuthClient-oid NAME 'oxAuthClient' SUP top STRUCTURAL MUST ob
   $ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthFederationId
   $ oxAuthFederationMetadataURI $ oxAuthSubjectIdentifier $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg
   $ oxAuthIdTokenEncryptedResponseEnc $ oxAuthIdTokenSignedResponseAlg
-  $ oxAuthInitiateLoginURI $ oxAuthJwksURI $ oxAuthLogoURI $ oxAuthPolicyURI
+  $ oxAuthInitiateLoginURI $ oxAuthJwksURI $ oxAuthJwks $ oxAuthLogoURI $ oxAuthPolicyURI
   $ oxAuthPostLogoutRedirectURI $ oxAuthRedirectURI $ oxAuthRegistrationAccessToken
   $ oxAuthRequestObjectSigningAlg $ oxAuthRequestURI $ oxAuthRequireAuthTime
   $ oxAuthResponseType $ oxAuthScope $ oxAuthSectorIdentifierURI $ oxAuthSignedResponseAlg
@@ -2146,7 +2158,7 @@ objectclasses: ( oxAuthClient-oid NAME 'oxAuthClient' SUP top STRUCTURAL MUST ob
   $ oxLastAccessTime $ oxLastLogonTime ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthCustomScope-oid NAME 'oxAuthCustomScope' SUP top STRUCTURAL MUST objectclass MAY 
- ( defaultScope $ description $ displayName $ inum $ oxAuthClaim ) 
+ ( defaultScope $ description $ displayName $ inum $ oxAuthClaim $ oxAuthGroupClaims)
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthFederationRP-oid NAME 'oxAuthFederationRP' SUP top STRUCTURAL MUST objectclass MAY 
  ( displayName $ inum $ oxAuthRedirectURI $ oxAuthX509PEM $ oxAuthX509URL ) 

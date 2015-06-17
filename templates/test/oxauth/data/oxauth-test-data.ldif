@@ -66,82 +66,44 @@ urn: urn:gluu:dir:attribute-def:oxAuthScope
 
 ######################################
 ######################################
-# Scopes
-######################################
-
-dn: inum=%(inumOrg)s!0009!C17A,ou=scopes,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthCustomScope
-objectClass: top
-defaultScope: true
-description: This data has information about your address
-displayName: address
-inum: %(inumOrg)s!0009!C17A
-oxAuthClaim: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!6609,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!6EEB,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!BCE8,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!D90B,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!E999,ou=attributes,o=%(inumOrg)s,o=gluu
-
-dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthCustomScope
-objectClass: top
-defaultScope: true
-description: Client Info
-displayName: clientinfo
-inum: %(inumOrg)s!0009!341A
-oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
-
-dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
-changetype: modify
-replace: defaultScope
-defaultScope: true
-
-dn: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
-changetype: modify
-replace: defaultScope
-defaultScope: true
-
-dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
-changetype: modify
-add: oxAuthClaim
-oxAuthClaim: inum=%(inumOrg)s!0005!6493,ou=attributes,o=%(inumOrg)s,o=gluu
-
-######################################
-
-######################################
-######################################
 # People
 ######################################
 dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
-objectClass: gluuPerson
+objectClass: inetOrgPerson
 objectClass: ox-%(inumOrgFN)s
-inum: %(inumOrg)s!0000!B1F3.AEAE.B798
-iname: @test*person*test_user
+objectClass: gluuPerson
+cn: Test User
+sn: User
+o: Test
+birthdate: 1983-1-6
 displayName: oxAuth Test User
+emailVerified: true
+gender: Male
 givenName: Test
 gluuStatus: active
-memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
-sn: User
-uid: test_user
+iname: @test*person*test_user
+inum: %(inumOrg)s!0000!B1F3.AEAE.B798
+locale: en-US
 mail: test_user@test.org
-userPassword: test_user_password
-o: Test
-preferredLanguage: en_US
-zoneinfo: America/Chicago
+middleName: User
+nickname: user
+phoneNumberVerified: true
 picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
-st: Texas
+preferredUsername: user
+preferredLanguage: en_US
+profile: http://www.mywebsite.com/profile
 street: 621 East 6th Street
+st: Texas
 c: US
 l: Austin
+telephoneNumber: (512) 516-2413
+uid: test_user
+updatedAt: 1428004163
+userPassword: test_user_password
+website: http://www.gluu.org
+zoneinfo: America/Chicago
+memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 
 ######################################
 
