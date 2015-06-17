@@ -76,13 +76,14 @@ dn: inum=%(inumOrg)s!0005!B52A,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Preferred Username
-gluuAttributeName: preferred_username
+gluuAttributeName: preferredUsername
 gluuLdapAttributeName: preferredUsername
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: preferred_username
 inum: %(inumOrg)s!0005!B52A
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferred_username
 description: A domain issued and managed identifier for the person.
@@ -101,6 +102,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuStatus: active
+oxAuthClaimName: profile
 inum: %(inumOrg)s!0005!64A0
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile
 description: URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.
@@ -118,6 +120,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuStatus: active
+oxAuthClaimName: website
 inum: %(inumOrg)s!0005!3B47
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/website
 description: URL of the End-User's Web page or blog.
@@ -126,13 +129,14 @@ dn: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Email Verified
-gluuAttributeName: email_verified
+gluuAttributeName: emailVerified
 gluuLdapAttributeName: emailVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: email_verified
 inum: %(inumOrg)s!0005!8F88
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/email_verified
 description: True if the End-User's e-mail address has been verified; otherwise false
@@ -142,13 +146,14 @@ dn: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Phone Number Verified
-gluuAttributeName: phone_number_verified
+gluuAttributeName: phoneNumberVerified
 gluuLdapAttributeName: phoneNumberVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: phone_number_verified
 inum: %(inumOrg)s!0005!B17A
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/phone_number_verified
 description: True if the End-User's phone number has been verified; otherwise false
@@ -174,13 +179,14 @@ dn: inum=%(inumOrg)s!0005!BE64,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 displayName: Last Updated
-gluuAttributeName: updated_at
+gluuAttributeName: updatedAt
 gluuLdapAttributeName: updatedAt
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: updated_at
 inum: %(inumOrg)s!0005!BE64
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
 description: Time the End-User's information was last updated. Its value is a
@@ -200,6 +206,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuStatus: active
+oxAuthClaimName: gender
 inum: %(inumOrg)s!0005!3692
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
 description: Gender of the person, either male or female
@@ -217,6 +224,7 @@ gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuStatus: active
+oxAuthClaimName: birthdate
 inum: %(inumOrg)s!0005!98FC
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate
 description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.
@@ -265,8 +273,9 @@ gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
-gluuLdapAttributeName: zoneinfo
+gluuLdapAttributeName: locale
 gluuStatus: active
+oxAuthClaimName: locale
 inum: %(inumOrg)s!0005!36D9
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/locale
 description: End-User's locale, represented as a BCP47 (RFC5646) language tag. This is typically an
@@ -321,7 +330,6 @@ gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuAttributeViewType: whitePages
 gluuLdapAttributeName: preferredLanguage
-oxAuthClaimName: locale
 gluuStatus: active
 inum: %(inumOrg)s!0005!6493
 objectClass: top
@@ -366,13 +374,14 @@ dn: inum=%(inumOrg)s!0005!A0E8,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: Middle Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
-gluuAttributeName: middle_name
+gluuAttributeName: middleName
 gluuLdapAttributeName: middleName
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: middle_name
 inum: %(inumOrg)s!0005!A0E8
 objectClass: top
 objectClass: gluuAttribute
@@ -389,7 +398,7 @@ displayName: Nickname
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: nickname
-gluuLdapAttributeName: middleName
+gluuLdapAttributeName: nickname
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
@@ -691,17 +700,18 @@ description: Home Telephone Number
 displayName: Home Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
-gluuAttributeName: homePhone
+gluuAttributeName: telephoneNumber
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuLdapAttributeName: homePhone
+gluuLdapAttributeName: telephoneNumber
 gluuStatus: active
+oxAuthClaimName: phone_number
 inum: %(inumOrg)s!0005!0C18
 objectClass: top
 objectClass: gluuAttribute
-urn: urn:mace:dir:attribute-def:homePhone
+urn: urn:mace:dir:attribute-def:phone_number
 
 dn: inum=%(inumOrg)s!0005!E6B8,ou=attributes,o=%(inumOrg)s,o=gluu
 description: State or Province
@@ -806,14 +816,12 @@ description: Work Telephone Number
 displayName: Work Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
-gluuAttributeName: telephoneNumber
-gluuAttributeName: phone_number
+gluuAttributeName: workTelephoneNumber
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuLdapAttributeName: telephoneNumber
-oxAuthClaimName: phone_number
+gluuLdapAttributeName: workTelephoneNumber
 gluuStatus: active
 inum: %(inumOrg)s!0005!570B
 objectClass: top
