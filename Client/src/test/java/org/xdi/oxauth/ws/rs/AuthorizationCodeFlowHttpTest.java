@@ -77,7 +77,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String state = "af0ifjsldkj";
         String nonce = UUID.randomUUID().toString();
 
-
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
@@ -332,8 +331,9 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         // 3. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = "af0ifjsldkj";
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
