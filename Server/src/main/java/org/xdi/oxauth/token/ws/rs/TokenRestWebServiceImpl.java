@@ -130,7 +130,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, authorizationCodeGrant.getAcrValues());
+                                    nonce, null, accToken, authorizationCodeGrant.getAcrValues());
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -169,7 +169,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (authorizationGrant.getScopes().contains("openid")) {
                             idToken = authorizationGrant.createIdToken(
-                                    null, null, null, null,
+                                    null, null, null,
                                     authorizationGrant.getAcrValues());
                         }
 
@@ -194,7 +194,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
                         idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, null, clientCredentialsGrant.getAcrValues());
+                                null, null, null, clientCredentialsGrant.getAcrValues());
                     }
 
                     builder.entity(getJSonResponse(accessToken,
@@ -231,7 +231,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant.getAcrValues());
+                                    null, null, null, resourceOwnerPasswordCredentialsGrant.getAcrValues());
                         }
 
                         builder.entity(getJSonResponse(accessToken,
