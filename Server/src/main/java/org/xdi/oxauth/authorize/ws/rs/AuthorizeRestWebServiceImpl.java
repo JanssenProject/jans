@@ -17,13 +17,11 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
-import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
@@ -56,10 +54,10 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 @Name("requestAuthorizationRestWebService")
-@Api(value = "/oxauth/authorize", description = "Authorization Endpointt")
+@Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Logger
@@ -294,7 +292,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     } else if (!jwtAuthorizationRequest.getPrompts().isEmpty() && !prompts.isEmpty()
                                             && !jwtAuthorizationRequest.getPrompts().containsAll(prompts)) {
                                         throw new InvalidJwtException("The prompt parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
+                                    } else if (jwtAuthorizationRequest.getIdTokenMember() != null
+                                            && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
                                             && !jwtAuthorizationRequest.getIdTokenMember().getMaxAge().equals(maxAge)) {
                                         throw new InvalidJwtException("The maxAge parameter is not the same in the JWT");
                                     }
@@ -417,6 +416,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 if (maxAge != null) {
                                     authenticationMaxAge = maxAge;
                                 } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
+                                        && jwtAuthorizationRequest.getIdTokenMember() != null
                                         && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
                                     authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
                                 }
@@ -448,6 +448,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 sessionUser.getAuthenticationTime());
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                        authorizationGrant.setScopes(scopes);
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
@@ -465,6 +466,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     sessionUser.getAuthenticationTime());
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                            authorizationGrant.setScopes(scopes);
 
                                             // Store acr_values
                                             authorizationGrant.setAcrValues(acrValuesStr);
@@ -483,13 +485,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     sessionUser.getAuthenticationTime());
                                             authorizationGrant.setNonce(nonce);
                                             authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                            authorizationGrant.setScopes(scopes);
 
                                             // Store authentication acr values
                                             authorizationGrant.setAcrValues(acrValuesStr);
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
-                                        Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
+                                        //Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
+                                                nonce, authorizationCode, newAccessToken,
                                                 nonce, authorizationCode, newAccessToken, idTokenClaims, authorizationGrant.getAcrValues());
 
                                         redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
@@ -654,6 +658,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return true;
     }
 
+    /*
     public Map<String, String> getClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
         Map<String, String> claims = new HashMap<String, String>();
 
@@ -705,7 +710,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return claims;
-    }
+    }*/
 
     private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         identity.logout();

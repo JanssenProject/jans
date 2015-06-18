@@ -6,18 +6,19 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.registration.Client;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Validates the parameters received for the authorize web service.
  *
- * @author Javier Rojas Blum Date: 09.20.2011
+ * @author Javier Rojas Blum
+ * @version June 3, 2015
  */
 public class AuthorizeParamsValidator {
 
@@ -34,7 +35,7 @@ public class AuthorizeParamsValidator {
                                          List<Prompt> prompts, String nonce,
                                          String request, String requestUri) {
         List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
-        if (responseTypes.contains(ResponseType.TOKEN)) {
+        if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
             if (StringUtils.isBlank(nonce)) {
                 return false;
             }

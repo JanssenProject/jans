@@ -22,6 +22,7 @@ public class Scope {
 
     private static final long serialVersionUID = 4308826784917052508L;
     private transient boolean isDefault;
+    private transient boolean isGroupClaims;
 
     @LdapDN
     private String dn;
@@ -39,6 +40,9 @@ public class Scope {
 
     @LdapAttribute(name = "defaultScope")
     private String defaultScope;
+
+    @LdapAttribute(name = "oxAuthGroupClaims")
+    private String oxAuthGroupClaims;
 
     public String getDn() {
         return dn;
@@ -100,10 +104,30 @@ public class Scope {
         return this.isDefault;
     }
 
+    public String getOxAuthGroupClaims() {
+        return oxAuthGroupClaims;
+    }
+
+    public void setOxAuthGroupClaims(String oxAuthGroupClaims) {
+        this.oxAuthGroupClaims = oxAuthGroupClaims;
+    }
+
+    public boolean getIsOxAuthGroupClaims() {
+        if (this.oxAuthGroupClaims == null) {
+            return false;
+        }
+        if (this.oxAuthGroupClaims.equalsIgnoreCase("true")) {
+            this.isGroupClaims = true;
+            return this.isGroupClaims;
+        }
+        this.isGroupClaims = false;
+        return this.isGroupClaims;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "Scope [description=%s, displayName=%s, inum=%s, oxAuthClaims=%s, defaultScope=%s, toString()=%s]",
-                description, displayName, inum, oxAuthClaims, defaultScope, super.toString());
+                "Scope [description=%s, displayName=%s, inum=%s, oxAuthClaims=%s, defaultScope=%s, oxAuthGroupClaims=%s, toString()=%s]",
+                description, displayName, inum, oxAuthClaims, defaultScope, oxAuthGroupClaims, super.toString());
     }
 }
