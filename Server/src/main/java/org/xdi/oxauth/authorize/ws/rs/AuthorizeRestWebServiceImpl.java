@@ -493,8 +493,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
                                         //Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken,
-                                                nonce, authorizationCode, newAccessToken, idTokenClaims, authorizationGrant.getAcrValues());
+                                                nonce, authorizationCode, newAccessToken, authorizationGrant.getAcrValues());
 
                                         redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
                                     }

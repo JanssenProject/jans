@@ -132,7 +132,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
                                  String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
             InvalidClaimException {
-        return grant.createIdToken(nonce, authorizationCode, accessToken, getScopes(), authMode);
+        return grant.createIdToken(nonce, authorizationCode, accessToken, authMode);
     }
 
     /**
