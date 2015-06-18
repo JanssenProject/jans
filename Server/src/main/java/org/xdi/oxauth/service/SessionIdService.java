@@ -93,10 +93,10 @@ public class SessionIdService {
             final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
             if (!currentSessionAttributes.equals(sessionAttributes)) {
             	sessionAttributes.putAll(currentSessionAttributes);
-            	
+
             	// Reinit login
             	sessionAttributes.put("auth_step", "1");
-            	
+
             	for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext();) {
             		Entry<String, String> currentSessionAttributesEntry = it.next();
     	        	String name = currentSessionAttributesEntry.getKey();
