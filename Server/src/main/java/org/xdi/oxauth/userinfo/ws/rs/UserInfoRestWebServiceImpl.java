@@ -57,15 +57,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version 0.9 May 18, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -361,7 +359,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-            PublicKey publicKey = JwtUtil.getPublicKey(authorizationGrant.getClient().getJwksUri(), SignatureAlgorithm.RS256, null);
+            PublicKey publicKey = JwtUtil.getPublicKey(authorizationGrant.getClient().getJwksUri(), null, SignatureAlgorithm.RS256, null);
             if (publicKey != null && publicKey instanceof RSAPublicKey) {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, (RSAPublicKey) publicKey);
                 jwe = jweEncrypter.encrypt(jwe);
@@ -396,23 +394,23 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             for (String scopeName : scopes) {
                 Scope scope = scopeService.getScopeByDisplayName(scopeName);
 
-                if (scope.getOxAuthClaims() != null) {
-                    for (String claimDn : scope.getOxAuthClaims()) {
-                        GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+                Map<String, Object> claims = getClaims(user, scope);
 
-                        String claimName = gluuAttribute.getOxAuthClaimName();
-                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
-                        Object attributeValue = null;
+                if (scope.getIsOxAuthGroupClaims()) {
+                    JSONObject jsonObjGroupClaim = new JSONObject();
 
-                        if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                            if (ldapName.equals("uid")) {
-                                attributeValue = user.getUserId();
-                            } else {
-                                attributeValue = user.getAttribute(gluuAttribute.getName(), true);
-                            }
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+                        jsonObjGroupClaim.put(key, value);
+                    }
 
-                            jsonObj.put(claimName, attributeValue);
-                        }
+                    jsonObj.put(scope.getDisplayName(), jsonObjGroupClaim);
+                } else {
+                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                        String key = entry.getKey();
+                        Object value = entry.getValue();
+                        jsonObj.put(key, value);
                     }
                 }
             }
@@ -443,5 +441,31 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         return jsonObj.toString(4).replace("\\/", "/");
+    }
+
+    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException {
+        Map<String, Object> claims = new HashMap<String, Object>();
+
+        if (scope != null && scope.getOxAuthClaims() != null) {
+            for (String claimDn : scope.getOxAuthClaims()) {
+                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+
+                String claimName = gluuAttribute.getOxAuthClaimName();
+                String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                Object attributeValue = null;
+
+                if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                    if (ldapName.equals("uid")) {
+                        attributeValue = user.getUserId();
+                    } else {
+                        attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                    }
+
+                    claims.put(claimName, attributeValue);
+                }
+            }
+        }
+
+        return claims;
     }
 }

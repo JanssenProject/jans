@@ -15,7 +15,8 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.util.JwtUtil;
 
 /**
- * @author Javier Rojas Blum Date: 11.20.2012
+ * @author Javier Rojas Blum
+ * @version 0.9 May 18, 2015
  */
 public class JwsValidator {
 
@@ -28,15 +29,15 @@ public class JwsValidator {
         this.sharedKey = sharedKey;
     }
 
-    public JwsValidator(Jwt jwt, String sharedKey, String jwksUri) {
+    public JwsValidator(Jwt jwt, String sharedKey, String jwksUri, String jwks) {
         this.jwt = jwt;
         this.sharedKey = sharedKey;
 
         if (jwt != null) {
             SignatureAlgorithm algorithm = jwt.getHeader().getAlgorithm();
-            if (StringUtils.isNotBlank(jwksUri)) {
+            if (StringUtils.isNotBlank(jwksUri) || StringUtils.isNotBlank(jwks)) {
                 String keyId = jwt.getHeader().getKeyId();
-                publicKey = JwtUtil.getPublicKey(jwksUri, algorithm, keyId);
+                publicKey = JwtUtil.getPublicKey(jwksUri, jwks, algorithm, keyId);
             }
         }
     }
