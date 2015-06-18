@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
@@ -19,13 +20,13 @@ import java.security.SignatureException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 3, 2015
  */
 
 public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
@@ -119,11 +120,12 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
      * @return The id token.
      */
     @Override
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 Map<String, String> claims, String authMode)
-            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+    public IdToken createIdToken(
+            String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String authMode)
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
+            InvalidClaimException {
         if (getIdToken() == null) {
-            IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, claims);
+            IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, getScopes());
             setIdToken(idToken);
             if (tokenIssuerObserver != null) {
                 tokenIssuerObserver.indexByIdToken(idToken, this.getParentRef());
@@ -133,18 +135,20 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
         return getIdToken();
     }
 
-    public static IdToken createIdToken(IAuthorizationGrant p_grant, String nonce, AuthorizationCode authorizationCode,
-                                        AccessToken accessToken, Map<String, String> claims)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException {
+    public static IdToken createIdToken(
+            IAuthorizationGrant p_grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
+            Set<String> scopes)
+            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
+            InvalidClaimException {
         final Client grantClient = p_grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            Jwe jwe = IdTokenFactory.generateEncryptedIdToken(p_grant, nonce, authorizationCode, accessToken, claims);
+            Jwe jwe = IdTokenFactory.generateEncryptedIdToken(p_grant, nonce, authorizationCode, accessToken, scopes);
             return new IdToken(jwe.toString(),
                     jwe.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                     jwe.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
         } else {
-            Jwt jwt = IdTokenFactory.generateSignedIdToken(p_grant, nonce, authorizationCode, accessToken, claims);
+            Jwt jwt = IdTokenFactory.generateSignedIdToken(p_grant, nonce, authorizationCode, accessToken, scopes);
             return new IdToken(jwt.toString(),
                     jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                     jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
