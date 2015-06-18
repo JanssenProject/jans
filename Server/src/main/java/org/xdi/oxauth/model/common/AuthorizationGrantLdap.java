@@ -138,7 +138,6 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
                     accessToken, getScopes());
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
-                tokenLdap.setAuthLevel(authLevel);
                 tokenLdap.setAuthMode(authMode);
                 persist(tokenLdap);
             }
