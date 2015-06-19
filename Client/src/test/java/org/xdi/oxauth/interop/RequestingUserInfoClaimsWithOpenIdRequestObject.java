@@ -108,10 +108,7 @@ public class RequestingUserInfoClaimsWithOpenIdRequestObject extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ZONEINFO));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.LOCALE));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.PICTURE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
