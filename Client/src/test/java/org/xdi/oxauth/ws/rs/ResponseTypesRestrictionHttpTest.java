@@ -293,8 +293,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
                 "address",
                 "email");
         String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
