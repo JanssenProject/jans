@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version June 19, 2015
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -1229,7 +1229,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         scopes.add("address");
         scopes.add("email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);

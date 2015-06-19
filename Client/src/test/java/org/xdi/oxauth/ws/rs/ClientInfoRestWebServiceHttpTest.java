@@ -27,7 +27,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Client Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version June 19, 2015
  */
 public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -64,7 +64,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         List<String> scopes = new ArrayList<String>();
         scopes.add("clientinfo");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);

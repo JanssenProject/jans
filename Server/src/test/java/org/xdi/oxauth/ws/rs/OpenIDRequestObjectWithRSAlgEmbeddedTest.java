@@ -44,7 +44,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 19, 2015
  */
 public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
@@ -126,7 +126,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId1, scopes, redirectUri, nonce);
@@ -249,7 +249,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId2, scopes, redirectUri, nonce);
@@ -372,7 +372,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId3, scopes, redirectUri, nonce);
@@ -495,7 +495,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId4, scopes, redirectUri, nonce);
@@ -618,7 +618,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId5, scopes, redirectUri, nonce);
@@ -741,7 +741,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList("openid");
                 String nonce = UUID.randomUUID().toString();
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId6, scopes, redirectUri, nonce);
