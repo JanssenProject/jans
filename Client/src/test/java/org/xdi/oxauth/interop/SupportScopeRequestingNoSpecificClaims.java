@@ -6,28 +6,10 @@
 
 package org.xdi.oxauth.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -40,10 +22,17 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * OC5:FeatureTest-Support scope Requesting No Specific Claims
  *
- * @author Javier Rojas Blum Date: 07.19.2013
+ * @author Javier Rojas Blum
+ * @version June 19, 2015
  */
 public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
 
@@ -80,7 +69,7 @@ public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
-        String state = "STATE_XYZ";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);

@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -22,15 +14,7 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -47,12 +31,18 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * OC5:FeatureTest-Support claims Request Specifying sub Value
  * If that user is logged in, the request succeeds, otherwise it fails.
  *
  * @author Javier Rojas Blum
- * @version 1.0, 07/21/2014
+ * @version June 19, 2015
  */
 public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
@@ -92,7 +82,7 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "STATE_XYZ";
+        String state = UUID.randomUUID().toString();
 
         // 2. Request authorization (first time)
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
@@ -211,7 +201,7 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setAuthUsername(userId);

@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
  * Functional tests for Sector Identifier URI Verification (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version June 19, 2015
  */
 public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
@@ -75,8 +75,9 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
                 "address",
                 "email");
         String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);

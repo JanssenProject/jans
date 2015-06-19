@@ -6,29 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -52,6 +29,22 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
+/**
+ * @author Javier Rojas Blum
+ * @version June 19, 2015
+ */
 public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
     private String clientId1;
@@ -317,7 +310,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                 scopes.add("profile");
                 scopes.add("address");
                 scopes.add("email");
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId2, scopes, redirectUri, null);
@@ -394,10 +387,10 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -686,7 +679,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                 scopes.add("profile");
                 scopes.add("address");
                 scopes.add("email");
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId3, scopes, redirectUri, null);
@@ -762,10 +755,10 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -1055,7 +1048,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                 scopes.add("profile");
                 scopes.add("address");
                 scopes.add("email");
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId4, scopes, redirectUri, null);
@@ -1133,10 +1126,10 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -1427,7 +1420,7 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                 scopes.add("profile");
                 scopes.add("address");
                 scopes.add("email");
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, clientId5, scopes, redirectUri, null);
@@ -1510,10 +1503,10 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {

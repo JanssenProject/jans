@@ -17,27 +17,20 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Holder;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 15/03/2013
+ * @version June 19, 2015
  */
 
 class TTokenRequest {
@@ -168,7 +161,7 @@ class TTokenRequest {
                 List<String> scopes = new ArrayList<String>();
                 scopes.add(p_scopeType);
 
-                String state = "af0ifjsldkj";
+                String state = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                         responseTypes, umaClientId, scopes, umaRedirectUri, null);
