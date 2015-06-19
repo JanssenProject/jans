@@ -36,7 +36,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version June 19, 2015
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -73,7 +73,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -234,7 +234,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("picture");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -299,7 +299,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                 responseTypes, clientId, scopes, redirectUri, nonce);
@@ -428,7 +428,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -507,7 +507,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -586,7 +586,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -664,7 +664,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -742,7 +742,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -820,7 +820,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -898,7 +898,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -976,7 +976,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1054,7 +1054,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1136,7 +1136,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1223,7 +1223,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1310,7 +1310,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1395,7 +1395,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1478,7 +1478,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);

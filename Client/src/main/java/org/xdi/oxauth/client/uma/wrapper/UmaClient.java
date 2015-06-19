@@ -6,12 +6,7 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
@@ -23,15 +18,16 @@ import org.xdi.oxauth.model.util.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 15/03/2013
+ * @version June 19, 2015
  */
 
 public class UmaClient {
 
-	@Deprecated
+    @Deprecated
     public static Token requestAat(final String authorizeUrl, final String tokenUrl,
                                    final String umaUserId, final String umaUserSecret,
                                    final String umaClientId, final String umaClientSecret,
@@ -40,10 +36,10 @@ public class UmaClient {
     }
 
     public static Token requestAat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
-    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.AUTHORIZATION, scopeArray);
+        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.AUTHORIZATION, scopeArray);
     }
 
-	@Deprecated
+    @Deprecated
     public static Token requestPat(final String authorizeUrl, final String tokenUrl,
                                    final String umaUserId, final String umaUserSecret,
                                    final String umaClientId, final String umaClientSecret,
@@ -52,10 +48,10 @@ public class UmaClient {
     }
 
     public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
-    	return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, scopeArray);
+        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, scopeArray);
     }
 
-	@Deprecated
+    @Deprecated
     public static Token request(final String authorizeUrl, final String tokenUrl,
                                 final String umaUserId, final String umaUserSecret,
                                 final String umaClientId, final String umaClientSecret,
@@ -71,7 +67,7 @@ public class UmaClient {
             scopes.addAll(Arrays.asList(scopeArray));
         }
 
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, umaClientId, scopes, umaRedirectUri, null);
         request.setState(state);
@@ -115,7 +111,7 @@ public class UmaClient {
     }
 
     public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType, String... scopeArray) throws Exception {
-    	String umaScope = scopeType.getValue();
+        String umaScope = scopeType.getValue();
 
         String scope = umaScope;
         if (scopeArray != null && scopeArray.length > 0) {
@@ -124,7 +120,7 @@ public class UmaClient {
             }
         }
 
-    	TokenClient tokenClient = new TokenClient(tokenUrl);
+        TokenClient tokenClient = new TokenClient(tokenUrl);
         TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
 
         if (response.getStatus() == 200) {
@@ -134,7 +130,7 @@ public class UmaClient {
                 return new Token(null, null, patToken, umaScope, expiresIn);
             }
         }
-        
+
         return null;
     }
 

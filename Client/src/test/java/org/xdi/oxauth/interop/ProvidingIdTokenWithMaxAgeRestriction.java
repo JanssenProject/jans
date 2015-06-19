@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing ID Token with max age Restriction
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version June 19, 2015
  */
 public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
@@ -242,7 +242,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
-            String state = "STATE_XYZ";
+            String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
@@ -286,7 +286,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             // 4. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
-            String state = "STATE_XYZ";
+            String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);

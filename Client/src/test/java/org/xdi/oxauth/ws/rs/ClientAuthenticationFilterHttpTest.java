@@ -6,27 +6,10 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
@@ -40,8 +23,15 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
- * @author Javier Rojas Blum Date: 09.06.2012
+ * @author Javier Rojas Blum
+ * @version June 19, 2015
  */
 public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
@@ -91,9 +81,10 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
                 "profile",
                 "address",
                 "email");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, customAttrValue1, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, customAttrValue1, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
@@ -168,7 +159,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
                 "address",
                 "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, customAttrValue1, scopes, redirectUri, nonce);
         request.setState(state);

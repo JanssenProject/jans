@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 24, 2015
+ * @version June 19, 2015
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
@@ -74,7 +74,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization and receive the authorization code.
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
@@ -194,7 +194,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 2. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         String nonce = UUID.randomUUID().toString();
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
@@ -330,7 +330,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
