@@ -43,7 +43,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 February 12, 2015
+ * @version June 19, 2015
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
@@ -80,7 +80,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -163,7 +163,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -296,7 +296,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
@@ -352,7 +352,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
@@ -409,7 +409,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -482,7 +482,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -568,7 +568,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -653,7 +653,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -738,7 +738,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -825,7 +825,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -911,7 +911,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -997,7 +997,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1083,7 +1083,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1169,7 +1169,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1254,7 +1254,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1340,7 +1340,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1426,7 +1426,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1506,7 +1506,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1557,7 +1557,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1619,7 +1619,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1682,7 +1682,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -1741,7 +1741,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request Authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1828,7 +1828,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request Authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1883,7 +1883,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -1938,7 +1938,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Authorization Request
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
@@ -2018,7 +2018,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -2106,7 +2106,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -2197,7 +2197,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -2289,7 +2289,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -2373,7 +2373,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);
@@ -2456,7 +2456,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         // 2. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);

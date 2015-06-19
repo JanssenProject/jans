@@ -6,30 +6,26 @@
 
 package org.xdi.oxauth.load;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * DON'T INCLUDE IT IN TEST SUITE.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 11/12/2013
+ * @version June 19, 2015
  */
 
 public class UserInfoLoadTest extends BaseTest {
@@ -50,7 +46,7 @@ public class UserInfoLoadTest extends BaseTest {
         scopes.add("address");
         scopes.add("email");
         String nonce = UUID.randomUUID().toString();
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         request.setState(state);

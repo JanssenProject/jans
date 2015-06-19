@@ -6,22 +6,10 @@
 
 package org.xdi.oxauth.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -34,17 +22,24 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+
 /**
  * OC5:FeatureTest-Can Request and Use Claims in id token
  *
- * @author Javier Rojas Blum Date: 09.04.2013
+ * @author Javier Rojas Blum
+ * @version June 19, 2015
  */
 public class CanRequestAndUseClaimsInIdToken extends BaseTest {
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
     @Test
     public void canRequestAndUseClaimsInIdToken(final String redirectUris, final String userId,
-                                                    final String userSecret, final String redirectUri) throws Exception {
+                                                final String userSecret, final String redirectUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Claims in id token");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -72,7 +67,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         // 2. Request Authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
-        String state = "STATE_XYZ";
+        String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);

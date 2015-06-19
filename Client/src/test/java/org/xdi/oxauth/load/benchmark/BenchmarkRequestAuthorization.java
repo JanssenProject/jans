@@ -6,25 +6,13 @@
 
 package org.xdi.oxauth.load.benchmark;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.Reporter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 import org.xdi.oxauth.model.common.Prompt;
@@ -32,18 +20,26 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * @author Yuriy Movchan
- * @version 0.1, 04/10/2015
+ * @author Javier Rojas Blum
+ * @version June 19, 2015
  */
 
-@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class })
+@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
 public class BenchmarkRequestAuthorization extends BaseTest {
 
     private String clientId;
-	private String redirectUri;
+    private String redirectUri;
 
-	@Parameters({"userId", "userSecret", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUris"})
     @BeforeClass
     public void registerClient(final String userId, final String userSecret, String redirectUris) throws Exception {
         Reporter.log("Register client", true);
@@ -77,21 +73,21 @@ public class BenchmarkRequestAuthorization extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = { "testAuthorization1" })
+    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
     public void testAuthorization2(final String userId, final String userSecret) throws Exception {
         testAuthorizationImpl(userId, userSecret, this.redirectUri, this.clientId);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = { "testAuthorization2" })
+    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = {"testAuthorization2"})
     public void testAuthorization3(final String userId, final String userSecret) throws Exception {
         testAuthorizationImpl(userId, userSecret, this.redirectUri, this.clientId);
     }
 
-	private void testAuthorizationImpl(final String userId, final String userSecret, String redirectUri, String clientId) {
+    private void testAuthorizationImpl(final String userId, final String userSecret, String redirectUri, String clientId) {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
-        String state = "af0ifjsldkj";
+        String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -113,6 +109,6 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         assertNotNull(response.getIdToken(), "The id_token is null");
         assertNotNull(response.getState(), "The state is null");
         assertNotNull(response.getScope(), "The scope is null");
-	}
+    }
 
 }
