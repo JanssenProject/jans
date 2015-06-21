@@ -165,8 +165,8 @@ public class IdTokenFactory {
             }
         }
         if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
+                && authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember() != null) {
+            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
                 boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
