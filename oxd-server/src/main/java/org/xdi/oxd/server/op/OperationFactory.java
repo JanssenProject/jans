@@ -22,6 +22,8 @@ public class OperationFactory {
             switch (p_command.getCommandType()) {
                 case AUTHORIZE_RPT:
                     return new AuthorizeRptOperation(p_command, injector);
+                case AUTHORIZATION_CODE_FLOW:
+                    return new AuthorizationCodeFlowOperation(p_command, injector);
                 case OBTAIN_PAT:
                     return new ObtainPatOperation(p_command, injector);
                 case OBTAIN_AAT:
