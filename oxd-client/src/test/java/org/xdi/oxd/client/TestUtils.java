@@ -34,6 +34,7 @@ import org.xdi.oxd.common.response.RegisterResourceOpResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,6 +61,8 @@ public class TestUtils {
             request.setAuthUsername(userId);
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
+            request.setNonce(UUID.randomUUID().toString());
+            request.setMaxAge(Integer.MAX_VALUE);
 
             final AuthorizeClient authorizeClient = new AuthorizeClient(p_authorizationEndpoint);
             authorizeClient.setRequest(request);
@@ -83,6 +86,7 @@ public class TestUtils {
                 tokenRequest.setScope(scope);
 
                 final TokenClient tokenClient1 = new TokenClient(p_tokenEndpoint);
+                tokenClient1.setExecutor(clientExecutor);
                 tokenClient1.setRequest(tokenRequest);
                 final TokenResponse response2 = tokenClient1.exec();
                 ClientUtils.showClient(authorizeClient);
