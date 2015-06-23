@@ -42,7 +42,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for the Client Authentication Filter (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 5, 2015
+ * @version @version June 23, 2015
  */
 public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
@@ -113,6 +113,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                                                     final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        final String nonce = UUID.randomUUID().toString();
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
@@ -126,7 +127,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, customAttrValue1, scopes, redirectUri, null);
+                        responseTypes, customAttrValue1, scopes, redirectUri, nonce);
                 authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);

@@ -39,7 +39,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for Authorize Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 5, 2015
+ * @version June 23, 2015
  */
 public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -592,6 +592,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                                                 final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        final String nonce = UUID.randomUUID().toString();
 
         new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
 
@@ -605,7 +606,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, null);
+                        responseTypes, clientId1, scopes, redirectUri, nonce);
                 authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
@@ -829,6 +830,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                                                  final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        final String nonce = UUID.randomUUID().toString();
 
         new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
 
@@ -842,7 +844,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 List<String> scopes = new ArrayList<String>();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, null);
+                        responseTypes, clientId1, scopes, redirectUri, nonce);
                 authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
