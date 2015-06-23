@@ -1,8 +1,6 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +8,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.response.IOpResponse;
-
-import java.io.IOException;
 
 /**
  * Base abstract class for all operations.
@@ -73,12 +69,6 @@ public abstract class BaseOperation implements IOperation {
         final String paramsAsString = m_command.paramsAsString();
         try {
             return CoreUtils.createJsonMapper().readValue(paramsAsString, p_class);
-        } catch (JsonMappingException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (JsonParseException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -93,6 +83,9 @@ public abstract class BaseOperation implements IOperation {
      * @return ok response with data
      */
     public CommandResponse okResponse(IOpResponse p_data) {
+        if (p_data == null) {
+            return CommandResponse.createInternalError();
+        }
         return CommandResponse.ok().setData(new POJONode(p_data));
     }
 }

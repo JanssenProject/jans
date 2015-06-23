@@ -8,7 +8,6 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -19,6 +18,7 @@ import org.xdi.oxd.server.HttpService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -39,8 +39,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
             final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
 
             final OpenIdConfigurationResponse discovery = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
-            final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
-            if (discovery != null && umaDiscovery != null) {
+            if (discovery != null) {
                 return okResponse(requestToken(discovery, params));
             }
         } catch (Exception e) {
@@ -63,6 +62,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
         request.setAuthUsername(params.getUserId());
         request.setAuthPassword(params.getUserSecret());
         request.getPrompts().add(Prompt.NONE);
+        request.setNonce(UUID.randomUUID().toString());
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
@@ -81,7 +81,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
             tokenRequest.setCode(authorizationCode);
             tokenRequest.setRedirectUri(params.getRedirectUrl());
             tokenRequest.setAuthUsername(params.getClientId());
-//            tokenRequest.setAuthPassword(params.getClientSecret());
+            tokenRequest.setAuthPassword(params.getClientSecret());
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
             tokenRequest.setScope(scope);
 
@@ -89,9 +89,9 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
             tokenClient1.setExecutor(HttpService.getInstance().getClientExecutor());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
-            ClientUtils.showClient(authorizeClient);
+            ClientUtils.showClient(tokenClient1);
 
-            if (response2.getStatus() == 200) {
+            if (response2.getStatus() == 200 || response2.getStatus() == 302) { // success or redirect
                 if (Util.allNotBlank(response2.getAccessToken(), response2.getRefreshToken())) {
                     final AuthorizationCodeFlowResponse opResponse = new AuthorizationCodeFlowResponse();
                     opResponse.setAccessToken(response2.getAccessToken());
