@@ -25,8 +25,18 @@ public class AuthorizationCodeFlowParams implements IParams {
     private String scope;
     @JsonProperty(value = "nonce")
     private String nonce;
+    @JsonProperty(value = "acr")
+    private String acr;
 
     public AuthorizationCodeFlowParams() {
+    }
+
+    public String getAcr() {
+        return acr;
+    }
+
+    public void setAcr(String acr) {
+        this.acr = acr;
     }
 
     public String getClientSecret() {
@@ -109,6 +119,7 @@ public class AuthorizationCodeFlowParams implements IParams {
         sb.append(", userSecret='").append(userSecret).append('\'');
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
+        sb.append(", acr='").append(acr).append('\'');
         sb.append('}');
         return sb.toString();
     }
