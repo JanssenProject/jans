@@ -39,7 +39,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version @version June 23, 2015
  */
 public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
 
@@ -495,9 +495,10 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
                         "address",
                         "email");
                 String state = UUID.randomUUID().toString();
+                String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId2, scopes, redirectUri, null);
+                        responseTypes, clientId2, scopes, redirectUri, nonce);
                 authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);

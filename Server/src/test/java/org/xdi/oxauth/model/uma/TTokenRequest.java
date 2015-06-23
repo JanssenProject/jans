@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version June 19, 2015
+ * @version @version June 23, 2015
  */
 
 class TTokenRequest {
@@ -162,9 +162,10 @@ class TTokenRequest {
                 scopes.add(p_scopeType);
 
                 String state = UUID.randomUUID().toString();
+                String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, umaClientId, scopes, umaRedirectUri, null);
+                        responseTypes, umaClientId, scopes, umaRedirectUri, nonce);
                 authorizationRequest.setState(state);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
