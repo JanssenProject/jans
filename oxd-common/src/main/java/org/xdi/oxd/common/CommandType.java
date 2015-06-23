@@ -15,6 +15,7 @@ public enum CommandType {
     REGISTER_CLIENT("register_client"),
     CLIENT_READ("client_read"),
     AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
+    IMPLICIT_FLOW("implicit_flow"),
     OBTAIN_PAT("obtain_pat"),
     OBTAIN_AAT("obtain_aat"),
     OBTAIN_RPT("obtain_rpt"),
