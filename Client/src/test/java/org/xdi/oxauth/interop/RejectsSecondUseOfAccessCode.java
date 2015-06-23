@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Rejects Second Use of Access Code
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 22, 2015
  */
 public class RejectsSecondUseOfAccessCode extends BaseTest {
 
@@ -63,8 +63,9 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         // 2. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
