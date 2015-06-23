@@ -13,6 +13,7 @@ gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuLdapAttributeName: oxAuthAppType
+oxAuthClaimName: oxAuthAppType
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CC
 urn: urn:gluu:dir:attribute-def:oxAuthAppType
@@ -28,6 +29,7 @@ gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuLdapAttributeName: oxAuthIdTokenSignedResponseAlg
+oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CD
 urn: urn:gluu:dir:attribute-def:oxAuthIdTokenSignedResponseAlg
@@ -43,6 +45,7 @@ gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuLdapAttributeName: oxAuthRedirectURI
+oxAuthClaimName: oxAuthRedirectURI
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CE
 urn: urn:gluu:dir:attribute-def:oxAuthRedirectURI
@@ -58,6 +61,7 @@ gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuLdapAttributeName: oxAuthScope
+oxAuthClaimName: oxAuthScope
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
@@ -130,7 +134,7 @@ inum: %(inumOrg)s!0008!FF81!2D39
 oxAuthAppType: web
 oxAuthClientSecret: KBvtRlZyEQ/ebFGy8/JGi0Nh3Qxasmn+dqU0LZPYmR4=
 oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home
+oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.seam
 oxAuthRedirectURI: https://client.example.com/cb
 oxAuthRedirectURI: https://client.example.com/cb1
 oxAuthRedirectURI: https://client.example.com/cb2
