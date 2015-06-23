@@ -267,7 +267,7 @@
       </dependency>
       <dependency>
         <groupId>org.xdi</groupId>
-        <artifactId>oxd-license-client</artifactId>
+        <artifactId>oxlicense-client</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
