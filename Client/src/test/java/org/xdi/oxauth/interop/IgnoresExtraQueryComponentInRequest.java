@@ -25,7 +25,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Ignores Extra Query Component in Request
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 22, 2015
  */
 public class IgnoresExtraQueryComponentInRequest extends BaseTest {
 
@@ -62,8 +62,9 @@ public class IgnoresExtraQueryComponentInRequest extends BaseTest {
         // 2. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getCustomParameters().put("custom_param", "custom_value");
 
