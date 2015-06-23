@@ -11,12 +11,12 @@ public class AuthorizationCodeFlowParams implements IParams {
 
     @JsonProperty(value = "discovery_url")
     private String discoveryUrl;
-    @JsonProperty(value = "uma_discovery_url")
-    private String umaDiscoveryUrl;
     @JsonProperty(value = "redirect_url")
     private String redirectUrl;
     @JsonProperty(value = "client_id")
     private String clientId;
+    @JsonProperty(value = "client_secret")
+    private String clientSecret;
     @JsonProperty(value = "user_id")
     private String userId;
     @JsonProperty(value = "user_secret")
@@ -27,6 +27,14 @@ public class AuthorizationCodeFlowParams implements IParams {
     private String nonce;
 
     public AuthorizationCodeFlowParams() {
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 
     public String getNonce() {
@@ -77,14 +85,6 @@ public class AuthorizationCodeFlowParams implements IParams {
         userSecret = p_userSecret;
     }
 
-    public String getUmaDiscoveryUrl() {
-        return umaDiscoveryUrl;
-    }
-
-    public void setUmaDiscoveryUrl(String p_umaDiscoveryUrl) {
-        umaDiscoveryUrl = p_umaDiscoveryUrl;
-    }
-
     public String getDiscoveryUrl() {
         return discoveryUrl;
     }
@@ -103,7 +103,6 @@ public class AuthorizationCodeFlowParams implements IParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("AuthorizationCodeFlowParams");
         sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
-        sb.append(", umaDiscoveryUrl='").append(umaDiscoveryUrl).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", userId='").append(userId).append('\'');
