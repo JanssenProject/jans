@@ -17,6 +17,7 @@
     <parameter name="licenseServerEndpoint" value="https://seed22.gluu.org/license-server"/>
     <parameter name="request_url" value="http://example.com/object/1234"/>
     <parameter name="request_http_method" value="DELETE"/>
+    <parameter name="register_client_app_type" value="web"/>
 
     <!-- main class to set up and tear down suite -->
     <test name="SetUp" enabled="true">
