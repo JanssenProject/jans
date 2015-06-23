@@ -1,6 +1,8 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
@@ -17,6 +19,7 @@ import org.xdi.oxd.server.DiscoveryService;
 import org.xdi.oxd.server.HttpService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,6 +66,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
         request.setAuthPassword(params.getUserSecret());
         request.getPrompts().add(Prompt.NONE);
         request.setNonce(UUID.randomUUID().toString());
+        request.setAcrValues(acrValues(params.getAcr()));
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
@@ -107,5 +111,16 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
             LOG.debug("Authorization code is blank.");
         }
         return null;
+    }
+
+    private static List<String> acrValues(String acr) {
+        List<String> acrValues = Lists.newArrayList();
+        if (StringUtils.isNotBlank(acr)) {
+            final String[] split = StringUtils.split(acr, " ");
+            if (split != null) {
+                acrValues.addAll(Arrays.asList(split));
+            }
+        }
+        return acrValues;
     }
 }
