@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 
-import os
 import os.path
 import Properties
 import random
@@ -51,7 +50,7 @@ class Setup(object):
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/%s/oxasimba-proxy-%s.war" % (self.oxVersion, self.oxVersion)
-        self.cas_war = "http://ox.gluu.org/maven/org/xdi/oxcas/%s/oxcas-%s.war" % (self.oxVersion, self.oxVersion)
+        self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.modifyNetworking = False
@@ -163,10 +162,7 @@ class Setup(object):
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
-        self.debian_services = [{ 'name' : 'memcached', 'order' : '30', 'runlevel' : '3'},
-                                { 'name' : 'opendj', 'order' : '40', 'runlevel' : '3'},
-                                { 'name' : 'tomcat', 'order' : '50', 'runlevel' : '3'},
-                                { 'name' : 'apache2', 'order' : '60', 'runlevel' : '3'}]
+        self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
@@ -210,6 +206,7 @@ class Setup(object):
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
+        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
@@ -248,6 +245,7 @@ class Setup(object):
                      self.ldif_scripts: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
+                     self.asimba_properties: False,
                      self.asimba_selector_configuration: True
                      }
 
@@ -291,12 +289,9 @@ class Setup(object):
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
-        realTomcatWebappsFolder = os.path.realpath("%s/webapps" % self.tomcatHome)
 
         self.run(['/bin/chmod', 'a-x', realCertFolder])
         self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
-
-        self.run(['/bin/chmod', '-R', '644', "%s/*" % realTomcatWebappsFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -708,7 +703,6 @@ class Setup(object):
 
     def gen_openid_keys(self):
         self.logIt("Generating oxAuth OpenID Connect keys")
-        self.copyFile("%s/static/oxauth/java.security" % self.install_dir, "/usr/java/latest/lib/security")
         self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.tomcat_user_home_lib)
@@ -728,6 +722,7 @@ class Setup(object):
                        '%s/oxauth.jar' % self.tomcat_user_home_lib]
 
         cmd = " ".join(["/usr/java/latest/bin/java",
+                        "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(requiredJars),
                         "org.xdi.oxauth.util.KeyGenerator"])
@@ -881,6 +876,12 @@ class Setup(object):
         if self.components['asimba']['enabled']:
             asimbaWar = 'oxasimba.war'
             distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+
+            # Asimba is not part of CE package. We need to download it if needed
+            if not os.path.exists(distAsimbaPath):
+                print "Downloading latest Asimba war file..."
+                self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
             self.logIt("Unpacking %s..." % asimbaWar)
@@ -892,10 +893,8 @@ class Setup(object):
                       distAsimbaPath], tmpAsimbaDir)
 
             self.logIt("Configuring Asimba...")
-            asimbaTemplateConfigurationPath = '%s/asimba.xml' % self.outputFolder
-            asimbaWarConfigurationPath = '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir
-
-            self.copyFile(asimbaTemplateConfigurationPath, asimbaWarConfigurationPath)
+            self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
+            self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
 
             self.logIt("Generating asimba.war...")
             self.run([self.jarCommand,
@@ -1169,6 +1168,16 @@ class Setup(object):
             self.logIt("Error removing file %s" % fileName, True)
             self.logIt(traceback.format_exc(), True)
 
+    def get_filepaths(self, directory):
+        file_paths = []
+        
+        for root, directories, files in os.walk(directory):
+            for filename in files:
+                # filepath = os.path.join(root, filename)
+                file_paths.append(filename)
+
+        return file_paths
+
     def render_templates(self):
         if self.components['saml']['enabled']: 
             self.oxTrustConfigGeneration = "enabled"
@@ -1186,6 +1195,33 @@ class Setup(object):
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
+
+    def render_test_templates(self):
+        self.logIt("Rendering test templates")
+        
+        testTepmplatesFolder = '%s/test/' % self.templateFolder
+        for templateBase, templateDirectories, templateFiles in os.walk(testTepmplatesFolder):
+            for templateFile in templateFiles:
+                fullPath = '%s/%s' % (templateBase, templateFile)
+                try:
+                    self.logIt("Rendering test template %s" % fullPath)
+                    fn = fullPath[12:] # Remove ./template/ from fullPath
+                    f = open(os.path.join(self.templateFolder, fn))
+                    template_text = f.read()
+                    f.close()
+                    
+                    fullOutputFile = os.path.join(self.outputFolder, fn)
+                    # Create full path to the output file
+                    fullOutputDir = os.path.dirname(fullOutputFile)
+                    if not os.path.exists(fullOutputDir):
+                        os.makedirs(fullOutputDir)
+
+                    newFn = open(fullOutputFile, 'w+')
+                    newFn.write(template_text % self.__dict__)
+                    newFn.close()
+                except:
+                    self.logIt("Error writing test template %s" % fullPath, True)
+                    self.logIt(traceback.format_exc(), True)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
@@ -1274,7 +1310,7 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service['name'], 'enable'])
+                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
     def start_services(self):
         # Detect sevice path and apache service name
@@ -1455,6 +1491,8 @@ if __name__ == '__main__':
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.render_templates()
+            installObject.render_test_templates()
+            1
             installObject.update_hostname()
             installObject.gen_crypto()
             installObject.configure_httpd()

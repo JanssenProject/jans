@@ -211,3 +211,23 @@ objectclass: top
 objectclass: organizationalunit
 ou: links
 
+################################
+
+# U2F data - LEVEL 3
+# Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
+dn: ou=u2f,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: u2f
+
+# U2F registration requests - LEVEL 4
+dn: ou=registration_requests,ou=u2f,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: registration_requests
+
+# U2F authentication requests - LEVEL 4
+dn: ou=authentication_requests,ou=u2f,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: authentication_requests
