@@ -18,15 +18,75 @@
 	},
 
 	{
-		"attribute": "lastModifiedTime",
-		"type": "date",
-		"index": ["ordering"]
+		"attribute": "oxAuthGrantId",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxAuthAuthorizationCode",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxAuthTokenCode",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "gluuStatus",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxState",
+		"type": "string",
+		"index": ["equality"]
 	},
 
 	{
 		"attribute": "oxAuthExpiration",
 		"type": "date",
 		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "lastModifiedTime",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "oxApplication",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxRequestId",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "creationDate",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "myCustomAttr1",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "myCustomAttr2",
+		"type": "string",
+		"index": ["equality"]
 	}
 
 ]

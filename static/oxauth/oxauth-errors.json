@@ -149,8 +149,8 @@
     ],
     "register":[
         {
-            "id":"invalid_client_id",
-            "description":"The value of client_id is invalid.",
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
             "uri":null
         },
         {
@@ -159,13 +159,8 @@
             "uri":null
         },
         {
-            "id":"invalid_configuration_parameter",
-            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
-            "uri":null
-        },
-        {
-            "id":"invalid_request",
-            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.",
+            "id":"invalid_client_metadata",
+            "description":"The value of one of the Client Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a Client's Metadata.",
             "uri":null
         },
         {
@@ -329,6 +324,33 @@
         {
             "id":"invalid_grant",
             "description":"The provided access token is invalid, or was issued to another client.",
+            "uri":null
+        }
+    ],
+    "fido":[
+        {
+            "id":"server_error",
+            "description":"The authorization server encountered an unexpected condition which prevented it from fulfilling the request.",
+            "uri":null
+        },
+        {
+            "id":"invalid_request",
+            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, has invalid signature, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"no_eligable_devices",
+            "description":"There are no devices registered.",
+            "uri":null
+        },
+        {
+            "id":"device_compromised",
+            "description":"All devices were compromised.",
+            "uri":null
+        },
+        {
+            "id":"session_expired",
+            "description":"The authentication or registration session was expired.",
             "uri":null
         }
     ]
