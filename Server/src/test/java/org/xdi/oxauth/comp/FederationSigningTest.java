@@ -6,19 +6,6 @@
 
 package org.xdi.oxauth.comp;
 
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.Test;
@@ -29,12 +16,20 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jws.RSASigner;
-import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtHeader;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.jwt.PureJwt;
+import org.xdi.oxauth.model.jwt.*;
 import org.xdi.oxauth.model.util.JwtUtil;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+
+import static org.testng.Assert.assertTrue;
 
 /**
  * https://localhost:8443/oxauth/seam/resource/restv1/oxauth/jwk
@@ -65,11 +60,11 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
 
     @Test
     public void test() throws InvalidJwtException, JSONException, SignatureException, IOException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException {
-        final String keyId = ConfigurationFactory.getConfiguration().getFederationSigningKid();
+        final String keyId = testKeyId();
         final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getFederationSigningAlg());
-        final String jwkUrl = ConfigurationFactory.getConfiguration().getJwksUri();
 
         final JSONWebKey JSONWebKey = ConfigurationFactory.getWebKeys().getKey(keyId);
+
         final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
         final JSONObject jsonHeader = JwtHeader.instance().
@@ -86,9 +81,29 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
         RSASigner rsaSigner = new RSASigner(algorithm, factory.getPublicKey());
         assertTrue(rsaSigner.validateSignature(jwt.getSigningInput(), jwt.getEncodedSignature()));//
 
-        // 2. check keyId and jwtPath
+        // 2. chtestKeyIdeyId and jwtPath
         final JwtHeader header = Jwt.parse(signedJwt).getHeader();
         assertTrue(header.getClaim(JwtHeaderName.KEY_ID).equals(keyId));
+
+    }
+
+    public static String testKeyId() {
+        String keyId = ConfigurationFactory.getConfiguration().getFederationSigningKid();
+
+        if (ConfigurationFactory.getWebKeys().getKey(keyId) != null) {
+            return keyId;
+        }
+
+        keyId = "6898cff9-4f92-4b58-b37c-2a2b6779b0b3";
+        if (ConfigurationFactory.getWebKeys().getKey(keyId) != null) {
+            return keyId;
+        }
+
+        if (!ConfigurationFactory.getWebKeys().getKeys().isEmpty()) {
+            return ConfigurationFactory.getWebKeys().getKeys().get(0).getKeyId();
+        }
+
+        throw new RuntimeException("Failed to identify key id for signing");
 
     }
 }
