@@ -44,7 +44,8 @@ public enum CustomScriptType implements LdapEnum {
 	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
 	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
 	ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
-	UMA_AUTHORIZATION_POLICY("uma_authorization_policy", "UMA Authorization Policies", AuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new DummyAuthorizationPolicyType());
+	UMA_AUTHORIZATION_POLICY("uma_authorization_policy", "UMA Authorization Policies", AuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new DummyAuthorizationPolicyType()),
+	DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", AuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new DummyAuthorizationPolicyType());
 
 	private String value;
 	private String displayName;
