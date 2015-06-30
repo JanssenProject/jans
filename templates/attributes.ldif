@@ -403,6 +403,7 @@ gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
+oxAuthClaimName: nickname
 gluuStatus: active
 inum: %(inumOrg)s!0005!5EC6
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nickname
@@ -514,7 +515,7 @@ description: End-User's full name in displayable form
 dn: inum=%(inumOrg)s!0005!EC3A,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
-inum: %(inumOrg)s!0005!EC32
+inum: %(inumOrg)s!0005!EC3A
 description: URL of the End-User's profile picture
 displayName: Picture URL
 gluuAttributeName: picture
