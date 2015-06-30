@@ -49,12 +49,14 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.*;
@@ -85,6 +87,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @In
     private UserService userService;
+
+	@In
+	private ExternalDynamicScopeService externalDynamicScopeService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
@@ -200,8 +205,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Claims
+        List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+        		dynamicScopes.add(scope.getDisplayName());
+        		continue;
+        	}
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -223,6 +233,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
+
         if (authorizationGrant.getJwtAuthorizationRequest() != null
                 && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
@@ -251,8 +262,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
+
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
         jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
+
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+        }
 
         // Signature
         JSONWebKey jwk = null;

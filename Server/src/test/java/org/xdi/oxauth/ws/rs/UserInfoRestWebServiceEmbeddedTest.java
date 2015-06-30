@@ -34,6 +34,7 @@ import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;

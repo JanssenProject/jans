@@ -8,12 +8,19 @@ package org.xdi.oxauth.model.token;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
+import org.jboss.seam.Component;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.contexts.Lifecycle;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -38,6 +45,7 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
@@ -53,11 +61,24 @@ import java.util.*;
  * JSON Web Encryption (JWE).
  *
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version Jun 22, 2015
  */
+@Scope(ScopeType.STATELESS)
+@Name("idTokenFactory")
+@AutoCreate
 public class IdTokenFactory {
 
-    public static Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
+	@In
+	private ExternalDynamicScopeService externalDynamicScopeService;
+
+	@In
+	private ScopeService scopeService;
+
+	@In
+	private AttributeService attributeService;
+
+    public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                             AuthorizationCode authorizationCode, AccessToken accessToken,
                                             Set<String> scopes) throws SignatureException, InvalidJwtException,
             StringEncrypter.EncryptionException, InvalidClaimException {
@@ -114,10 +135,13 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim("oxValidationURI", ConfigurationFactory.getConfiguration().getCheckSessionIFrame());
         jwt.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.getConfiguration().getOxOpenIdConnectVersion());
 
-        ScopeService scopeService = ScopeService.instance();
-        AttributeService attributeService = AttributeService.instance();
+        List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
-            Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+        		dynamicScopes.add(scope.getDisplayName());
+        		continue;
+        	}
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 if (scope.getIsOxAuthGroupClaims()) {
@@ -195,6 +219,10 @@ public class IdTokenFactory {
 
         jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+        }
+
         // Signature
         JSONWebKey jwk = null;
         switch (signatureAlgorithm) {
@@ -231,7 +259,7 @@ public class IdTokenFactory {
         return jwt;
     }
 
-    public static Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
+    public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                                AuthorizationCode authorizationCode, AccessToken accessToken,
                                                Set<String> scopes) throws InvalidJweException, InvalidClaimException {
         Jwe jwe = new Jwe();
@@ -278,10 +306,13 @@ public class IdTokenFactory {
         jwe.getClaims().setClaim("oxValidationURI", ConfigurationFactory.getConfiguration().getCheckSessionIFrame());
         jwe.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.getConfiguration().getOxOpenIdConnectVersion());
 
-        ScopeService scopeService = ScopeService.instance();
-        AttributeService attributeService = AttributeService.instance();
+        List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
-            Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+        		dynamicScopes.add(scope.getDisplayName());
+        		continue;
+        	}
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -303,6 +334,7 @@ public class IdTokenFactory {
                 }
             }
         }
+
         if (authorizationGrant.getJwtAuthorizationRequest() != null
                 && authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
@@ -332,6 +364,10 @@ public class IdTokenFactory {
             }
         }
 
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+        }
+
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
@@ -359,4 +395,19 @@ public class IdTokenFactory {
 
         return jwe;
     }
+
+    /**
+     * Get IdTokenFactory instance
+     *
+     * @return IdTokenFactory instance
+     */
+    public static IdTokenFactory instance() {
+        boolean createContexts = !Contexts.isEventContextActive() && !Contexts.isApplicationContextActive();
+        if (createContexts) {
+            Lifecycle.beginCall();
+        }
+
+        return (IdTokenFactory) Component.getInstance(IdTokenFactory.class);
+    }
+
 }
