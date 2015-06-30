@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
