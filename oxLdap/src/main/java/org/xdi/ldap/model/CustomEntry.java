@@ -13,6 +13,7 @@ import java.util.List;
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 04/08/2014
@@ -28,6 +29,20 @@ public class CustomEntry extends BaseEntry implements Serializable {
 
 	public List<CustomAttribute> getCustomAttributes() {
 		return customAttributes;
+	}
+
+	public String getCustomAttributeValue(String attributeName) {
+		if (customAttributes == null) {
+			return null;
+		}
+		
+		for (CustomAttribute customAttribute : customAttributes) {
+			if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
+				return customAttribute.getValue();
+			}
+		}
+
+		return null;
 	}
 
 	public void setCustomAttributes(List<CustomAttribute> customAttributes) {
