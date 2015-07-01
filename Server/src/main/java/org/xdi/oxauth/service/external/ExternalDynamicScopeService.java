@@ -19,6 +19,10 @@ import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.scope.DynamicScopeType;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.jwe.Jwe;
+import org.xdi.oxauth.model.token.JsonWebToken;
+import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
 
 /**
@@ -38,12 +42,12 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		super(CustomScriptType.DYNAMIC_SCOPE);
 	}
 
-	public boolean executeExternalUpdateMethod(CustomScriptConfiguration customScriptConfiguration, List<String> scopes, Object jsonToken, Object user) {
+	public boolean executeExternalUpdateMethod(CustomScriptConfiguration customScriptConfiguration, DynamicScopeExternalContext dynamicScopeContext) {
 		try {
 			log.debug("Executing python 'update' method");
 			DynamicScopeType dynamicScopeType = (DynamicScopeType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-			return dynamicScopeType.update(null, configurationAttributes);
+			return dynamicScopeType.update(dynamicScopeContext, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
@@ -51,10 +55,16 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		return false;
 	}
 
-	public boolean executeExternalUpdateMethods(List<String> scopes, Object jsonToken, Object user) {
+	public boolean executeExternalUpdateMethods(List<String> dynamicScopes, JsonWebToken jsonToken, User user) {
+		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonToken, user);
+
+		return executeExternalUpdateMethods(dynamicScopeContext);
+	}
+
+	public boolean executeExternalUpdateMethods(DynamicScopeExternalContext dynamicScopeContext) {
 		boolean result = true;
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			result &= executeExternalUpdateMethod(customScriptConfiguration, scopes, jsonToken, user);
+			result &= executeExternalUpdateMethod(customScriptConfiguration, dynamicScopeContext);
 			if (!result) {
 				return result;
 			}
