@@ -138,7 +138,7 @@ public class IdTokenFactory {
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
         	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+        	if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
         		dynamicScopes.add(scope.getDisplayName());
         		continue;
         	}
