@@ -14,7 +14,7 @@
         "federationRequest": "ou=request,ou=federation,o=${config.oxauth.organization},o=gluu",
         "federationTrust": "ou=trust,ou=federation,o=${config.oxauth.organization},o=gluu",
         "umaBase": "ou=uma,o=${config.oxauth.organization},o=gluu",
-        "umaPolicy": "ou=policies,ou=uma,o=${config.oxauth.organization},o=gluu"
+        "umaPolicy": "ou=policies,ou=uma,o=${config.oxauth.organization},o=gluu",
         "u2fBase": "ou=u2f,o=${config.oxauth.organization},o=gluu"
     }
 }
