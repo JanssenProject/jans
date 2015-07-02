@@ -21,7 +21,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.scope.DynamicScopeType;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.token.JsonWebReposne;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
 
@@ -55,7 +55,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		return false;
 	}
 
-	public boolean executeExternalUpdateMethods(List<String> dynamicScopes, JsonWebReposne jsonToken, User user) {
+	public boolean executeExternalUpdateMethods(List<String> dynamicScopes, JsonWebResponse jsonToken, User user) {
 		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonToken, user);
 
 		return executeExternalUpdateMethods(dynamicScopeContext);
