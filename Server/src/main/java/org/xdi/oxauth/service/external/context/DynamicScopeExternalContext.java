@@ -32,14 +32,14 @@ import org.xdi.oxauth.util.ServerUtil;
 public class DynamicScopeExternalContext extends ExternalScriptContext {
 
 	private List<String> dynamicScopes;
-	private JsonWebResponse jsonToken;
+	private JsonWebResponse jsonWebResponse;
 	private User user;
 
-    public DynamicScopeExternalContext(List<String> dynamicScopes, JsonWebResponse jsonToken, User user) {
+    public DynamicScopeExternalContext(List<String> dynamicScopes, JsonWebResponse jsonWebResponse, User user) {
     	super(null);
 
     	this.dynamicScopes = dynamicScopes;
-    	this.jsonToken = jsonToken;
+    	this.jsonWebResponse = jsonWebResponse;
     	this.user = user;
     }
 
@@ -51,12 +51,12 @@ public class DynamicScopeExternalContext extends ExternalScriptContext {
 		this.dynamicScopes = dynamicScopes;
 	}
 
-	public JsonWebResponse getJsonToken() {
-		return jsonToken;
+	public JsonWebResponse getJsonWebResponse() {
+		return jsonWebResponse;
 	}
 
-	public void setJsonToken(JsonWebResponse jsonToken) {
-		this.jsonToken = jsonToken;
+	public void setJsonWebResponse(JsonWebResponse jsonWebResponse) {
+		this.jsonWebResponse = jsonWebResponse;
 	}
 
 	public User getUser() {
