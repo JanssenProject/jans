@@ -1,5 +1,4 @@
 ######################################
-######################################
 # Attributes
 ######################################
 dn: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -67,8 +66,26 @@ inum: %(inumOrg)s!0005!18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
 
 ######################################
-
+# Scopes
 ######################################
+dn: inum=%(inumOrg)s!0009!7D01,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: org_name
+inum: %(inumOrg)s!0009!7D01
+description: Dynamic scope org_name
+defaultScope: true
+oxScopeType: dynamic
+
+dn: inum=%(inumOrg)s!0009!7D02,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: work_phone
+inum: %(inumOrg)s!0009!7D02
+description: Dynamic scope work_phone
+defaultScope: true
+oxScopeType: dynamic
+
 ######################################
 # People
 ######################################
@@ -110,9 +127,6 @@ zoneinfo: America/Chicago
 memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 
 ######################################
-
-######################################
-######################################
 # Groups
 ######################################
 dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
@@ -120,9 +134,6 @@ changetype: modify
 add: member
 member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 
-######################################
-
-######################################
 ######################################
 # Clients
 ######################################
@@ -179,9 +190,6 @@ oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 
-######################################
-
-######################################
 ######################################
 # Federation
 ######################################
@@ -281,10 +289,6 @@ oxAuthReleasedScope: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthSkipAuthorization: true
 
 ######################################
-
-
-######################################
-######################################
 # UMA
 ######################################
 dn: inum=%(inumOrg)s!5214.40D1,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
@@ -336,5 +340,3 @@ owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxFaviconImage: http://example.com/generate_id_icon.png
 oxId: 1428339837931
 oxRevision: 1
-
-######################################
