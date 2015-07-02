@@ -139,6 +139,46 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
+    public void authorizationCodeWithNotAllowedScopeFlow(final String userId, final String userSecret, final String redirectUris,
+                                      final String redirectUri) throws Exception {
+        showTitle("authorizationCodeDynamicScopeFlow");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.CODE,
+                ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
+
+        // 1. Register client
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization and receive the authorization code.
+        List<String> authorizationScopes = Arrays.asList("openid", "profile", "address", "email", "user_name", "mobile_phone");
+        String nonce = UUID.randomUUID().toString();
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, authorizationScopes, clientId, nonce);
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
+        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString("user_name"));
+        assertNull(jwt.getClaims().getClaimAsString("mobile_phone"));
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Test
     public void authorizationCodeDynamicScopeFlow(final String userId, final String userSecret, final String redirectUris,
                                       final String redirectUri) throws Exception {
         showTitle("authorizationCodeDynamicScopeFlow");
