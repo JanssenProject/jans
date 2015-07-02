@@ -19,7 +19,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.token.JsonWebToken;
+import org.xdi.oxauth.model.token.JsonWebReposne;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -32,10 +32,10 @@ import org.xdi.oxauth.util.ServerUtil;
 public class DynamicScopeExternalContext extends ExternalScriptContext {
 
 	private List<String> dynamicScopes;
-	private JsonWebToken jsonToken;
+	private JsonWebReposne jsonToken;
 	private User user;
 
-    public DynamicScopeExternalContext(List<String> dynamicScopes, JsonWebToken jsonToken, User user) {
+    public DynamicScopeExternalContext(List<String> dynamicScopes, JsonWebReposne jsonToken, User user) {
     	super(null);
 
     	this.dynamicScopes = dynamicScopes;
@@ -51,11 +51,11 @@ public class DynamicScopeExternalContext extends ExternalScriptContext {
 		this.dynamicScopes = dynamicScopes;
 	}
 
-	public JsonWebToken getJsonToken() {
+	public JsonWebReposne getJsonToken() {
 		return jsonToken;
 	}
 
-	public void setJsonToken(JsonWebToken jsonToken) {
+	public void setJsonToken(JsonWebReposne jsonToken) {
 		this.jsonToken = jsonToken;
 	}
 
