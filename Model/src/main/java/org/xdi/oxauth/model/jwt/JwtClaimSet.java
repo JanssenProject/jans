@@ -211,7 +211,7 @@ public abstract class JwtClaimSet {
 
     public String toBase64JsonObject() throws InvalidJwtException {
         try {
-            String jsonObjectString = toJsobString();
+            String jsonObjectString = toJsonString();
             byte[] jsonObjectBytes = jsonObjectString.getBytes(Util.UTF8_STRING_ENCODING);
             return JwtUtil.base64urlencode(jsonObjectBytes);
         } catch (UnsupportedEncodingException e) {
@@ -219,10 +219,11 @@ public abstract class JwtClaimSet {
         }
     }
 
-    public String toJsobString() throws InvalidJwtException {
+    public String toJsonString() throws InvalidJwtException {
 		JSONObject jsonObject = toJsonObject();
 		String jsonObjectString = jsonObject.toString();
 		jsonObjectString = jsonObjectString.replace("\\/", "/");
+
 		return jsonObjectString;
 	}
 

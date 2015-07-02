@@ -429,6 +429,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope.getIsOxAuthGroupClaims()) {
                 JwtSubClaimObject groupClaim = new JwtSubClaimObject();
+                groupClaim.setName(scope.getDisplayName());
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
