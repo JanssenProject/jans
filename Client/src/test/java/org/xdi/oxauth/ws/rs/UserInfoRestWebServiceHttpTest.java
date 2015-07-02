@@ -1152,12 +1152,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 
-	private static RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes) {
+	private RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
 
-        RegisterClient registerClient = new RegisterClient("http://localhost:8080/oxauth/seam/resource/restv1/oxauth/register");
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
@@ -1178,7 +1178,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 		return requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId, scopes);
 	}
 
-	private static AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
+	private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
 			List<ResponseType> responseTypes, String clientId, List<String> scopes) {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1189,7 +1189,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient("http://localhost:8080/oxauth/seam/resource/restv1/oxauth/authorize");
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
         AuthorizationResponse response1 = authorizeClient.exec();
 
@@ -1205,45 +1205,4 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 		return response1;
 	}
 
-	
-	public static void main(String[] args) {
-		String userId = "mike";
-		String userSecret = "secret";
-		String redirectUri = "https://client.example.com/cb";
-		String redirectUris = "https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
-
-        List<ResponseType> responseTypes = Arrays.asList(
-                ResponseType.TOKEN,
-                ResponseType.ID_TOKEN
-        );
-
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "org_name", "work_phone");
-
-		// 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes);
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request authorization
-        AuthorizationResponse response1 = requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId, scopes);
-
-        String accessToken = response1.getAccessToken();
-
-        // 3. Request user info
-        UserInfoClient userInfoClient = new UserInfoClient("http://localhost:8080/oxauth/seam/resource/restv1/oxauth/userinfo");
-        UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
-
-        showClient(userInfoClient);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response2.getClaim(JwtClaimName.NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(response2.getClaim("org_name"));
-        assertNotNull(response2.getClaim("work_phone"));
- 
-	}
 }
