@@ -9,16 +9,12 @@ package org.xdi.oxauth.model.jwe;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtClaims;
-import org.xdi.oxauth.model.jwt.JwtHeader;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
-public class Jwe {
-
-    private JwtHeader header;
-    private JwtClaims claims;
+public class Jwe extends JsonWebResponse {
 
     private String encodedHeader;
     private String encodedEncryptedKey;
@@ -27,30 +23,11 @@ public class Jwe {
     private String encodedIntegrityValue;
 
     public Jwe() {
-        header = new JwtHeader();
-        claims = new JwtClaims();
-
         encodedHeader = null;
         encodedEncryptedKey = null;
         encodedInitializationVector = null;
         encodedCiphertext = null;
         encodedIntegrityValue = null;
-    }
-
-    public JwtHeader getHeader() {
-        return header;
-    }
-
-    public void setHeader(JwtHeader header) {
-        this.header = header;
-    }
-
-    public JwtClaims getClaims() {
-        return claims;
-    }
-
-    public void setClaims(JwtClaims claims) {
-        this.claims = claims;
     }
 
     public String getEncodedHeader() {

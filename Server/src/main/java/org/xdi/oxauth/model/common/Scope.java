@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
@@ -15,12 +16,14 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
+ * @author Yuriy Movchan Date: 06/30/2015
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthCustomScope"})
-public class Scope {
+public class Scope implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
+
     private transient boolean isDefault;
     private transient boolean isGroupClaims;
 
@@ -34,6 +37,9 @@ public class Scope {
 
     @LdapAttribute
     private String description;
+
+    @LdapAttribute(name = "oxScopeType")
+    private ScopeType scopeType;
  
     @LdapAttribute(name = "oxAuthClaim")
     private List<String> oxAuthClaims;
@@ -76,7 +82,15 @@ public class Scope {
         this.description = description;
     }
 
-    public List<String> getOxAuthClaims() {
+    public ScopeType getScopeType() {
+		return scopeType;
+	}
+
+	public void setScopeType(ScopeType scopeType) {
+		this.scopeType = scopeType;
+	}
+
+	public List<String> getOxAuthClaims() {
         return this.oxAuthClaims;
     }
 
