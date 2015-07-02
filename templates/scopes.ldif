@@ -112,3 +112,12 @@ inum: %(inumOrg)s!0009!6D99
 objectClass: oxAuthCustomScope
 objectClass: top
 
+dn: inum=%(inumOrg)s!0009!8A01,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+displayName: mobile_phone
+inum: %(inumOrg)s!0009!8A01
+description: Your mobile phone number
+defaultScope: false
+oxAuthClaim: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
+
