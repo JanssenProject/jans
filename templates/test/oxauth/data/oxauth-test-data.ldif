@@ -119,6 +119,7 @@ st: Texas
 c: US
 l: Austin
 telephoneNumber: (512) 516-2413
+mobile: (512) 516-2413
 uid: test_user
 updatedAt: 1428004163
 userPassword: test_user_password
