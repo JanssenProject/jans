@@ -174,7 +174,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
         assertNotNull(jwt.getClaims().getClaimAsString("user_name"));
-        assertNull(jwt.getClaims().getClaimAsString("mobile_phone"));
+        assertNull(jwt.getClaims().getClaimAsString("phone_mobile_number"));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
