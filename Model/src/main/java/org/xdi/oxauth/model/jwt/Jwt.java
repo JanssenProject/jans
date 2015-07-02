@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.jwt;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -19,10 +20,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
  *
  * @author Javier Rojas Blum Date: 11.09.2012
  */
-public class Jwt {
-
-    private JwtHeader header;
-    private JwtClaims claims;
+public class Jwt extends JsonWebResponse {
 
     private String encodedHeader;
     private String encodedClaims;
@@ -31,28 +29,9 @@ public class Jwt {
     private boolean loaded = false;
 
     public Jwt() {
-        header = new JwtHeader();
-        claims = new JwtClaims();
-
         encodedHeader = null;
         encodedClaims = null;
         encodedSignature = null;
-    }
-
-    public JwtHeader getHeader() {
-        return header;
-    }
-
-    public void setHeader(JwtHeader header) {
-        this.header = header;
-    }
-
-    public JwtClaims getClaims() {
-        return claims;
-    }
-
-    public void setClaims(JwtClaims claims) {
-        this.claims = claims;
     }
 
     public String getEncodedSignature() {
