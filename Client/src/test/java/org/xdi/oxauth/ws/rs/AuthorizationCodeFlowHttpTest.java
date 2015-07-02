@@ -141,7 +141,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
     @Test
     public void authorizationCodeWithNotAllowedScopeFlow(final String userId, final String userSecret, final String redirectUris,
                                       final String redirectUri) throws Exception {
-        showTitle("authorizationCodeDynamicScopeFlow");
+        showTitle("authorizationCodeWithNotAllowedScopeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
