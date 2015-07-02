@@ -9,12 +9,12 @@ package org.xdi.oxauth.model.jwe;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.token.JsonWebReposne;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
-public class Jwe extends JsonWebReposne {
+public class Jwe extends JsonWebResponse {
 
     private String encodedHeader;
     private String encodedEncryptedKey;

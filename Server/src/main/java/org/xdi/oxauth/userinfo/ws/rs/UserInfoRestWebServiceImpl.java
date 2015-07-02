@@ -43,7 +43,7 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.token.JsonWebReposne;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
@@ -415,7 +415,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws JSONException, InvalidClaimException {
-        JsonWebReposne jsonWebToken = new JsonWebReposne(); 
+        JsonWebResponse jsonWebResponse = new JsonWebResponse(); 
 
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
@@ -441,16 +441,16 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
 
-                jsonWebToken.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+                jsonWebResponse.getClaims().setClaim(scope.getDisplayName(), groupClaim);
             } else {
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
 
                     if (value instanceof List) {
-                    	jsonWebToken.getClaims().setClaim(key, (List<String>) value);
+                    	jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
                     } else {
-                    	jsonWebToken.getClaims().setClaim(key, (String) value);
+                    	jsonWebResponse.getClaims().setClaim(key, (String) value);
                     }
                 }
             }
@@ -476,10 +476,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                     values.add(value);
                                 }
                             }
-                            jsonWebToken.getClaims().setClaim(claim.getName(), values);
+                            jsonWebResponse.getClaims().setClaim(claim.getName(), values);
                         } else {
                             String value = (String) attribute;
-                            jsonWebToken.getClaims().setClaim(claim.getName(), value);
+                            jsonWebResponse.getClaims().setClaim(claim.getName(), value);
                         }
                     }
                 }
@@ -487,13 +487,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jsonWebToken.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
+        jsonWebResponse.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebToken, authorizationGrant.getUser());
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
         }
 
-        return jsonWebToken.toString();
+        return jsonWebResponse.toString();
     }
 
     public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException {

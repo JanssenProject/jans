@@ -18,14 +18,14 @@ import org.xdi.oxauth.model.jwt.JwtHeader;
  *
  * @author Yuriy Movchan Date: 06/30/2015
  */
-public class JsonWebReposne implements Serializable {
+public class JsonWebResponse implements Serializable {
 
 	private static final long serialVersionUID = -4141298937204111173L;
 
 	protected JwtHeader header;
 	protected JwtClaims claims;
 	
-	public JsonWebReposne() {
+	public JsonWebResponse() {
         this.header = new JwtHeader();
         this.claims = new JwtClaims();
 	}
