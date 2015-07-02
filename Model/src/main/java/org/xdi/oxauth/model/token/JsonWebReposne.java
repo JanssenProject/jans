@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.token;
 
 import java.io.Serializable;
 
+import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 
@@ -17,14 +18,14 @@ import org.xdi.oxauth.model.jwt.JwtHeader;
  *
  * @author Yuriy Movchan Date: 06/30/2015
  */
-public class JsonWebToken implements Serializable {
+public class JsonWebReposne implements Serializable {
 
 	private static final long serialVersionUID = -4141298937204111173L;
 
 	protected JwtHeader header;
 	protected JwtClaims claims;
 	
-	public JsonWebToken() {
+	public JsonWebReposne() {
         this.header = new JwtHeader();
         this.claims = new JwtClaims();
 	}
@@ -43,6 +44,17 @@ public class JsonWebToken implements Serializable {
 
 	public void setClaims(JwtClaims claims) {
 		this.claims = claims;
+	}
+	
+	@Override
+	public String toString() {
+		try {
+			return claims.toJsobString();
+		} catch (InvalidJwtException ex) {
+			ex.printStackTrace();
+		}
+
+		return "";
 	}
 
 }
