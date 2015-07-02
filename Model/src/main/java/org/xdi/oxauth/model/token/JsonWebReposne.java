@@ -49,7 +49,7 @@ public class JsonWebReposne implements Serializable {
 	@Override
 	public String toString() {
 		try {
-			return claims.toJsobString();
+			return claims.toJsonString();
 		} catch (InvalidJwtException ex) {
 			ex.printStackTrace();
 		}
