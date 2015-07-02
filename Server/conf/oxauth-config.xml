@@ -245,7 +245,7 @@
     Currently JOIN is the only supported value, means joining all scopes of trust list.-->
     <federation-scope-policy>JOIN</federation-scope-policy>
     <federation-signing-alg>RS512</federation-signing-alg>
-    <federation-signing-kid>1</federation-signing-kid>
+    <federation-signing-kid>6898cff9-4f92-4b58-b37c-2a2b6779b0b3</federation-signing-kid>
 
     <!-- Dynamic registration custom stuff -->
     <dynamic-registration-scopes-param-enabled>true</dynamic-registration-scopes-param-enabled>
