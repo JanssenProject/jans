@@ -41,7 +41,9 @@ import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
+import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.token.JsonWebReposne;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
@@ -317,8 +319,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
+        List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+        		dynamicScopes.add(scope.getDisplayName());
+        		continue;
+        	}
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -372,6 +379,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
         jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+        }
+
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
@@ -403,60 +414,85 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     /**
      * Builds a JSon String with the response parameters.
      */
-    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws JSONException {
-        JSONObject jsonObj = new JSONObject();
+    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws JSONException, InvalidClaimException {
+        JsonWebReposne jsonWebToken = new JsonWebReposne(); 
 
-        try {
-            for (String scopeName : scopes) {
-                Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        List<String> dynamicScopes = new ArrayList<String>();
+        for (String scopeName : scopes) {
+        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+        	if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+        		dynamicScopes.add(scope.getDisplayName());
+        		continue;
+        	}
 
-                Map<String, Object> claims = getClaims(user, scope);
+            Map<String, Object> claims = getClaims(user, scope);
 
-                if (scope.getIsOxAuthGroupClaims()) {
-                    JSONObject jsonObjGroupClaim = new JSONObject();
+            if (scope.getIsOxAuthGroupClaims()) {
+                JwtSubClaimObject groupClaim = new JwtSubClaimObject();
+                for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
 
-                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        jsonObjGroupClaim.put(key, value);
+                    if (value instanceof List) {
+                    	groupClaim.setClaim(key, (List<String>) value);
+                    } else {
+                    	groupClaim.setClaim(key, (String) value);
                     }
+                }
 
-                    jsonObj.put(scope.getDisplayName(), jsonObjGroupClaim);
-                } else {
-                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        jsonObj.put(key, value);
+                jsonWebToken.getClaims().setClaim(scope.getDisplayName(), groupClaim);
+            } else {
+                for (Map.Entry<String, Object> entry : claims.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    if (value instanceof List) {
+                    	jsonWebToken.getClaims().setClaim(key, (List<String>) value);
+                    } else {
+                    	jsonWebToken.getClaims().setClaim(key, (String) value);
                     }
                 }
             }
+        }
 
-            if (authorizationGrant.getJwtAuthorizationRequest() != null
-                    && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
-                for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
-                    boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
+        if (authorizationGrant.getJwtAuthorizationRequest() != null
+                && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
+            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
+                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-                    if (gluuAttribute != null) {
-                        String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                if (gluuAttribute != null) {
+                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
 
-                        Object attribute = user.getAttribute(ldapClaimName, optional);
-                        if (attribute != null) {
-                            jsonObj.put(claim.getName(), attribute);
+                    Object attribute = user.getAttribute(ldapClaimName, optional);
+                    if (attribute != null) {
+                        if (attribute instanceof JSONArray) {
+                            JSONArray jsonArray = (JSONArray) attribute;
+                            List<String> values = new ArrayList<String>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String value = jsonArray.optString(i);
+                                if (value != null) {
+                                    values.add(value);
+                                }
+                            }
+                            jsonWebToken.getClaims().setClaim(claim.getName(), values);
+                        } else {
+                            String value = (String) attribute;
+                            jsonWebToken.getClaims().setClaim(claim.getName(), value);
                         }
                     }
                 }
             }
-
-            //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-            jsonObj.put(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
         }
 
-        return jsonObj.toString(4).replace("\\/", "/");
+        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
+        jsonWebToken.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
+
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebToken, authorizationGrant.getUser());
+        }
+
+        return jsonWebToken.toString();
     }
 
     public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException {
@@ -468,20 +504,35 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 String claimName = gluuAttribute.getOxAuthClaimName();
                 String ldapName = gluuAttribute.getGluuLdapAttributeName();
-                Object attributeValue = null;
+                Object attribute = null;
 
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
-                        attributeValue = user.getUserId();
+                    	attribute = user.getUserId();
                     } else {
-                        attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        attribute = user.getAttribute(gluuAttribute.getName(), true);
                     }
 
-                    claims.put(claimName, attributeValue);
+                    if (attribute != null) {
+                        if (attribute instanceof JSONArray) {
+                            JSONArray jsonArray = (JSONArray) attribute;
+                            List<String> values = new ArrayList<String>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String value = jsonArray.optString(i);
+                                if (value != null) {
+                                    values.add(value);
+                                }
+                            }
+                            claims.put(claimName, values);
+                        } else {
+                            claims.put(claimName, attribute);
+                        }
+                    }
                 }
             }
         }
 
         return claims;
     }
+
 }

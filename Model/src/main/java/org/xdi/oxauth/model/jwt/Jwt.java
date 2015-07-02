@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.jwt;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.token.JsonWebToken;
+import org.xdi.oxauth.model.token.JsonWebReposne;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.token.JsonWebToken;
  *
  * @author Javier Rojas Blum Date: 11.09.2012
  */
-public class Jwt extends JsonWebToken {
+public class Jwt extends JsonWebReposne {
 
     private String encodedHeader;
     private String encodedClaims;
