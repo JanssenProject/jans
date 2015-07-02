@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.AssertJUnit.assertNull;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -74,12 +75,15 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
+        assertNull(response2.getClaim("org_name"));
+        assertNull(response2.getClaim("work_phone"));
     }
+
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
     public void requestUserInfoDynamicScopesImplicitFlow(final String userId, final String userSecret,
                                             final String redirectUris, final String redirectUri) throws Exception {
-        showTitle("requestUserInfoImplicitFlow");
+        showTitle("requestUserInfoDynamicScopesImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.TOKEN,
@@ -159,13 +163,15 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
         assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
+        assertNull(response2.getClaim("org_name"));
+        assertNull(response2.getClaim("work_phone"));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris"})
     @Test
     public void requestUserInfoDynamicScopesPasswordFlow(final String userId, final String userSecret,
                                             final String redirectUris) throws Exception {
-        showTitle("requestUserInfoPasswordFlow");
+        showTitle("requestUserInfoDynamicScopesPasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
 
