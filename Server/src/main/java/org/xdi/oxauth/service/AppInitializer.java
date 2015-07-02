@@ -113,7 +113,8 @@ public class AppInitializer {
 	@Observer("org.jboss.seam.postInitialization")
 	@Asynchronous
     public void postInitialization() {
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList( CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION );
+		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
+				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
 		CustomScriptManager.instance().init(supportedCustomScriptTypes);
         CustomScriptManagerMigrator.instance().migrateOldConfigurations();
 	}

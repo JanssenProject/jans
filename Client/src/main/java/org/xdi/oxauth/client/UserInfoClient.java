@@ -20,6 +20,7 @@ import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

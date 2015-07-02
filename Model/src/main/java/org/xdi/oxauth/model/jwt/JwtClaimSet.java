@@ -211,15 +211,21 @@ public abstract class JwtClaimSet {
 
     public String toBase64JsonObject() throws InvalidJwtException {
         try {
-            JSONObject jsonObject = toJsonObject();
-            String jsonObjectString = jsonObject.toString();
-            jsonObjectString = jsonObjectString.replace("\\/", "/");
+            String jsonObjectString = toJsonString();
             byte[] jsonObjectBytes = jsonObjectString.getBytes(Util.UTF8_STRING_ENCODING);
             return JwtUtil.base64urlencode(jsonObjectBytes);
         } catch (UnsupportedEncodingException e) {
             return null;
         }
     }
+
+    public String toJsonString() throws InvalidJwtException {
+		JSONObject jsonObject = toJsonObject();
+		String jsonObjectString = jsonObject.toString();
+		jsonObjectString = jsonObjectString.replace("\\/", "/");
+
+		return jsonObjectString;
+	}
 
     public Map<String, List<String>> toMap() throws InvalidJwtException {
         Map<String, List<String>> map = new HashMap<String, java.util.List<String>>();
