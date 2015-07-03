@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.model.authorize;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
@@ -44,7 +44,7 @@ public class ScopeChecker {
 
     public Set<String> checkScopesPolicy(Client client, String scope) {
     	log.debug("Checking scopes policy for: " + scope);
-        Set<String> grantedScopes = new CopyOnWriteArraySet<String>();
+        Set<String> grantedScopes = new HashSet<String>();
 
         ScopeService scopeService = ScopeService.instance();
 
