@@ -7,6 +7,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
@@ -41,6 +42,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -98,6 +100,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @In
     private SessionIdService sessionIdService;
+    
+    @In
+    private ScopeChecker scopeChecker;
 
     @In
     private SessionId sessionUser;
@@ -156,7 +161,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
-        List<String> scopes = Util.splittedStringAsList(scope, " ");
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
 
@@ -164,7 +168,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
-
 
 
         try {
@@ -187,6 +190,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
 
                 if (client != null) {
+                	List<String> scopes = new ArrayList<String>();
+                    if (StringHelper.isNotEmpty(scope)) {
+                    	Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+                    	scopes.addAll(grantedScopes);
+                    }
+
                     // Validate redirectUri
                     redirectUri = redirectionUriService.validateRedirectionUri(clientId, redirectUri);
                     boolean validRedirectUri = redirectUri != null;
