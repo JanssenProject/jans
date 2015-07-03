@@ -9,6 +9,7 @@ package org.xdi.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
@@ -199,50 +200,21 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      * @return A space-delimited list of scopes
      */
     @Override
-    public String checkScopesPolicy(String scope) {
-        LOGGER.debug("Checking scopes policy for: " + scope);
+    public String checkScopesPolicy(String requestedScopes) {
+    	this.scopes.clear();
 
-        ScopeService scopeService = ScopeService.instance();
-        scopes.clear();
-
+    	Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
+    	this.scopes.addAll(grantedScopes);
+    	
         final StringBuilder grantedScopesSb = new StringBuilder();
-        final String[] scopesRequested = scope.split(" ");
-        final String[] scopesAllowed = client.getScopes();
+        for (String scope : scopes) {
+            grantedScopesSb.append(" ").append(scope);
 
-        // if federation is enabled, take scopes from federation trust
-        if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
-            LOGGER.trace("Ignore client scopes because federation is enabled (take scopes from trust).");
-            final List<FederationTrust> list = FederationDataService.instance().getTrustByClient(client, FederationTrustStatus.ACTIVE);
-            final List<String> allScopes = FederationDataService.getScopes(list);
-            LOGGER.trace("Take scopes from federation trust list: " + list);
-            for (String dn : allScopes) {
-                final Scope scopeByDn = scopeService.getScopeByDnSilently(dn);
-                if (scopeByDn != null) {
-                    final String displayName = scopeByDn.getDisplayName();
-                    scopes.add(displayName);
-                    grantedScopesSb.append(" ").append(displayName);
-                }
-            }
-        } else {
-            for (String scopeRequested : scopesRequested) {
-                if (StringUtils.isNotBlank(scopeRequested)) {
-                    for (String scopeAllowedDn : scopesAllowed) {
-                        Scope scopeAllowed = scopeService.getScopeByDnSilently(scopeAllowedDn);
-                        if (scopeAllowed != null) {
-                            String scopeAllowedName = scopeAllowed.getDisplayName();
-                            if (scopeRequested.equals(scopeAllowedName)) {
-                                scopes.add(scopeRequested);
-                                grantedScopesSb.append(" ").append(scopeRequested);
-                            }
-                        }
-                    }
-                }
-            }
         }
 
-        final String grantedScopes = grantedScopesSb.toString().trim();
-        LOGGER.debug("Granted scopes: " + grantedScopes);
-        return grantedScopes;
+        final String grantedScopesSt = grantedScopesSb.toString().trim();
+
+    	return grantedScopesSt;
     }
 
     @Override
