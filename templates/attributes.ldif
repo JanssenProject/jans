@@ -691,6 +691,7 @@ gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuLdapAttributeName: mobile
 gluuStatus: active
+oxAuthClaimName: phone_mobile_number
 inum: %(inumOrg)s!0005!6DA6
 objectClass: top
 objectClass: gluuAttribute
