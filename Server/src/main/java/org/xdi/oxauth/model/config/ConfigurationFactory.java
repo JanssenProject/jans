@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.config;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
@@ -66,14 +67,16 @@ public class ConfigurationFactory {
 
     private static final String CONFIG_RELOAD_MARKER_FILE_PATH = DIR + "oxauth.config.reload";
 
-    private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
-    public static final String ERRORS_FILE_PATH = DIR + "oxauth-errors.json";
-    public static final String STATIC_CONF_FILE_PATH = DIR + "oxauth-static-conf.json";
-    public static final String ID_GEN_SCRIPT_FILE_PATH = DIR + "oxauth-id-gen.py";
-    public static final String WEB_KEYS_FILE = "oxauth-web-keys.json";
-    public static String webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE;
+    private static final String CONF_DIR = confDir();
+
+    private static final String CONFIG_FILE_PATH = CONF_DIR + "oxauth-config.xml";
+
+    public static final String ERRORS_FILE_PATH = CONF_DIR + "oxauth-errors.json";
+    public static final String STATIC_CONF_FILE_PATH = CONF_DIR + "oxauth-static-conf.json";
+
+    public static String webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + "oxauth-web-keys.json";
 
     public static final String CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE = DIR + "salt";
 
@@ -91,6 +94,14 @@ public class ConfigurationFactory {
     private long errorsFileLastModifiedTime = -1;
     private long staticConfFileLastModifiedTime = -1;
     private long webkeysFileLastModifiedTime = -1;
+
+    private static String confDir() {
+        final String confDir = getLdapConfiguration().getString("confDir");
+        if (StringUtils.isNotBlank(confDir)) {
+            return confDir;
+        }
+        return DIR;
+    }
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
