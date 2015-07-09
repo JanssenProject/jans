@@ -13,6 +13,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.io.FileUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
@@ -123,9 +124,18 @@ public class ConfigurationFactory {
     		return;
     	}
     	
-    	File  file = new File(m_conf.getConfigurationReloadTrigger());
-    	if (file.exists()) {
-    		reoadConfigurationImpl();
+    	String configurationReloadTrigger = m_conf.getConfigurationReloadTrigger();
+    	File  file = new File(configurationReloadTrigger);
+    	if (file.exists() && file.canWrite()) {
+    		try {
+    			reoadConfigurationImpl();
+    		} finally {
+    			boolean removeResult = FileUtils.deleteQuietly(file);
+    			
+    			if (!removeResult) {
+    				log.error("Failed to remove configuration reload trigger file: '{0}'", configurationReloadTrigger);
+    			}
+    		}
     	}
 	}
 
