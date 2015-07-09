@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import org.apache.commons.io.FileUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
@@ -34,7 +26,12 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -68,6 +65,7 @@ public class ConfigurationFactory {
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
     private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
+    private static final String CONFIG_RELOAD_MARKER_FILE_PATH = DIR + "oxauth.config.reload";
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
     public static final String ERRORS_FILE_PATH = DIR + "oxauth-errors.json";
@@ -88,14 +86,14 @@ public class ConfigurationFactory {
     private Log log;
 
     private AtomicBoolean isActive;
-	private long lastFinishedTime;
+	private long fileLastModifiedTime = -1;
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
 		this.isActive = new AtomicBoolean(false);
-		this.lastFinishedTime = System.currentTimeMillis();
 
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 30 * 1000L, DEFAULT_INTERVAL * 1000L));
+        final long delayBeforeFirstRun = 60 * 1000L;
+        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(delayBeforeFirstRun, DEFAULT_INTERVAL * 1000L));
     }
 
 	@Observer(EVENT_TYPE)
@@ -115,33 +113,22 @@ public class ConfigurationFactory {
 			log.error("Exception happened while reloading application configuration", ex);
 		} finally {
 			this.isActive.set(false);
-			this.lastFinishedTime = System.currentTimeMillis();
 		}
 	}
 
     private void reloadConfiguration() {
-    	if ((m_conf == null) || StringHelper.isEmpty(m_conf.getConfigurationReloadTrigger())) {
-    		return;
-    	}
-    	
-    	String configurationReloadTrigger = m_conf.getConfigurationReloadTrigger();
-    	File  file = new File(configurationReloadTrigger);
-    	if (file.exists() && file.canWrite()) {
-    		try {
-    			reoadConfigurationImpl();
-    		} finally {
-    			boolean removeResult = FileUtils.deleteQuietly(file);
-    			
-    			if (!removeResult) {
-    				log.error("Failed to remove configuration reload trigger file: '{0}'", configurationReloadTrigger);
-    			}
-    		}
-    	}
-	}
+        File reloadMarker = new File(CONFIG_RELOAD_MARKER_FILE_PATH);
+        File file = new File(CONFIG_FILE_PATH);
+        if (reloadMarker.exists() && file.exists()) {
+            final long lastModified = file.lastModified();
+            if (lastModified > fileLastModifiedTime) { // reload configuration only if it was modified
 
-	private void reoadConfigurationImpl() {
-		log.info("Stating configuration reload from properties files");
-	}
+                log.info("Starting configuration reload from files");
+                reloadFromFileAndPersistToLdap(ServerUtil.getLdapManager());
+                fileLastModifiedTime = lastModified;
+            }
+        }
+    }
 
 	private static class LdapHolder {
         private static final FileConfiguration LDAP_CONF = createLdapConfiguration();
@@ -238,16 +225,8 @@ public class ConfigurationFactory {
             if (p_recoverFromFiles) {
                 LOG.info("Unable to find configuration in LDAP, try to create configuration entry in LDAP... ");
                 if (getLdapConfiguration().getBoolean("createLdapConfigurationEntryIfNotExist")) {
-                    createFromFile();
-                    final Conf conf = asConf();
-                    if (conf != null) {
-                        try {
-                            ldapManager.persist(conf);
-                            LOG.info("Configuration entry is created in LDAP.");
-                            return true;
-                        } catch (Exception ex) {
-                            LOG.error(e.getMessage(), ex);
-                        }
+                    if (reloadFromFileAndPersistToLdap(ldapManager)) {
+                        return true;
                     }
                 }
             }
@@ -255,6 +234,21 @@ public class ConfigurationFactory {
             LOG.error(e.getMessage(), e);
         }
 
+        return false;
+    }
+
+    private static boolean reloadFromFileAndPersistToLdap(LdapEntryManager ldapManager) {
+        createFromFile();
+        final Conf conf = asConf();
+        if (conf != null) {
+            try {
+                ldapManager.persist(conf);
+                LOG.info("Configuration entry is created in LDAP.");
+                return true;
+            } catch (Exception ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        }
         return false;
     }
 
