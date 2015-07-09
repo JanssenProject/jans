@@ -6,12 +6,25 @@
 
 package org.xdi.oxauth.model.config;
 
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.async.Asynchronous;
+import org.jboss.seam.async.TimerSchedule;
+import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
@@ -20,11 +33,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,9 +43,13 @@ import java.io.File;
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
 @AutoCreate
+@Startup
 public class ConfigurationFactory {
 
     private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
+
+    private final static String EVENT_TYPE = "ConfigurationFactoryTimerEvent";
+    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
     static {
         if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null )) {
@@ -70,7 +83,57 @@ public class ConfigurationFactory {
     private volatile StaticConf m_staticConf;
     private volatile JSONWebKeySet m_jwks;
 
-    private static class LdapHolder {
+    @Logger
+    private Log log;
+
+    private AtomicBoolean isActive;
+	private long lastFinishedTime;
+
+    @Observer("org.jboss.seam.postInitialization")
+    public void initReloadTimer() {
+		this.isActive = new AtomicBoolean(false);
+		this.lastFinishedTime = System.currentTimeMillis();
+
+		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 30 * 1000L, DEFAULT_INTERVAL * 1000L));
+    }
+
+	@Observer(EVENT_TYPE)
+	@Asynchronous
+	public void reloadConfigurationTimerEvent() {
+		if (this.isActive.get()) {
+			return;
+		}
+
+		if (!this.isActive.compareAndSet(false, true)) {
+			return;
+		}
+
+		try {
+			reloadConfiguration();
+		} catch (Throwable ex) {
+			log.error("Exception happened while reloading application configuration", ex);
+		} finally {
+			this.isActive.set(false);
+			this.lastFinishedTime = System.currentTimeMillis();
+		}
+	}
+
+    private void reloadConfiguration() {
+    	if ((m_conf == null) || StringHelper.isEmpty(m_conf.getConfigurationReloadTrigger())) {
+    		return;
+    	}
+    	
+    	File  file = new File(m_conf.getConfigurationReloadTrigger());
+    	if (file.exists()) {
+    		reoadConfigurationImpl();
+    	}
+	}
+
+	private void reoadConfigurationImpl() {
+		log.info("Stating configuration reload from properties files");
+	}
+
+	private static class LdapHolder {
         private static final FileConfiguration LDAP_CONF = createLdapConfiguration();
 
         private static FileConfiguration createLdapConfiguration() {

@@ -120,6 +120,8 @@ public class Configuration {
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
+    
+    private String configurationReloadTrigger;
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
@@ -1066,6 +1068,15 @@ public class Configuration {
 
     public void setImgLocation(String imgLocation) {
         this.imgLocation = imgLocation;
+    }
+
+    @XmlElement(name = "configuration-reload-trigger")
+    public String getConfigurationReloadTrigger() {
+        return configurationReloadTrigger;
+    }
+
+    public void setConfigurationReloadTrigger(String configurationReloadTrigger) {
+        this.configurationReloadTrigger = configurationReloadTrigger;
     }
 
 }
