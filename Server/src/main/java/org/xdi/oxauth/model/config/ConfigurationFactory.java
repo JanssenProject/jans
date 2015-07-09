@@ -50,7 +50,7 @@ public class ConfigurationFactory {
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
     static {
-        if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null )) {
+        if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
             BASE_DIR = System.getProperty("catalina.home");
@@ -87,38 +87,38 @@ public class ConfigurationFactory {
     private Log log;
 
     private AtomicBoolean isActive;
-	private long confFileLastModifiedTime = -1;
-	private long errorsFileLastModifiedTime = -1;
-	private long staticConfFileLastModifiedTime = -1;
-	private long webkeysFileLastModifiedTime = -1;
+    private long confFileLastModifiedTime = -1;
+    private long errorsFileLastModifiedTime = -1;
+    private long staticConfFileLastModifiedTime = -1;
+    private long webkeysFileLastModifiedTime = -1;
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
-		this.isActive = new AtomicBoolean(false);
+        this.isActive = new AtomicBoolean(false);
 
         final long delayBeforeFirstRun = 60 * 1000L;
         Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(delayBeforeFirstRun, DEFAULT_INTERVAL * 1000L));
     }
 
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void reloadConfigurationTimerEvent() {
-		if (this.isActive.get()) {
-			return;
-		}
+    @Observer(EVENT_TYPE)
+    @Asynchronous
+    public void reloadConfigurationTimerEvent() {
+        if (this.isActive.get()) {
+            return;
+        }
 
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
+        if (!this.isActive.compareAndSet(false, true)) {
+            return;
+        }
 
-		try {
-			reloadConfiguration();
-		} catch (Throwable ex) {
-			log.error("Exception happened while reloading application configuration", ex);
-		} finally {
-			this.isActive.set(false);
-		}
-	}
+        try {
+            reloadConfiguration();
+        } catch (Throwable ex) {
+            log.error("Exception happened while reloading application configuration", ex);
+        } finally {
+            this.isActive.set(false);
+        }
+    }
 
     private void reloadConfiguration() {
         File reloadMarker = new File(CONFIG_RELOAD_MARKER_FILE_PATH);
@@ -135,7 +135,6 @@ public class ConfigurationFactory {
             if (configFile.exists()) {
                 final long lastModified = configFile.lastModified();
                 if (lastModified > confFileLastModifiedTime) { // reload configuration only if it was modified
-                    log.info("Starting configuration reload from files");
                     reloadConfFromFile();
                     confFileLastModifiedTime = lastModified;
                     isAnyChanged = true;
@@ -175,7 +174,7 @@ public class ConfigurationFactory {
         }
     }
 
-	private static class LdapHolder {
+    private static class LdapHolder {
         private static final FileConfiguration LDAP_CONF = createLdapConfiguration();
 
         private static FileConfiguration createLdapConfiguration() {
@@ -229,37 +228,41 @@ public class ConfigurationFactory {
     private static void reloadWebkeyFromFile() {
         final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
         if (webKeysFromFile != null) {
+            LOG.info("Reloaded web keys from file: " + webKeysFilePath);
             INSTANCE.setKeyValueList(webKeysFromFile);
         } else {
-            LOG.error("Failed to load web keys configuration from file: {0}. ", webKeysFilePath);
+            LOG.error("Failed to load web keys configuration from file: " + webKeysFilePath);
         }
     }
 
     private static void reloadStaticConfFromFile() {
         final StaticConf staticConfFromFile = loadStaticConfFromFile();
         if (staticConfFromFile != null) {
+            LOG.info("Reloaded static conf from file: " + STATIC_CONF_FILE_PATH);
             INSTANCE.setStaticConf(staticConfFromFile);
         } else {
-            LOG.error("Failed to load static configuration from file: {0}. ", STATIC_CONF_FILE_PATH);
+            LOG.error("Failed to load static configuration from file: " + STATIC_CONF_FILE_PATH);
         }
     }
 
     private static void reloadErrorsFromFile() {
         final ErrorMessages errorsFromFile = loadErrorsFromFile();
         if (errorsFromFile != null) {
+            LOG.info("Reloaded errors from file: " + ERRORS_FILE_PATH);
             final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
             f.setMessages(errorsFromFile);
         } else {
-            LOG.error("Failed to load errors from file: {0}. ", ERRORS_FILE_PATH);
+            LOG.error("Failed to load errors from file: " + ERRORS_FILE_PATH);
         }
     }
 
     private static void reloadConfFromFile() {
         final Configuration configFromFile = loadConfFromFile();
         if (configFromFile != null) {
+            LOG.info("Reloaded configuration from file: " + CONFIG_FILE_PATH);
             INSTANCE.setConf(configFromFile);
         } else {
-            LOG.error("Failed to load configuration from file: {0}. " + CONFIG_FILE_PATH);
+            LOG.error("Failed to load configuration from file: " + CONFIG_FILE_PATH);
         }
     }
 
@@ -307,7 +310,15 @@ public class ConfigurationFactory {
                 LOG.info("Configuration entry is created in LDAP.");
                 return true;
             } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
+
+                try {
+                    ldapManager.merge(conf);
+                    LOG.info("Configuration entry updated in LDAP.");
+                    return true;
+                } catch (Exception e) {
+                    LOG.error(ex.getMessage(), ex);
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
         return false;
