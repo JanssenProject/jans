@@ -64,8 +64,9 @@ public class ConfigurationFactory {
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
     private static final String CONFIG_RELOAD_MARKER_FILE_PATH = DIR + "oxauth.config.reload";
+
+    private static final String CONFIG_FILE_PATH = DIR + "oxauth-config.xml";
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
     public static final String ERRORS_FILE_PATH = DIR + "oxauth-errors.json";
@@ -86,7 +87,10 @@ public class ConfigurationFactory {
     private Log log;
 
     private AtomicBoolean isActive;
-	private long fileLastModifiedTime = -1;
+	private long confFileLastModifiedTime = -1;
+	private long errorsFileLastModifiedTime = -1;
+	private long staticConfFileLastModifiedTime = -1;
+	private long webkeysFileLastModifiedTime = -1;
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
@@ -118,14 +122,55 @@ public class ConfigurationFactory {
 
     private void reloadConfiguration() {
         File reloadMarker = new File(CONFIG_RELOAD_MARKER_FILE_PATH);
-        File file = new File(CONFIG_FILE_PATH);
-        if (reloadMarker.exists() && file.exists()) {
-            final long lastModified = file.lastModified();
-            if (lastModified > fileLastModifiedTime) { // reload configuration only if it was modified
 
-                log.info("Starting configuration reload from files");
-                reloadFromFileAndPersistToLdap(ServerUtil.getLdapManager());
-                fileLastModifiedTime = lastModified;
+        if (reloadMarker.exists()) {
+
+            boolean isAnyChanged = false;
+
+            File configFile = new File(CONFIG_FILE_PATH);
+            File errorsFile = new File(ERRORS_FILE_PATH);
+            File staticConfFile = new File(STATIC_CONF_FILE_PATH);
+            File webkeysFile = new File(webKeysFilePath);
+
+            if (configFile.exists()) {
+                final long lastModified = configFile.lastModified();
+                if (lastModified > confFileLastModifiedTime) { // reload configuration only if it was modified
+                    log.info("Starting configuration reload from files");
+                    reloadConfFromFile();
+                    confFileLastModifiedTime = lastModified;
+                    isAnyChanged = true;
+                }
+            }
+
+            if (errorsFile.exists()) {
+                final long lastModified = configFile.lastModified();
+                if (lastModified > errorsFileLastModifiedTime) { // reload configuration only if it was modified
+                    reloadErrorsFromFile();
+                    errorsFileLastModifiedTime = lastModified;
+                    isAnyChanged = true;
+                }
+            }
+
+            if (staticConfFile.exists()) {
+                final long lastModified = configFile.lastModified();
+                if (lastModified > staticConfFileLastModifiedTime) { // reload configuration only if it was modified
+                    reloadStaticConfFromFile();
+                    staticConfFileLastModifiedTime = lastModified;
+                    isAnyChanged = true;
+                }
+            }
+
+            if (webkeysFile.exists()) {
+                final long lastModified = configFile.lastModified();
+                if (lastModified > webkeysFileLastModifiedTime) { // reload configuration only if it was modified
+                    reloadWebkeyFromFile();
+                    webkeysFileLastModifiedTime = lastModified;
+                    isAnyChanged = true;
+                }
+            }
+
+            if (isAnyChanged) {
+                persistToLdap(ServerUtil.getLdapManager());
             }
         }
     }
@@ -175,34 +220,46 @@ public class ConfigurationFactory {
     }
 
     private static void createFromFile() {
-        final Configuration configFromFile = loadConfFromFile();
-        final ErrorMessages errorsFromFile = loadErrorsFromFile();
-        final StaticConf staticConfFromFile = loadStaticConfFromFile();
+        reloadConfFromFile();
+        reloadErrorsFromFile();
+        reloadStaticConfFromFile();
+        reloadWebkeyFromFile();
+    }
+
+    private static void reloadWebkeyFromFile() {
         final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
-
-        if (configFromFile != null) {
-            INSTANCE.setConf(configFromFile);
+        if (webKeysFromFile != null) {
+            INSTANCE.setKeyValueList(webKeysFromFile);
         } else {
-            LOG.error("Failed to load configuration from file: {0}. " + CONFIG_FILE_PATH);
+            LOG.error("Failed to load web keys configuration from file: {0}. ", webKeysFilePath);
         }
+    }
 
+    private static void reloadStaticConfFromFile() {
+        final StaticConf staticConfFromFile = loadStaticConfFromFile();
+        if (staticConfFromFile != null) {
+            INSTANCE.setStaticConf(staticConfFromFile);
+        } else {
+            LOG.error("Failed to load static configuration from file: {0}. ", STATIC_CONF_FILE_PATH);
+        }
+    }
+
+    private static void reloadErrorsFromFile() {
+        final ErrorMessages errorsFromFile = loadErrorsFromFile();
         if (errorsFromFile != null) {
             final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
             f.setMessages(errorsFromFile);
         } else {
             LOG.error("Failed to load errors from file: {0}. ", ERRORS_FILE_PATH);
         }
+    }
 
-        if (staticConfFromFile != null) {
-            INSTANCE.setStaticConf(staticConfFromFile);
+    private static void reloadConfFromFile() {
+        final Configuration configFromFile = loadConfFromFile();
+        if (configFromFile != null) {
+            INSTANCE.setConf(configFromFile);
         } else {
-            LOG.error("Failed to load static configuration from file: {0}. ", STATIC_CONF_FILE_PATH);
-        }
-
-        if (webKeysFromFile != null) {
-            INSTANCE.setKeyValueList(webKeysFromFile);
-        } else {
-            LOG.error("Failed to load web keys configuration from file: {0}. ", webKeysFilePath);
+            LOG.error("Failed to load configuration from file: {0}. " + CONFIG_FILE_PATH);
         }
     }
 
@@ -239,6 +296,10 @@ public class ConfigurationFactory {
 
     private static boolean reloadFromFileAndPersistToLdap(LdapEntryManager ldapManager) {
         createFromFile();
+        return persistToLdap(ldapManager);
+    }
+
+    private static boolean persistToLdap(LdapEntryManager ldapManager) {
         final Conf conf = asConf();
         if (conf != null) {
             try {
