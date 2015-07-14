@@ -49,6 +49,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.net.SslDefaultHttpClient;
+import org.xdi.oxauth.model.net.HttpServiceResponse;
 import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
 /**
@@ -136,7 +137,7 @@ public class HttpService implements Serializable {
 		return httpClient;
 	}
 	
-	public HttpResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
+	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
         HttpPost httpPost = new HttpPost(uri);
         if (StringHelper.isNotEmpty(authData)) {
         	httpPost.setHeader("Authorization", "Basic " + authData);
@@ -152,16 +153,16 @@ public class HttpService implements Serializable {
 		httpPost.setEntity(stringEntity);
 		
         try {
-        	return httpClient.execute(httpPost);
+        	HttpResponse httpResponse = httpClient.execute(httpPost);
+
+        	return new HttpServiceResponse(httpPost, httpResponse);
 		} catch (IOException ex) {
 	    	log.error("Failed to execute post request", ex);
-		} finally {
-			httpPost.releaseConnection();
 		}
         
         return null;
 	}
-	public HttpResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
+	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType);
 	}
 
@@ -185,7 +186,7 @@ public class HttpService implements Serializable {
 		return null;
 	}
 
-	public HttpResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
 		HttpGet httpGet = new HttpGet(requestUri);
         
         if (headers != null) {
@@ -195,17 +196,17 @@ public class HttpService implements Serializable {
         }
 
 		try {
-			return httpClient.execute(httpGet);
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+
+			return new HttpServiceResponse(httpGet, httpResponse);
 		} catch (IOException ex) {
 	    	log.error("Failed to execute get request", ex);
-		} finally {
-			httpGet.releaseConnection();
 		}
 
 		return null;
 	}
 
-	public HttpResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
 		return executeGet(httpClient, requestUri, null);
 	}
 
