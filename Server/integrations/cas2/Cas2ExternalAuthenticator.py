@@ -48,7 +48,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         httpService = HttpService.instance();
 
-        http_client = httpService.getHttpsClientDefaulTrustStore();
+        http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();
         http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout);
 
@@ -120,7 +120,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
-            http_client = httpService.getHttpsClientDefaulTrustStore();
+            http_client = httpService.getHttpsClient();
             http_response = httpService.executeGet(http_client, cas_service_request_uri)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
             print "CAS2. Authenticate for step 1. validation_content: " + validation_content
@@ -243,9 +243,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if (step == 1):
             print "CAS2. Prepare for step 1"
-
-            print "CAS2. Prepare for step 1. Store current request parameters in session because CAS don't pass them via service URI"
-            authenticationService.storeRequestParametersInSession()
 
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             parametersMap = HashMap()
