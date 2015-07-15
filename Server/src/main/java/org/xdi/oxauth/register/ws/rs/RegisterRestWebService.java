@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -18,10 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * Provides interface for register REST web services.
@@ -52,6 +54,17 @@ public interface RegisterRestWebService {
             notes = "Registers new client dynamically.",
             response = Response.class
     )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 400, message = "invalid_redirect_uri\n" +
+                    "The value of one or more redirect_uris is invalid. "),
+            @ApiResponse(code = 400, message = "invalid_client_metadata\n" +
+                    "The value of one of the Client Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a Client's Metadata."),
+            @ApiResponse(code = 302, message = "access_denies\n" +
+                    "The authorization server denied the request.")
+
+    })
     Response requestRegister(
             @ApiParam(value = "Request parameters as JSON object with data described by Connect Client Registration Specification. ", required = true)
             String requestParams,
@@ -79,6 +92,16 @@ public interface RegisterRestWebService {
             response = Response.class,
             responseContainer = "JSON"
     )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 400, message = "invalid_redirect_uri\n" +
+                    "The value of one or more redirect_uris is invalid. "),
+            @ApiResponse(code = 400, message = "invalid_client_metadata\n" +
+                    "The value of one of the Client Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a Client's Metadata."),
+            @ApiResponse(code = 302, message = "access_denies\n" +
+                    "The authorization server denied the request.")
+    })
     Response requestClientUpdate(
             @ApiParam(value = "Request parameters as JSON object with data described by Connect Client Registration Specification. ", required = true)
             String requestParams,
@@ -100,11 +123,21 @@ public interface RegisterRestWebService {
     @Path("/register")
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(
-                value = "Reads client info.",
-                notes = "Reads client info.",
-                response = Response.class,
-                responseContainer = "JSON"
-        )
+            value = "Reads client info.",
+            notes = "Reads client info.",
+            response = Response.class,
+            responseContainer = "JSON"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 400, message = "invalid_redirect_uri\n" +
+                    "The value of one or more redirect_uris is invalid. "),
+            @ApiResponse(code = 400, message = "invalid_client_metadata\n" +
+                    "The value of one of the Client Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a Client's Metadata."),
+            @ApiResponse(code = 302, message = "access_denies\n" +
+                    "The authorization server denied the request.")
+    })
     Response requestClientRead(
             @QueryParam("client_id")
             @ApiParam(value = "Client ID that identifies client.", required = true)
