@@ -48,24 +48,28 @@ class PersonAuthentication(PersonAuthenticationType):
 
         httpService = HttpService.instance();
 
-        http_client = httpService.getHttpsClientDefaulTrustStore();
+        http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();
         http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout);
 
         try:
-            http_response = httpService.executeGet(http_client, cas_validation_uri)
+            http_service_response = httpService.executeGet(http_client, cas_validation_uri)
+            http_response = http_service_response.getHttpResponse()
         except:
             print "CAS2. Rest API authenticate isValidAuthenticationMethod. Exception: ", sys.exc_info()[1]
             return False
 
-        if (http_response.getStatusLine().getStatusCode() != 200):
-            print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
+        try:
+            if (http_response.getStatusLine().getStatusCode() != 200):
+                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
+                httpService.consume(http_response)
+                return False
+    
+            validation_response_bytes = httpService.getResponseContent(http_response)
+            validation_response_string = httpService.convertEntityToString(validation_response_bytes)
             httpService.consume(http_response)
-            return False
-
-        validation_response_bytes = httpService.getResponseContent(http_response)
-        validation_response_string = httpService.convertEntityToString(validation_response_bytes)
-        httpService.consume(http_response)
+        finally:
+            http_service_response.closeConnection()
 
         if (validation_response_string == None or validation_response_string.find(cas_validation_pattern) == -1):
             print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid login page from CAS2 server:"
@@ -120,9 +124,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
-            http_client = httpService.getHttpsClientDefaulTrustStore();
-            http_response = httpService.executeGet(http_client, cas_service_request_uri)
-            validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
+            http_client = httpService.getHttpsClient();
+            http_service_response = httpService.executeGet(http_client, cas_service_request_uri)
+            
+            try:
+                validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_service_response.getHttpResponse()))
+            finally:
+                http_service_response.closeConnection()
+
             print "CAS2. Authenticate for step 1. validation_content: " + validation_content
             if StringHelper.isEmpty(validation_content):
                 print "CAS2. Authenticate for step 1. Ticket validation response is invalid"
@@ -243,9 +252,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if (step == 1):
             print "CAS2. Prepare for step 1"
-
-            print "CAS2. Prepare for step 1. Store current request parameters in session because CAS don't pass them via service URI"
-            authenticationService.storeRequestParametersInSession()
 
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             parametersMap = HashMap()
