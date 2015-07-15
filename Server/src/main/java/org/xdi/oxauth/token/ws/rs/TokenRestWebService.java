@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -15,10 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * Provides interface for token REST web services
@@ -38,6 +40,29 @@ public interface TokenRestWebService {
             response = Response.class,
             responseContainer = "JSON"
     )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    " The request is missing a required parameter, includes an unsupported parameter value (other than grant type), repeats a parameter, includes multiple credentials,\n" +
+                    " utilizes more than one mechanism for authenticating the client, or is otherwise malformed."),
+            @ApiResponse(code = 400, message = "invalid_client\n" +
+                    "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported\n" +
+                    "authentication method).  The authorization server MAY return an HTTP 401 (Unauthorized) status code to indicate\n" +
+                    "which HTTP authentication schemes are supported.  If the client attempted to authenticate via the \"Authorization\"\n" +
+                    "request header field, the authorization server MUST respond with an HTTP 401 (Unauthorized) status code and\n" +
+                    "include the \"WWW-Authenticate\" response header field matching the authentication scheme used by the client."),
+            @ApiResponse(code = 400, message = "invalid_grant\n" +
+                    " The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is\n" +
+                    " invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client."),
+            @ApiResponse(code = 400, message = "unauthorized_client\n" +
+                    "The authenticated client is not authorized to use this authorization grant type."),
+            @ApiResponse(code = 400, message = "unsupported_grant_type\n" +
+                    "The authorization grant type is not supported by the authorization server."),
+            @ApiResponse(code = 400, message = " invalid_scope\n" +
+                    "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner."),
+            @ApiResponse(code = 400, message = "invalid_client"),
+            @ApiResponse(code = 400, message = "invalid_client")
+    })
     Response requestAccessToken(
             @FormParam("grant_type")
             @ApiParam(value = "Grant type value, one of these: authorization_code, implicit, password, client_credentials, refresh_token as described in OAuth 2.0 [RFC6749]", required = true)
