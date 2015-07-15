@@ -59,9 +59,7 @@ public interface TokenRestWebService {
             @ApiResponse(code = 400, message = "unsupported_grant_type\n" +
                     "The authorization grant type is not supported by the authorization server."),
             @ApiResponse(code = 400, message = " invalid_scope\n" +
-                    "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner."),
-            @ApiResponse(code = 400, message = "invalid_client"),
-            @ApiResponse(code = 400, message = "invalid_client")
+                    "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner.")
     })
     Response requestAccessToken(
             @FormParam("grant_type")
