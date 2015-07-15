@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.userinfo.ws.rs;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -15,10 +21,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * Provides interface for User Info REST web services
@@ -37,6 +39,15 @@ public interface UserInfoRestWebService {
             response = Response.class,
             responseContainer = "JSON"
     )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 401, message = "invalid_token\n" +
+                    "The access token provided is expired, revoked, malformed, or invalid for other reasons.  The resource SHOULD respond with the HTTP 401 (Unauthorized) status code.  The client MAY request a new access token and retry the protected resource request."),
+            @ApiResponse(code = 403, message = "insufficient_scope\n" +
+                    "The request requires higher privileges than provided by the access token.  The resource server SHOULD respond with the HTTP 403 (Forbidden) status code and MAY include the \"scope\"\n" +
+                    " attribute with the scope necessary to access the protected resource.")
+    })
     Response requestUserInfoGet(
             @QueryParam("access_token")
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
@@ -52,6 +63,15 @@ public interface UserInfoRestWebService {
             response = Response.class,
             responseContainer = "JSON"
     )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 401, message = "invalid_token\n" +
+                    "The access token provided is expired, revoked, malformed, or invalid for other reasons.  The resource SHOULD respond with the HTTP 401 (Unauthorized) status code.  The client MAY request a new access token and retry the protected resource request."),
+            @ApiResponse(code = 403, message = "insufficient_scope\n" +
+                    "The request requires higher privileges than provided by the access token.  The resource server SHOULD respond with the HTTP 403 (Forbidden) status code and MAY include the \"scope\"\n" +
+                    " attribute with the scope necessary to access the protected resource.")
+    })
     Response requestUserInfoPost(
             @FormParam("access_token")
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
