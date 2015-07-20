@@ -11,6 +11,7 @@ import com.unboundid.ldap.sdk.*;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.util.StaticUtils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
@@ -48,6 +49,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class, LdapEnum.class };
 	private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class, double.class,
 			Double.class };
+	private static final String[] NO_STRINGS = new String[0];
 
 	private transient OperationsFacade ldapOperationService;
 	private transient List<DeleteNotifier> subscribers;
@@ -430,7 +432,21 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 		List<AttributeData> result = new ArrayList<AttributeData>();
 		for (Attribute attribute : entry.getAttributes()) {
-			AttributeData tmpAttribute = new AttributeData(attribute.getName(), attribute.getValues());
+			String[] attributeValueStrings = NO_STRINGS;
+
+			if (attribute.needsBase64Encoding()) {
+				byte[][] attributeValues = attribute.getValueByteArrays();
+				if (attributeValues != null) {
+					attributeValueStrings = new String[attributeValues.length];
+					for (int i = 0; i < attributeValues.length; i++) {
+						attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
+					}
+				}
+			} else {
+				attributeValueStrings = attribute.getValues();
+			}
+			
+			AttributeData tmpAttribute = new AttributeData(attribute.getName(), attributeValueStrings);
 			result.add(tmpAttribute);
 		}
 
