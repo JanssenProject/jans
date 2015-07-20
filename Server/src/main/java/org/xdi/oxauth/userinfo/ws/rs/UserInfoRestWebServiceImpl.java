@@ -220,7 +220,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapName = gluuAttribute.getName();
                     String attributeValue = null;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
@@ -243,7 +243,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapClaimName = gluuAttribute.getName();
                     Object attribute = user.getAttribute(ldapClaimName, optional);
                     if (attribute != null) {
                         if (attribute instanceof JSONArray) {
@@ -332,7 +332,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapName = gluuAttribute.getName();
                     String attributeValue = null;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
@@ -354,7 +354,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapClaimName = gluuAttribute.getName();
 
                     Object attribute = user.getAttribute(ldapClaimName, optional);
                     if (attribute != null) {
@@ -463,7 +463,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapClaimName = gluuAttribute.getName();
 
                     Object attribute = user.getAttribute(ldapClaimName, optional);
                     if (attribute != null) {
@@ -504,7 +504,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                 String claimName = gluuAttribute.getOxAuthClaimName();
-                String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                String ldapName = gluuAttribute.getName();
                 Object attribute = null;
 
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
