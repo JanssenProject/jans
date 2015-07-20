@@ -85,7 +85,7 @@ public class AuthorizationContext extends ExternalScriptContext {
         GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(p_claimName);
 
         if (gluuAttribute != null) {
-            String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+            String ldapClaimName = gluuAttribute.getName();
             return getEntryAttributeValue(getGrant().getUserDn(), ldapClaimName);
         }
 
