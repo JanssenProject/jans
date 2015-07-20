@@ -85,9 +85,6 @@ public class GluuAttribute extends Entry implements Serializable {
     @LdapAttribute(name = "gluuAttributeUsageType")
     private GluuAttributeUsageType[] usageType;
 
-    @LdapAttribute(name = "gluuLdapAttributeName")
-    private String gluuLdapAttributeName;
-
     @LdapAttribute(name = "oxAuthClaimName")
     private String oxAuthClaimName;
 
@@ -242,14 +239,6 @@ public class GluuAttribute extends Entry implements Serializable {
 
 	public void setUsageType(GluuAttributeUsageType[] usageType) {
 		this.usageType = usageType;
-	}
-
-	public String getGluuLdapAttributeName() {
-		return gluuLdapAttributeName;
-	}
-
-	public void setGluuLdapAttributeName(String gluuLdapAttributeName) {
-		this.gluuLdapAttributeName = gluuLdapAttributeName;
 	}
 
 	public String getOxAuthClaimName() {
