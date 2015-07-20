@@ -97,6 +97,12 @@
                 <version>1.4.2</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>1.4.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>net.sf.ehcache</groupId>
                 <artifactId>ehcache-core</artifactId>
                 <version>2.4.3</version>
