@@ -152,7 +152,7 @@ public class IdTokenFactory {
                         GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
-                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                        String ldapName = gluuAttribute.getName();
                         String attributeValue = null;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
@@ -172,7 +172,7 @@ public class IdTokenFactory {
                         GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
-                        String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                        String ldapName = gluuAttribute.getName();
                         String attributeValue = null;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
@@ -195,7 +195,7 @@ public class IdTokenFactory {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapClaimName = gluuAttribute.getName();
                     Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
                     if (attribute != null) {
                         if (attribute instanceof JSONArray) {
@@ -319,7 +319,7 @@ public class IdTokenFactory {
                     GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapName = gluuAttribute.getName();
                     String attributeValue = null;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
@@ -342,7 +342,7 @@ public class IdTokenFactory {
                 GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
                 if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
+                    String ldapClaimName = gluuAttribute.getName();
                     Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional);
                     if (attribute != null) {
                         if (attribute instanceof JSONArray) {
