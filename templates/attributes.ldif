@@ -39,7 +39,6 @@ displayName: First Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: givenName
-gluuAttributeName: given_name
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
@@ -496,7 +495,6 @@ displayName: Display Name
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: displayName
-gluuAttributeName: name
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
