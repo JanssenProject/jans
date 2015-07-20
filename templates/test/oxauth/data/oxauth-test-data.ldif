@@ -11,7 +11,6 @@ gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
-gluuLdapAttributeName: oxAuthAppType
 oxAuthClaimName: oxAuthAppType
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CC
@@ -27,7 +26,6 @@ gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
-gluuLdapAttributeName: oxAuthIdTokenSignedResponseAlg
 oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CD
@@ -43,7 +41,6 @@ gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
-gluuLdapAttributeName: oxAuthRedirectURI
 oxAuthClaimName: oxAuthRedirectURI
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CE
@@ -59,7 +56,6 @@ gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
-gluuLdapAttributeName: oxAuthScope
 oxAuthClaimName: oxAuthScope
 gluuStatus: active
 inum: %(inumOrg)s!0005!18CF

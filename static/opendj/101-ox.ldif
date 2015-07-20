@@ -125,12 +125,6 @@ attributeTypes: ( gluuAttributeName-oid NAME 'gluuAttributeName'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuLdapAttributeName-oid NAME 'gluuLdapAttributeName'
-  DESC 'Used by oxAuth and oxTrust to specify the LDAP attribute of the name.'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( gluuAttributeOrigin-oid NAME 'gluuAttributeOrigin'
   DESC 'Specify the person objectclass associated with the attribute,
   used for display purposes in oxTrust.'
@@ -802,7 +796,7 @@ attributeTypes: ( oxAttributeType-oid NAME 'oxAttributeType'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthClaimName-oid NAME 'oxAuthClaimName'
-  DESC 'Used by oxAuth in conjunction with gluuLdapAttributeName to map claims to attributes in LDAP.'
+  DESC 'Used by oxAuth in conjunction with gluuttributeName to map claims to attributes in LDAP.'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2106,7 +2100,7 @@ objectclasses: ( gluuAttribute-oid NAME 'gluuAttribute' SUP top STRUCTURAL MUST 
   $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName
   $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI
   $ gluuSAML2URI $ gluuStatus $ iname $ inum $ objectClass $ oxAttributeType $ oxMultivaluedAttribute
-  $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuLdapAttributeName $ gluuRegExp $ gluuTooltip )
+  $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuSAMLconfig-oid NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUST objectclass MAY 
  ( description $ displayName $ federationRules $ gluuContainerFederation $ gluuEntityId
