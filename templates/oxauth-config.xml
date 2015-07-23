@@ -304,6 +304,4 @@
     <imgLocation>/oxauth/img</imgLocation>
 -->
 
-    <configuration-reload-trigger>/opt/tomcat/conf/realod_oxauth_config_marker</configuration-reload-trigger>
-
 </configuration>
