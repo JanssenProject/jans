@@ -243,15 +243,15 @@ public class ConfigurationFactory {
     }
 
     public FileConfiguration getLdapConfiguration() {
-        return instance().ldapConfiguration;
+        return ldapConfiguration;
     }
 
     public Configuration getConfiguration() {
-        return instance().m_conf;
+        return m_conf;
     }
 
     public StaticConf getStaticConfiguration() {
-        return instance().m_staticConf;
+        return m_staticConf;
     }
 
     public BaseDnConfiguration getBaseDn() {
@@ -259,7 +259,7 @@ public class ConfigurationFactory {
     }
 
     public JSONWebKeySet getWebKeys() {
-        return instance().m_jwks;
+        return m_jwks;
     }
 
     public void create() {
