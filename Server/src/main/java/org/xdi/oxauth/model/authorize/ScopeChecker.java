@@ -52,7 +52,7 @@ public class ScopeChecker {
         final String[] scopesAllowed = client.getScopes();
 
         // if federation is enabled, take scopes from federation trust
-        if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+        if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
         	log.trace("Ignore client scopes because federation is enabled (take scopes from trust).");
             final List<FederationTrust> list = FederationDataService.instance().getTrustByClient(client, FederationTrustStatus.ACTIVE);
             final List<String> allScopes = FederationDataService.getScopes(list);

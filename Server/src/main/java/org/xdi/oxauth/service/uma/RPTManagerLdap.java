@@ -57,7 +57,7 @@ public class RPTManagerLdap extends AbstractRPTManager {
     public UmaRPT getRPTByCode(String p_code) {
         try {
             final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", p_code));
-            final String baseDn = ConfigurationFactory.getBaseDn().getClients();
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
             final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
@@ -85,7 +85,7 @@ public class RPTManagerLdap extends AbstractRPTManager {
         try {
             final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
             final List<UmaRPT> entries = ldapEntryManager.findEntries(
-                    ConfigurationFactory.getBaseDn().getClients(), UmaRPT.class, filter);
+                    ConfigurationFactory.instance().getBaseDn().getClients(), UmaRPT.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 for (UmaRPT p : entries) {
                     ldapEntryManager.remove(p);

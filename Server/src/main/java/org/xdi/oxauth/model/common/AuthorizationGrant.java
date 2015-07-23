@@ -46,7 +46,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      */
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                               Date authenticationTime) {
-        switch (ConfigurationFactory.getConfiguration().getModeEnum()) {
+        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
             case IN_MEMORY:
                 grant = new AuthorizationGrantInMemory(user, authorizationGrantType, client, authenticationTime);
                 ((AuthorizationGrantInMemory) grant).setParentRef(this);
@@ -56,7 +56,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
                 break;
             default:
                 LOGGER.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.) " + ConfigurationFactory.getConfiguration().getModeEnum());
+                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.) " + ConfigurationFactory.instance().getConfiguration().getModeEnum());
         }
     }
 

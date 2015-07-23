@@ -53,7 +53,7 @@ public class ResourceSetPermissionManagerLdap extends AbstractResourceSetPermiss
     @Override
     public ResourceSetPermission getResourceSetPermissionByTicket(String p_ticket) {
         try {
-            final String baseDn = ConfigurationFactory.getBaseDn().getClients();
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
             final Filter filter = Filter.create(String.format("&(oxTicket=%s)", p_ticket));
             final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(baseDn, ResourceSetPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
@@ -104,7 +104,7 @@ public class ResourceSetPermissionManagerLdap extends AbstractResourceSetPermiss
         try {
             final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
             final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(
-                    ConfigurationFactory.getBaseDn().getClients(), ResourceSetPermission.class, filter);
+                    ConfigurationFactory.instance().getBaseDn().getClients(), ResourceSetPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 for (ResourceSetPermission p : entries) {
                     ldapEntryManager.remove(p);

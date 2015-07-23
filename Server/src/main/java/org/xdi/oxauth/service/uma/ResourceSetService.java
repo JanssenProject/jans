@@ -162,7 +162,7 @@ public class ResourceSetService {
     }
 
     public String getBaseDnForResourceSet() {
-        final String umaBaseDn = ConfigurationFactory.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
+        final String umaBaseDn = ConfigurationFactory.instance().getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resource_sets,%s", umaBaseDn);
     }
 

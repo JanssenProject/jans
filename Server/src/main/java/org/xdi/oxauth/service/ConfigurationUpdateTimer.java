@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 @Name("configurationUpdateTimer")
 @AutoCreate
 @Scope(ScopeType.APPLICATION)
+@Deprecated
 public class ConfigurationUpdateTimer {
 
     private final static String EVENT_TYPE = "ConfigurationUpdateTimerEvent";
@@ -35,15 +36,13 @@ public class ConfigurationUpdateTimer {
 
     @Logger
     private Log log;
-//    @In
-//    private LdapEntryManager ldapEntryManager;
 
     private AtomicBoolean isActive;
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
         this.isActive = new AtomicBoolean(false);
-        long interval = ConfigurationFactory.getConfiguration().getConfigurationUpdateInterval();
+        long interval = ConfigurationFactory.instance().getConfiguration().getConfigurationUpdateInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
@@ -60,7 +59,7 @@ public class ConfigurationUpdateTimer {
 
         if (this.isActive.compareAndSet(false, true)) {
             try {
-                if (ConfigurationFactory.updateFromLdap()) {
+                if (ConfigurationFactory.instance().updateFromLdap()) {
                     log.trace("Configuration updated from LDAP successfully.");
                 } else {
                     log.trace("Failed to update configuration from LDAP successfully.");

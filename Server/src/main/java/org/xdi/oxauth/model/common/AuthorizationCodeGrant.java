@@ -49,7 +49,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
      */
     public AuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
         super(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime);
-        setAuthorizationCode(new AuthorizationCode(ConfigurationFactory.getConfiguration().getAuthorizationCodeLifetime()));
+        setAuthorizationCode(new AuthorizationCode(ConfigurationFactory.instance().getConfiguration().getAuthorizationCodeLifetime()));
     }
 
     /**

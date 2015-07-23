@@ -51,7 +51,7 @@ public class U2fConfigurationWS {
 	@ApiResponses(value = { @ApiResponse(code = 500, message = "Failed to build FIDO U2F configuration json object.") })
 	public Response getConfiguration() {
 		try {
-			final Configuration configuration = ConfigurationFactory.getConfiguration();
+			final Configuration configuration = ConfigurationFactory.instance().getConfiguration();
 			final String baseEndpointUri = configuration.getBaseEndpoint();
 
 			final U2fConfiguration conf = new U2fConfiguration();

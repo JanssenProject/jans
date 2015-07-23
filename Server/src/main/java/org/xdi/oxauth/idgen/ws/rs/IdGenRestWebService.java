@@ -55,8 +55,8 @@ public class IdGenRestWebService {
 
         public static Response unauthorizedResponse() {
             return Response.status(Response.Status.UNAUTHORIZED).
-                    header("host_id", ConfigurationFactory.getConfiguration().getIssuer()).
-                    header("as_uri", ConfigurationFactory.getConfiguration().getUmaConfigurationEndpoint()).
+                    header("host_id", ConfigurationFactory.instance().getConfiguration().getIssuer()).
+                    header("as_uri", ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint()).
                     build();
         }
 
@@ -159,7 +159,7 @@ public class IdGenRestWebService {
         // to facilitate authorization server configuration data discovery,
         // including discovery of the endpoint where the client can request an RPT (Section 3.4.1).
         log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
-                ConfigurationFactory.getConfiguration().getUmaConfigurationEndpoint());
+                ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint());
 
         return new Pair<Boolean, Response>(false, UnauthorizedResponseHolder.UNAUTHORIZED_RESPONSE);
     }

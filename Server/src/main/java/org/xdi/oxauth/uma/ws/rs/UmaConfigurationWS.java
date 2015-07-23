@@ -57,7 +57,7 @@ public class UmaConfigurationWS {
     })
     public Response getConfiguration() {
         try {
-            final Configuration configuration = ConfigurationFactory.getConfiguration();
+            final Configuration configuration = ConfigurationFactory.instance().getConfiguration();
             final String baseEndpointUri = configuration.getBaseEndpoint();
 
             final UmaConfiguration c = new UmaConfiguration();

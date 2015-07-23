@@ -62,7 +62,7 @@ public class WebFinger extends HttpServlet {
                     JSONArray linksJsonArray = new JSONArray();
                     JSONObject linkJsonObject = new JSONObject();
                     linkJsonObject.put(REL, REL_VALUE);
-                    linkJsonObject.put(HREF, ConfigurationFactory.getConfiguration().getIssuer());
+                    linkJsonObject.put(HREF, ConfigurationFactory.instance().getConfiguration().getIssuer());
 
                     linksJsonArray.put(linkJsonObject);
                     jsonObj.put(LINKS, linksJsonArray);

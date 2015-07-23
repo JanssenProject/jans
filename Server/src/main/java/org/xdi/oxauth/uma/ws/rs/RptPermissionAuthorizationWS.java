@@ -122,7 +122,7 @@ public class RptPermissionAuthorizationWS {
         // Validate resource set permission
         umaValidationService.validateResourceSetPermission(resourceSetPermission);
 
-        final Boolean federationEnabled = ConfigurationFactory.getConfiguration().getFederationEnabled();
+        final Boolean federationEnabled = ConfigurationFactory.instance().getConfiguration().getFederationEnabled();
         if (federationEnabled != null && federationEnabled) {
             final Client client = clientService.getClient(rpt.getClientId());
             final List<FederationTrust> trustList = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
