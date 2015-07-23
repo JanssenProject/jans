@@ -85,7 +85,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         log.debug(
                 "Attempting to request access token: grantType = {0}, code = {1}, redirectUri = {2}, username = {3}, refreshToken = {4}, clientId = {5}, ExtraParams = {6}, isSecure = {7}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(), sec.isSecure());
-        final Mode serverMode = ConfigurationFactory.getConfiguration().getModeEnum();
+        final Mode serverMode = ConfigurationFactory.instance().getConfiguration().getModeEnum();
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
 
@@ -104,7 +104,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     clientService.updatAccessTime(client, false);
                 }
 
-                if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+                if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                     if (!federationDataService.hasAnyActiveTrust(client)) {
                         log.debug("Forbid token issuing. Client is not in any trust relationship however federation is enabled for server. Client id: {0}, redirectUris: {1}",
                                 client.getClientId(), client.getRedirectUris());
@@ -267,7 +267,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         persistentJwt.setLongLivedAccessToken(authorizationGrant.getLongLivedAccessToken());
                         persistentJwt.setIdToken(authorizationGrant.getIdToken());
 
-                        if (ConfigurationFactory.getConfiguration().getModeEnum() == Mode.IN_MEMORY) {
+                        if (ConfigurationFactory.instance().getConfiguration().getModeEnum() == Mode.IN_MEMORY) {
                             userService.saveLongLivedToken(authorizationGrant.getUserId(), persistentJwt);
                         }
 

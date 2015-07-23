@@ -316,7 +316,7 @@ public class SessionIdService {
 }
 
 	private void configureOpbsCookie(SessionId sessionId) {
-		final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+		final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
         FacesContext facesContext = FacesContext.getCurrentInstance();
         if (facesContext != null) {
             Cookie cookie = new Cookie("opbs", sessionId.getId());
@@ -333,7 +333,7 @@ public class SessionIdService {
 		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
-        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+        	final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
 			if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
 	            sessionId.setLastUsedAt(new Date());
 
@@ -360,7 +360,7 @@ public class SessionIdService {
 		List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
 		try {
-        	final int unusedLifetime = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
+        	final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
 			if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
                 if (updateLastUsedAt) {
 	                sessionId.setLastUsedAt(new Date());
@@ -379,7 +379,7 @@ public class SessionIdService {
 
     private static boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
-            final Boolean persistOnPromptNone = ConfigurationFactory.getConfiguration().getSessionIdPersistOnPromptNone();
+            final Boolean persistOnPromptNone = ConfigurationFactory.instance().getConfiguration().getSessionIdPersistOnPromptNone();
             return persistOnPromptNone != null && persistOnPromptNone;
         }
         return true;
@@ -443,7 +443,7 @@ public class SessionIdService {
     }
 
     private static String getBaseDn() {
-        return ConfigurationFactory.getBaseDn().getSessionId();
+        return ConfigurationFactory.instance().getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionId p_sessionId) {
@@ -464,8 +464,8 @@ public class SessionIdService {
     }
 
     public void cleanUpSessions() {
-        final int interval = ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime();
-        final int unauthenticatedInterval = ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime();
+        final int interval = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
+        final int unauthenticatedInterval = ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime();
 
         remove(getUnauthenticatedIdsOlderThan(unauthenticatedInterval));
         remove(getIdsOlderThan(interval));
@@ -499,14 +499,14 @@ public class SessionIdService {
             return false;
         }
 
-        final long sessionInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime());
-        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
+        final long sessionInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime());
+        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
-        if (timeSinceLastAccess > sessionInterval && ConfigurationFactory.getConfiguration().getSessionIdUnusedLifetime() != -1) {
+        if (timeSinceLastAccess > sessionInterval && ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime() != -1) {
             return false;
         }
-        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && ConfigurationFactory.getConfiguration().getSessionIdUnauthenticatedUnusedLifetime() != -1) {
+        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime() != -1) {
             return false;
         }
 

@@ -44,7 +44,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
 
     @Create
     public void init() {
-        final Configuration conf = ConfigurationFactory.getConfiguration();
+        final Configuration conf = ConfigurationFactory.instance().getConfiguration();
         super.init(conf.getAuthenticationFilters(), Boolean.TRUE.equals(conf.getAuthenticationFiltersEnabled()), true);
     }
 

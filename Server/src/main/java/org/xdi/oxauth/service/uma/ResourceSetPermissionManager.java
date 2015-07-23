@@ -39,7 +39,7 @@ public class ResourceSetPermissionManager implements IResourceSetPermissionManag
 
     @Create
     public void init() {
-        switch (ConfigurationFactory.getConfiguration().getModeEnum()) {
+        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
             case IN_MEMORY:
                 manager = new ResourceSetPermissionManagerInMemory();
                 log.info("Created IN-MEMORY UMA resource set manager");

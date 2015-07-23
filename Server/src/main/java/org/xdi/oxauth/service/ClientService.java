@@ -109,7 +109,7 @@ public class ClientService {
 
     public Client getClient(String clientId) {
         if (clientId != null && !clientId.isEmpty()) {
-            if (Boolean.TRUE.equals(ConfigurationFactory.getConfiguration().getClientAuthenticationFiltersEnabled())) {
+            if (Boolean.TRUE.equals(ConfigurationFactory.instance().getConfiguration().getClientAuthenticationFiltersEnabled())) {
                 final String dn = getClientDnByFilters(clientId);
                 if (StringUtils.isNotBlank(dn)) {
                     return getClientByDn(dn);
@@ -138,7 +138,7 @@ public class ClientService {
 	}
 
     public Client getClient(String clientId, String registrationAccessToken) {
-        String baseDN = ConfigurationFactory.getBaseDn().getClients();
+        String baseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
         Client client = new Client();
         client.setDn(baseDN);
@@ -194,7 +194,7 @@ public class ClientService {
 	}
 
     public List<Client> getAllClients(String[] returnAttributes) {
-        String baseDn = ConfigurationFactory.getBaseDn().getClients();
+        String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
 
         List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, returnAttributes, null);
 
@@ -202,7 +202,7 @@ public class ClientService {
 	}
 
     public List<Client> getClientsWithExpirationDate(String[] returnAttributes) {
-        String baseDN = ConfigurationFactory.getBaseDn().getClients();
+        String baseDN = ConfigurationFactory.instance().getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
 
         return ldapEntryManager.findEntries(baseDN, Client.class, filter);

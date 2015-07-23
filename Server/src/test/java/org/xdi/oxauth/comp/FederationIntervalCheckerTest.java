@@ -44,8 +44,8 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
     public void beforeClass() {
         final InumService inumService = ServerUtil.instance(InumService.class);
 
-        final Pair<String, String> pair1 = inumService.generateNewDN(ConfigurationFactory.getBaseDn().getFederationTrust());
-        final Pair<String, String> pair2 = inumService.generateNewDN(ConfigurationFactory.getBaseDn().getFederationTrust());
+        final Pair<String, String> pair1 = inumService.generateNewDN(ConfigurationFactory.instance().getBaseDn().getFederationTrust());
+        final Pair<String, String> pair2 = inumService.generateNewDN(ConfigurationFactory.instance().getBaseDn().getFederationTrust());
 
         m_invalidFederationUrlTrust = new FederationTrust();
         m_invalidFederationUrlTrust.setId(pair1.getFirst());

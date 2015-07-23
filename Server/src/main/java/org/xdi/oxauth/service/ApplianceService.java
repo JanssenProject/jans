@@ -102,7 +102,7 @@ public class ApplianceService {
 	 * @throws Exception 
 	 */
 	public String getDnForAppliance(String inum) {
-		String baseDn = ConfigurationFactory.getBaseDn().getAppliance();
+		String baseDn = ConfigurationFactory.instance().getBaseDn().getAppliance();
 		if (StringHelper.isEmpty(inum)) {
 			return baseDn;
 		}
@@ -120,7 +120,7 @@ public class ApplianceService {
 	}
 
 	public String getApplianceInum() {
-		return ConfigurationFactory.getConfiguration().getApplianceInum();
+		return ConfigurationFactory.instance().getConfiguration().getApplianceInum();
 	}
 
 	/**

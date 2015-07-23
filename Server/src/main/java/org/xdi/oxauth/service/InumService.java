@@ -35,7 +35,7 @@ public class InumService {
     private IdGenService idGenService;
 
     public String generateClientInum() {
-        return generateClientInum(ConfigurationFactory.getConfiguration().getOrganizationInum());
+        return generateClientInum(ConfigurationFactory.instance().getConfiguration().getOrganizationInum());
     }
 
     public String generateClientInum(String p_organizationInum) {
@@ -43,7 +43,7 @@ public class InumService {
     }
 
     public String generatePeopleInum() {
-        return idGenService.generateId(IdType.PEOPLE, ConfigurationFactory.getConfiguration().getOrganizationInum());
+        return idGenService.generateId(IdType.PEOPLE, ConfigurationFactory.instance().getConfiguration().getOrganizationInum());
     }
 
     public String generateInum() {

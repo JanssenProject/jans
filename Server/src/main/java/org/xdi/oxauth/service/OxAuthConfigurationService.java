@@ -25,29 +25,29 @@ import org.xdi.util.StringHelper;
 public class OxAuthConfigurationService {
 
 	public String getCssLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getCssLocation())){
+		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getCssLocation())){
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/stylesheet";
 		}else{
-			return ConfigurationFactory.getConfiguration().getCssLocation();
+			return ConfigurationFactory.instance().getConfiguration().getCssLocation();
 		}	
 	}
 	
 	public String getJsLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getJsLocation())){
+		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getJsLocation())){
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/js";
 		}else{
-			return ConfigurationFactory.getConfiguration().getJsLocation();
+			return ConfigurationFactory.instance().getConfiguration().getJsLocation();
 		}	
 	}
 	
 	public String getImgLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.getConfiguration().getImgLocation())){
+		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getImgLocation())){
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/img";
 		}else{
-			return ConfigurationFactory.getConfiguration().getImgLocation();
+			return ConfigurationFactory.instance().getConfiguration().getImgLocation();
 		}	
 	}
 	

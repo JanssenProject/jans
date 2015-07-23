@@ -59,10 +59,10 @@ public class FederationCheckTimer {
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
-        if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+        if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
             log.trace("Initializing FederationCheckTimer...");
 
-            long interval = ConfigurationFactory.getConfiguration().getFederationCheckInterval();
+            long interval = ConfigurationFactory.instance().getConfiguration().getFederationCheckInterval();
             if (interval <= 0) {
                 interval = DEFAULT_INTERVAL;
             }
@@ -82,7 +82,7 @@ public class FederationCheckTimer {
 
     public void cleanUpTrusts() {
         try {
-            final String baseDn = ConfigurationFactory.getBaseDn().getFederationTrust();
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getFederationTrust();
             final List<FederationTrust> result = ldapEntryManager.findEntries(baseDn, FederationTrust.class, Filter.create("inum=*"));
             final Map<Pair<String, String>, List<FederationTrust>> map = groupByMetadata(result);
             if (!map.isEmpty()) {

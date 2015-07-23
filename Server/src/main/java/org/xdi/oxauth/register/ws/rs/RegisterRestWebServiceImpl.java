@@ -87,13 +87,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
             if (r.getIdTokenSignedResponseAlg() == null) {
-                r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getDefaultSignatureAlgorithm()));
+                r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
             }
 
             log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}",
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri());
 
-            if (ConfigurationFactory.getConfiguration().getDynamicRegistrationEnabled()) {
+            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
 
                 if (RegisterParamsValidator.validateParamsClientRegister(r.getApplicationType(), r.getRedirectUris(),
                         r.getSectorIdentifierUri())) {
@@ -102,14 +102,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
                         builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                     } else {
-                        String clientsBaseDN = ConfigurationFactory.getBaseDn().getClients();
+                        String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
                         String inum = inumService.generateClientInum();
                         String generatedClientSecret = UUID.randomUUID().toString();
 
                         String[] scopes = new String[0];
-                        if (ConfigurationFactory.getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
-                                && ConfigurationFactory.getConfiguration().getDynamicRegistrationScopesParamEnabled()
+                        if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
+                                && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()
                                 && r.getScopes().size() > 0) {
                             scopes = scopeService.getScopesDn(r.getScopes()).toArray(scopes);
                         } else {
@@ -146,8 +146,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                         client.setClientIdIssuedAt(calendar.getTime());
 
-                        if (ConfigurationFactory.getConfiguration().getDynamicRegistrationExpirationTime() > 0) {
-                            calendar.add(Calendar.SECOND, ConfigurationFactory.getConfiguration().getDynamicRegistrationExpirationTime());
+                        if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime() > 0) {
+                            calendar.add(Calendar.SECOND, ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime());
                             client.setClientSecretExpiresAt(calendar.getTime());
                         }
 
@@ -357,7 +357,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            if (ConfigurationFactory.getConfiguration().getDynamicRegistrationEnabled()) {
+            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
                 if (RegisterParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                     Client client = clientService.getClient(clientId, accessToken);
                     if (client != null) {
@@ -406,7 +406,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), client.getClientSecret());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
-                ConfigurationFactory.getConfiguration().getRegistrationEndpoint() + "?" +
+                ConfigurationFactory.instance().getConfiguration().getRegistrationEndpoint() + "?" +
                         RegisterResponseParam.CLIENT_ID.toString() + "=" + client.getClientId());
         responseJsonObject.put(CLIENT_ID_ISSUED_AT.toString(), client.getClientIdIssuedAt().getTime() / 1000);
         responseJsonObject.put(CLIENT_SECRET_EXPIRES_AT.toString(), client.getClientSecretExpiresAt() != null && client.getClientSecretExpiresAt().getTime() > 0 ?
@@ -468,13 +468,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
      */
     private static void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
         // custom object class
-        final String customOC = ConfigurationFactory.getConfiguration().getDynamicRegistrationCustomObjectClass();
+        final String customOC = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationCustomObjectClass();
         if (StringUtils.isNotBlank(customOC)) {
             p_client.setCustomObjectClasses(new String[]{customOC});
         }
 
         // custom attributes (custom attributes must be in custom object class)
-        final List<String> attrList = ConfigurationFactory.getConfiguration().getDynamicRegistrationCustomAttributes();
+        final List<String> attrList = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationCustomAttributes();
         if (attrList != null && !attrList.isEmpty()) {
             final Log staticLog = Logging.getLog(RegisterRestWebServiceImpl.class);
             for (String attr : attrList) {

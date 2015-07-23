@@ -37,7 +37,7 @@ public class ConfigurationTest extends BaseComponentTestAdapter {
      */
     @Test
     public void configurationPresence() {
-        final String dn = ConfigurationFactory.getLdapConfiguration().getString("configurationEntryDN");
+        final String dn = ConfigurationFactory.instance().getLdapConfiguration().getString("configurationEntryDN");
         final Conf conf = getLdapManager().find(Conf.class, dn);
         Assert.assertTrue(conf != null && Util.allNotBlank(conf.getDynamic(), conf.getErrors(), conf.getStatics(), conf.getWebKeys()));
     }

@@ -110,7 +110,7 @@ public class InumGenerator implements IdGenerator {
     }
 
     public String baseDn(IdType p_type) {
-        final BaseDnConfiguration baseDn = ConfigurationFactory.getBaseDn();
+        final BaseDnConfiguration baseDn = ConfigurationFactory.instance().getBaseDn();
         switch (p_type) {
             case CLIENTS:
                 return baseDn.getClients();

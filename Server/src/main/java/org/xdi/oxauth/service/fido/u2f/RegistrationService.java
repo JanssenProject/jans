@@ -198,7 +198,7 @@ public class RegistrationService extends RequestService {
 	 * Build DN string for U2F register request
 	 */
 	public String getDnForRegisterRequestMessage(String oxId) {
-		final String u2fBaseDn = ConfigurationFactory.getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(oxId)) {
 			return String.format("ou=registration_requests,%s", u2fBaseDn);
 		}

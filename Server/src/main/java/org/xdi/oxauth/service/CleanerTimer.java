@@ -71,7 +71,7 @@ public class CleanerTimer {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
 
-        long interval = ConfigurationFactory.getConfiguration().getCleanServiceInterval();
+        long interval = ConfigurationFactory.instance().getConfiguration().getCleanServiceInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
@@ -108,7 +108,7 @@ public class CleanerTimer {
     private void processAuthorizationGrantList() {
         log.debug("Start AuthorizationGrant clean up");
 
-        switch (ConfigurationFactory.getConfiguration().getModeEnum()) {
+        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
             case IN_MEMORY:
                 final List<AuthorizationGrant> grantList = authorizationGrantList.getAuthorizationGrants();
 

@@ -213,7 +213,7 @@ public class AuthorizeAction {
                 }
 
                 // OXAUTH-88 : federation support
-                if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+                if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                     final List<FederationTrust> list = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
 
                     if (list == null || list.isEmpty()) {
@@ -227,7 +227,7 @@ public class AuthorizeAction {
 
                 if (AuthorizeParamsValidator.validatePrompt(prompts)) {
                     // if trusted client = true, then skip authorization page and grant access directly
-                    if (ConfigurationFactory.getConfiguration().getTrustedClientEnabled()) {
+                    if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) {
                         if (Boolean.parseBoolean(client.getTrustedClient()) && !prompts.contains(Prompt.CONSENT)) {
                             permissionGranted(session);
                         }

@@ -82,8 +82,8 @@ public class PermissionService {
 
             log.debug("Construct response: HTTP 403 (Forbidden), entity: " + entity);
             final Response response = Response.status(Response.Status.FORBIDDEN).
-                    header("host_id", ConfigurationFactory.getConfiguration().getIssuer()).
-                    header("as_uri", ConfigurationFactory.getConfiguration().getUmaConfigurationEndpoint()).
+                    header("host_id", ConfigurationFactory.instance().getConfiguration().getIssuer()).
+                    header("as_uri", ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint()).
                     header("error", "insufficient_scope").
                     entity(entity).
                     build();
@@ -124,7 +124,7 @@ public class PermissionService {
         r.setResourceSetId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 
-        final String host = ConfigurationFactory.getConfiguration().getIssuer();
+        final String host = ConfigurationFactory.instance().getConfiguration().getIssuer();
         final ResourceSetPermission permission = resourceSetPermissionManager.createResourceSetPermission(
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
