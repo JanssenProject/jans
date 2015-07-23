@@ -27,6 +27,8 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
+import org.jboss.seam.contexts.Contexts;
+import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -532,7 +534,12 @@ public class ConfigurationFactory {
 	 * @return ConfigurationFactory instance
 	 */
 	public static ConfigurationFactory instance() {
-		return (ConfigurationFactory) Component.getInstance(ConfigurationFactory.class);
+        boolean createContexts = !Contexts.isEventContextActive() && !Contexts.isApplicationContextActive();
+        if (createContexts) {
+            Lifecycle.beginCall();
+        }
+
+        return (ConfigurationFactory) Component.getInstance(ConfigurationFactory.class);
 	}
 
 }
