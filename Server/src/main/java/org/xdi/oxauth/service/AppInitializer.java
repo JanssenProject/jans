@@ -10,6 +10,7 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -170,8 +171,9 @@ public class AppInitializer {
 
 	private void reloadConfiguration() {
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
-
 		reloadConfigurationImpl(newLdapAuthConfigs);
+
+		recreateLdapAuthEntryManagers();
 	}
 
 	private void reloadConfigurationImpl(List<GluuLdapConfiguration> currLdapAuthConfigs) {
@@ -235,17 +237,46 @@ public class AppInitializer {
 		return ldapAuthEntryManagers;
 	}
 
-	public LdapEntryManager createLdapAuthEntryManager(GluuLdapConfiguration ldapAuthConfig) {
-    	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
+    @Observer(ConfigurationFactory.LDAP_CONFIGUARION_RELOAD_EVENT_TYPE)
+    public void recreateLdapEntryManager() {
+    	// Backup current references to objects to allow shutdown properly
+    	LdapEntryManager oldLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME);
 
-    	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
-	    log.debug("Created authentication LdapEntryManager: {0}", ldapAuthEntryManager);
-	        
-		return ldapAuthEntryManager;
+    	// Recreate components
+    	createConnectionProvider();
+
+        // Destroy old components
+    	Contexts.getApplicationContext().remove(LDAP_ENTRY_MANAGER_NAME);
+    	oldLdapEntryManager.destroy();
+
+    	log.debug("Destroyed {0}: {1}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+    }
+
+    public void recreateLdapAuthEntryManagers() {
+    	// Backup current references to objects to allow shutdown properly
+    	List<LdapEntryManager> oldLdapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(LDAP_AUTH_ENTRY_MANAGER_NAME);
+
+    	// Recreate components
+        createAuthConnectionProviders(ldapAuthConfigs);
+
+        // Destroy old components
+    	Contexts.getApplicationContext().remove(LDAP_AUTH_ENTRY_MANAGER_NAME);
+
+		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
+			oldLdapAuthEntryManager.destroy();
+	        log.debug("Destroyed {0}: {1}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+		}
+    }
+
+	private void destroyLdapConnectionService(LdapConnectionService connectionProvider) {
+		if (connectionProvider != null) {
+			connectionProvider.closeConnectionPool();
+	        log.debug("Destoryed connectionProvider: {1}", connectionProvider);
+        }
 	}
 
     private void createConnectionProvider() {
-        this.ldapConfig = configurationFactory.getLdapConfiguration();
+    	this.ldapConfig = configurationFactory.getLdapConfiguration();
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
