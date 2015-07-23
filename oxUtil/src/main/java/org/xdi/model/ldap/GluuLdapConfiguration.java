@@ -155,6 +155,104 @@ public class GluuLdapConfiguration implements Serializable {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((baseDNs == null) ? 0 : baseDNs.hashCode());
+		result = prime * result + ((bindDN == null) ? 0 : bindDN.hashCode());
+		result = prime * result + ((bindPassword == null) ? 0 : bindPassword.hashCode());
+		result = prime * result + ((configId == null) ? 0 : configId.hashCode());
+		result = prime * result + (enabled ? 1231 : 1237);
+		result = prime * result + ((localPrimaryKey == null) ? 0 : localPrimaryKey.hashCode());
+		result = prime * result + maxConnections;
+		result = prime * result + ((primaryKey == null) ? 0 : primaryKey.hashCode());
+		result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+		result = prime * result + (useAnonymousBind ? 1231 : 1237);
+		result = prime * result + (useSSL ? 1231 : 1237);
+		result = prime * result + version;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof GluuLdapConfiguration)) {
+			return false;
+		}
+		GluuLdapConfiguration other = (GluuLdapConfiguration) obj;
+		if (baseDNs == null) {
+			if (other.baseDNs != null) {
+				return false;
+			}
+		} else if (!baseDNs.equals(other.baseDNs)) {
+			return false;
+		}
+		if (bindDN == null) {
+			if (other.bindDN != null) {
+				return false;
+			}
+		} else if (!bindDN.equals(other.bindDN)) {
+			return false;
+		}
+		if (bindPassword == null) {
+			if (other.bindPassword != null) {
+				return false;
+			}
+		} else if (!bindPassword.equals(other.bindPassword)) {
+			return false;
+		}
+		if (configId == null) {
+			if (other.configId != null) {
+				return false;
+			}
+		} else if (!configId.equals(other.configId)) {
+			return false;
+		}
+		if (enabled != other.enabled) {
+			return false;
+		}
+		if (localPrimaryKey == null) {
+			if (other.localPrimaryKey != null) {
+				return false;
+			}
+		} else if (!localPrimaryKey.equals(other.localPrimaryKey)) {
+			return false;
+		}
+		if (maxConnections != other.maxConnections) {
+			return false;
+		}
+		if (primaryKey == null) {
+			if (other.primaryKey != null) {
+				return false;
+			}
+		} else if (!primaryKey.equals(other.primaryKey)) {
+			return false;
+		}
+		if (servers == null) {
+			if (other.servers != null) {
+				return false;
+			}
+		} else if (!servers.equals(other.servers)) {
+			return false;
+		}
+		if (useAnonymousBind != other.useAnonymousBind) {
+			return false;
+		}
+		if (useSSL != other.useSSL) {
+			return false;
+		}
+		if (version != other.version) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN).append(", bindPassword=")
