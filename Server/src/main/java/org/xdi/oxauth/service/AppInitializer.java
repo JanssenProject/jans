@@ -171,26 +171,23 @@ public class AppInitializer {
 
 	private void reloadConfiguration() {
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
-		reloadConfigurationImpl(newLdapAuthConfigs);
-
-		recreateLdapAuthEntryManagers();
+		
+		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
+			reloadConfigurationImpl(newLdapAuthConfigs);
+			recreateLdapAuthEntryManagers();
+		}
 	}
 
 	private void reloadConfigurationImpl(List<GluuLdapConfiguration> currLdapAuthConfigs) {
-		List<GluuLdapConfiguration> newLdapAuthConfigs = null;
-		if (currLdapAuthConfigs.size() > 0) {
-			newLdapAuthConfigs = currLdapAuthConfigs;
-		}
-
-		this.ldapAuthConfigs = newLdapAuthConfigs;
+		this.ldapAuthConfigs = currLdapAuthConfigs;
 
 		Context applicationContext = Contexts.getApplicationContext();
-        if (newLdapAuthConfigs == null) {
+        if (currLdapAuthConfigs.size() == 0) {
         	if (applicationContext.isSet(LDAP_AUTH_CONFIG_NAME)) {
         		applicationContext.remove(LDAP_AUTH_CONFIG_NAME);
         	}
         } else {
-        	applicationContext.set(LDAP_AUTH_CONFIG_NAME, newLdapAuthConfigs);
+        	applicationContext.set(LDAP_AUTH_CONFIG_NAME, currLdapAuthConfigs);
         }
 	}
 
@@ -223,7 +220,7 @@ public class AppInitializer {
 	@Factory(value = LDAP_AUTH_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
 	public List<LdapEntryManager> createLdapAuthEntryManager() {
 		List<LdapEntryManager> ldapAuthEntryManagers = new ArrayList<LdapEntryManager>();
-		if (this.ldapAuthConfigs == null) {
+		if (this.ldapAuthConfigs.size() == 0) {
 			return ldapAuthEntryManagers;
 		}
 
