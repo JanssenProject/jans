@@ -88,10 +88,10 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
 
     private String asSignedJSON(FederationMetadata p_metadata) throws JSONException, InvalidJwtException {
         try {
-            final String keyId = ConfigurationFactory.getConfiguration().getFederationSigningKid();
-            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getFederationSigningAlg());
+            final String keyId = ConfigurationFactory.instance().getConfiguration().getFederationSigningKid();
+            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
 
-            final JSONWebKey JSONWebKey = ConfigurationFactory.getWebKeys().getKey(keyId);
+            final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
             final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
             final JSONObject jsonHeader = JwtHeader.instance().

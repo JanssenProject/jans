@@ -58,7 +58,7 @@ public class ScopeService {
      * @return list of scopes
      */
     public List<org.xdi.oxauth.model.common.Scope> getAllScopesList() {
-        String scopesBaseDN = ConfigurationFactory.getBaseDn().getScopes();
+        String scopesBaseDN = ConfigurationFactory.instance().getBaseDn().getScopes();
 
         return ldapEntryManager.findEntries(scopesBaseDN,
                 org.xdi.oxauth.model.common.Scope.class,
@@ -120,7 +120,7 @@ public class ScopeService {
      * @return scope
      */
     public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String DisplayName) {
-        String scopesBaseDN = ConfigurationFactory.getBaseDn().getScopes();
+        String scopesBaseDN = ConfigurationFactory.instance().getBaseDn().getScopes();
 
         org.xdi.oxauth.model.common.Scope scope = new org.xdi.oxauth.model.common.Scope();
         scope.setDn(scopesBaseDN);

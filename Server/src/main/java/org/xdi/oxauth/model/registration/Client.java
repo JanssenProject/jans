@@ -927,7 +927,7 @@ public class Client {
     public static String buildClientDn(String p_clientId) {
         final StringBuilder dn = new StringBuilder();
         dn.append(String.format("inum=%s,", p_clientId));
-        dn.append(ConfigurationFactory.getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
+        dn.append(ConfigurationFactory.instance().getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
         return dn.toString();
     }
 

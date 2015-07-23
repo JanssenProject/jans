@@ -219,7 +219,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createAccessToken() {
-        int lifetime = ConfigurationFactory.getConfiguration().getShortLivedAccessTokenLifetime();
+        int lifetime = ConfigurationFactory.instance().getConfiguration().getShortLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -229,7 +229,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createLongLivedAccessToken() {
-        int lifetime = ConfigurationFactory.getConfiguration().getLongLivedAccessTokenLifetime();
+        int lifetime = ConfigurationFactory.instance().getConfiguration().getLongLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -239,7 +239,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public RefreshToken createRefreshToken() {
-        int lifetime = ConfigurationFactory.getConfiguration().getRefreshTokenLifetime();
+        int lifetime = ConfigurationFactory.instance().getConfiguration().getRefreshTokenLifetime();
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());

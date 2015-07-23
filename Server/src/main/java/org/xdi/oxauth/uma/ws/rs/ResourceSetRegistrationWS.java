@@ -375,7 +375,7 @@ public class ResourceSetRegistrationWS {
         ldapResourceSet.setDn(resourceSetDn);
         ldapResourceSet.setScopes(scopeDNs);
 
-        final Boolean addClient = ConfigurationFactory.getConfiguration().getUmaKeepClientDuringResourceSetRegistration();
+        final Boolean addClient = ConfigurationFactory.instance().getConfiguration().getUmaKeepClientDuringResourceSetRegistration();
         if (addClient != null ? addClient : true) {
             ldapResourceSet.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
         }

@@ -441,7 +441,7 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateBySessionId(String p_sessionId) {
-        if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.getConfiguration().getSessionIdEnabled()) {
+        if (StringUtils.isNotBlank(p_sessionId) && ConfigurationFactory.instance().getConfiguration().getSessionIdEnabled()) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
                 return authenticateBySessionId(sessionId);

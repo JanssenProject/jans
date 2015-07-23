@@ -79,6 +79,9 @@ public class AppInitializer {
     
     @In
     private ApplianceService applianceService;
+    
+    @In
+    private ConfigurationFactory configurationFactory;
 
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
@@ -99,7 +102,7 @@ public class AppInitializer {
     	createStringEncrypter();
 
     	createConnectionProvider();
-        ConfigurationFactory.create();
+        configurationFactory.create();
 
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
         reloadConfigurationImpl(ldapAuthConfigs);
@@ -120,10 +123,10 @@ public class AppInitializer {
 	}
 
 	private void createStringEncrypter() {
-		String encodeSalt = ConfigurationFactory.loadCryptoConfigurationSalt();
+		String encodeSalt = configurationFactory.loadCryptoConfigurationSalt();
     	
     	if (StringHelper.isEmpty(encodeSalt)) {
-    		throw new ConfigurationException("Encode salt isn't defined in " + ConfigurationFactory.CONFIGURATION_FILE_CRYPTO_PROPERTIES_FILE );
+    		throw new ConfigurationException("Encode salt isn't defined");
     	}
     	
     	try {
@@ -242,7 +245,7 @@ public class AppInitializer {
 	}
 
     private void createConnectionProvider() {
-        this.ldapConfig =  ConfigurationFactory.getLdapConfiguration();
+        this.ldapConfig = configurationFactory.getLdapConfiguration();
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
@@ -278,7 +281,7 @@ public class AppInitializer {
     }
 
 	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration ldapAuthConfig) {
-        FileConfiguration configuration = ConfigurationFactory.getLdapConfiguration();
+        FileConfiguration configuration = configurationFactory.getLdapConfiguration();
 
 		Properties properties = (Properties) configuration.getProperties().clone();
 		if (ldapAuthConfig != null) {
@@ -348,8 +351,8 @@ public class AppInitializer {
 	}
 
 	public List<oxIDPAuthConf> loadLdapIdpAuthConfigs(LdapEntryManager localLdapEntryManager) {
-		String baseDn = ConfigurationFactory.getBaseDn().getAppliance();
-		String applianceInum = ConfigurationFactory.getConfiguration().getApplianceInum();
+		String baseDn = ConfigurationFactory.instance().getBaseDn().getAppliance();
+		String applianceInum = ConfigurationFactory.instance().getConfiguration().getApplianceInum();
 		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
 			return null;
 		}

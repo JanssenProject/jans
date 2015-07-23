@@ -43,7 +43,7 @@ public class ClientFilterService extends BaseAuthFilterService {
 
     @Create
     public void init() {
-        final Configuration conf = ConfigurationFactory.getConfiguration();
+        final Configuration conf = ConfigurationFactory.instance().getConfiguration();
         super.init(conf.getClientAuthenticationFilters(), Boolean.TRUE.equals(conf.getClientAuthenticationFiltersEnabled()), false);
     }
 

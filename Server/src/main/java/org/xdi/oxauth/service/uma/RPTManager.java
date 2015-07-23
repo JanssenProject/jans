@@ -47,7 +47,7 @@ public class RPTManager implements IRPTManager {
 
     @Create
     public void init() {
-        switch (ConfigurationFactory.getConfiguration().getModeEnum()) {
+        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
             case IN_MEMORY:
                 manager = new RPTManagerInMemory();
                 log.info("Created IN-MEMORY UMA RPT manager");

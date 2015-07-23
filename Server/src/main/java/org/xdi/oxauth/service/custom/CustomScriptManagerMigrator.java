@@ -64,7 +64,7 @@ public class CustomScriptManagerMigrator {
 			return;
 		}
 		
-		String basedInum = ConfigurationFactory.getConfiguration().getOrganizationInum();
+		String basedInum = ConfigurationFactory.instance().getConfiguration().getOrganizationInum();
 		for (CustomAuthenticationConfiguration customAuthenticationConfiguration : customAuthenticationConfigurations) {
 			String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 			String dn = customScriptService.buildDn(customScriptId);

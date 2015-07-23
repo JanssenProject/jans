@@ -26,7 +26,7 @@ public class CustomScriptService extends AbstractCustomScriptService{
 	private static final long serialVersionUID = -5283102477313448031L;
 
     public String baseDn() {
-        return ConfigurationFactory.getBaseDn().getScripts();
+        return ConfigurationFactory.instance().getBaseDn().getScripts();
     }
 
 }

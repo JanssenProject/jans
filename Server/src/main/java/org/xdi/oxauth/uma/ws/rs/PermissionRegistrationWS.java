@@ -116,7 +116,7 @@ public class PermissionRegistrationWS {
     }
 
     public static Date rptExpirationDate() {
-        int lifeTime = ConfigurationFactory.getConfiguration().getUmaRequesterPermissionTokenLifetime();
+        int lifeTime = ConfigurationFactory.instance().getConfiguration().getUmaRequesterPermissionTokenLifetime();
         if (lifeTime <= 0) {
             lifeTime = DEFAULT_PERMISSION_LIFETIME;
         }

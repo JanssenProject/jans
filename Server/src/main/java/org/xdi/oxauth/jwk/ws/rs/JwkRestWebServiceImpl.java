@@ -48,7 +48,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         JSONObject jsonObj = new JSONObject();
         JSONArray keys = new JSONArray();
         try {
-            for (JSONWebKey jsonWebKey : ConfigurationFactory.getWebKeys().getKeys()) {
+            for (JSONWebKey jsonWebKey : ConfigurationFactory.instance().getWebKeys().getKeys()) {
                 JSONObject jsonKeyValue = new JSONObject();
                 if (jsonWebKey.getKeyType() != null) {
                     jsonKeyValue.put(KEY_TYPE, jsonWebKey.getKeyType());
@@ -56,7 +56,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
                 if (jsonWebKey.getKeyId() != null) {
                     jsonKeyValue.put(KEY_ID, jsonWebKey.getKeyId());
                 }
-                if (ConfigurationFactory.getConfiguration().getKeyRegenerationEnabled()
+                if (ConfigurationFactory.instance().getConfiguration().getKeyRegenerationEnabled()
                         && jsonWebKey.getExpirationTime() != null) {
                     jsonKeyValue.put(EXPIRATION_TIME, jsonWebKey.getExpirationTime());
                 }

@@ -43,7 +43,7 @@ public class FederationServiceTest extends BaseComponentTest {
     @Override
     public void beforeClass() {
         final InumService inumService = (InumService) Component.getInstance(InumService.class);
-        final Pair<String, String> pair = inumService.generateNewDN(ConfigurationFactory.getBaseDn().getFederationTrust());
+        final Pair<String, String> pair = inumService.generateNewDN(ConfigurationFactory.instance().getBaseDn().getFederationTrust());
 
         m_trust = new FederationTrust();
         m_trust.setId(pair.getFirst());
