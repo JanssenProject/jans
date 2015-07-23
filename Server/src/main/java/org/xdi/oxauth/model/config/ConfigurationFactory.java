@@ -96,7 +96,7 @@ public class ConfigurationFactory {
     private long confFileLastModifiedTime = -1;
     private long errorsFileLastModifiedTime = -1;
     private long staticConfFileLastModifiedTime = -1;
-    private long webkeysFileLastModifiedTime = -1;
+    private long webKeysFileLastModifiedTime = -1;
 
     @Create
     public void init() {
@@ -189,9 +189,9 @@ public class ConfigurationFactory {
 
             if (webkeysFile.exists()) {
                 final long lastModified = webkeysFile.lastModified();
-                if (lastModified > webkeysFileLastModifiedTime) { // reload configuration only if it was modified
+                if (lastModified > webKeysFileLastModifiedTime) { // reload configuration only if it was modified
                     reloadWebkeyFromFile();
-                    webkeysFileLastModifiedTime = lastModified;
+                    webKeysFileLastModifiedTime = lastModified;
                     isAnyChanged = true;
                 }
             }
@@ -212,6 +212,34 @@ public class ConfigurationFactory {
             }
 
         }
+    }
+
+    private void determineConfigurationLastModificationTime() {
+		File ldapFile = new File(LDAP_FILE_PATH);
+		File configFile = new File(configFilePath);
+		File errorsFile = new File(errorsFilePath);
+		File staticConfFile = new File(staticConfFilePath);
+		File webKeysFile = new File(webKeysFilePath);
+
+		if (ldapFile.exists()) {
+			this.ldapFileLastModifiedTime = ldapFile.lastModified();
+		}
+
+		if (configFile.exists()) {
+			this.confFileLastModifiedTime = configFile.lastModified();
+		}
+
+		if (errorsFile.exists()) {
+			this.errorsFileLastModifiedTime = errorsFile.lastModified();
+		}
+
+		if (staticConfFile.exists()) {
+			this.staticConfFileLastModifiedTime = staticConfFile.lastModified();
+		}
+
+		if (webKeysFile.exists()) {
+			this.webKeysFileLastModifiedTime = webKeysFile.lastModified();
+		}
     }
 
     public FileConfiguration getLdapConfiguration() {
@@ -237,10 +265,11 @@ public class ConfigurationFactory {
     public void create() {
         if (!createFromLdap(true)) {
             LOG.error("Failed to load configuration from LDAP. Please fix it!!!.");
-            throw new RuntimeException("Failed to load configuration from LDAP.");
+            throw new ConfigurationException("Failed to load configuration from LDAP.");
 //            LOG.warn("Emergency configuration load from files.");
 //            createFromFile();
         } else {
+        	determineConfigurationLastModificationTime();
             LOG.info("Configuration loaded successfully.");
         }
     }
