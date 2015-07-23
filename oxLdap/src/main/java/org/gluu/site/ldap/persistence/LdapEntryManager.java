@@ -6,10 +6,18 @@
 
 package org.gluu.site.ldap.persistence;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.util.StaticUtils;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
@@ -28,9 +36,21 @@ import org.slf4j.LoggerFactory;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.*;
+import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.Control;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.SearchScope;
+import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
+import com.unboundid.util.StaticUtils;
 
 /**
  * LDAP Entry Manager
@@ -433,8 +453,9 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		List<AttributeData> result = new ArrayList<AttributeData>();
 		for (Attribute attribute : entry.getAttributes()) {
 			String[] attributeValueStrings = NO_STRINGS;
+			String attributeName = attribute.getName();
 
-			if (attribute.needsBase64Encoding()) {
+			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(StringHelper.toLowerCase(attributeName))) {
 				byte[][] attributeValues = attribute.getValueByteArrays();
 				if (attributeValues != null) {
 					attributeValueStrings = new String[attributeValues.length];

@@ -10,15 +10,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.xdi.util.ArrayHelper;
 
 import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.BindResult;
+import com.unboundid.ldap.sdk.Control;
+import com.unboundid.ldap.sdk.DeleteRequest;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPConnectionPool;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPResult;
+import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ModifyRequest;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchRequest;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.SearchResultReference;
+import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
+import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldif.LDIFChangeRecord;
 
 /**
@@ -428,6 +446,10 @@ public class OperationsFacade {
 		}
 		
 		return result;
+	}
+
+	public boolean isBinaryAttribute(String attributeName) {
+		return this.connectionProvider.isBinaryAttribute(attributeName);
 	}
 
 }

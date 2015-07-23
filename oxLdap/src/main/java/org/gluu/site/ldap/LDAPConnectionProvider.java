@@ -7,11 +7,14 @@
 package org.gluu.site.ldap;
 
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
+import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.FailoverServerSet;
@@ -45,6 +48,8 @@ public class LDAPConnectionProvider {
 	private String bindDn;
 	private String bindPassword;
 	private boolean useSSL;
+
+	private ArrayList<String> binaryAttributes;
 
 	@SuppressWarnings("unused")
 	private LDAPConnectionProvider() {}
@@ -113,6 +118,13 @@ public class LDAPConnectionProvider {
 				connectionPool.setMaxWaitTimeMillis(Long.parseLong(connectionMaxWaitTime));
 			}
 		}
+		
+		this.binaryAttributes = new ArrayList<String>();
+		if (props.containsKey("binaryAttributes")) {
+			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString(), ",");
+			this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
+		}
+		
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.creationResultCode = ResultCode.SUCCESS;
@@ -250,6 +262,10 @@ public class LDAPConnectionProvider {
 
 	public boolean isUseSSL() {
 		return useSSL;
+	}
+
+	public boolean isBinaryAttribute(String attributeName) {
+		return binaryAttributes.contains(attributeName);
 	}
 
 }
