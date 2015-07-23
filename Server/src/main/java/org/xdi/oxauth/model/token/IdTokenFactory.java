@@ -83,10 +83,10 @@ public class IdTokenFactory {
                                             Set<String> scopes) throws SignatureException, InvalidJwtException,
             StringEncrypter.EncryptionException, InvalidClaimException {
         Jwt jwt = new Jwt();
-        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
+        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
 
         // Header
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(ConfigurationFactory.getConfiguration().getDefaultSignatureAlgorithm());
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm());
         if (authorizationGrant.getClient() != null
                 && authorizationGrant.getClient().getIdTokenSignedResponseAlg() != null) {
             signatureAlgorithm = SignatureAlgorithm.fromName(authorizationGrant.getClient().getIdTokenSignedResponseAlg());
@@ -103,10 +103,10 @@ public class IdTokenFactory {
         }
 
         // Claims
-        jwt.getClaims().setIssuer(ConfigurationFactory.getConfiguration().getIssuer());
+        jwt.getClaims().setIssuer(ConfigurationFactory.instance().getConfiguration().getIssuer());
         jwt.getClaims().setAudience(authorizationGrant.getClient().getClientId());
 
-        int lifeTime = ConfigurationFactory.getConfiguration().getIdTokenLifetime();
+        int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -132,8 +132,8 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(signatureAlgorithm);
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwt.getClaims().setClaim("oxValidationURI", ConfigurationFactory.getConfiguration().getCheckSessionIFrame());
-        jwt.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.getConfiguration().getOxOpenIdConnectVersion());
+        jwt.getClaims().setClaim("oxValidationURI", ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
+        jwt.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.instance().getConfiguration().getOxOpenIdConnectVersion());
 
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
@@ -272,10 +272,10 @@ public class IdTokenFactory {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        jwe.getClaims().setIssuer(ConfigurationFactory.getConfiguration().getIssuer());
+        jwe.getClaims().setIssuer(ConfigurationFactory.instance().getConfiguration().getIssuer());
         jwe.getClaims().setAudience(authorizationGrant.getClient().getClientId());
 
-        int lifeTime = ConfigurationFactory.getConfiguration().getIdTokenLifetime();
+        int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -303,8 +303,8 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(null);
             jwe.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwe.getClaims().setClaim("oxValidationURI", ConfigurationFactory.getConfiguration().getCheckSessionIFrame());
-        jwe.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.getConfiguration().getOxOpenIdConnectVersion());
+        jwe.getClaims().setClaim("oxValidationURI", ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
+        jwe.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.instance().getConfiguration().getOxOpenIdConnectVersion());
 
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {

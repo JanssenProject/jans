@@ -75,7 +75,7 @@ public class ClientAssertion {
                         && clientId.equals(issuer) && issuer.equals(subject))) {
 
                     // Validate audience
-                    String tokenUrl = ConfigurationFactory.getConfiguration().getTokenEndpoint();
+                    String tokenUrl = ConfigurationFactory.instance().getConfiguration().getTokenEndpoint();
                     if (audience != null && audience.contains(tokenUrl)) {
 
                         // Validate expiration

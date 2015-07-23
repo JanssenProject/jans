@@ -55,7 +55,7 @@ public class GrantService {
     }
 
     public static String baseDn() {
-        return ConfigurationFactory.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
+        return ConfigurationFactory.instance().getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
     }
 
     public static GrantService instance() {

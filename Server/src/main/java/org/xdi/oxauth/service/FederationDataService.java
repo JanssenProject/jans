@@ -58,7 +58,7 @@ public class FederationDataService {
     private ClientService clientService;
 
     private Pair<String, String> generateNewDN() {
-        return inumService.generateNewDN(ConfigurationFactory.getBaseDn().getFederationRequest());
+        return inumService.generateNewDN(ConfigurationFactory.instance().getBaseDn().getFederationRequest());
     }
 
     public boolean persist(FederationRequest p_federationRequest) {
@@ -86,7 +86,7 @@ public class FederationDataService {
 
     public static boolean skipAuthorization(List<FederationTrust> p_list) {
         if (p_list != null && !p_list.isEmpty()) {
-            final FederationSkipPolicy skipPolicy = FederationSkipPolicy.fromStringWithDefault(ConfigurationFactory.getConfiguration().getFederationSkipPolicy());
+            final FederationSkipPolicy skipPolicy = FederationSkipPolicy.fromStringWithDefault(ConfigurationFactory.instance().getConfiguration().getFederationSkipPolicy());
             if (skipPolicy != null) {
                 switch (skipPolicy) {
                     case OR:
@@ -117,7 +117,7 @@ public class FederationDataService {
     public static List<String> getScopes(List<FederationTrust> p_list) {
         final List<String> result = new ArrayList<String>();
         if (p_list != null && !p_list.isEmpty()) {
-            final FederationScopePolicy policy = FederationScopePolicy.fromStringWithDefault(ConfigurationFactory.getConfiguration().getFederationScopePolicy());
+            final FederationScopePolicy policy = FederationScopePolicy.fromStringWithDefault(ConfigurationFactory.instance().getConfiguration().getFederationScopePolicy());
             if (policy != null) {
                 switch (policy) {
                     case JOIN:
@@ -184,7 +184,7 @@ public class FederationDataService {
 
     public List<FederationTrust> getTrustByAnyRedirectUri(List<String> p_redirectUri, FederationTrustStatus p_status) {
         if (p_redirectUri != null && !p_redirectUri.isEmpty()) {
-            final String baseDn = ConfigurationFactory.getBaseDn().getFederationTrust();
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getFederationTrust();
             try {
                 final Filter filter;
                 if (p_status == null) {

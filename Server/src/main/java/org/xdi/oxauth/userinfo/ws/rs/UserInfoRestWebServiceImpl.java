@@ -191,7 +191,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws StringEncrypter.EncryptionException, InvalidJwtException, InvalidClaimException, SignatureException {
         Jwt jwt = new Jwt();
-        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
+        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
 
         // Header
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {

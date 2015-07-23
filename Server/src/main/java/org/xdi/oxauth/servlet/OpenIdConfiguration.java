@@ -54,20 +54,20 @@ public class OpenIdConfiguration extends HttpServlet {
         try {
             JSONObject jsonObj = new JSONObject();
 
-            jsonObj.put(ISSUER, ConfigurationFactory.getConfiguration().getIssuer());
-            jsonObj.put(AUTHORIZATION_ENDPOINT, ConfigurationFactory.getConfiguration().getAuthorizationEndpoint());
-            jsonObj.put(TOKEN_ENDPOINT, ConfigurationFactory.getConfiguration().getTokenEndpoint());
-            jsonObj.put(USER_INFO_ENDPOINT, ConfigurationFactory.getConfiguration().getUserInfoEndpoint());
-            jsonObj.put(CLIENT_INFO_ENDPOINT, ConfigurationFactory.getConfiguration().getClientInfoEndpoint());
-            jsonObj.put(CHECK_SESSION_IFRAME, ConfigurationFactory.getConfiguration().getCheckSessionIFrame());
-            jsonObj.put(END_SESSION_ENDPOINT, ConfigurationFactory.getConfiguration().getEndSessionEndpoint());
-            jsonObj.put(JWKS_URI, ConfigurationFactory.getConfiguration().getJwksUri());
-            jsonObj.put(REGISTRATION_ENDPOINT, ConfigurationFactory.getConfiguration().getRegistrationEndpoint());
-            jsonObj.put(VALIDATE_TOKEN_ENDPOINT, ConfigurationFactory.getConfiguration().getValidateTokenEndpoint());
-            jsonObj.put(FEDERATION_METADATA_ENDPOINT, ConfigurationFactory.getConfiguration().getFederationMetadataEndpoint());
-            jsonObj.put(FEDERATION_ENDPOINT, ConfigurationFactory.getConfiguration().getFederationEndpoint());
-            jsonObj.put(ID_GENERATION_ENDPOINT, ConfigurationFactory.getConfiguration().getIdGenerationEndpoint());
-            jsonObj.put(INTROSPECTION_ENDPOINT, ConfigurationFactory.getConfiguration().getIntrospectionEndpoint());
+            jsonObj.put(ISSUER, ConfigurationFactory.instance().getConfiguration().getIssuer());
+            jsonObj.put(AUTHORIZATION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getAuthorizationEndpoint());
+            jsonObj.put(TOKEN_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getTokenEndpoint());
+            jsonObj.put(USER_INFO_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getUserInfoEndpoint());
+            jsonObj.put(CLIENT_INFO_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getClientInfoEndpoint());
+            jsonObj.put(CHECK_SESSION_IFRAME, ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
+            jsonObj.put(END_SESSION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getEndSessionEndpoint());
+            jsonObj.put(JWKS_URI, ConfigurationFactory.instance().getConfiguration().getJwksUri());
+            jsonObj.put(REGISTRATION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getRegistrationEndpoint());
+            jsonObj.put(VALIDATE_TOKEN_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getValidateTokenEndpoint());
+            jsonObj.put(FEDERATION_METADATA_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getFederationMetadataEndpoint());
+            jsonObj.put(FEDERATION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getFederationEndpoint());
+            jsonObj.put(ID_GENERATION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getIdGenerationEndpoint());
+            jsonObj.put(INTROSPECTION_ENDPOINT, ConfigurationFactory.instance().getConfiguration().getIntrospectionEndpoint());
 
             ScopeService scopeService = ScopeService.instance();
             JSONArray scopesSupported = new JSONArray();
@@ -79,7 +79,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray responseTypesSupported = new JSONArray();
-            for (String responseType : ConfigurationFactory.getConfiguration().getResponseTypesSupported()) {
+            for (String responseType : ConfigurationFactory.instance().getConfiguration().getResponseTypesSupported()) {
                 responseTypesSupported.put(responseType);
             }
             if (responseTypesSupported.length() > 0) {
@@ -87,7 +87,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray grantTypesSupported = new JSONArray();
-            for (String grantType : ConfigurationFactory.getConfiguration().getGrantTypesSupported()) {
+            for (String grantType : ConfigurationFactory.instance().getConfiguration().getGrantTypesSupported()) {
                 grantTypesSupported.put(grantType);
             }
             if (grantTypesSupported.length() > 0) {
@@ -102,7 +102,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
 
             JSONArray subjectTypesSupported = new JSONArray();
-            for (String subjectType : ConfigurationFactory.getConfiguration().getSubjectTypesSupported()) {
+            for (String subjectType : ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported()) {
                 subjectTypesSupported.put(subjectType);
             }
             if (subjectTypesSupported.length() > 0) {
@@ -110,7 +110,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
-            for (String userInfoSigningAlg : ConfigurationFactory.getConfiguration().getUserInfoSigningAlgValuesSupported()) {
+            for (String userInfoSigningAlg : ConfigurationFactory.instance().getConfiguration().getUserInfoSigningAlgValuesSupported()) {
                 userInfoSigningAlgValuesSupported.put(userInfoSigningAlg);
             }
             if (userInfoSigningAlgValuesSupported.length() > 0) {
@@ -118,7 +118,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray userInfoEncryptionAlgValuesSupported = new JSONArray();
-            for (String userInfoEncryptionAlg : ConfigurationFactory.getConfiguration().getUserInfoEncryptionAlgValuesSupported()) {
+            for (String userInfoEncryptionAlg : ConfigurationFactory.instance().getConfiguration().getUserInfoEncryptionAlgValuesSupported()) {
                 userInfoEncryptionAlgValuesSupported.put(userInfoEncryptionAlg);
             }
             if (userInfoEncryptionAlgValuesSupported.length() > 0) {
@@ -126,7 +126,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray userInfoEncryptionEncValuesSupported = new JSONArray();
-            for (String userInfoEncryptionEnc : ConfigurationFactory.getConfiguration().getUserInfoEncryptionEncValuesSupported()) {
+            for (String userInfoEncryptionEnc : ConfigurationFactory.instance().getConfiguration().getUserInfoEncryptionEncValuesSupported()) {
                 userInfoEncryptionEncValuesSupported.put(userInfoEncryptionEnc);
             }
             if (userInfoEncryptionAlgValuesSupported.length() > 0) {
@@ -134,7 +134,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray idTokenSigningAlgValuesSupported = new JSONArray();
-            for (String idTokenSigningAlg : ConfigurationFactory.getConfiguration().getIdTokenSigningAlgValuesSupported()) {
+            for (String idTokenSigningAlg : ConfigurationFactory.instance().getConfiguration().getIdTokenSigningAlgValuesSupported()) {
                 idTokenSigningAlgValuesSupported.put(idTokenSigningAlg);
             }
             if (idTokenSigningAlgValuesSupported.length() > 0) {
@@ -142,7 +142,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray idTokenEncryptionAlgValuesSupported = new JSONArray();
-            for (String idTokenEncryptionAlg : ConfigurationFactory.getConfiguration().getIdTokenEncryptionAlgValuesSupported()) {
+            for (String idTokenEncryptionAlg : ConfigurationFactory.instance().getConfiguration().getIdTokenEncryptionAlgValuesSupported()) {
                 idTokenEncryptionAlgValuesSupported.put(idTokenEncryptionAlg);
             }
             if (idTokenEncryptionAlgValuesSupported.length() > 0) {
@@ -150,7 +150,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray idTokenEncryptionEncValuesSupported = new JSONArray();
-            for (String idTokenEncryptionEnc : ConfigurationFactory.getConfiguration().getIdTokenEncryptionEncValuesSupported()) {
+            for (String idTokenEncryptionEnc : ConfigurationFactory.instance().getConfiguration().getIdTokenEncryptionEncValuesSupported()) {
                 idTokenEncryptionEncValuesSupported.put(idTokenEncryptionEnc);
             }
             if (idTokenEncryptionEncValuesSupported.length() > 0) {
@@ -158,7 +158,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray requestObjectSigningAlgValuesSupported = new JSONArray();
-            for (String requestObjectSigningAlg : ConfigurationFactory.getConfiguration().getRequestObjectSigningAlgValuesSupported()) {
+            for (String requestObjectSigningAlg : ConfigurationFactory.instance().getConfiguration().getRequestObjectSigningAlgValuesSupported()) {
                 requestObjectSigningAlgValuesSupported.put(requestObjectSigningAlg);
             }
             if (requestObjectSigningAlgValuesSupported.length() > 0) {
@@ -166,7 +166,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray requestObjectEncryptionAlgValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionAlg : ConfigurationFactory.getConfiguration().getRequestObjectEncryptionAlgValuesSupported()) {
+            for (String requestObjectEncryptionAlg : ConfigurationFactory.instance().getConfiguration().getRequestObjectEncryptionAlgValuesSupported()) {
                 requestObjectEncryptionAlgValuesSupported.put(requestObjectEncryptionAlg);
             }
             if (requestObjectEncryptionAlgValuesSupported.length() > 0) {
@@ -174,7 +174,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray requestObjectEncryptionEncValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionEnc : ConfigurationFactory.getConfiguration().getRequestObjectEncryptionEncValuesSupported()) {
+            for (String requestObjectEncryptionEnc : ConfigurationFactory.instance().getConfiguration().getRequestObjectEncryptionEncValuesSupported()) {
                 requestObjectEncryptionEncValuesSupported.put(requestObjectEncryptionEnc);
             }
             if (requestObjectEncryptionEncValuesSupported.length() > 0) {
@@ -182,7 +182,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray tokenEndpointAuthMethodsSupported = new JSONArray();
-            for (String tokenEndpointAuthMethod : ConfigurationFactory.getConfiguration().getTokenEndpointAuthMethodsSupported()) {
+            for (String tokenEndpointAuthMethod : ConfigurationFactory.instance().getConfiguration().getTokenEndpointAuthMethodsSupported()) {
                 tokenEndpointAuthMethodsSupported.put(tokenEndpointAuthMethod);
             }
             if (tokenEndpointAuthMethodsSupported.length() > 0) {
@@ -190,7 +190,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray tokenEndpointAuthSigningAlgValuesSupported = new JSONArray();
-            for (String tokenEndpointAuthSigningAlg : ConfigurationFactory.getConfiguration().getTokenEndpointAuthSigningAlgValuesSupported()) {
+            for (String tokenEndpointAuthSigningAlg : ConfigurationFactory.instance().getConfiguration().getTokenEndpointAuthSigningAlgValuesSupported()) {
                 tokenEndpointAuthSigningAlgValuesSupported.put(tokenEndpointAuthSigningAlg);
             }
             if (tokenEndpointAuthSigningAlgValuesSupported.length() > 0) {
@@ -198,7 +198,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray displayValuesSupported = new JSONArray();
-            for (String display : ConfigurationFactory.getConfiguration().getDisplayValuesSupported()) {
+            for (String display : ConfigurationFactory.instance().getConfiguration().getDisplayValuesSupported()) {
                 displayValuesSupported.put(display);
             }
             if (displayValuesSupported.length() > 0) {
@@ -206,7 +206,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray claimTypesSupported = new JSONArray();
-            for (String claimType : ConfigurationFactory.getConfiguration().getClaimTypesSupported()) {
+            for (String claimType : ConfigurationFactory.instance().getConfiguration().getClaimTypesSupported()) {
                 claimTypesSupported.put(claimType);
             }
             if (claimTypesSupported.length() > 0) {
@@ -225,10 +225,10 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
             }
 
-            jsonObj.put(SERVICE_DOCUMENTATION, ConfigurationFactory.getConfiguration().getServiceDocumentation());
+            jsonObj.put(SERVICE_DOCUMENTATION, ConfigurationFactory.instance().getConfiguration().getServiceDocumentation());
 
             JSONArray claimsLocalesSupported = new JSONArray();
-            for (String claimLocale : ConfigurationFactory.getConfiguration().getClaimsLocalesSupported()) {
+            for (String claimLocale : ConfigurationFactory.instance().getConfiguration().getClaimsLocalesSupported()) {
                 claimsLocalesSupported.put(claimLocale);
             }
             if (claimsLocalesSupported.length() > 0) {
@@ -236,7 +236,7 @@ public class OpenIdConfiguration extends HttpServlet {
             }
 
             JSONArray uiLocalesSupported = new JSONArray();
-            for (String uiLocale : ConfigurationFactory.getConfiguration().getUiLocalesSupported()) {
+            for (String uiLocale : ConfigurationFactory.instance().getConfiguration().getUiLocalesSupported()) {
                 uiLocalesSupported.put(uiLocale);
             }
             if (uiLocalesSupported.length() > 0) {
@@ -245,12 +245,12 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(SCOPE_TO_CLAIMS_MAPPING, createScopeToClaimsMapping());
 
-            jsonObj.put(CLAIMS_PARAMETER_SUPPORTED, ConfigurationFactory.getConfiguration().getClaimsParameterSupported());
-            jsonObj.put(REQUEST_PARAMETER_SUPPORTED, ConfigurationFactory.getConfiguration().getRequestParameterSupported());
-            jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, ConfigurationFactory.getConfiguration().getRequestUriParameterSupported());
-            jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, ConfigurationFactory.getConfiguration().getRequireRequestUriRegistration());
-            jsonObj.put(OP_POLICY_URI, ConfigurationFactory.getConfiguration().getOpPolicyUri());
-            jsonObj.put(OP_TOS_URI, ConfigurationFactory.getConfiguration().getOpTosUri());
+            jsonObj.put(CLAIMS_PARAMETER_SUPPORTED, ConfigurationFactory.instance().getConfiguration().getClaimsParameterSupported());
+            jsonObj.put(REQUEST_PARAMETER_SUPPORTED, ConfigurationFactory.instance().getConfiguration().getRequestParameterSupported());
+            jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, ConfigurationFactory.instance().getConfiguration().getRequestUriParameterSupported());
+            jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, ConfigurationFactory.instance().getConfiguration().getRequireRequestUriRegistration());
+            jsonObj.put(OP_POLICY_URI, ConfigurationFactory.instance().getConfiguration().getOpPolicyUri());
+            jsonObj.put(OP_TOS_URI, ConfigurationFactory.instance().getConfiguration().getOpTosUri());
 
             out.println(jsonObj.toString(4).replace("\\/", "/"));
         } catch (JSONException e) {

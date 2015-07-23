@@ -47,7 +47,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
      */
     @Create
     public void init() {
-        switch (ConfigurationFactory.getConfiguration().getModeEnum()) {
+        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
             case IN_MEMORY:
                 grant = new AuthorizationGrantListInMemory();
                 loadPersistentJwts();

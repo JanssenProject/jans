@@ -35,7 +35,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
 		final CustomScriptService customScriptService = (CustomScriptService) Component.getInstance(CustomScriptService.class);
 
-		String basedInum = ConfigurationFactory.getConfiguration().getOrganizationInum();
+		String basedInum = ConfigurationFactory.instance().getConfiguration().getOrganizationInum();
 		String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 		String dn = customScriptService.buildDn(customScriptId);
 

@@ -78,7 +78,7 @@ public class UmaValidationService {
         }
 
         try {
-            URI umaBaseEndpoint = new URI(ConfigurationFactory.getConfiguration().getBaseEndpoint());
+            URI umaBaseEndpoint = new URI(ConfigurationFactory.instance().getConfiguration().getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(host, umaBaseEndpoint.getHost())) {
                 log.error("Get request for another AM: '{0}'", host);
                 throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
@@ -146,7 +146,7 @@ public class UmaValidationService {
         }
 
         final Client client = authorizationGrant.getClient();
-        if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+        if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
             final List<FederationTrust> list = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
 
             if (list == null || list.isEmpty()) {

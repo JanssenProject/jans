@@ -102,7 +102,7 @@ public class UserService {
 
 		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
-		List<User> entries = ldapEntryManager.findEntries(ConfigurationFactory.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
+		List<User> entries = ldapEntryManager.findEntries(ConfigurationFactory.instance().getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
 		log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
 
 		if (entries.size() > 0) {
@@ -129,7 +129,7 @@ public class UserService {
 	}
 
     public User addDefaultUser(String uid) {
-        String peopleBaseDN = ConfigurationFactory.getBaseDn().getPeople();
+        String peopleBaseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
 
         String inum = inumService.generatePeopleInum();
 
@@ -147,7 +147,7 @@ public class UserService {
 	}
     
     public User addUser(User user) {
-        String peopleBaseDN = ConfigurationFactory.getBaseDn().getPeople();
+        String peopleBaseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
 
         String inum = inumService.generatePeopleInum();
 
@@ -164,7 +164,7 @@ public class UserService {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
         User user = new User();
-        user.setDn(ConfigurationFactory.getBaseDn().getPeople());
+        user.setDn(ConfigurationFactory.instance().getBaseDn().getPeople());
         
         List<CustomAttribute> customAttributes =  new ArrayList<CustomAttribute>();
         customAttributes.add(new CustomAttribute(attributeName, attributeValue));
@@ -285,14 +285,14 @@ public class UserService {
     }
 
     public List<User> getUsersWithPersistentJwts() {
-        String baseDN = ConfigurationFactory.getBaseDn().getPeople();
+        String baseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
         Filter filter = Filter.createPresenceFilter("oxAuthPersistentJWT");
 
         return ldapEntryManager.findEntries(baseDN, User.class, filter);
     }
 
     public String getDnForUser(String inum) {
-		String peopleDn = ConfigurationFactory.getBaseDn().getPeople();
+		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
 		if (StringHelper.isEmpty(inum)) {
 			return peopleDn;
 		}

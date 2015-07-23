@@ -203,7 +203,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)) {
                         if (validRedirectUri) {
 
-                            if (ConfigurationFactory.getConfiguration().getFederationEnabled()) {
+                            if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                                 if (!federationDataService.hasAnyActiveTrust(client)) {
                                     log.debug("Forbid authorization. Client is not in any trust relationship however federation is enabled for server. Client id: {0}, client redirectUris: {1}",
                                             client.getClientId(), client.getRedirectUris());
@@ -582,7 +582,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             List<String> uiLocales, String idTokenHint, String loginHint, List<String> acrValues, List<String> amrValues, String request,
             String requestUri, String originHeaders) {
 
-        redirectUriResponse.setBaseRedirectUri(ConfigurationFactory.getConfiguration().getAuthorizationPage());
+        redirectUriResponse.setBaseRedirectUri(ConfigurationFactory.instance().getConfiguration().getAuthorizationPage());
 
         // oAuth parameters
         String responseType = implode(responseTypes, " ");

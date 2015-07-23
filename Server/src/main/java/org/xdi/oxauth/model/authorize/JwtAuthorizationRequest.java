@@ -102,7 +102,7 @@ public class JwtAuthorizationRequest {
 
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
-                        JSONWebKeySet jwks = ConfigurationFactory.getWebKeys();
+                        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
                         JSONWebKey jwk = jwks.getKey(keyId);
                         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
                                 jwk.getPrivateKey().getModulus(),

@@ -47,7 +47,7 @@ public class FederationMetadataService {
     public List<FederationMetadata> getMetadataList() {
         try {
             final FederationMetadata m = new FederationMetadata();
-            m.setDn(ConfigurationFactory.getBaseDn().getFederationMetadata());
+            m.setDn(ConfigurationFactory.instance().getBaseDn().getFederationMetadata());
 
             final List<FederationMetadata> entries = ldapEntryManager.findEntries(m);
             if (entries != null) {
@@ -67,7 +67,7 @@ public class FederationMetadataService {
 
         try {
             final FederationMetadata m = new FederationMetadata();
-            m.setDn(ConfigurationFactory.getBaseDn().getFederationMetadata());
+            m.setDn(ConfigurationFactory.instance().getBaseDn().getFederationMetadata());
             m.setId(p_federationId);
 
             final List<FederationMetadata> entries = ldapEntryManager.findEntries(m);
@@ -82,7 +82,7 @@ public class FederationMetadataService {
                             final Filter rpFilter = LdapUtils.createAnyFilterFromDnList("inum", rps);
                             if (rpFilter != null) {
                                 final List<FederationRP> rpList = ldapEntryManager.findEntries(
-                                        ConfigurationFactory.getBaseDn().getFederationRP(),
+                                        ConfigurationFactory.instance().getBaseDn().getFederationRP(),
                                         FederationRP.class, rpFilter);
                                 result.setRpList(rpList);
                             } else {
@@ -96,7 +96,7 @@ public class FederationMetadataService {
                             final Filter opFilter = LdapUtils.createAnyFilterFromDnList("inum", ops);
                             if (opFilter != null) {
                                 final List<FederationOP> opList = ldapEntryManager.findEntries(
-                                        ConfigurationFactory.getBaseDn().getFederationOP(),
+                                        ConfigurationFactory.instance().getBaseDn().getFederationOP(),
                                         FederationOP.class, opFilter);
                                 result.setOpList(opList);
                             } else {
