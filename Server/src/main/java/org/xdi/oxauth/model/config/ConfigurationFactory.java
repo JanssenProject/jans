@@ -51,7 +51,7 @@ public class ConfigurationFactory {
 
     private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
 
-    private final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "LDAP_CONFIGUARION_RELOAD";
+    public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "LDAP_CONFIGUARION_RELOAD";
     private final static String EVENT_TYPE = "ConfigurationFactoryTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
