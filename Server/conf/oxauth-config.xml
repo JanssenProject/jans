@@ -304,6 +304,4 @@
 
     <imgLocation>/${config.oxauth.contextPath}/img</imgLocation>
 
-    <configuration-reload-trigger></configuration-reload-trigger>
-
 </configuration>
