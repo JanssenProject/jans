@@ -183,6 +183,7 @@ class Setup(object):
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_xml = '%s/conf/oxauth-config.xml' % self.tomcatHome
+        self.oxauth_config_reload = '%s/conf/oxauth.config.reload' % self.tomcatHome
         self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
@@ -223,6 +224,7 @@ class Setup(object):
 
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_xml: True,
+                     self.oxauth_config_reload: True,
                      self.oxTrust_properties: True,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
