@@ -49,9 +49,10 @@
     </scm>
 
     <modules>
+        <module>oxUtil</module>
         <module>oxLdap</module>
         <module>oxLdap-annotations</module>
-        <module>oxUtil</module>
+        <module>oxModel</module>
         <module>oxSaml</module>
         <module>oxService</module>
         <module>oxGwt</module>
@@ -171,6 +172,13 @@
                 <artifactId>httpclient</artifactId>
                 <version>4.2.5</version>
             </dependency>
+
+            <!-- Metrics -->
+			<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>3.1.2</version>
+			</dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.model.statistic;
+package org.xdi.model.metric;
 
 import java.io.Serializable;
 
@@ -12,12 +12,12 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 
 /**
- * base event statistic data class
+ * Base metric data class
  * 
  * @author Yuriy Movchan Date: 07/28/2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventData implements Serializable {
+public class MetricData implements Serializable {
 
 	private static final long serialVersionUID = -2520744744010853187L;
 

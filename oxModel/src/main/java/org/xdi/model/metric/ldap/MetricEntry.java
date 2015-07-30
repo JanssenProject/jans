@@ -2,7 +2,7 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.model.statistic;
+ */package org.xdi.model.metric.ldap;
 
 import java.util.Date;
 
@@ -11,15 +11,16 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 import org.xdi.model.ApplicationType;
+import org.xdi.model.metric.MetricEventType;
 
 /**
- * Statistic entry 
+ * Base metric entry 
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
 @LdapEntry(sortBy = "level")
-@LdapObjectClass(values = {"top", "oxStatistic"})
-public class StatisticEntry extends BaseEntry {
+@LdapObjectClass(values = {"top", "oxMetric"})
+public class MetricEntry extends BaseEntry {
 
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String id;
@@ -34,7 +35,7 @@ public class StatisticEntry extends BaseEntry {
 	private ApplicationType applicationType;
 
     @LdapAttribute(name = "oxEventType")
-	private StatisticEventType eventType;
+	private MetricEventType eventType;
 
     @LdapAttribute(name = "description")
 	private String description;
@@ -42,9 +43,9 @@ public class StatisticEntry extends BaseEntry {
     @LdapAttribute(name = "creationDate")
 	private Date creationDate;
 
-	public StatisticEntry() {}
+	public MetricEntry() {}
 
-	public StatisticEntry(String dn, String id, Date creationDate) {
+	public MetricEntry(String dn, String id, Date creationDate) {
 		super(dn);
 		this.id = id;
 		this.creationDate = creationDate;
@@ -82,11 +83,11 @@ public class StatisticEntry extends BaseEntry {
 		this.applicationType = applicationType;
 	}
 
-	public StatisticEventType getEventType() {
+	public MetricEventType getEventType() {
 		return eventType;
 	}
 
-	public void setEventType(StatisticEventType eventType) {
+	public void setEventType(MetricEventType eventType) {
 		this.eventType = eventType;
 	}
 
@@ -104,6 +105,15 @@ public class StatisticEntry extends BaseEntry {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("MetricEntry [id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
+				.append(", applicationType=").append(applicationType).append(", eventType=").append(eventType).append(", description=").append(description)
+				.append(", creationDate=").append(creationDate).append("]");
+		return builder.toString();
 	}
 
 }

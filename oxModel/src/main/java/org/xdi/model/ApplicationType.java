@@ -12,27 +12,27 @@ import java.util.Map;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
- * Statistic Counter Type
+ * Metric application type
  * 
  * @author Yuriy Movchan Date: 07/28/2015
  */
-public enum CounterType implements LdapEnum {
+public enum ApplicationType implements LdapEnum {
 
-	SUM("sum", "Sum"),
-	AVERAGE("average", "Average");
+	OX_AUTH("oxauth", "oxAuth"),
+	OX_TRUST("oxtrust", "oxTrust");
 
 	private String value;
 	private String displayName;
 
-	private static Map<String, CounterType> mapByValues = new HashMap<String, CounterType>();
+	private static Map<String, ApplicationType> mapByValues = new HashMap<String, ApplicationType>();
 
 	static {
-		for (CounterType enumType : values()) {
+		for (ApplicationType enumType : values()) {
 			mapByValues.put(enumType.getValue(), enumType);
 		}
 	}
 
-	private CounterType(String value, String displayName) {
+	private ApplicationType(String value, String displayName) {
 		this.value = value;
 		this.displayName = displayName;
 	}
@@ -45,7 +45,7 @@ public enum CounterType implements LdapEnum {
 		return displayName;
 	}
 
-	public static CounterType getByValue(String value) {
+	public static ApplicationType getByValue(String value) {
 		return mapByValues.get(value);
 	}
 
