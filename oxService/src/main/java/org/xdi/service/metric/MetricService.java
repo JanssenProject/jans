@@ -67,7 +67,7 @@ public abstract class MetricService implements Serializable {
     	this.registeredMetricTypes = new HashSet<MetricType>();
     	
     	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getComponentName()).build();
-    	ldapEntryReporter.start(60, TimeUnit.SECONDS);
+    	ldapEntryReporter.start(metricInterval, TimeUnit.SECONDS);
     }
 
 	@Observer(EVENT_TYPE)
