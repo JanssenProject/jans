@@ -53,6 +53,9 @@ public class BaseDnConfiguration {
     @XmlElement(name = "u2fBase")
     private String u2fBase;
 
+    @XmlElement(name = "metric")
+    private String metric;
+
     public String getUmaBase() {
         return umaBase;
     }
@@ -179,6 +182,14 @@ public class BaseDnConfiguration {
 
 	public void setU2fBase(String u2fBase) {
 		this.u2fBase = u2fBase;
+	}
+
+	public String getMetric() {
+		return metric;
+	}
+
+	public void setMetric(String metric) {
+		this.metric = metric;
 	}
 
 }
