@@ -37,10 +37,13 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 
 	@In
     private ApplianceService applianceService;
-    
+
+	@In
+	private ConfigurationFactory configurationFactory;
+
     @Create
     public void create() {
-    	init(60);
+    	init(configurationFactory.getConfiguration().getMetricReporterInterval());
     }
 
 	@Override
