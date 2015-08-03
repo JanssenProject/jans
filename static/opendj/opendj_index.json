@@ -78,6 +78,30 @@
 	},
 
 	{
+		"attribute": "oxStartDate",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "oxEndDate",
+		"type": "date",
+		"index": ["ordering"]
+	},
+
+	{
+		"attribute": "oxApplicationType",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
+		"attribute": "oxMetricType",
+		"type": "string",
+		"index": ["equality"]
+	},
+
+	{
 		"attribute": "myCustomAttr1",
 		"type": "string",
 		"index": ["equality"]

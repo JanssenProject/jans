@@ -2041,6 +2041,30 @@ attributeTypes: ( researchAndScholarshipEnabled-oid NAME 'researchAndScholarship
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxStartDate-oid NAME 'oxStartDate'
+  DESC 'Start date'
+  ORDERING generalizedTimeOrderingMatch
+  EQUALITY generalizedTimeMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxEndDate-oid NAME 'oxEndDate'
+  DESC 'End date'
+  ORDERING generalizedTimeOrderingMatch
+  EQUALITY generalizedTimeMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxApplicationType-oid NAME 'oxApplicationType'
+  DESC 'Application type'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxMetricType-oid NAME 'oxMetricType'
+  DESC 'Metric type'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
