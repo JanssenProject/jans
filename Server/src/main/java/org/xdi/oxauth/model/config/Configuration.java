@@ -120,6 +120,7 @@ public class Configuration {
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
+	private int metricReporterInterval;
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
@@ -1067,4 +1068,14 @@ public class Configuration {
     public void setImgLocation(String imgLocation) {
         this.imgLocation = imgLocation;
     }
+
+    @XmlElement(name = "metric-reporter-interval")
+    public int getMetricReporterInterval() {
+        return metricReporterInterval;
+    }
+
+    public void setMetricReporterInterval(int metricReporterInterval) {
+    	this.metricReporterInterval = metricReporterInterval;
+    }
+
 }
