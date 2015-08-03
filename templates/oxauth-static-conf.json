@@ -15,6 +15,7 @@
         "federationTrust":"ou=trust,ou=federation,o=%(inumOrg)s,o=gluu",
         "umaBase":"ou=uma,o=%(inumOrg)s,o=gluu",
         "umaPolicy":"ou=policies,ou=uma,o=%(inumOrg)s,o=gluu",
-        "u2fBase":"ou=u2f,o=%(inumOrg)s,o=gluu"
+        "u2fBase":"ou=u2f,o=%(inumOrg)s,o=gluu",
+        "metric":"ou=metric,o=%(inumOrg)s,o=gluu"
     }
 }
