@@ -45,8 +45,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 
 	@Override
 	public String baseDn() {
-        String metricBaseDn = ConfigurationFactory.instance().getBaseDn().getMetrics();
-		return metricBaseDn;
+		return ConfigurationFactory.instance().getBaseDn().getMetric();
 	}
 
 	@Override
