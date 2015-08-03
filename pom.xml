@@ -128,6 +128,11 @@
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>oxModel</artifactId>
+                <version>${oxCore.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
                 <version>${jettison.version}</version>
@@ -479,6 +484,13 @@
                 <version>2.3</version>
                 <scope>provided</scope>
             </dependency>
+
+            <!-- Metrics -->
+			<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>3.1.2</version>
+			</dependency>
 
             <!-- Hibernate -->
             <dependency>

@@ -47,6 +47,7 @@ import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.metric.OxAuthMetricType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
@@ -104,6 +105,9 @@ public class AuthenticationService {
     @In
     private SessionId sessionUser;
 
+    @In
+    private MetricService metricService;
+
     /**
      * Authenticate user.
      *
@@ -113,11 +117,30 @@ public class AuthenticationService {
      */
     public boolean authenticate(String userName, String password) {
         log.debug("Authenticating user with LDAP: username: {0}", userName);
-        if (this.ldapAuthConfigs == null) {
-            return localAuthenticate(userName, password);
-        } else {
-            return externalAuthenticate(userName, password);
-        }
+
+        boolean authenticated = false;
+
+        com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+        try {
+			if (this.ldapAuthConfigs == null) {
+				authenticated = localAuthenticate(userName, password);
+			} else {
+				authenticated = externalAuthenticate(userName, password);
+			}
+		} finally {
+			timerContext.stop();
+		}
+
+        OxAuthMetricType metricType;
+		if (authenticated) {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		}
+
+		metricService.incCounter(metricType);
+        
+        return authenticated;
     }
 
 	private boolean localAuthenticate(String userName, String password) {
@@ -169,20 +192,36 @@ public class AuthenticationService {
     		return authenticate(null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
     	}
     	
-		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
-			GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
-			LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+    	boolean authenticated = false;
 
-			boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
-			if (authenticated) {
-				return authenticated;
+    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+        try {
+			for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
+				GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
+				LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
+	
+				authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+				if (authenticated) {
+					break;
+				}
 			}
+        } finally {
+        	timerContext.stop();
+        }
+
+		OxAuthMetricType metricType;
+		if (authenticated) {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
 		}
-		
-		return false;
+
+		metricService.incCounter(metricType);
+
+		return authenticated;
     }
 
-    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
+    private boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
 		log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}'", primaryKey, keyValue);
 
 		List<?> baseDNs;
@@ -232,20 +271,33 @@ public class AuthenticationService {
 
     public boolean authenticate(String userName) {
         log.debug("Authenticating user with LDAP: username: {0}", userName);
-        User user = userService.getUser(userName);
-        if (user != null) {
-            if (!checkUserStatus(user)) {
-            	return false;
-            }
-
-            credentials.setUsername(user.getUserId());
-            credentials.setUser(user);
-            updateLastLogonUserTime(user);
-
-            return true;
-        }
         
-        return false;
+        boolean authenticated = false;
+
+    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+        try {
+	        User user = userService.getUser(userName);
+	        if ((user != null) && checkUserStatus(user)) {
+	            credentials.setUsername(user.getUserId());
+	            credentials.setUser(user);
+	            updateLastLogonUserTime(user);
+	
+	            authenticated = true;
+	        }
+        } finally {
+        	timerContext.stop();
+        }
+
+		OxAuthMetricType metricType;
+		if (authenticated) {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		}
+
+		metricService.incCounter(metricType);
+
+        return authenticated;
     }
 
     private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
