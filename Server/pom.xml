@@ -663,6 +663,10 @@
             <groupId>com.wordnik</groupId>
             <artifactId>swagger-servlet_2.9.1</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+		</dependency>
     </dependencies>
 
     <profiles>

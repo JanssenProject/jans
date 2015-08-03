@@ -86,6 +86,10 @@
             <artifactId>oxUtil</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxModel</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxrs</artifactId>
         </dependency>
