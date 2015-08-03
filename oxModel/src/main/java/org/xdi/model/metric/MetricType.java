@@ -14,7 +14,7 @@ import org.xdi.model.metric.ldap.MetricEntry;
  * 
  * @author Yuriy Movchan Date: 07/30/2015
  */
-public interface MetricEventType extends LdapEnum {
+public interface MetricType extends LdapEnum {
 
 	public String getValue();
 	public String getDisplayName();

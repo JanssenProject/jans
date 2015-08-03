@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -23,16 +23,12 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.model.ApplicationType;
-import org.xdi.model.metric.MetricEventType;
-import org.xdi.model.metric.counter.CounterMetricData;
-import org.xdi.model.metric.counter.CounterMetricEntry;
+import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.ldap.MetricEntry;
 import org.xdi.util.StringHelper;
 
@@ -58,7 +54,7 @@ public abstract class MetricService implements Serializable {
 
 	private MetricRegistry metricRegistry;
 
-	private Set<MetricEventType> registeredMetricEventTypes;
+	private Set<MetricType> registeredMetricTypes;
 
 	@Logger
 	private Log log;
@@ -66,64 +62,19 @@ public abstract class MetricService implements Serializable {
 	@In
 	private LdapEntryManager ldapEntryManager;
 
-	private AtomicBoolean isActive;
-	private long lastFinishedTime;
-
     public void init(int metricInterval) {
     	this.metricRegistry = new MetricRegistry();
-    	this.registeredMetricEventTypes = new HashSet<MetricEventType>();
-
-		this.isActive = new AtomicBoolean(false);
-		this.lastFinishedTime = System.currentTimeMillis();
-
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, metricInterval * 1000L));
+    	this.registeredMetricTypes = new HashSet<MetricType>();
+    	
+    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getComponentName()).build();
+    	ldapEntryReporter.start(60, TimeUnit.SECONDS);
     }
 
 	@Observer(EVENT_TYPE)
 	@Asynchronous
-	public void writeMetricTimerEvent() {
-		if (this.isActive.get()) {
-			return;
-		}
-
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
-
-		try {
-			writeMetric();
-		} catch (Throwable ex) {
-			log.error("Exception happened while writing metric data", ex);
-		} finally {
-			this.isActive.set(false);
-			this.lastFinishedTime = System.currentTimeMillis();
-			log.trace("Last finished time '{0}'", new Date(this.lastFinishedTime));
-		}
-	}
-
-	private void writeMetric() {
-		List<MetricEntry> result = new ArrayList<MetricEntry>();
-		
-		Set<MetricEventType> currentRegisteredMetricEventTypes = new HashSet<MetricEventType>(this.registeredMetricEventTypes);
-		for (MetricEventType metricEventType : currentRegisteredMetricEventTypes) {
-			if (metricEventType.getEventDataType().equals(CounterMetricData.class)) {
-				Counter counter = getCounter(metricEventType);
-				if (counter != null) {
-					long count = counter.getCount();
-
-					removeCounter(metricEventType);
-
-					CounterMetricData counterMetricData = new CounterMetricData(count);
-					CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
-					counterMetricEntry.setMetricData(counterMetricData);
-
-					result.add(counterMetricEntry);
-				}
-			}
-		}
-		
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!:" + result);
-	}
+	public void writeMetricEntries(List<MetricEntry> metricEntries, Date creationTime) {
+    	add(metricEntries, creationTime);
+    }
 
 	public void addBranch(String branchDn, String ou) {
 		SimpleBranch branch = new SimpleBranch();
@@ -148,17 +99,17 @@ public abstract class MetricService implements Serializable {
 		}
 	}
 
-	public void prepareBranch(Date creationDate, ApplicationType applicationType, String applianceInum) {
-		String baseDn = buildDn(null, creationDate, applicationType, applianceInum);
+	public void prepareBranch(Date creationDate, ApplicationType applicationType) {
+		String baseDn = buildDn(null, creationDate, applicationType);
 		// Create ou=YYYY-MM branch if needed
 		if (!containsBranch(baseDn)) {
 			// Create ou=application_type branch if needed
-			String applicationBaseDn = buildDn(null, null, applicationType, applianceInum);
+			String applicationBaseDn = buildDn(null, null, applicationType);
 			if (!containsBranch(applicationBaseDn)) {
 				// Create ou=appliance_inum branch if needed
-				String applianceBaseDn = buildDn(null, null, null, applianceInum);
+				String applianceBaseDn = buildDn(null, null, null);
 				if (!containsBranch(applianceBaseDn)) {
-					createBranch(applianceBaseDn, applianceInum);
+					createBranch(applianceBaseDn, applianceInum());
 				}
 
 				createBranch(applicationBaseDn, applicationType.getValue());
@@ -168,53 +119,62 @@ public abstract class MetricService implements Serializable {
 		}
 	}
 
-	public void add(MetricEntry metricEntry, String applianceInum) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType(), applianceInum);
+	@Asynchronous
+	public void add(List<MetricEntry> metricEntries, Date creationTime) {
+		prepareBranch(creationTime, ApplicationType.OX_AUTH);
+		
+		for (MetricEntry metricEntry : metricEntries) {
+			ldapEntryManager.persist(metricEntry);
+		}
+	}
+
+	public void add(MetricEntry metricEntry) {
+		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
 		ldapEntryManager.persist(metricEntry);
 	}
 
-	public void update(MetricEntry metricEntry, String applianceInum) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType(), applianceInum);
+	public void update(MetricEntry metricEntry) {
+		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
 		ldapEntryManager.merge(metricEntry);
 	}
 
-	public void remove(MetricEntry metricEntry, String applianceInum) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType(), applianceInum);
+	public void remove(MetricEntry metricEntry) {
+		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
 		ldapEntryManager.remove(metricEntry);
 	}
 
-	public MetricEntry getMetricEntryByDn(MetricEventType metricEventType, String metricEventDn) {
-		return ldapEntryManager.find(metricEventType.getMetricEntryType(), metricEventDn);
+	public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
+		return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
 	}
 
-	public Map<MetricEventType, List<MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
-			List<MetricEventType> metricEventTypes, Date startDate, Date endDate, String... returnAttributes) {
-		prepareBranch(null, applicationType, applianceInum);
+	public Map<MetricType, List<MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
+			List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
+		prepareBranch(null, applicationType);
 
-		Map<MetricEventType, List<MetricEntry>> result = new HashMap<MetricEventType, List<MetricEntry>>();
+		Map<MetricType, List<MetricEntry>> result = new HashMap<MetricType, List<MetricEntry>>();
 
-		if ((metricEventTypes == null) || (metricEventTypes.size() == 0)) {
+		if ((metricTypes == null) || (metricTypes.size() == 0)) {
 			return result;
 		}
 
 		String baseDn = buildDn(applianceInum, applicationType);
 
-		for (MetricEventType metricEventType : metricEventTypes) {
-			List<Filter> metricEventTypeFilters = new ArrayList<Filter>();
+		for (MetricType metricType : metricTypes) {
+			List<Filter> metricTypeFilters = new ArrayList<Filter>();
 
 			Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
-			Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxEventType", metricEventType.getValue());
-			metricEventTypeFilters.add(applicationTypeFilter);
-			metricEventTypeFilters.add(eventTypeTypeFilter);
+			Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxEventType", metricType.getValue());
+			metricTypeFilters.add(applicationTypeFilter);
+			metricTypeFilters.add(eventTypeTypeFilter);
 
-			Filter filter = Filter.createANDFilter(metricEventTypeFilters);
+			Filter filter = Filter.createANDFilter(metricTypeFilters);
 
-			List<MetricEntry> metricEventTypeResult = (List<MetricEntry>) ldapEntryManager.findEntries(baseDn,
-					metricEventType.getMetricEntryType(), returnAttributes, filter);
-			result.put(metricEventType, metricEventTypeResult);
+			List<MetricEntry> metricTypeResult = (List<MetricEntry>) ldapEntryManager.findEntries(baseDn,
+					metricType.getMetricEntryType(), returnAttributes, filter);
+			result.put(metricType, metricTypeResult);
 		}
 
 		return result;
@@ -224,61 +184,63 @@ public abstract class MetricService implements Serializable {
 		return String.valueOf(initialId.incrementAndGet());
 	}
 
-	public Counter getCounter(MetricEventType metricEventType) {
-		if (!registeredMetricEventTypes.contains(metricEventType)) {
-			registeredMetricEventTypes.add(metricEventType);
+	public Counter getCounter(MetricType metricType) {
+		if (!registeredMetricTypes.contains(metricType)) {
+			registeredMetricTypes.add(metricType);
 		}
 
-		return metricRegistry.counter(metricEventType.getMetricName());
+		return metricRegistry.counter(metricType.getMetricName());
 	}
 
-	private void removeCounter(MetricEventType metricEventType) {
-		if (registeredMetricEventTypes.contains(metricEventType)) {
-			registeredMetricEventTypes.remove(metricEventType);
-		}
-		metricRegistry.remove(metricEventType.getMetricName());
-	}
-
-	public Timer getTimer(MetricEventType metricEventType) {
-		if (!registeredMetricEventTypes.contains(metricEventType)) {
-			registeredMetricEventTypes.add(metricEventType);
+	public Timer getTimer(MetricType metricType) {
+		if (!registeredMetricTypes.contains(metricType)) {
+			registeredMetricTypes.add(metricType);
 		}
 
-		return metricRegistry.timer(metricEventType.getMetricName());
+		return metricRegistry.timer(metricType.getMetricName());
 	}
 
-	public void incCounter(MetricEventType metricEventType) {
-		Counter counter = getCounter(metricEventType);
+	public void incCounter(MetricType metricType) {
+		Counter counter = getCounter(metricType);
 		counter.inc();
 	}
 
 	public String buildDn(String applianceInum, ApplicationType applicationType) {
-		return buildDn(null, null, applicationType, applianceInum);
+		return buildDn(null, null, applicationType);
 	}
 
 	/*
 	 * Should return similar to this pattern DN:
-	 * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,o=gluu
+	 * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,ou=organization_name,o=gluu
 	 */
-	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String applianceInum) {
+	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
 		final StringBuilder dn = new StringBuilder();
-		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null)) {
+		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
 			dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
 		}
-		if (creationDate != null) {
+		if ((creationDate != null) && (applicationType != null)) {
 			dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
 		}
-		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
+		if (applicationType != null) {
 			dn.append(String.format("ou=%s,", applicationType.getValue()));
 		}
-		dn.append(String.format("ou=%s,", applianceInum));
+		dn.append(String.format("ou=%s,", applianceInum()));
 		dn.append(baseDn());
 
 		return dn.toString();
 	}
 
+	public Set<MetricType> getRegisteredMetricTypes() {
+		return registeredMetricTypes;
+	}
+
 	// Should return ou=metric,o=gluu
 	public abstract String baseDn();
+
+	// Should return appliance Inum
+	public abstract String applianceInum();
+
+	public abstract String getComponentName();
 
 	/**
 	 * Get MetricService instance

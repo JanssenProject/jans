@@ -19,28 +19,28 @@ public class TimerMetricEntry extends MetricEntry {
 
     @LdapJsonObject
     @LdapAttribute(name = "oxData")
-	private TimerMetricData eventData;
+	private TimerMetricData metricData;
 
 	public TimerMetricEntry() {}
 
-	public TimerMetricEntry(String dn, String id, Date creationDate, TimerMetricData eventData) {
+	public TimerMetricEntry(String dn, String id, Date creationDate, TimerMetricData metricData) {
 		super(dn, id, creationDate);
 
-		this.eventData = eventData;
+		this.metricData = metricData;
 	}
 
-	public TimerMetricData getEventData() {
-		return eventData;
+	public TimerMetricData getMetricData() {
+		return metricData;
 	}
 
-	public void setEventData(TimerMetricData eventData) {
-		this.eventData = eventData;
+	public void setMetricData(TimerMetricData metricData) {
+		this.metricData = metricData;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("TimerMetricEntry [eventData=").append(eventData).append(", toString()=").append(super.toString()).append("]");
+		builder.append("TimerMetricEntry [metricData=").append(metricData).append(", toString()=").append(super.toString()).append("]");
 		return builder.toString();
 	}
 

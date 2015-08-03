@@ -11,7 +11,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 import org.xdi.model.ApplicationType;
-import org.xdi.model.metric.MetricEventType;
+import org.xdi.model.metric.MetricType;
 
 /**
  * Base metric entry 
@@ -34,11 +34,8 @@ public class MetricEntry extends BaseEntry {
     @LdapAttribute(name = "oxApplicationType")
 	private ApplicationType applicationType;
 
-    @LdapAttribute(name = "oxEventType")
-	private MetricEventType eventType;
-
-    @LdapAttribute(name = "description")
-	private String description;
+    @LdapAttribute(name = "oxMetricType")
+	private MetricType metricType;
 
     @LdapAttribute(name = "creationDate")
 	private Date creationDate;
@@ -83,20 +80,12 @@ public class MetricEntry extends BaseEntry {
 		this.applicationType = applicationType;
 	}
 
-	public MetricEventType getEventType() {
-		return eventType;
+	public MetricType getMetricType() {
+		return metricType;
 	}
 
-	public void setEventType(MetricEventType eventType) {
-		this.eventType = eventType;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
+	public void setMetricType(MetricType metricType) {
+		this.metricType = metricType;
 	}
 
 	public Date getCreationDate() {
@@ -111,7 +100,7 @@ public class MetricEntry extends BaseEntry {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("MetricEntry [id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
-				.append(", applicationType=").append(applicationType).append(", eventType=").append(eventType).append(", description=").append(description)
+				.append(", applicationType=").append(applicationType).append(", metricType=").append(metricType)
 				.append(", creationDate=").append(creationDate).append("]");
 		return builder.toString();
 	}

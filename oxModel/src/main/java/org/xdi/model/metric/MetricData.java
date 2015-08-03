@@ -10,7 +10,6 @@ import java.io.Serializable;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-
 /**
  * Base metric data class
  * 

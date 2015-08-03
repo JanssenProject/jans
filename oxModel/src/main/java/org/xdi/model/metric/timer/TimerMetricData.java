@@ -20,23 +20,29 @@ public class TimerMetricData extends MetricData {
 	private static final long serialVersionUID = -2322501012136295255L;
 
 	private long count;
-	private double meanRate;
 
+	private double meanRate;
 	private double oneMinuteRate, fiveMinuteRate, fifteenMinuteRate;
+	private String rateUnit;
 
 	private double min, max;
+	private String durationUnit;
 
 	public TimerMetricData() {
 	}
 
-	public TimerMetricData(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, double min, double max) {
+	public TimerMetricData(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, String rateUnit, double min, double max, String durationUnit) {
 		this.count = count;
+
 		this.meanRate = meanRate;
 		this.oneMinuteRate = oneMinuteRate;
 		this.fiveMinuteRate = fiveMinuteRate;
 		this.fifteenMinuteRate = fifteenMinuteRate;
+		this.rateUnit = rateUnit;
+
 		this.min = min;
 		this.max = max;
+		this.durationUnit = durationUnit;
 	}
 
 	public long getCount() {
@@ -79,6 +85,14 @@ public class TimerMetricData extends MetricData {
 		this.fifteenMinuteRate = fifteenMinuteRate;
 	}
 
+	public String getRateUnit() {
+		return rateUnit;
+	}
+
+	public void setRateUnit(String rateUnit) {
+		this.rateUnit = rateUnit;
+	}
+
 	public double getMin() {
 		return min;
 	}
@@ -95,12 +109,20 @@ public class TimerMetricData extends MetricData {
 		this.max = max;
 	}
 
+	public String getDurationUnit() {
+		return durationUnit;
+	}
+
+	public void setDurationUnit(String durationUnit) {
+		this.durationUnit = durationUnit;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("TimerMetricData [count=").append(count).append(", meanRate=").append(meanRate).append(", oneMinuteRate=").append(oneMinuteRate)
-				.append(", fiveMinuteRate=").append(fiveMinuteRate).append(", fifteenMinuteRate=").append(fifteenMinuteRate).append(", min=").append(min)
-				.append(", max=").append(max).append("]");
+				.append(", fiveMinuteRate=").append(fiveMinuteRate).append(", fifteenMinuteRate=").append(fifteenMinuteRate).append(", rateUnit=")
+				.append(rateUnit).append(", min=").append(min).append(", max=").append(max).append(", durationUnit=").append(durationUnit).append("]");
 		return builder.toString();
 	}
 
