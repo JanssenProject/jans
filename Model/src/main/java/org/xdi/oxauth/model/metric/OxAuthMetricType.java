@@ -27,7 +27,8 @@ public enum OxAuthMetricType implements MetricType {
 
 		OXAUTH_USER_AUTHENTICATION_SUCCESS("user_authentication_success",  "Count successfull oxAuth user authentications", CounterMetricData.class, CounterMetricEntry.class),
 		OXAUTH_USER_AUTHENTICATION_FAILURES("user_authentication_failure", "Count failed oxAuth user authentications", CounterMetricData.class, CounterMetricEntry.class),
-		OXAUTH_USER_AUTHENTICATION_RATE("user_authentication_rate", "Authentication rate", TimerMetricData.class, TimerMetricEntry.class);
+		OXAUTH_USER_AUTHENTICATION_RATE("user_authentication_rate", "User authentication rate", TimerMetricData.class, TimerMetricEntry.class),
+		DYNAMIC_CLIENT_REGISTRATION_RATE("dynamic_client_registration_rate", "Dynamic client registration rate", TimerMetricData.class, TimerMetricEntry.class);
 
 		private String value;
 		private String displayName;

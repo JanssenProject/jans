@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.metric.OxAuthMetricType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.registration.Client;
@@ -32,6 +33,7 @@ import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.service.MetricService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
@@ -44,6 +46,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
 import java.net.URI;
 import java.util.*;
 
@@ -76,12 +79,23 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private TokenService tokenService;
 
     @In
+    private MetricService metricService;
+
+    @In
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
 
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
+        com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.DYNAMIC_CLIENT_REGISTRATION_RATE).time();
+        try {
+        	return registerClientImpl(requestParams, securityContext);
+        } finally {
+        	timerContext.stop();
+        }
+    }
 
-        Response.ResponseBuilder builder = Response.ok();
+	private Response registerClientImpl(String requestParams, SecurityContext securityContext) {
+		Response.ResponseBuilder builder = Response.ok();
 
         try {
             final RegisterRequest r = RegisterRequest.fromJson(requestParams);
@@ -196,7 +210,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         builder.cacheControl(ServerUtil.cacheControl(true, false));
         builder.header("Pragma", "no-cache");
         return builder.build();
-    }
+	}
 
     public Response.ResponseBuilder internalErrorResponse() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
