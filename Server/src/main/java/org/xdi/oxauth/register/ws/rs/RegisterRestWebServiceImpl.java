@@ -181,6 +181,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         if (externalDynamicClientRegistrationService.isEnabled()) {
                             externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
                         }
+                        
+                        Date currentTime = Calendar.getInstance().getTime();
+                        client.setLastAccessTime(currentTime);
+                        client.setLastLogonTime(currentTime);
 
                         clientService.persist(client);
 
