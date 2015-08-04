@@ -207,7 +207,7 @@ public class LdapEntryReporter extends ScheduledReporter {
 	        	long count = counter.getCount();
 				
 				// Remove to avoid writing not changed statistic
-	        	registeredMetricTypes.remove(metricType);
+	        	// registeredMetricTypes.remove(metricType);
 	        	
 	        	CounterMetricData counterMetricData = new CounterMetricData(count);
 				CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
@@ -238,6 +238,14 @@ public class LdapEntryReporter extends ScheduledReporter {
 						getRateUnit(),
 						convertDuration(snapshot.getMin()),
 						convertDuration(snapshot.getMax()),
+						convertDuration(snapshot.getMean()),
+						convertDuration(snapshot.getStdDev()),
+						convertDuration(snapshot.getMedian()),
+						convertDuration(snapshot.get75thPercentile()),
+						convertDuration(snapshot.get95thPercentile()),
+						convertDuration(snapshot.get98thPercentile()),
+						convertDuration(snapshot.get99thPercentile()),
+						convertDuration(snapshot.get999thPercentile()),
 						getDurationUnit());
 				TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
 				timerMetricEntry.setMetricData(timerMetricData);
