@@ -167,8 +167,13 @@ public abstract class MetricService implements Serializable {
 
 			Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
 			Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxEventType", metricType.getValue());
+			Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(startDate));
+			Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
+
 			metricTypeFilters.add(applicationTypeFilter);
 			metricTypeFilters.add(eventTypeTypeFilter);
+			metricTypeFilters.add(startDateFilter);
+			metricTypeFilters.add(endDateFilter);
 
 			Filter filter = Filter.createANDFilter(metricTypeFilters);
 
