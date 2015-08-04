@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9 February 25, 2015
  */
 @XmlRootElement(name = "configuration")
