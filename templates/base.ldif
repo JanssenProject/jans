@@ -231,3 +231,12 @@ dn: ou=authentication_requests,ou=u2f,o=%(inumOrg)s,o=gluu
 objectclass: top
 objectclass: organizationalUnit
 ou: authentication_requests
+
+################################
+
+# Metric data - LEVEL 3
+dn: ou=metric,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
+ou: metric
+
