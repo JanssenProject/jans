@@ -151,6 +151,12 @@ public class Client {
 
     @LdapAttribute(name = "oxAuthSubjectIdentifier")
     private String subjectIdentifier;
+    
+    @LdapAttribute(name = "oxLastAccessTime")
+    private Date lastAccessTime;
+
+    @LdapAttribute(name = "oxLastLogonTime")
+    private Date lastLogonTime;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -904,7 +910,23 @@ public class Client {
         this.subjectIdentifier = subjectIdentifier;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public Date getLastAccessTime() {
+		return lastAccessTime;
+	}
+
+	public void setLastAccessTime(Date lastAccessTime) {
+		this.lastAccessTime = lastAccessTime;
+	}
+
+	public Date getLastLogonTime() {
+		return lastLogonTime;
+	}
+
+	public void setLastLogonTime(Date lastLogonTime) {
+		this.lastLogonTime = lastLogonTime;
+	}
+
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
