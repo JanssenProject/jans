@@ -16,7 +16,7 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: profile
 inum: %(inumOrg)s!0009!43F1
-defaultScope: true
+defaultScope: false
 description: This information includes: name, family_name, given_name, middle_name, nickname,
   preferred username, picture, website, gender, birthdate, zoneinfo, locale and when the profile
   was last updated.
@@ -41,7 +41,7 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: email
 inum: %(inumOrg)s!0009!764C
-defaultScope: true
+defaultScope: false
 description: Your email address and whether its verified.
 oxAuthClaim: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -52,7 +52,7 @@ objectClass: oxAuthCustomScope
 displayName: address
 inum: %(inumOrg)s!0009!C17A
 description: This data has information about your address
-defaultScope: true
+defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!6609,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -69,14 +69,14 @@ objectClass: oxAuthCustomScope
 displayName: phone
 inum: %(inumOrg)s!0009!D491
 description: Your phone number
-defaultScope: true
+defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
-defaultScope: true
+defaultScope: false
 description: Client Info
 displayName: clientinfo
 inum: %(inumOrg)s!0009!341A
@@ -93,7 +93,7 @@ objectClass: oxAuthCustomScope
 displayName: user_name
 inum: %(inumOrg)s!0009!10B2
 description: Your local username in the Gluu Server
-defaultScope: true
+defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
