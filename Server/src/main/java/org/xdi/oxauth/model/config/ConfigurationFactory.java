@@ -36,8 +36,8 @@ import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.util.FileConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.properties.FileConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -76,21 +76,21 @@ public class ConfigurationFactory {
 
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
 
+    @Logger
+    private Log log;
+
     private final String CONFIG_FILE_NAME = "oxauth-config.xml";
     private final String ERRORS_FILE_NAME = "oxauth-errors.json";
     private final String STATIC_CONF_FILE_NAME = "oxauth-static-conf.json";
     private final String WEB_KEYS_FILE_NAME = "oxauth-web-keys.json";
     private final String SALT_FILE_NAME = "salt";
 
-    private String CONF_DIR, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
+    private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
     private FileConfiguration ldapConfiguration;
     private Configuration m_conf;
     private StaticConf m_staticConf;
     private JSONWebKeySet m_jwks;
-
-    @Logger
-    private Log log;
 
     private AtomicBoolean isActive;
 
@@ -103,13 +103,13 @@ public class ConfigurationFactory {
     @Create
     public void init() {
     	loadLdapConfiguration();
-    	this.CONF_DIR = confDir();
+    	this.confDir = confDir();
 
-    	this.configFilePath = CONF_DIR + CONFIG_FILE_NAME;
-    	this.errorsFilePath = CONF_DIR + ERRORS_FILE_NAME;
-    	this.staticConfFilePath = CONF_DIR + STATIC_CONF_FILE_NAME;
+    	this.configFilePath = confDir + CONFIG_FILE_NAME;
+    	this.errorsFilePath = confDir + ERRORS_FILE_NAME;
+    	this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
     	this.webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE_NAME;
-    	this.saltFilePath = CONF_DIR + SALT_FILE_NAME;
+    	this.saltFilePath = confDir + SALT_FILE_NAME;
     }
 
     @Observer("org.jboss.seam.postInitialization")
@@ -140,20 +140,10 @@ public class ConfigurationFactory {
         }
     }
 
-    private String confDir() {
-        final String confDir = getLdapConfiguration().getString("confDir");
-        if (StringUtils.isNotBlank(confDir)) {
-            return confDir;
-        }
-
-        return DIR;
-    }
-
     private void reloadConfiguration() {
         File reloadMarker = new File(CONFIG_RELOAD_MARKER_FILE_PATH);
 
         if (reloadMarker.exists()) {
-
             boolean isAnyChanged = false;
 
             File ldapFile = new File(LDAP_FILE_PATH);
@@ -244,6 +234,15 @@ public class ConfigurationFactory {
 		}
     }
 
+    private String confDir() {
+        final String confDir = getLdapConfiguration().getString("confDir");
+        if (StringUtils.isNotBlank(confDir)) {
+            return confDir;
+        }
+
+        return DIR;
+    }
+
     public FileConfiguration getLdapConfiguration() {
         return ldapConfiguration;
     }
@@ -271,9 +270,9 @@ public class ConfigurationFactory {
 //            LOG.warn("Emergency configuration load from files.");
 //            createFromFile();
         } else {
-        	determineConfigurationLastModificationTime();
             LOG.info("Configuration loaded successfully.");
         }
+    	determineConfigurationLastModificationTime();
     }
 
     private void createFromFile() {
