@@ -62,6 +62,39 @@ inum: %(inumOrg)s!0005!18CF
 urn: urn:gluu:dir:attribute-def:oxAuthScope
 
 ######################################
+# Default Scopes
+######################################
+dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+dn: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+dn: inum=%(inumOrg)s!0009!C17A,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+dn: inum=%(inumOrg)s!0009!D491,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+dn: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: defaultScope
+defaultScope: true
+
+######################################
 # Scopes
 ######################################
 dn: inum=%(inumOrg)s!0009!7D01,ou=scopes,o=%(inumOrg)s,o=gluu
