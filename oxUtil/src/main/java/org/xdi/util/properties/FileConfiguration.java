@@ -7,7 +7,6 @@
 package org.xdi.util.properties;
 
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,8 +31,6 @@ public class FileConfiguration {
 	private boolean loaded;
 
 	protected PropertiesConfiguration propertiesConfiguration;
-	protected String configurationFolderPrefix = "";
-
 	protected Properties properties;
 
 	private final ReentrantLock reloadLock = new ReentrantLock();
@@ -51,26 +48,16 @@ public class FileConfiguration {
 		if (isResource) {
 			loadResourceProperties();
 		} else {
-			initProperties();
 			loadProperties();
 		}
 	}
 
-	protected void initProperties() {
-		String tomcatHome = System.getProperty("catalina.home");
-		if (tomcatHome != null) {
-			log.debug("Setting the tomcat home directory");
-			setConfigurationFolderPrefix(System.getProperty("catalina.home") + File.separator + "conf" + File.separator);
-		}
-		log.debug(String.format("Loading '%s' configuration file from tomcat config folder", this.fileName));
-	}
-
 	protected void loadProperties() {
 		try {
-			this.propertiesConfiguration = new PropertiesConfiguration(configurationFolderPrefix + this.fileName);
+			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
-			log.debug(String.format("Failed to load '%s' configuration file from tomcat config folder", this.fileName));
+			log.debug(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
 		}
 	}
 
@@ -84,7 +71,7 @@ public class FileConfiguration {
 		}
 	}
 
-	public void reloadProperties() {
+	public void reload() {
 		this.isReload = true;
 
 		reloadLock.lock(); // block until condition holds
@@ -113,14 +100,6 @@ public class FileConfiguration {
 
 	public boolean isLoaded() {
 		return loaded;
-	}
-
-	public String getConfigurationFolderPrefix() {
-		return configurationFolderPrefix;
-	}
-
-	public void setConfigurationFolderPrefix(String configurationFolderPrefix) {
-		this.configurationFolderPrefix = configurationFolderPrefix;
 	}
 
 	public void saveProperties() {
@@ -245,5 +224,32 @@ public class FileConfiguration {
 	public void setString(String key, String value) {
 		this.propertiesConfiguration.setProperty(key, value);
 	}
+
+	public boolean isKeyExist(String key) {
+        @SuppressWarnings("unchecked")
+        Iterator<String> keyIterator = propertiesConfiguration.getKeys();
+        while (keyIterator.hasNext()) {
+            String k = keyIterator.next();
+            if (k.equals(key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public String getKey(String value) {
+        @SuppressWarnings("unchecked")
+		Iterator<String> keyIterator = propertiesConfiguration.getKeys();
+        while (keyIterator.hasNext()) {
+            String k = keyIterator.next();
+            String v = propertiesConfiguration.getString(k);
+            if (v.equals(value)) {
+                return k;
+            }
+        }
+
+        return null;
+    }
 
 }

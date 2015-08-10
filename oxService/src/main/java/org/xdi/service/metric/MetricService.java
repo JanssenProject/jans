@@ -46,7 +46,9 @@ public abstract class MetricService implements Serializable {
 
 	private static final long serialVersionUID = -3393618600428448743L;
 
-	private final static String EVENT_TYPE = "MetricServiceTimerEvent";
+	private static final String EVENT_TYPE = "MetricServiceTimerEvent";
+
+	private static final int DEFAULT_METRIC_REPORTER_INTERVAL = 60;
 
 	private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 	
@@ -67,7 +69,12 @@ public abstract class MetricService implements Serializable {
     	this.registeredMetricTypes = new HashSet<MetricType>();
     	
     	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getComponentName()).build();
-    	ldapEntryReporter.start(metricInterval, TimeUnit.SECONDS);
+    	
+    	int metricReporterInterval = metricInterval;
+    	if (metricReporterInterval <= 0) {
+    		metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
+    	}
+    	ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
     }
 
 	@Observer(EVENT_TYPE)
