@@ -51,8 +51,19 @@ public class AuthenticationCustomScript extends CustomScript {
 			setModuleProperties(moduleProperties);
 		}
 
-		SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty("usage_type", usageType.getValue());
-		moduleProperties.add(usageTypeModuleProperties);
+		boolean found = false; 
+		for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
+			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
+				moduleProperty.setValue2(usageType.getValue());
+				found = true;
+				break;
+			}
+		}
+		
+		if (!found) {
+			SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty("usage_type", usageType.getValue());
+			moduleProperties.add(usageTypeModuleProperties);
+		}
 	}
 
 }
