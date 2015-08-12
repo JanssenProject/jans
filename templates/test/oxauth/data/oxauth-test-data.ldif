@@ -9,6 +9,7 @@ displayName: oxAuth Client Application Type
 gluuAttributeName: oxAuthAppType
 gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthAppType
@@ -24,6 +25,7 @@ displayName: oxAuth Client ID Token Signed Response Algorithm
 gluuAttributeName: oxAuthIdTokenSignedResponseAlg
 gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthIdTokenSignedResponseAlg
@@ -39,6 +41,7 @@ displayName: oxAuth Client Redirect URI
 gluuAttributeName: oxAuthRedirectURI
 gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthRedirectURI
@@ -54,6 +57,7 @@ displayName: oxAuth Client Scope
 gluuAttributeName: oxAuthScope
 gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
 oxAuthClaimName: oxAuthScope

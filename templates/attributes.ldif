@@ -8,6 +8,7 @@ gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 oxAuthClaimName: inum
 gluuStatus: active
@@ -22,6 +23,7 @@ displayName: oxAuth Subject Identifier
 gluuAttributeName: oxAuthSubjectIdentifier
 gluuAttributeOrigin: oxAuthClient
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: sub
@@ -57,6 +59,7 @@ gluuAttributeName: uid
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 oxAuthClaimName: user_name
 gluuStatus: active
@@ -74,6 +77,7 @@ displayName: Preferred Username
 gluuAttributeName: preferredUsername
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -124,6 +128,7 @@ displayName: Email Verified
 gluuAttributeName: emailVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -140,6 +145,7 @@ displayName: Phone Number Verified
 gluuAttributeName: phoneNumberVerified
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -155,6 +161,7 @@ displayName: OpenID Connect JSON formatted address
 gluuAttributeName: address
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -171,6 +178,7 @@ displayName: Last Updated
 gluuAttributeName: updatedAt
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
@@ -221,6 +229,7 @@ displayName: memberOf
 gluuAttributeName: memberOf
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 inum: %(inumOrg)s!0005!D2E0
@@ -322,6 +331,7 @@ displayName: iname
 gluuAttributeName: iname
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: iname
@@ -519,6 +529,7 @@ displayName: Organization i-number
 gluuAttributeName: o
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 oxAuthClaimName: o
 gluuStatus: active
@@ -892,6 +903,7 @@ description: Specifies the person's relationship(s) to the institution
 displayName: eduPersonAffiliation
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.1
@@ -904,6 +916,7 @@ gluuAttributeName: eduPersonNickName
 displayName: eduPersonNickName
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.2
@@ -921,6 +934,7 @@ description: The distinguished name (DN) of the directory entry
 displayName: eduPersonOrgDN
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.3
@@ -938,6 +952,7 @@ description: The distinguished name(s) (DN) of the directory entries
 displayName: eduPersonOrgUnitDN
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.4
@@ -953,6 +968,7 @@ description: Specifies the person's primary relationship to the
 displayName: eduPersonPrimaryAffiliation
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn:oid:1.3.6.1.4.1.5923.1.1.1.5
@@ -972,6 +988,7 @@ description: A scoped identifier for a person. It should be
 displayName: eduPersonPrincipalName
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.6
@@ -985,6 +1002,7 @@ description: URI (either URN or URL) that indicates a set of rights to specific 
 displayName: eduPersonEntitlement
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.7
@@ -999,6 +1017,7 @@ description: The distinguished name (DN) of the directory entry representing
 displayName: eduPersonPrimaryOrgUnitDN
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
@@ -1021,6 +1040,7 @@ description: Specifies the person's affiliation within a particular security dom
 displayName: eduPersonScopedAffiliation
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.9
@@ -1034,6 +1054,7 @@ description: A persistent, non-reassigned, opaque identifier for a principal.
 displayName: eduPersonTargetedID
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.10
@@ -1048,6 +1069,7 @@ description: Set of URIs that assert compliance with specific standards
 displayName: eduPersonAssurance
 gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
+gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
