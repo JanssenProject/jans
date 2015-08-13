@@ -38,6 +38,7 @@ import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
@@ -56,6 +57,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.*;
@@ -262,6 +264,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
+        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
+        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute("inum"));
+
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
         }
@@ -370,6 +375,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
+
+        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
+        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute("inum"));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
