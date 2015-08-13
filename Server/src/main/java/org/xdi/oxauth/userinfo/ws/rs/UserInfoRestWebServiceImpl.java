@@ -92,6 +92,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 	@In
 	private ExternalDynamicScopeService externalDynamicScopeService;
 
+    @In
+    private ConfigurationFactory configurationFactory;
+
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
         return requestUserInfo(accessToken, authorization, securityContext);
@@ -265,7 +268,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
@@ -377,7 +381,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());

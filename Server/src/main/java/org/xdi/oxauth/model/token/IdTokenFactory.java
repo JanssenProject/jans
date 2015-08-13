@@ -78,6 +78,9 @@ public class IdTokenFactory {
     @In
     private AttributeService attributeService;
 
+    @In
+    private ConfigurationFactory configurationFactory;
+
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
                                      Set<String> scopes) throws SignatureException, InvalidJwtException,
@@ -217,7 +220,8 @@ public class IdTokenFactory {
             }
         }
 
-        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
@@ -284,7 +288,8 @@ public class IdTokenFactory {
         jwe.getClaims().setExpirationTime(expiration);
         jwe.getClaims().setIssuedAt(issuedAt);
 
-        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
 
         if (authorizationGrant.getAcrValues() != null) {
             jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
