@@ -69,18 +69,18 @@ import java.util.*;
 @AutoCreate
 public class IdTokenFactory {
 
-	@In
-	private ExternalDynamicScopeService externalDynamicScopeService;
+    @In
+    private ExternalDynamicScopeService externalDynamicScopeService;
 
-	@In
-	private ScopeService scopeService;
+    @In
+    private ScopeService scopeService;
 
-	@In
-	private AttributeService attributeService;
+    @In
+    private AttributeService attributeService;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                            AuthorizationCode authorizationCode, AccessToken accessToken,
-                                            Set<String> scopes) throws SignatureException, InvalidJwtException,
+                                     AuthorizationCode authorizationCode, AccessToken accessToken,
+                                     Set<String> scopes) throws SignatureException, InvalidJwtException,
             StringEncrypter.EncryptionException, InvalidClaimException {
         Jwt jwt = new Jwt();
         JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
@@ -137,11 +137,11 @@ public class IdTokenFactory {
 
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
-        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
-        		dynamicScopes.add(scope.getDisplayName());
-        		continue;
-        	}
+            org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+            if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+                dynamicScopes.add(scope.getDisplayName());
+                continue;
+            }
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 if (scope.getIsOxAuthGroupClaims()) {
@@ -217,10 +217,8 @@ public class IdTokenFactory {
             }
         }
 
-        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
-
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
         }
 
         // Signature
@@ -260,8 +258,8 @@ public class IdTokenFactory {
     }
 
     public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                               AuthorizationCode authorizationCode, AccessToken accessToken,
-                                               Set<String> scopes) throws InvalidJweException, InvalidClaimException {
+                                        AuthorizationCode authorizationCode, AccessToken accessToken,
+                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException {
         Jwe jwe = new Jwe();
 
         // Header
@@ -283,8 +281,6 @@ public class IdTokenFactory {
 
         jwe.getClaims().setExpirationTime(expiration);
         jwe.getClaims().setIssuedAt(issuedAt);
-
-        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         if (authorizationGrant.getAcrValues() != null) {
             jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
@@ -308,11 +304,11 @@ public class IdTokenFactory {
 
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
-        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-        		dynamicScopes.add(scope.getDisplayName());
-        		continue;
-        	}
+            org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+            if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+                dynamicScopes.add(scope.getDisplayName());
+                continue;
+            }
 
             if (scope != null && scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -365,7 +361,7 @@ public class IdTokenFactory {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
         }
 
         // Encryption

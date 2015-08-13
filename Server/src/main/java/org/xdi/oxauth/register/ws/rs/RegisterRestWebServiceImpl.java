@@ -19,7 +19,6 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -29,7 +28,6 @@ import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.registration.RegisterParamsValidator;
 import org.xdi.oxauth.model.token.HandleTokenFactory;
-import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.InumService;
@@ -136,26 +134,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         client.setClientSecret(generatedClientSecret);
                         client.setScopes(scopes);
                         client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
-
-                        if (r.getSubjectType() != null && r.getSubjectType().equals(SubjectType.PAIRWISE)) {
-                            String salt = UUID.randomUUID().toString();
-                            SubjectIdentifierGenerator subjectIdentifierGenerator = new SubjectIdentifierGenerator(salt);
-                            String sectorIdentifier = null;
-
-                            if (StringUtils.isNotBlank(r.getSectorIdentifierUri())) {
-                                URI uri = new URI(r.getSectorIdentifierUri());
-                                sectorIdentifier = uri.getHost();
-                            } else {
-                                URI uri = new URI(r.getRedirectUris().get(0));
-                                sectorIdentifier = uri.getHost();
-                            }
-
-                            String pairwiseSubjectIdentifier = subjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
-                                    sectorIdentifier, inum, generatedClientSecret.getBytes());
-                            client.setSubjectIdentifier(pairwiseSubjectIdentifier);
-                        } else {
-                            client.setSubjectIdentifier(inum);
-                        }
 
                         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                         client.setClientIdIssuedAt(calendar.getTime());

@@ -149,9 +149,6 @@ public class Client {
     @LdapAttribute(name = "oxAuthFederationMetadataURI")
     private String federationURI;
 
-    @LdapAttribute(name = "oxAuthSubjectIdentifier")
-    private String subjectIdentifier;
-    
     @LdapAttribute(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
@@ -900,14 +897,6 @@ public class Client {
 
     public void setFederationURI(String p_federationURI) {
         federationURI = p_federationURI;
-    }
-
-    public String getSubjectIdentifier() {
-        return subjectIdentifier;
-    }
-
-    public void setSubjectIdentifier(String subjectIdentifier) {
-        this.subjectIdentifier = subjectIdentifier;
     }
 
     public Date getLastAccessTime() {
