@@ -265,7 +265,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute("inum"));
+        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
@@ -377,7 +377,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getUser().getAttribute("inum"));
+        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
@@ -418,6 +418,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             throws JSONException, InvalidClaimException {
         JsonWebResponse jsonWebResponse = new JsonWebResponse(); 
 
+        // Claims
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
         	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
@@ -455,6 +456,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
             }
+
+            jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
         }
 
         if (authorizationGrant.getJwtAuthorizationRequest() != null
@@ -508,7 +511,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             String pairwiseSubjectIdentifier = subjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
                     sectorIdentifier, sub, client.getClientSecret().getBytes());
-            jsonWebResponse.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, pairwiseSubjectIdentifier);
+            jsonWebResponse.setSubjectIdentifier(pairwiseSubjectIdentifier);
         }
         */
 
