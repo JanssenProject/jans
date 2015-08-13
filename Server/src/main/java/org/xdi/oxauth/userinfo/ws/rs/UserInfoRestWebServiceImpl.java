@@ -9,7 +9,6 @@ package org.xdi.oxauth.userinfo.ws.rs;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -39,7 +38,6 @@ import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
@@ -58,7 +56,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.*;
@@ -265,9 +262,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwt.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
-
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
         }
@@ -376,8 +370,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 }
             }
         }
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jwe.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
@@ -414,7 +406,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     /**
      * Builds a JSon String with the response parameters.
      */
-    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws JSONException, InvalidClaimException {
+    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
+            throws JSONException, InvalidClaimException {
         JsonWebResponse jsonWebResponse = new JsonWebResponse(); 
 
         List<String> dynamicScopes = new ArrayList<String>();
@@ -486,8 +479,30 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        jsonWebResponse.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, authorizationGrant.getClient().getSubjectIdentifier());
+        /*
+        Client client = authorizationGrant.getClient();
+        if (client != null && jsonWebResponse.getClaims().getClaim(JwtClaimName.SUBJECT_IDENTIFIER) != null &&
+                client.getSubjectType() != null &&
+                SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE)) {
+            String sub = jsonWebResponse.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
+
+            String salt = UUID.randomUUID().toString();
+            SubjectIdentifierGenerator subjectIdentifierGenerator = new SubjectIdentifierGenerator(salt);
+            String sectorIdentifier = null;
+
+            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
+                URI uri = new URI(client.getSectorIdentifierUri());
+                sectorIdentifier = uri.getHost();
+            } else {
+                URI uri = new URI(client.getRedirectUris()[0]);
+                sectorIdentifier = uri.getHost();
+            }
+
+            String pairwiseSubjectIdentifier = subjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
+                    sectorIdentifier, sub, client.getClientSecret().getBytes());
+            jsonWebResponse.getClaims().setClaim(JwtClaimName.SUBJECT_IDENTIFIER, pairwiseSubjectIdentifier);
+        }
+        */
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
         	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
