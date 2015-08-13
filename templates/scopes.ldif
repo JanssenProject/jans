@@ -10,7 +10,6 @@ inum: %(inumOrg)s!0009!F0C4
 defaultScope: true
 description: A persistent but non-identifiable correlation key released by your OpenID Provider.
 oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CB,ou=attributes,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top

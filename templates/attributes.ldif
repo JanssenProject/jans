@@ -18,22 +18,6 @@ objectClass: gluuAttribute
 urn: urn:gluu:dir:attribute-def:inum
 description: XRI i-number, persistent non-reassignable identifier
 
-dn: inum=%(inumOrg)s!0005!18CB,ou=attributes,o=%(inumOrg)s,o=gluu
-displayName: oxAuth Subject Identifier
-gluuAttributeName: inum
-gluuAttributeOrigin: gluuPerson
-gluuAttributeType: string
-gluuAttributeEditType: admin
-gluuAttributeViewType: user
-gluuAttributeViewType: admin
-oxAuthClaimName: sub
-gluuStatus: active
-inum: %(inumOrg)s!0005!18CB
-objectClass: top
-objectClass: gluuAttribute
-urn: urn:gluu:dir:attribute-def:SubjectIdentifier
-description: XRI i-number, persistent non-reassignable identifier
-
 dn: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: First Name
 gluuAttributeEditType: user
