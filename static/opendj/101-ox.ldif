@@ -957,12 +957,6 @@ attributeTypes: ( oxAuthFederationMetadataURI-oid NAME 'oxAuthFederationMetadata
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAuthSubjectIdentifier-oid NAME 'oxAuthSubjectIdentifier'
-  DESC 'oxAuth Subject Identifier metadata attribute'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthFederationOP-oid NAME 'oxAuthFederationOP'
   DESC 'oxAuth Federation OP attribute'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2171,7 +2165,7 @@ objectclasses: ( oxAuthClient-oid NAME 'oxAuthClient' SUP top STRUCTURAL MUST ob
  ( associatedPerson $ displayName $ inum $ oxAuthAppType $ oxAuthClientIdIssuedAt
   $ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthClientURI
   $ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthFederationId
-  $ oxAuthFederationMetadataURI $ oxAuthSubjectIdentifier $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg
+  $ oxAuthFederationMetadataURI $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg
   $ oxAuthIdTokenEncryptedResponseEnc $ oxAuthIdTokenSignedResponseAlg
   $ oxAuthInitiateLoginURI $ oxAuthJwksURI $ oxAuthJwks $ oxAuthLogoURI $ oxAuthPolicyURI
   $ oxAuthPostLogoutRedirectURI $ oxAuthRedirectURI $ oxAuthRegistrationAccessToken
