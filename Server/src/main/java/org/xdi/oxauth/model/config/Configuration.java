@@ -49,6 +49,7 @@ public class Configuration {
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
     private String umaConfigurationEndpoint;
+    private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
@@ -436,7 +437,16 @@ public class Configuration {
         umaConfigurationEndpoint = p_umaConfigurationEndpoint;
     }
 
-    @XmlElement(name = "id-generation-endpoint")
+    @XmlElement(name = "openid-sub-attribute")
+    public String getOpenidSubAttribute() {
+		return openidSubAttribute;
+	}
+
+	public void setOpenidSubAttribute(String openidSubAttribute) {
+		this.openidSubAttribute = openidSubAttribute;
+	}
+
+	@XmlElement(name = "id-generation-endpoint")
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
     }
