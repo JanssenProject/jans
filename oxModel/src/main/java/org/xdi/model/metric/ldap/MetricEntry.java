@@ -22,7 +22,7 @@ import org.xdi.model.metric.MetricType;
 @LdapObjectClass(values = {"top", "oxMetric"})
 public class MetricEntry extends BaseEntry {
 
-	@LdapAttribute(ignoreDuringUpdate = true)
+	@LdapAttribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
 	private String id;
 
     @LdapAttribute(name = "oxStartDate")
