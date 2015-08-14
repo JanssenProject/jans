@@ -146,14 +146,16 @@ public class UserService {
 		return getUser(uid);
 	}
     
-    public User addUser(User user) {
+    public User addUser(User user, boolean active) {
         String peopleBaseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
 
         String inum = inumService.generatePeopleInum();
 
         user.setDn("inum=" + inum + "," + peopleBaseDN);
         user.setAttribute("inum", inum);
-        user.setAttribute("gluuStatus",  GluuStatus.REGISTER.getValue());
+        
+        GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
+        user.setAttribute("gluuStatus",  status.getValue());
 		ldapEntryManager.persist(user);
 		
 		return getUserByDn(user.getDn());
