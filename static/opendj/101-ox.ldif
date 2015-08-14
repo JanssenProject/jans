@@ -2268,3 +2268,7 @@ objectclasses: ( oxDeviceRegistration-oid NAME 'oxDeviceRegistration' SUP top ST
 objectclasses: ( oxU2fRequest-oid NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxId $ oxRequestId $ oxRequest $ creationDate ) 
   X-ORIGIN 'Gluu created objectclass' )
+objectclasses: ( oxMetric-oid NAME 'oxMetric' SUP top STRUCTURAL MUST objectclass MAY 
+ ( uniqueIdentifier $ oxStartDate $ oxEndDate $ oxApplicationType $ oxMetricType $ creationDate $ oxData ) 
+  X-ORIGIN 'Gluu created objectclass' )
+  
