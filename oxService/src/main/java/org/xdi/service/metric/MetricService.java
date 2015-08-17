@@ -169,8 +169,6 @@ public abstract class MetricService implements Serializable {
 		if ((metricTypes == null) || (metricTypes.size() == 0)) {
 			return result;
 		}
-
-		String baseDn = buildDn(null, endDate, applicationType, applianceInum);
 		
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -179,12 +177,14 @@ public abstract class MetricService implements Serializable {
 			cal.setTime(startDate);
 			List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
 			while (cal.getTime().before(endDate)) {
-				cal.setTime(startDate);
+				Date currentStartDate = cal.getTime();
+				String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
+
 				List<Filter> metricTypeFilters = new ArrayList<Filter>();
 	
 				Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
 				Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
-				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((cal.getTime())));
+				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((currentStartDate)));
 				Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
 	
 				metricTypeFilters.add(applicationTypeFilter);
