@@ -18,7 +18,7 @@ import org.xdi.model.metric.MetricType;
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
-@LdapEntry(sortBy = "level")
+@LdapEntry(sortBy = "startDate")
 @LdapObjectClass(values = {"top", "oxMetric"})
 public class MetricEntry extends BaseEntry {
 
