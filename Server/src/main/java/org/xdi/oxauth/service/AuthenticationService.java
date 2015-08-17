@@ -41,13 +41,13 @@ import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
+import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.metric.OxAuthMetricType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
@@ -120,7 +120,7 @@ public class AuthenticationService {
 
         boolean authenticated = false;
 
-        com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+        com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
 			if (this.ldapAuthConfigs == null) {
 				authenticated = localAuthenticate(userName, password);
@@ -131,11 +131,11 @@ public class AuthenticationService {
 			timerContext.stop();
 		}
 
-        OxAuthMetricType metricType;
+        MetricType metricType;
 		if (authenticated) {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
@@ -194,7 +194,7 @@ public class AuthenticationService {
     	
     	boolean authenticated = false;
 
-    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
 			for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 				GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
@@ -209,11 +209,11 @@ public class AuthenticationService {
         	timerContext.stop();
         }
 
-		OxAuthMetricType metricType;
+        MetricType metricType;
 		if (authenticated) {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
@@ -274,7 +274,7 @@ public class AuthenticationService {
         
         boolean authenticated = false;
 
-    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+    	com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
 	        User user = userService.getUser(userName);
 	        if ((user != null) && checkUserStatus(user)) {
@@ -288,11 +288,11 @@ public class AuthenticationService {
         	timerContext.stop();
         }
 
-		OxAuthMetricType metricType;
+        MetricType metricType;
 		if (authenticated) {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
 		} else {
-			metricType = OxAuthMetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
 		}
 
 		metricService.incCounter(metricType);
