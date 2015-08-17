@@ -169,22 +169,37 @@ public abstract class MetricService implements Serializable {
 		if ((metricTypes == null) || (metricTypes.size() == 0)) {
 			return result;
 		}
-		
+
+		// Prepare list of DNs
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+		cal.setTime(startDate);
+
+		Set<String> metricDns = new HashSet<String>();
+		while (cal.getTime().before(endDate) || cal.getTime().equals(endDate)) {
+			Date currentStartDate = cal.getTime();
+			cal.add(Calendar.MONTH , 1);
+
+			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
+			if (!containsBranch(baseDn)) {
+				continue;
+			}
+			
+			metricDns.add(baseDn);
+		}
+		
+		if (metricDns.size() == 0) {
+			return result;
+		}
 
 		for (MetricType metricType : metricTypes) {
-			cal.setTime(startDate);
 			List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
-			while (cal.getTime().before(endDate)) {
-				Date currentStartDate = cal.getTime();
-				String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
-
+			for (String metricDn : metricDns) {
 				List<Filter> metricTypeFilters = new ArrayList<Filter>();
 	
 				Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
 				Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
-				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((currentStartDate)));
+				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((startDate)));
 				Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
 	
 				metricTypeFilters.add(applicationTypeFilter);
@@ -194,11 +209,9 @@ public abstract class MetricService implements Serializable {
 	
 				Filter filter = Filter.createANDFilter(metricTypeFilters);
 	
-				List<MetricEntry> metricTypeMonthResult = (List<MetricEntry>) ldapEntryManager.findEntries(baseDn,
+				List<MetricEntry> metricTypeMonthResult = (List<MetricEntry>) ldapEntryManager.findEntries(metricDn,
 						metricType.getMetricEntryType(), returnAttributes, filter);
 				metricTypeResult.addAll(metricTypeMonthResult);
-				
-				cal.add(Calendar.MONTH , 1);
 			}
 			result.put(metricType, metricTypeResult);
 		}
