@@ -7,12 +7,15 @@
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -167,25 +170,36 @@ public abstract class MetricService implements Serializable {
 			return result;
 		}
 
-		String baseDn = buildDn(applianceInum, applicationType);
+		String baseDn = buildDn(null, endDate, applicationType, applianceInum);
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		for (MetricType metricType : metricTypes) {
-			List<Filter> metricTypeFilters = new ArrayList<Filter>();
-
-			Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
-			Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxEventType", metricType.getValue());
-			Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(startDate));
-			Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
-
-			metricTypeFilters.add(applicationTypeFilter);
-			metricTypeFilters.add(eventTypeTypeFilter);
-			metricTypeFilters.add(startDateFilter);
-			metricTypeFilters.add(endDateFilter);
-
-			Filter filter = Filter.createANDFilter(metricTypeFilters);
-
-			List<MetricEntry> metricTypeResult = (List<MetricEntry>) ldapEntryManager.findEntries(baseDn,
-					metricType.getMetricEntryType(), returnAttributes, filter);
+			cal.setTime(startDate);
+			List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
+			while (cal.getTime().before(endDate)) {
+				cal.setTime(startDate);
+				List<Filter> metricTypeFilters = new ArrayList<Filter>();
+	
+				Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
+				Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
+				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((cal.getTime())));
+				Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
+	
+				metricTypeFilters.add(applicationTypeFilter);
+				metricTypeFilters.add(eventTypeTypeFilter);
+				metricTypeFilters.add(startDateFilter);
+				metricTypeFilters.add(endDateFilter);
+	
+				Filter filter = Filter.createANDFilter(metricTypeFilters);
+	
+				List<MetricEntry> metricTypeMonthResult = (List<MetricEntry>) ldapEntryManager.findEntries(baseDn,
+						metricType.getMetricEntryType(), returnAttributes, filter);
+				metricTypeResult.addAll(metricTypeMonthResult);
+				
+				cal.add(Calendar.MONTH , 1);
+			}
 			result.put(metricType, metricTypeResult);
 		}
 
@@ -217,15 +231,15 @@ public abstract class MetricService implements Serializable {
 		counter.inc();
 	}
 
-	public String buildDn(String applianceInum, ApplicationType applicationType) {
-		return buildDn(null, null, applicationType);
+	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
+		return buildDn(uniqueIdentifier, creationDate, applicationType, null);
 	}
 
 	/*
 	 * Should return similar to this pattern DN:
 	 * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,ou=organization_name,o=gluu
 	 */
-	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
+	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String currentApplianceInum) {
 		final StringBuilder dn = new StringBuilder();
 		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
 			dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
@@ -236,7 +250,12 @@ public abstract class MetricService implements Serializable {
 		if (applicationType != null) {
 			dn.append(String.format("ou=%s,", applicationType.getValue()));
 		}
-		dn.append(String.format("ou=%s,", applianceInum()));
+		
+		if (currentApplianceInum == null) {
+			dn.append(String.format("ou=%s,", applianceInum()));
+		} else {
+			dn.append(String.format("ou=%s,", currentApplianceInum));
+		}
 		dn.append(baseDn());
 
 		return dn.toString();
