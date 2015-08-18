@@ -263,7 +263,7 @@ dn: inum=%(inumOrg)s!14AF.A70C,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 displayName: cas
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!14AF.A70C
 oxConfigurationProperty: {"value1":"cas_map_user","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"cas_renew_opt","value2":"false","description":""}
