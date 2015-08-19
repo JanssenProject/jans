@@ -67,13 +67,13 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10)
+    @Test(invocationCount = 1000, threadPoolSize = 5)
     public void testAuthorization1(final String userId, final String userSecret) throws Exception {
         testAuthorizationImpl(userId, userSecret, this.redirectUri, this.clientId);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
+    @Test(invocationCount = 1000, threadPoolSize = 5, dependsOnMethods = {"testAuthorization1"})
     public void testAuthorization2(final String userId, final String userSecret) throws Exception {
         testAuthorizationImpl(userId, userSecret, this.redirectUri, this.clientId);
     }
