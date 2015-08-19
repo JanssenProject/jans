@@ -48,6 +48,7 @@ class Setup(object):
         # Used only if -w (get wars) options is given to setup.py
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.asimba_war = "http://ox.gluu.org/maven/org/xdi/oxasimba-proxy/%s/oxasimba-proxy-%s.war" % (self.oxVersion, self.oxVersion)
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
@@ -62,7 +63,8 @@ class Setup(object):
                            'httpd':   {'enabled': True},
                            'saml':    {'enabled': False},
                            'asimba':  {'enabled': False},
-                           'cas':     {'enabled': False}
+                           'cas':     {'enabled': False},
+                           'oxauth_rp':  {'enabled': False}
         }
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -270,7 +272,8 @@ class Setup(object):
             + 'Install Apache 2 web server'.ljust(30) + `self.components['httpd']['enabled']`.rjust(35) + "\n" \
             + 'Install Shibboleth 2 SAML IDP'.ljust(30) + `self.components['saml']['enabled']`.rjust(35) + "\n" \
             + 'Install Asimba SAML Proxy'.ljust(30) + `self.components['asimba']['enabled']`.rjust(35) + "\n" \
-            + 'Install CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n"
+            + 'Install CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n" \
+            + 'Install oxAuth RP'.ljust(30) + `self.components['oxauth_rp']['enabled']`.rjust(35) + "\n"
 
     def add_ldap_schema(self):
         try:
@@ -513,16 +516,15 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            print "Downloading latest oxAuth war file..."
+            print "Downloading oxAuth war file..."
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
-            print "Downloading latest oxTrust war file..."
+            print "Downloading oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
-            print "Downloading latest Shibboleth IDP war file..."
+            print "Downloading Shibboleth IDP war file..."
             self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
-            print "Downloading latest CAS war file..."
+            print "Downloading CAS war file..."
             self.run(['/usr/bin/wget', self.cas_war, '-O', '%s/oxcas.war' % self.distFolder])
-            print "Downloading latest Asimba war file..."
-            self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+
             print "Finished downloading latest war files"
 
     def encode_passwords(self):
@@ -883,7 +885,7 @@ class Setup(object):
 
             # Asimba is not part of CE package. We need to download it if needed
             if not os.path.exists(distAsimbaPath):
-                print "Downloading latest Asimba war file..."
+                print "Downloading Asimba war file..."
                 self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
 
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
@@ -949,6 +951,21 @@ class Setup(object):
 
             self.removeDirs(tmpCasDir)
             self.removeFile('%s/cas.war' % self.distFolder)
+
+    def install_oxauth_rp_war(self):
+        if self.components['oxauth_rp']['enabled']:
+            oxAuthRPWar = 'oxauth-rp.war'
+            distOxAuthRpPath = '%s/%s' % (self.distFolder, oxAuthRPWar)
+
+            # oxAuth RP is not part of CE package. We need to download it if needed
+            if not os.path.exists(distOxAuthRpPath):
+                print "Downloading oxAuth RP war file..."
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '-O', '%s/oxauth-rp.war' % self.distFolder])
+
+            self.logIt("Copying oxauth-rp.war into tomcat webapps folder...")
+            self.copyFile('%s/oxauth-rp.war' % self.distFolder, self.tomcatWebAppFolder)
+
+            self.removeFile('%s/oxauth-rp.war' % self.distFolder)
 
     def isIP(self, address):
         try:
@@ -1153,6 +1170,12 @@ class Setup(object):
             installObject.components['cas']['enabled'] = True
         else:
             installObject.components['cas']['enabled'] = False
+
+        promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
+        if promptForOxAuthRP == 'y':
+            installObject.components['oxauth_rp']['enabled'] = True
+        else:
+            installObject.components['oxauth_rp']['enabled'] = False
 
     def removeDirs(self, name):
         try:
@@ -1371,6 +1394,7 @@ def print_help():
     print "Options:"
     print ""
     print "    -a   Install Asimba"
+    print "    -r   Install oxAuth RP"
     print "    -c   Install CAS"
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
@@ -1419,6 +1443,8 @@ def getOpts(argv, setupOptions):
             setupOptions['modifyNetworking'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
+        elif opt == '-r':
+            setupOptions['installOxAuthRP'] = True
     return setupOptions
 
 if __name__ == '__main__':
@@ -1434,6 +1460,7 @@ if __name__ == '__main__':
         'installSAML': False,
         'installAsimba': False,
         'installCAS': False,
+        'installOxAuthRP': False,
         'modifyNetworking': False
     }
     if len(sys.argv) > 1:
@@ -1451,6 +1478,7 @@ if __name__ == '__main__':
     installObject.components['saml']['enabled'] = setupOptions['installSAML']
     installObject.components['asimba']['enabled'] = setupOptions['installAsimba']
     installObject.components['cas']['enabled'] = setupOptions['installCAS']
+    installObject.components['oxauth_rp']['enabled'] = setupOptions['installOxAuthRP']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
@@ -1511,6 +1539,7 @@ if __name__ == '__main__':
             installObject.copy_static()
             installObject.install_cas_war()
             installObject.install_asimba_war()
+            installObject.install_oxauth_rp_war()
             installObject.change_ownership()
             installObject.change_permissions()
             installObject.start_services()
