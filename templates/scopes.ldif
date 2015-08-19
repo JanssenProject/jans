@@ -82,7 +82,6 @@ displayName: clientinfo
 inum: %(inumOrg)s!0009!341A
 oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu

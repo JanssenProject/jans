@@ -93,6 +93,11 @@ changetype: modify
 replace: defaultScope
 defaultScope: true
 
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+add: oxAuthClaim
+oxAuthClaim: inum=%(inumOrg)s!0005!18CC,ou=attributes,o=%(inumOrg)s,o=gluu
+
 dn: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 changetype: modify
 replace: defaultScope
