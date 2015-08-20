@@ -19,6 +19,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.xdi.exception.PythonException;
@@ -47,6 +48,8 @@ public class PythonService implements Serializable {
 	public void initPythonInterpreter() {
         try {
     		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
+		} catch (PyException ex) {
+			log.error("Failed to initialize PythonInterpreter correctly", ex);
 		} catch (Exception ex) {
 			log.error("Failed to initialize PythonInterpreter correctly", ex);
 		}
