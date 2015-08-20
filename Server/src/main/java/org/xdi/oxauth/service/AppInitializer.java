@@ -105,7 +105,6 @@ public class AppInitializer {
         configurationFactory.create();
 
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
-        reloadConfigurationImpl(ldapAuthConfigs);
 
         createAuthConnectionProviders(ldapAuthConfigs);
 
@@ -172,22 +171,8 @@ public class AppInitializer {
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
-			reloadConfigurationImpl(newLdapAuthConfigs);
-			recreateLdapAuthEntryManagers();
+			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
 		}
-	}
-
-	private void reloadConfigurationImpl(List<GluuLdapConfiguration> currLdapAuthConfigs) {
-		this.ldapAuthConfigs = currLdapAuthConfigs;
-
-		Context applicationContext = Contexts.getApplicationContext();
-        if (currLdapAuthConfigs.size() == 0) {
-        	if (applicationContext.isSet(LDAP_AUTH_CONFIG_NAME)) {
-        		applicationContext.remove(LDAP_AUTH_CONFIG_NAME);
-        	}
-        } else {
-        	applicationContext.set(LDAP_AUTH_CONFIG_NAME, currLdapAuthConfigs);
-        }
 	}
 
 	private void addSecurityProviders() {
@@ -248,12 +233,12 @@ public class AppInitializer {
     	log.debug("Destroyed {0}: {1}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
     }
 
-    public void recreateLdapAuthEntryManagers() {
+    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
     	// Backup current references to objects to allow shutdown properly
     	List<LdapEntryManager> oldLdapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(LDAP_AUTH_ENTRY_MANAGER_NAME);
 
     	// Recreate components
-        createAuthConnectionProviders(ldapAuthConfigs);
+        createAuthConnectionProviders(newLdapAuthConfigs);
 
         // Destroy old components
     	Contexts.getApplicationContext().remove(LDAP_AUTH_ENTRY_MANAGER_NAME);
@@ -281,19 +266,22 @@ public class AppInitializer {
         this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
     }
 
-    private void createAuthConnectionProviders(List<GluuLdapConfiguration> ldapAuthConfigs) {
+    private void createAuthConnectionProviders(List<GluuLdapConfiguration> newLdapAuthConfigs) {
     	List<LdapConnectionService> tmpAuthConnectionProviders = new ArrayList<LdapConnectionService>();
     	List<LdapConnectionService> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionService>();
 
     	// Prepare connection providers per LDAP authentication configuration
-        for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
+        for (GluuLdapConfiguration ldapAuthConfig : newLdapAuthConfigs) {
         	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
 
 	        tmpAuthConnectionProviders.add(ldapConnectionProviders.getConnectionProvider());
 	        tmpAuthBindConnectionProviders.add(ldapConnectionProviders.getConnectionBindProvider());
     	}
 
-        this.authConnectionProviders = tmpAuthConnectionProviders;
+		this.ldapAuthConfigs = newLdapAuthConfigs;
+		Contexts.getApplicationContext().set(LDAP_AUTH_CONFIG_NAME, newLdapAuthConfigs);
+
+		this.authConnectionProviders = tmpAuthConnectionProviders;
     	this.authBindConnectionProviders = tmpAuthBindConnectionProviders;
     }
 
@@ -476,7 +464,7 @@ public class AppInitializer {
 		return clazzObject;
 	}
 
-    public static AppInitializer instance() {
+	public static AppInitializer instance() {
         return ServerUtil.instance(AppInitializer.class);
     }
 
