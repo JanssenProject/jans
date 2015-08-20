@@ -1,0 +1,25 @@
+package org.xdi.oxd.web;
+
+import com.google.inject.AbstractModule;
+import org.xdi.oxd.web.service.CommandService;
+import org.xdi.oxd.web.ws.CommandWS;
+
+/**
+ * @author Yuriy Zabrovarnyy
+ * @version 0.9, 20/08/2015
+ */
+
+public class AppModule extends AbstractModule {
+
+//    private static final Logger LOG = LoggerFactory.getLogger(AppModule.class);
+
+//       private static final String ENCRYPTION_KEY = "123456789012345678901234567890";
+
+       @Override
+       protected void configure() {
+           bind(CommandService.class);
+
+           // ws
+           bind(CommandWS.class);
+       }
+}
