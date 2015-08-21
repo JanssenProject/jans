@@ -35,6 +35,12 @@
 		"index": ["equality"]
 	},
 
+    {
+        "attribute": "oxSectorIdentifierURI",
+        "type": "string",
+        "index": ["equality"]
+    },
+
 	{
 		"attribute": "gluuStatus",
 		"type": "string",
