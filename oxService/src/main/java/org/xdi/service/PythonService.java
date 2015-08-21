@@ -41,19 +41,30 @@ public class PythonService implements Serializable {
 	private Log log;
 
 	private PythonInterpreter pythonInterpreter;
+	private boolean interpereterReady;
 
 	/*
 	 * Initialize singleton instance during startup
 	 */
-	public void initPythonInterpreter() {
-        try {
-    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
-		} catch (PyException ex) {
-			log.error("Failed to initialize PythonInterpreter correctly", ex);
-		} catch (Exception ex) {
-			log.error("Failed to initialize PythonInterpreter correctly", ex);
+	public boolean initPythonInterpreter() {
+		boolean result = false;
+
+		if (isInitInterpreter()) {
+	        try {
+	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
+	            this.pythonInterpreter = new PythonInterpreter();
+	
+	            result = true;
+			} catch (PyException ex) {
+				log.error("Failed to initialize PythonInterpreter correctly", ex);
+			} catch (Exception ex) {
+				log.error("Failed to initialize PythonInterpreter correctly", ex);
+			}
 		}
-        this.pythonInterpreter = new PythonInterpreter();
+
+        this.interpereterReady = result;
+
+        return result;
 	}
 
 	/**
@@ -96,8 +107,13 @@ public class PythonService implements Serializable {
 		return props;
 	}
 
+	private boolean isInitInterpreter() {
+		String pythonHome = System.getenv("PYTHON_HOME");
+		return StringHelper.isNotEmpty(pythonHome);
+	}
+
 	public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
-		if (StringHelper.isEmpty(scriptName)) {
+		if (!interpereterReady || StringHelper.isEmpty(scriptName)) {
 			return null;
 		}
 
@@ -111,7 +127,7 @@ public class PythonService implements Serializable {
 	}
 
 	public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
-		if (scriptFile == null) {
+		if (!interpereterReady || (scriptFile == null)) {
 			return null;
 		}
 
