@@ -65,7 +65,6 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         this.redirectUri = redirectUrisList.get(0);
     }
 
-
     @Parameters({"userId", "userSecret"})
     @Test(invocationCount = 1000, threadPoolSize = 10)
     public void testAuthorization1(final String userId, final String userSecret) throws Exception {
