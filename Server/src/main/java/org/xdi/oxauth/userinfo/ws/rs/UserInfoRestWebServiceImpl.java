@@ -38,16 +38,17 @@ import org.xdi.oxauth.model.jws.ECDSASigner;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
@@ -57,7 +58,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.*;
@@ -66,7 +66,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version August 21, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -89,11 +89,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @In
     private UserService userService;
 
-	@In
-	private ExternalDynamicScopeService externalDynamicScopeService;
+    @In
+    private ExternalDynamicScopeService externalDynamicScopeService;
 
     @In
     private ConfigurationFactory configurationFactory;
+
+    @In
+    private PairwiseIdentifierService pairwiseIdentifierService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
@@ -212,10 +215,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-        		dynamicScopes.add(scope.getDisplayName());
-        		continue;
-        	}
+            if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+                dynamicScopes.add(scope.getDisplayName());
+                continue;
+            }
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -267,12 +270,35 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
-        jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+        // Check for Subject Identifier Type
+        if (authorizationGrant.getClient().getSubjectType() != null &&
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+            String sectorIdentifier = null;
+            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
+                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+            } else {
+                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+            }
+
+            String userInum = authorizationGrant.getUser().getAttribute("inum");
+            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
+                    userInum, sectorIdentifier);
+            if (pairwiseIdentifier == null) {
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
+                        pairwiseIdentifier.getId(),
+                        userInum));
+                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+            }
+            jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
+        } else {
+            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+        }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
         }
 
         // Signature
@@ -325,10 +351,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-        		dynamicScopes.add(scope.getDisplayName());
-        		continue;
-        	}
+            if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
+                dynamicScopes.add(scope.getDisplayName());
+                continue;
+            }
 
             if (scope.getOxAuthClaims() != null) {
                 for (String claimDn : scope.getOxAuthClaims()) {
@@ -380,12 +406,35 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        //The sub (subject) Claim MUST always be returned in the UserInfo Response.
-        String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
-        jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+        // Check for Subject Identifier Type
+        if (authorizationGrant.getClient().getSubjectType() != null &&
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+            String sectorIdentifier = null;
+            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
+                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+            } else {
+                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+            }
+
+            String userInum = authorizationGrant.getUser().getAttribute("inum");
+            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
+                    userInum, sectorIdentifier);
+            if (pairwiseIdentifier == null) {
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
+                        pairwiseIdentifier.getId(),
+                        userInum));
+                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+            }
+            jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
+        } else {
+            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+        }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
         }
 
         // Encryption
@@ -421,16 +470,16 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
             throws JSONException, InvalidClaimException {
-        JsonWebResponse jsonWebResponse = new JsonWebResponse(); 
+        JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
         // Claims
         List<String> dynamicScopes = new ArrayList<String>();
         for (String scopeName : scopes) {
-        	org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
-        	if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
-        		dynamicScopes.add(scope.getDisplayName());
-        		continue;
-        	}
+            org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
+            if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+                dynamicScopes.add(scope.getDisplayName());
+                continue;
+            }
 
             Map<String, Object> claims = getClaims(user, scope);
 
@@ -442,9 +491,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     Object value = entry.getValue();
 
                     if (value instanceof List) {
-                    	groupClaim.setClaim(key, (List<String>) value);
+                        groupClaim.setClaim(key, (List<String>) value);
                     } else {
-                    	groupClaim.setClaim(key, (String) value);
+                        groupClaim.setClaim(key, (String) value);
                     }
                 }
 
@@ -455,9 +504,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     Object value = entry.getValue();
 
                     if (value instanceof List) {
-                    	jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
+                        jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
                     } else {
-                    	jsonWebResponse.getClaims().setClaim(key, (String) value);
+                        jsonWebResponse.getClaims().setClaim(key, (String) value);
                     }
                 }
             }
@@ -495,33 +544,35 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        /*
-        Client client = authorizationGrant.getClient();
-        if (client != null && jsonWebResponse.getClaims().getClaim(JwtClaimName.SUBJECT_IDENTIFIER) != null &&
-                client.getSubjectType() != null &&
-                SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sub = jsonWebResponse.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
-
-            String salt = UUID.randomUUID().toString();
-            SubjectIdentifierGenerator subjectIdentifierGenerator = new SubjectIdentifierGenerator(salt);
+        // Check for Subject Identifier Type
+        if (authorizationGrant.getClient().getSubjectType() != null &&
+                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
             String sectorIdentifier = null;
-
-            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
-                URI uri = new URI(client.getSectorIdentifierUri());
-                sectorIdentifier = uri.getHost();
+            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
+                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                URI uri = new URI(client.getRedirectUris()[0]);
-                sectorIdentifier = uri.getHost();
+                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
-            String pairwiseSubjectIdentifier = subjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
-                    sectorIdentifier, sub, client.getClientSecret().getBytes());
-            jsonWebResponse.setSubjectIdentifier(pairwiseSubjectIdentifier);
+            String userInum = authorizationGrant.getUser().getAttribute("inum");
+            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
+                    userInum, sectorIdentifier);
+            if (pairwiseIdentifier == null) {
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
+                        pairwiseIdentifier.getId(),
+                        userInum));
+                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+            }
+            jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
+        } else {
+            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
-        */
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-        	externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
         }
 
         return jsonWebResponse.toString();
@@ -540,7 +591,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
-                    	attribute = user.getUserId();
+                        attribute = user.getUserId();
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true);
                     }
