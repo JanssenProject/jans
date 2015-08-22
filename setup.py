@@ -833,9 +833,40 @@ class Setup(object):
                   '-c',
                   '%s' % importCmd])
 
-    def index_opendj(self):
+    def index_opendj_site(self):
         try:
-            self.logIt("Running LDAP index creation commands")
+            self.logIt("Running LDAP index creation commands for site backend")
+            indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                                             self.ldapDsconfigCommand,
+                                             'create-local-db-index',
+                                             '--backend-name',
+                                             'site',
+                                             '--type',
+                                             'generic',
+                                             '--index-name',
+                                             'inum',
+                                             '--set',
+                                             'index-type:equality',
+                                             '--set',
+                                             'index-entry-limit:4000',
+                                             '--hostName',
+                                             self.ldap_hostname,
+                                             '--port',
+                                             self.ldap_admin_port,
+                                             '--bindDN',
+                                             '"%s"' % self.ldap_binddn,
+                                             '-j', self.ldapPassFn,
+                                             '--trustAll',
+                                             '--noPropertiesFile',
+                                             '--no-prompt'])
+            self.run(['/bin/su', 'ldap', '-c', indexCmd])
+        except:
+            self.logIt("Error occured during backend site LDAP indexing", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def index_opendj_useroot(self):
+        try:
+            self.logIt("Running LDAP index creation commands for userRoot backend")
             # This json file contains a mapping of the required indexes.
             # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
             index_json = self.load_json(self.indexJson)
@@ -875,7 +906,7 @@ class Setup(object):
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
-            self.logIt("Error occured during LDAP indexing", True)
+            self.logIt("Error occured during backend userRoot LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
 
     def install_asimba_war(self):
@@ -1524,13 +1555,13 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.render_test_templates()
-            1
             installObject.update_hostname()
             installObject.gen_crypto()
             installObject.configure_httpd()
             installObject.setup_opendj()
             installObject.configure_opendj()
-            installObject.index_opendj()
+            installObject.index_opendj_useroot()
+            installObject.index_opendj_site()
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.export_opendj_public_cert()
