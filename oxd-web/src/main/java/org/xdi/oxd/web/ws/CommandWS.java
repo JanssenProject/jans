@@ -42,9 +42,11 @@ public class CommandWS {
     @Produces({MediaType.APPLICATION_JSON})
     public Response execute(@FormParam("request") Command command, @Context HttpServletRequest httpRequest) {
         try {
-            // todo log command
+            LOG.debug("Request, command: " + command);
             validate(command);
-            return Response.ok().entity(CoreUtils.asJson(execute(command))).build();
+            String response = CoreUtils.asJson(execute(command));
+            LOG.debug("Response, command: " + command + "\n, response: " + response);
+            return Response.ok().entity(response).build();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command object is blank").build());
@@ -55,8 +57,9 @@ public class CommandWS {
         if (command == null) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command object is blank").build());
         }
-        // todo
-
+        if (command.getCommandType() == null) {
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command type is blank").build());
+        }
     }
 
     public CommandResponse execute(Command command) {
