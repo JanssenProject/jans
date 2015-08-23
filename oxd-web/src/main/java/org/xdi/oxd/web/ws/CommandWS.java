@@ -40,9 +40,10 @@ public class CommandWS {
     @POST
     @Path("/command")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response execute(@FormParam("request") Command command, @Context HttpServletRequest httpRequest) {
+    public Response execute(@FormParam("request") String commandAsJson, @Context HttpServletRequest httpRequest) {
         try {
-            LOG.debug("Request, command: " + command);
+            LOG.debug("Request, command: " + commandAsJson);
+            Command command = CoreUtils.asCommand(commandAsJson);
             validate(command);
             String response = CoreUtils.asJson(execute(command));
             LOG.debug("Response, command: " + command + "\n, response: " + response);

@@ -22,11 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Executors;
@@ -123,6 +119,9 @@ public class CoreUtils {
         return JacksonMapperHolder.MAPPER;
     }
 
+    public static Command asCommand(String commandAsJson) throws IOException {
+        return createJsonMapper().readValue(commandAsJson, Command.class);
+    }
 
     public static long parseSilently(String p_str) {
         try {
