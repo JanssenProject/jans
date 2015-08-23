@@ -11,13 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.response.IOpResponse;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 09/08/2013
  */
 @JsonPropertyOrder({"status", "data"})
-public class CommandResponse {
+public class CommandResponse implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandResponse.class);
 
