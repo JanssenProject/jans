@@ -59,7 +59,7 @@ public class CommandWS {
 
     }
 
-    private CommandResponse execute(Command command) {
+    public CommandResponse execute(Command command) {
         return processor.process(command);
     }
 }
