@@ -42,12 +42,30 @@ public class Configuration {
         private static volatile Configuration CONF = load();
 
         private static Configuration load() {
-            final Configuration fromSysProperty = tryToLoadFromSysProperty();
+            // 1. try system property "oxd.server.config"
+            final Configuration fromSysProperty = tryToLoadFromSysProperty(CONF_SYS_PROPERTY_NAME);
             if (fromSysProperty != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", CONF_SYS_PROPERTY_NAME);
                 LOG.trace("Configuration: {}", fromSysProperty);
                 return fromSysProperty;
             }
+
+            // 2. catalina.base
+            final Configuration fromCatalinaBaseProperty = tryToLoadFromSysProperty(System.getProperty("catalina.base"));
+            if (fromCatalinaBaseProperty != null) {
+                LOG.trace("Configuration loaded successfully from system property: {}.", System.getProperty("catalina.base"));
+                LOG.trace("Configuration: {}", fromCatalinaBaseProperty);
+                return fromCatalinaBaseProperty;
+            }
+
+            // 2. catalina.home
+            final Configuration fromCatalinaHomeProperty = tryToLoadFromSysProperty(System.getProperty("catalina.home"));
+            if (fromCatalinaHomeProperty != null) {
+                LOG.trace("Configuration loaded successfully from system property: {}.", System.getProperty("catalina.home"));
+                LOG.trace("Configuration: {}", fromCatalinaHomeProperty);
+                return fromCatalinaHomeProperty;
+            }
+
 
             final InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(FILE_NAME);
             final Configuration c = createConfiguration(stream);
@@ -60,10 +78,10 @@ public class Configuration {
             return c;
         }
 
-        private static Configuration tryToLoadFromSysProperty() {
-            final String confProperty = System.getProperty(CONF_SYS_PROPERTY_NAME);
+        private static Configuration tryToLoadFromSysProperty(String propertyName) {
+            final String confProperty = System.getProperty(propertyName);
             if (StringUtils.isNotBlank(confProperty)) {
-                LOG.trace("Try to load configuration from system property: {}, value: {}", CONF_SYS_PROPERTY_NAME, confProperty);
+                LOG.trace("Try to load configuration from system property: {}, value: {}", propertyName, confProperty);
                 FileInputStream fis = null;
                 try {
                     final File f = new File(confProperty);
