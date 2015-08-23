@@ -43,27 +43,29 @@ public class Configuration {
 
         private static Configuration load() {
             // 1. try system property "oxd.server.config"
-            final Configuration fromSysProperty = tryToLoadFromSysProperty(CONF_SYS_PROPERTY_NAME);
-            if (fromSysProperty != null) {
+            Configuration conf = tryToLoadFromSysProperty(CONF_SYS_PROPERTY_NAME);
+            if (conf != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", CONF_SYS_PROPERTY_NAME);
-                LOG.trace("Configuration: {}", fromSysProperty);
-                return fromSysProperty;
+                LOG.trace("Configuration: {}", conf);
+                return conf;
             }
 
             // 2. catalina.base
-            final Configuration fromCatalinaBaseProperty = tryToLoadFromSysProperty(System.getProperty("catalina.base"));
-            if (fromCatalinaBaseProperty != null) {
-                LOG.trace("Configuration loaded successfully from system property: {}.", System.getProperty("catalina.base"));
-                LOG.trace("Configuration: {}", fromCatalinaBaseProperty);
-                return fromCatalinaBaseProperty;
+            String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator;
+            conf = tryToLoadFromSysProperty(property);
+            if (conf != null) {
+                LOG.trace("Configuration loaded successfully from system property: {}.", property);
+                LOG.trace("Configuration: {}", conf);
+                return conf;
             }
 
             // 2. catalina.home
-            final Configuration fromCatalinaHomeProperty = tryToLoadFromSysProperty(System.getProperty("catalina.home"));
-            if (fromCatalinaHomeProperty != null) {
-                LOG.trace("Configuration loaded successfully from system property: {}.", System.getProperty("catalina.home"));
-                LOG.trace("Configuration: {}", fromCatalinaHomeProperty);
-                return fromCatalinaHomeProperty;
+            property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator;
+            conf = tryToLoadFromSysProperty(property);
+            if (conf != null) {
+                LOG.trace("Configuration loaded successfully from system property: {}.", property);
+                LOG.trace("Configuration: {}", conf);
+                return conf;
             }
 
 
