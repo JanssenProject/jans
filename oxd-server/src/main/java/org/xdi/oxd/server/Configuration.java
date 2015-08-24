@@ -51,7 +51,7 @@ public class Configuration {
             }
 
             // 2. catalina.base
-            String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator;
+            String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator + FILE_NAME;
             conf = tryToLoadFromSysProperty(property);
             if (conf != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", property);
@@ -60,7 +60,7 @@ public class Configuration {
             }
 
             // 2. catalina.home
-            property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator;
+            property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + FILE_NAME;
             conf = tryToLoadFromSysProperty(property);
             if (conf != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", property);
