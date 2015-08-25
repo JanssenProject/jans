@@ -68,7 +68,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuLdapAttributeName", name, ConfigurationFactory.instance().getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, ConfigurationFactory.instance().getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
