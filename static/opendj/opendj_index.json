@@ -2,115 +2,134 @@
 	{
 		"attribute": "inum",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
 	},
 
 	{
 		"attribute": "uniqueIdentifier",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxID",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxAuthGrantId",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxAuthAuthorizationCode",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxAuthTokenCode",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "gluuStatus",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
 	},
 
 	{
 		"attribute": "oxState",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxAuthExpiration",
 		"type": "date",
-		"index": ["ordering"]
+		"index": ["ordering"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "lastModifiedTime",
 		"type": "date",
-		"index": ["ordering"]
+		"index": ["ordering"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxApplication",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxRequestId",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "creationDate",
 		"type": "date",
-		"index": ["ordering"]
+		"index": ["ordering"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxStartDate",
 		"type": "date",
-		"index": ["ordering"]
+		"index": ["ordering"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxEndDate",
 		"type": "date",
-		"index": ["ordering"]
+		"index": ["ordering"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxApplicationType",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "oxMetricType",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "myCustomAttr1",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "myCustomAttr2",
 		"type": "string",
-		"index": ["equality"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	}
 
 ]

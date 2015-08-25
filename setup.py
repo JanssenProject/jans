@@ -833,40 +833,9 @@ class Setup(object):
                   '-c',
                   '%s' % importCmd])
 
-    def index_opendj_site(self):
+    def index_opendj(self, backend):
         try:
-            self.logIt("Running LDAP index creation commands for site backend")
-            indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
-                                             self.ldapDsconfigCommand,
-                                             'create-local-db-index',
-                                             '--backend-name',
-                                             'site',
-                                             '--type',
-                                             'generic',
-                                             '--index-name',
-                                             'inum',
-                                             '--set',
-                                             'index-type:equality',
-                                             '--set',
-                                             'index-entry-limit:4000',
-                                             '--hostName',
-                                             self.ldap_hostname,
-                                             '--port',
-                                             self.ldap_admin_port,
-                                             '--bindDN',
-                                             '"%s"' % self.ldap_binddn,
-                                             '-j', self.ldapPassFn,
-                                             '--trustAll',
-                                             '--noPropertiesFile',
-                                             '--no-prompt'])
-            self.run(['/bin/su', 'ldap', '-c', indexCmd])
-        except:
-            self.logIt("Error occured during backend site LDAP indexing", True)
-            self.logIt(traceback.format_exc(), True)
-
-    def index_opendj_useroot(self):
-        try:
-            self.logIt("Running LDAP index creation commands for userRoot backend")
+            self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
             # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
             index_json = self.load_json(self.indexJson)
@@ -875,38 +844,41 @@ class Setup(object):
                     attr_name = attrDict['attribute']
                     index_types = attrDict['index']
                     for index_type in index_types:
-                        self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                        indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
-                                             self.ldapDsconfigCommand,
-                                             'create-local-db-index',
-                                             '--backend-name',
-                                             'userRoot',
-                                             '--type',
-                                             'generic',
-                                             '--index-name',
-                                             attr_name,
-                                             '--set',
-                                             'index-type:%s' % index_type,
-                                             '--set',
-                                             'index-entry-limit:4000',
-                                             '--hostName',
-                                             self.ldap_hostname,
-                                             '--port',
-                                             self.ldap_admin_port,
-                                             '--bindDN',
-                                             '"%s"' % self.ldap_binddn,
-                                             '-j', self.ldapPassFn,
-                                             '--trustAll',
-                                             '--noPropertiesFile',
-                                             '--no-prompt'])
-                        self.run(['/bin/su',
-                                  'ldap',
-                                  '-c',
-                                  indexCmd])
+                        backend_names = attrDict['backend']
+                        for backend_name in backend_names:
+                            if (backend_name == backend):
+                                self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
+                                indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                                                     self.ldapDsconfigCommand,
+                                                     'create-local-db-index',
+                                                     '--backend-name',
+                                                     backend,
+                                                     '--type',
+                                                     'generic',
+                                                     '--index-name',
+                                                     attr_name,
+                                                     '--set',
+                                                     'index-type:%s' % index_type,
+                                                     '--set',
+                                                     'index-entry-limit:4000',
+                                                     '--hostName',
+                                                     self.ldap_hostname,
+                                                     '--port',
+                                                     self.ldap_admin_port,
+                                                     '--bindDN',
+                                                     '"%s"' % self.ldap_binddn,
+                                                     '-j', self.ldapPassFn,
+                                                     '--trustAll',
+                                                     '--noPropertiesFile',
+                                                     '--no-prompt'])
+                                self.run(['/bin/su',
+                                          'ldap',
+                                          '-c',
+                                          indexCmd])
             else:
                 self.logIt('NO indexes found %s' % self.indexJson, True)
         except:
-            self.logIt("Error occured during backend userRoot LDAP indexing", True)
+            self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
 
     def install_asimba_war(self):
@@ -1560,8 +1532,8 @@ if __name__ == '__main__':
             installObject.configure_httpd()
             installObject.setup_opendj()
             installObject.configure_opendj()
-            installObject.index_opendj_useroot()
-            installObject.index_opendj_site()
+            installObject.index_opendj('userRoot')
+            installObject.index_opendj('site')
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.export_opendj_public_cert()
