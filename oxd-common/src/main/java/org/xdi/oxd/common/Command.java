@@ -6,12 +6,14 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.xdi.oxd.common.params.IParams;
 
+import java.io.Serializable;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 09/08/2013
  */
 @JsonPropertyOrder({"command", "params"})
-public class Command {
+public class Command implements Serializable {
 
 //    private static final Logger LOG = LoggerFactory.getLogger(Command.class);
 
