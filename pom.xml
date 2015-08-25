@@ -21,7 +21,6 @@
     <resteasy.version>2.3.4.Final</resteasy.version>
     <licensing.version>1.1.0</licensing.version>
     <guice.version>3.0</guice.version>
-    <gwt.version>2.6.1</gwt.version>
     <guava.version>13.0.1</guava.version>
     <ejbca.version>6.0.2</ejbca.version>
   </properties>
@@ -69,18 +68,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-user</artifactId>
-        <version>${gwt.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.gwt</groupId>
-        <artifactId>gwt-servlet</artifactId>
-        <version>${gwt.version}</version>
-        <scope>compile</scope>
-      </dependency>
       <dependency>
         <groupId>org.xdi</groupId>
         <artifactId>oxd-common</artifactId>
@@ -195,11 +182,6 @@
         <version>17.0</version>
       </dependency>
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava-gwt</artifactId>
-        <version>${guava.version}</version>
-      </dependency>
-      <dependency>
         <groupId>commons-httpclient</groupId>
         <artifactId>commons-httpclient</artifactId>
         <version>3.1</version>
@@ -282,25 +264,6 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>
-          <version>${gwt.version}</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>compile</goal>
-              </goals>
-            </execution>
-          </executions>
-          <dependencies>
-            <dependency>
-              <groupId>com.google.gwt</groupId>
-              <artifactId>gwt-dev</artifactId>
-              <version>${gwt.version}</version>
-            </dependency>
-          </dependencies>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
