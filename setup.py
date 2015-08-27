@@ -190,6 +190,7 @@ class Setup(object):
         self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
+        self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.tomcat_oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
@@ -232,6 +233,7 @@ class Setup(object):
                      self.oxTrust_properties: True,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
+                     self.oxtrust_import_person_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.tomcat_oxauth_static_conf_json: True,
                      self.oxTrust_log_rotation_configuration: True,
