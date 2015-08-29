@@ -1,4 +1,4 @@
-package org.xdi.oxd.web.ws;
+package org.xdi.oxd.web;
 
 import com.google.inject.Inject;
 import junit.framework.Assert;
@@ -6,6 +6,7 @@ import org.testng.annotations.Guice;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.web.TestAppModule;
+import org.xdi.oxd.web.ws.CommandWS;
 
 /**
  * Created by yuriy on 8/23/2015.

@@ -9,6 +9,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.GuiceModule;
 import org.xdi.oxd.server.Processor;
+import org.xdi.oxd.web.CommandService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -50,23 +51,14 @@ public class CommandWS {
     private Response execute(String commandAsJson) {
         try {
             LOG.debug("Request, command: " + commandAsJson);
-            Command command = CoreUtils.asCommand(commandAsJson);
-            validate(command);
+            Command command = new CommandService().validate(commandAsJson);
+
             String response = CoreUtils.asJson(execute(command));
             LOG.debug("Response, command: " + command + "\n, response: " + response);
             return Response.ok().entity(response).build();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command object is blank").build());
-        }
-    }
-
-    private void validate(Command command) {
-        if (command == null) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command object is blank").build());
-        }
-        if (command.getCommandType() == null) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Command type is blank").build());
         }
     }
 

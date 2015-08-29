@@ -16,14 +16,14 @@ public class JettyServer {
     public JettyServer(int port) {
         server = new Server(port);
 
-        server.setHandler(WebAppContextBuilder.build());
+        server.setHandler(ServerHandlerBuilder.build());
     }
 
     public void start() {
         try {
             server.start();
             //LOG.trace(server.dump());
-            server.dumpStdErr();
+            //server.dumpStdErr();
             server.join();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
