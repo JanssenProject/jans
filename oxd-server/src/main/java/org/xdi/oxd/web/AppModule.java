@@ -1,7 +1,6 @@
 package org.xdi.oxd.web;
 
 import com.google.inject.AbstractModule;
-import org.xdi.oxd.web.service.CommandService;
 import org.xdi.oxd.web.ws.CommandWS;
 
 /**

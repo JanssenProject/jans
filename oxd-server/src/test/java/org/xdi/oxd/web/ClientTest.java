@@ -1,4 +1,4 @@
-package org.xdi.oxd.web.ws;
+package org.xdi.oxd.web;
 
 import junit.framework.Assert;
 import org.jboss.resteasy.client.ClientRequest;
