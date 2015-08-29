@@ -14,10 +14,6 @@
         <version>3.0.3-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <jetty.version>9.3.2.v20150730</jetty.version>
-    </properties>
-
     <build>
         <finalName>oxd-web</finalName>
 
