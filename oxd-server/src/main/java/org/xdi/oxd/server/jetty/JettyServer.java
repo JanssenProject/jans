@@ -13,8 +13,8 @@ public class JettyServer {
 
     private final Server server;
 
-    public JettyServer() {
-        server = new Server(8080);
+    public JettyServer(int port) {
+        server = new Server(port);
 
         server.setHandler(WebAppContextBuilder.build());
     }
