@@ -11,11 +11,7 @@ import org.xdi.oxd.server.GuiceModule;
 import org.xdi.oxd.server.Processor;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -37,10 +33,21 @@ public class CommandWS {
         processor = new Processor(injector);
     }
 
+    @GET
+    @Path("/command")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response get(@QueryParam("request") String commandAsJson, @Context HttpServletRequest httpRequest) {
+        return execute(commandAsJson);
+    }
+
     @POST
     @Path("/command")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response execute(@FormParam("request") String commandAsJson, @Context HttpServletRequest httpRequest) {
+    public Response post(@FormParam("request") String commandAsJson, @Context HttpServletRequest httpRequest) {
+        return execute(commandAsJson);
+    }
+
+    private Response execute(String commandAsJson) {
         try {
             LOG.debug("Request, command: " + commandAsJson);
             Command command = CoreUtils.asCommand(commandAsJson);
