@@ -10,6 +10,7 @@ public class WebAppContextBuilder {
     public static WebAppContext build() {
         WebAppContext context = new WebAppContext();
         context.setDescriptor("resources/WEB-INF/web.xml");
+//        context.setWar();
         context.setResourceBase(".");
         context.setContextPath("/");
         context.setParentLoaderPriority(true);
