@@ -8,6 +8,7 @@ import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.server.jetty.JettyServer;
 
 import java.security.Provider;
 import java.security.Security;
@@ -41,7 +42,15 @@ public class ServerLauncher {
         LOG.info("Starting...");
         addSecurityProviders();
         registerResteasyProviders();
-        SOCKET_SERVICE.listenSocket();
+        Configuration configuration = SOCKET_SERVICE.listenSocket();
+        startJetty(configuration);
+    }
+
+    private static void startJetty(Configuration configuration) {
+        if (configuration.isStartJetty()) {
+            JettyServer server = new JettyServer(configuration.getJettyPort());
+            server.start();
+        }
     }
 
     private static void configureLogger() {
