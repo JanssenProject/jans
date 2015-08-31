@@ -53,7 +53,7 @@ public class SocketService {
         return INSTANCE;
     }
 
-    public void listenSocket() {
+    public Configuration listenSocket() {
         final Injector injector = Guice.createInjector(new GuiceModule());
 
         final Configuration c = Configuration.getInstance();
@@ -93,11 +93,13 @@ public class SocketService {
                     //System.exit(-1);
                 }
             }
+            return c;
         } catch (IOException e) {
             LOG.error("Could not listen on port: {}.", port);
         } finally {
             IOUtils.closeQuietly(m_serverSocket);
         }
+        return null;
     }
 
     public void setShutdown(boolean p_shutdown) {

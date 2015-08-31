@@ -131,6 +131,10 @@ public class Configuration {
     private int port;
     @JsonProperty(value = "time_out_in_seconds")
     private int timeOutInSeconds;
+    @JsonProperty(value = "jetty_port")
+    private int jettyPort;
+    @JsonProperty(value = "start_jetty")
+    private boolean startJetty;
     @JsonProperty(value = "register_client_app_type")
     private String registerClientAppType;
     @JsonProperty(value = "register_client_response_types")
@@ -155,6 +159,22 @@ public class Configuration {
     private String licensePassword;
     @JsonProperty(value = "license_check_period_in_hours")
     private Integer licenseCheckPeriodInHours = 24;
+
+    public int getJettyPort() {
+        return jettyPort;
+    }
+
+    public void setJettyPort(int jettyPort) {
+        this.jettyPort = jettyPort;
+    }
+
+    public boolean isStartJetty() {
+        return startJetty;
+    }
+
+    public void setStartJetty(boolean startJetty) {
+        this.startJetty = startJetty;
+    }
 
     public Integer getLicenseCheckPeriodInHours() {
         return licenseCheckPeriodInHours;
