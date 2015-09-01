@@ -207,10 +207,10 @@
 
     <op-tos-uri>http://ox.gluu.org/doku.php?id=oxauth:tos</op-tos-uri>
 
-    <authorization-code-lifetime>600</authorization-code-lifetime>
+    <authorization-code-lifetime>60</authorization-code-lifetime>
     <refresh-token-lifetime>14400</refresh-token-lifetime>
     <id-token-lifetime>3600</id-token-lifetime>
-    <short-lived-access-token-lifetime>3600</short-lived-access-token-lifetime>
+    <short-lived-access-token-lifetime>300</short-lived-access-token-lifetime>
     <long-lived-access-token-lifetime>31536000</long-lived-access-token-lifetime>
 
     <!-- if session id is not used during some time then it's removed automatically.
