@@ -156,6 +156,10 @@ public abstract class MetricService implements Serializable {
 		ldapEntryManager.remove(metricEntry);
 	}
 
+	public void removeBranch(String branchDn) {
+		ldapEntryManager.removeWithSubtree(branchDn);
+	}
+
 	public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
 		return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
 	}
@@ -171,22 +175,7 @@ public abstract class MetricService implements Serializable {
 		}
 
 		// Prepare list of DNs
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		cal.setTime(startDate);
-
-		Set<String> metricDns = new HashSet<String>();
-		while (cal.getTime().before(endDate) || cal.getTime().equals(endDate)) {
-			Date currentStartDate = cal.getTime();
-			cal.add(Calendar.MONTH , 1);
-
-			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
-			if (!containsBranch(baseDn)) {
-				continue;
-			}
-			
-			metricDns.add(baseDn);
-		}
+		Set<String> metricDns = getBaseDnForPeriod(applicationType, applianceInum, startDate, endDate);
 		
 		if (metricDns.size() == 0) {
 			return result;
@@ -217,6 +206,81 @@ public abstract class MetricService implements Serializable {
 		}
 
 		return result;
+	}
+
+	public List<MetricEntry> getExpiredMetricEntries(String baseDnForPeriod, Date expirationDate) {
+		Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
+
+		List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, new String[] { "uniqueIdentifier" }, expiratioFilter);
+
+		return metricEntries;
+	}
+
+	public Set<String> findAllPeriodBranches(ApplicationType applicationType, String applianceInum) {
+		String baseDn = buildDn(null, null, applicationType, applianceInum);
+
+		Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
+		List<SimpleBranch> periodBranches = (List<SimpleBranch>) ldapEntryManager.findEntries(baseDn, SimpleBranch.class, new String[] { "ou" }, skipRootDnFilter);
+
+		Set<String> periodBranchesStrings = new HashSet<String>();
+		for (SimpleBranch periodBranch: periodBranches) {
+			if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
+				periodBranchesStrings.add(periodBranch.getDn());
+			}
+		}
+
+		return periodBranchesStrings;
+	}
+
+	public void removeExpiredMetricEntries(Date expirationDate, ApplicationType applicationType, String applianceInum) {
+		Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
+		
+		Set<String> allBaseDnForPeriod = findAllPeriodBranches(applicationType, applianceInum);
+		
+		allBaseDnForPeriod.removeAll(keepBaseDnForPeriod);
+		
+		// Remove expired months
+		for (String baseDnForPeriod : allBaseDnForPeriod) {
+			removeBranch(baseDnForPeriod);
+		}
+		
+		// Remove expired entries
+		for (String baseDnForPeriod : keepBaseDnForPeriod) {
+			List<MetricEntry> expiredMetricEntries = getExpiredMetricEntries(baseDnForPeriod, expirationDate);
+			for (MetricEntry expiredMetricEntry : expiredMetricEntries) {
+				remove(expiredMetricEntry);
+			}
+		}
+	}
+
+	private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+		cal.setTime(startDate);
+
+		Set<String> metricDns = new HashSet<String>();
+		while (cal.getTime().before(endDate) || cal.getTime().equals(endDate)) {
+			Date currentStartDate = cal.getTime();
+
+			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
+			if (!containsBranch(baseDn)) {
+				continue;
+			}
+			
+			metricDns.add(baseDn);
+
+			if (cal.getTime().equals(endDate)) {
+				break;
+			} else {
+				cal.add(Calendar.MONTH , 1);
+				
+				if (cal.getTime().after(endDate)) {
+					cal.setTime(endDate);
+				}
+			}
+		}
+
+		return metricDns;
 	}
 	
 	public String getuUiqueIdentifier() {
