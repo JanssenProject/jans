@@ -32,7 +32,7 @@ public class Configuration {
     /**
      * Configuration file name.
      */
-    public static final String FILE_NAME = Utils.isTestMode() ? "configuration-test.json" : "configuration.json";
+    public static final String FILE_NAME = Utils.isTestMode() ? "oxd-conf-test.json" : "oxd-conf.json";
 
     /**
      * Lazy initialization via static holder
