@@ -309,4 +309,7 @@
     <!-- Metric reporter interval in seconds -->
     <metric-reporter-interval>300</metric-reporter-interval>
 
+    <!-- How long metric reporter should keep data in days -->
+    <metric-reporter-keep-data-days>15</metric-reporter-keep-data-days>
+
 </configuration>

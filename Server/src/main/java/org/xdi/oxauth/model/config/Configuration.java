@@ -123,6 +123,7 @@ public class Configuration {
     private String jsLocation;
     private String imgLocation;
 	private int metricReporterInterval;
+	private int metricReporterKeepDataDays;
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
@@ -1088,5 +1089,14 @@ public class Configuration {
     public void setMetricReporterInterval(int metricReporterInterval) {
     	this.metricReporterInterval = metricReporterInterval;
     }
+
+    @XmlElement(name = "metric-reporter-keep-data-days")
+    public int getMetricReporterKeepDataDays() {
+        return metricReporterKeepDataDays;
+    }
+
+	public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
+		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+	}
 
 }
