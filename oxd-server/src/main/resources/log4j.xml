@@ -24,7 +24,7 @@
     </category>
 
     <root>
-        <priority value="TRACE"/>
+        <priority value="INFO"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>
