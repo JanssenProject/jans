@@ -19,7 +19,7 @@
     </dependencySets>
     <files>
         <file>
-            <source>${project.basedir}/src/main/resources/configuration.json</source>
+            <source>${project.basedir}/src/main/resources/oxd-conf.json</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
