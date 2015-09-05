@@ -15,7 +15,7 @@ These are steps needed to get it:
     h) Click "Download JSON" in order to download gplus_client_secrets.json file
 Also it's mandatory to enable Google+ API:
     a) Log into: https://console.developers.google.com/project
-    b) Select project ant enter project name
+    b) Select project and enter project name
     c) Open new project "API & auth -> API" menu item in configuration navigation tree
     d) Click "Google+ API"
     e) Click "Enable API" button
