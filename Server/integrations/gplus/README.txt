@@ -6,7 +6,7 @@ The module has a few properties:
 Example: `/etc/certs/gplus_client_secrets.json`
 These are steps needed to get it:
     a) Log into: https://console.developers.google.com/project
-    b) Click "Create project" ant enter project name
+    b) Click "Create project" and enter project name
     c) Open new project "API & auth -> Credentials" menu item in configuration navigation tree
     d) Click "Add credential" with type "OAuth 2.0 client ID"
     e) Select "Web application" application type
