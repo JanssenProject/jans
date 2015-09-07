@@ -246,7 +246,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return postLoginResult
             else:
-                # Check if the is user with specified gplusUserUid
+                # Check if there is user with specified gplusUserUid
                 print "Google+ Authenticate for step 1. Attempting to find user by uid:", gplusUserUid
 
                 foundUser = userService.getUser(gplusUserUid)
