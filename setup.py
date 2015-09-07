@@ -289,9 +289,11 @@ class Setup(object):
 
     def change_ownership(self):
         self.logIt("Changing ownership")
+        realCertFolder = os.path.realpath(self.certFolder)
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
@@ -299,8 +301,8 @@ class Setup(object):
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
 
-        self.run(['/bin/chmod', 'a-x', realCertFolder])
-        self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
+        self.run(['/bin/chmod', '-R', '400', realCertFolder])
+        self.run(['/bin/chmod', 'o+X', realCertFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -484,7 +486,7 @@ class Setup(object):
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
         if self.components['oxauth']['enabled']: 
-            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/python/" % self.tomcatHome)
+            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
 
