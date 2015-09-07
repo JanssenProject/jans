@@ -419,7 +419,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: DUO authentication module
 displayName: duo
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!5018.F9CF
 oxConfigurationProperty: {"value1":"duo_creds_file","value2":"/etc/certs/duo
  _creds.json","description":""}
