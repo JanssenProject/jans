@@ -5,11 +5,10 @@ This list of steps needed to do to enable DUO person authentication module.
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
 2. Copy required python libraries from ./lib folder to $CATALINA_HOME/conf/python folder.
-3. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
 
-4. Prepare DUO creds file /etc/certs/duo_creds.json with ikey, akey, skey
+3. Prepare DUO creds file /etc/certs/duo_creds.json with ikey, akey, skey
 
-5. Confire new custom module in oxTrust:
+4. Confire new custom module in oxTrust:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Custom Scripts" page.
     - Select "Person Authentication" tab.
@@ -22,17 +21,17 @@ This list of steps needed to do to enable DUO person authentication module.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 
-6. Configure oxAuth to use DUO authentication by default:
+5. Configure oxAuth to use DUO authentication by default:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "duo" authentication mode.
     - Click "Update" button at the bottom of this page.
 
-7. Try to log in using DUO authentication method:
+6. Try to log in using DUO authentication method:
     - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
     - Open second browser or second browsing session and try to log in again. It's better to try to do that from another browser session because we can return back to previous authentication method if something will go wrong.
 
-8. This step is an optional. We need to define SMTP configuration if we are plaaning to use audit_group property. In order to set SMTP configuration
+7. This step is an optional. We need to define SMTP configuration if we are plaaning to use audit_group property. In order to set SMTP configuration
    we need to do:
     - Open "Configuration"->"Organization configuration" page.
     - Scroll down to "SMTP Server Configuration" section.
