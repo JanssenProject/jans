@@ -302,7 +302,7 @@ class Setup(object):
         realCertFolder = os.path.realpath(self.certFolder)
 
         self.run(['/bin/chmod', '-R', '400', realCertFolder])
-        self.run(['/bin/chmod', 'o+X', realCertFolder])
+        self.run(['/bin/chmod', 'u+X', realCertFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
