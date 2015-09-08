@@ -45,7 +45,7 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 public class CleanerTimer {
 
     private final static String EVENT_TYPE = "CleanerTimerEvent";
-    private final static int DEFAULT_INTERVAL = 60; // 10 minutes
+    private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
     @Logger
     private Log log;
