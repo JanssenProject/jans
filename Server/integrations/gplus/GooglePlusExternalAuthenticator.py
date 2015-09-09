@@ -227,7 +227,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     newUser.setAttribute("oxExternalUid", "gplus:" + gplusUserUid)
                     print "Google+ Authenticate for step 1. Attempting to add user", gplusUserUid, " with next attributes", newUser.getCustomAttributes()
  
-                    foundUser = userService.addUser(newUser, true)
+                    foundUser = userService.addUser(newUser, True)
                     print "Google+ Authenticate for step 1. Added new user with UID", foundUser.getUserId()
 
                 foundUserName = foundUser.getUserId()
