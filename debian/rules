@@ -10,21 +10,15 @@
 override_dh_auto_build:
 		mvn clean package -Dmaven.test.skip=true
 override_dh_auto_install:
-		mkdir -p debian/oxd-server/opt/oxd-server/conf/
-		mkdir -p debian/oxd-server/opt/oxd-server/bin/
-		mkdir -p debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-server/src/main/resources/oxd-conf.json debian/oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/bin/oxd-start.sh debian/oxd-server/opt/oxd-server/bin/
-		cp oxd-client/target/oxd-client.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-common/target/oxd-common.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-license-client/target/oxd-license-client.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-license-server/target/oxd-license-server/WEB-INF/lib/bcprov-jdk15on-1.51.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-license-server/target/oxd-license-server/WEB-INF/lib/resteasy-jaxrs-2.3.4.Final.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-license-server/target/oxd-license-server.war debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-license-admin/target/oxd-license-admin.war debian/oxd-server/opt/oxd-server/lib/
+		mkdir -p debian/gluu-oxd-server/opt/oxd-server/conf/
+		mkdir -p debian/gluu-oxd-server/opt/oxd-server/bin/
+		mkdir -p debian/gluu-oxd-server/opt/oxd-server/lib/
+		cp oxd-server/src/main/resources/oxd-conf.json debian/gluu-oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/resources/log4j.xml debian/gluu-oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/bin/oxd-start.sh debian/gluu-oxd-server/opt/oxd-server/bin/
+		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-server/opt/oxd-server/lib/
+		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
+		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 override_dh_fixperms:
 		dh_fixperms
-		chmod 755 debian/oxd-server/opt/oxd-server/bin/oxd-start.sh
+		chmod 755 debian/gluu-oxd-server/opt/oxd-server/bin/oxd-start.sh
