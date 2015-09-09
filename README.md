@@ -1,3 +1,5 @@
+All rights reserved -- Copyright 2015 Gluu Inc.
+
 oxd
 ===
 
