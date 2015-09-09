@@ -1,3 +1,6 @@
+/**
+ * All rights reserved -- Copyright 2015 Gluu Inc.
+ */
 package org.xdi.oxd.common;
 
 import org.codehaus.jackson.JsonNode;
