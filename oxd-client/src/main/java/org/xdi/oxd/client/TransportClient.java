@@ -1,3 +1,7 @@
+/**
+ * All rights reserved -- Copyright 2015 Gluu Inc.
+ */
+
 package org.xdi.oxd.client;
 
 import org.apache.commons.io.IOUtils;
