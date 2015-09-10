@@ -651,7 +651,7 @@ class Setup(object):
     def gen_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
-            self.gen_cert('httpd', self.httpdKeyPass, 'apache')
+            self.gen_cert('httpd', self.httpdKeyPass, 'tomcat')
             self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
             # Shibboleth IDP and Asimba will be added soon...
