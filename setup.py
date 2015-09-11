@@ -289,9 +289,11 @@ class Setup(object):
 
     def change_ownership(self):
         self.logIt("Changing ownership")
+        realCertFolder = os.path.realpath(self.certFolder)
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
@@ -299,8 +301,8 @@ class Setup(object):
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
 
-        self.run(['/bin/chmod', 'a-x', realCertFolder])
-        self.run(['/bin/chmod', '-R', 'u+X', realCertFolder])
+        self.run(['/bin/chmod', '-R', '400', realCertFolder])
+        self.run(['/bin/chmod', 'u+X', realCertFolder])
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -474,7 +476,7 @@ class Setup(object):
     def copy_static(self):
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
         self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
-        # TODO: add this file to rpm.
+
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.components['saml']['enabled']: 
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
@@ -482,6 +484,11 @@ class Setup(object):
             self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
+
+        if self.components['oxauth']['enabled']: 
+            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
+            self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
 
     def createDirs(self, name):
         try:
@@ -644,7 +651,7 @@ class Setup(object):
     def gen_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
-            self.gen_cert('httpd', self.httpdKeyPass, 'apache')
+            self.gen_cert('httpd', self.httpdKeyPass, 'tomcat')
             self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
             # Shibboleth IDP and Asimba will be added soon...
