@@ -264,6 +264,7 @@ public abstract class MetricService implements Serializable {
 
 			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
 			if (!containsBranch(baseDn)) {
+				cal.add(Calendar.DAY_OF_MONTH , 1);
 				continue;
 			}
 			
@@ -272,7 +273,7 @@ public abstract class MetricService implements Serializable {
 			if (cal.getTime().equals(endDate)) {
 				break;
 			} else {
-				cal.add(Calendar.MONTH , 1);
+				cal.add(Calendar.DAY_OF_MONTH , 1);
 				
 				if (cal.getTime().after(endDate)) {
 					cal.setTime(endDate);
