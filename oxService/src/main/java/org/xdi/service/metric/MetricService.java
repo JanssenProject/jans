@@ -263,18 +263,15 @@ public abstract class MetricService implements Serializable {
 			Date currentStartDate = cal.getTime();
 
 			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
-			if (!containsBranch(baseDn)) {
-				cal.add(Calendar.DAY_OF_MONTH , 1);
-				continue;
+			if (containsBranch(baseDn)) {
+				metricDns.add(baseDn);
 			}
-			
-			metricDns.add(baseDn);
 
 			if (cal.getTime().equals(endDate)) {
 				break;
 			} else {
-				cal.add(Calendar.DAY_OF_MONTH , 1);
-				
+				cal.add(Calendar.MONTH, 1);
+
 				if (cal.getTime().after(endDate)) {
 					cal.setTime(endDate);
 				}
