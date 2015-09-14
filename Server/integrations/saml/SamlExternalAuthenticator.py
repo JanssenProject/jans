@@ -262,7 +262,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user", saml_user_uid, " with next attributes", newUser.getCustomAttributes()
 
-                    find_user_by_uid = userService.addUser(newUser)
+                    find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
@@ -317,7 +317,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         attribute.setValue(saml_user_uid)
                         customAttributes.add(attribute)
 
-                    find_user_by_uid = userService.addUser(user)
+                    find_user_by_uid = userService.addUser(user, True)
                     print "Saml. Authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()

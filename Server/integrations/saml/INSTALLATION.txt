@@ -4,11 +4,9 @@ This list of steps needed to do to enable SAML person authentication module.
     - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
     - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
 
-2. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
+2. Prepare file with IdP public certificate /etc/certs/saml.pem  
 
-3. Prepare file with IdP public certificate /etc/certs/saml.pem  
-
-4. Confire new custom module in oxTrust:
+3. Confire new custom module in oxTrust:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Custom Scripts" page.
     - Select "Person Authentication" tab.
@@ -21,13 +19,13 @@ This list of steps needed to do to enable SAML person authentication module.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 
-5. Configure oxAuth to use SAML authentication by default:
+4. Configure oxAuth to use SAML authentication by default:
     - Log into oxTrust with administrative permissions.
     - Open "Configuration→Manage Authentication" page.
     - Scroll to "Default Authentication Method" panel. Select "saml" authentication mode.
     - Click "Update" button at the bottom of this page.
 
-6. Try to log in using SAML authentication method:
+5. Try to log in using SAML authentication method:
     - Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.
     - Open second browser or second browsing session and try to log in again. It's better to try to do that from another browser session because we can return back to previous authentication method if something will go wrong.
 
