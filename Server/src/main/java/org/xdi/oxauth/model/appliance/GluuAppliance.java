@@ -36,6 +36,9 @@ public class GluuAppliance extends InumEntry implements Serializable {
 	@LdapAttribute(name = "oxIDPAuthentication")
 	private List<String> oxIDPAuthentication;
 
+	@LdapAttribute(name = "oxAuthenticationMode")
+	private String authenticationMode;
+
 	public String getInum() {
 		return inum;
 	}
@@ -60,9 +63,21 @@ public class GluuAppliance extends InumEntry implements Serializable {
 		this.oxIDPAuthentication = oxIDPAuthentication;
 	}
 
+	public String getAuthenticationMode() {
+		return authenticationMode;
+	}
+
+	public void setAuthenticationMode(String authenticationMode) {
+		this.authenticationMode = authenticationMode;
+	}
+
 	@Override
 	public String toString() {
-		return String.format("GluuAppliance [inum=%s, oxIDPAuthentication=%s, toString()=%s]", inum, oxIDPAuthentication, super.toString());
+		StringBuilder builder = new StringBuilder();
+		builder.append("GluuAppliance [inum=").append(inum).append(", smtpConfiguration=").append(smtpConfiguration).append(", oxIDPAuthentication=")
+				.append(oxIDPAuthentication).append(", authenticationMode=").append(authenticationMode).append(", toString()=").append(super.toString())
+				.append("]");
+		return builder.toString();
 	}
 
 }

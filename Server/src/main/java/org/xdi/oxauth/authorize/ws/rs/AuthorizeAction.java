@@ -6,6 +6,18 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -35,19 +47,18 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AcrChangedException;
+import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.FederationDataService;
+import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserGroupService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 11.21.2011
@@ -86,6 +97,9 @@ public class AuthorizeAction {
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
+    
+    @In(value = AppInitializer.DEFAULT_AUTH_MODE_NAME, required = false)
+    private String defaultAuthenticationMethod;
 
     @In("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
@@ -154,8 +168,19 @@ public class AuthorizeAction {
             String redirectTo = "/login.xhtml";
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-            List<String> acrValuesList = acrValuesList();
-            if (useExternalAuthenticator && !acrValuesList.isEmpty()) {
+            if (useExternalAuthenticator) {
+                List<String> acrValuesList = acrValuesList();
+                if (acrValuesList.isEmpty()) {
+                	if (StringHelper.isNotEmpty(defaultAuthenticationMethod)) {
+                		acrValuesList = Arrays.asList(defaultAuthenticationMethod);
+                	} else {
+                		CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
+                		if (defaultExternalAuthenticator != null) {
+                    		acrValuesList = Arrays.asList(defaultExternalAuthenticator.getName());
+                		}
+                	}
+                	
+                }
 
                 CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
 
