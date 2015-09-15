@@ -133,8 +133,10 @@ class PersonAuthentication(PersonAuthenticationType):
 		print "TwilioSmsAuthenticator: %s" % s
 
     def getExtraParametersForStep(self, configurationAttributes, step):
+        if (step == 2):
+            return Arrays.asList("code")
         return None
-
+        
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
 
