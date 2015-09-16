@@ -16,8 +16,8 @@ public class RegisterClientParams implements IParams {
 
     @JsonProperty(value = "discovery_url")
     private String discoveryUrl;
-    @JsonProperty(value = "redirect_url")
-    private String redirectUrl;
+    @JsonProperty(value = "redirect_uri")
+    private List<String> redirectUrl;
     @JsonProperty(value = "logout_redirect_url")
     private String logoutRedirectUrl;
     @JsonProperty(value = "client_name")
@@ -42,10 +42,10 @@ public class RegisterClientParams implements IParams {
     public RegisterClientParams() {
     }
 
-    public RegisterClientParams(String p_discoveryUrl, String p_redirectUrl, String p_clientName) {
-        discoveryUrl = p_discoveryUrl;
-        redirectUrl = p_redirectUrl;
-        clientName = p_clientName;
+    public RegisterClientParams(String discoveryUrl, List<String> redirectUrl, String clientName) {
+        this.discoveryUrl = discoveryUrl;
+        this.redirectUrl = redirectUrl;
+        this.clientName = clientName;
     }
 
     public List<String> getRequestUris() {
@@ -120,12 +120,12 @@ public class RegisterClientParams implements IParams {
         discoveryUrl = p_discoveryUrl;
     }
 
-    public String getRedirectUrl() {
+    public List<String> getRedirectUrl() {
         return redirectUrl;
     }
 
-    public void setRedirectUrl(String p_redirectUrl) {
-        redirectUrl = p_redirectUrl;
+    public void setRedirectUrl(List<String> redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
     public String getLogoutRedirectUrl() {
