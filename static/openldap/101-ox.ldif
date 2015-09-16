@@ -1567,10 +1567,13 @@ olcObjectClasses: ( 7.3.5.4.1 NAME 'oxAuthUmaResourceSetPermission' SUP top STRU
  ( oxAmHost $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxHost
   $ oxResourceSetId $ oxTicket ) 
   X-ORIGIN 'Gluu created objectclass' )
-olcObjectClasses: ( 7.1.2.8.6 NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY 
+olcObjectClasses: ( 7.1.2.8.5 NAME 'oxAuthGrant' SUP top STRUCTURAL MUST objectclass MAY
+ ( oxAuthGrantId )
+  X-ORIGIN 'Gluu created objectclass' )
+olcObjectClasses: ( 7.1.2.8.6 NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY
  ( oxCreateTimestamp $ oxAuthAuthenticationTime $ oxAuthAuthorizationCode
   $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
-  $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId
+  $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId
   $ oxAuthenticationMode $ uniqueIdentifier ) 
   X-ORIGIN 'Gluu created objectclass' )
 olcObjectClasses: ( 8.6.4.2.9 NAME 'oxAuthUmaRPT' SUP top STRUCTURAL MUST objectclass MAY 
