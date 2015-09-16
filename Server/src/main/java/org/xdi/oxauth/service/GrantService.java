@@ -6,32 +6,29 @@
 
 package org.xdi.oxauth.service;
 
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.*;
+import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.ldap.Grant;
+import org.xdi.oxauth.model.ldap.TokenLdap;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.util.ServerUtil;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.ldap.TokenLdap;
-import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.util.ServerUtil;
-
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
-
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 10/01/2013
+ * @author Javier Rojas Blum
+ * @version September 16, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("grantService")
@@ -47,9 +44,9 @@ public class GrantService {
         return UUID.randomUUID().toString();
     }
 
-    public static String buildDn(String p_uniqueIdentifier, String p_clientId) {
+    public static String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {
         final StringBuilder dn = new StringBuilder();
-        dn.append(String.format("uniqueIdentifier=%s,", p_uniqueIdentifier));
+        dn.append(String.format("uniqueIdentifier=%s,oxAuthGrantId=%s,", p_uniqueIdentifier, p_grantId));
         dn.append(Client.buildClientDn(p_clientId));
         return dn.toString();
     }
@@ -63,11 +60,13 @@ public class GrantService {
     }
 
     public void merge(TokenLdap p_token) {
+        prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
         ldapEntryManager.merge(p_token);
     }
 
     public void mergeSilently(TokenLdap p_token) {
         try {
+            prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
             ldapEntryManager.merge(p_token);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -75,6 +74,7 @@ public class GrantService {
     }
 
     public void persist(TokenLdap p_token) {
+        prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
         ldapEntryManager.persist(p_token);
     }
 
@@ -199,5 +199,32 @@ public class GrantService {
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
+    }
+
+    private void addGrantBranch(final String p_grantId, final String p_clientId) {
+        Grant grant = new Grant();
+        grant.setDn(getBaseDnForGrant(p_grantId, p_clientId));
+        grant.setId(p_grantId);
+
+        ldapEntryManager.persist(grant);
+    }
+
+    private void prepareGrantBranch(final String p_grantId, final String p_clientId) {
+        // Create ocAuthGrant branch if needed
+        if (!containsGrantBranch(p_grantId, p_clientId)) {
+            addGrantBranch(p_grantId, p_clientId);
+        }
+    }
+
+    private boolean containsGrantBranch(final String p_grantId, final String p_clientId) {
+        return ldapEntryManager.contains(Grant.class, getBaseDnForGrant(p_grantId, p_clientId));
+    }
+
+    private String getBaseDnForGrant(final String p_grantId, final String p_clientId) {
+        final StringBuilder dn = new StringBuilder();
+        dn.append(String.format("oxAuthGrantId=%s,", p_grantId));
+        dn.append(Client.buildClientDn(p_clientId));
+
+        return dn.toString();
     }
 }
