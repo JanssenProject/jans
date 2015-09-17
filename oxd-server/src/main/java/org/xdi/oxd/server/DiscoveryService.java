@@ -32,7 +32,13 @@ public class DiscoveryService {
     /**
      * Singleton
      */
-    private static final DiscoveryService INSTANCE = new DiscoveryService();
+    private static final DiscoveryService INSTANCE = new DiscoveryService(null);
+
+    private final Configuration configuration;
+
+    public DiscoveryService(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     public static DiscoveryService getInstance() {
         return INSTANCE;

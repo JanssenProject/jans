@@ -162,6 +162,16 @@ public class Configuration {
     private String licensePassword;
     @JsonProperty(value = "license_check_period_in_hours")
     private Integer licenseCheckPeriodInHours = 24;
+    @JsonProperty(value = "op_host")
+    private String opHost;
+
+    public String getOpHost() {
+        return opHost;
+    }
+
+    public void setOpHost(String opHost) {
+        this.opHost = opHost;
+    }
 
     public int getJettyPort() {
         return jettyPort;
