@@ -260,7 +260,7 @@ public abstract class MetricService implements Serializable {
 
 		Set<String> metricDns = new HashSet<String>();
 		boolean stopCondition = false;
-		while (cal.getTime().before(endDate) && !stopCondition) {
+		while (true) {  // Add at least one month if the data exists
 			Date currentStartDate = cal.getTime();
 
 			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
@@ -268,12 +268,12 @@ public abstract class MetricService implements Serializable {
 				metricDns.add(baseDn);
 			}
 
-			if (cal.getTime().equals(endDate)) {
+			if (stopCondition) {
 				break;
 			} else {
 				cal.add(Calendar.MONTH, 1);
 
-				if (cal.getTime().after(endDate)) {
+				if (cal.getTime().after(endDate)) { // Stop condition which allows to add DN for end of the period
 					stopCondition = true;
 				}
 			}
