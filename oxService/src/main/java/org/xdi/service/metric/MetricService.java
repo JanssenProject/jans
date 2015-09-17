@@ -260,7 +260,7 @@ public abstract class MetricService implements Serializable {
 
 		Set<String> metricDns = new HashSet<String>();
 		boolean stopCondition = false;
-		while (cal.getTime().before(endDate) || !stopCondition) {
+		while (cal.getTime().before(endDate) && !stopCondition) {
 			Date currentStartDate = cal.getTime();
 
 			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
