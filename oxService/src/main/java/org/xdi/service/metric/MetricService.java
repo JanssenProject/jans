@@ -256,8 +256,12 @@ public abstract class MetricService implements Serializable {
 	private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		cal.setTime(endDate);
-		int endMonth = cal.get(Calendar.MONTH);
+		cal.setTime(startDate);
+
+		Calendar calEndMonth = Calendar.getInstance();
+		calEndMonth.setTimeZone(TimeZone.getTimeZone("UTC"));
+		calEndMonth.setTime(endDate);
+		int endMonth = calEndMonth.get(Calendar.MONTH);
 
 		Set<String> metricDns = new HashSet<String>();
 
