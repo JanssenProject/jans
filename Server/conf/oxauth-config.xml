@@ -25,7 +25,7 @@
 
     <!-- sets mode of the server. Possible values: memory, ldap-->
     <mode>ldap</mode>
-    
+
     <openid-sub-attribute>inum</openid-sub-attribute>
 
     <!-- Configuration is updated from LDAP, interval in seconds, 3600seconds = 1hour -->
@@ -47,6 +47,10 @@
         <grant-type>urn:ietf:params:oauth:grant-type:jwt-bearer</grant-type>
     </grant-types-supported>
 
+    <!--
+    Configure the supported Subject Types.
+    For example: to Force Pairwise Client Registration comment or delete the public subject type.
+    -->
     <subject-types-supported>
         <subject-type>public</subject-type>
         <subject-type>pairwise</subject-type>
@@ -221,7 +225,8 @@
     <session-id-persist-on-prompt-none>false</session-id-persist-on-prompt-none>
 
     <uma-add-scopes-automatically>false</uma-add-scopes-automatically>
-    <uma-requester-permission-token-lifetime>${config.uma.requester-permission-token-lifetime}</uma-requester-permission-token-lifetime>
+    <uma-requester-permission-token-lifetime>${config.uma.requester-permission-token-lifetime}
+    </uma-requester-permission-token-lifetime>
     <uma-keep-client-during-resource-set-registration>true</uma-keep-client-during-resource-set-registration>
 
     <!-- Clean service interval in seconds -->
