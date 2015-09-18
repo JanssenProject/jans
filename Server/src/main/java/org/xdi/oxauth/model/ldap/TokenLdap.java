@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version September 16, 2015
  */
 
 @LdapEntry
@@ -31,6 +31,8 @@ public class TokenLdap {
     private String grantId;
     @LdapAttribute(name = "oxAuthUserId")
     private String userId;
+    @LdapAttribute(name = "oxAuthClientId")
+    private String clientId;
     @LdapAttribute(name = "oxAuthCreation")
     private Date creationDate;
     @LdapAttribute(name = "oxAuthExpiration")
@@ -170,6 +172,14 @@ public class TokenLdap {
 
     public void setUserId(String p_userId) {
         userId = p_userId;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getJwtRequest() {
