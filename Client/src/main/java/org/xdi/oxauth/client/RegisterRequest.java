@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version June 3, 2015
+ * @version September 1, 2015
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -983,7 +983,7 @@ public class RegisterRequest extends BaseRequest {
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(requestObject.has(SUBJECT_TYPE.toString()) ?
-                SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : SubjectType.PUBLIC);
+                SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : null);
         result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
                 SignatureAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
         return result;
