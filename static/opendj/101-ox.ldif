@@ -2210,7 +2210,7 @@ objectclasses: ( oxAuthToken-oid NAME 'oxAuthToken' SUP top STRUCTURAL MUST obje
  ( createTimestamp $ oxAuthAuthenticationTime $ oxAuthAuthorizationCode
   $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
   $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId
-  $ oxAuthenticationMode $ uniqueIdentifier ) 
+  $ oxAuthenticationMode $ oxAuthClientId $ uniqueIdentifier ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaRPT-oid NAME 'oxAuthUmaRPT' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration
