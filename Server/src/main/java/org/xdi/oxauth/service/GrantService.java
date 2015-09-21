@@ -60,13 +60,11 @@ public class GrantService {
     }
 
     public void merge(TokenLdap p_token) {
-        prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
         ldapEntryManager.merge(p_token);
     }
 
     public void mergeSilently(TokenLdap p_token) {
         try {
-            prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
             ldapEntryManager.merge(p_token);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
