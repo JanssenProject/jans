@@ -53,6 +53,8 @@ public class OperationFactory {
                     return new LicenseStatusOperation(p_command, injector);
                 case GET_AUTHORIZATION_URL:
                     return new GetAuthorizationUrlOperation(p_command, injector);
+                case GET_TOKENS_BY_CODE:
+                    return new GetTokensByCodeOperation(p_command, injector);
             }
             LOG.error("Command is not supported. Command: {}", p_command);
         } else {
