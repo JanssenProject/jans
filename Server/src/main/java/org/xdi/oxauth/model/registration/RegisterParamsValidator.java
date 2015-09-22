@@ -14,6 +14,7 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.Util;
 
@@ -30,7 +31,7 @@ import java.util.Set;
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 11, 2015
+ * @version September 1, 2015
  */
 public class RegisterParamsValidator {
 
@@ -44,14 +45,20 @@ public class RegisterParamsValidator {
      * Validates the parameters for a register request.
      *
      * @param applicationType     The Application Type: native or web.
+     * @param subjectType         The subject_type requested for responses to this Client.
      * @param redirectUris        Space-separated list of redirect URIs.
      * @param sectorIdentifierUrl A HTTPS scheme URL to be used in calculating Pseudonymous Identifiers by the OP.
      *                            The URL contains a file with a single JSON array of redirect_uri values.
      * @return Whether the parameters of client register is valid or not.
      */
-    public static boolean validateParamsClientRegister(ApplicationType applicationType, List<String> redirectUris,
-                                                       String sectorIdentifierUrl) {
+    public static boolean validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
+                                                       List<String> redirectUris, String sectorIdentifierUrl) {
         boolean validParams = applicationType != null && redirectUris != null && !redirectUris.isEmpty();
+
+        if (subjectType == null || !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(subjectType.toString())) {
+            LOG.debug("Parameter subject_type is not valid.");
+            return false;
+        }
 
         if (validParams && StringUtils.isNotBlank(sectorIdentifierUrl)) {
             try {
