@@ -29,7 +29,8 @@ public enum CommandType {
     CHECK_ACCESS_TOKEN("access_token_status"),
     LICENSE_STATUS("license_status"),
     DISCOVERY("discovery"),
-    GET_AUTHORIZATION_URL("get_authorization_url");
+    GET_AUTHORIZATION_URL("get_authorization_url"),
+    GET_TOKENS_BY_CODE("get_tokens_by_code");
 
     private final String value;
 
