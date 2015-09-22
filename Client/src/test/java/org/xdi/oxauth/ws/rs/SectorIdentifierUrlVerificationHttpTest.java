@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
  * Functional tests for Sector Identifier URI Verification (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version August 21, 2015
  */
 public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
@@ -102,6 +102,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         Jwt jwt = Jwt.parse(idToken);
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
