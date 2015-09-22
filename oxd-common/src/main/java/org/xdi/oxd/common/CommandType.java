@@ -28,7 +28,8 @@ public enum CommandType {
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
     LICENSE_STATUS("license_status"),
-    DISCOVERY("discovery");
+    DISCOVERY("discovery"),
+    GET_AUTHORIZATION_URL("get_authorization_url");
 
     private final String value;
 
