@@ -189,7 +189,7 @@ public class Authenticator implements Serializable {
             return false;
         }
 
-	    // Set in event context sessionAttributs to allow access them from external authenticator
+	    // Set in event context sessionAttributes to allow access them from external authenticator
 	    Context eventContext = Contexts.getEventContext();
 	    eventContext.set("sessionAttributes", sessionIdAttributes);
 
