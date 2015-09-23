@@ -5,30 +5,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.params.GetTokensByCodeParams;
+import org.xdi.oxd.common.params.GetUserInfoParams;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
  */
 
-public class GetTokensByCodeOperation extends BaseOperation {
+public class GetUserInfoOperation extends BaseOperation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GetTokensByCodeOperation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
 
     /**
      * Base constructor
      *
-     * @param p_command command
+     * @param command command
      */
-    protected GetTokensByCodeOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected GetUserInfoOperation(Command command, final Injector injector) {
+        super(command, injector);
     }
 
     @Override
     public CommandResponse execute() {
         try {
-            final GetTokensByCodeParams params = asParams(GetTokensByCodeParams.class);
+            final GetUserInfoParams params = asParams(GetUserInfoParams.class);
             // todo we need load site conf here
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

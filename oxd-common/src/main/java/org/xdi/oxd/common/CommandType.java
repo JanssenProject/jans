@@ -30,7 +30,8 @@ public enum CommandType {
     LICENSE_STATUS("license_status"),
     DISCOVERY("discovery"),
     GET_AUTHORIZATION_URL("get_authorization_url"),
-    GET_TOKENS_BY_CODE("get_tokens_by_code");
+    GET_TOKENS_BY_CODE("get_tokens_by_code"),
+    GET_USER_INFO("get_user_info");
 
     private final String value;
 
