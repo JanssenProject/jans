@@ -4,7 +4,6 @@
                 xmlns:c="http://java.sun.com/jstl/core"
                 xmlns:s="http://jboss.com/products/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
@@ -44,38 +43,72 @@
     <ui:define name="pageTitle">oxAuth Wikid - Login</ui:define>
 
     <ui:define name="body">
-        <h:form id="loginForm">
-            <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
-                <div class="login-panel">
-                    <div class="login-panel-header">Wikid Login (second step)</div>
-                    <div class="login-panel-body">
-                        <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+        <table border="0" align="center">
+            <tr>
+                <td>
+                    <div>
+                        <h:form id="loginForm">
+                            <s:token/>
+                            <h:panelGroup rendered="#{not identity.loggedIn}">
+                                <div class="login-panel">
+                                    <div class="login-panel-header">
+                                        <h:outputText value="#{messages['login.login']}"/>
+                                    </div>
+                                    <div class="login-panel-body">
+                                        <c:set var="client" value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
-                            <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                                        </s:div>
 
-                        <p class="info">Please login here</p>
+                                        <p class="info">
+                                            <h:outputText value="#{messages['login.pleaseLoginHere']}"/>
+                                        </p>
 
-                        <div class="dialog">
-                            <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="passcode">Passcode</h:outputLabel>
-				                <input name="passcode" type="text" autocomplete="off" />
-                            </h:panelGrid>
-                        </div>
+                                        <div class="dialog">
+                                            <h:panelGrid columns="3" border="0" rowClasses="prop"
+                                                         columnClasses="name,value,hint">
+				                                <h:outputLabel for="passcode">One-time passcode</h:outputLabel>
+								                <input name="passcode" type="text" autocomplete="off" />
+                                                <h:outputText value="One time passocde generated with token client"/>
+                                            </h:panelGrid>
+                                        </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
-                            <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
-                            </p>
-                        </s:div>
+                                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                            <p>
+                                                <h:outputText value="#{messages['common.agreePolicy']}"/>
+                                                <a target="_blank" href='#{client.getPolicyUri()}'>
+                                                    <h:outputText value="#{messages['common.privacyPolicy']}"/>
+                                                </a>
+                                            </p>
+                                        </s:div>
 
-                        <div class="actionButtons">
-                            <h:commandButton value="Login" action="#{authenticator.authenticate}"/>
-                        </div>
+                                        <s:div rendered='#{!empty client.getTosUri()}'>
+                                            <p>
+                                                <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+                                                <a target="_blank" href='#{client.getTosUri()}'>
+                                                    <h:outputText value="#{messages['common.termsOfService']}"/>
+                                                </a>
+                                            </p>
+                                        </s:div>
+
+                                        <div class="actionButtons">
+                                            <h:commandButton id="loginButton"
+                                                             value="#{messages['login.login']}"
+                                                             action="#{authenticator.authenticate}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </h:panelGroup>
+                        </h:form>
                     </div>
-                </div>
-            </h:panelGroup>
-        </h:form>
+                </td>
+            </tr>
+        </table>
+        <script type="text/javascript">
+            window.onload = function() {
+                document.getElementById("loginForm:username").focus();
+            };
+        </script>
     </ui:define>
 </ui:composition>
