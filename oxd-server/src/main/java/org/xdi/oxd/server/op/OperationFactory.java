@@ -20,45 +20,49 @@ public class OperationFactory {
     private OperationFactory() {
     }
 
-    public static IOperation create(Command p_command, final Injector injector) {
-        if (p_command != null && p_command.getCommandType() != null) {
-            switch (p_command.getCommandType()) {
+    public static IOperation create(Command command, final Injector injector) {
+        if (command != null && command.getCommandType() != null) {
+            switch (command.getCommandType()) {
                 case AUTHORIZE_RPT:
-                    return new AuthorizeRptOperation(p_command, injector);
+                    return new AuthorizeRptOperation(command, injector);
                 case AUTHORIZATION_CODE_FLOW:
-                    return new AuthorizationCodeFlowOperation(p_command, injector);
+                    return new AuthorizationCodeFlowOperation(command, injector);
                 case OBTAIN_PAT:
-                    return new ObtainPatOperation(p_command, injector);
+                    return new ObtainPatOperation(command, injector);
                 case OBTAIN_AAT:
-                    return new ObtainAatOperation(p_command, injector);
+                    return new ObtainAatOperation(command, injector);
                 case OBTAIN_RPT:
-                    return new ObtainRptOperation(p_command, injector);
+                    return new ObtainRptOperation(command, injector);
                 case REGISTER_CLIENT:
-                    return new RegisterClientOperation(p_command, injector);
+                    return new RegisterClientOperation(command, injector);
                 case CLIENT_READ:
-                    return new ClientReadOperation(p_command, injector);
+                    return new ClientReadOperation(command, injector);
                 case REGISTER_RESOURCE:
-                    return new RegisterResourceOperation(p_command, injector);
+                    return new RegisterResourceOperation(command, injector);
                 case REGISTER_TICKET:
-                    return new RegisterTicketOperation(p_command, injector);
+                    return new RegisterTicketOperation(command, injector);
                 case RPT_STATUS:
-                    return new RptStatusOperation(p_command, injector);
+                    return new RptStatusOperation(command, injector);
                 case DISCOVERY:
-                    return new DiscoveryOperation(p_command, injector);
+                    return new DiscoveryOperation(command, injector);
                 case CHECK_ID_TOKEN:
-                    return new CheckIdTokenOperation(p_command, injector);
+                    return new CheckIdTokenOperation(command, injector);
                 case CHECK_ACCESS_TOKEN:
-                    return new CheckAccessTokenOperation(p_command, injector);
+                    return new CheckAccessTokenOperation(command, injector);
                 case LICENSE_STATUS:
-                    return new LicenseStatusOperation(p_command, injector);
+                    return new LicenseStatusOperation(command, injector);
                 case GET_AUTHORIZATION_URL:
-                    return new GetAuthorizationUrlOperation(p_command, injector);
+                    return new GetAuthorizationUrlOperation(command, injector);
                 case GET_TOKENS_BY_CODE:
-                    return new GetTokensByCodeOperation(p_command, injector);
+                    return new GetTokensByCodeOperation(command, injector);
+                case GET_USER_INFO:
+                    return new GetUserInfoOperation(command, injector);
+                case IMPLICIT_FLOW:
+                    return new ImplicitFlowOperation(command, injector);
             }
-            LOG.error("Command is not supported. Command: {}", p_command);
+            LOG.error("Command is not supported. Command: {}", command);
         } else {
-            LOG.error("Command is invalid. Command: {}", p_command);
+            LOG.error("Command is invalid. Command: {}", command);
         }
         return null;
     }
