@@ -31,7 +31,8 @@ public enum CommandType {
     DISCOVERY("discovery"),
     GET_AUTHORIZATION_URL("get_authorization_url"),
     GET_TOKENS_BY_CODE("get_tokens_by_code"),
-    GET_USER_INFO("get_user_info");
+    GET_USER_INFO("get_user_info"),
+    REGISTER_SITE("register_site");
 
     private final String value;
 
