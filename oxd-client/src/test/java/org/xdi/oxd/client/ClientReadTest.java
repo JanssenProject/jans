@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -28,7 +29,7 @@ public class ClientReadTest {
             // register client first
             final RegisterClientParams params = new RegisterClientParams();
             params.setDiscoveryUrl(discoveryUrl);
-            params.setRedirectUrl(redirectUrl);
+            params.setRedirectUrl(Lists.newArrayList(redirectUrl));
             params.setClientName(clientName);
 
             final Command command = new Command(CommandType.REGISTER_CLIENT);

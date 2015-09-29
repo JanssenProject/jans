@@ -8,6 +8,8 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
+import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.SocketService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,6 +21,8 @@ public class GuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(LicenseService.class).in(Singleton.class);
+        bind(ConfigurationService.class).in(Singleton.class);
+        bind(SocketService.class).in(Singleton.class);
     }
 
     @Provides

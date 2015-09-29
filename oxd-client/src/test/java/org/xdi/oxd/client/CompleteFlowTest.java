@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -61,7 +62,7 @@ public class CompleteFlowTest {
     public RegisterClientOpResponse registerClient(String discoveryUrl, String redirectUrl, String clientName) {
         final RegisterClientParams params = new RegisterClientParams();
         params.setDiscoveryUrl(discoveryUrl);
-        params.setRedirectUrl(redirectUrl);
+        params.setRedirectUrl(Lists.newArrayList(redirectUrl));
         params.setClientName(clientName);
 
         final Command command = new Command(CommandType.REGISTER_CLIENT);

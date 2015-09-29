@@ -3,10 +3,7 @@
  */
 package org.xdi.oxd.server;
 
-import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
@@ -32,12 +29,10 @@ public class Processor {
      */
     private static final Logger LOG = LoggerFactory.getLogger(Processor.class);
 
-    private final Injector injector;
     private final LicenseService licenseService;
 
-    public Processor(final Injector injector) {
-        this.injector = injector;
-        this.licenseService = injector.getInstance(LicenseService.class);
+    public Processor(LicenseService licenseService) {
+        this.licenseService = licenseService;
     }
 
     /**
@@ -62,10 +57,6 @@ public class Processor {
                     return null;
                 }
             }
-        } catch (JsonMappingException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (JsonParseException e) {
-            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -100,7 +91,7 @@ public class Processor {
     public CommandResponse process(Command p_command) {
         if (p_command != null) {
             try {
-                final IOperation iOperation = OperationFactory.create(p_command, injector);
+                final IOperation iOperation = OperationFactory.create(p_command, ServerLauncher.getInjector());
                 if (iOperation != null) {
                     return iOperation.execute();
                 } else {

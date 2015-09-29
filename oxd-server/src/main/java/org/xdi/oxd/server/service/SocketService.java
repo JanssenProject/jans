@@ -1,15 +1,15 @@
 /**
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
-package org.xdi.oxd.server;
+package org.xdi.oxd.server.service;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.guice.GuiceModule;
+import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.SocketProcessor;
 import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.IOException;
@@ -33,88 +33,73 @@ public class SocketService {
     private static final Logger LOG = LoggerFactory.getLogger(SocketService.class);
 
     /**
-     * Singleton
-     */
-    private static final SocketService INSTANCE = new SocketService();
-
-    /**
      * Server socket
      */
-    private volatile ServerSocket m_serverSocket = null;
+    private volatile ServerSocket serverSocket = null;
 
     /**
      * Shutdown flag
      */
-    private volatile boolean m_shutdown = false;
+    private volatile boolean shutdown = false;
 
+    private Configuration conf;
     /**
      * Avoid direct instance creation
      */
-    private SocketService() {
+    @Inject
+    public SocketService(Configuration conf) {
+        this.conf = conf;
     }
 
-    public static SocketService getInstance() {
-        return INSTANCE;
-    }
+    public void listenSocket() {
+        final int port = conf.getPort();
 
-    public Configuration listenSocket() {
-        final Injector injector = Guice.createInjector(new GuiceModule());
-
-        final Configuration c = Configuration.getInstance();
-        final int port = c.getPort();
-
-        final LicenseService licenseService = new LicenseService(c);
+        final LicenseService licenseService = new LicenseService(conf);
         final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.getThreadsCount(), CoreUtils.daemonThreadFactory());
 
         try {
-            final Boolean localhostOnly = c.getLocalhostOnly();
+            final Boolean localhostOnly = conf.getLocalhostOnly();
             if (localhostOnly == null || localhostOnly) {
                 final InetAddress address = InetAddress.getByName("127.0.0.1");
-                m_serverSocket = new ServerSocket(port, 50, address);
+                serverSocket = new ServerSocket(port, 50, address);
             } else {
-                m_serverSocket = new ServerSocket(port, 50);
+                serverSocket = new ServerSocket(port, 50);
             }
 
-            m_serverSocket.setSoTimeout(c.getTimeOutInSeconds() * 1000);
-            LOG.info("Server socket is bound to port: {}, with timeout: {} seconds. Start listening for notifications.", port, c.getTimeOutInSeconds());
-            while (!m_shutdown) {
+            serverSocket.setSoTimeout(conf.getTimeOutInSeconds() * 1000);
+            LOG.info("Server socket is bound to port: {}, with timeout: {} seconds. Start listening for notifications.", port, conf.getTimeOutInSeconds());
+            while (!shutdown) {
                 try {
                     if (licenseService.isLicenseChanged()) {
                         licenseService.reset();
                         LOG.info("License was changed. Restart oxd server to enforce new license!");
                         shutdownNow();
-                        m_shutdown = false;
+                        shutdown = false;
                         LOG.info("Starting...");
                         listenSocket();
                     }
 
-                    final Socket clientSocket = m_serverSocket.accept();
+                    final Socket clientSocket = serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    executorService.execute(new SocketProcessor(clientSocket, injector));
+                    executorService.execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;
                     //System.exit(-1);
                 }
             }
-            return c;
         } catch (IOException e) {
             LOG.error("Could not listen on port: {}.", port);
         } finally {
-            IOUtils.closeQuietly(m_serverSocket);
+            IOUtils.closeQuietly(serverSocket);
         }
-        return null;
-    }
-
-    public void setShutdown(boolean p_shutdown) {
-        m_shutdown = p_shutdown;
     }
 
     public void shutdownNow() {
         LOG.info("Shutdown server...");
         try {
-            m_shutdown = true;
-            IOUtils.closeQuietly(m_serverSocket);
+            shutdown = true;
+            IOUtils.closeQuietly(serverSocket);
         } finally {
             LOG.info("Shutdown finished.");
         }
