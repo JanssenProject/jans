@@ -14,14 +14,20 @@ public class SiteConfiguration implements Serializable {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
+
+    @JsonProperty(value = "authorization_redirect_uri")
+    private String authorizationRedirectUri;
+
+    @JsonProperty(value = "application_type")
+    private String applicationType;
+    @JsonProperty(value = "redirect_uris")
+    private List<String> redirectUris;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "client_secret")
     private String clientSecret;
-    @JsonProperty(value = "redirect_uris")
-    private List<String> redirectUris;
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
@@ -30,8 +36,34 @@ public class SiteConfiguration implements Serializable {
     private List<String> claimsLocales;
     @JsonProperty(value = "acr_values")
     private List<String> acrValues;
-    @JsonProperty(value = "grant_type")
-    private String grantType;
+    @JsonProperty(value = "grant_types")
+    private List<String> grantType;
+    @JsonProperty(value = "contacts")
+    private List<String> contacts;
+
+    public String getApplicationType() {
+        return applicationType;
+    }
+
+    public void setApplicationType(String applicationType) {
+        this.applicationType = applicationType;
+    }
+
+    public String getAuthorizationRedirectUri() {
+        return authorizationRedirectUri;
+    }
+
+    public void setAuthorizationRedirectUri(String authorizationRedirectUri) {
+        this.authorizationRedirectUri = authorizationRedirectUri;
+    }
+
+    public List<String> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<String> contacts) {
+        this.contacts = contacts;
+    }
 
     public List<String> getAcrValues() {
         return acrValues;
@@ -65,11 +97,11 @@ public class SiteConfiguration implements Serializable {
         this.clientSecret = clientSecret;
     }
 
-    public String getGrantType() {
+    public List<String> getGrantType() {
         return grantType;
     }
 
-    public void setGrantType(String grantType) {
+    public void setGrantType(List<String> grantType) {
         this.grantType = grantType;
     }
 
@@ -113,20 +145,24 @@ public class SiteConfiguration implements Serializable {
         this.uiLocales = uiLocales;
     }
 
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("SiteConfiguration");
         sb.append("{acrValues=").append(acrValues);
         sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
+        sb.append(", applicationType='").append(applicationType).append('\'');
+        sb.append(", redirectUris=").append(redirectUris);
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
-        sb.append(", redirectUris=").append(redirectUris);
         sb.append(", scope=").append(scope);
         sb.append(", uiLocales=").append(uiLocales);
         sb.append(", claimsLocales=").append(claimsLocales);
-        sb.append(", grantType='").append(grantType).append('\'');
+        sb.append(", grantType=").append(grantType);
+        sb.append(", contacts=").append(contacts);
         sb.append('}');
         return sb.toString();
     }

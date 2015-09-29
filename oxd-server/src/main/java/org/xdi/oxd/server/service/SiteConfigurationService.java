@@ -72,4 +72,8 @@ public class SiteConfigurationService {
         }
     }
 
+    public boolean persist(SiteConfiguration siteConfiguration) {
+        // todo
+        return false;
+    }
 }
