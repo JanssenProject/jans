@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.GuiceModule;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.Processor;
 import org.xdi.oxd.web.CommandService;
 

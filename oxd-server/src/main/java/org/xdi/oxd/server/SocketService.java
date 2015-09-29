@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.IOException;
