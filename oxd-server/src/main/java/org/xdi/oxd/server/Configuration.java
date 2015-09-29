@@ -30,7 +30,7 @@ public class Configuration {
     /**
      * oxD configuration property name
      */
-    private static final String CONF_SYS_PROPERTY_NAME = "oxd.server.config";
+    public static final String CONF_SYS_PROPERTY_NAME = "oxd.server.config";
 
     /**
      * Configuration file name.
