@@ -1,11 +1,12 @@
 /**
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
-package org.xdi.oxd.server;
+package org.xdi.oxd.server.guice;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
 
 /**
