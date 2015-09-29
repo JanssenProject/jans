@@ -19,8 +19,6 @@ public class AppModule extends AbstractModule {
 
        @Override
        protected void configure() {
-           bind(CommandService.class);
-
            // ws
            bind(CommandWS.class);
        }

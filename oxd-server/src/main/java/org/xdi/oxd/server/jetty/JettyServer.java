@@ -28,6 +28,7 @@ public class JettyServer {
             //LOG.trace(server.dump());
             //server.dumpStdErr();
             server.join();
+            LOG.info("Jetty Server is started.");
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

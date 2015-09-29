@@ -3,7 +3,6 @@
  */
 package org.xdi.oxd.server;
 
-import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -11,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ReadResult;
+import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -33,9 +32,9 @@ public class SocketProcessor implements Runnable {
     private final Socket socket;
     private final Processor processor;
 
-    public SocketProcessor(Socket socket, final Injector injector) {
+    public SocketProcessor(Socket socket) {
         this.socket = socket;
-        this.processor = new Processor(injector);
+        this.processor = new Processor(ServerLauncher.getInjector().getInstance(LicenseService.class));
     }
 
     @Override
@@ -71,8 +70,6 @@ public class SocketProcessor implements Runnable {
                     break;
                 }
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {

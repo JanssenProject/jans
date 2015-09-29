@@ -57,8 +57,7 @@ public class RegisterClientOperation extends BaseOperation {
 
                     final ApplicationType applicationType = ApplicationType.fromString(applicationTypeString);
                     final List<ResponseType> responseTypes = ResponseType.fromString(responseTypeString, " ");
-                    final RegisterRequest request = new RegisterRequest(applicationType, params.getClientName(),
-                            org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getRedirectUrl()));
+                    final RegisterRequest request = new RegisterRequest(applicationType, params.getClientName(), params.getRedirectUrl());
                     request.setResponseTypes(responseTypes);
                     request.setJwksUri(params.getJwksUri());
                     request.setPostLogoutRedirectUris(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getLogoutRedirectUrl()));

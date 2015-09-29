@@ -3,19 +3,24 @@
  */
 package org.xdi.oxd.web.ws;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.Processor;
+import org.xdi.oxd.server.ServerLauncher;
+import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.web.CommandService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -33,8 +38,7 @@ public class CommandWS {
     private final Processor processor;
 
     public CommandWS() {
-        final Injector injector = Guice.createInjector(new GuiceModule());
-        processor = new Processor(injector);
+        processor = new Processor(ServerLauncher.getInjector().getInstance(LicenseService.class));
     }
 
     @GET
