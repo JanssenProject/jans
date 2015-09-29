@@ -3,15 +3,14 @@
  */
 package org.xdi.oxd.web;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.Processor;
+import org.xdi.oxd.server.ServerLauncher;
+import org.xdi.oxd.server.license.LicenseService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -29,14 +28,12 @@ public class CommandServlet extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandServlet.class);
 
-    private final CommandService commandService = new CommandService();
     private Processor processor;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        final Injector injector = Guice.createInjector(new GuiceModule());
-        processor = new Processor(injector);
+        processor = new Processor(ServerLauncher.getInjector().getInstance(LicenseService.class));
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {

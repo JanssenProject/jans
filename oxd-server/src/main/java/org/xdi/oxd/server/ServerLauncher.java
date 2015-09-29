@@ -4,6 +4,8 @@
 package org.xdi.oxd.server;
 
 import com.google.common.base.Strings;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -12,7 +14,9 @@ import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.jetty.JettyServer;
+import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
 import java.security.Provider;
@@ -31,7 +35,7 @@ public class ServerLauncher {
      */
     private static final Logger LOG = LoggerFactory.getLogger(ServerLauncher.class);
 
-    private static final SocketService SOCKET_SERVICE = SocketService.getInstance();
+    private static final Injector INJECTOR = Guice.createInjector(new GuiceModule());
 
     /**
      * Main method.
@@ -48,8 +52,13 @@ public class ServerLauncher {
         addSecurityProviders();
         registerResteasyProviders();
         checkConfiguration();
-        Configuration configuration = SOCKET_SERVICE.listenSocket();
-        startJetty(configuration);
+
+        startOxd();
+        startJetty();
+    }
+
+    private static void startOxd() {
+        INJECTOR.getInstance(SocketService.class).listenSocket();
     }
 
     private static void checkConfiguration() {
@@ -67,9 +76,10 @@ public class ServerLauncher {
                 Configuration.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
     }
 
-    private static void startJetty(Configuration configuration) {
-        if (configuration.isStartJetty()) {
-            JettyServer server = new JettyServer(configuration.getJettyPort());
+    private static void startJetty() {
+        final Configuration conf = INJECTOR.getInstance(Configuration.class);
+        if (conf.isStartJetty()) {
+            JettyServer server = new JettyServer(conf.getJettyPort());
             server.start();
         }
     }
@@ -107,6 +117,10 @@ public class ServerLauncher {
     }
 
     public static void shutdown() {
-        SOCKET_SERVICE.shutdownNow();
+        INJECTOR.getInstance(SocketService.class).shutdownNow();
+    }
+
+    public static Injector getInjector() {
+        return INJECTOR;
     }
 }
