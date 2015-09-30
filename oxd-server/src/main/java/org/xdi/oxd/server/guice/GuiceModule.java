@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
 /**
@@ -23,6 +24,7 @@ public class GuiceModule extends AbstractModule {
         bind(LicenseService.class).in(Singleton.class);
         bind(ConfigurationService.class).in(Singleton.class);
         bind(SocketService.class).in(Singleton.class);
+        bind(SiteConfigurationService.class).in(Singleton.class);
     }
 
     @Provides
