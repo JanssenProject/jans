@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.jetty.JettyServer;
+import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
@@ -59,21 +61,22 @@ public class ServerLauncher {
 
     private static void startOxd() {
         INJECTOR.getInstance(SocketService.class).listenSocket();
+        INJECTOR.getInstance(SiteConfigurationService.class).load();
     }
 
     private static void checkConfiguration() {
-        final String confProperty = System.getProperty(Configuration.CONF_SYS_PROPERTY_NAME);
+        final String confProperty = System.getProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME);
         if (!Strings.isNullOrEmpty(confProperty)) {
             if (new File(confProperty).exists()) {
                 return; // configuration exists and can be read
             } else {
                 throw new AssertionError("Failed to start oxd, system property " +
-                        Configuration.CONF_SYS_PROPERTY_NAME + " points to absent/empty file: " + confProperty);
+                        ConfigurationService.CONF_SYS_PROPERTY_NAME + " points to absent/empty file: " + confProperty);
             }
         }
         throw new AssertionError("Failed to start oxd, system property " +
-                Configuration.CONF_SYS_PROPERTY_NAME + " is not specified. (Please defined it as -D" +
-                Configuration.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
+                ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please defined it as -D" +
+                ConfigurationService.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
     }
 
     private static void startJetty() {
