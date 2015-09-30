@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.service.ConfigurationService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,16 +29,6 @@ public class Configuration {
     private static final Logger LOG = LoggerFactory.getLogger(Configuration.class);
 
     /**
-     * oxD configuration property name
-     */
-    public static final String CONF_SYS_PROPERTY_NAME = "oxd.server.config";
-
-    /**
-     * Configuration file name.
-     */
-    public static final String FILE_NAME = Utils.isTestMode() ? "oxd-conf-test.json" : "oxd-conf.json";
-
-    /**
      * Lazy initialization via static holder
      */
     private static class Holder {
@@ -46,15 +37,15 @@ public class Configuration {
 
         private static Configuration load() {
             // 1. try system property "oxd.server.config"
-            Configuration conf = tryToLoadFromSysProperty(CONF_SYS_PROPERTY_NAME);
+            Configuration conf = tryToLoadFromSysProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME);
             if (conf != null) {
-                LOG.trace("Configuration loaded successfully from system property: {}.", CONF_SYS_PROPERTY_NAME);
+                LOG.trace("Configuration loaded successfully from system property: {}.", ConfigurationService.CONF_SYS_PROPERTY_NAME);
                 LOG.trace("Configuration: {}", conf);
                 return conf;
             }
 
             // 2. catalina.base
-            String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator + FILE_NAME;
+            String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
             conf = tryToLoadFromSysProperty(property);
             if (conf != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", property);
@@ -63,7 +54,7 @@ public class Configuration {
             }
 
             // 2. catalina.home
-            property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + FILE_NAME;
+            property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
             conf = tryToLoadFromSysProperty(property);
             if (conf != null) {
                 LOG.trace("Configuration loaded successfully from system property: {}.", property);
@@ -72,7 +63,7 @@ public class Configuration {
             }
 
 
-            final InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(FILE_NAME);
+            final InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(ConfigurationService.FILE_NAME);
             final Configuration c = createConfiguration(stream);
             if (c != null) {
                 LOG.trace("Configuration loaded successfully.");

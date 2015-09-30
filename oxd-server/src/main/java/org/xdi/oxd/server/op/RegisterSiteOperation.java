@@ -10,6 +10,7 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -49,9 +50,10 @@ public class RegisterSiteOperation extends BaseOperation {
     private void persistSiteConfiguration(String siteId) {
         final RegisterSiteParams params = asParams(RegisterSiteParams.class);
         final SiteConfigurationService siteService = getInjector().getInstance(SiteConfigurationService.class);
-        final boolean persisted = siteService.persist(createSiteConfiguration(siteId, params));
-        if (!persisted) {
-            throw new RuntimeException("Failed to persist site configuration, params: " + params);
+        try {
+            siteService.persist(createSiteConfiguration(siteId, params));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to persist site configuration, params: " + params, e);
         }
     }
 
