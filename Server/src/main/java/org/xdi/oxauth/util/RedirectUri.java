@@ -6,6 +6,11 @@
 
 package org.xdi.oxauth.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.util.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -14,14 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.util.Util;
-
 /**
  * @author Javier Rojas Blum
- * @version 0.9 October 28, 2014
+ * @version October 1, 2015
  */
 public class RedirectUri {
 
@@ -32,6 +32,7 @@ public class RedirectUri {
 
     public RedirectUri(String baseRedirectUri) {
         this.baseRedirectUri = baseRedirectUri;
+        this.responseMode = ResponseMode.QUERY;
 
         responseParameters = new HashMap<String, String>();
     }
@@ -48,7 +49,14 @@ public class RedirectUri {
 
     public void setBaseRedirectUri(String baseRedirectUri) {
         this.baseRedirectUri = baseRedirectUri;
-        this.responseMode = ResponseMode.QUERY;
+    }
+
+    public ResponseMode getResponseMode() {
+        return responseMode;
+    }
+
+    public void setResponseMode(ResponseMode responseMode) {
+        this.responseMode = responseMode;
     }
 
     public void addResponseParameter(String key, String value) {
@@ -121,19 +129,35 @@ public class RedirectUri {
         StringBuilder sb = new StringBuilder(baseRedirectUri);
 
         if (responseParameters.size() > 0) {
-            if (responseMode != null) {
-                if (responseMode == ResponseMode.QUERY) {
-                    appendQuerySymbol(sb);
-                } else if (responseMode == ResponseMode.FRAGMENT) {
+            if (responseMode != ResponseMode.FORM_POST) {
+                if (responseMode != null) {
+                    if (responseMode == ResponseMode.QUERY) {
+                        appendQuerySymbol(sb);
+                    } else if (responseMode == ResponseMode.FRAGMENT) {
+                        appendFragmentSymbol(sb);
+                    }
+                } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
                     appendFragmentSymbol(sb);
+                } else {
+                    appendQuerySymbol(sb);
                 }
-            } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
-                appendFragmentSymbol(sb);
-            } else {
-                appendQuerySymbol(sb);
+                sb.append(getQueryString());
             }
 
-            sb.append(getQueryString());
+            if (responseMode == ResponseMode.FORM_POST) {
+                sb = new StringBuilder();
+                sb.append("<html>");
+                sb.append("<head><title>Submit This Form</title></head>");
+                sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+                //sb.append("<body>");
+                sb.append("<form method=\"post\" action=\"" + baseRedirectUri + "\">");
+                for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                    sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
+                }
+                sb.append("</form>");
+                sb.append("</body>");
+                sb.append("</html>");
+            }
         }
         return sb.toString();
     }
