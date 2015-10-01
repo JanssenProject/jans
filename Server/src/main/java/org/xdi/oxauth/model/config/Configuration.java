@@ -22,7 +22,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version 0.9 February 25, 2015
+ * @version October 1, 2015
  */
 @XmlRootElement(name = "configuration")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -122,8 +122,8 @@ public class Configuration {
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
-	private int metricReporterInterval;
-	private int metricReporterKeepDataDays;
+    private int metricReporterInterval;
+    private int metricReporterKeepDataDays;
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
@@ -440,14 +440,14 @@ public class Configuration {
 
     @XmlElement(name = "openid-sub-attribute")
     public String getOpenidSubAttribute() {
-		return openidSubAttribute;
-	}
+        return openidSubAttribute;
+    }
 
-	public void setOpenidSubAttribute(String openidSubAttribute) {
-		this.openidSubAttribute = openidSubAttribute;
-	}
+    public void setOpenidSubAttribute(String openidSubAttribute) {
+        this.openidSubAttribute = openidSubAttribute;
+    }
 
-	@XmlElement(name = "id-generation-endpoint")
+    @XmlElement(name = "id-generation-endpoint")
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
     }
@@ -1087,7 +1087,7 @@ public class Configuration {
     }
 
     public void setMetricReporterInterval(int metricReporterInterval) {
-    	this.metricReporterInterval = metricReporterInterval;
+        this.metricReporterInterval = metricReporterInterval;
     }
 
     @XmlElement(name = "metric-reporter-keep-data-days")
@@ -1095,8 +1095,8 @@ public class Configuration {
         return metricReporterKeepDataDays;
     }
 
-	public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
-		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
-	}
+    public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
+        this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+    }
 
 }
