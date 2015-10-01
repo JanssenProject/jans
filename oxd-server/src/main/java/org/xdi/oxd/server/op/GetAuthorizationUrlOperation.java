@@ -7,6 +7,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
+import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 
@@ -37,9 +38,13 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
 
             String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getAuthorizationEndpoint();
 
-            authorizationEndpoint += "?response_type=" + site.getResponseTypes(); // todo
+            authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
             authorizationEndpoint += "&client_id=" + site.getClientId();
             authorizationEndpoint += "&client_secret=" + site.getClientSecret();
+            authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
+            authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
+            authorizationEndpoint += "&state=" + state();
+            authorizationEndpoint += "&nonce=" + nonce();
 
 
             return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
@@ -48,4 +53,14 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
+
+    private String nonce() {
+        return "n-0S6_WzA2Mj"; // fixme
+    }
+
+    private String state() {
+        return "af0ifjsldkj"; // fixme
+    }
+
+
 }
