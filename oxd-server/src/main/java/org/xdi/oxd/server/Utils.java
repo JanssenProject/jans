@@ -3,6 +3,12 @@
  */
 package org.xdi.oxd.server;
 
+import com.google.common.base.Joiner;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+
 /**
  * Utility class with static methods.
  *
@@ -37,5 +43,9 @@ public class Utils {
 
     public static String getUmaDiscoveryUrl(String p_amHost) {
         return String.format("https://%s/.well-known/uma-configuration", p_amHost);
+    }
+
+    public static String joinAndUrlEncode(List<String> list) throws UnsupportedEncodingException {
+        return URLEncoder.encode(Joiner.on(" ").join(list), "UTF-8");
     }
 }
