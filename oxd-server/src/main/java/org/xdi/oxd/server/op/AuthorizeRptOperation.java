@@ -18,8 +18,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.params.AuthorizeRptParams;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
 import org.xdi.oxd.server.Utils;
 
 import java.util.List;
@@ -45,7 +43,7 @@ public class AuthorizeRptOperation extends BaseOperation {
             if (params != null && CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {
 
                 final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
-                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(umaDiscoveryUrl);
+                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(umaDiscoveryUrl);
                 if (umaDiscovery != null) {
                     ClaimTokenList tokenList = new ClaimTokenList();
                     for (Map.Entry<String, List<String>> claim : params.getClaims().entrySet()) {
@@ -56,7 +54,7 @@ public class AuthorizeRptOperation extends BaseOperation {
                     authorizationRequest.setClaims(tokenList);
 
                     LOG.debug("Try to authorize RPT with ticket: {}...", params.getTicket());
-                    final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                    final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, getHttpService().getClientExecutor());
                     final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
                             "Bearer " + params.getAatToken(), params.getAmHost(), authorizationRequest);
                     if (authorizationResponse != null) {

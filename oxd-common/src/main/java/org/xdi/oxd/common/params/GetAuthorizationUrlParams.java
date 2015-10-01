@@ -2,6 +2,8 @@ package org.xdi.oxd.common.params;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
@@ -11,6 +13,8 @@ public class GetAuthorizationUrlParams implements IParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
+    @JsonProperty(value = "acr_values")
+     private List<String> acrValues;
 
     public GetAuthorizationUrlParams() {
     }
@@ -23,6 +27,15 @@ public class GetAuthorizationUrlParams implements IParams {
         this.oxdId = oxdId;
     }
 
+    public List<String> getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(List<String> acrValues) {
+        this.acrValues = acrValues;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -30,20 +43,25 @@ public class GetAuthorizationUrlParams implements IParams {
 
         GetAuthorizationUrlParams that = (GetAuthorizationUrlParams) o;
 
-        return !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
+        if (acrValues != null ? !acrValues.equals(that.acrValues) : that.acrValues != null) return false;
+        if (oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null) return false;
 
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return oxdId != null ? oxdId.hashCode() : 0;
+        int result = oxdId != null ? oxdId.hashCode() : 0;
+        result = 31 * result + (acrValues != null ? acrValues.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("GetAuthorizationUrl");
-        sb.append("{oxdId='").append(oxdId).append('\'');
+        sb.append("GetAuthorizationUrlParams");
+        sb.append("{acrValues=").append(acrValues);
+        sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append('}');
         return sb.toString();
     }

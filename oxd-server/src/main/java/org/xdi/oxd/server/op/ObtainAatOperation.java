@@ -19,8 +19,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ObtainAatParams;
 import org.xdi.oxd.common.response.ObtainAatOpResponse;
 import org.xdi.oxd.server.Configuration;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +47,8 @@ public class ObtainAatOperation extends BaseOperation {
         try {
             final ObtainAatParams params = asParams(ObtainAatParams.class);
             if (params != null) {
-                final OpenIdConfigurationResponse discovery = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
-                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
                 if (discovery != null && umaDiscovery != null) {
                     final ObtainAatOpResponse r;
                     if (useClientAuthentication()) {
@@ -70,13 +68,13 @@ public class ObtainAatOperation extends BaseOperation {
     }
 
     public boolean useClientAuthentication() {
-        final Configuration c = Configuration.getInstance();
+        final Configuration c = getConfiguration();
         return c != null && c.getUseClientAuthenticationForPat() != null && c.getUseClientAuthenticationForPat();
     }
 
     private ObtainAatOpResponse obtainAatWithClientCredentials(OpenIdConfigurationResponse discovery, ObtainAatParams params) {
         final TokenClient tokenClient = new TokenClient(discovery.getTokenEndpoint());
-        tokenClient.setExecutor(HttpService.getInstance().getClientExecutor());
+        tokenClient.setExecutor(getHttpService().getClientExecutor());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(getScope().getValue() + " openid", params.getClientId(), params.getClientSecret());
         if (response != null) {
             final String patToken = response.getAccessToken();
@@ -108,7 +106,7 @@ public class ObtainAatOperation extends BaseOperation {
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(HttpService.getInstance().getClientExecutor());
+        authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
         ClientUtils.showClient(authorizeClient);
@@ -128,7 +126,7 @@ public class ObtainAatOperation extends BaseOperation {
             tokenRequest.setScope(scope);
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
-            tokenClient1.setExecutor(HttpService.getInstance().getClientExecutor());
+            tokenClient1.setExecutor(getHttpService().getClientExecutor());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
             ClientUtils.showClient(authorizeClient);

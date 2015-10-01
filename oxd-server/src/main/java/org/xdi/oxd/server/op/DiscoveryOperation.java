@@ -13,7 +13,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.DiscoveryParams;
-import org.xdi.oxd.server.DiscoveryService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,7 +32,7 @@ public class DiscoveryOperation extends BaseOperation {
         try {
             final DiscoveryParams params = asParams(DiscoveryParams.class);
             if (params != null) {
-                final OpenIdConfigurationResponse response = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
+                final OpenIdConfigurationResponse response = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
                 if (StringUtils.isNotBlank(response.getEntity())) {
                     final JsonNode node = CoreUtils.createJsonMapper().readTree(response.getEntity());
                     if (node != null) {

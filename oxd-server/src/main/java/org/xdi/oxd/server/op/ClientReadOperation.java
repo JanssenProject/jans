@@ -14,7 +14,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ClientReadParams;
 import org.xdi.oxd.common.response.RegisterClientOpResponse;
 import org.xdi.oxd.server.Convertor;
-import org.xdi.oxd.server.HttpService;
+import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,7 +37,7 @@ public class ClientReadOperation extends BaseOperation {
             if (params != null) {
                 RegisterRequest registerRequest = new RegisterRequest(params.getRegistrationAccessToken());
                 RegisterClient registerClient = new RegisterClient(params.getRegistrationClientUri());
-                registerClient.setExecutor(HttpService.getInstance().getClientExecutor());
+                registerClient.setExecutor(getHttpService().getClientExecutor());
                 registerClient.setRequest(registerRequest);
                 RegisterResponse response = registerClient.exec();
 

@@ -15,8 +15,8 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterPermissionTicketParams;
 import org.xdi.oxd.common.response.RegisterPermissionTicketOpResponse;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
+import org.xdi.oxd.server.service.DiscoveryService;
+import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,9 +36,9 @@ public class RegisterTicketOperation extends BaseOperation {
         try {
             final RegisterPermissionTicketParams params = asParams(RegisterPermissionTicketParams.class);
             if (params != null) {
-                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
                 final PermissionRegistrationService registrationService = UmaClientFactory.instance().
-                        createResourceSetPermissionRegistrationService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                        createResourceSetPermissionRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
 
                 final RegisterPermissionRequest request = new RegisterPermissionRequest();
                 request.setResourceSetId(params.getResourceSetId());

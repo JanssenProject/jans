@@ -43,6 +43,7 @@ public class SocketService {
     private volatile boolean shutdown = false;
 
     private Configuration conf;
+
     /**
      * Avoid direct instance creation
      */
