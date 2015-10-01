@@ -15,8 +15,8 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterResourceParams;
 import org.xdi.oxd.common.response.RegisterResourceOpResponse;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
+import org.xdi.oxd.server.service.DiscoveryService;
+import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,8 +36,8 @@ public class RegisterResourceOperation extends BaseOperation {
         try {
             final RegisterResourceParams params = asParams(RegisterResourceParams.class);
             if (params != null) {
-                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                final ResourceSetRegistrationService registrationService = UmaClientFactory.instance().createResourceSetRegistrationService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final ResourceSetRegistrationService registrationService = UmaClientFactory.instance().createResourceSetRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
 
                 final ResourceSet resourceSet = new ResourceSet();
                 resourceSet.setName(params.getName());

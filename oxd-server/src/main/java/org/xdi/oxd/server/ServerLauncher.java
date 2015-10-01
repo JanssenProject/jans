@@ -60,8 +60,9 @@ public class ServerLauncher {
     }
 
     private static void startOxd() {
-        INJECTOR.getInstance(SocketService.class).listenSocket();
+        INJECTOR.getInstance(ConfigurationService.class).load();
         INJECTOR.getInstance(SiteConfigurationService.class).load();
+        INJECTOR.getInstance(SocketService.class).listenSocket();
     }
 
     private static void checkConfiguration() {

@@ -14,8 +14,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RptStatusParams;
 import org.xdi.oxd.common.response.RptStatusOpResponse;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,8 +33,8 @@ public class RptStatusOperation extends BaseOperation {
         try {
             final RptStatusParams params = asParams(RptStatusParams.class);
             if (params != null) {
-                final UmaConfiguration umaDiscovery = DiscoveryService.getInstance().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, HttpService.getInstance().getClientExecutor());
+                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
+                final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, getHttpService().getClientExecutor());
 
                 final RptIntrospectionResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), params.getRpt(), "");
 
