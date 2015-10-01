@@ -1,8 +1,9 @@
 /**
  * All rights reserved -- Copyright 2015 Gluu Inc.
  */
-package org.xdi.oxd.server;
+package org.xdi.oxd.server.service;
 
+import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -11,6 +12,7 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.Configuration;
 
 import java.io.File;
 
@@ -23,20 +25,21 @@ public class HttpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
 
-    private static final HttpService INSTANCE = new HttpService();
+    private Configuration configuration;
 
-    public static HttpService getInstance() {
-        return INSTANCE;
+    @Inject
+    public HttpService(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     public HttpClient getHttpClient() {
         try {
-            final Boolean trustAllCerts = Configuration.getInstance().getTrustAllCerts();
+            final Boolean trustAllCerts = configuration.getTrustAllCerts();
             if (trustAllCerts != null && trustAllCerts) {
                 LOG.trace("Created TRUST_ALL client.");
                 return CoreUtils.createHttpClientTrustAll();
             }
-            final String keyStorePath = Configuration.getInstance().getKeyStorePath();
+            final String keyStorePath = configuration.getKeyStorePath();
             if (StringUtils.isNotBlank(keyStorePath)) {
                 final File keyStoreFile = new File(keyStorePath);
                 if (!keyStoreFile.exists()) {

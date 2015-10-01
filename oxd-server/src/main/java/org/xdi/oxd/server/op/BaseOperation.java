@@ -11,6 +11,10 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.response.IOpResponse;
+import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.service.DiscoveryService;
+import org.xdi.oxd.server.service.HttpService;
+import org.xdi.oxd.server.service.ConfigurationService;
 
 /**
  * Base abstract class for all operations.
@@ -50,6 +54,18 @@ public abstract class BaseOperation implements IOperation {
      */
     public Injector getInjector() {
         return injector;
+    }
+
+    public Configuration getConfiguration() {
+        return injector.getInstance(ConfigurationService.class).getConfiguration();
+    }
+
+    public HttpService getHttpService() {
+        return injector.getInstance(HttpService.class);
+    }
+
+    public DiscoveryService getDiscoveryService() {
+        return injector.getInstance(DiscoveryService.class);
     }
 
     /**

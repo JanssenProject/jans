@@ -18,8 +18,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.AuthorizationCodeFlowParams;
 import org.xdi.oxd.common.response.AuthorizationCodeFlowResponse;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +42,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
         try {
             final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
 
-            final OpenIdConfigurationResponse discovery = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
+            final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
             if (discovery != null) {
                 return okResponse(requestToken(discovery, params));
             }
@@ -73,7 +71,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(HttpService.getInstance().getClientExecutor());
+        authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
         ClientUtils.showClient(authorizeClient);
@@ -93,7 +91,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
             tokenRequest.setScope(scope);
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
-            tokenClient1.setExecutor(HttpService.getInstance().getClientExecutor());
+            tokenClient1.setExecutor(getHttpService().getClientExecutor());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
             ClientUtils.showClient(tokenClient1);

@@ -19,10 +19,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterClientParams;
 import org.xdi.oxd.common.response.RegisterClientOpResponse;
-import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Convertor;
-import org.xdi.oxd.server.DiscoveryService;
-import org.xdi.oxd.server.HttpService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +43,14 @@ public class RegisterClientOperation extends BaseOperation {
             final RegisterClientParams params = asParams(RegisterClientParams.class);
             LOG.trace("Start process, params: {}", params);
             if (params != null) {
-                final OpenIdConfigurationResponse discoveryResponse = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
+                final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
                 if (discoveryResponse != null) {
 
                     final String applicationTypeString = StringUtils.isNotBlank(params.getApplicationType()) ?
-                            params.getApplicationType() : Configuration.getInstance().getRegisterClientAppType();
+                            params.getApplicationType() : getConfiguration().getRegisterClientAppType();
 
                     final String responseTypeString = StringUtils.isNotBlank(params.getResponseTypes()) ?
-                            params.getResponseTypes() : Configuration.getInstance().getRegisterClientResponesType();
+                            params.getResponseTypes() : getConfiguration().getRegisterClientResponesType();
 
                     final ApplicationType applicationType = ApplicationType.fromString(applicationTypeString);
                     final List<ResponseType> responseTypes = ResponseType.fromString(responseTypeString, " ");
@@ -84,7 +81,7 @@ public class RegisterClientOperation extends BaseOperation {
 
                     final RegisterClient registerClient = new RegisterClient(discoveryResponse.getRegistrationEndpoint());
                     registerClient.setRequest(request);
-                    registerClient.setExecutor(HttpService.getInstance().getClientExecutor());
+                    registerClient.setExecutor(getHttpService().getClientExecutor());
                     final RegisterResponse response = registerClient.exec();
                     if (response != null) {
                         LOG.trace("RegisterResponse: {}, client_id: {}", response, response.getClientId());

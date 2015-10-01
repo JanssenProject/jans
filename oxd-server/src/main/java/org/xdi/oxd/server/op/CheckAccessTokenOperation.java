@@ -18,7 +18,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.CheckAccessTokenParams;
 import org.xdi.oxd.common.response.CheckAccessTokenResponse;
-import org.xdi.oxd.server.DiscoveryService;
 
 import java.util.Date;
 
@@ -40,7 +39,7 @@ public class CheckAccessTokenOperation extends BaseOperation {
         try {
             final CheckAccessTokenParams params = asParams(CheckAccessTokenParams.class);
             if (params != null) {
-                final OpenIdConfigurationResponse discoveryResponse = DiscoveryService.getInstance().getDiscoveryResponse(params.getDiscoveryUrl());
+                final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
                 final String idToken = params.getIdToken();
                 final String accessToken = params.getAccessToken();
 

@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
+import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
+import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -29,7 +32,17 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
     public CommandResponse execute() {
         try {
             final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
-            // todo we need load site conf here
+            final SiteConfigurationService siteService = getInjector().getInstance(SiteConfigurationService.class);
+            final SiteConfiguration site = siteService.getSite(params.getOxdId());
+
+            String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getAuthorizationEndpoint();
+
+            authorizationEndpoint += "?response_type=" + site.getResponseTypes(); // todo
+            authorizationEndpoint += "&client_id=" + site.getClientId();
+            authorizationEndpoint += "&client_secret=" + site.getClientSecret();
+
+
+            return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
