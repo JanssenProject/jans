@@ -7,6 +7,8 @@ import org.testng.annotations.Test;
 import org.xdi.oxd.Tester;
 import org.xdi.oxd.web.TestAppModule;
 
+import java.util.UUID;
+
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -29,4 +31,17 @@ public class SiteConfigurationServiceTest {
     public void load() throws Exception {
         assertTrue(service.getSites().size() == 2);
     }
+
+    @Test
+    public void persist() throws Exception {
+        service.persist(newSiteConfiguration());
+        assertTrue(service.getSites().size() == 3);
+    }
+
+    public SiteConfiguration newSiteConfiguration() {
+        SiteConfiguration conf = new SiteConfiguration(service.defaultSiteConfiguration());
+        conf.setOxdId(UUID.randomUUID().toString());
+        return conf;
+    }
+
 }
