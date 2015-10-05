@@ -4,7 +4,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
+import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
@@ -17,7 +18,7 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
  * @version 0.9, 05/10/2015
  */
 
-public class RegisterSiteTest {
+public class GetAuthorizationUrlTest {
 
     @Parameters({"host", "port", "redirectUrl"})
     @Test
@@ -26,25 +27,19 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse resp = registerSite(client, redirectUrl);
-            assertNotNull(resp);
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl);
 
-            notEmpty(resp.getSiteId());
+            final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+            commandParams.setOxdId(site.getSiteId());
+
+            final Command command = new Command(CommandType.GET_AUTHORIZATION_URL);
+            command.setParamsObject(commandParams);
+
+            final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
+            assertNotNull(resp);
+            notEmpty(resp.getAuthorizationUrl());
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
-
-    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl) {
-        final RegisterSiteParams commandParams = new RegisterSiteParams();
-        commandParams.setAuthorizationRedirectUri(redirectUrl);
-
-        final Command command = new Command(CommandType.REGISTER_SITE);
-        command.setParamsObject(commandParams);
-
-        final RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
-        assertNotNull(resp);
-        return resp;
-    }
-
 }
