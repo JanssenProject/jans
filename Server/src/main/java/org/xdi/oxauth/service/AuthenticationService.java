@@ -511,6 +511,9 @@ public class AuthenticationService {
         if (o instanceof String) {
             final String s = (String) o;
             return s;
+        } else if (o instanceof Integer) {
+            final Integer i = (Integer) o;
+            return i.toString();
         } else if (o instanceof Boolean) {
             final Boolean b = (Boolean) o;
             return b.toString();
