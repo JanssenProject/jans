@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.service;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
@@ -94,7 +95,15 @@ public class SiteConfigurationService {
         }
     }
 
-    public void persist(SiteConfiguration siteConfiguration) throws IOException {
+    public void update(SiteConfiguration siteConfiguration) throws IOException {
+        String fileName = siteConfiguration.getOxdId() + ".json";
+
+        File file = siteFiles.get(fileName);
+        Preconditions.checkNotNull(file);
+        CoreUtils.createJsonMapper().writeValue(file, siteConfiguration);
+    }
+
+    public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
         String fileName = siteConfiguration.getOxdId() + ".json";
 
         File file = siteFiles.get(fileName);

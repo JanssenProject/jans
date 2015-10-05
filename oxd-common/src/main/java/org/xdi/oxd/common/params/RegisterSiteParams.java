@@ -13,6 +13,8 @@ public class RegisterSiteParams implements IParams {
 
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
+    @JsonProperty(value = "logout_redirect_uri")
+    private String logoutRedirectUri;
 
     @JsonProperty(value = "application_type")
     private String applicationType;
@@ -20,10 +22,18 @@ public class RegisterSiteParams implements IParams {
     private List<String> redirectUris;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
+
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "client_secret")
     private String clientSecret;
+    @JsonProperty(value = "client_jwks_uri")
+    private String clientJwksUri;
+    @JsonProperty(value = "client_token_endpoint_auth_method")
+    private String clientTokenEndpointAuthMethod;
+    @JsonProperty(value = "client_request_uris")
+    private List<String> clientRequestUris;
+
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
@@ -38,6 +48,38 @@ public class RegisterSiteParams implements IParams {
     private List<String> contacts;
 
     public RegisterSiteParams() {
+    }
+
+    public List<String> getClientRequestUris() {
+        return clientRequestUris;
+    }
+
+    public void setClientRequestUris(List<String> clientRequestUris) {
+        this.clientRequestUris = clientRequestUris;
+    }
+
+    public String getClientTokenEndpointAuthMethod() {
+        return clientTokenEndpointAuthMethod;
+    }
+
+    public void setClientTokenEndpointAuthMethod(String clientTokenEndpointAuthMethod) {
+        this.clientTokenEndpointAuthMethod = clientTokenEndpointAuthMethod;
+    }
+
+    public String getLogoutRedirectUri() {
+        return logoutRedirectUri;
+    }
+
+    public void setLogoutRedirectUri(String logoutRedirectUri) {
+        this.logoutRedirectUri = logoutRedirectUri;
+    }
+
+    public String getClientJwksUri() {
+        return clientJwksUri;
+    }
+
+    public void setClientJwksUri(String clientJwksUri) {
+        this.clientJwksUri = clientJwksUri;
     }
 
     public String getAuthorizationRedirectUri() {

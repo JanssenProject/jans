@@ -1,12 +1,18 @@
 package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -16,6 +22,8 @@ import org.xdi.oxd.server.service.SiteConfiguration;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -28,6 +36,7 @@ public class RegisterSiteOperation extends BaseOperation {
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
     private SiteConfigurationService siteService;
+    private SiteConfiguration siteConfiguration;
 
     /**
      * Base constructor
@@ -59,7 +68,7 @@ public class RegisterSiteOperation extends BaseOperation {
         final RegisterSiteParams params = asParams(RegisterSiteParams.class);
 
         try {
-            final SiteConfiguration siteConfiguration = createSiteConfiguration(siteId, params);
+            siteConfiguration = createSiteConfiguration(siteId, params);
 
             if (!hasClient()) {
                 final RegisterResponse registerResponse = registerClient();
@@ -71,7 +80,7 @@ public class RegisterSiteOperation extends BaseOperation {
                 siteConfiguration.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
 
-            siteService.persist(siteConfiguration);
+            siteService.createNewFile(siteConfiguration);
         } catch (IOException e) {
             throw new RuntimeException("Failed to persist site configuration, params: " + params, e);
         }
@@ -95,35 +104,75 @@ public class RegisterSiteOperation extends BaseOperation {
 
     private RegisterRequest createRegisterClientRequest() {
         final RegisterSiteParams params = asParams(RegisterSiteParams.class);
+        final SiteConfiguration fallback = siteService.defaultSiteConfiguration();
 
-        final ApplicationType applicationType = ApplicationType.fromString(params.getApplicationType());
+        ApplicationType applicationType = null;
+        if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
+            applicationType = ApplicationType.fromString(params.getApplicationType());
+        }
+        if (applicationType == null) {
+            applicationType = ApplicationType.fromString(fallback.getApplicationType());
+        }
 
-//        final List<ResponseType> responseTypes = ResponseType.fromString(responseTypeString, " ");
-//        final RegisterRequest request = new RegisterRequest(applicationType, params.getClientName(), params.getRedirectUrl());
-//        request.setResponseTypes(responseTypes);
-//        request.setJwksUri(params.getJwksUri());
-//        request.setPostLogoutRedirectUris(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getLogoutRedirectUrl()));
-//
-//        if (StringUtils.isNotBlank(params.getContacts())) {
-//            request.setContacts(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getContacts()));
-//        }
-//
-//        if (StringUtils.isNotBlank(params.getGrantTypes())) {
-//            request.setGrantTypes(grantTypes(params.getGrantTypes()));
-//        }
-//
-//        if (StringUtils.isNotBlank(params.getTokenEndpointAuthMethod())) {
-//            final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getTokenEndpointAuthMethod());
-//            if (authenticationMethod != null) {
-//                request.setTokenEndpointAuthMethod(authenticationMethod);
-//            }
-//        }
-//
-//        if (params.getRequestUris() != null && !params.getRequestUris().isEmpty()) {
-//            request.setRequestUris(params.getRequestUris());
-//        }
-//        return request;
-        return null; // todo
+        List<ResponseType> responseTypes = Lists.newArrayList();
+        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
+            for (String type : params.getResponseTypes()) {
+                responseTypes.add(ResponseType.fromString(type));
+            }
+        }
+        if (responseTypes.isEmpty()) {
+            for (String type : fallback.getResponseTypes()) {
+                responseTypes.add(ResponseType.fromString(type));
+            }
+        }
+
+        String clientName = "oxD client for site: " + siteConfiguration.getOxdId();
+
+        Set<String> redirectUris = Sets.newHashSet();
+        redirectUris.add(params.getAuthorizationRedirectUri());
+        if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
+            redirectUris.addAll(params.getRedirectUris());
+        }
+
+        final RegisterRequest request = new RegisterRequest(applicationType, clientName != null ? clientName : "", Lists.newArrayList(redirectUris));
+        request.setResponseTypes(responseTypes);
+        request.setJwksUri(params.getClientJwksUri());
+        request.setPostLogoutRedirectUris(Lists.newArrayList(params.getLogoutRedirectUri()));
+        request.setContacts(params.getContacts());
+
+        request.setGrantTypes(grantTypes());
+
+        if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
+            final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getClientTokenEndpointAuthMethod());
+            if (authenticationMethod != null) {
+                request.setTokenEndpointAuthMethod(authenticationMethod);
+            }
+        }
+
+        if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
+            request.setRequestUris(params.getClientRequestUris());
+        }
+
+        siteConfiguration.setResponseTypes(asString(responseTypes));
+        siteConfiguration.setLogoutRedirectUri(params.getLogoutRedirectUri());
+        siteConfiguration.setContacts(params.getContacts());
+        return request;
+    }
+
+    private List<GrantType> grantTypes() {
+        List<GrantType> grantTypes = Lists.newArrayList();
+        grantTypes.add(GrantType.AUTHORIZATION_CODE);
+        grantTypes.add(GrantType.IMPLICIT);
+        grantTypes.add(GrantType.REFRESH_TOKEN);
+        return grantTypes;
+    }
+
+    private List<String> asString(List<ResponseType> responseTypes) {
+        List<String> list = Lists.newArrayList();
+        for (ResponseType r : responseTypes) {
+            list.add(r.getValue());
+        }
+        return list;
     }
 
     private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {

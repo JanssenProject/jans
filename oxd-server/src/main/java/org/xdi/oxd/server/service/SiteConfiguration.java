@@ -20,6 +20,8 @@ public class SiteConfiguration implements Serializable {
 
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
+    @JsonProperty(value = "logout_redirect_uri")
+    private String logoutRedirectUri;
 
     @JsonProperty(value = "application_type")
     private String applicationType;
@@ -40,6 +42,8 @@ public class SiteConfiguration implements Serializable {
     private Date clientIdIssuedAt;
     @JsonProperty(value = "client_secret_expires_at")
     private Date clientSecretExpiresAt;
+    @JsonProperty(value = "client_name")
+    private String clientName;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -59,7 +63,10 @@ public class SiteConfiguration implements Serializable {
 
     public SiteConfiguration(SiteConfiguration conf) {
         this.oxdId = conf.oxdId;
+
         this.authorizationRedirectUri = conf.authorizationRedirectUri;
+        this.logoutRedirectUri = conf.logoutRedirectUri;
+
         this.applicationType = conf.applicationType;
         this.redirectUris = conf.redirectUris;
         this.responseTypes = conf.responseTypes;
@@ -70,6 +77,7 @@ public class SiteConfiguration implements Serializable {
         this.clientRegistrationClientUri = conf.clientRegistrationClientUri;
         this.clientIdIssuedAt = conf.clientIdIssuedAt;
         this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
+        this.clientName = conf.clientName;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -77,6 +85,22 @@ public class SiteConfiguration implements Serializable {
         this.acrValues = conf.acrValues;
         this.grantType = conf.grantType;
         this.contacts = conf.contacts;
+    }
+
+    public String getLogoutRedirectUri() {
+        return logoutRedirectUri;
+    }
+
+    public void setLogoutRedirectUri(String logoutRedirectUri) {
+        this.logoutRedirectUri = logoutRedirectUri;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public Date getClientIdIssuedAt() {
