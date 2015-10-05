@@ -739,36 +739,6 @@
         </profile>
 
         <profile>
-            <id>wikid</id>
-            <activation>
-            </activation>
-            <properties>
-            </properties>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-            <repositories>
-                <repository>
-                    <id>wikid-local</id>
-                    <url>file://${project.basedir}/integrations/wikid/repository</url>
-                </repository>
-            </repositories>
-            <dependencies>
-                <dependency>
-                    <groupId>com.wikidsystems</groupId>
-                    <artifactId>wClient</artifactId>
-                    <version>3.4.85</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.jdom</groupId>
-                    <artifactId>jdom</artifactId>
-                    <version>1.1.3</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
             <id>phonefactor</id>
             <activation>
                 <property>
