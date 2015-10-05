@@ -6,13 +6,15 @@
 
 package org.xdi.oxauth.client;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.CODE;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.ID_TOKEN;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SCOPE;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.STATE;
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.resteasy.client.ClientResponse;
+import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.xdi.oxauth.model.common.Parameters;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.TokenType;
+import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -20,19 +22,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jboss.resteasy.client.ClientResponse;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.common.Parameters;
-import org.xdi.oxauth.model.common.TokenType;
-import org.xdi.oxauth.model.util.Util;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.
  *
- * @author Javier Rojas Blum Date: 10.18.2011
+ * @author Javier Rojas Blum
+ * @version October 1, 2015
  */
 public class AuthorizationResponse extends BaseResponse {
 
@@ -45,6 +41,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String state;
     private String sessionId;
     private Map<String, String> customParams;
+    private ResponseMode responseMode;
 
     private AuthorizeErrorResponseType errorType;
     private String errorDescription;
@@ -95,11 +92,13 @@ public class AuthorizationResponse extends BaseResponse {
                 Map<String, String> params = null;
                 int fragmentIndex = location.indexOf("#");
                 if (fragmentIndex != -1) {
+                    responseMode = ResponseMode.FRAGMENT;
                     String fragment = location.substring(fragmentIndex + 1);
                     params = QueryStringDecoder.decode(fragment);
                 } else {
                     int queryStringIndex = location.indexOf("?");
                     if (queryStringIndex != -1) {
+                        responseMode = ResponseMode.QUERY;
                         String queryString = location.substring(queryStringIndex + 1);
                         params = QueryStringDecoder.decode(queryString);
                     }
@@ -221,6 +220,14 @@ public class AuthorizationResponse extends BaseResponse {
 
     public void setCustomParams(Map<String, String> customParams) {
         this.customParams = customParams;
+    }
+
+    public ResponseMode getResponseMode() {
+        return responseMode;
+    }
+
+    public void setResponseMode(ResponseMode responseMode) {
+        this.responseMode = responseMode;
     }
 
     /**
