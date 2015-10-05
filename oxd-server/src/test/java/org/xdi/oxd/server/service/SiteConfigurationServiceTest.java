@@ -34,7 +34,7 @@ public class SiteConfigurationServiceTest {
 
     @Test
     public void persist() throws Exception {
-        service.persist(newSiteConfiguration());
+        service.createNewFile(newSiteConfiguration());
         assertTrue(service.getSites().size() == 3);
     }
 
