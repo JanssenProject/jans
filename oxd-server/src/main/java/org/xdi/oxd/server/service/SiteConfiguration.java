@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,10 +27,20 @@ public class SiteConfiguration implements Serializable {
     private List<String> redirectUris;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
+
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "client_secret")
     private String clientSecret;
+    @JsonProperty(value = "client_registration_access_token")
+    private String clientRegistrationAccessToken;
+    @JsonProperty(value = "client_registration_client_uri")
+    private String clientRegistrationClientUri;
+    @JsonProperty(value = "client_id_issued_at")
+    private Date clientIdIssuedAt;
+    @JsonProperty(value = "client_secret_expires_at")
+    private Date clientSecretExpiresAt;
+
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "ui_locales")
@@ -52,8 +63,14 @@ public class SiteConfiguration implements Serializable {
         this.applicationType = conf.applicationType;
         this.redirectUris = conf.redirectUris;
         this.responseTypes = conf.responseTypes;
+
         this.clientId = conf.clientId;
         this.clientSecret = conf.clientSecret;
+        this.clientRegistrationAccessToken = conf.clientRegistrationAccessToken;
+        this.clientRegistrationClientUri = conf.clientRegistrationClientUri;
+        this.clientIdIssuedAt = conf.clientIdIssuedAt;
+        this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
+
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
         this.claimsLocales = conf.claimsLocales;
@@ -62,6 +79,37 @@ public class SiteConfiguration implements Serializable {
         this.contacts = conf.contacts;
     }
 
+    public Date getClientIdIssuedAt() {
+        return clientIdIssuedAt;
+    }
+
+    public void setClientIdIssuedAt(Date clientIdIssuedAt) {
+        this.clientIdIssuedAt = clientIdIssuedAt;
+    }
+
+    public String getClientRegistrationAccessToken() {
+        return clientRegistrationAccessToken;
+    }
+
+    public void setClientRegistrationAccessToken(String clientRegistrationAccessToken) {
+        this.clientRegistrationAccessToken = clientRegistrationAccessToken;
+    }
+
+    public String getClientRegistrationClientUri() {
+        return clientRegistrationClientUri;
+    }
+
+    public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
+        this.clientRegistrationClientUri = clientRegistrationClientUri;
+    }
+
+    public Date getClientSecretExpiresAt() {
+        return clientSecretExpiresAt;
+    }
+
+    public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
+        this.clientSecretExpiresAt = clientSecretExpiresAt;
+    }
 
     public String getApplicationType() {
         return applicationType;
