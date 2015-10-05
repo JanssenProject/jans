@@ -15,7 +15,7 @@ public class ClientCredentialsTest {
     @Parameters({"clientId", "clientSecret"})
     @Test
     public void test(String clientId, String clientSecret) {
-        final String tokenEndpoint = "https://seed21.gluu.org/oxauth/seam/resource/restv1/oxauth/token";
+        final String tokenEndpoint = "https://ce-dev.gluu.org/oxauth/seam/resource/restv1/oxauth/token";
         final TokenClient tokenClient = new TokenClient(tokenEndpoint);
         final TokenResponse response = tokenClient.execClientCredentialsGrant("openid", clientId, clientSecret);
         System.out.println(response);
