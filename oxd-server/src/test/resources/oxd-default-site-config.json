@@ -1,0 +1,9 @@
+{
+  "response_type": ["code"],
+  "scope": ["openid", "profile"],
+  "max_age":"4665665",
+  "ui_locales":["en"],
+  "claims_locales":["en"],
+  "acr_values":[""],
+  "grant_type":"authorization_code"
+}

@@ -1,9 +1,9 @@
 {
   "oxd_id":"6F9619FF-8B86-D011-B42D-00CF4FC964FF",
-  "response_type": ["code"],
+  "response_types": ["code"],
   "client_id": "s6BhdRkqt3",
   "client_secret": "gldelkrf",
-  "redirect_uri": "https%3A%2F%2Fclient.example.org%2Fcb",
+  "redirect_uris": ["https%3A%2F%2Fclient.example.org%2Fcb"],
   "scope": ["openid", "profile"],
   "max_age":"4665665",
   "ui_locales":["en"],
