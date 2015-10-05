@@ -70,7 +70,12 @@ public class SiteConfigurationService {
     }
 
     public SiteConfiguration defaultSiteConfiguration() {
-        return sites.get(DEFAULT_SITE_CONFIG_JSON);
+        SiteConfiguration siteConfiguration = sites.get(DEFAULT_SITE_CONFIG_JSON);
+        if (siteConfiguration == null) {
+            LOG.error("Failed to load fallback configuration!");
+            siteConfiguration = new SiteConfiguration();
+        }
+        return siteConfiguration;
     }
 
     public SiteConfiguration getSite(String id) {
@@ -100,7 +105,7 @@ public class SiteConfigurationService {
 
         File file = siteFiles.get(fileName);
         Preconditions.checkNotNull(file);
-        CoreUtils.createJsonMapper().writeValue(file, siteConfiguration);
+        CoreUtils.createJsonMapper().writerWithDefaultPrettyPrinter().writeValue(file, siteConfiguration);
     }
 
     public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
@@ -110,7 +115,7 @@ public class SiteConfigurationService {
         if (file == null) {
             file = createSiteFile(fileName);
         }
-        CoreUtils.createJsonMapper().writeValue(file, siteConfiguration);
+        CoreUtils.createJsonMapper().writerWithDefaultPrettyPrinter().writeValue(file, siteConfiguration);
 
         sites.put(file.getName(), siteConfiguration);
         siteFiles.put(file.getName(), file);

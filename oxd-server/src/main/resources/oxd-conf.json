@@ -15,5 +15,5 @@
     "public_key":"",
     "public_password":"",
     "license_password":"",
-    "op_host":"https://ce-release.gluu.org"
+    "op_host":"https://ce-dev.gluu.org"
 }
