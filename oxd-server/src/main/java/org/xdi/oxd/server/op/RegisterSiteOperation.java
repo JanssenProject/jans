@@ -156,6 +156,7 @@ public class RegisterSiteOperation extends BaseOperation {
         siteConfiguration.setResponseTypes(asString(responseTypes));
         siteConfiguration.setLogoutRedirectUri(params.getLogoutRedirectUri());
         siteConfiguration.setContacts(params.getContacts());
+        siteConfiguration.setRedirectUris(Lists.newArrayList(redirectUris));
         return request;
     }
 
@@ -176,20 +177,46 @@ public class RegisterSiteOperation extends BaseOperation {
     }
 
     private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {
-        final SiteConfiguration siteConf = new SiteConfiguration();
+
+        final SiteConfiguration siteConf = new SiteConfiguration(siteService.defaultSiteConfiguration());
         siteConf.setOxdId(siteId);
-        siteConf.setAcrValues(params.getAcrValues());
-        siteConf.setApplicationType(params.getApplicationType());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
-        siteConf.setClaimsLocales(params.getClaimsLocales());
-        siteConf.setClientId(params.getClientId());
-        siteConf.setClientSecret(params.getClientSecret());
-        siteConf.setContacts(params.getContacts());
-        siteConf.setGrantType(params.getGrantType());
         siteConf.setRedirectUris(params.getRedirectUris());
-        siteConf.setResponseTypes(params.getResponseTypes());
-        siteConf.setScope(params.getScope());
-        siteConf.setUiLocales(params.getUiLocales());
+
+        if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
+            siteConf.setAcrValues(params.getAcrValues());
+        }
+        if (!Strings.isNullOrEmpty(params.getApplicationType())) {
+            siteConf.setApplicationType(params.getApplicationType());
+        }
+        if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
+            siteConf.setClaimsLocales(params.getClaimsLocales());
+        }
+
+        if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
+            siteConf.setClientId(params.getClientId());
+            siteConf.setClientSecret(params.getClientSecret());
+        }
+
+        if (params.getContacts() != null && !params.getContacts().isEmpty()) {
+            siteConf.setContacts(params.getContacts());
+        }
+
+        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
+            siteConf.setGrantType(params.getGrantType());
+        }
+
+        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
+            siteConf.setResponseTypes(params.getResponseTypes());
+        }
+
+        if (params.getScope() != null && !params.getScope().isEmpty()) {
+            siteConf.setScope(params.getScope());
+        }
+
+        if (params.getUiLocales() != null && !params.getUiLocales().isEmpty()) {
+            siteConf.setUiLocales(params.getUiLocales());
+        }
 
         return siteConf;
     }

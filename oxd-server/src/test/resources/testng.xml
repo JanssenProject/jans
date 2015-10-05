@@ -94,4 +94,15 @@
             <class name="org.xdi.oxd.client.RptStatusTest"/>
         </classes>
     </test>
+    <test name="Register site" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RegisterSiteTest"/>
+        </classes>
+    </test>
+    <test name="Get authorization url" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.GetAuthorizationUrlTest"/>
+        </classes>
+    </test>
+
 </suite>
