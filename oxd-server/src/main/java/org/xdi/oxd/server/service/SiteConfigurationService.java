@@ -40,17 +40,21 @@ public class SiteConfigurationService {
     ConfigurationService configurationService;
 
     public void load() {
+
+        // load all files
         final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(configurationService.getConfDirectoryFile()));
         for (File file : files) {
+            if (!file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) &&
+                    (file.getName().length() != FILE_NAME_LENGTH ||
+                            !file.getName().endsWith(".json"))) { // precondition
+
+                continue;
+            }
             loadFile(file);
         }
     }
 
     private void loadFile(File file) {
-        if (file.getName().length() != FILE_NAME_LENGTH || !file.getName().endsWith(".json")) { // precondition
-            return;
-        }
-
         LOG.trace("Try to load site file name: {}", file.getName());
         FileInputStream fis = null;
         try {
@@ -70,6 +74,10 @@ public class SiteConfigurationService {
 
     public SiteConfiguration getSite(String id) {
         return sites.get(id + ".json");
+    }
+
+    public Map<String, SiteConfiguration> getSites() {
+        return Maps.newHashMap(sites);
     }
 
     public static SiteConfiguration createConfiguration(InputStream p_stream) {
