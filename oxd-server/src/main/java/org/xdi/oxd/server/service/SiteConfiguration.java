@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.service;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.List;
  * @version 0.9, 28/09/2015
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SiteConfiguration implements Serializable {
 
     @JsonProperty(value = "oxd_id")

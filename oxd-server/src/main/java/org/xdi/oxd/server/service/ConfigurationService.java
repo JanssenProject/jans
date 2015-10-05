@@ -31,10 +31,12 @@ public class ConfigurationService implements Provider<Configuration> {
      */
     public static final String CONF_SYS_PROPERTY_NAME = "oxd.server.config";
 
+    public static final String TEST_FILE_NAME = "oxd-conf-test.json";
+
     /**
      * Configuration file name.
      */
-    public static final String FILE_NAME = Utils.isTestMode() ? "oxd-conf-test.json" : "oxd-conf.json";
+    public static final String FILE_NAME = Utils.isTestMode() ? TEST_FILE_NAME : "oxd-conf.json";
 
     private Configuration configuration = null;
 
