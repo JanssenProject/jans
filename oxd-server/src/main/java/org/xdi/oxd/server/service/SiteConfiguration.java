@@ -43,6 +43,26 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "contacts")
     private List<String> contacts;
 
+    public SiteConfiguration() {
+    }
+
+    public SiteConfiguration(SiteConfiguration conf) {
+        this.oxdId = conf.oxdId;
+        this.authorizationRedirectUri = conf.authorizationRedirectUri;
+        this.applicationType = conf.applicationType;
+        this.redirectUris = conf.redirectUris;
+        this.responseTypes = conf.responseTypes;
+        this.clientId = conf.clientId;
+        this.clientSecret = conf.clientSecret;
+        this.scope = conf.scope;
+        this.uiLocales = conf.uiLocales;
+        this.claimsLocales = conf.claimsLocales;
+        this.acrValues = conf.acrValues;
+        this.grantType = conf.grantType;
+        this.contacts = conf.contacts;
+    }
+
+
     public String getApplicationType() {
         return applicationType;
     }
