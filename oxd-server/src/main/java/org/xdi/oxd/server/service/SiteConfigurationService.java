@@ -55,7 +55,7 @@ public class SiteConfigurationService {
     }
 
     private void loadFile(File file) {
-        LOG.trace("Try to load site file name: {}", file.getName());
+        LOG.trace("Loading site file name: {}", file.getName());
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
