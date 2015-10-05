@@ -24,7 +24,7 @@ public class ClientTest {
         Command command = new Command();
         command.setCommandType(CommandType.DISCOVERY);
 
-        command.setParamsObject(new DiscoveryParams("https://seed.gluu.org/.well-known/openid-configuration"));
+        command.setParamsObject(new DiscoveryParams("https://ce-dev.gluu.org/.well-known/openid-configuration"));
 
         String url = "http://localhost:8080/rest/command";
 
