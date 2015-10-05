@@ -305,7 +305,7 @@ public abstract class BaseTest {
         stopSelenium();
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
-        if (authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
+        if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
             authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
         }
         authorizeClient.setResponse(authorizationResponse);
