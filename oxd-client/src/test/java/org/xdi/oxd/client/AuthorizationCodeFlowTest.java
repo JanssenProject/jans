@@ -1,11 +1,8 @@
 package org.xdi.oxd.client;
 
-import junit.framework.Assert;
-import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.AuthorizationCodeFlowParams;
 import org.xdi.oxd.common.response.AuthorizationCodeFlowResponse;
@@ -14,6 +11,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertNotNull;
+import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,14 +41,10 @@ public class AuthorizationCodeFlowTest {
 
             final Command command = new Command(CommandType.AUTHORIZATION_CODE_FLOW);
             command.setParamsObject(commandParams);
-            final CommandResponse response = client.send(command);
-            assertNotNull(response);
 
-            final CommandResponse r = client.send(command);
-            assertNotNull(r);
-
-            final AuthorizationCodeFlowResponse resp = r.dataAsResponse(AuthorizationCodeFlowResponse.class);
+            final AuthorizationCodeFlowResponse resp = client.send(command).dataAsResponse(AuthorizationCodeFlowResponse.class);
             assertNotNull(resp);
+
             notEmpty(resp.getAccessToken());
             notEmpty(resp.getAuthorizationCode());
             notEmpty(resp.getIdToken());
@@ -60,9 +54,4 @@ public class AuthorizationCodeFlowTest {
             CommandClient.closeQuietly(client);
         }
     }
-
-    private static void notEmpty(String str) {
-        Assert.assertTrue(StringUtils.isNotBlank(str));
-    }
-
 }

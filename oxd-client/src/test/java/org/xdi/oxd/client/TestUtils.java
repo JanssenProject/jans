@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.Assert;
@@ -35,6 +36,9 @@ import org.xdi.oxd.common.response.RegisterResourceOpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -143,7 +147,7 @@ public class TestUtils {
         command.setParamsObject(params);
 
         final CommandResponse response = p_commandClient.send(command);
-        junit.framework.Assert.assertNotNull(response);
+        assertNotNull(response);
         System.out.println(response);
 
         return response.dataAsResponse(ObtainPatOpResponse.class);
@@ -166,7 +170,7 @@ public class TestUtils {
         command.setParamsObject(params);
 
         final CommandResponse response = p_commandClient.send(command);
-        junit.framework.Assert.assertNotNull(response);
+        assertNotNull(response);
         System.out.println(response);
 
         return response.dataAsResponse(ObtainAatOpResponse.class);
@@ -183,11 +187,11 @@ public class TestUtils {
         command.setParamsObject(params);
 
         final CommandResponse response = p_client.send(command);
-        junit.framework.Assert.assertNotNull(response);
+        assertNotNull(response);
         System.out.println(response);
 
         final RegisterResourceOpResponse r = response.dataAsResponse(RegisterResourceOpResponse.class);
-        junit.framework.Assert.assertNotNull(r);
+        assertNotNull(r);
         return r;
     }
 
@@ -208,11 +212,15 @@ public class TestUtils {
         command.setParamsObject(params);
 
         final CommandResponse response = p_client.send(command);
-        junit.framework.Assert.assertNotNull(response);
+        assertNotNull(response);
         System.out.println(response);
 
         final RegisterPermissionTicketOpResponse r = response.dataAsResponse(RegisterPermissionTicketOpResponse.class);
-        junit.framework.Assert.assertNotNull(r);
+        assertNotNull(r);
         return r;
+    }
+
+    public static void notEmpty(String str) {
+        assertTrue(StringUtils.isNotBlank(str));
     }
 }
