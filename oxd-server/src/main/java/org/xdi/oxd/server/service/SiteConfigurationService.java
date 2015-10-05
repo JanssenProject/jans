@@ -102,6 +102,9 @@ public class SiteConfigurationService {
             file = createSiteFile(fileName);
         }
         CoreUtils.createJsonMapper().writeValue(file, siteConfiguration);
+
+        sites.put(file.getName(), siteConfiguration);
+        siteFiles.put(file.getName(), file);
     }
 
     private File createSiteFile(String fileName) throws IOException {
