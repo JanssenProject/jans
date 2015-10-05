@@ -52,7 +52,7 @@
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
                                     <div class="login-panel-header">
-                                        <h:outputText value="#{messages['login.login']}"/>
+                                        <h:outputText value="Register token"/>
                                     </div>
                                     <div class="login-panel-body">
                                         <c:set var="client" value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
@@ -68,9 +68,9 @@
                                         <div class="dialog">
                                             <h:panelGrid columns="3" border="0" rowClasses="prop"
                                                          columnClasses="name,value,hint">
-				                                <h:outputLabel for="passcode">One-time passcode</h:outputLabel>
-								                <input name="passcode" type="text" autocomplete="off" />
-                                                <h:outputText value="One time passocde generated with token client"/>
+				                                <h:outputLabel for="regcode">Registration code</h:outputLabel>
+								                <input name="regcode" type="text" autocomplete="off" />
+                                                <h:outputText value="Code generated during token registration"/>
                                             </h:panelGrid>
                                         </div>
 
