@@ -13,7 +13,6 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.server.Configuration;
 
-import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -116,8 +115,8 @@ public class DiscoveryService {
         if (!baseUrl.startsWith("http")) {
             baseUrl = "https://" + baseUrl;
         }
-        if (!baseUrl.endsWith(File.separator)) {
-            baseUrl = baseUrl + File.separator;
+        if (baseUrl.endsWith("/")) {
+            baseUrl = StringUtils.removeEnd(baseUrl, "/");
         }
         return baseUrl;
     }
