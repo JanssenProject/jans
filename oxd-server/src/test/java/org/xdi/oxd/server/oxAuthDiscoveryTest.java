@@ -17,7 +17,7 @@ public class oxAuthDiscoveryTest {
 
     @Test
     public void discoveryCallByOxAuthClient() {
-        String url = "https://seed21.gluu.org/.well-known/openid-configuration";
+        String url = "https://ce-dev.gluu.org/.well-known/openid-configuration";
         OpenIdConfigurationClient client = new OpenIdConfigurationClient(url);
         OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
         System.out.println(response.getEntity());

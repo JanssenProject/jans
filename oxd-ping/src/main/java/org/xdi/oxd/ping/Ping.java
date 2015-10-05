@@ -31,7 +31,7 @@ public class Ping {
 
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_PORT = "8099";
-    private static final String DEFAULT_DISCOVERY_URL = "http://seed21.gluu.org/.well-known/openid-configuration";
+    private static final String DEFAULT_DISCOVERY_URL = "http://ce-dev.gluu.org/.well-known/openid-configuration";
 
     private static String parameterValue(String propertyName, String fallbackValue) {
         String value = System.getProperty(propertyName);
