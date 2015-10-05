@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -47,22 +35,19 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AcrChangedException;
-import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserGroupService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
 /**
- * @author Javier Rojas Blum Date: 11.21.2011
- * @author Yuriy Movchan Date: 10/01/2014
+ * @author Javier Rojas Blum
+ * @author Yuriy Movchan
+ * @version October 1, 2015
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -97,7 +82,7 @@ public class AuthorizeAction {
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
-    
+
     @In(value = AppInitializer.DEFAULT_AUTH_MODE_NAME, required = false)
     private String defaultAuthenticationMethod;
 
@@ -115,6 +100,7 @@ public class AuthorizeAction {
     private String state;
 
     // OpenID Connect request parameters
+    private String responseMode;
     private String nonce;
     private String display;
     private String prompt;
@@ -171,15 +157,15 @@ public class AuthorizeAction {
             if (useExternalAuthenticator) {
                 List<String> acrValuesList = acrValuesList();
                 if (acrValuesList.isEmpty()) {
-                	if (StringHelper.isNotEmpty(defaultAuthenticationMethod)) {
-                		acrValuesList = Arrays.asList(defaultAuthenticationMethod);
-                	} else {
-                		CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
-                		if (defaultExternalAuthenticator != null) {
-                    		acrValuesList = Arrays.asList(defaultExternalAuthenticator.getName());
-                		}
-                	}
-                	
+                    if (StringHelper.isNotEmpty(defaultAuthenticationMethod)) {
+                        acrValuesList = Arrays.asList(defaultAuthenticationMethod);
+                    } else {
+                        CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
+                        if (defaultExternalAuthenticator != null) {
+                            acrValuesList = Arrays.asList(defaultExternalAuthenticator.getName());
+                        }
+                    }
+
                 }
 
                 CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
@@ -207,7 +193,7 @@ public class AuthorizeAction {
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
-            	log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
+                log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
             }
 
             this.sessionId = unauthenticatedSession.getId();
@@ -269,6 +255,7 @@ public class AuthorizeAction {
     /**
      * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
      * sent it to us as json array. So we try both.
+     *
      * @return acr value list
      */
     private List<String> acrValuesList() {
@@ -414,6 +401,24 @@ public class AuthorizeAction {
     }
 
     /**
+     * Returns the mechanism to be used for returning parameters from the Authorization Endpoint.
+     *
+     * @return The response mode.
+     */
+    public String getResponseMode() {
+        return responseMode;
+    }
+
+    /**
+     * Sets the mechanism to be used for returning parameters from the Authorization Endpoint.
+     *
+     * @param responseMode The response mode.
+     */
+    public void setResponseMode(String responseMode) {
+        this.responseMode = responseMode;
+    }
+
+    /**
      * Return a string value used to associate a user agent session with an ID Token, and to mitigate replay attacks.
      *
      * @return The nonce value.
@@ -511,15 +516,15 @@ public class AuthorizeAction {
         this.acrValues = acrValues;
     }
 
-	public String getAmrValues() {
-		return amrValues;
-	}
+    public String getAmrValues() {
+        return amrValues;
+    }
 
-	public void setAmrValues(String amrValues) {
-		this.amrValues = amrValues;
-	}
+    public void setAmrValues(String amrValues) {
+        this.amrValues = amrValues;
+    }
 
-	/**
+    /**
      * Returns a JWT encoded OpenID Request Object.
      *
      * @return A JWT encoded OpenID Request Object.
@@ -565,7 +570,7 @@ public class AuthorizeAction {
 
     public void permissionGranted() {
         final SessionId session = getSession();
-    	permissionGranted(session);
+        permissionGranted(session);
     }
 
     public void permissionGranted(SessionId session) {
@@ -577,7 +582,7 @@ public class AuthorizeAction {
             SessionIdService.instance().createSessionIdCookie(sessionId);
 
             Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
-            
+
             final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
             final String uri = "seam/resource/restv1/oxauth/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {0}", uri);

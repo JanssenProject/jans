@@ -6,20 +6,11 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,7 +27,7 @@ import javax.ws.rs.core.SecurityContext;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version October 1, 2015
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
@@ -56,6 +47,9 @@ public interface AuthorizeRestWebService {
      *                         this value when redirecting the user-agent back to the client.
      *                         The parameter should be used for preventing cross-site request
      *                         forgery.
+     * @param responseMode     Informs the Authorization Server of the mechanism to be used for returning parameters
+     *                         from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the
+     *                         Response Mode that would be requested is the default mode specified for the Response Type.
      * @param nonce            A string value used to associate a user agent session with an ID Token,
      *                         and to mitigate replay attacks.
      * @param display          An ASCII string value that specifies how the Authorization Server displays the
