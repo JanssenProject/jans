@@ -19,15 +19,15 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class RegisterSiteTest {
 
-    @Parameters({"host", "port"})
+    @Parameters({"host", "port", "redirectUrl"})
     @Test
-    public void test(String host, int port) throws IOException {
+    public void test(String host, int port, String redirectUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
             final RegisterSiteParams commandParams = new RegisterSiteParams();
-            commandParams.setAuthorizationRedirectUri("http://site.example.com");
+            commandParams.setAuthorizationRedirectUri(redirectUrl);
 
             final Command command = new Command(CommandType.REGISTER_SITE);
             command.setParamsObject(commandParams);
