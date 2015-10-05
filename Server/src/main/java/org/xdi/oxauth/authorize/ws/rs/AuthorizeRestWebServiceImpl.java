@@ -7,7 +7,6 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
@@ -42,7 +41,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
-
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,7 +54,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version October 1, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -100,7 +98,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @In
     private SessionIdService sessionIdService;
-    
+
     @In
     private ScopeChecker scopeChecker;
 
@@ -178,7 +176,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                             AuthorizeErrorResponseType.INVALID_REQUEST, state));
 
-                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                 } else {
                     builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
                     builder.entity(errorResponseFactory.getErrorAsJson(
@@ -189,10 +187,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
 
                 if (client != null) {
-                	List<String> scopes = new ArrayList<String>();
+                    List<String> scopes = new ArrayList<String>();
                     if (StringHelper.isNotEmpty(scope)) {
-                    	Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-                    	scopes.addAll(grantedScopes);
+                        Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+                        scopes.addAll(grantedScopes);
                     }
 
                     // Validate redirectUri
@@ -218,7 +216,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                             AuthorizeErrorResponseType.ACCESS_DENIED, state));
 
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     return builder.build();
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
@@ -257,7 +255,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                                 AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
 
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                         return builder.build();
                                     }
                                 } catch (URISyntaxException e) {
@@ -321,7 +319,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                         AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
 
-                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                             } else {
                                 AuthorizationGrant authorizationGrant = null;
                                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
@@ -339,7 +337,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                                         AuthorizeErrorResponseType.USER_MISMATCHED, state));
 
-                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                                 return builder.build();
                                             }
                                         }
@@ -369,14 +367,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                                         AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
 
-                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                                 return builder.build();
                                             }
                                         } else {
                                             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                                     AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
 
-                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                             return builder.build();
                                         }
                                     } else {
@@ -386,9 +384,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
 
                                         redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                                redirectUri, state, nonce, display, prompts, maxAge, uiLocales,
+                                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                                 idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders);
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                         return builder.build();
                                     }
                                 }
@@ -402,9 +400,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     prompts.remove(Prompt.LOGIN);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     return builder.build();
                                 }
 
@@ -412,9 +410,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     prompts.remove(Prompt.CONSENT);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     return builder.build();
                                 }
 
@@ -442,9 +440,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     endSession(sessionId, httpRequest, httpResponse);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     return builder.build();
                                 }
 
@@ -527,11 +525,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                     clientService.updatAccessTime(client, false);
 
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                 } else {
                                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                             AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state));
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                 }
                             }
                         } else { // Invalid redirectUri
@@ -577,11 +575,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void redirectToAuthorizationPage(
             RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
-            String redirectUri, String state, String nonce, String display, List<Prompt> prompts, Integer maxAge,
-            List<String> uiLocales, String idTokenHint, String loginHint, List<String> acrValues, List<String> amrValues, String request,
-            String requestUri, String originHeaders) {
+            String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
+            List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
+            List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders) {
 
         redirectUriResponse.setBaseRedirectUri(ConfigurationFactory.instance().getConfiguration().getAuthorizationPage());
+        redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
         String responseType = implode(responseTypes, " ");
@@ -599,6 +598,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
         if (StringUtils.isNotBlank(state)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.STATE, state);
+        }
+        if (responseMode != null) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_MODE, responseMode.getParamName());
         }
 
         // OIC parameters

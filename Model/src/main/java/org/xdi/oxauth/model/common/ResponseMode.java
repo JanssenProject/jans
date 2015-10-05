@@ -10,12 +10,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Javier Rojas Blum Date: 03.21.2014
+ * @author Javier Rojas Blum
+ * @version October 1, 2015
  */
 public enum ResponseMode implements HasParamName {
 
+    /**
+     * In this mode, Authorization Response parameters are encoded in the query string added to the redirect_uri when
+     * redirecting back to the Client.
+     */
     QUERY("query"),
-    FRAGMENT("fragment");
+    /**
+     * In this mode, Authorization Response parameters are encoded in the fragment added to the redirect_uri when
+     * redirecting back to the Client.
+     */
+    FRAGMENT("fragment"),
+    /**
+     * In this mode, Authorization Response parameters are encoded as HTML form values that are auto-submitted in the
+     * User Agent, and thus are transmitted via the HTTP POST method to the Client, with the result parameters being
+     * encoded in the body using the application/x-www-form-urlencoded format.
+     */
+    FORM_POST("form_post");
 
     private final String value;
 

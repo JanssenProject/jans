@@ -22,6 +22,8 @@
            value="#{authorizeAction.state}"/>
 
     <!-- OpenID Connect request parameters -->
+    <param name="response_mode"
+           value="#{authorizeAction.responseMode}"/>
     <param name="nonce"
            value="#{authorizeAction.nonce}"/>
     <param name="display"
