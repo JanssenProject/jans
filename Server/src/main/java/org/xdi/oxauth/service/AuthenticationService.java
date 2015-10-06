@@ -315,12 +315,12 @@ public class AuthenticationService {
     private boolean checkUserStatus(User user) {
         CustomAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
 
-        if ((userStatus == null) || GluuStatus.INACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
-            log.warn("User '{0}' was disabled", user.getUserId());
-            return false;
-        }
+		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
+			return true;
+		}
 
-        return true;
+		log.warn("User '{0}' was disabled", user.getUserId());
+        return false;
     }
 
     private void updateLastLogonUserTime(User user) {
