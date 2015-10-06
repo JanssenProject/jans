@@ -36,7 +36,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
             final SiteConfigurationService siteService = getInjector().getInstance(SiteConfigurationService.class);
             final SiteConfiguration site = siteService.getSite(params.getOxdId());
 
-            String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getAuthorizationEndpoint();
+            String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getIssuer() + "/oxauth/authorize";
 
             authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
             authorizationEndpoint += "&client_id=" + site.getClientId();
