@@ -15,6 +15,8 @@ import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 
 /**
  * Base abstract class for all operations.
@@ -66,6 +68,14 @@ public abstract class BaseOperation implements IOperation {
 
     public DiscoveryService getDiscoveryService() {
         return injector.getInstance(DiscoveryService.class);
+    }
+
+    public SiteConfigurationService getSiteService() {
+        return getInjector().getInstance(SiteConfigurationService.class);
+    }
+
+    public SiteConfiguration getSite(String oxdId) {
+        return getSiteService().getSite(oxdId);
     }
 
     /**

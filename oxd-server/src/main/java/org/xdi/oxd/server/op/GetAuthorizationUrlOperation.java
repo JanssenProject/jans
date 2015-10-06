@@ -9,7 +9,6 @@ import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.SiteConfigurationService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,8 +32,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
     public CommandResponse execute() {
         try {
             final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
-            final SiteConfigurationService siteService = getInjector().getInstance(SiteConfigurationService.class);
-            final SiteConfiguration site = siteService.getSite(params.getOxdId());
+            final SiteConfiguration site = getSite(params.getOxdId());
 
             String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getIssuer() + "/oxauth/authorize";
 
