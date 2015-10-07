@@ -3,9 +3,19 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.ClientUtils;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
+import org.xdi.oxd.server.service.SiteConfiguration;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -29,10 +39,47 @@ public class GetTokensByCodeOperation extends BaseOperation {
     public CommandResponse execute() {
         try {
             final GetTokensByCodeParams params = asParams(GetTokensByCodeParams.class);
-            // todo we need load site conf here
+            final SiteConfiguration site = getSite(params.getOxdId());
+
+            final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            tokenRequest.setCode(params.getCode());
+            tokenRequest.setRedirectUri(site.getAuthorizationRedirectUri());
+            tokenRequest.setAuthUsername(site.getClientId());
+            tokenRequest.setAuthPassword(site.getClientSecret());
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+            tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
+
+            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse().getTokenEndpoint());
+            tokenClient.setExecutor(getHttpService().getClientExecutor());
+            tokenClient.setRequest(tokenRequest);
+            final TokenResponse response = tokenClient.exec();
+            ClientUtils.showClient(tokenClient);
+
+            if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
+                if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
+//                    final AuthorizationCodeFlowResponse opResponse = new AuthorizationCodeFlowResponse();
+//                    opResponse.setAccessToken(response.getAccessToken());
+//                    opResponse.setIdToken(response.getIdToken());
+//                    opResponse.setRefreshToken(response.getRefreshToken());
+//                    opResponse.setAuthorizationCode(authorizationCode);
+//                    opResponse.setScope(scope);
+//                    opResponse.setExpiresIn(response.getExpiresIn());
+//                    return opResponse;
+                }
+            } else {
+                LOG.error("Failed to get tokens because response code is: " + response.getScope());
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
+    }
+
+    private static String asCommaSeparatedString(List<String> scope) {
+        String result = "";
+        for (String s : scope) {
+            result = s + " ";
+        }
+        return result.trim();
     }
 }

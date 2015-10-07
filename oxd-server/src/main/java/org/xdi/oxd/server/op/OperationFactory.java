@@ -61,6 +61,8 @@ public class OperationFactory {
                     return new ImplicitFlowOperation(command, injector);
                 case REGISTER_SITE:
                     return new RegisterSiteOperation(command, injector);
+                case GET_AUTHORIZATION_CODE:
+                    return new GetAuthorizationCodeOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
