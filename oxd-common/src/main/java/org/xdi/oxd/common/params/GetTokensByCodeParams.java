@@ -2,6 +2,8 @@ package org.xdi.oxd.common.params;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
@@ -15,8 +17,18 @@ public class GetTokensByCodeParams implements IParams {
     private String code;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "scopes")
+    private List<String> scopes;
 
     public GetTokensByCodeParams() {
+    }
+
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<String> scopes) {
+        this.scopes = scopes;
     }
 
     public String getCode() {
