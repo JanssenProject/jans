@@ -125,7 +125,9 @@ public abstract class MetricService implements Serializable {
 				createBranch(applicationBaseDn, applicationType.getValue());
 			}
 
-			createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate));
+			if (creationDate != null) {
+				createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate));
+			}
 		}
 	}
 

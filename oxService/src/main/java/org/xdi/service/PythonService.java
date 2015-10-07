@@ -2,14 +2,17 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.service;
+ */
+
+package org.xdi.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -53,6 +56,8 @@ public class PythonService implements Serializable {
 	        try {
 	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
 	            this.pythonInterpreter = new PythonInterpreter();
+	            this.pythonInterpreter.setOut(new PythonLoggerOutputStream(log, false));
+	            this.pythonInterpreter.setErr(new PythonLoggerOutputStream(log, true));
 	
 	            result = true;
 			} catch (PyException ex) {
@@ -170,6 +175,39 @@ public class PythonService implements Serializable {
 	 */
 	public static PythonService instance() {
 		return (PythonService) Component.getInstance(PythonService.class);
+	}
+	
+	class PythonLoggerOutputStream extends OutputStream {
+
+		private boolean error;
+		private Log log;
+		private StringBuffer buffer;
+
+		private PythonLoggerOutputStream(Log log, boolean error) {
+			this.error = error;
+			this.log = log;
+			this.buffer = new StringBuffer();
+		}
+
+		public void write(int b) throws IOException {
+			if (((char) b == '\n') || ((char) b == '\r')) {
+				flush();
+			} else {
+				buffer.append((char) b);
+			}
+		}
+
+		public void flush() {
+			if (buffer.length() > 0) {
+				if (error) {
+					this.log.error(buffer.toString());
+				} else {
+					this.log.info(buffer.toString());
+				}
+	
+				this.buffer.setLength(0);
+			}
+		}
 	}
 
 }
