@@ -6,6 +6,8 @@
 package org.xdi.service.custom.script;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -18,11 +20,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -35,6 +37,7 @@ import org.jboss.seam.log.Log;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
+import org.xdi.model.ScriptLocationType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -44,7 +47,7 @@ import org.xdi.service.PythonService;
 import org.xdi.util.StringHelper;
 
 /**
- * Provides actual versions of scrips
+ * Provides actual versions of scripts
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
@@ -59,7 +62,7 @@ public class CustomScriptManager implements Serializable {
 	public final static String MODIFIED_EVENT_TYPE = "CustomScriptModifiedEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
     
-    public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "gluuStatus" };
+    public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "oxModuleProperty", "gluuStatus" };
 
 	@Logger
 	protected Log log;
@@ -175,7 +178,7 @@ public class CustomScriptManager implements Serializable {
 			newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>();
 			modified = true;
 		} else {
-			// Clone old map to avoid reload not changed scripts becuase it's time and CPU consuming process
+			// Clone old map to avoid reload not changed scripts because it's time and CPU consuming process
 			newCustomScriptConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations);
 		}
 
@@ -183,6 +186,13 @@ public class CustomScriptManager implements Serializable {
 		for (CustomScript newCustomScript : newCustomScripts) {
 	        if (!newCustomScript.isEnabled()) {
 	        	continue;
+	        }
+	        
+	        if (ScriptLocationType.FILE == newCustomScript.getLocationType()) {
+	        	// Replace script revision with file modification time. This should allow to reload script automatically after changing location_type
+	        	long fileModifiactionTime = getFileModificationTime(newCustomScript.getLocationPath());
+	        	
+	        	newCustomScript.setRevision(fileModifiactionTime);
 	        }
 	        	
 			String newSupportedCustomScriptInum = StringHelper.toLowerCase(newCustomScript.getInum());
@@ -209,6 +219,20 @@ public class CustomScriptManager implements Serializable {
 				for (SimpleCustomProperty simpleCustomProperty : simpleCustomProperties) {
 					newConfigurationAttributes.put(simpleCustomProperty.getValue1(), simpleCustomProperty);
 				}
+
+				if (ScriptLocationType.FILE == loadedCustomScript.getLocationType()) {
+		        	// Replace script revision with file modification time. This should allow to reload script automatically after changing location_type
+		        	long fileModifiactionTime = getFileModificationTime(loadedCustomScript.getLocationPath());
+		        	loadedCustomScript.setRevision(fileModifiactionTime);
+
+		        	if (fileModifiactionTime != 0) {
+			        	String scriptFromFile = loadFromFile(loadedCustomScript.getLocationPath());
+			        	if (StringHelper.isNotEmpty(scriptFromFile)) {
+			        		loadedCustomScript.setScript(scriptFromFile);
+			        	}
+			        	
+		        	}
+		        }
 
 				// Create authenticator
 	        	BaseExternalType newCustomScriptExternalType = createExternalType(loadedCustomScript, newConfigurationAttributes);
@@ -238,6 +262,28 @@ public class CustomScriptManager implements Serializable {
 		}
 
 		return new ReloadResult(newCustomScriptConfigurations, modified);
+	}
+
+	private String loadFromFile(String locationPath) {
+		try {
+			String scriptFromFile = FileUtils.readFileToString(new File(locationPath));
+			
+			return scriptFromFile;
+		} catch (IOException ex) {
+			log.error("Faield to load script from '{0}'", locationPath);
+		}
+
+		return null;
+	}
+
+	private long getFileModificationTime(String locationPath) {
+        File scriptFile = new File(locationPath);
+
+        if (scriptFile.exists()) {
+            return scriptFile.lastModified();
+        }
+
+        return 0;
 	}
 
 	private boolean destroyCustomScript(CustomScriptConfiguration customScriptConfiguration) {

@@ -4,6 +4,7 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.model.custom.script.model;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Transient;
@@ -15,8 +16,10 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 import org.xdi.model.ProgrammingLanguage;
+import org.xdi.model.ScriptLocationType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
+import org.xdi.util.StringHelper;
 
 /**
  * Custom script configuration 
@@ -26,6 +29,9 @@ import org.xdi.model.custom.script.CustomScriptType;
 @LdapEntry(sortBy = "level")
 @LdapObjectClass(values = {"top", "oxCustomScript"})
 public class CustomScript extends BaseEntry {
+	
+	public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
+	public static final String LOCATION_PATH_MODEL_PROPERTY = "location_path";
 
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String inum;
@@ -58,7 +64,7 @@ public class CustomScript extends BaseEntry {
     private int level;
 
     @LdapAttribute(name = "oxRevision")
-    private int revision;
+    private long revision;
 
     @LdapAttribute(name = "gluuStatus")
     private boolean enabled;
@@ -162,11 +168,11 @@ public class CustomScript extends BaseEntry {
 		this.level = level;
 	}
 
-	public int getRevision() {
+	public long getRevision() {
 		return revision;
 	}
 
-	public void setRevision(int revision) {
+	public void setRevision(long revision) {
 		this.revision = revision;
 	}
 
@@ -184,6 +190,80 @@ public class CustomScript extends BaseEntry {
 
 	public void setModified(boolean modified) {
 		this.modified = modified;
+	}
+
+	public ScriptLocationType getLocationType() {
+		SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_TYPE_MODEL_PROPERTY);
+		if (moduleProperty == null) {
+			return null;
+		}
+
+		return ScriptLocationType.getByValue(moduleProperty.getValue2());
+	}
+
+	public void setLocationType(ScriptLocationType locationType) {
+		setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
+	}
+
+	public String getLocationPath() {
+		SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_PATH_MODEL_PROPERTY);
+		if (moduleProperty == null) {
+			return null;
+		}
+
+		return moduleProperty.getValue2();
+	}
+
+	public void setLocationPath(String locationPath) {
+		setModuleProperty(LOCATION_PATH_MODEL_PROPERTY, locationPath);
+	}
+
+	protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
+		SimpleCustomProperty result = null;
+
+		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
+		if (moduleProperties == null) {
+			return result;
+		}
+
+		for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
+			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
+				result = moduleProperty;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	protected void setModuleProperty(String name, String value) {
+		SimpleCustomProperty moduleProperty = getModuleProperty(name);
+		
+		if (moduleProperty == null) {
+			addModuleProperty(name, value);
+		} else {
+			moduleProperty.setValue2(value);
+		}
+	}
+
+	public void addModuleProperty(final String name, final String value) {
+		SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty(name, value);
+		getModuleProperties().add(usageTypeModuleProperties);
+	}
+
+	public void removeModuleProperty(final String modulePropertyName) {
+		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
+		if (moduleProperties == null) {
+			return;
+		}
+
+		for (Iterator<SimpleCustomProperty> it = moduleProperties.iterator(); it.hasNext();) {
+			SimpleCustomProperty moduleProperty = (SimpleCustomProperty) it.next();
+			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
+				it.remove();
+				break;
+			}
+		}
 	}
 
 }
