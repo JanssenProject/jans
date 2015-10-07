@@ -55,15 +55,15 @@ public class GetAuthorizationCodeOperation extends BaseOperation {
             final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse().getAuthorizationEndpoint());
             authorizeClient.setRequest(request);
             authorizeClient.setExecutor(getHttpService().getClientExecutor());
-            final AuthorizationResponse response1 = authorizeClient.exec();
+            final AuthorizationResponse response = authorizeClient.exec();
 
             ClientUtils.showClient(authorizeClient);
+            if (response != null) {
+                return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
+            } else {
+                LOG.error("Failed to get response from oxauth client.");
+            }
 
-            final String scope = response1.getScope();
-            final String authorizationCode = response1.getCode();
-
-            // todo
-            return okResponse(new GetAuthorizationCodeResponse());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
