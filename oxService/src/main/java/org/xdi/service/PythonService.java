@@ -56,6 +56,8 @@ public class PythonService implements Serializable {
 	        try {
 	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
 	            this.pythonInterpreter = new PythonInterpreter();
+	            
+	            // Init output redirect for all new interpreters
 	            this.pythonInterpreter.setOut(new PythonLoggerOutputStream(log, false));
 	            this.pythonInterpreter.setErr(new PythonLoggerOutputStream(log, true));
 	
@@ -122,13 +124,14 @@ public class PythonService implements Serializable {
 			return null;
 		}
 
+    	PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
         try {
-			this.pythonInterpreter.execfile(scriptName);
+        	currentPythonInterpreter.execfile(scriptName);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
 	}
 
 	public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
@@ -136,13 +139,14 @@ public class PythonService implements Serializable {
 			return null;
 		}
 
+    	PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
         try {
-			this.pythonInterpreter.execfile(scriptFile);
+        	currentPythonInterpreter.execfile(scriptFile);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -152,6 +156,7 @@ public class PythonService implements Serializable {
         if (scriptPythonTypeObject == null) {
         	return null;
         }
+        
 
         PyObject scriptPythonTypeClass;
         try {
