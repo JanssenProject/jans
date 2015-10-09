@@ -52,6 +52,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
             userService = UserService.instance()
 
+            update_button = requestParameters.get("loginForm:updateButton")
+            if ArrayHelper.isEmpty(update_button):
+                return True
+
             new_password_array = requestParameters.get("new_password")
             if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
                 print "Basic (with password update). Authenticate for step 2. New password is empty"
