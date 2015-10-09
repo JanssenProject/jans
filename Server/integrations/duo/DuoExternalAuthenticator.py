@@ -32,9 +32,9 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             f.close()
 
-        self.ikey = creds["ikey"]
-        self.skey = creds["skey"]
-        self.akey = creds["akey"]
+        self.ikey = str(creds["ikey"])
+        self.skey = str(creds["skey"])
+        self.akey = str(creds["akey"])
 
         self.use_duo_group = False
         if (configurationAttributes.containsKey("duo_group")):
