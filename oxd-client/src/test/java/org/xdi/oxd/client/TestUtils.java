@@ -223,4 +223,8 @@ public class TestUtils {
     public static void notEmpty(String str) {
         assertTrue(StringUtils.isNotBlank(str));
     }
+
+    public static void notEmpty(List<String> str) {
+        assertTrue(str != null && !str.isEmpty() && StringUtils.isNotBlank(str.get(0)));
+    }
 }
