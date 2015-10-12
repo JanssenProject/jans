@@ -94,6 +94,8 @@
             <class name="org.xdi.oxd.client.RptStatusTest"/>
         </classes>
     </test>
+
+    <!-- State full tests -->
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RegisterSiteTest"/>
@@ -102,6 +104,11 @@
     <test name="Get authorization url" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.GetAuthorizationUrlTest"/>
+        </classes>
+    </test>
+    <test name="Get tokens by code" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.GetTokensByCodeTest"/>
         </classes>
     </test>
 

@@ -4,10 +4,13 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.JwkClient;
+import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -16,9 +19,14 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Date;
 
 /**
@@ -81,12 +89,28 @@ public class CheckIdTokenOperation extends BaseOperation {
             // 2. validate signature
             final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(algorithm);
 
-            final RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwkUrl, kid);
+            final RSAPublicKey publicKey = getRSAPublicKey(jwkUrl, kid);
             final RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
             return rsaSigner.validate(jwt);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
+    }
+
+    public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        RSAPublicKey publicKey = null;
+
+        JwkClient jwkClient = new JwkClient(jwkSetUri);
+        jwkClient.setExecutor(new ApacheHttpClient4Executor(CoreUtils.createHttpClientTrustAll()));
+        JwkResponse jwkResponse = jwkClient.exec();
+        if (jwkResponse != null && jwkResponse.getStatus() == 200) {
+            PublicKey pk = jwkResponse.getPublicKey(keyId);
+            if (pk instanceof RSAPublicKey) {
+                publicKey = (RSAPublicKey) pk;
+            }
+        }
+
+        return publicKey;
     }
 }

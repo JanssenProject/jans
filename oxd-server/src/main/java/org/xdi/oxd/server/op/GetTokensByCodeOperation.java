@@ -88,7 +88,7 @@ public class GetTokensByCodeOperation extends BaseOperation {
     private static String asCommaSeparatedString(List<String> scope) {
         String result = "";
         for (String s : scope) {
-            result = s + " ";
+            result = result + " " + s;
         }
         return result.trim();
     }
