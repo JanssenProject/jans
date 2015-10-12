@@ -9,13 +9,17 @@ import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
+import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -57,14 +61,20 @@ public class GetTokensByCodeOperation extends BaseOperation {
 
             if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
                 if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
-//                    final AuthorizationCodeFlowResponse opResponse = new AuthorizationCodeFlowResponse();
-//                    opResponse.setAccessToken(response.getAccessToken());
-//                    opResponse.setIdToken(response.getIdToken());
-//                    opResponse.setRefreshToken(response.getRefreshToken());
-//                    opResponse.setAuthorizationCode(authorizationCode);
-//                    opResponse.setScope(scope);
-//                    opResponse.setExpiresIn(response.getExpiresIn());
-//                    return opResponse;
+                    final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
+                    opResponse.setAccessToken(response.getAccessToken());
+                    opResponse.setIdToken(response.getIdToken());
+                    opResponse.setRefreshToken(response.getRefreshToken());
+                    opResponse.setExpiresIn(response.getExpiresIn());
+
+                    final Jwt jwt = Jwt.parse(response.getIdToken());
+                    if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse())) {
+                        final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
+                        opResponse.setIdTokenClaims(claims);
+                        return okResponse(opResponse);
+                    } else {
+                        LOG.error("ID Token is not valid, token: " + response.getIdToken());
+                    }
                 }
             } else {
                 LOG.error("Failed to get tokens because response code is: " + response.getScope());
