@@ -60,7 +60,7 @@ public class CheckIdTokenOperation extends BaseOperation {
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    private boolean isValid(Jwt jwt, OpenIdConfigurationResponse p_discoveryResponse) {
+    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse p_discoveryResponse) {
         try {
             //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
