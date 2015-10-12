@@ -186,6 +186,10 @@
             <artifactId>oxUtil</artifactId>
         </dependency>
         <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
             <version>1.46</version> <!-- Special version to be compatible with oxAuth client -->
