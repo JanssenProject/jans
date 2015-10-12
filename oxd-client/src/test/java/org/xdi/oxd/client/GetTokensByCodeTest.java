@@ -13,6 +13,7 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 import java.io.IOException;
 
 import static junit.framework.Assert.assertNotNull;
+import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,13 +34,13 @@ public class GetTokensByCodeTest {
             final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
             commandParams.setOxdId(site.getSiteId());
             commandParams.setCode(codeRequest(client, site.getSiteId(), userId, userSecret));
-//               commandParams.setState();
 
             final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
 
             final GetTokensByCodeResponse resp = client.send(command).dataAsResponse(GetTokensByCodeResponse.class);
             assertNotNull(resp);
-//            notEmpty(resp.getAuthorizationUrl());
+            notEmpty(resp.getAccessToken());
+            notEmpty(resp.getIdToken());
         } finally {
             CommandClient.closeQuietly(client);
         }
