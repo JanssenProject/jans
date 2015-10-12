@@ -3,9 +3,12 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.UserInfoClient;
+import org.xdi.oxauth.client.UserInfoRequest;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetUserInfoParams;
+import org.xdi.oxd.common.response.GetUserInfoResponse;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -29,7 +32,13 @@ public class GetUserInfoOperation extends BaseOperation {
     public CommandResponse execute() {
         try {
             final GetUserInfoParams params = asParams(GetUserInfoParams.class);
-            // todo we need load site conf here
+
+            UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponse().getUserInfoEndpoint());
+            client.setExecutor(getHttpService().getClientExecutor());
+            client.setRequest(new UserInfoRequest(params.getAccessToken()));
+
+            GetUserInfoResponse opResponse = new GetUserInfoResponse(client.exec().getClaims());
+            return okResponse(opResponse);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
