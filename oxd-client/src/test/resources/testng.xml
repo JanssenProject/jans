@@ -88,4 +88,9 @@
             <class name="org.xdi.oxd.client.GetAuthorizationUrlTest"/>
         </classes>
     </test>
+    <test name="Get tokens by code" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.GetTokensByCodeTest"/>
+        </classes>
+    </test>
 </suite>
