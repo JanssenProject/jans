@@ -93,4 +93,10 @@
             <class name="org.xdi.oxd.client.GetTokensByCodeTest"/>
         </classes>
     </test>
+    <test name="Get user info" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.GetUserInfoTest"/>
+        </classes>
+    </test>
+
 </suite>

@@ -46,7 +46,7 @@ public class GetTokensByCodeTest {
         }
     }
 
-    private String codeRequest(CommandClient client, String siteId, String userId, String userSecret) {
+    public static String codeRequest(CommandClient client, String siteId, String userId, String userSecret) {
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(siteId);
         params.setUsername(userId);
