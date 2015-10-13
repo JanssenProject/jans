@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -30,10 +25,15 @@ import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.util.StringHelper;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version 0.9 October 28, 2014
+ * @version October 1, 2015
  */
 @Name("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
@@ -49,7 +49,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @In
     private AuthorizationGrantList authorizationGrantList;
-    
+
     @In
     private ExternalApplicationSessionService externalApplicationSessionService;
 
@@ -93,7 +93,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                         redirectUriResponse.addResponseParameter(EndSessionResponseParam.STATE, state);
                     }
 
-                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.toString(), httpRequest);
+                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                 } else {
                     builder = Response.status(400);
                     builder.entity(errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_REQUEST));

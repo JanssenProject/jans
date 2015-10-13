@@ -121,7 +121,9 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public RefreshToken createRefreshToken() {
         try {
             final RefreshToken refreshToken = super.createRefreshToken();
-            persist(asToken(refreshToken));
+            if (refreshToken.getExpiresIn() > 0) {
+            	persist(asToken(refreshToken));
+            }
             return refreshToken;
         } catch (Exception e) {
             LOGGER.trace(e.getMessage(), e);
