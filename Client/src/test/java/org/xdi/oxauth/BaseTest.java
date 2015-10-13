@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.dev.HostnameVerifierType;
+import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
@@ -46,7 +47,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 22, 2015
+ * @version October 1, 2015
  */
 public abstract class BaseTest {
 
@@ -74,37 +75,38 @@ public abstract class BaseTest {
     private String loginFormLoginButton;
     private String authorizeFormAllowButton;
     private String authorizeFormDoNotAllowButton;
-	
-	@BeforeSuite
-	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-    	SecurityProviderUtility.installBCProvider();
 
-    	Reporter.log("Invoked init test suite method \n", true);
+    @BeforeSuite
+    public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+        SecurityProviderUtility.installBCProvider();
 
-		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
-		if (StringHelper.isEmpty(propertiesFile)) {
-			propertiesFile = "target/test-classes/testng.properties";
-		}
+        Reporter.log("Invoked init test suite method \n", true);
 
-		// Load test paramters
-		FileInputStream conf = new FileInputStream(propertiesFile);
-		Properties prop = new Properties();
-		prop.load(conf);
-		
-		Map<String, String> parameters = new HashMap<String, String>();
-		for (Entry<Object, Object> entry : prop.entrySet()) {
-			Object key = entry.getKey();
-			Object value = entry.getValue();
-			
-			if (StringHelper.isEmptyString(key) || StringHelper.isEmptyString(value)) {
-				continue;
-			}
-			parameters.put(key.toString(), value.toString());
-		}
+        String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
+        if (StringHelper.isEmpty(propertiesFile)) {
+            propertiesFile = "target/test-classes/testng.properties";
+        }
 
-		// Overrided test paramters
-		context.getSuite().getXmlSuite().setParameters(parameters);
-	}
+        // Load test paramters
+        //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
+        FileInputStream conf = new FileInputStream(propertiesFile);
+        Properties prop = new Properties();
+        prop.load(conf);
+
+        Map<String, String> parameters = new HashMap<String, String>();
+        for (Entry<Object, Object> entry : prop.entrySet()) {
+            Object key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (StringHelper.isEmptyString(key) || StringHelper.isEmptyString(value)) {
+                continue;
+            }
+            parameters.put(key.toString(), value.toString());
+        }
+
+        // Overrided test paramters
+        context.getSuite().getXmlSuite().setParameters(parameters);
+    }
 
     public WebDriver getDriver() {
         return driver;
@@ -242,7 +244,9 @@ public abstract class BaseTest {
 
         //driver = new FirefoxDriver();
 
-        driver = new HtmlUnitDriver();
+        //driver = new InternetExplorerDriver();
+
+        driver = new HtmlUnitDriver(true);
     }
 
     public void stopSelenium() {
@@ -301,6 +305,9 @@ public abstract class BaseTest {
         stopSelenium();
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
+        if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
+            authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
+        }
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
 

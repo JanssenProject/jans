@@ -6,20 +6,25 @@
 
 package org.xdi.oxauth.util;
 
-import java.net.MalformedURLException;
-import java.net.URI;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.model.common.ResponseMode;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import java.net.MalformedURLException;
+import java.net.URI;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-
+/**
+ * @version October 1, 2015
+ */
 public class RedirectUtil {
 
     private final static Log LOG = Logging.getLog(RedirectUtil.class);
@@ -30,16 +35,12 @@ public class RedirectUtil {
 
     static int HTTP_REDIRECT = 302;
 
-    public static ResponseBuilder getRedirectResponseBuilder(String location, HttpServletRequest httpRequest) {
+    public static ResponseBuilder getRedirectResponseBuilder(RedirectUri redirectUriResponse, HttpServletRequest httpRequest) {
+        ResponseBuilder builder = null;
 
-        URI redirectURI = URI.create(location);
-        ResponseBuilder builder;
-
-        if (httpRequest == null || httpRequest.getHeader(NO_REDIRECT_HEADER) == null) {
-            builder = Response.status(HTTP_REDIRECT);
-            builder.location(redirectURI);
-        } else {
+        if (httpRequest != null && httpRequest.getHeader(NO_REDIRECT_HEADER) != null) {
             try {
+                URI redirectURI = URI.create(redirectUriResponse.toString());
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(JSON_REDIRECT_PROPNAME, redirectURI.toURL());
                 String jsonResp = jsonObject.toString();
@@ -56,6 +57,18 @@ public class RedirectUtil {
                 builder = Response.serverError();
                 LOG.debug(e.getMessage(), e);
             }
+        } else if (redirectUriResponse.getResponseMode() != ResponseMode.FORM_POST) {
+            URI redirectURI = URI.create(redirectUriResponse.toString());
+            builder = new ResponseBuilderImpl();
+            builder = Response.status(HTTP_REDIRECT);
+            builder.location(redirectURI);
+        } else {
+            builder = new ResponseBuilderImpl();
+            builder.status(Response.Status.OK);
+            builder.type(MediaType.TEXT_HTML_TYPE);
+            builder.cacheControl(CacheControl.valueOf("no-cache, no-store"));
+            builder.header("Pragma", "no-cache");
+            builder.entity(redirectUriResponse.toString());
         }
 
         return builder;
