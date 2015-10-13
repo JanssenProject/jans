@@ -87,6 +87,7 @@ class Setup(object):
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
+        self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
@@ -188,6 +189,7 @@ class Setup(object):
         self.oxauth_config_reload = '%s/conf/oxauth.config.reload' % self.tomcatHome
         self.oxtrust_config_reload = '%s/conf/oxtrust.config.reload' % self.tomcatHome
         self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
+        self.oxTrust_CacheRefresh_properties = '%s/conf/oxTrustCacheRefresh.properties' % self.tomcatHome
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
         self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
@@ -231,6 +233,7 @@ class Setup(object):
                      self.oxauth_config_reload: True,
                      self.oxtrust_config_reload: True,
                      self.oxTrust_properties: True,
+                     self.oxTrust_CacheRefresh_properties: True,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
                      self.oxtrust_import_person_properties: True,
@@ -1046,6 +1049,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.tomcat_user_home_lib])
                 self.run([mkdir, '-p', self.oxPhotosFolder])
                 self.run([mkdir, '-p', self.oxTrustRemovedFolder])
+                self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
 
             if self.components['saml']['enabled']:
                 self.run([mkdir, '-p', self.idpFolder])
