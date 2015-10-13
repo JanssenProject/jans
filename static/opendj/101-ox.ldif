@@ -409,7 +409,7 @@ attributeTypes: ( gluuPersonCount-oid NAME 'gluuPersonCount'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )	
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( gluuPrivate-oid NAME 'gluuPrivate'
   DESC 'TODO - in use?'
   SUBSTR caseIgnoreSubstringsMatch
@@ -1218,18 +1218,6 @@ attributeTypes: ( oxAuthenticationMode-oid NAME 'oxAuthenticationMode'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxClusterType-oid NAME 'oxClusterType'
-  DESC 'Type of the underlying clustering mechanism'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxClusteredServers-oid NAME 'oxClusteredServers'
-  DESC 'List of the clustering partners of this server'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxConfigurationCode-oid NAME 'oxConfigurationCode'
   DESC 'ox configuration code'
   SUBSTR caseIgnoreSubstringsMatch
@@ -1369,12 +1357,6 @@ attributeTypes: ( oxLinktrackPassword-oid NAME 'oxLinktrackPassword'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxLogViewerConfig-oid NAME 'oxLogViewerConfig'
   DESC 'Log viewer configuration'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxMemcachedServerAddress-oid NAME 'oxMemcachedServerAddress'
-  DESC 'Initialization string for memcached client'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2035,6 +2017,15 @@ attributeTypes: ( oxData-oid NAME 'oxData'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxSectorIdentifierURI-oid NAME 'oxSectorIdentifierURI'
+  DESC 'ox Sector Identifier URI'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
+   ( oxId $ oxSectorIdentifierURI )
+    X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
@@ -2085,8 +2076,8 @@ objectclasses: ( gluuAppliance-oid NAME 'gluuAppliance' SUP top STRUCTURAL MUST 
   $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount
   $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount
   $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode
-  $ oxClusterType $ oxClusteredServers $ oxIDPAuthentication $ oxLogViewerConfig
-  $ oxMemcachedServerAddress $ oxSmtpConfiguration $ oxTrustStoreCert $ oxTrustStoreConf
+  $ oxIDPAuthentication $ oxLogViewerConfig
+  $ oxSmtpConfiguration $ oxTrustStoreCert $ oxTrustStoreConf
   $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuAttribute-oid NAME 'gluuAttribute' SUP top STRUCTURAL MUST objectclass MAY 

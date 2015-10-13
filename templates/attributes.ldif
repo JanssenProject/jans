@@ -765,7 +765,7 @@ description: Work Telephone Number
 displayName: Work Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
-gluuAttributeName: workTelephoneNumber
+gluuAttributeName: telephoneNumber
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
