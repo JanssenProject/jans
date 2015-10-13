@@ -69,6 +69,8 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
+    public static final String DEFAULT_AUTH_MODE_NAME = "defaultAuthModeName";
+
     public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
     public static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
@@ -104,9 +106,11 @@ public class AppInitializer {
     	createConnectionProvider();
         configurationFactory.create();
 
-        List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
-
+        LdapEntryManager localLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true);
+        List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
+        
+        setDefaultAuthenticationMethod(localLdapEntryManager);
 
         addSecurityProviders();
         PythonService.instance().initPythonInterpreter();
@@ -168,11 +172,14 @@ public class AppInitializer {
 	}
 
 	private void reloadConfiguration() {
-		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs((LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true));
+        LdapEntryManager localLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true);
+		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
 			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
 		}
+
+		setDefaultAuthenticationMethod(localLdapEntryManager);
 	}
 
 	private void addSecurityProviders() {
@@ -365,22 +372,8 @@ public class AppInitializer {
 		return sb.toString();
 	}
 
-	public List<oxIDPAuthConf> loadLdapIdpAuthConfigs(LdapEntryManager localLdapEntryManager) {
-		String baseDn = ConfigurationFactory.instance().getBaseDn().getAppliance();
-		String applianceInum = ConfigurationFactory.instance().getConfiguration().getApplianceInum();
-		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
-			return null;
-		}
-
-		String applianceDn = String.format("inum=%s,%s", applianceInum, baseDn);
-
-		GluuAppliance appliance = null;
-		try {
-			appliance = localLdapEntryManager.find(GluuAppliance.class, applianceDn);
-		} catch (LdapMappingException ex) {
-			log.error("Failed to load appliance entry from Ldap", ex);
-			return null;
-		}
+	private List<oxIDPAuthConf> loadLdapIdpAuthConfigs(LdapEntryManager localLdapEntryManager) {
+		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxIDPAuthentication");
 
 		if ((appliance == null) || (appliance.getOxIDPAuthentication() == null)) {
 			return null;
@@ -402,6 +395,37 @@ public class AppInitializer {
 		return configurations;
 	}
 
+	private void setDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
+		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
+
+		String authenticationMode = null;
+		if (appliance != null) {
+			authenticationMode = appliance.getAuthenticationMode();
+		}
+
+		Contexts.getApplicationContext().set(DEFAULT_AUTH_MODE_NAME, authenticationMode);
+	}
+
+	private GluuAppliance loadAppliance(LdapEntryManager localLdapEntryManager, String ... ldapReturnAttributes) {
+		String baseDn = ConfigurationFactory.instance().getBaseDn().getAppliance();
+		String applianceInum = ConfigurationFactory.instance().getConfiguration().getApplianceInum();
+		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
+			return null;
+		}
+
+		String applianceDn = String.format("inum=%s,%s", applianceInum, baseDn);
+
+		GluuAppliance appliance = null;
+		try {
+			appliance = localLdapEntryManager.find(GluuAppliance.class, applianceDn, ldapReturnAttributes);
+		} catch (LdapMappingException ex) {
+			log.error("Failed to load appliance entry from Ldap", ex);
+			return null;
+		}
+
+		return appliance;
+	}
+
 	public GluuLdapConfiguration loadLdapAuthConfig(oxIDPAuthConf configuration) {
 		if (configuration == null) {
 			return null;
@@ -420,7 +444,7 @@ public class AppInitializer {
 		return null;
 	}
 
-	public List<GluuLdapConfiguration> loadLdapAuthConfigs(LdapEntryManager localLdapEntryManager) {
+	private List<GluuLdapConfiguration> loadLdapAuthConfigs(LdapEntryManager localLdapEntryManager) {
 		List<GluuLdapConfiguration> ldapAuthConfigs = new ArrayList<GluuLdapConfiguration>();
 
 		List<oxIDPAuthConf> ldapIdpAuthConfigs = loadLdapIdpAuthConfigs(localLdapEntryManager);

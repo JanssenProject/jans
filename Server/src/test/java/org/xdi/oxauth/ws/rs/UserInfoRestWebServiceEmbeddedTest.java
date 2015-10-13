@@ -21,10 +21,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -34,7 +31,6 @@ import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -46,7 +42,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version August 21, 2015
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -67,9 +63,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     private String clientSecret2;
     private String clientSecret3;
 
-    @Parameters({"registerPath", "redirectUris"})
+    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri"})
     @Test
-    public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+    public void dynamicClientRegistration(final String registerPath, final String redirectUris,
+                                          final String sectorIdentifierUri) throws Exception {
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.POST, registerPath) {
@@ -87,6 +84,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);

@@ -33,6 +33,16 @@
           </layout>
    </appender>
 
+    <appender name="OX_SCRIPT_LOG_FILE" class="org.apache.log4j.DailyRollingFileAppender">
+         <param name="File" value="${catalina.home}/logs/oxauth_script.log"/>
+         <param name="DatePattern" value="'.'yyyy-MM-dd"/>
+
+         <layout class="org.apache.log4j.PatternLayout">
+              <!-- The default pattern: Date Priority [Category] (Thread) Message\n -->
+              <param name="ConversionPattern" value="%d %-5p [%c{6}] (%t) %m%n"/>
+          </layout>
+   </appender>
+
     <!-- ############### oxAuth #################  -->
     <category name="org.xdi.oxauth">
         <priority value="TRACE"/>
@@ -145,6 +155,21 @@
     <logger name="org.xdi.oxauth.service.status.ldap" additivity="false">
         <level value="DEBUG"/>
         <appender-ref ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
+    </logger>
+
+    <logger name="org.xdi.service.PythonService" additivity="false">
+        <level value="DEBUG"/>
+        <appender-ref ref="OX_SCRIPT_LOG_FILE" />
+    </logger>
+
+    <logger name="org.xdi.service.custom.script" additivity="false">
+        <level value="DEBUG"/>
+        <appender-ref ref="OX_SCRIPT_LOG_FILE" />
+    </logger>
+
+    <logger name="org.xdi.oxauth.service.custom" additivity="false">
+        <level value="DEBUG"/>
+        <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
     <root>

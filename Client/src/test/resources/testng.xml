@@ -16,6 +16,13 @@
         </classes>
     </test>
 
+    <!-- Authorization Response Mode -->
+    <test name="Authorization Response Mode (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizationResponseModeHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Authorize test -->
     <test name="Authorize test (HTTP)" enabled="true">
         <classes>

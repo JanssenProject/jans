@@ -7,10 +7,12 @@
 package org.xdi.oxauth.model.common;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013
@@ -23,20 +25,29 @@ public class User extends SimpleUser {
 
 	public void setAttribute(String attributeName, String attributeValue) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValue);
-		getCustomAttributes().remove(attribute);
+		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
 	public void setAttribute(String attributeName, String[] attributeValues) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, Arrays.asList(attributeValues));
-		getCustomAttributes().remove(attribute);
+		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
 	public void setAttribute(String attributeName, List<String> attributeValues) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValues);
-		getCustomAttributes().remove(attribute);
+		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
+	}
+	
+	public void removeAttribute(String attributeName) {
+		for (Iterator<CustomAttribute> it = getCustomAttributes().iterator(); it.hasNext();) {
+			if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
+				it.remove();
+				break;
+			}
+		}
 	}
 
 }

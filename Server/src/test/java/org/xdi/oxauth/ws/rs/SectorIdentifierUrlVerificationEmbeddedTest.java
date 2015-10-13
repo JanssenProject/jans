@@ -6,24 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -38,14 +20,31 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for Sector Identifier URL Verification (embedded)
  *
- * @author Javier Rojas Blum Date: 09.26.2012
+ * @author Javier Rojas Blum
+ * @version August 21, 2015
  */
 public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
@@ -65,10 +64,16 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
                 try {
                     super.prepareRequest(request);
 
+                    List<ResponseType> responseTypes = Arrays.asList(
+                            ResponseType.CODE,
+                            ResponseType.ID_TOKEN);
+
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+                    registerRequest.setResponseTypes(responseTypes);
                     registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -117,17 +122,16 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.CODE);
-                List<String> scopes = new ArrayList<String>();
-                scopes.add("openid");
-                scopes.add("profile");
-                scopes.add("address");
-                scopes.add("email");
+                List<ResponseType> responseTypes = Arrays.asList(
+                        ResponseType.CODE,
+                        ResponseType.ID_TOKEN);
+                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+                String state = UUID.randomUUID().toString();
+                String nonce = UUID.randomUUID().toString();
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, null);
-                authorizationRequest.setState("af0ifjsldkj");
+                        responseTypes, clientId1, scopes, redirectUri, nonce);
+                authorizationRequest.setState(state);
                 authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
@@ -147,16 +151,34 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
                 try {
                     URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getQuery(), "Query string is null");
+                    assertNotNull(uri.getFragment());
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                     assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The ID Token is null");
                     assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
                     assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+
+                    String idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
+
+                    Jwt jwt = Jwt.parse(idToken);
+                    assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+                    assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
+                } catch (InvalidJwtException e) {
+                    e.printStackTrace();
+                    fail("Invalid JWT");
                 }
             }
         }.run();

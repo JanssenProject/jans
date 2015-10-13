@@ -11,7 +11,7 @@ oxConfigurationProperty: {"value1":"gplus_deployment_type","value2":"enroll"
 oxConfigurationProperty: {"value1":"gplus_local_attributes_list","value2":"u
  id, mail, givenName, sn, cn, preferredLanguage","description":""}
 oxConfigurationProperty: {"value1":"gplus_remote_attributes_list","value2":"
- email, email, name, family_name, given_name, locale","description":""}
+ email, email, given_name, family_name, given_name, locale","description":""}
 oxLevel: 22
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description
  ":""}
