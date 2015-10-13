@@ -2026,7 +2026,7 @@ attributeTypes: ( oxSectorIdentifierURI-oid NAME 'oxSectorIdentifierURI'
 objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
    ( oxId $ oxSectorIdentifierURI )
     X-ORIGIN 'Gluu created objectclass' )
-objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY 
+objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
   $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
@@ -2191,7 +2191,7 @@ objectclasses: ( oxAuthUmaResourceSetPermission-oid NAME 'oxAuthUmaResourceSetPe
 objectclasses: ( oxAuthGrant-oid NAME 'oxAuthGrant' SUP top STRUCTURAL MUST objectclass MAY
    ( oxAuthGrantId )
     X-ORIGIN 'Gluu created objectclass' )
-objectclasses: ( oxAuthToken-oid NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY 
+objectclasses: ( oxAuthToken-oid NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY
  ( createTimestamp $ oxAuthAuthenticationTime $ oxAuthAuthorizationCode
   $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
   $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId
