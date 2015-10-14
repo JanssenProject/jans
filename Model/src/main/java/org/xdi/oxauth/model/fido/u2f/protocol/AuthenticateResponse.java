@@ -49,7 +49,7 @@ public class AuthenticateResponse implements Serializable {
 		this.clientData = clientData;
 		this.signatureData = signatureData;
 		this.keyHandle = keyHandle;
-		clientDataRef = new ClientData(clientData);
+		this.clientDataRef = new ClientData(clientData);
 	}
 
 	public ClientData getClientData() {
