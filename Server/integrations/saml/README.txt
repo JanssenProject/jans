@@ -1,4 +1,4 @@
-This is SAML person authentication modules for oxAuth. It allows to configure oxAuth to use 2 factor authentication for interactive user logins.
+This authentication interception script configures oxAuth to use an external SAML identity provider. If you are using Asimba to consolidate many inbound SAML IDPs, then Asimba is the IDP you will configure here. One advantage of this approach is that it also enables you to enroll users--meaning you can create a local ldap entry for each new inbound SAML user. This is handy because it enables you to use either SAML or OpenID Connect API's that connect to the Gluu Server. Confusing? Yes! Handy... yes, yes! 
 
 This module has next properties:
 1) saml_certificate_file - It's path to file which contains public IdP certificate in.
@@ -60,6 +60,6 @@ This module has next properties:
     ...
     return True/False
 
-    Saml scripts calls init method at initialization. And calls postLogin after user log in order to execute additional custom workflow.
+    SAML scripts calls init method at initialization, and calls postLogin after to execute additional custom workflow.
 12) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
    Example: false
