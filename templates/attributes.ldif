@@ -316,7 +316,6 @@ gluuAttributeName: iname
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
-gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: iname
 gluuStatus: active
@@ -499,7 +498,6 @@ displayName: i-number
 gluuAttributeName: inum
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
-gluuAttributeViewType: user
 gluuAttributeViewType: admin
 gluuStatus: active
 inum: %(inumOrg)s!0005!29DA
