@@ -77,12 +77,15 @@ public class CheckIdTokenOperation extends BaseOperation {
 
             final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-            if (new Date().after(expiresAt)) {
+            final Date now = new Date();
+            if (now.after(expiresAt)) {
+                LOG.trace("ID Token is expired. (It is after " + now + ").");
                 return false;
             }
 
             // 1. validate issuer
             if (!issuer.equals(p_discoveryResponse.getIssuer())) {
+                LOG.trace("ID Token issuer is invalid.");
                 return false;
             }
 
@@ -91,7 +94,11 @@ public class CheckIdTokenOperation extends BaseOperation {
 
             final RSAPublicKey publicKey = getRSAPublicKey(jwkUrl, kid);
             final RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
-            return rsaSigner.validate(jwt);
+            final boolean signature = rsaSigner.validate(jwt);
+            if (!signature) {
+                LOG.trace("ID Token signature is invalid.");
+            }
+            return signature;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return false;
