@@ -34,6 +34,7 @@
     <module>oxd-client</module>
     <module>oxd-server</module>
     <module>oxd-ping</module>
+    <module>oxd-rp-client</module>
   </modules>
 
   <repositories>
