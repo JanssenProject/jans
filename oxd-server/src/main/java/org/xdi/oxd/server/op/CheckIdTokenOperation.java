@@ -68,11 +68,11 @@ public class CheckIdTokenOperation extends BaseOperation {
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse p_discoveryResponse) {
+    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
         try {
             //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
-            final String jwkUrl = p_discoveryResponse.getJwksUri();
+            final String jwkUrl = discoveryResponse.getJwksUri();
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 
             final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
@@ -84,8 +84,8 @@ public class CheckIdTokenOperation extends BaseOperation {
             }
 
             // 1. validate issuer
-            if (!issuer.equals(p_discoveryResponse.getIssuer())) {
-                LOG.trace("ID Token issuer is invalid.");
+            if (!issuer.equals(discoveryResponse.getIssuer())) {
+                LOG.trace("ID Token issuer is invalid. Token issuer: " + issuer + ", discovery issuer: " + discoveryResponse.getIssuer());
                 return false;
             }
 
