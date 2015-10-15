@@ -37,12 +37,12 @@ public class CommandClient {
     /**
      * Constructor.
      *
-     * @param p_host host
-     * @param p_port port
+     * @param host host
+     * @param port port
      * @throws IOException throws if unable to connect by specified host and port
      */
-    public CommandClient(String p_host, int p_port) throws IOException {
-        m_client = new TransportClient("localhost", 8099);
+    public CommandClient(String host, int port) throws IOException {
+        m_client = new TransportClient(host, port);
     }
 
     /**
