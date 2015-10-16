@@ -215,6 +215,7 @@ class Setup(object):
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
+        self.network = "/etc/sysconfig/network"
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -257,7 +258,8 @@ class Setup(object):
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
-                     self.asimba_selector_configuration: True
+                     self.asimba_selector_configuration: True,
+                     self.network: False
                      }
 
     def __repr__(self):
@@ -1391,6 +1393,9 @@ class Setup(object):
         self.run(['/bin/hostname', self.hostname])
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+
+        if self.os_type in ['centos', 'redhat', 'fedora']:
+            self.copyFile("%s/network" % self.outputFolder, self.network)
 
     def writeLdapPW(self):
         try:
