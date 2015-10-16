@@ -204,15 +204,6 @@ ou: token
 
 ################################
 
-# oxTrust links for Invitation code enrollment
-# should perhaps be under ou=oxTrust,inum=<appliance-inum>,ou=applications,o=gluu
-dn: ou=links,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalunit
-ou: links
-
-################################
-
 # U2F data - LEVEL 3
 # Perhaps this should be under ou=u2f,o=<org-inum>,o=gluu
 dn: ou=u2f,o=%(inumOrg)s,o=gluu

@@ -1283,12 +1283,6 @@ attributeTypes: ( oxId-oid NAME 'oxId'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxInviteCode-oid NAME 'oxInviteCode'
-  DESC 'Invite Code'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxLastAccessTime-oid NAME 'oxLastAccessTime'
   DESC 'Last access time'
   ORDERING generalizedTimeOrderingMatch
@@ -2030,7 +2024,7 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
  ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
   $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
   $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
-  $ oxInviteCode $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail
+  $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail
   $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue
   $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion
   $ oxTrustNameFormatted $ oxTrustPhoneValue
@@ -2069,7 +2063,7 @@ objectclasses: ( gluuAppliance-oid NAME 'gluuAppliance' SUP top STRUCTURAL MUST 
   $ gluuPaidUntil $ gluuPaymentProcessorTimestamp $ gluuPersonCount 
   $ gluuPrivate $ gluuPublishIdpMetadata $ gluuResizeInitiated $ gluuSPTR $ gluuScimEnabled
   $ gluuShibAssertionsIssued $ gluuShibFailedAuth $ gluuShibSecurityEvents
-  $ gluuShibSuccessfulAuths $ gluuSmtpFromEmailAddress $ gluuSmtpFromName
+  $ gluuShibSuccessfulAuths $ oxTrustEmail $ gluuSmtpFromEmailAddress $ gluuSmtpFromName
   $ gluuSmtpHost $ gluuSmtpPassword $ gluuSmtpPort $ gluuSmtpRequiresAuthentication
   $ gluuSmtpRequiresSsl $ gluuSmtpUserName $ gluuSslExpiry $ gluuStatus 
   $ gluuSystemUptime $ gluuTargetRAM $ gluuUrl $ gluuVDSenabled $ gluuVDSstatus
