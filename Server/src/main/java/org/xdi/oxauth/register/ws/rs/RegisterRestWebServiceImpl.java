@@ -58,7 +58,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 1, 2015
+ * @version October 16, 2015
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -171,6 +171,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         Date currentTime = Calendar.getInstance().getTime();
                         client.setLastAccessTime(currentTime);
                         client.setLastLogonTime(currentTime);
+
+                        boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
+                        client.setPersistClientAuthorizations(persistClientAuthorizations);
 
                         clientService.persist(client);
 
