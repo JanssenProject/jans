@@ -22,7 +22,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 1, 2015
+ * @version October 16, 2015
  */
 @XmlRootElement(name = "configuration")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -95,6 +95,7 @@ public class Configuration {
     private String oxId;
     private Boolean dynamicRegistrationEnabled;
     private int dynamicRegistrationExpirationTime;
+    private Boolean dynamicRegistrationPersistClientAuthorizations;
     private Boolean trustedClientEnabled;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
@@ -879,6 +880,15 @@ public class Configuration {
 
     public void setDynamicRegistrationExpirationTime(int dynamicRegistrationExpirationTime) {
         this.dynamicRegistrationExpirationTime = dynamicRegistrationExpirationTime;
+    }
+
+    @XmlElement(name = "dynamic-registration-persist-client-authorizations")
+    public Boolean getDynamicRegistrationPersistClientAuthorizations() {
+        return dynamicRegistrationPersistClientAuthorizations;
+    }
+
+    public void setDynamicRegistrationPersistClientAuthorizations(Boolean dynamicRegistrationPersistClientAuthorizations) {
+        this.dynamicRegistrationPersistClientAuthorizations = dynamicRegistrationPersistClientAuthorizations;
     }
 
     @XmlElement(name = "trusted-client-enabled")
