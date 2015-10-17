@@ -24,6 +24,7 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
@@ -54,7 +55,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version October 16, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -104,6 +105,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @In
     private SessionId sessionUser;
+
+    @In
+    private ClientAuthorizationsService clientAuthorizationsService;
 
     @Override
     public Response requestAuthorizationGet(
@@ -391,6 +395,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
                                 }
 
+                                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                                if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                                        Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                    sessionUser.addPermission(clientId, true);
+                                }
                                 if (prompts.contains(Prompt.NONE) && Boolean.parseBoolean(client.getTrustedClient())) {
                                     sessionUser.addPermission(clientId, true);
                                 }
