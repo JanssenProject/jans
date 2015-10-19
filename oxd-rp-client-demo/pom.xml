@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-rp-client-demo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>3.0.5-SNAPSHOT</version>
     <name>oxD RP Client Demo</name>
     <url>http://ox.gluu.org</url>
@@ -18,7 +18,30 @@
     <build>
         <finalName>oxd-rp-client-demo</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.java</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.jpg</include>
+                    <include>**/*.gif</include>
+                    <include>**/*.png</include>
+                    <include>**/*.css</include>
+                    <include>**/*.html</include>
+                    <include>**/*.rpc</include>
+                    <include>**/*.js</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -83,6 +106,21 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.sencha.gxt</groupId>
+            <artifactId>gxt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+            <version>${gwt.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxd-client</artifactId>

@@ -23,6 +23,8 @@
     <guice.version>3.0</guice.version>
     <guava.version>13.0.1</guava.version>
     <jetty.version>9.2.13.v20150730</jetty.version>
+    <gwt.version>2.6.0</gwt.version>
+    <gxt.version>3.0.1</gxt.version>
   </properties>
 
   <prerequisites>
@@ -69,6 +71,22 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+          <groupId>com.sencha.gxt</groupId>
+          <artifactId>gxt</artifactId>
+          <version>${gxt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-user</artifactId>
+        <version>${gwt.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-servlet</artifactId>
+        <version>${gwt.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
@@ -280,6 +298,20 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>gwt-maven-plugin</artifactId>
+            <version>${gwt.version}</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>compile</goal>
+                        <!--goal>generateAsync</goal-->
+                        <goal>test</goal>
+                   </goals>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
