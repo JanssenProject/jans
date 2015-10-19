@@ -8,7 +8,7 @@
 
     <extend-property name="locale" values="en"/>
 
-    <entry-point class='org.xdi.uma.demo.rs.client.RS'/>
+    <entry-point class='org.xdi.oxd.rp.client.demo.client.Demo'/>
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>
