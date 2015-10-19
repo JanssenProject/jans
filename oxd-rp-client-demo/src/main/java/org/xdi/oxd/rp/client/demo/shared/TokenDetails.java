@@ -1,6 +1,10 @@
 package org.xdi.oxd.rp.client.demo.shared;
 
+import com.google.common.collect.Maps;
+
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -12,6 +16,7 @@ public class TokenDetails implements Serializable {
     private String code;
     private String accessToken;
     private String idToken;
+    private Map<String, List<String>> claims = Maps.newHashMap();
 
     public TokenDetails() {
     }
@@ -38,5 +43,13 @@ public class TokenDetails implements Serializable {
 
     public void setIdToken(String idToken) {
         this.idToken = idToken;
+    }
+
+    public Map<String, List<String>> getClaims() {
+        return claims;
+    }
+
+    public void setClaims(Map<String, List<String>> claims) {
+        this.claims = claims;
     }
 }

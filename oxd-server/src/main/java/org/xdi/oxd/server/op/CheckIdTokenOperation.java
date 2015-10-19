@@ -3,6 +3,8 @@
  */
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
@@ -47,7 +49,16 @@ public class CheckIdTokenOperation extends BaseOperation {
         try {
             final CheckIdTokenParams params = asParams(CheckIdTokenParams.class);
             if (params != null) {
-                final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+                OpenIdConfigurationResponse discoveryResponse = null;
+
+                if (!Strings.isNullOrEmpty(params.getDiscoveryUrl())) {
+                    discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+                }
+
+                if (!Strings.isNullOrEmpty(params.getOxdId())) {
+                    discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse();
+                }
+                Preconditions.checkNotNull(discoveryResponse, "Failed to identify discovery response, params: " + params);
 
                 final String idToken = params.getIdToken();
                 final Jwt jwt = Jwt.parse(idToken);

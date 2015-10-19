@@ -4,8 +4,11 @@ import com.google.common.base.Preconditions;
 import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.apache.log4j.Logger;
+import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.rp.client.HrefDetails;
 import org.xdi.oxd.rp.client.RpClient;
 import org.xdi.oxd.rp.client.RpClientFactory;
+import org.xdi.oxd.rp.client.RpClientUtils;
 import org.xdi.oxd.rp.client.demo.client.Service;
 import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
@@ -59,7 +62,23 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
 
     @Override
     public TokenDetails getTokenDetails(String href) {
-        return null;
+        final HrefDetails hrefDetails = RpClientUtils.parseHref(href);
+
+        if (hrefDetails.hasIdToken()) {
+            CheckIdTokenResponse validationResponse = rpClient.validateIdToken(hrefDetails.getIdToken());
+
+            TokenDetails tokenDetails = new TokenDetails();
+            if (validationResponse.isActive()) {
+                tokenDetails.setAccessToken(hrefDetails.getAccessToken());
+                tokenDetails.setIdToken(hrefDetails.getIdToken());
+                tokenDetails.setCode(hrefDetails.getCode());
+                tokenDetails.setClaims(validationResponse.getClaims());
+            }
+            return tokenDetails;
+        }
+
+        // for now unsupported operation, but it's as easy as request tokens by code
+        throw new UnsupportedOperationException();
     }
 
     @Override
