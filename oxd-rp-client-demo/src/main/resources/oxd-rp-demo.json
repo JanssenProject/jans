@@ -1,5 +1,5 @@
 {
     "oxd_host":"localhost",
     "oxd_port": 8099,
-    "site_public_url":"http://ox.gluu.org/oxdRpDemo"
+    "site_public_url":"https://ox.gluu.org/oxdRpDemo"
 }
