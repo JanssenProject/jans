@@ -70,6 +70,9 @@ public class LoginController {
     }
 
     public static void loadTokenDetails() {
+        if (tokenDetails != null && tokenDetails.getAccessToken() != null) {
+            return;
+        }
         if (!hrefHasCodeOrToken()) {
             return;
         }
