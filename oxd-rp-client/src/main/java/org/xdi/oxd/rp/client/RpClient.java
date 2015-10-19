@@ -19,4 +19,6 @@ public interface RpClient {
     String getOxdId();
 
     void close();
+
+    String getAuthorizationUrl();
 }

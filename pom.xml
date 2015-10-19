@@ -114,6 +114,11 @@
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
+                <artifactId>oxd-rp-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xdi</groupId>
                 <artifactId>oxd-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
