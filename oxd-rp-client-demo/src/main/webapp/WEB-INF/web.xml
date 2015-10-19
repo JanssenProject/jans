@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+    <display-name>oxD RP Client Demo</display-name>
+
+    <!--<context-param>-->
+        <!--<param-name>resteasy.servlet.mapping.prefix</param-name>-->
+        <!--<param-value>/ws</param-value>-->
+    <!--</context-param>-->
+
+    <!--<servlet>-->
+        <!--<servlet-name>Resteasy</servlet-name>-->
+        <!--<servlet-class>-->
+            <!--org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher-->
+        <!--</servlet-class>-->
+        <!--<init-param>-->
+            <!--<param-name>resteasy.scan</param-name>-->
+            <!--<param-value>true</param-value>-->
+        <!--</init-param>-->
+        <!--<init-param>-->
+            <!--<param-name>resteasy.scan.resources</param-name>-->
+            <!--<param-value>true</param-value>-->
+        <!--</init-param>-->
+        <!--<init-param>-->
+            <!--<param-name>resteasy.scan.providers</param-name>-->
+            <!--<param-value>false</param-value>-->
+        <!--</init-param>-->
+    <!--</servlet>-->
+    <!--<servlet-mapping>-->
+        <!--<servlet-name>Resteasy</servlet-name>-->
+        <!--<url-pattern>/ws/*</url-pattern>-->
+    <!--</servlet-mapping>-->
+
+    <servlet>
+        <servlet-name>rpServiceServlet</servlet-name>
+        <servlet-class>org.xdi.oxd.rp.client.demo.server.ServiceImpl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>rpServiceServlet</servlet-name>
+        <url-pattern>/rp/rpService</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>oxd-rp-demo.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

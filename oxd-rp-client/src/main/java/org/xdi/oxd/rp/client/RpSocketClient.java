@@ -3,7 +3,9 @@ package org.xdi.oxd.rp.client;
 import org.xdi.oxd.client.CommandClient;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
@@ -60,5 +62,17 @@ public class RpSocketClient implements RpClient {
     @Override
     public void close() {
         client.close();
+    }
+
+    @Override
+    public String getAuthorizationUrl() {
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(getOxdId());
+
+        final Command command = new Command(CommandType.GET_AUTHORIZATION_URL);
+        command.setParamsObject(commandParams);
+
+        final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
+        return resp.getAuthorizationUrl();
     }
 }

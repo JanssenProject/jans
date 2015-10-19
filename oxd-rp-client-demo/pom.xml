@@ -127,6 +127,10 @@
         </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
+            <artifactId>oxd-rp-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xdi</groupId>
             <artifactId>oxauth-client</artifactId>
             <scope>test</scope>
         </dependency>
