@@ -39,8 +39,11 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
 
             // make sure oxd id is not blank
             Preconditions.checkState(notEmpty(rpClient.getOxdId()));
+            LOG.info("Demo Servlet is started successfully.");
+            LOG.info("Site is registered at oxD Server, oxd id : " + rpClient.getOxdId());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 
