@@ -8,7 +8,6 @@ gluuOrgProfileMgt: disabled
 gluuManageIdentityPermission: enabled
 gluuFederationHostingEnabled: disabled
 gluuVdsCacheRefreshEnabled: disabled
-oxClusterType: Disabled
 gluuScimEnabled: enabled
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
