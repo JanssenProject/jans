@@ -5,11 +5,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.container.Viewport;
+import org.xdi.oxd.rp.client.demo.client.ui.Main;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -40,7 +40,7 @@ public class Demo implements EntryPoint {
     }
 
     private Widget createContent() {
-        return new HTML("Hi-ho!");
+        return new Main();
     }
 
     public static ServiceAsync getService() {

@@ -2,6 +2,7 @@ package org.xdi.oxd.rp.client.demo.client;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -11,4 +12,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface Service extends RemoteService {
 
     String getAuthorizationUrl();
+
+    TokenDetails getTokenDetails(String href);
 }

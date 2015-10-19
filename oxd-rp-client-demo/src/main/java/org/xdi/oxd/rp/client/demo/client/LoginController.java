@@ -4,6 +4,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.xdi.oxd.rp.client.demo.client.event.LoginEvent;
+import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 import java.util.Date;
 
@@ -40,47 +41,44 @@ public class LoginController {
 
     public static void login() {
         if (!hasAccessToken()) {
-            final String accessToken = parseCode();
-            if (accessToken != null && accessToken.length() > 0 && !LoginController.hasAccessToken()) {
-                LoginController.setLoginCookie(accessToken);
-                Demo.getEventBus().fireEvent(new LoginEvent(true));
-                return;
-            }
 
-            Demo.getService().getAuthorizationUrl(new AsyncCallback<String>() {
-                public void onFailure(Throwable caught) {
-                    GwtUtils.showError("Unable to login.");
-                }
-
-                public void onSuccess(String result) {
-                    if (result != null && result.length() > 0) {
-                        Window.Location.assign(result);
-                    } else {
-                        GwtUtils.showInformation("Unable to login.");
+            if (hrefHasCodeOrToken()) {
+                Demo.getService().getTokenDetails(Window.Location.getHref(), new AsyncCallback<TokenDetails>() {
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        GwtUtils.showError("Failed to get token details. " + throwable.getMessage());
                     }
-                }
-            });
+
+                    @Override
+                    public void onSuccess(TokenDetails tokenDetails) {
+                        final String accessToken = tokenDetails.getAccessToken();
+                        if (accessToken != null && accessToken.length() > 0 && !LoginController.hasAccessToken()) {
+                            LoginController.setLoginCookie(accessToken);
+                            Demo.getEventBus().fireEvent(new LoginEvent(true));
+                        }
+                    }
+                });
+            } else {
+                Demo.getService().getAuthorizationUrl(new AsyncCallback<String>() {
+                    public void onFailure(Throwable caught) {
+                        GwtUtils.showError("Unable to login.");
+                    }
+
+                    public void onSuccess(String result) {
+                        if (result != null && result.length() > 0) {
+                            Window.Location.assign(result);
+                        } else {
+                            GwtUtils.showInformation("Unable to login.");
+                        }
+                    }
+                });
+            }
         }
     }
 
-    private static String parseCode() {
-        String hashString = Window.Location.getHash();
-
-        if (hashString != null && hashString.trim().length() > 0) {
-            if (hashString.startsWith("#")) {
-                hashString = hashString.substring(1); // cut # sign
-            }
-            final String[] split = hashString.split("&");
-            if (split != null && split.length > 0) {
-                for (String keyValue : split) {
-                    final String[] splitKeyValue = keyValue.split("=");
-                    if (splitKeyValue != null && splitKeyValue.length == 2 && splitKeyValue[0].trim().equals("access_token")) {
-                        return splitKeyValue[1];
-                    }
-                }
-            }
-        }
-        return "";
+    private static boolean hrefHasCodeOrToken() {
+        final String href = Window.Location.getHref();
+        return href.contains("&code=") || href.contains("&access_token=");
     }
 
     public static String getAccessToken() {
