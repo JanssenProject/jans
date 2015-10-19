@@ -5,8 +5,6 @@
     <inherits name="com.sencha.gxt.ui.GXT"/>
     <inherits name="com.google.gwt.i18n.CldrLocales"/>
     <inherits name='com.google.gwt.i18n.I18N'/>
-    <inherits name='org.xdi.uma.demo.common.UmaDemoCommon'/>
-    <inherits name='org.xdi.gwt.oxGwt'/>
 
     <extend-property name="locale" values="en"/>
 
