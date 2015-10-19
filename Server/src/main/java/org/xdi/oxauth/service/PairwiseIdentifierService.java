@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 21, 2015
+ * @version October 16, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("pairwiseIdentifierService")
@@ -57,7 +57,7 @@ public class PairwiseIdentifierService {
 
         List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
         if (entries != null && !entries.isEmpty()) {
-            // if more then one scope then it's problem, non-deterministic behavior, id must be unique
+            // if more then one entry then it's problem, non-deterministic behavior, id must be unique
             if (entries.size() > 1) {
                 log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifierUri);
                 for (PairwiseIdentifier pairwiseIdentifier : entries) {

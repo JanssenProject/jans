@@ -32,6 +32,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
@@ -47,7 +48,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 1, 2015
+ * @version October 16, 2015
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -79,6 +80,9 @@ public class AuthorizeAction {
 
     @In
     private AuthenticationService authenticationService;
+
+    @In
+    private ClientAuthorizationsService clientAuthorizationsService;
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
@@ -237,8 +241,12 @@ public class AuthorizeAction {
                 }
 
                 if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    // if trusted client = true, then skip authorization page and grant access directly
-                    if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) {
+                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                        permissionGranted(session);
+                    } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                         if (Boolean.parseBoolean(client.getTrustedClient()) && !prompts.contains(Prompt.CONSENT)) {
                             permissionGranted(session);
                         }
@@ -575,6 +583,11 @@ public class AuthorizeAction {
 
     public void permissionGranted(SessionId session) {
         try {
+            final User user = userService.getUserByDn(session.getUserDn());
+            final Client client = clientService.getClient(clientId);
+            final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
+            clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
+
             session.addPermission(clientId, true);
             sessionIdService.updateSessionId(session);
 
