@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.xdi.oxd.rp.client.RpClient;
 import org.xdi.oxd.rp.client.RpClientFactory;
 import org.xdi.oxd.rp.client.demo.client.Service;
+import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -54,6 +55,11 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     @Override
     public String getAuthorizationUrl() {
         return rpClient.getAuthorizationUrl();
+    }
+
+    @Override
+    public TokenDetails getTokenDetails(String href) {
+        return null;
     }
 
     @Override
