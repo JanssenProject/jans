@@ -272,6 +272,7 @@
     <dynamic-registration-enabled>true</dynamic-registration-enabled>
     <!-- Value in seconds or 0 if they do not expire -->
     <dynamic-registration-expiration-time>${config.client.dynamic-registration-expiration-time}</dynamic-registration-expiration-time>
+    <dynamic-registration-persist-client-authorizations>true</dynamic-registration-persist-client-authorizations>
 
     <trusted-client-enabled>true</trusted-client-enabled>
 
