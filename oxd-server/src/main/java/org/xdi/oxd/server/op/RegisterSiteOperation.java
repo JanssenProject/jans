@@ -96,8 +96,14 @@ public class RegisterSiteOperation extends BaseOperation {
         registerClient.setRequest(createRegisterClientRequest());
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
-        if (response != null && !Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
-            return response;
+        if (response != null) {
+            if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
+                return response;
+            } else {
+                LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
+            }
+        } else {
+            LOG.error("RegisterClient response is null.");
         }
         throw new RuntimeException("Failed to register client for site.");
     }
@@ -134,7 +140,7 @@ public class RegisterSiteOperation extends BaseOperation {
             redirectUris.addAll(params.getRedirectUris());
         }
 
-        final RegisterRequest request = new RegisterRequest(applicationType, clientName != null ? clientName : "", Lists.newArrayList(redirectUris));
+        final RegisterRequest request = new RegisterRequest(applicationType, clientName, Lists.newArrayList(redirectUris));
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setPostLogoutRedirectUris(Lists.newArrayList(params.getLogoutRedirectUri()));

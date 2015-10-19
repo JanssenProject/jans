@@ -18,13 +18,6 @@
             <param name="ConversionPattern" value="%d %-5p [%c] %m%n"/>
         </layout>
     </appender>
-    <appender name="IN_MEMORY" class="org.xdi.uma.demo.common.server.InMemoryAppender">
-        <param name="Size" value="1000"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <!-- The default pattern: Date Priority [Category] Message\n -->
-            <param name="ConversionPattern" value="%d %-5p [%c] %m%n"/>
-        </layout>
-    </appender>
 
     <category name="org.xdi.oxd.rp.client.demo">
         <priority value="TRACE"/>
@@ -42,7 +35,6 @@
         <priority value="INFO"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="IN_MEMORY"/>
     </root>
 
 </log4j:configuration>
