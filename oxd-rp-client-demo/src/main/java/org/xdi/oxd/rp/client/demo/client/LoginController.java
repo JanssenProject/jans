@@ -9,6 +9,8 @@ import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 import java.util.Date;
 
 /**
+ * Just sample, don't make login data static.
+ *
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 19/10/2015
  */
@@ -25,9 +27,14 @@ public class LoginController {
      */
     public static long ONE_DAY_IN_MILIS = (long) 1000.0 * 60 * 60 * 24;
 
+    private static TokenDetails tokenDetails;
+
     private LoginController() {
     }
 
+    public static TokenDetails getTokenDetails() {
+        return tokenDetails;
+    }
 
     /**
      * Sets login cookie.
@@ -43,21 +50,7 @@ public class LoginController {
         if (!hasAccessToken()) {
 
             if (hrefHasCodeOrToken()) {
-                Demo.getService().getTokenDetails(Window.Location.getHref(), new AsyncCallback<TokenDetails>() {
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        GwtUtils.showError("Failed to get token details. " + throwable.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(TokenDetails tokenDetails) {
-                        final String accessToken = tokenDetails.getAccessToken();
-                        if (accessToken != null && accessToken.length() > 0 && !LoginController.hasAccessToken()) {
-                            LoginController.setLoginCookie(accessToken);
-                            Demo.getEventBus().fireEvent(new LoginEvent(true));
-                        }
-                    }
-                });
+                loadTokenDetails();
             } else {
                 Demo.getService().getAuthorizationUrl(new AsyncCallback<String>() {
                     public void onFailure(Throwable caught) {
@@ -74,6 +67,28 @@ public class LoginController {
                 });
             }
         }
+    }
+
+    public static void loadTokenDetails() {
+        if (!hrefHasCodeOrToken()) {
+            return;
+        }
+        Demo.getService().getTokenDetails(Window.Location.getHref(), new AsyncCallback<TokenDetails>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                GwtUtils.showError("Failed to get token details. " + throwable.getMessage());
+            }
+
+            @Override
+            public void onSuccess(TokenDetails tokenDetails) {
+                final String accessToken = tokenDetails.getAccessToken();
+                if (accessToken != null && accessToken.length() > 0 && !LoginController.hasAccessToken()) {
+                    LoginController.tokenDetails = tokenDetails;
+                    //LoginController.setLoginCookie(accessToken);
+                    Demo.getEventBus().fireEvent(new LoginEvent(tokenDetails));
+                }
+            }
+        });
     }
 
     private static boolean hrefHasCodeOrToken() {
@@ -97,7 +112,8 @@ public class LoginController {
 
     public static void logout() {
         Cookies.removeCookie(ACCESS_TOKEN_COOKIE_NAME);
-        Demo.getEventBus().fireEvent(new LoginEvent(false));
+        LoginController.tokenDetails = null;
+        Demo.getEventBus().fireEvent(new LoginEvent(null));
     }
 
 }

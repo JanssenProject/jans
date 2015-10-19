@@ -1,5 +1,6 @@
 package org.xdi.oxd.rp.client;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
@@ -52,4 +53,13 @@ public class HrefDetails implements Serializable {
     public void setIdToken(String idToken) {
         this.idToken = idToken;
     }
+
+    public boolean hasIdToken() {
+        return !Strings.isNullOrEmpty(idToken);
+    }
+
+    public boolean hasAccessToken() {
+        return !Strings.isNullOrEmpty(accessToken);
+    }
+
 }
