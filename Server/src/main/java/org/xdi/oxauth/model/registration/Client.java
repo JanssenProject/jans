@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version October 16, 2015
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -154,6 +154,9 @@ public class Client {
 
     @LdapAttribute(name = "oxLastLogonTime")
     private Date lastLogonTime;
+
+    @LdapAttribute(name = "oxPersistClientAuthorizations")
+    private Boolean persistClientAuthorizations;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -900,22 +903,30 @@ public class Client {
     }
 
     public Date getLastAccessTime() {
-		return lastAccessTime;
-	}
+        return lastAccessTime;
+    }
 
-	public void setLastAccessTime(Date lastAccessTime) {
-		this.lastAccessTime = lastAccessTime;
-	}
+    public void setLastAccessTime(Date lastAccessTime) {
+        this.lastAccessTime = lastAccessTime;
+    }
 
-	public Date getLastLogonTime() {
-		return lastLogonTime;
-	}
+    public Date getLastLogonTime() {
+        return lastLogonTime;
+    }
 
-	public void setLastLogonTime(Date lastLogonTime) {
-		this.lastLogonTime = lastLogonTime;
-	}
+    public void setLastLogonTime(Date lastLogonTime) {
+        this.lastLogonTime = lastLogonTime;
+    }
 
-	public List<CustomAttribute> getCustomAttributes() {
+    public Boolean getPersistClientAuthorizations() {
+        return persistClientAuthorizations;
+    }
+
+    public void setPersistClientAuthorizations(Boolean persistClientAuthorizations) {
+        this.persistClientAuthorizations = persistClientAuthorizations;
+    }
+
+    public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
