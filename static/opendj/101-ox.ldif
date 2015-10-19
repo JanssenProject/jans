@@ -1218,6 +1218,11 @@ attributeTypes: ( oxAuthenticationMode-oid NAME 'oxAuthenticationMode'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxTrustAuthenticationMode-oid NAME 'oxTrustAuthenticationMode'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxConfigurationCode-oid NAME 'oxConfigurationCode'
   DESC 'ox configuration code'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2076,7 +2081,7 @@ objectclasses: ( gluuAppliance-oid NAME 'gluuAppliance' SUP top STRUCTURAL MUST 
   $ gluuVdsCacheRefreshEnabled $ gluuVdsCacheRefreshLastUpdate $ gluuVdsCacheRefreshLastUpdateCount
   $ gluuVdsCacheRefreshPollingInterval $ gluuVdsCacheRefreshProblemCount
   $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode
-  $ oxIDPAuthentication $ oxLogViewerConfig
+  $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig
   $ oxSmtpConfiguration $ oxTrustStoreCert $ oxTrustStoreConf
   $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress )
   X-ORIGIN 'Gluu created objectclass' )
