@@ -1,6 +1,7 @@
 package org.xdi.oxd.rp.client;
 
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.response.CheckIdTokenResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 /**
@@ -21,4 +22,6 @@ public interface RpClient {
     void close();
 
     String getAuthorizationUrl();
+
+    CheckIdTokenResponse validateIdToken(String idToken);
 }

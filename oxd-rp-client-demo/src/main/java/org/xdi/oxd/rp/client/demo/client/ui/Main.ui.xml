@@ -13,6 +13,10 @@
             You are logged in.
             <g:Button ui:field="logoutButton">Logout</g:Button>
             <br/>
+            <h3>Claims:</h3>
+            <br/>
+            <g:HTML ui:field="idTokenClaims"/>
+            <br/>
             <g:Button ui:field="showUserInfoButton">User info</g:Button>
         </g:HTMLPanel>
 

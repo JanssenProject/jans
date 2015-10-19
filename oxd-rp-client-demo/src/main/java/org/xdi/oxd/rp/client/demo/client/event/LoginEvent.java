@@ -2,6 +2,7 @@ package org.xdi.oxd.rp.client.demo.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
+import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,14 +29,15 @@ public class LoginEvent extends GwtEvent<LoginEvent.Handler> {
      */
     public static final Type<Handler> TYPE = new Type<Handler>();
 
-    private boolean isLoggedIn = false;
+    private TokenDetails tokenDetails = null;
 
-    public LoginEvent(boolean loggedIn) {
-        isLoggedIn = loggedIn;
+    public LoginEvent(TokenDetails tokenDetails) {
+        this.tokenDetails = tokenDetails;
     }
 
-    public boolean isLoggedIn() {
-        return isLoggedIn;
+
+    public TokenDetails getTokenDetails() {
+        return tokenDetails;
     }
 
     @Override

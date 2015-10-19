@@ -3,8 +3,10 @@ package org.xdi.oxd.rp.client;
 import org.xdi.oxd.client.CommandClient;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.response.CheckIdTokenResponse;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
@@ -74,5 +76,17 @@ public class RpSocketClient implements RpClient {
 
         final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
         return resp.getAuthorizationUrl();
+    }
+
+    @Override
+    public CheckIdTokenResponse validateIdToken(String idToken) {
+
+        final CheckIdTokenParams params = new CheckIdTokenParams();
+        params.setOxdId(getOxdId());
+        params.setIdToken(idToken);
+
+        final Command checkIdTokenCommand = new Command(CommandType.CHECK_ID_TOKEN);
+        checkIdTokenCommand.setParamsObject(params);
+        return client.send(checkIdTokenCommand).dataAsResponse(CheckIdTokenResponse.class);
     }
 }
