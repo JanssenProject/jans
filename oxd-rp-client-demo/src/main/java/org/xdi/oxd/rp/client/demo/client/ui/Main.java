@@ -88,7 +88,7 @@ public class Main extends Composite {
     }
 
     private void setState(TokenDetails details) {
-        final boolean isLoggedIn = LoginController.hasAccessToken();
+        final boolean isLoggedIn = LoginController.hasAccessToken() || LoginController.getTokenDetails() != null;
         notLoggedInPanel.setVisible(!isLoggedIn);
         loggedInPanel.setVisible(isLoggedIn);
         idTokenClaims.setHTML("");
@@ -103,7 +103,7 @@ public class Main extends Composite {
     private String createClaimsHtml(Map<String, List<String>> claims) {
         String s = "<br/>";
         for (Map.Entry<String, List<String>> entry : claims.entrySet()) {
-            s = entry.getKey() + "=" + entry.getValue() + "<br/>";
+            s = s + entry.getKey() + "=" + entry.getValue() + "<br/>";
         }
         return s;
     }
