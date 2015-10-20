@@ -21,14 +21,12 @@ gluuAttributeName: mail
 gluuAttributeName: middleName
 gluuAttributeName: nickname
 gluuAttributeName: sn
-gluuAttributeName: family_name
 gluuAttributeName: transientId
 gluuAttributeName: persistentId
 gluuAttributeName: c
 gluuAttributeName: displayName
 gluuAttributeName: picture
 gluuAttributeName: inum
-
 gluuAttributeName: o
 gluuAttributeName: userPassword
 gluuAttributeName: title
