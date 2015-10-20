@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.xdi.oxd.rp.client.demo.client.Demo;
 import org.xdi.oxd.rp.client.demo.client.LoginController;
 import org.xdi.oxd.rp.client.demo.client.event.LoginEvent;
+import org.xdi.oxd.rp.client.demo.client.model.LoginType;
 import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 import java.util.List;
@@ -64,7 +65,13 @@ public class Main extends Composite {
         loginAuthorizationCodeFlowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                LoginController.login();
+                LoginController.login(LoginType.AUTHORIZATION_CODE_FLOW);
+            }
+        });
+        loginImplicitFlowButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                LoginController.login(LoginType.IMPLICIT_FLOW);
             }
         });
         showUserInfoButton.addClickHandler(new ClickHandler() {
