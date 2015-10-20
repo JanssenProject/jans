@@ -32,7 +32,7 @@ public class Main extends Composite {
     @UiField
     HTMLPanel loggedInPanel;
     @UiField
-    Button loginButton;
+    Button loginAuthorizationCodeFlowButton;
     @UiField
     HTMLPanel notLoggedInPanel;
     @UiField
@@ -41,6 +41,8 @@ public class Main extends Composite {
     Button showUserInfoButton;
     @UiField
     HTML idTokenClaims;
+    @UiField
+    Button loginImplicitFlowButton;
 
     interface MainUiBinder extends UiBinder<Widget, Main> {
     }
@@ -59,7 +61,7 @@ public class Main extends Composite {
     }
 
     private void buttonHandlers() {
-        loginButton.addClickHandler(new ClickHandler() {
+        loginAuthorizationCodeFlowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
                 LoginController.login();
