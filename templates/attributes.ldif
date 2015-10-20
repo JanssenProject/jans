@@ -535,7 +535,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!C001
 objectClass: top
 objectClass: gluuAttribute
@@ -551,7 +551,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!4502
 objectClass: top
 objectClass: gluuAttribute
@@ -567,7 +567,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!BD22
 objectClass: top
 objectClass: gluuAttribute
@@ -582,7 +582,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!08E2
 objectClass: top
 objectClass: gluuAttribute
@@ -596,7 +596,7 @@ gluuAttributeName: employeeType
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!3D44
 objectClass: top
 objectClass: gluuAttribute
@@ -612,7 +612,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!D054
 objectClass: top
 objectClass: gluuAttribute
@@ -628,7 +628,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 oxAuthClaimName: phone_mobile_number
 inum: %(inumOrg)s!0005!6DA6
 objectClass: top
@@ -645,7 +645,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 oxAuthClaimName: phone_number
 inum: %(inumOrg)s!0005!0C18
 objectClass: top
@@ -663,7 +663,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: region
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!E6B8
 objectClass: top
 objectClass: gluuAttribute
@@ -677,7 +677,7 @@ gluuAttributeName: manager
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!42D8
 objectClass: top
 objectClass: gluuAttribute
@@ -694,7 +694,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: street_address
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!6609
 objectClass: top
 objectClass: gluuAttribute
@@ -710,7 +710,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!E999
 objectClass: top
 objectClass: gluuAttribute
@@ -724,7 +724,7 @@ gluuAttributeName: employeeNumber
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!D0C9
 objectClass: top
 objectClass: gluuAttribute
@@ -738,7 +738,7 @@ gluuAttributeName: preferredDeliveryMethod
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!894A
 objectClass: top
 objectClass: gluuAttribute
@@ -754,7 +754,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!570B
 objectClass: top
 objectClass: gluuAttribute
@@ -770,7 +770,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!D90B
 objectClass: top
 objectClass: gluuAttribute
@@ -784,7 +784,7 @@ gluuAttributeName: secretary
 gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!AC0B
 objectClass: top
 objectClass: gluuAttribute
@@ -801,7 +801,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: formatted
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!27DB
 objectClass: top
 objectClass: gluuAttribute
@@ -818,7 +818,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: locality
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!6EEB
 objectClass: top
 objectClass: gluuAttribute
@@ -835,7 +835,7 @@ gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
 oxAuthClaimName: postal_code
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!2A3D
 objectClass: top
 objectClass: gluuAttribute
@@ -851,7 +851,7 @@ gluuAttributeOrigin: inetOrgPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 inum: %(inumOrg)s!0005!48EE
 objectClass: top
 objectClass: gluuAttribute
@@ -873,7 +873,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.1
 
 dn: inum=%(inumOrg)s!0005!E7BC,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -886,7 +886,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.2
 description: Person's nickname, or the informal name by which the End-User is accustomed
  to be hailed. A casual name that may or may not be the same as the given_name. For instance,
@@ -904,7 +904,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.3
 
 dn: inum=%(inumOrg)s!0005!ED0D,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -922,7 +922,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.4
 
 dn: inum=%(inumOrg)s!0005!91E7,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -938,7 +938,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn:oid:1.3.6.1.4.1.5923.1.1.1.5
 
 dn: inum=%(inumOrg)s!0005!096B,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -958,7 +958,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.6
 
 dn: inum=%(inumOrg)s!0005!BF03,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -972,7 +972,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.7
 
 dn: inum=%(inumOrg)s!0005!0247,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -987,7 +987,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
 dn: inum=%(inumOrg)s!0005!002A,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -1010,7 +1010,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.9
 
 dn: inum=%(inumOrg)s!0005!8FF3,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -1024,7 +1024,7 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.10
 
 dn: inum=%(inumOrg)s!0005!4B0F,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -1039,6 +1039,6 @@ gluuAttributeOrigin: eduPerson
 gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
-gluuStatus: active
+gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
 
