@@ -491,19 +491,6 @@ oxAuthClaimName: picture
 gluuStatus: active
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
 
-dn: inum=%(inumOrg)s!0005!29DA,ou=attributes,o=%(inumOrg)s,o=gluu
-description: XRI i-number
-displayName: i-number
-gluuAttributeName: inum
-gluuAttributeOrigin: gluuPerson
-gluuAttributeType: string
-gluuAttributeViewType: admin
-gluuStatus: active
-inum: %(inumOrg)s!0005!29DA
-objectClass: top
-objectClass: gluuAttribute
-urn: urn:gluu:dir:attribute-def:inum
-
 dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=%(inumOrg)s,o=gluu
 description: Organization i-number
 displayName: Organization i-number
