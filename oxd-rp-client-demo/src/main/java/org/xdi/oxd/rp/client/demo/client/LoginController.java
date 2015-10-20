@@ -4,6 +4,7 @@ import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.xdi.oxd.rp.client.demo.client.event.LoginEvent;
+import org.xdi.oxd.rp.client.demo.client.model.LoginType;
 import org.xdi.oxd.rp.client.demo.shared.TokenDetails;
 
 import java.util.Date;
@@ -46,7 +47,7 @@ public class LoginController {
         Cookies.setCookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, new Date(tomorrowMilis));
     }
 
-    public static void login() {
+    public static void login(LoginType loginType) {
         if (!hasAccessToken()) {
 
             if (hrefHasCodeOrToken()) {
