@@ -6,7 +6,8 @@
     <g:HTMLPanel ui:field="rootPanel">
         <g:HTMLPanel ui:field="notLoggedInPanel">
             You are not logged in. Please login.
-            <g:Button ui:field="loginButton">Login</g:Button>
+            <g:Button ui:field="loginAuthorizationCodeFlowButton">Login with Authorization Code Flow</g:Button>
+            <g:Button ui:field="loginImplicitFlowButton">Login with Implicit Flow</g:Button>
         </g:HTMLPanel>
 
         <g:HTMLPanel ui:field="loggedInPanel">
