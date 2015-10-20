@@ -385,7 +385,6 @@ description: Last Name
 displayName: Last Name
 oxAuthClaimName: family_name
 gluuAttributeName: sn
-gluuAttributeName: family_name
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
