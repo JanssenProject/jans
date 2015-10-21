@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -36,6 +37,7 @@ public class CustomScript extends BaseEntry {
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String inum;
 
+	@Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Name should contain only letters, digits and underscores")
     @NotNull(message = "Name should be not empty")
     @LdapAttribute(name = "displayName")
 	private String name;
