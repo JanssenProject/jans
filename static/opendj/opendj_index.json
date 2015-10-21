@@ -41,11 +41,12 @@
 		"backend": ["userRoot"]
 	},
 
-    {
-        "attribute": "oxSectorIdentifierURI",
-        "type": "string",
-        "index": ["equality"]
-    },
+    	{
+        	"attribute": "oxSectorIdentifierURI",
+	        "type": "string",
+        	"index": ["equality"],
+		"backend": ["userRoot"]
+	},
 
 	{
 		"attribute": "gluuStatus",
