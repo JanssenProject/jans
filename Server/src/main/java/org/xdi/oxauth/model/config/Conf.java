@@ -29,6 +29,9 @@ public class Conf {
     @LdapAttribute(name = "oxAuthConfWebKeys")
     private String webKeys;
 
+    @LdapAttribute(name = "oxRevision")
+    private long revision;
+
     public Conf() {
     }
 
@@ -72,7 +75,15 @@ public class Conf {
         webKeys = p_webKeys;
     }
 
-    @Override
+    public long getRevision() {
+		return revision;
+	}
+
+	public void setRevision(long revision) {
+		this.revision = revision;
+	}
+
+	@Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Conf");

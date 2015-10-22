@@ -6,6 +6,14 @@
 
 package org.xdi.oxauth.auth;
 
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -36,13 +44,6 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Authenticator component
