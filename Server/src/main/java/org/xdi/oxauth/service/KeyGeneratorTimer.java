@@ -74,11 +74,13 @@ public class KeyGeneratorTimer {
         try {
             String dn = ConfigurationFactory.instance().getLdapConfiguration().getString("configurationEntryDN");
             Conf conf = ldapEntryManager.find(Conf.class, dn);
+            
+            long nextRevision = conf.getRevision() + 1;
             JSONObject jwks = new JSONObject(conf.getWebKeys());
             conf.setWebKeys(updateKeys(jwks).toString());
+            
+            conf.setRevision(nextRevision);
             ldapEntryManager.merge(conf);
-
-            ConfigurationFactory.instance().updateFromLdap();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
