@@ -6,12 +6,15 @@
 
 import java.io.Serializable;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * oxTrust configuration
  * 
  * @author Yuriy Movchan
  * @version 0.1, 05/15/2013
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class ApplicationConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -8991383390239617013L;
@@ -54,8 +57,6 @@ public final class ApplicationConfiguration implements Serializable {
 	private String shibboleth2IdpRootDir;
 	private String shibboleth2SpConfDir;
 
-	private String pokenApplicationSecret;
-
 	private boolean updateApplianceStatus;
 
 	private String svnConfigurationStoreRoot;
@@ -96,10 +97,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String shibboleth2FederationRootDir;
 
-	private boolean cacheRefreshEnabled;
-
-	private int cacheRefreshIntervalMinutes;
-
 	private String caCertsLocation;
 	private String caCertsPassphrase;
 	private String tempCertDir;
@@ -111,7 +108,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String oxAuthAuthorizeUrl;
 	private String oxAuthTokenUrl;
-	private String oxAuthValidateTokenUrl;
 	private String oxAuthEndSessionUrl;
 	private String oxAuthLogoutUrl;
 
@@ -356,14 +352,6 @@ public final class ApplicationConfiguration implements Serializable {
 		this.shibboleth2SpConfDir = shibboleth2SpConfDir;
 	}
 
-	public String getPokenApplicationSecret() {
-		return pokenApplicationSecret;
-	}
-
-	public void setPokenApplicationSecret(String pokenApplicationSecret) {
-		this.pokenApplicationSecret = pokenApplicationSecret;
-	}
-
 	public boolean isUpdateApplianceStatus() {
 		return updateApplianceStatus;
 	}
@@ -566,22 +554,6 @@ public final class ApplicationConfiguration implements Serializable {
 		this.shibboleth2FederationRootDir = shibboleth2FederationRootDir;
 	}
 
-	public boolean isCacheRefreshEnabled() {
-		return cacheRefreshEnabled;
-	}
-
-	public void setCacheRefreshEnabled(boolean cacheRefreshEnabled) {
-		this.cacheRefreshEnabled = cacheRefreshEnabled;
-	}
-
-	public int getCacheRefreshIntervalMinutes() {
-		return cacheRefreshIntervalMinutes;
-	}
-
-	public void setCacheRefreshIntervalMinutes(int cacheRefreshIntervalMinutes) {
-		this.cacheRefreshIntervalMinutes = cacheRefreshIntervalMinutes;
-	}
-
 	public String getCaCertsLocation() {
 		return caCertsLocation;
 	}
@@ -644,14 +616,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setOxAuthTokenUrl(String oxAuthTokenUrl) {
 		this.oxAuthTokenUrl = oxAuthTokenUrl;
-	}
-
-	public String getOxAuthValidateTokenUrl() {
-		return oxAuthValidateTokenUrl;
-	}
-
-	public void setOxAuthValidateTokenUrl(String oxAuthValidateTokenUrl) {
-		this.oxAuthValidateTokenUrl = oxAuthValidateTokenUrl;
 	}
 
 	public String getOxAuthEndSessionUrl() {

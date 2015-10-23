@@ -19,6 +19,7 @@ import org.xdi.ldap.model.Entry;
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthConfiguration"})
 public class LdapOxAuthConfiguration extends Entry {
+
 	private static final long serialVersionUID = 2453308522994526877L;
 
 	@LdapDN
@@ -29,6 +30,15 @@ public class LdapOxAuthConfiguration extends Entry {
 	
 	@LdapAttribute(name = "oxAuthConfStatic")
     private String oxAuthConfstatic;
+
+	@LdapAttribute(name = "oxAuthConfErrors")
+    private String oxAuthConfErrors;
+
+	@LdapAttribute(name = "oxAuthConfWebKeys")
+    private String oxAuthConfWebKeys;
+
+    @LdapAttribute(name = "oxRevision")
+    private long revision;
 
 	public LdapOxAuthConfiguration() {
 	}
@@ -50,6 +60,30 @@ public class LdapOxAuthConfiguration extends Entry {
 		this.oxAuthConfstatic = oxAuthConfstatic;
 	}
 	
+	public String getOxAuthConfErrors() {
+		return oxAuthConfErrors;
+	}
+
+	public void setOxAuthConfErrors(String oxAuthConfErrors) {
+		this.oxAuthConfErrors = oxAuthConfErrors;
+	}
+
+	public String getOxAuthConfWebKeys() {
+		return oxAuthConfWebKeys;
+	}
+
+	public void setOxAuthConfWebKeys(String oxAuthConfWebKeys) {
+		this.oxAuthConfWebKeys = oxAuthConfWebKeys;
+	}
+
+	public long getRevision() {
+		return revision;
+	}
+
+	public void setRevision(long revision) {
+		this.revision = revision;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

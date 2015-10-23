@@ -20,11 +20,16 @@ import org.xdi.ldap.model.Entry;
 @LdapObjectClass(values = {"top", "oxTrustConfiguration"})
 public class LdapOxTrustConfiguration extends Entry {
 
+	private static final long serialVersionUID = -15289347651306279L;
+
 	@LdapDN
     private String dn;
 
 	@LdapAttribute(name = "oxTrustConfApplication")
     private String application;
+
+    @LdapAttribute(name = "oxRevision")
+    private long revision;
 
     public LdapOxTrustConfiguration() {
 	}
@@ -35,6 +40,14 @@ public class LdapOxTrustConfiguration extends Entry {
 
 	public void setApplication(String application) {
 		this.application = application;
+	}
+
+	public long getRevision() {
+		return revision;
+	}
+
+	public void setRevision(long revision) {
+		this.revision = revision;
 	}
 
 	@Override
