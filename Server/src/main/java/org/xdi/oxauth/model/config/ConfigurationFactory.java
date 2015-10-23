@@ -88,8 +88,9 @@ public class ConfigurationFactory {
 
     private AtomicBoolean isActive;
 
+    private long ldapFileLastModifiedTime = -1;
+
     private long loadedRevision = -1;
-    
     private boolean loadedFromLdap = true;
 
     @Create
@@ -142,6 +143,17 @@ public class ConfigurationFactory {
     }
 
     private void reloadConfiguration() {
+        // Reload LDAP configuration if needed
+        File ldapFile = new File(LDAP_FILE_PATH);
+        if (ldapFile.exists()) {
+            final long lastModified = ldapFile.lastModified();
+            if (lastModified > ldapFileLastModifiedTime) { // reload configuration only if it was modified
+                loadLdapConfiguration();
+                ldapFileLastModifiedTime = lastModified;
+                Events.instance().raiseAsynchronousEvent(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
+            }
+        }
+
     	if (!loadedFromLdap) {
     		return;
     	}
@@ -150,7 +162,7 @@ public class ConfigurationFactory {
         if (conf == null) {
         	return;
         }
-        
+
         if (conf.getRevision() <= this.loadedRevision) {
         	return;
         }
@@ -336,16 +348,21 @@ public class ConfigurationFactory {
         }
     }
 
-	public void loadLdapConfiguration() {
+	private void loadLdapConfiguration() {
         try {
-            ldapConfiguration = new FileConfiguration(LDAP_FILE_PATH);
+    		File ldapFile = new File(LDAP_FILE_PATH);
+    		if (ldapFile.exists()) {
+    			this.ldapFileLastModifiedTime = ldapFile.lastModified();
+    		}
+
+    		ldapConfiguration = new FileConfiguration(LDAP_FILE_PATH);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             ldapConfiguration = null;
         }
 	}
 
-    public Configuration loadConfFromFile() {
+	private Configuration loadConfFromFile() {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(configFilePath), Configuration.class);
         } catch (Exception e) {
