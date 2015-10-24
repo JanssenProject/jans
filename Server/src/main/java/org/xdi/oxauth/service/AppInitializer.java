@@ -126,7 +126,7 @@ public class AppInitializer {
 	}
 
 	private void createStringEncrypter() {
-		String encodeSalt = configurationFactory.loadCryptoConfigurationSalt();
+		String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
     	
     	if (StringHelper.isEmpty(encodeSalt)) {
     		throw new ConfigurationException("Encode salt isn't defined");
