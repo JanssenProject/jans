@@ -14,6 +14,7 @@ override_dh_auto_install:
 		mkdir -p debian/gluu-oxd-server/opt/oxd-server/bin/
 		mkdir -p debian/gluu-oxd-server/opt/oxd-server/lib/
 		cp oxd-server/src/main/resources/oxd-conf.json debian/gluu-oxd-server/opt/oxd-server/conf/
+		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/gluu-oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/log4j.xml debian/gluu-oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/bin/oxd-start.sh debian/gluu-oxd-server/opt/oxd-server/bin/
 		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-server/opt/oxd-server/lib/
