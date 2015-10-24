@@ -85,6 +85,7 @@ public class ConfigurationFactory {
     private Configuration m_conf;
     private StaticConf m_staticConf;
     private JSONWebKeySet m_jwks;
+	private String cryptoConfigurationSalt;
 
     private AtomicBoolean isActive;
 
@@ -93,16 +94,22 @@ public class ConfigurationFactory {
     private long loadedRevision = -1;
     private boolean loadedFromLdap = true;
 
+
     @Create
     public void init() {
-    	loadLdapConfiguration();
-    	this.confDir = confDir();
-
-    	this.configFilePath = confDir + CONFIG_FILE_NAME;
-    	this.errorsFilePath = confDir + ERRORS_FILE_NAME;
-    	this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
-    	this.webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE_NAME;
-    	this.saltFilePath = confDir + SALT_FILE_NAME;
+        this.isActive = new AtomicBoolean(true);
+    	try {
+			loadLdapConfiguration();
+			this.confDir = confDir();
+			this.configFilePath = confDir + CONFIG_FILE_NAME;
+			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
+			this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
+			this.webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE_NAME;
+			this.saltFilePath = confDir + SALT_FILE_NAME;
+			loadCryptoConfigurationSalt();
+		} finally {
+			this.isActive.set(false);
+		}
     }
 
     public void create() {
@@ -116,8 +123,6 @@ public class ConfigurationFactory {
 
     @Observer("org.jboss.seam.postInitialization")
     public void initReloadTimer() {
-        this.isActive = new AtomicBoolean(false);
-
         final long delayBeforeFirstRun = 30 * 1000L;
         Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(delayBeforeFirstRun, DEFAULT_INTERVAL * 1000L));
     }
@@ -149,7 +154,6 @@ public class ConfigurationFactory {
             final long lastModified = ldapFile.lastModified();
             if (lastModified > ldapFileLastModifiedTime) { // reload configuration only if it was modified
                 loadLdapConfiguration();
-                ldapFileLastModifiedTime = lastModified;
                 Events.instance().raiseAsynchronousEvent(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
             }
         }
@@ -199,7 +203,11 @@ public class ConfigurationFactory {
         return m_jwks;
     }
 
-    private boolean createFromFile() {
+    public String getCryptoConfigurationSalt() {
+		return cryptoConfigurationSalt;
+	}
+
+	private boolean createFromFile() {
     	boolean result = reloadConfFromFile() &&  reloadErrorsFromFile() && reloadStaticConfFromFile() && reloadWebkeyFromFile();
     	
     	return result;
@@ -350,12 +358,12 @@ public class ConfigurationFactory {
 
 	private void loadLdapConfiguration() {
         try {
+    		ldapConfiguration = new FileConfiguration(LDAP_FILE_PATH);
+
     		File ldapFile = new File(LDAP_FILE_PATH);
     		if (ldapFile.exists()) {
     			this.ldapFileLastModifiedTime = ldapFile.lastModified();
     		}
-
-    		ldapConfiguration = new FileConfiguration(LDAP_FILE_PATH);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             ldapConfiguration = null;
@@ -398,11 +406,11 @@ public class ConfigurationFactory {
         return null;
     }
 
-    public String loadCryptoConfigurationSalt() {
+    public void loadCryptoConfigurationSalt() {
         try {
             FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath, true);
 
-            return cryptoConfiguration.getString("encodeSalt");
+			this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
             LOG.error("Failed to load configuration from {0}", ex, saltFilePath);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
