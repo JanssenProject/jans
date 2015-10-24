@@ -28,6 +28,9 @@ public class LdapOxTrustConfiguration extends Entry {
 	@LdapAttribute(name = "oxTrustConfApplication")
     private String application;
 
+	@LdapAttribute(name = "oxTrustConfCacheRefresh")
+    private String cacheRefresh;
+
     @LdapAttribute(name = "oxRevision")
     private long revision;
 
@@ -42,6 +45,14 @@ public class LdapOxTrustConfiguration extends Entry {
 		this.application = application;
 	}
 
+	public String getCacheRefresh() {
+		return cacheRefresh;
+	}
+
+	public void setCacheRefresh(String cacheRefresh) {
+		this.cacheRefresh = cacheRefresh;
+	}
+
 	public long getRevision() {
 		return revision;
 	}
@@ -53,7 +64,8 @@ public class LdapOxTrustConfiguration extends Entry {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("LdapAppConfiguration [dn=").append(dn).append(", application=").append(application).append("]");
+		builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=").append(cacheRefresh)
+				.append(", revision=").append(revision).append("]");
 		return builder.toString();
 	}
 

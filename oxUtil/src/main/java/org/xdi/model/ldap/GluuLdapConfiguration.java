@@ -10,8 +10,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.xdi.model.SimpleProperty;
 
@@ -20,7 +18,6 @@ import org.xdi.model.SimpleProperty;
  * 
  * @author Yuriy Movchan Date: 07.29.2011
  */
-@XmlRootElement
 @JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
 public class GluuLdapConfiguration implements Serializable {
 
