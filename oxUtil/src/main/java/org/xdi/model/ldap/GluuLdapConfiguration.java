@@ -10,6 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.xdi.model.SimpleProperty;
 
@@ -19,6 +22,7 @@ import org.xdi.model.SimpleProperty;
  * @author Yuriy Movchan Date: 07.29.2011
  */
 @JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuLdapConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -7160480457430436511L;
@@ -26,10 +30,22 @@ public class GluuLdapConfiguration implements Serializable {
 	private String configId;
 	private String bindDN;
 	private String bindPassword;
+
+	@JsonIgnore
 	private List<SimpleProperty> servers;
+
+	@JsonProperty("servers")
+	private List<String> serversStringsList;
+
 	private int maxConnections;
 	private boolean useSSL;
+	
+	@JsonIgnore
 	private List<SimpleProperty> baseDNs;
+
+	@JsonProperty("baseDNs")
+	private List<String> baseDNsStringsList;
+
 	private String primaryKey;
 	private String localPrimaryKey;
 	private boolean useAnonymousBind;
@@ -39,6 +55,8 @@ public class GluuLdapConfiguration implements Serializable {
 	public GluuLdapConfiguration() {
 		this.servers = new ArrayList<SimpleProperty>();
 		this.baseDNs = new ArrayList<SimpleProperty>();
+
+		updateStringsLists();
 	}
 
 	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<SimpleProperty> servers, int maxConnections,
@@ -53,6 +71,8 @@ public class GluuLdapConfiguration implements Serializable {
 		this.primaryKey = primaryKey;
 		this.localPrimaryKey = localPrimaryKey;
 		this.useAnonymousBind = useAnonymousBind;
+
+		updateStringsLists();
 	}
 
 	public String getConfigId() {
@@ -149,6 +169,64 @@ public class GluuLdapConfiguration implements Serializable {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public List<String> getServersStringsList() {
+		return serversStringsList;
+	}
+
+	public void setServersStringsList(List<String> serversStringsList) {
+		this.serversStringsList = serversStringsList;
+
+		updateSimplePropertiesLists();
+	}
+
+	public List<String> getBaseDNsStringsList() {
+		return baseDNsStringsList;
+	}
+
+	public void setBaseDNsStringsList(List<String> baseDNsStringsList) {
+		this.baseDNsStringsList = baseDNsStringsList;
+
+		updateSimplePropertiesLists();
+	}
+
+	public void updateStringsLists() {
+		this.serversStringsList = toStringList(servers);
+		this.baseDNsStringsList = toStringList(baseDNs);
+	}
+
+	public void updateSimplePropertiesLists() {
+		this.servers = toSimpleProperties(serversStringsList);
+		this.baseDNs = toSimpleProperties(baseDNsStringsList);
+	}
+
+	private List<String> toStringList(List<SimpleProperty> values) {
+		if (values == null) {
+			return null;
+		}
+
+		List<String> result = new ArrayList<String>();
+
+		for (SimpleProperty simpleProperty : values) {
+			result.add(simpleProperty.getValue());
+		}
+
+		return result;
+	}
+
+	private List<SimpleProperty> toSimpleProperties(List<String> values) {
+		if (values == null) {
+			return null;
+		}
+
+		List<SimpleProperty> result = new ArrayList<SimpleProperty>();
+
+		for (String value : values) {
+			result.add(new SimpleProperty(value));
+		}
+
+		return result;
 	}
 
 	@Override
