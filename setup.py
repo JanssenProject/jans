@@ -186,14 +186,14 @@ class Setup(object):
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
-        self.oxauth_config_json = '%s/conf/oxauth-config.json' % self.tomcatHome
-        self.oxtrust_config_json = '%s/conf/oxTrust.properties' % self.tomcatHome
-        self.oxtrust_cache_refresh_json = '%s/conf/oxtrust-cache-refresh.json' % self.tomcatHome
+        self.oxauth_config_json = '%s/conf/oxauth-config.json' % self.outputFolder
+        self.oxtrust_config_json = '%s/conf/oxtrust-config.json' % self.outputFolder
+        self.oxtrust_cache_refresh_json = '%s/conf/oxtrust-cache-refresh.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
         self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
-        self.oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
+        self.oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.outputFolder
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
@@ -263,6 +263,7 @@ class Setup(object):
                      self.ldif_people: False,
                      self.ldif_groups: False,
                      self.ldif_scripts: False,
+                     self.ldif_configuration : False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
