@@ -186,14 +186,14 @@ class Setup(object):
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
-        self.oxauth_config_json = '%s/conf/oxauth-config.json' % self.outputFolder
-        self.oxtrust_config_json = '%s/conf/oxtrust-config.json' % self.outputFolder
-        self.oxtrust_cache_refresh_json = '%s/conf/oxtrust-cache-refresh.json' % self.outputFolder
+        self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
+        self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
+        self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
         self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
-        self.oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.outputFolder
+        self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
@@ -263,7 +263,6 @@ class Setup(object):
                      self.ldif_people: False,
                      self.ldif_groups: False,
                      self.ldif_scripts: False,
-                     self.ldif_configuration : False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
@@ -1230,23 +1229,36 @@ class Setup(object):
 
         return file_paths
 
+    def renderTemplate(self, filePath):
+        self.logIt("Rendering template %s" % filePath)
+        fn = os.path.split(filePath)[-1]
+        f = open(os.path.join(self.templateFolder, fn))
+        template_text = f.read()
+        f.close()
+        newFn = open(os.path.join(self.outputFolder, fn), 'w+')
+        newFn.write(template_text % self.__dict__)
+        newFn.close()
+
     def render_templates(self):
         if self.components['saml']['enabled']: 
             self.oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
             try:
-                self.logIt("Rendering template %s" % fullPath)
-                fn = os.path.split(fullPath)[-1]
-                f = open(os.path.join(self.templateFolder, fn))
-                template_text = f.read()
-                f.close()
-                newFn = open(os.path.join(self.outputFolder, fn), 'w+')
-                newFn.write(template_text % self.__dict__)
-                newFn.close()
+                self.renderTemplate(fullPath)
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
+
+    def render_configuration_template(self):
+        self.logIt("Rendering configuration templates")
+        
+        fullPath = self.ldif_configuration
+        try:
+            self.renderTemplate(fullPath)
+        except:
+            self.logIt("Error writing template %s" % fullPath, True)
+            self.logIt(traceback.format_exc(), True)
 
     def render_test_templates(self):
         self.logIt("Rendering test templates")
@@ -1275,7 +1287,14 @@ class Setup(object):
                     self.logIt("Error writing test template %s" % fullPath, True)
                     self.logIt(traceback.format_exc(), True)
 
-    def generate_base64_file(self, fn):
+    def reindent(self, text, num_spaces):
+        text = string.split(text, '\n')
+        text = [(num_spaces * ' ') + string.lstrip(line) for line in text]
+        text = string.join(text, '\n')
+
+        return text
+
+    def generate_base64_file(self, fn, num_spaces):
         self.logIt('Loading file %s' % fn)
         plain_file_b64encoded_text = None
         try:
@@ -1286,17 +1305,23 @@ class Setup(object):
         except:
             self.logIt("Error loading file", True)
             self.logIt(traceback.format_exc(), True)
-            
+        
+        if num_spaces > 0:
+            plain_file_b64encoded_text = self.reindent(plain_file_b64encoded_text, num_spaces)
+
         return plain_file_b64encoded_text
 
-    def generate_base64_configuration(self):
-        self.oxauth_config_base64 = self.generate_base64_file(self.oxauth_config_json);
-        self.oxauth_static_conf_base64 = self.generate_base64_file(self.oxauth_static_conf_json);
-        self.oxauth_error_base64 = self.generate_base64_file(self.oxauth_error_json);
-        self.oxauth_openid_key_base64 = self.generate_base64_file(self.oxauth_openid_key_json);
+    def generate_base64_ldap_file(self, fn):
+        return self.generate_base64_file(fn, 1)
 
-        self.oxtrust_config_base64 = self.generate_base64_file(self.oxtrust_config_json);
-        self.oxtrust_cache_refresh_base64 = self.generate_base64_file(self.oxtrust_cache_refresh_json);
+    def generate_base64_configuration(self):
+        self.oxauth_config_base64 = self.generate_base64_ldap_file(self.oxauth_config_json);
+        self.oxauth_static_conf_base64 = self.generate_base64_ldap_file(self.oxauth_static_conf_json);
+        self.oxauth_error_base64 = self.generate_base64_ldap_file(self.oxauth_error_json);
+        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_key_json);
+
+        self.oxtrust_config_base64 = self.generate_base64_ldap_file(self.oxtrust_config_json);
+        self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json);
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
@@ -1573,10 +1598,11 @@ if __name__ == '__main__':
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
-            installObject.generate_base64_configuration()
-            installObject.gen_crypto()
             installObject.render_templates()
             installObject.render_test_templates()
+            installObject.generate_base64_configuration()
+            installObject.render_configuration_template()
+            installObject.gen_crypto()
             installObject.update_hostname()
             installObject.configure_httpd()
             installObject.setup_opendj()

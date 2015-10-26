@@ -9,16 +9,16 @@ dn: ou=oxauth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: oxAuthConfiguration
 objectClass: top
 ou: oxauth
-oxAuthConfDynamic:: %(oxauth_config_base64)s
-oxAuthConfStatic:: %(oxauth_static_conf_base64)s
-oxAuthConfWebKeys:: %(oxauth_openid_key_base64)s
-oxAuthConfErrors:: %(oxauth_error_base64)s
+oxAuthConfDynamic::%(oxauth_config_base64)s
+oxAuthConfStatic::%(oxauth_static_conf_base64)s
+oxAuthConfWebKeys::%(oxauth_openid_key_base64)s
+oxAuthConfErrors::%(oxauth_error_base64)s
 oxRevision: 1
 
 dn: ou=oxtrust,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: top
 objectClass: oxTrustConfiguration
 ou: oxtrust
-oxTrustConfApplication:: %(oxtrust_config_base64)s
-oxTrustConfCacheRefresh:: %(oxtrust_cache_refresh_base64)s
+oxTrustConfApplication::%(oxtrust_config_base64)s
+oxTrustConfCacheRefresh::%(oxtrust_cache_refresh_base64)s
 oxRevision: 1
