@@ -486,8 +486,6 @@ class Setup(object):
         self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        self.createDirs("%s/conf/template/conf" % self.tomcatHome)
-
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.components['saml']['enabled']: 
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
