@@ -190,7 +190,7 @@ class Setup(object):
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
-        self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
+        self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
         self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
@@ -487,7 +487,6 @@ class Setup(object):
 
     def copy_static(self):
         self.createDirs("%s/conf/template/conf" % self.tomcatHome)
-        self.copyFile("%s/static/oxtrust/oxTrustCacheRefresh-template.properties.vm" % self.install_dir, "%s/conf/template/conf" % self.tomcatHome)
 
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.components['saml']['enabled']: 
@@ -1600,9 +1599,9 @@ if __name__ == '__main__':
             installObject.encode_passwords()
             installObject.render_templates()
             installObject.render_test_templates()
+            installObject.gen_crypto()
             installObject.generate_base64_configuration()
             installObject.render_configuration_template()
-            installObject.gen_crypto()
             installObject.update_hostname()
             installObject.configure_httpd()
             installObject.setup_opendj()
