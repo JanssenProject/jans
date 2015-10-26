@@ -129,6 +129,7 @@ class Setup(object):
         self.staticFolder = '%s/static/opendj' % self.install_dir
         self.indexJson = '%s/static/opendj/opendj_index.json' % self.install_dir
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
+        self.oxauth_openid_key_json = "%s/oxauth-web-keys.json" % self.certFolder
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
@@ -185,16 +186,14 @@ class Setup(object):
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
-        self.oxauth_config_xml = '%s/conf/oxauth-config.xml' % self.tomcatHome
-        self.oxauth_config_reload = '%s/conf/oxauth.config.reload' % self.tomcatHome
-        self.oxtrust_config_reload = '%s/conf/oxtrust.config.reload' % self.tomcatHome
-        self.oxTrust_properties = '%s/conf/oxTrust.properties' % self.tomcatHome
-        self.oxTrust_CacheRefresh_properties = '%s/conf/oxTrustCacheRefresh.properties' % self.tomcatHome
+        self.oxauth_config_json = '%s/conf/oxauth-config.json' % self.tomcatHome
+        self.oxtrust_config_json = '%s/conf/oxTrust.properties' % self.tomcatHome
+        self.oxtrust_cache_refresh_json = '%s/conf/oxtrust-cache-refresh.json' % self.tomcatHome
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxTrustLdap.properties' % self.tomcatHome
         self.oxtrust_import_person_properties = '%s/conf/gluuImportPerson.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
-        self.tomcat_oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
+        self.oxauth_static_conf_json = '%s/conf/oxauth-static-conf.json' % self.tomcatHome
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
@@ -210,6 +209,7 @@ class Setup(object):
         self.ldif_groups = '%s/groups.ldif' % self.outputFolder
         self.ldif_site = '%s/static/cache-refresh/o_site.ldif' % self.install_dir
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
+        self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -219,6 +219,14 @@ class Setup(object):
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
+        # oxAuth/oxTrust Base64 configuration files
+        self.oxauth_config_base64 = None
+        self.oxauth_static_conf_base64 = None
+        self.oxauth_error_base64 = None
+        self.oxauth_openid_key_base64 = None
+        self.oxtrust_config_base64 = None
+        self.oxtrust_cache_refresh_base64 = None
+
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
                            self.ldif_attributes,
@@ -227,19 +235,19 @@ class Setup(object):
                            self.ldif_people,
                            self.ldif_groups,
                            self.ldif_site,
-                           self.ldif_scripts]
+                           self.ldif_scripts,
+                           self.ldif_configuration
+                           ]
 
         self.ce_templates = {self.oxauth_ldap_properties: True,
-                     self.oxauth_config_xml: True,
-                     self.oxauth_config_reload: True,
-                     self.oxtrust_config_reload: True,
-                     self.oxTrust_properties: True,
-                     self.oxTrust_CacheRefresh_properties: True,
+                     self.oxauth_config_json: False,
+                     self.oxtrust_config_json: False,
+                     self.oxtrust_cache_refresh_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
                      self.oxtrust_import_person_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
-                     self.tomcat_oxauth_static_conf_json: True,
+                     self.oxauth_static_conf_json: False,
                      self.oxTrust_log_rotation_configuration: True,
                      self.ldap_setup_properties: False,
                      self.org_custom_schema: False,
@@ -457,7 +465,6 @@ class Setup(object):
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
-        self.copyFile(self.oxauth_error_json, "%s/conf" % self.tomcatHome)
 
         self.run([service_path, apache_service_name, 'start'])
 
@@ -755,13 +762,12 @@ class Setup(object):
             if err:
                 self.logIt(err, True)
             if output:
-                openid_key_json_fn = "%s/oxauth-web-keys.json" % self.certFolder
-                f = open(openid_key_json_fn, 'w')
+                f = open(self.oxauth_openid_key_json, 'w')
                 f.write(output)
                 f.close()
-                self.run(["/bin/chown", 'tomcat:tomcat', openid_key_json_fn])
-                self.run(["/bin/chmod", '700', openid_key_json_fn])
-                self.logIt("Wrote oxauth OpenID Connect key to %s" % openid_key_json_fn)
+                self.run(["/bin/chown", 'tomcat:tomcat', self.oxauth_openid_key_json])
+                self.run(["/bin/chmod", '700', self.oxauth_openid_key_json])
+                self.logIt("Wrote oxauth OpenID Connect key to %s" % self.oxauth_openid_key_json)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
@@ -1268,6 +1274,29 @@ class Setup(object):
                     self.logIt("Error writing test template %s" % fullPath, True)
                     self.logIt(traceback.format_exc(), True)
 
+    def generate_base64_file(self, fn):
+        self.logIt('Loading file %s' % fn)
+        plain_file_b64encoded_text = None
+        try:
+            plain_file = open(fn)
+            plain_file_text = plain_file.read()
+            plain_file_b64encoded_text = plain_file_text.encode('base64').strip()
+            plain_file.close()
+        except:
+            self.logIt("Error loading file", True)
+            self.logIt(traceback.format_exc(), True)
+            
+        return plain_file_b64encoded_text
+
+    def generate_base64_configuration(self):
+        self.oxauth_config_base64 = self.generate_base64_file(self.oxauth_config_json);
+        self.oxauth_static_conf_base64 = self.generate_base64_file(self.oxauth_static_conf_json);
+        self.oxauth_error_base64 = self.generate_base64_file(self.oxauth_error_json);
+        self.oxauth_openid_key_base64 = self.generate_base64_file(self.oxauth_openid_key_json);
+
+        self.oxtrust_config_base64 = self.generate_base64_file(self.oxtrust_config_json);
+        self.oxtrust_cache_refresh_base64 = self.generate_base64_file(self.oxtrust_cache_refresh_json);
+
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
         self.logIt('Running: %s' % ' '.join(args))
@@ -1543,10 +1572,11 @@ if __name__ == '__main__':
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
+            installObject.generate_base64_configuration()
+            installObject.gen_crypto()
             installObject.render_templates()
             installObject.render_test_templates()
             installObject.update_hostname()
-            installObject.gen_crypto()
             installObject.configure_httpd()
             installObject.setup_opendj()
             installObject.configure_opendj()
