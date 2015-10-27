@@ -1,11 +1,8 @@
 {
-    "orgDisplayName":"%(orgName)s",
     "orgInum":"%(inumOrg)s",
     "orgIname":null,
-    "orgShortName":"%(orgShortName)s",
     "orgSupportEmail":"%(admin_email)s",
 
-    "applianceIname":null,
     "applianceInum":"%(inumAppliance)s",
 
     "baseDN":"o=gluu",
