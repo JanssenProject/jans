@@ -3,7 +3,7 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxCore</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.3-SNAPSHOT</version>
     <name>oxCore</name>
     <url>http://ox.gluu.org</url>
 
