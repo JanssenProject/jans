@@ -35,7 +35,6 @@
         "implicit",
         "urn:ietf:params:oauth:grant-type:jwt-bearer"
     ],
-    "acrValuesSupported":null,
     "subjectTypesSupported":[
         "public",
         "pairwise"
