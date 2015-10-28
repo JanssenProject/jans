@@ -51,7 +51,6 @@ public class Configuration {
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
-    private List<String> acrValuesSupported;
     private List<String> subjectTypesSupported;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
@@ -492,16 +491,6 @@ public class Configuration {
 
     public void setGrantTypesSupported(List<String> grantTypesSupported) {
         this.grantTypesSupported = grantTypesSupported;
-    }
-
-    @XmlElementWrapper(name = "acr-values-supported")
-    @XmlElement(name = "acr")
-    public List<String> getAcrValuesSupported() {
-        return acrValuesSupported;
-    }
-
-    public void setAcrValuesSupported(List<String> acrValuesSupported) {
-        this.acrValuesSupported = acrValuesSupported;
     }
 
     @XmlElementWrapper(name = "subject-types-supported")
