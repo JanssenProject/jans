@@ -20,11 +20,19 @@ import org.xdi.ldap.model.Entry;
 @LdapObjectClass(values = {"top", "oxTrustConfiguration"})
 public class LdapOxTrustConfiguration extends Entry {
 
+	private static final long serialVersionUID = -15289347651306279L;
+
 	@LdapDN
     private String dn;
 
 	@LdapAttribute(name = "oxTrustConfApplication")
     private String application;
+
+	@LdapAttribute(name = "oxTrustConfCacheRefresh")
+    private String cacheRefresh;
+
+    @LdapAttribute(name = "oxRevision")
+    private long revision;
 
     public LdapOxTrustConfiguration() {
 	}
@@ -37,10 +45,27 @@ public class LdapOxTrustConfiguration extends Entry {
 		this.application = application;
 	}
 
+	public String getCacheRefresh() {
+		return cacheRefresh;
+	}
+
+	public void setCacheRefresh(String cacheRefresh) {
+		this.cacheRefresh = cacheRefresh;
+	}
+
+	public long getRevision() {
+		return revision;
+	}
+
+	public void setRevision(long revision) {
+		this.revision = revision;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("LdapAppConfiguration [dn=").append(dn).append(", application=").append(application).append("]");
+		builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=").append(cacheRefresh)
+				.append(", revision=").append(revision).append("]");
 		return builder.toString();
 	}
 

@@ -10,8 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.xdi.model.SimpleProperty;
 
@@ -20,8 +21,8 @@ import org.xdi.model.SimpleProperty;
  * 
  * @author Yuriy Movchan Date: 07.29.2011
  */
-@XmlRootElement
 @JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuLdapConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -7160480457430436511L;
@@ -29,10 +30,22 @@ public class GluuLdapConfiguration implements Serializable {
 	private String configId;
 	private String bindDN;
 	private String bindPassword;
+
+	@JsonIgnore
 	private List<SimpleProperty> servers;
+
+	@JsonProperty("servers")
+	private List<String> serversStringsList;
+
 	private int maxConnections;
 	private boolean useSSL;
+	
+	@JsonIgnore
 	private List<SimpleProperty> baseDNs;
+
+	@JsonProperty("baseDNs")
+	private List<String> baseDNsStringsList;
+
 	private String primaryKey;
 	private String localPrimaryKey;
 	private boolean useAnonymousBind;
@@ -42,6 +55,8 @@ public class GluuLdapConfiguration implements Serializable {
 	public GluuLdapConfiguration() {
 		this.servers = new ArrayList<SimpleProperty>();
 		this.baseDNs = new ArrayList<SimpleProperty>();
+
+		updateStringsLists();
 	}
 
 	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<SimpleProperty> servers, int maxConnections,
@@ -56,6 +71,8 @@ public class GluuLdapConfiguration implements Serializable {
 		this.primaryKey = primaryKey;
 		this.localPrimaryKey = localPrimaryKey;
 		this.useAnonymousBind = useAnonymousBind;
+
+		updateStringsLists();
 	}
 
 	public String getConfigId() {
@@ -152,6 +169,162 @@ public class GluuLdapConfiguration implements Serializable {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public List<String> getServersStringsList() {
+		return serversStringsList;
+	}
+
+	public void setServersStringsList(List<String> serversStringsList) {
+		this.serversStringsList = serversStringsList;
+
+		updateSimplePropertiesLists();
+	}
+
+	public List<String> getBaseDNsStringsList() {
+		return baseDNsStringsList;
+	}
+
+	public void setBaseDNsStringsList(List<String> baseDNsStringsList) {
+		this.baseDNsStringsList = baseDNsStringsList;
+
+		updateSimplePropertiesLists();
+	}
+
+	public void updateStringsLists() {
+		this.serversStringsList = toStringList(servers);
+		this.baseDNsStringsList = toStringList(baseDNs);
+	}
+
+	public void updateSimplePropertiesLists() {
+		this.servers = toSimpleProperties(serversStringsList);
+		this.baseDNs = toSimpleProperties(baseDNsStringsList);
+	}
+
+	private List<String> toStringList(List<SimpleProperty> values) {
+		if (values == null) {
+			return null;
+		}
+
+		List<String> result = new ArrayList<String>();
+
+		for (SimpleProperty simpleProperty : values) {
+			result.add(simpleProperty.getValue());
+		}
+
+		return result;
+	}
+
+	private List<SimpleProperty> toSimpleProperties(List<String> values) {
+		if (values == null) {
+			return null;
+		}
+
+		List<SimpleProperty> result = new ArrayList<SimpleProperty>();
+
+		for (String value : values) {
+			result.add(new SimpleProperty(value));
+		}
+
+		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((baseDNs == null) ? 0 : baseDNs.hashCode());
+		result = prime * result + ((bindDN == null) ? 0 : bindDN.hashCode());
+		result = prime * result + ((bindPassword == null) ? 0 : bindPassword.hashCode());
+		result = prime * result + ((configId == null) ? 0 : configId.hashCode());
+		result = prime * result + (enabled ? 1231 : 1237);
+		result = prime * result + ((localPrimaryKey == null) ? 0 : localPrimaryKey.hashCode());
+		result = prime * result + maxConnections;
+		result = prime * result + ((primaryKey == null) ? 0 : primaryKey.hashCode());
+		result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+		result = prime * result + (useAnonymousBind ? 1231 : 1237);
+		result = prime * result + (useSSL ? 1231 : 1237);
+		result = prime * result + version;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof GluuLdapConfiguration)) {
+			return false;
+		}
+		GluuLdapConfiguration other = (GluuLdapConfiguration) obj;
+		if (baseDNs == null) {
+			if (other.baseDNs != null) {
+				return false;
+			}
+		} else if (!baseDNs.equals(other.baseDNs)) {
+			return false;
+		}
+		if (bindDN == null) {
+			if (other.bindDN != null) {
+				return false;
+			}
+		} else if (!bindDN.equals(other.bindDN)) {
+			return false;
+		}
+		if (bindPassword == null) {
+			if (other.bindPassword != null) {
+				return false;
+			}
+		} else if (!bindPassword.equals(other.bindPassword)) {
+			return false;
+		}
+		if (configId == null) {
+			if (other.configId != null) {
+				return false;
+			}
+		} else if (!configId.equals(other.configId)) {
+			return false;
+		}
+		if (enabled != other.enabled) {
+			return false;
+		}
+		if (localPrimaryKey == null) {
+			if (other.localPrimaryKey != null) {
+				return false;
+			}
+		} else if (!localPrimaryKey.equals(other.localPrimaryKey)) {
+			return false;
+		}
+		if (maxConnections != other.maxConnections) {
+			return false;
+		}
+		if (primaryKey == null) {
+			if (other.primaryKey != null) {
+				return false;
+			}
+		} else if (!primaryKey.equals(other.primaryKey)) {
+			return false;
+		}
+		if (servers == null) {
+			if (other.servers != null) {
+				return false;
+			}
+		} else if (!servers.equals(other.servers)) {
+			return false;
+		}
+		if (useAnonymousBind != other.useAnonymousBind) {
+			return false;
+		}
+		if (useSSL != other.useSSL) {
+			return false;
+		}
+		if (version != other.version) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

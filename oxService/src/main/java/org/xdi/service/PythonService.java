@@ -2,14 +2,17 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.service;
+ */
+
+package org.xdi.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -19,6 +22,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.xdi.exception.PythonException;
@@ -40,17 +44,34 @@ public class PythonService implements Serializable {
 	private Log log;
 
 	private PythonInterpreter pythonInterpreter;
+	private boolean interpereterReady;
 
 	/*
 	 * Initialize singleton instance during startup
 	 */
-	public void initPythonInterpreter() {
-        try {
-    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
-		} catch (Exception ex) {
-			log.error("Failed to initialize PythonInterpreter correctly", ex);
+	public boolean initPythonInterpreter() {
+		boolean result = false;
+
+		if (isInitInterpreter()) {
+	        try {
+	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
+	            this.pythonInterpreter = new PythonInterpreter();
+	            
+	            // Init output redirect for all new interpreters
+	            this.pythonInterpreter.setOut(new PythonLoggerOutputStream(log, false));
+	            this.pythonInterpreter.setErr(new PythonLoggerOutputStream(log, true));
+	
+	            result = true;
+			} catch (PyException ex) {
+				log.error("Failed to initialize PythonInterpreter correctly", ex);
+			} catch (Exception ex) {
+				log.error("Failed to initialize PythonInterpreter correctly", ex);
+			}
 		}
-        this.pythonInterpreter = new PythonInterpreter();
+
+        this.interpereterReady = result;
+
+        return result;
 	}
 
 	/**
@@ -93,32 +114,39 @@ public class PythonService implements Serializable {
 		return props;
 	}
 
+	private boolean isInitInterpreter() {
+		String pythonHome = System.getenv("PYTHON_HOME");
+		return StringHelper.isNotEmpty(pythonHome);
+	}
+
 	public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
-		if (StringHelper.isEmpty(scriptName)) {
+		if (!interpereterReady || StringHelper.isEmpty(scriptName)) {
 			return null;
 		}
 
+    	PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
         try {
-			this.pythonInterpreter.execfile(scriptName);
+        	currentPythonInterpreter.execfile(scriptName);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
 	}
 
 	public <T> T loadPythonScript(InputStream scriptFile, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
-		if (scriptFile == null) {
+		if (!interpereterReady || (scriptFile == null)) {
 			return null;
 		}
 
+    	PythonInterpreter currentPythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
         try {
-			this.pythonInterpreter.execfile(scriptFile);
+        	currentPythonInterpreter.execfile(scriptFile);
 		} catch (Exception ex) {
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
 		}
 
-        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, this.pythonInterpreter);
+        return loadPythonScript(scriptPythonType, scriptJavaType, constructorArgs, currentPythonInterpreter);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -128,6 +156,7 @@ public class PythonService implements Serializable {
         if (scriptPythonTypeObject == null) {
         	return null;
         }
+        
 
         PyObject scriptPythonTypeClass;
         try {
@@ -151,6 +180,39 @@ public class PythonService implements Serializable {
 	 */
 	public static PythonService instance() {
 		return (PythonService) Component.getInstance(PythonService.class);
+	}
+	
+	class PythonLoggerOutputStream extends OutputStream {
+
+		private boolean error;
+		private Log log;
+		private StringBuffer buffer;
+
+		private PythonLoggerOutputStream(Log log, boolean error) {
+			this.error = error;
+			this.log = log;
+			this.buffer = new StringBuffer();
+		}
+
+		public void write(int b) throws IOException {
+			if (((char) b == '\n') || ((char) b == '\r')) {
+				flush();
+			} else {
+				buffer.append((char) b);
+			}
+		}
+
+		public void flush() {
+			if (buffer.length() > 0) {
+				if (error) {
+					this.log.error(buffer.toString());
+				} else {
+					this.log.info(buffer.toString());
+				}
+	
+				this.buffer.setLength(0);
+			}
+		}
 	}
 
 }

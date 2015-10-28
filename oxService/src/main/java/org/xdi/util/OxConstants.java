@@ -23,9 +23,11 @@ public  class OxConstants extends LDAPConstants {
 	public static final String MAIL = "mail";
 
 	public static final String CACHE_ORGANIZATION_KEY = "organization";
+	public static final String CACHE_METRICS_KEY = "metrics";
 	public static final String CACHE_APPLICATION_NAME = "ApplicationCache";
 	public static final String CACHE_ATTRIBUTE_NAME = "AttributeCache";
 	public static final String CACHE_LOOKUP_NAME = "LookupCache";
+	public static final String CACHE_METRICS_NAME = "metricsCache";
 
 	public static final String CACHE_ATTRIBUTE_KEY_LIST = "attributeList";
 	public static final String CACHE_ACTIVE_ATTRIBUTE_KEY_LIST = "activeAttributeList";

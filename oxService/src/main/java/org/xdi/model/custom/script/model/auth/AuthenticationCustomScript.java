@@ -4,13 +4,9 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.model.custom.script.model.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.model.CustomScript;
-import org.xdi.util.StringHelper;
 
 /**
  * Person authentication script configuration 
@@ -19,6 +15,8 @@ import org.xdi.util.StringHelper;
  */
 public class AuthenticationCustomScript extends CustomScript {
 
+	public static final String USAGE_TYPE_MODEL_PROPERTY = "usage_type";
+
 	public AuthenticationCustomScript() {}
 
 	public AuthenticationCustomScript(CustomScript customScript) {
@@ -26,33 +24,18 @@ public class AuthenticationCustomScript extends CustomScript {
 	}
 
 	public AuthenticationScriptUsageType getUsageType() {
+		SimpleCustomProperty moduleProperty = getModuleProperty(USAGE_TYPE_MODEL_PROPERTY);
 		AuthenticationScriptUsageType usageType = null;
 
-		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-		if (moduleProperties == null) {
+		if (moduleProperty == null) {
 			return usageType;
 		}
 
-		for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
-			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), "usage_type")) {
-				usageType = AuthenticationScriptUsageType.getByValue(moduleProperty.getValue2());
-				break;
-			}
-		}
-
-		return usageType;
+		return AuthenticationScriptUsageType.getByValue(moduleProperty.getValue2());
 	}
 
 	public void setUsageType(AuthenticationScriptUsageType usageType) {
-		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-		
-		if (moduleProperties == null) {
-			moduleProperties = new ArrayList<SimpleCustomProperty>();
-			setModuleProperties(moduleProperties);
-		}
-
-		SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty("usage_type", usageType.getValue());
-		moduleProperties.add(usageTypeModuleProperties);
+		setModuleProperty(USAGE_TYPE_MODEL_PROPERTY, usageType.getValue());
 	}
 
 }
