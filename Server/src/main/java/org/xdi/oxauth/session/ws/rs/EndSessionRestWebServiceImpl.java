@@ -33,6 +33,7 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
+ * @author Yuriy Zabrovarnyy
  * @version October 1, 2015
  */
 @Name("endSessionRestWebService")
@@ -78,10 +79,17 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, authorizationGrant);
                     log.info("End session result for '{0}': '{1}'", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
                 }
+            } else {
+                log.info("Failed to find out authorization grant for id_token_hing '{0}'", idTokenHint);
+
+                return Response
+                        .status(401)
+                        .entity(errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT))
+                        .build();
             }
-            boolean isGrantAndNoExternalLogout = authorizationGrant != null && !isExternalAuthenticatorLogoutPresent;
-            boolean isGrantAndExternalLogoutSuccessful = authorizationGrant != null && isExternalAuthenticatorLogoutPresent && externalLogoutResult;
-            if (isGrantAndNoExternalLogout || isGrantAndExternalLogoutSuccessful) {
+
+            boolean isGrantAndExternalLogoutSuccessful = isExternalAuthenticatorLogoutPresent && externalLogoutResult;
+            if (!isExternalAuthenticatorLogoutPresent || isGrantAndExternalLogoutSuccessful) {
                 authorizationGrant.revokeAllTokens();
 
                 // Validate redirectUri
@@ -107,23 +115,27 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private void removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String id = sessionId;
-        if (StringHelper.isEmpty(id)) {
-            id = sessionIdService.getSessionIdFromCookie(httpRequest);
-        }
-
-        if (StringHelper.isNotEmpty(id)) {
-            SessionId ldapSessionId = sessionIdService.getSessionId(id);
-            if (ldapSessionId != null) {
-                boolean result = sessionIdService.remove(ldapSessionId);
-                if (!result) {
-                    log.error("Failed to remove session_id '{0}' from LDAP", id);
-                }
-            } else {
-                log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+        try {
+            String id = sessionId;
+            if (StringHelper.isEmpty(id)) {
+                id = sessionIdService.getSessionIdFromCookie(httpRequest);
             }
-        }
 
-        sessionIdService.removeSessionIdCookie(httpResponse);
+            if (StringHelper.isNotEmpty(id)) {
+                SessionId ldapSessionId = sessionIdService.getSessionId(id);
+                if (ldapSessionId != null) {
+                    boolean result = sessionIdService.remove(ldapSessionId);
+                    if (!result) {
+                        log.error("Failed to remove session_id '{0}' from LDAP", id);
+                    }
+                } else {
+                    log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            sessionIdService.removeSessionIdCookie(httpResponse);
+        }
     }
 }
