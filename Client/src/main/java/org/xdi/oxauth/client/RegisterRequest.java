@@ -46,6 +46,7 @@ public class RegisterRequest extends BaseRequest {
     private String clientUri;
     private AuthenticationMethod tokenEndpointAuthMethod;
     private String policyUri;
+    private String logoutUri;
     private String tosUri;
     private String jwksUri;
     private String jwks;
@@ -132,6 +133,23 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setAccessToken(String registrationAccessToken) {
         this.registrationAccessToken = registrationAccessToken;
+    }
+
+    /**
+     * Gets logout uri.
+     * @return logout uri
+     */
+    public String getLogoutUri() {
+        return logoutUri;
+    }
+
+    /**
+     * Sets logout uri
+     *
+     * @param logoutUri logout uri
+     */
+    public void setLogoutUri(String logoutUri) {
+        this.logoutUri = logoutUri;
     }
 
     /**
