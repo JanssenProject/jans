@@ -48,6 +48,6 @@ public interface JwkRestWebService {
      */
     @GET
     @Path("/jwks")
-    @Produces({MediaType.TEXT_PLAIN})
+    @Produces({MediaType.APPLICATION_JSON})
     Response requestJwk(@Context SecurityContext securityContext);
 }
