@@ -6,43 +6,7 @@
 
 package org.xdi.oxauth.client;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_ID;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FEDERATION_METADATA_URL;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -51,6 +15,13 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.xdi.oxauth.model.register.ApplicationType;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.Map;
+
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
@@ -233,6 +204,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 }
                 if (getRequest().getPostLogoutRedirectUris() != null && !getRequest().getPostLogoutRedirectUris().isEmpty()) {
                     requestBody.put(POST_LOGOUT_REDIRECT_URIS.toString(), getRequest().getPostLogoutRedirectUris());
+                }
+                if (!Strings.isNullOrEmpty(getRequest().getLogoutUri())) {
+                    requestBody.put(LOGOUT_URI.getName(), getRequest().getLogoutUri());
+                }
+                if (getRequest().getLogoutSessionRequired() != null) {
+                    requestBody.put(LOGOUT_SESSION_REQUIRED.getName(), getRequest().getLogoutSessionRequired());
                 }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
