@@ -22,3 +22,10 @@ ou: oxtrust
 oxTrustConfApplication::%(oxtrust_config_base64)s
 oxTrustConfCacheRefresh::%(oxtrust_cache_refresh_base64)s
 oxRevision: 1
+
+dn: ou=oxidp,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
+objectClass: top
+objectClass: oxIdpConfiguration
+ou: oxidp
+oxConfApplication::%(oxidp_config_base64)s
+oxRevision: 1
