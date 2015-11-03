@@ -59,9 +59,9 @@ public class LDAPConnectionProvider {
 			init(props);
 		} catch (LDAPException ex) {
 			creationResultCode = ex.getResultCode();
-			log.error("Failed to create connection pool", ex);
+			log.error("Failed to create connection pool with properties: " + props, ex);
 		} catch (Exception ex) {
-			log.error("Failed to create connection pool", ex);
+			log.error("Failed to create connection pool with properties: " + props, ex);
 		}
 	}
 
