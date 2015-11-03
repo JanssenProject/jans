@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.registration;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -15,10 +16,15 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -174,5 +180,54 @@ public class RegisterParamsValidator {
         }
 
         return true;
+    }
+
+    public static void validateLogoutUri(String logoutUri, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
+
+        // preconditions
+        if (Strings.isNullOrEmpty(logoutUri) || redirectUris == null || redirectUris.isEmpty()) {
+            LOG.error("Preconditions of logout uri validation are failed.");
+            throwInvalidLogoutUri(errorResponseFactory);
+            return;
+        }
+
+        try {
+            Set<String> redirectUriHosts = collectUriHosts(redirectUris);
+
+            URI uri = new URI(logoutUri);
+
+            if (!redirectUriHosts.contains(uri.getHost())) {
+                LOG.error("logout uri host is not within redirect_uris, logout_uri: {0}, redirect_uris: {1}", logoutUri, redirectUris);
+                throwInvalidLogoutUri(errorResponseFactory);
+                return;
+            }
+
+            if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
+                LOG.error("logout uri schema is not https, logout_uri: {0}", logoutUri);
+                throwInvalidLogoutUri(errorResponseFactory);
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throwInvalidLogoutUri(errorResponseFactory);
+        }
+    }
+
+    private static void throwInvalidLogoutUri(ErrorResponseFactory errorResponseFactory) throws WebApplicationException {
+        throw new WebApplicationException(
+                Response.status(Response.Status.BAD_REQUEST.getStatusCode()).
+                        entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI)).
+                        cacheControl(ServerUtil.cacheControl(true, false)).
+                        header("Pragma", "no-cache").
+                        build());
+    }
+
+    private static Set<String> collectUriHosts(List<String> uriList) throws URISyntaxException {
+        Set<String> hosts = new HashSet<String>();
+
+        for (String redirectUri : uriList) {
+            URI uri = new URI(redirectUri);
+            hosts.add(uri.getHost());
+        }
+        return hosts;
     }
 }
