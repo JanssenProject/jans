@@ -110,8 +110,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
             }
 
-            log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}",
-                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri());
+            log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
+                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
             if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
 
@@ -122,6 +122,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
                         builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                     } else {
+                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUri(), r.getRedirectUris(), errorResponseFactory);
+
                         String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
                         String inum = inumService.generateClientInum();
@@ -187,6 +189,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                 }
             } else {
+                log.debug("Dynamic client registration is disabled.");
                 builder = Response.status(Response.Status.BAD_REQUEST).
                         entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.ACCESS_DENIED));
             }
