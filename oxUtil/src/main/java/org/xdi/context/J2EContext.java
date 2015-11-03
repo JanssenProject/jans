@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * This is wrapper and utility for J2E request and response
@@ -150,4 +151,15 @@ public class J2EContext implements WebContext {
 			return requestURL.append('?').append(queryString).toString();
 		}
 	}
+
+	@Override
+	public void sendRedirect(String location) throws IOException {
+		response.sendRedirect(location);
+	}
+
+	@Override
+	public HttpSession getSession(boolean create) {
+		return request.getSession(create);
+	}
+
 }

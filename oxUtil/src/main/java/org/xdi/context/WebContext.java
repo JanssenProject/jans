@@ -8,6 +8,8 @@ package org.xdi.context;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * This is interface for J2E context wrapper
  *  
@@ -119,5 +121,9 @@ public interface WebContext {
 	 * @return the Url
 	 */
 	public String getFullRequestURL();
+
+	public void sendRedirect(String location) throws IOException;
+
+	public HttpSession getSession(boolean create);
 
 }

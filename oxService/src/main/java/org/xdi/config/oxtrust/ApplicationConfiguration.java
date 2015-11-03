@@ -23,11 +23,8 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String orgInum;
 	private String orgIname;
-	private String orgDisplayName;
-	private String orgShortName;
 	private String orgSupportEmail;
 
-	private String applianceIname;
 	private String applianceInum;
 	private String applianceUrl;
 
@@ -162,36 +159,12 @@ public final class ApplicationConfiguration implements Serializable {
 		this.orgIname = orgIname;
 	}
 
-	public String getOrgDisplayName() {
-		return orgDisplayName;
-	}
-
-	public void setOrgDisplayName(String orgDisplayName) {
-		this.orgDisplayName = orgDisplayName;
-	}
-
-	public String getOrgShortName() {
-		return orgShortName;
-	}
-
-	public void setOrgShortName(String orgShortName) {
-		this.orgShortName = orgShortName;
-	}
-
 	public String getOrgSupportEmail() {
 		return orgSupportEmail;
 	}
 
 	public void setOrgSupportEmail(String orgSupportEmail) {
 		this.orgSupportEmail = orgSupportEmail;
-	}
-
-	public String getApplianceIname() {
-		return applianceIname;
-	}
-
-	public void setApplianceIname(String applianceIname) {
-		this.applianceIname = applianceIname;
 	}
 
 	public String getApplianceInum() {
