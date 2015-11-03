@@ -456,6 +456,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, POST_LOGOUT_REDIRECT_URIS.toString(), client.getPostLogoutRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_URIS.toString(), client.getRequestUris());
 
+        // Logout params
+        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_URI.toString(), client.getLogoutUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_SESSION_REQUIRED.toString(), client.getLogoutSessionRequired());
+
         // Federation Params
         Util.addToJSONObjectIfNotNull(responseJsonObject, FEDERATION_METADATA_URL.toString(), client.getFederationURI());
         Util.addToJSONObjectIfNotNull(responseJsonObject, FEDERATION_METADATA_ID.toString(), client.getFederationId());

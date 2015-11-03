@@ -176,6 +176,19 @@ public enum RegisterRequestParam {
     POST_LOGOUT_REDIRECT_URIS("post_logout_redirect_uris"),
 
     /**
+     * RP URL that will cause the RP to log itself out when rendered in an iframe by the OP.
+     * A sid (session ID) query parameter MAY be included by the OP to enable the RP to validate the request and
+     * to determine which of the potentially multiple sessions is to be logged out.
+     */
+    LOGOUT_URI("logout_uri"),
+
+    /**
+     * 	Boolean value specifying whether the RP requires that a sid (session ID) query parameter be included
+     * 	to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.
+     */
+    LOGOUT_SESSION_REQUIRED("logout_session_required"),
+
+    /**
      * Array of request_uri values that are pre-registered by the Client for use at the Authorization Server.
      */
     REQUEST_URIS("request_uris"),
@@ -189,15 +202,15 @@ public enum RegisterRequestParam {
     /**
      * Parameter name
      */
-    private final String m_name;
+    private final String name;
 
     /**
      * Constructor
      *
-     * @param p_name parameter name
+     * @param name parameter name
      */
-    private RegisterRequestParam(String p_name) {
-        m_name = p_name;
+    private RegisterRequestParam(String name) {
+        this.name = name;
     }
 
     /**
@@ -206,7 +219,7 @@ public enum RegisterRequestParam {
      * @return parameter name
      */
     public String getName() {
-        return m_name;
+        return name;
     }
 
     /**
@@ -239,6 +252,6 @@ public enum RegisterRequestParam {
 
     @Override
     public String toString() {
-        return m_name;
+        return name;
     }
 }
