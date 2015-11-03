@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,7 +63,10 @@ public class SessionId implements Serializable {
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
-    
+
+    @LdapAttribute(name = "oxAssociatedClient")
+    private List<String> associatedClientDns;
+
     @Transient
     private transient boolean persisted;
 
@@ -75,6 +79,14 @@ public class SessionId implements Serializable {
 
     public void setDn(String p_dn) {
         dn = p_dn;
+    }
+
+    public List<String> getAssociatedClientDns() {
+        return associatedClientDns;
+    }
+
+    public void setAssociatedClientDns(List<String> associatedClientDns) {
+        this.associatedClientDns = associatedClientDns;
     }
 
     public SessionIdState getState() {
@@ -174,9 +186,7 @@ public class SessionId implements Serializable {
 
         SessionId id1 = (SessionId) o;
 
-        if (id != null ? !id.equals(id1.id) : id1.id != null) return false;
-
-        return true;
+        return !(id != null ? !id.equals(id1.id) : id1.id != null);
     }
 
     @Override
@@ -185,13 +195,21 @@ public class SessionId implements Serializable {
     }
 
     @Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("SessionId [dn=").append(dn).append(", id=").append(id).append(", lastUsedAt=").append(lastUsedAt)
-				.append(", userDn=").append(userDn).append(", authenticationTime=").append(authenticationTime).append(", state=")
-				.append(state).append(", permissionGranted=").append(permissionGranted).append(", permissionGrantedMap=")
-				.append(permissionGrantedMap).append(", sessionAttributes=").append(sessionAttributes).append("]");
-		return builder.toString();
-	}
-
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("SessionId");
+        sb.append("{associatedClientDns=").append(associatedClientDns);
+        sb.append(", dn='").append(dn).append('\'');
+        sb.append(", id='").append(id).append('\'');
+        sb.append(", lastUsedAt=").append(lastUsedAt);
+        sb.append(", userDn='").append(userDn).append('\'');
+        sb.append(", authenticationTime=").append(authenticationTime);
+        sb.append(", state=").append(state);
+        sb.append(", permissionGranted=").append(permissionGranted);
+        sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
+        sb.append(", sessionAttributes=").append(sessionAttributes);
+        sb.append(", persisted=").append(persisted);
+        sb.append('}');
+        return sb.toString();
+    }
 }
