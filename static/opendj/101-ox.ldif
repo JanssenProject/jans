@@ -2183,7 +2183,7 @@ objectclasses: ( oxAuthFederationTrust-oid NAME 'oxAuthFederationTrust' SUP top 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthSessionId-oid NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
  ( lastModifiedTime $ oxAuthAuthenticationTime $ oxAuthPermissionGranted
-  $ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute )
+  $ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute $ oxAssociatedClient )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthConfiguration-oid NAME 'oxAuthConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxAuthConfCustomAuthMethod $ oxAuthConfDynamic $ oxAuthConfErrors
