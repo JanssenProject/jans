@@ -54,7 +54,6 @@ class Setup(object):
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
-        self.modifyNetworking = False
         self.downloadWars = None
 
         self.components = {'oxauth':  {'enabled': True},
@@ -285,7 +284,6 @@ class Setup(object):
             + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
             + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
             + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-            + 'Modify Networking'.ljust(30) + `self.modifyNetworking`.rjust(35) + "\n" \
             + 'Install oxAuth'.ljust(30) + `self.components['oxauth']['enabled']`.rjust(35) + "\n" \
             + 'Install oxTrust'.ljust(30) + `self.components['oxtrust']['enabled']`.rjust(35) + "\n" \
             + 'Install LDAP'.ljust(30) + `self.components['ldap']['enabled']`.rjust(35) + "\n" \
@@ -1086,14 +1084,9 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
             sys.exit()
 
-    def modify_networking_prompt(self):
-        if self.modifyNetworking:
-            self.ce_templates[self.etc_hosts] = True
-            self.ce_templates[self.etc_hostname] = True
-
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
-        if self.components['httpd']['enabled'] | self.modifyNetworking:
+        if self.components['httpd']['enabled']:
             detectedIP = None
             try:
                 testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -1151,9 +1144,6 @@ class Setup(object):
         installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1536')
         randomPW = installObject.getPW()
         installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
-        modifyNetworking = self.getPrompt("Update the hostname, hosts, and resolv.conf files?", "No")[0].lower()
-        if modifyNetworking == 'y':
-            installObject.modifyNetworking = True
 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
         if promptForOxAuth == 'y':
@@ -1447,14 +1437,18 @@ class Setup(object):
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
-
-        self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
-        self.run(['/bin/hostname', self.hostname])
-
-        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+        self.ce_templates[self.etc_hosts] = True
+        self.ce_templates[self.etc_hostname] = True
+            
+        if self.os_type in ['debian', 'ubuntu']:
+            self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
 
         if self.os_type in ['centos', 'redhat', 'fedora']:
             self.copyFile("%s/network" % self.outputFolder, self.network)
+
+        self.run(['/bin/hostname', self.hostname])
+
+        self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
 
     def writeLdapPW(self):
         try:
@@ -1519,8 +1513,6 @@ def getOpts(argv, setupOptions):
             setupOptions['installHTTPD'] = False
         elif opt == "-s":
             setupOptions['installSAML'] = True
-        elif opt == "-u":
-            setupOptions['modifyNetworking'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == '-r':
@@ -1540,8 +1532,7 @@ if __name__ == '__main__':
         'installSAML': False,
         'installAsimba': False,
         'installCAS': False,
-        'installOxAuthRP': False,
-        'modifyNetworking': False
+        'installOxAuthRP': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -1549,7 +1540,6 @@ if __name__ == '__main__':
     installObject = Setup(setupOptions['install_dir'])
 
     installObject.downloadWars = setupOptions['downloadWars']
-    installObject.modifyNetworking = setupOptions['modifyNetworking']
 
     installObject.components['oxauth']['enabled'] = setupOptions['installOxAuth']
     installObject.components['oxtrust']['enabled'] = setupOptions['installOxTrust']
@@ -1598,7 +1588,6 @@ if __name__ == '__main__':
             installObject.makeFolders()
             installObject.make_salt()
             installObject.downloadWarFiles()
-            installObject.modify_networking_prompt()
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
