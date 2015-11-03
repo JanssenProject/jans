@@ -30,6 +30,12 @@ public enum RegisterErrorResponseType implements IErrorType {
      * The access token provided is expired, revoked, malformed, or invalid for other reasons.
      */
     INVALID_TOKEN("invalid_token"),
+
+    /**
+     * Value of logout_uri is invalid.
+     */
+    INVALID_LOGOUT_URI("invalid_logout_uri"),
+
     /**
      * The authorization server denied the request.
      */
