@@ -57,4 +57,6 @@ public interface ConfigurationResponseClaim {
     public static final String OP_TOS_URI = "op_tos_uri";
     public static final String SCOPE_KEY = "scope";
     public static final String CLAIMS_KEY = "claims";
+    public static final String HTTP_LOGOUT_SUPPORTED = "http_logout_supported";
+    public static final String LOGOUT_SESSION_SUPPORTED = "logout_session_supported";
 }
