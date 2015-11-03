@@ -1,0 +1,15 @@
+{
+    "applicationName":"Saml",
+
+    "openIdProviderUrl":"https://%(hostname)s/.well-known/openid-configuration",
+    "openIdClientId":"%(oxauth_client_id)s",
+    "openIdClientPassword":"%(oxauthClient_encoded_pw)s",
+    "openIdScopes":[
+        "openid",
+        "profile",
+        "email",
+        "user_name",
+        
+    ],
+    "openIdRedirectUrl": "https://%(hostname)s/identity/authentication/finishlogout"
+}
