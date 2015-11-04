@@ -1437,8 +1437,6 @@ class Setup(object):
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
-        self.ce_templates[self.etc_hosts] = True
-        self.ce_templates[self.etc_hostname] = True
             
         if self.os_type in ['debian', 'ubuntu']:
             self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
