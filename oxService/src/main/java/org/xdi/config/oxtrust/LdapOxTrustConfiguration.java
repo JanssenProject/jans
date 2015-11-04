@@ -9,6 +9,7 @@ package org.xdi.config.oxtrust;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.Entry;
 
@@ -25,11 +26,13 @@ public class LdapOxTrustConfiguration extends Entry {
 	@LdapDN
     private String dn;
 
+	@LdapJsonObject
 	@LdapAttribute(name = "oxTrustConfApplication")
-    private String application;
+    private ApplicationConfiguration application;
 
+	@LdapJsonObject
 	@LdapAttribute(name = "oxTrustConfCacheRefresh")
-    private String cacheRefresh;
+    private CacheRefreshConfiguration cacheRefresh;
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
@@ -37,19 +40,19 @@ public class LdapOxTrustConfiguration extends Entry {
     public LdapOxTrustConfiguration() {
 	}
 
-	public String getApplication() {
+	public ApplicationConfiguration getApplication() {
 		return application;
 	}
 
-	public void setApplication(String application) {
+	public void setApplication(ApplicationConfiguration application) {
 		this.application = application;
 	}
 
-	public String getCacheRefresh() {
+	public CacheRefreshConfiguration getCacheRefresh() {
 		return cacheRefresh;
 	}
 
-	public void setCacheRefresh(String cacheRefresh) {
+	public void setCacheRefresh(CacheRefreshConfiguration cacheRefresh) {
 		this.cacheRefresh = cacheRefresh;
 	}
 
