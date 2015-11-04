@@ -124,6 +124,13 @@ description: Dynamic scope work_phone
 defaultScope: true
 oxScopeType: dynamic
 
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+add: oxAuthClaim
+oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+
 ######################################
 # People
 ######################################
