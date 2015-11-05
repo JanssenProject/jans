@@ -171,7 +171,7 @@
     "oxId":"https://%(hostname)s/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":86400,
-    "dynamicRegistrationPersistClientAuthorizations":null,
+    "dynamicRegistrationPersistClientAuthorizations":false,
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
@@ -186,7 +186,7 @@
         {
             "filter":"(&(mail=*{0}*)(inum={1}))",
             "bind":false,
-            "bindPasswordAttribute":null,
+            "bindPasswordAttribute":"",
             "baseDn":"o=gluu"
         },
         {
@@ -199,21 +199,20 @@
     "clientAuthenticationFilters":[
         {
             "filter":"myCustomAttr1={0}",
-            "bind":null,
-            "bindPasswordAttribute":null,
+            "bind":"",
+            "bindPasswordAttribute":"",
             "baseDn":"ou=clients,o=%(inumOrg)s,o=gluu"
         }
     ],
-    "externalAuthenticatorEnabled":null,
     "applianceInum":"%(inumAppliance)s",
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":false,
     "configurationUpdateInterval":3600,
-    "cssLocation":null,
-    "jsLocation":null,
-    "imgLocation":null,
+    "cssLocation":"",
+    "jsLocation":"",
+    "imgLocation":"",
     "metricReporterInterval":300,
     "metricReporterKeepDataDays":15
 }
