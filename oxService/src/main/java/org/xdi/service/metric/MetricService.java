@@ -166,11 +166,11 @@ public abstract class MetricService implements Serializable {
 		return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
 	}
 
-	public Map<MetricType, List<MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
+	public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
 			List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
 		prepareBranch(null, applicationType);
 
-		Map<MetricType, List<MetricEntry>> result = new HashMap<MetricType, List<MetricEntry>>();
+		Map<MetricType, List<? extends MetricEntry>> result = new HashMap<MetricType, List<? extends MetricEntry>>();
 
 		if ((metricTypes == null) || (metricTypes.size() == 0)) {
 			return result;
@@ -200,10 +200,13 @@ public abstract class MetricService implements Serializable {
 	
 				Filter filter = Filter.createANDFilter(metricTypeFilters);
 	
-				List<MetricEntry> metricTypeMonthResult = (List<MetricEntry>) ldapEntryManager.findEntries(metricDn,
+				List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) ldapEntryManager.findEntries(metricDn,
 						metricType.getMetricEntryType(), returnAttributes, filter);
 				metricTypeResult.addAll(metricTypeMonthResult);
 			}
+			// Sort entries to avoid calculation errors
+			ldapEntryManager.sortListByProperties(MetricEntry.class, metricTypeResult, "creationDate");
+
 			result.put(metricType, metricTypeResult);
 		}
 
