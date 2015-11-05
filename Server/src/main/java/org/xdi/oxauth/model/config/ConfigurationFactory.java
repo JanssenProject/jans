@@ -94,7 +94,6 @@ public class ConfigurationFactory {
     private long loadedRevision = -1;
     private boolean loadedFromLdap = true;
 
-
     @Create
     public void init() {
         this.isActive = new AtomicBoolean(true);
