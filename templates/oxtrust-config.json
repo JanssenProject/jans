@@ -6,6 +6,9 @@
     "applianceInum":"%(inumAppliance)s",
 
     "baseDN":"o=gluu",
+
+    "baseEndpoint":"https://%(hostname)s/identity/seam/resource/restv1",
+
     "authMode":"",
 
     "idpUrl":"https://%(hostname)s",
