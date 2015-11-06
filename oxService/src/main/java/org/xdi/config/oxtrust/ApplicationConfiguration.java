@@ -28,6 +28,8 @@ public final class ApplicationConfiguration implements Serializable {
 	private String applianceInum;
 	private String applianceUrl;
 
+	private String baseEndpoint;
+
 	private String schemaAddObjectClassWithoutAttributeTypesDefinition;
 	private String schemaAddObjectClassWithAttributeTypesDefinition;
 
@@ -182,6 +184,14 @@ public final class ApplicationConfiguration implements Serializable {
 	public void setApplianceUrl(String applianceUrl) {
 		this.applianceUrl = applianceUrl;
 	}
+
+    public String getBaseEndpoint() {
+        return baseEndpoint;
+    }
+
+    public void setBaseEndpoint(String baseEndpoint) {
+        this.baseEndpoint = baseEndpoint;
+    }
 
 	public String getSchemaAddObjectClassWithoutAttributeTypesDefinition() {
 		return schemaAddObjectClassWithoutAttributeTypesDefinition;

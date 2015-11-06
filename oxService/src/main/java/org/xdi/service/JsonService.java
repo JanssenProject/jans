@@ -47,6 +47,10 @@ public class JsonService {
 		return mapper.writeValueAsString(obj);
 	}
 
+	public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+	}
+
     /**
      * Get jsonService instance
      *
