@@ -1,0 +1,36 @@
+# SCIM Scope
+dn: inum=%(inumOrg)s!0009!FF81.E33B,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+oxUrl: https://%(hostname)s/uma/scim
+oxType: external
+objectClass: oxAuthUmaScopeDescription
+objectClass: top
+oxRevision: 0
+displayName: SCIM Access
+inum: %(inumOrg)s!0010!FF81.E33B
+oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
+
+# SCIM Resource Set
+dn: inum=%(inumOrg)s!0010!FF81.E33B,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
+oxFaviconImage: http://gluu.org/img/logo.png
+objectClass: oxAuthUmaResourceSet
+objectClass: top
+oxRevision: 0
+oxId: 1446839101270
+displayName: SCIM Resource Set
+oxAuthUmaScope: inum=%(inumOrg)s!0010!FF81.E33B,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+oxResource: https://%(hostname)s/identity/seam/resource/restv1/v1
+oxResource: https://%(hostname)s/identity/seam/resource/restv1/v2
+
+# SCIM Client
+dn: inum=%(inumOrg)s!0008!4C72.3107,ou=clients,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+inum: inum=%(inumOrg)s!0008!4C72.3107
+oxAuthClientSecret: %(scim_client_secret_encoded)s
+oxAuthTokenEndpointAuthMethod: client_secret_post
+oxPersistClientAuthorizations: false
+oxAuthRedirectURI: https://%(hostname)s/scim-client
+oxAuthAppType: native
+oxAuthTrustedClient: false
+displayName: SCIM Client
+oxAuthIdTokenSignedResponseAlg: HS256

@@ -1,12 +1,12 @@
 version: 1
 
-dn: inum=%(inumOrg)s!031C.4A65,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!031C.4A65,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Id Generator script
 displayName: id_generator
 gluuStatus: false
-inum: %(inumOrg)s!031C.4A65
+inum: %(inumOrg)s!0011!031C.4A65
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5pZCBpbXBvcnQgS
@@ -35,13 +35,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5pZCBpbXBvcnQgS
 oxScriptType: id_generator
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!13D3.E7AD,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!13D3.E7AD,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Cache Refresh script
 displayName: cache_refresh
 gluuStatus: false
-inum: %(inumOrg)s!13D3.E7AD
+inum: %(inumOrg)s!0011!13D3.E7AD
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
@@ -80,13 +80,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
 oxScriptType: cache_refresh
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample UMA Authorization policy
 displayName: uma_autorization_policy
 gluuStatus: false
-inum: %(inumOrg)s!2DAF.F995
+inum: %(inumOrg)s!0011!2DAF.F995
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0I
@@ -124,13 +124,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0I
 oxScriptType: uma_authorization_policy
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!522F.CDC5,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!522F.CDC5,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Update User script
 displayName: update_user
 gluuStatus: false
-inum: %(inumOrg)s!522F.CDC5
+inum: %(inumOrg)s!0011!522F.CDC5
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
@@ -158,13 +158,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
 oxScriptType: update_user
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!6EA0.8F0C,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!6EA0.8F0C,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample User Registration script
 displayName: user_registration
 gluuStatus: false
-inum: %(inumOrg)s!6EA0.8F0C
+inum: %(inumOrg)s!0011!6EA0.8F0C
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
@@ -210,7 +210,7 @@ objectClass: top
 description: Sample Authentication script
 displayName: basic
 gluuStatus: false
-inum: %(inumOrg)s!A51E.76DA
+inum: %(inumOrg)s!0011!A51E.76DA
 oxLevel: 100
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description
  ":""}
@@ -259,13 +259,13 @@ oxScript:: ZnJvbSBvcmcuamJvc3Muc2VhbS5zZWN1cml0eSBpbXBvcnQgSWRlbnRpdHkNCmZyb
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!8BAF.80D6,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!8BAF.80D6,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Fido U2F authentication module
 displayName: u2f
 gluuStatus: false
-inum: %(inumOrg)s!8BAF.80D6
+inum: %(inumOrg)s!0011!8BAF.80D6
 oxConfigurationProperty: {"value1":"u2f_application_id","value2":"https://%(hostname)s","description":""}
 oxConfigurationProperty: {"value1":"u2f_server_uri","value2":"https://%(hostname)s","description":""}
 oxLevel: 10
@@ -414,13 +414,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5hdXRoIGltcG9yd
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!5018.F9CF,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!5018.F9CF,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: DUO authentication module
 displayName: duo
 gluuStatus: false
-inum: %(inumOrg)s!5018.F9CF
+inum: %(inumOrg)s!0011!5018.F9CF
 oxConfigurationProperty: {"value1":"duo_creds_file","value2":"/etc/certs/duo
  _creds.json","description":""}
 oxConfigurationProperty: {"value1":"duo_host","value2":"api-random.duosecuri
@@ -578,13 +578,13 @@ oxScript:: ZnJvbSBvcmcuamJvc3Muc2VhbS5jb250ZXh0cyBpbXBvcnQgQ29udGV4dCwgQ29ud
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!14AF.A70C,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!14AF.A70C,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: CAS authentication module
 displayName: cas
 gluuStatus: false
-inum: %(inumOrg)s!14AF.A70C
+inum: %(inumOrg)s!0011!14AF.A70C
 oxConfigurationProperty: {"value1":"cas_map_user","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"cas_renew_opt","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"cas_host","value2":"https://%(hostname)s/cas","description":""}
@@ -846,13 +846,13 @@ oxScript:: ZnJvbSBvcmcuamJvc3Muc2VhbS5jb250ZXh0cyBpbXBvcnQgQ29udGV4dCwgQ29ud
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!7523.8F2D,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!7523.8F2D,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Google+ authentication module
 displayName: gplus
 gluuStatus: false
-inum: %(inumOrg)s!7523.8F2D
+inum: %(inumOrg)s!0011!7523.8F2D
 oxConfigurationProperty: {"value1":"gplus_client_secrets_file","value2":"/et
  c/certs/gplus_client_secrets.json","description":""}
 oxConfigurationProperty: {"value1":"gplus_deployment_type","value2":"enroll"
@@ -1324,13 +1324,13 @@ oxScript:: ZnJvbSBvcmcuamJvc3Muc2VhbS5jb250ZXh0cyBpbXBvcnQgQ29udGV4dCwgQ29ud
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!D40C.1CA3,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!D40C.1CA3,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Saml authentication module
 displayName: saml
 gluuStatus: false
-inum: %(inumOrg)s!D40C.1CA3
+inum: %(inumOrg)s!0011!D40C.1CA3
 oxConfigurationProperty: {"value1":"saml_certificate_file","value2":"/etc/ce
  rts/saml.pem","description":""}
 oxConfigurationProperty: {"value1":"saml_deployment_type","value2":"enroll",
@@ -1920,13 +1920,13 @@ oxScript:: ZnJvbSBvcmcuamJvc3Muc2VhbS5jb250ZXh0cyBpbXBvcnQgQ29udGV4dCwgQ29ud
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!DAA9.B788,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.B788,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Client Registration script
 displayName: client_registration
 gluuStatus: false
-inum: %(inumOrg)s!DAA9.B788
+inum: %(inumOrg)s!0011!DAA9.B788
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5jbGllbnQgaW1wb
@@ -1973,13 +1973,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5jbGllbnQgaW1wb
 oxScriptType: client_registration
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!DAA9.B789,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!DAA9.B789,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Application Session script
 displayName: application_session
 gluuStatus: false
-inum: %(inumOrg)s!DAA9.B789
+inum: %(inumOrg)s!0011!DAA9.B789
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5zZXNzaW9uIGltc
@@ -2009,13 +2009,13 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5zZXNzaW9uIGltc
 oxScriptType: application_session
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Dynamic Scope script
 displayName: dynamic_scope
 gluuStatus: true
-inum: %(inumOrg)s!031C.5621
+inum: %(inumOrg)s!0011!031C.5621
 oxLevel: 100
 oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS5zY29wZSBpbXBvcnQgRHluYW1pY1Njb3BlVHlwZQ0KZnJvbSBvcmcueGRpLnV0aWwgaW1wb3J0IFN0cmluZ0hlbHBlciwgQXJyYXlIZWxwZXINCmZyb
