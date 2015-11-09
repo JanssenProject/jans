@@ -204,7 +204,6 @@
             "baseDn":"ou=clients,o=${config.oxauth.organization},o=gluu"
         }
     ],
-    "externalAuthenticatorEnabled":null,
     "applianceInum":"${config.oxauth.appliance}",
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":60,
