@@ -22,10 +22,10 @@ oxResource: https://%(hostname)s/identity/seam/resource/restv1/v1
 oxResource: https://%(hostname)s/identity/seam/resource/restv1/v2
 
 # SCIM Client
-dn: inum=%(inumOrg)s!0008!4C72.3107,ou=clients,o=%(inumOrg)s,o=gluu
+dn: inum=%(scim_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
-inum: inum=%(inumOrg)s!0008!4C72.3107
+inum: inum=%(scim_client_id)s
 oxAuthClientSecret: %(scim_client_secret_encoded)s
 oxAuthTokenEndpointAuthMethod: client_secret_post
 oxPersistClientAuthorizations: false
