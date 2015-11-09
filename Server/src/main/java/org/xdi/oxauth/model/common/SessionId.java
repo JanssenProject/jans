@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,9 +63,6 @@ public class SessionId implements Serializable {
     @LdapAttribute(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
 
-    @LdapAttribute(name = "oxAssociatedClient")
-    private List<String> associatedClientDns;
-
     @Transient
     private transient boolean persisted;
 
@@ -79,14 +75,6 @@ public class SessionId implements Serializable {
 
     public void setDn(String p_dn) {
         dn = p_dn;
-    }
-
-    public List<String> getAssociatedClientDns() {
-        return associatedClientDns;
-    }
-
-    public void setAssociatedClientDns(List<String> associatedClientDns) {
-        this.associatedClientDns = associatedClientDns;
     }
 
     public SessionIdState getState() {
@@ -146,10 +134,7 @@ public class SessionId implements Serializable {
     }
 
     public Boolean isPermissionGrantedForClient(String clientId) {
-        if (permissionGrantedMap != null) {
-            return permissionGrantedMap.get(clientId);
-        }
-        return false;
+        return permissionGrantedMap != null && permissionGrantedMap.get(clientId);
     }
 
     public void addPermission(String clientId, Boolean granted) {
@@ -198,7 +183,6 @@ public class SessionId implements Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("SessionId");
-        sb.append("{associatedClientDns=").append(associatedClientDns);
         sb.append(", dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);
