@@ -131,6 +131,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 if (jsonObj.has(END_SESSION_ENDPOINT)) {
                     getResponse().setEndSessionEndpoint(jsonObj.getString(END_SESSION_ENDPOINT));
                 }
+                if (jsonObj.has(END_SESSION_PAGE)) {
+                    getResponse().setEndSessionPage(jsonObj.getString(END_SESSION_PAGE));
+                }
                 if (jsonObj.has(JWKS_URI)) {
                     getResponse().setJwksUri(jsonObj.getString(JWKS_URI));
                 }
