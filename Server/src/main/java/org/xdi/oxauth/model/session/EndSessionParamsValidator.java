@@ -6,13 +6,29 @@
 
 package org.xdi.oxauth.model.session;
 
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+
 /**
- * @author Javier Rojas Date: 12.15.2011
+ * @author Javier Rojas
+ * @author Yuriy Zabrovarnyy
+ *
+ * Date: 12.15.2011
  */
 public class EndSessionParamsValidator {
 
-    public static boolean validateParams(String idTokenHint, String postLogoutRedirectUri) {
-        return idTokenHint != null && !idTokenHint.isEmpty()
-                && postLogoutRedirectUri != null && !postLogoutRedirectUri.isEmpty();
+    public static boolean isValidParams(String idTokenHint) {
+        return idTokenHint != null && !idTokenHint.isEmpty();
+    }
+
+    public static void validateParams(String idTokenHint, String postLogoutUrl, ErrorResponseFactory errorFactory) {
+        if (!isValidParams(idTokenHint) || postLogoutUrl == null || postLogoutUrl.isEmpty()) {
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+        }
+    }
+
+    public static void validateParams(String idTokenHint, ErrorResponseFactory errorFactory) {
+        if (!isValidParams(idTokenHint)) {
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+        }
     }
 }
