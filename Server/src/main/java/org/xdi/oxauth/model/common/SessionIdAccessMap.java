@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.Sets;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -39,6 +41,16 @@ public class SessionIdAccessMap implements Serializable {
         this.permissionGranted = permissionGranted;
     }
 
+    public Set<String> getClientIds(boolean granted) {
+        Set<String> clientIds = Sets.newHashSet();
+        for (Map.Entry<String, Boolean> entry : permissionGranted.entrySet()) {
+            if (entry.getValue().equals(granted) ) {
+                clientIds.add(entry.getKey());
+            }
+        }
+        return clientIds;
+    }
+
     public Boolean get(String clientId) {
         ensureInitialized();
         final Boolean result = permissionGranted.get(clientId);
@@ -54,5 +66,12 @@ public class SessionIdAccessMap implements Serializable {
     public void put(String clientId, Boolean granted) {
         ensureInitialized();
         permissionGranted.put(clientId, granted);
+    }
+
+    public void putIfAbsent(String clientId) {
+        ensureInitialized();
+        if (permissionGranted.get(clientId) == null) {
+            permissionGranted.put(clientId, false);
+        }
     }
 }
