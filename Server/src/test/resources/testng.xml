@@ -288,6 +288,7 @@
     <parameter name="clientInfoPath" value="/restv1/oxauth/clientinfo"/>
     <parameter name="checkSessionPath" value="/restv1/oxauth/check_session"/>
     <parameter name="endSessionPath" value="/restv1/oxauth/end_session"/>
+    <parameter name="endSessionPagePath" value="/restv1/oxauth/end_session_page"/>
     <parameter name="registerPath" value="/restv1/oxauth/register"/>
     <parameter name="federationMetadataPath" value="/restv1/oxauth/federationmetadata"/>
     <parameter name="federationPath" value="/restv1/oxauth/federation"/>

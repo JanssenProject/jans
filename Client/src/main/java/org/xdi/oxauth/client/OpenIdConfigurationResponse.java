@@ -6,16 +6,16 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.configuration.ConfigurationResponseClaim;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an OpenId Configuration received from the authorization server.
@@ -32,6 +32,7 @@ public class OpenIdConfigurationResponse extends BaseResponse {
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
     private String endSessionEndpoint;
+    private String endSessionPage;
     private String jwksUri;
     private String registrationEndpoint;
     private String validateTokenEndpoint;
@@ -269,6 +270,24 @@ public class OpenIdConfigurationResponse extends BaseResponse {
      */
     public void setEndSessionEndpoint(String endSessionEndpoint) {
         this.endSessionEndpoint = endSessionEndpoint;
+    }
+
+    /**
+     * Returns the URL of the End Session page.
+     *
+     * @return The URL of the End Session page.
+     */
+    public String getEndSessionPage() {
+        return endSessionPage;
+    }
+
+    /**
+     * Sets the URL of the End Session page.
+     *
+     * @param endSessionPage The URL of the End Session page.
+     */
+    public void setEndSessionPage(String endSessionPage) {
+        this.endSessionPage = endSessionPage;
     }
 
     /**
