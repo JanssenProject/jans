@@ -1,7 +1,7 @@
 # SCIM Scope
 dn: inum=%(inumOrg)s!0009!FF81.E33B,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 oxUrl: https://%(hostname)s/uma/scim
-oxType: external
+oxType: internal
 objectClass: oxAuthUmaScopeDescription
 objectClass: top
 oxRevision: 0
