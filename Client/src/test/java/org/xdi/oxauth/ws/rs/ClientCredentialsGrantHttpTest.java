@@ -29,13 +29,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
     public void defaultAuthenticationMethod(final String redirectUris) throws Exception {
         showTitle("defaultAuthenticationMethod");
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         List<String> scopes = Arrays.asList("clientinfo");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -88,13 +86,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
     public void clientSecretBasicAuthenticationMethod(final String redirectUris) throws Exception {
         showTitle("clientSecretBasicAuthenticationMethod");
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         List<String> scopes = Arrays.asList("clientinfo");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
@@ -149,13 +145,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
     public void clientSecretPostAuthenticationMethod(final String redirectUris) throws Exception {
         showTitle("clientSecretPostAuthenticationMethod");
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         List<String> scopes = Arrays.asList("clientinfo");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
@@ -210,13 +204,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
     public void clientSecretJwtAuthenticationMethod(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethod");
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         List<String> scopes = Arrays.asList("clientinfo");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
@@ -275,13 +267,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                                                   final String privateExponent) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethod");
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
         List<String> scopes = Arrays.asList("clientinfo");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
