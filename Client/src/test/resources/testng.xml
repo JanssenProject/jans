@@ -37,6 +37,13 @@
         </classes>
     </test>
 
+    <!-- Client Credentials Grant test -->
+    <test name="Client Credentials Grant test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientCredentialsGrantHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Client Info test  -->
     <test name="Client Info test (HTTP)" enabled="true">
         <classes>
