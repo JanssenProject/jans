@@ -6,13 +6,11 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +18,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 8, 2015
+ * @version November 9, 2015
  */
 public class ClientCredentialsGrantHttpTest extends BaseTest {
 
@@ -211,7 +209,6 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -274,7 +271,6 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setJwksUri(clientJwksUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -290,7 +286,6 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
         RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
@@ -298,7 +293,6 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setRsaPrivateKey(privateKey);
