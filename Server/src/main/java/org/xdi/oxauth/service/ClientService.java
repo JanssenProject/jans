@@ -110,6 +110,20 @@ public class ClientService {
         return authenticated;
     }
 
+    public Set<Client> getClient(Collection<String> clientIds, boolean silent) {
+        Set<Client> set = Sets.newHashSet();
+        for (String clientId : clientIds) {
+            try {
+                set.add(getClient(clientId));
+            } catch (RuntimeException e) {
+                if (!silent) {
+                    throw e;
+                }
+            }
+        }
+        return set;
+    }
+
     public Client getClient(String clientId) {
         if (clientId != null && !clientId.isEmpty()) {
             if (Boolean.TRUE.equals(ConfigurationFactory.instance().getConfiguration().getClientAuthenticationFiltersEnabled())) {

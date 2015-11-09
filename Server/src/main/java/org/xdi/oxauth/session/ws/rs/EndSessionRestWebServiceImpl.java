@@ -7,7 +7,6 @@
 package org.xdi.oxauth.session.ws.rs;
 
 import com.google.common.collect.Sets;
-import com.google.gdata.util.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -140,14 +139,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final Set<String> logoutUris = getRpLogoutUris(ldapSessionId);
         final String html = constructPage(logoutUris);
+        log.debug("Constructed http logout page: " + html);
         return Response.ok().type(MediaType.TEXT_HTML_TYPE).entity(html).build();
     }
 
     private Set<String> getRpLogoutUris(SessionId sessionId) {
-        Preconditions.checkState(sessionId.getAssociatedClientDns() != null && !sessionId.getAssociatedClientDns().isEmpty(), "Session does not have associated clients.");
-
         final Set<String> result = Sets.newHashSet();
-        final Set<Client> clientsByDns = clientService.getClientsByDns(sessionId.getAssociatedClientDns());
+        final Set<Client> clientsByDns = clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true);
         for (Client client : clientsByDns) {
             result.add(client.getLogoutUri());
         }
