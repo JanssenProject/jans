@@ -63,4 +63,30 @@ public interface EndSessionRestWebService {
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
+
+    @GET
+    @Path("/end_session_page")
+    @Produces({MediaType.TEXT_HTML})
+    @ApiOperation(
+            value = "End current Connect session.",
+            notes = "End current Connect session.",
+            response = Response.class,
+            responseContainer = "JSON"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter, uses more than one method for including an access token, or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+            @ApiResponse(code = 400, message = "invalid_grant\n" +
+                    "The provided access token is invalid, or was issued to another client.")
+    })
+    Response requestEndSessionPage(
+            @QueryParam(EndSessionRequestParam.ID_TOKEN_HINT)
+            @ApiParam(value = "Previously issued ID Token (id_token) passed to the logout endpoint as a hint about the End-User's current authenticated session with the Client. This is used as an indication of the identity of the End-User that the RP is requesting be logged out by the OP. The OP need not be listed as an audience of the ID Token when it is used as an id_token_hint value.", required = true)
+            String idTokenHint,
+            @QueryParam("session_id")
+            @ApiParam(value = "Session ID", required = false)
+            String sessionId,
+            @Context HttpServletRequest httpRequest,
+            @Context HttpServletResponse httpResponse,
+            @Context SecurityContext securityContext);
 }

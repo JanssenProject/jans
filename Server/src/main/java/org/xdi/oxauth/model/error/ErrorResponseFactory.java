@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.ScopeType;
@@ -30,6 +27,11 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Provides an easy way to get Error responses based in an error response type
@@ -80,6 +82,19 @@ public class ErrorResponseFactory {
 
     public String getErrorAsJson(IErrorType p_type) {
         return getErrorResponse(p_type).toJSonString();
+    }
+
+    public void throwUnauthorizedException(IErrorType type) throws WebApplicationException {
+        throwWebApplicationException(Response.Status.UNAUTHORIZED, type);
+    }
+
+    public void throwBadRequestException(IErrorType type) throws WebApplicationException {
+        throwWebApplicationException(Response.Status.BAD_REQUEST, type);
+    }
+
+    public void throwWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
+        final Response response = Response.status(status).entity(getErrorAsJson(type)).build();
+        throw new WebApplicationException(response);
     }
 
     public String getErrorAsJson(IErrorType p_type, String p_state) {
