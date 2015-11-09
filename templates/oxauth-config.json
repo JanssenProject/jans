@@ -10,6 +10,7 @@
     "clientInfoEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/clientinfo",
     "checkSessionIFrame":"https://%(hostname)s/oxauth/opiframe",
     "endSessionEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session",
+    "endSessionPage":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session_page",
     "jwksUri":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/jwks",
     "registrationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/register",
     "validateTokenEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/validate",
