@@ -6,15 +6,14 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.common.Mode;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the configuration XML file.
@@ -38,6 +37,7 @@ public class Configuration {
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
     private String endSessionEndpoint;
+    private String endSessionPage;
     private String jwksUri;
     private String registrationEndpoint;
     private String validateTokenEndpoint;
@@ -344,6 +344,25 @@ public class Configuration {
      */
     public void setEndSessionEndpoint(String endSessionEndpoint) {
         this.endSessionEndpoint = endSessionEndpoint;
+    }
+
+    /**
+     * Returns the URL of the End Session page.
+     *
+     * @return The URL of the End Session page.
+     */
+    @XmlElement(name = "end-session-page")
+    public String getEndSessionPage() {
+        return endSessionPage;
+    }
+
+    /**
+     * Sets the URL of the End Session page.
+     *
+     * @param endSessionPage The URL of the End Session page.
+     */
+    public void setEndSessionPage(String endSessionPage) {
+        this.endSessionPage = endSessionPage;
     }
 
     /**
