@@ -40,7 +40,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                request.addHeader("Accept", MediaType.APPLICATION_JSON);
             }
 
             @Override
