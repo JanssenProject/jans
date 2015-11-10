@@ -163,6 +163,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (StringUtils.isNotBlank(getRequest().getJwksUri())) {
                     requestBody.put(JWKS_URI.toString(), getRequest().getJwksUri());
                 }
+                if (StringUtils.isNotBlank(getRequest().getJwks())) {
+                    requestBody.put(JWKS.toString(), getRequest().getJwks());
+                }
                 if (StringUtils.isNotBlank(getRequest().getSectorIdentifierUri())) {
                     requestBody.put(SECTOR_IDENTIFIER_URI.toString(), getRequest().getSectorIdentifierUri());
                 }
