@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
@@ -148,6 +149,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         final Set<Client> clientsByDns = clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true);
         for (Client client : clientsByDns) {
             String logoutUri = client.getLogoutUri();
+
+            if (Strings.isNullOrEmpty(logoutUri)) {
+                continue; // skip client if logout_uri is blank
+            }
+
             if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
                 if (logoutUri.contains("?")) {
                     logoutUri = logoutUri + "&sid=" + sessionId.getId();
