@@ -41,13 +41,13 @@ oxType: internal
 oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
 
 # SCIM Resource Set
-dn: inum=%(inumOrg)s!B23E.0517,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0012!B23E.0517,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthUmaResourceSet
 objectClass: top
 displayName: SCIM Resource Set
-inum: %(inumOrg)s!B23E.0517
+inum: %(inumOrg)s!0012!B23E.0517
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
-oxAuthUmaScope: inum=%(inumOrg)s!8CAD.B06D,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06D,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 oxFaviconImage: http://gluu.org/img/scim_logo.png
 oxId: 1447184268430
 oxResource: https://%(hostname)s/identity/seam/resource/restv1/scim/v1
