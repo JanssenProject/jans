@@ -183,9 +183,12 @@ public class RegisterParamsValidator {
     }
 
     public static void validateLogoutUri(String logoutUri, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
+        if (Strings.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
+            return;
+        }
 
         // preconditions
-        if (Strings.isNullOrEmpty(logoutUri) || redirectUris == null || redirectUris.isEmpty()) {
+        if (redirectUris == null || redirectUris.isEmpty()) {
             LOG.error("Preconditions of logout uri validation are failed.");
             throwInvalidLogoutUri(errorResponseFactory);
             return;
