@@ -147,7 +147,15 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         final Set<String> result = Sets.newHashSet();
         final Set<Client> clientsByDns = clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true);
         for (Client client : clientsByDns) {
-            result.add(client.getLogoutUri());
+            String logoutUri = client.getLogoutUri();
+            if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
+                if (logoutUri.contains("?")) {
+                    logoutUri = logoutUri + "&sid=" + sessionId.getId();
+                } else {
+                    logoutUri = logoutUri + "?sid=" + sessionId.getId();
+                }
+            }
+            result.add(logoutUri);
         }
         return result;
     }
