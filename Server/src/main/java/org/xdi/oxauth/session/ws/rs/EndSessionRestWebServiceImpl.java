@@ -28,6 +28,7 @@ import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
+import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -71,12 +72,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         EndSessionParamsValidator.validateParams(idTokenHint, postLogoutRedirectUri, errorResponseFactory);
 
-        endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
-
-        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
+        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
 
         // Validate redirectUri
-        String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
+        String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
 
         if (StringUtils.isNotBlank(redirectUri)) {
             RedirectUri redirectUriResponse = new RedirectUri(redirectUri);
@@ -91,7 +90,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return Response.ok().build();
     }
 
-    private SessionId endSession(String idTokenHint, String sessionId,
+    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId,
                                  HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
 
         EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
@@ -119,7 +118,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         authorizationGrant.revokeAllTokens();
 
-        return ldapSessionId;
+        return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
     }
 
     @Override
@@ -136,9 +135,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 idTokenHint, sessionId, sec.isSecure());
 
 
-        final SessionId ldapSessionId = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
+        Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
 
-        final Set<String> logoutUris = getRpLogoutUris(ldapSessionId);
+        final Set<String> logoutUris = getRpLogoutUris(pair.getFirst());
         final String html = constructPage(logoutUris);
         log.debug("Constructed http logout page: " + html);
         return Response.ok().type(MediaType.TEXT_HTML_TYPE).entity(html).build();

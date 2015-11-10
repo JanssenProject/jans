@@ -174,8 +174,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         client.setLastAccessTime(currentTime);
                         client.setLastLogonTime(currentTime);
 
-                        boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
-                        client.setPersistClientAuthorizations(persistClientAuthorizations);
+                        Boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
+                        client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
 
                         clientService.persist(client);
 
