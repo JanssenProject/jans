@@ -197,7 +197,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private String constructPage(Set<String> logoutUris) {
         String iframes = "";
         for (String logoutUri : logoutUris) {
-             iframes = iframes + String.format("<iframe src=\"%s\"></iframe>", logoutUri);
+             iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\"></iframe>", logoutUri);
         }
         return "<!DOCTYPE html>" +
                 "<html>" +
@@ -205,6 +205,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "<title>Gluu Generated logout page</title>"+
                 "</head>" +
                 "<body>" +
+                "Logout requests sent.<br/>" +
                 iframes +
                 "</body>" +
                 "</html>";
