@@ -93,6 +93,10 @@
             "id":"invalid_grant",
             "description":"The provided access token is invalid, or was issued to another client.",
             "uri":null
+        },{
+            "id":"invalid_logout_uri",
+            "description":"The provided logout_uri is invalid.",
+            "uri":null
         }
     ],
     "federation":[
