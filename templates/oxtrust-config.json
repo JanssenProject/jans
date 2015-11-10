@@ -72,7 +72,7 @@
 
     ],
 
-    "configGeneration":false,
+    "configGeneration":true,
     "ignoreValidation":false,
 
     "idpSecurityCert":"/etc/certs/shibIDP.crt",
