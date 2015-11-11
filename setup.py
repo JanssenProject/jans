@@ -121,9 +121,6 @@ class Setup(object):
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
-        self.scim_client_id =  None
-        self.scim_client_secret =  None
-        self.scim_client_secret_encoded =  None
         self.encode_salt = "123456789012345678901234"
 
         self.outputFolder = '%s/output' % self.install_dir
@@ -182,9 +179,6 @@ class Setup(object):
         self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStorePW = 'changeit'
 
-        self.oxtrust_openid_client_id = None
-        self.oxtrust_uma_client_id = None
-
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
@@ -232,6 +226,16 @@ class Setup(object):
         self.oxtrust_config_base64 = None
         self.oxtrust_cache_refresh_base64 = None
         self.oxidp_config_base64 = None
+
+        # oxTrust SCIM configuration
+        self.scim_rs_client_id = None
+        self.scim_rp_client_id = None
+        self.scim_rs_client_jwks = None
+        self.scim_rp_client_jwks = None
+        self.scim_rs_client_base64_jwks = None
+        self.scim_rp_client_base64_jwks = None
+
+        self.scim_rp_client_openid_key_json = '%s/scim-rp-openid-keys.json' % self.outputFolder
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
@@ -379,10 +383,13 @@ class Setup(object):
             self.inumAppliance = '%s!0002!%s' % (self.baseInum, applianceTwoQuads)
         if not self.oxauth_client_id:
             clientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.oxauth_client_id = '%s!0008!%s' % (self.baseInum, clientTwoQuads)
-        if not self.scim_client_id:
-            scimclientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
-            self.scim_client_id = '%s!0008!%s' % (self.baseInum, scimclientTwoQuads)
+            self.oxauth_client_id = '%s!0008!%s' % (self.inumOrg, clientTwoQuads)
+        if not self.scim_rs_client_id:
+            scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.scim_rs_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+        if not self.scim_rp_client_id:
+            scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.scim_rp_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
         if not self.inumApplianceFN:
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
@@ -569,9 +576,6 @@ class Setup(object):
             self.oxauthClient_pw = self.getPW()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
             self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
-            self.scim_client_secret = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.scim_client_secret)
-            self.scim_client_secret_encoded = os.popen(cmd, 'r').read().strip()
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
@@ -672,7 +676,7 @@ class Setup(object):
                   "-file", public_certificate, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
-    def gen_crypto(self):
+    def generate_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
             self.gen_cert('httpd', self.httpdKeyPass, 'tomcat')
@@ -691,7 +695,6 @@ class Setup(object):
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
                               'tomcat')
-            self.gen_openid_keys()
             self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
             self.run(['/bin/chmod', '-R', '500', self.certFolder])
         except:
@@ -771,18 +774,59 @@ class Setup(object):
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
+            p.wait()
             if err:
                 self.logIt(err, True)
             if output:
-                f = open(self.oxauth_openid_key_json, 'w')
-                f.write(output)
-                f.close()
-                self.run(["/bin/chown", 'tomcat:tomcat', self.oxauth_openid_key_json])
-                self.run(["/bin/chmod", '700', self.oxauth_openid_key_json])
-                self.logIt("Wrote oxauth OpenID Connect key to %s" % self.oxauth_openid_key_json)
+                return output.split(os.linesep)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
+
+        return None
+
+    def write_openid_keys(self, fn, jwks):
+        self.logIt("Writing oxAuth OpenID Connect keys")
+        if not jwks:
+            self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
+            return
+
+        try:
+            jwks_text = '\n'.join(jwks)
+            f = open(fn, 'w')
+            f.write(jwks_text)
+            f.close()
+            self.run(["/bin/chown", 'tomcat:tomcat', fn])
+            self.run(["/bin/chmod", '600', fn])
+            self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
+        except:
+            self.logIt("Error writing command : %s" % fn, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def generate_oxauth_openid_keys(self):
+        jwks = self.gen_openid_keys()
+        self.write_openid_keys(self.oxauth_openid_key_json, jwks)
+
+    def generate_base64_string(self, lines, num_spaces):
+        if not lines:
+            return None
+
+        plain_text = ''.join(lines)
+        plain_b64encoded_text = plain_text.encode('base64').strip()
+
+        if num_spaces > 0:
+            plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
+
+        return plain_b64encoded_text
+
+    def generate_scim_configuration(self):
+        self.scim_rs_client_jwks = self.gen_openid_keys()
+        self.scim_rp_client_jwks = self.gen_openid_keys()
+
+        self.scim_rs_client_base64_jwks = self.generate_base64_string(self.scim_rs_client_jwks, 1)
+        self.scim_rp_client_base64_jwks = self.generate_base64_string(self.scim_rp_client_jwks, 1)
+
+        self.write_openid_keys(self.scim_rp_client_openid_key_json, self.scim_rp_client_jwks)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -1319,15 +1363,15 @@ class Setup(object):
         return self.generate_base64_file(fn, 1)
 
     def generate_base64_configuration(self):
-        self.oxauth_config_base64 = self.generate_base64_ldap_file(self.oxauth_config_json);
-        self.oxauth_static_conf_base64 = self.generate_base64_ldap_file(self.oxauth_static_conf_json);
-        self.oxauth_error_base64 = self.generate_base64_ldap_file(self.oxauth_error_json);
-        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_key_json);
+        self.oxauth_config_base64 = self.generate_base64_ldap_file(self.oxauth_config_json)
+        self.oxauth_static_conf_base64 = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
+        self.oxauth_error_base64 = self.generate_base64_ldap_file(self.oxauth_error_json)
+        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_key_json)
 
         self.oxtrust_config_base64 = self.generate_base64_ldap_file(self.oxtrust_config_json);
-        self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json);
+        self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
 
-        self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json);
+        self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
@@ -1601,9 +1645,11 @@ if __name__ == '__main__':
             installObject.writeLdapPW()
             installObject.copy_scripts()
             installObject.encode_passwords()
+            installObject.generate_scim_configuration()
             installObject.render_templates()
             installObject.render_test_templates()
-            installObject.gen_crypto()
+            installObject.generate_crypto()
+            installObject.generate_oxauth_openid_keys()
             installObject.generate_base64_configuration()
             installObject.render_configuration_template()
             installObject.update_hostname()
