@@ -121,7 +121,7 @@
 
     "umaIssuer":"https://%(hostname)s",
     "umaClientId":"%(scim_rs_client_id)s",
-    "umaClientAlgorithm":"HS384",
+    "umaClientKeyId":"",
     "umaResourceId":"1447184268430",
     "umaScope":"https://%(hostname)s/oxauth/seam/resource/restv1/uma/scopes/scim_access",
 
