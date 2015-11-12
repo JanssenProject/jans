@@ -6,7 +6,54 @@
 
 package org.xdi.oxauth.model.util;
 
-import org.apache.commons.codec.binary.Base64;
+import static org.xdi.oxauth.model.jwk.JWKParameter.D;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JWKS_ALGORITHM;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JWKS_KEY_ID;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_KEY;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
+import java.util.Set;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.ws.rs.HttpMethod;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -28,27 +75,15 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.crypto.Certificate;
-import org.xdi.oxauth.model.crypto.signature.*;
-
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.HttpMethod;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
-import java.util.Set;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version 0.9 May 18, 2015
  */
 public class JwtUtil {
@@ -634,83 +669,98 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
+	public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
+		log.debug("Retrieving JWK Key...");
+
+		JSONObject jsonKey = null;
+		try {
+			if (StringUtils.isBlank(jwks)) {
+				ClientRequest clientRequest = new ClientRequest(jwksUri);
+				clientRequest.setHttpMethod(HttpMethod.GET);
+				ClientResponse<String> clientResponse = clientRequest.get(String.class);
+
+				int status = clientResponse.getStatus();
+				log.debug(String.format("Status: %n%d", status));
+
+				if (status == 200) {
+					jwks = clientResponse.getEntity(String.class);
+					log.debug(String.format("JWK: %s", jwks));
+				}
+			}
+			if (org.apache.commons.lang.StringUtils.isNotBlank(jwks)) {
+				JSONObject jsonObject = new JSONObject(jwks);
+				JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
+				if (keys.length() > 0) {
+					if (keyId == null) {
+						jsonKey = keys.getJSONObject(0);
+					} else {
+						for (int i = 0; i < keys.length(); i++) {
+							JSONObject kv = keys.getJSONObject(i);
+							if (kv.getString(JWKS_KEY_ID).equals(keyId)) {
+								jsonKey = kv;
+								break;
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+
+		return jsonKey;
+	}
+
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
-        log.debug("Retrieving JWK...");
+        log.debug("Retrieving JWK Public Key...");
 
+        JSONObject jsonKeyValue = getJsonKey(jwksUri, jwks, keyId);
+        if (jsonKeyValue == null) {
+            return null;
+        }
+        
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
         try {
-            if (StringUtils.isBlank(jwks)) {
-                ClientRequest clientRequest = new ClientRequest(jwksUri);
-                clientRequest.setHttpMethod(HttpMethod.GET);
-                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+            if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
+                //String alg = jsonKeyValue.getString(ALGORITHM);
+                //String use = jsonKeyValue.getString(KEY_USE);
+                String exp = jsonKeyValue.getString(EXPONENT);
+                String mod = jsonKeyValue.getString(MODULUS);
 
-                int status = clientResponse.getStatus();
-                log.debug(String.format("Status: %n%d", status));
+                BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
+                BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
 
-                if (status == 200) {
-                    jwks = clientResponse.getEntity(String.class);
-                    log.debug(String.format("JWK: %s", jwks));
-                }
+                publicKey = new RSAPublicKey(modulus, publicExponent);
+            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
+                //String alg = jsonKeyValue.getString(ALGORITHM);
+                //String use = jsonKeyValue.getString(KEY_USE);
+                //String crv = jsonKeyValue.getString(CURVE);
+                String xx = jsonKeyValue.getString(X);
+                String yy = jsonKeyValue.getString(Y);
+
+                BigInteger x = new BigInteger(1, JwtUtil.base64urldecode(xx));
+                BigInteger y = new BigInteger(1, JwtUtil.base64urldecode(yy));
+
+                publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
             }
-            if (org.apache.commons.lang.StringUtils.isNotBlank(jwks)) {
-                JSONObject jsonObject = new JSONObject(jwks);
-                JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
-                if (keys.length() > 0) {
-                    JSONObject jsonKeyValue = null;
-                    if (keyId == null) {
-                        jsonKeyValue = keys.getJSONObject(0);
-                    } else {
-                        for (int i = 0; i < keys.length(); i++) {
-                            JSONObject kv = keys.getJSONObject(i);
-                            if (kv.get(KEY_ID).equals(keyId)) {
-                                jsonKeyValue = kv;
-                                break;
-                            }
-                        }
-                    }
 
-                    if (jsonKeyValue == null) {
-                        return null;
-                    }
+            if (publicKey != null && jsonKeyValue.has(X5C)) {
+                final String BEGIN = "-----BEGIN CERTIFICATE-----";
+                final String END = "-----END CERTIFICATE-----";
 
-                    if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                        //String alg = jsonKeyValue.getString(ALGORITHM);
-                        //String use = jsonKeyValue.getString(KEY_USE);
-                        String exp = jsonKeyValue.getString(EXPONENT);
-                        String mod = jsonKeyValue.getString(MODULUS);
-
-                        BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
-                        BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
-
-                        publicKey = new RSAPublicKey(modulus, publicExponent);
-                    } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                        //String alg = jsonKeyValue.getString(ALGORITHM);
-                        //String use = jsonKeyValue.getString(KEY_USE);
-                        //String crv = jsonKeyValue.getString(CURVE);
-                        String xx = jsonKeyValue.getString(X);
-                        String yy = jsonKeyValue.getString(Y);
-
-                        BigInteger x = new BigInteger(1, JwtUtil.base64urldecode(xx));
-                        BigInteger y = new BigInteger(1, JwtUtil.base64urldecode(yy));
-
-                        publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
-                    }
-
-                    if (publicKey != null && jsonKeyValue.has(X5C)) {
-                        final String BEGIN = "-----BEGIN CERTIFICATE-----";
-                        final String END = "-----END CERTIFICATE-----";
-
-                        JSONArray certChain = jsonKeyValue.getJSONArray(X5C);
-                        String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
-                        StringReader sr = new StringReader(certificateString);
-                        PEMReader pemReader = new PEMReader(sr);
-                        X509Certificate cert = (X509CertificateObject) pemReader.readObject();
-                        Certificate certificate = new Certificate(signatureAlgorithm, cert);
-                        publicKey.setCertificate(certificate);
-                    }
-                }
+                JSONArray certChain = jsonKeyValue.getJSONArray(X5C);
+                String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
+                StringReader sr = new StringReader(certificateString);
+                PEMReader pemReader = new PEMReader(sr);
+                try {
+					X509Certificate cert = (X509CertificateObject) pemReader.readObject();
+					Certificate certificate = new Certificate(signatureAlgorithm, cert);
+					publicKey.setCertificate(certificate);
+				} finally {
+	                pemReader.close();
+				}
             }
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
@@ -720,4 +770,46 @@ public class JwtUtil {
 
         return publicKey;
     }
+
+
+    public static org.xdi.oxauth.model.crypto.PrivateKey getPrivateKey(String jwksUri, String jwks, String keyId) {
+        log.debug("Retrieving JWK Private Key...");
+
+        JSONObject jsonKeyValue = getJsonKey(jwksUri, jwks, keyId);
+        if (jsonKeyValue == null) {
+            return null;
+        }
+        
+        org.xdi.oxauth.model.crypto.PrivateKey privateKey = null;
+
+        try {
+        	SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(jsonKeyValue.getString(JWKS_ALGORITHM));
+            if (signatureAlgorithm == null) {
+                log.error(String.format("Failed to determine key '%s' signature algorithm", keyId));
+            	return null;
+            }
+
+            JSONObject jsonPrivateKey = jsonKeyValue.getJSONObject(PRIVATE_KEY);
+            if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
+                String exp = jsonPrivateKey.getString(PRIVATE_EXPONENT);
+                String mod = jsonPrivateKey.getString(PRIVATE_MODULUS);
+
+                BigInteger privateExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
+                BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
+
+                privateKey = new RSAPrivateKey(modulus, privateExponent);
+            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
+                String dd = jsonPrivateKey.getString(D);
+
+                BigInteger d = new BigInteger(1, JwtUtil.base64urldecode(dd));
+
+                privateKey = new ECDSAPrivateKey(d);
+            }
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+
+        return privateKey;
+    }
+
 }
