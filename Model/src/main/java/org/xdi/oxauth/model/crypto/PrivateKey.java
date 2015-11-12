@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.crypto;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.xdi.oxauth.model.common.JSONable;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
@@ -17,10 +16,8 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
  */
 public abstract class PrivateKey implements JSONable {
 
-	@JsonIgnore
 	private String keyId;
 
-	@JsonIgnore
 	private SignatureAlgorithm signatureAlgorithm;
 
 	public String getKeyId() {
