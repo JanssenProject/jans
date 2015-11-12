@@ -130,7 +130,7 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String umaIssuer;
 	private String umaClientId;
-	private String umaClientPassword;
+	private String umaClientKeyId;
 	private String umaResourceId;
 	private String umaScope;
 
@@ -721,12 +721,12 @@ public final class ApplicationConfiguration implements Serializable {
 		this.umaClientId = umaClientId;
 	}
 
-	public String getUmaClientPassword() {
-		return umaClientPassword;
+	public String getUmaClientKeyId() {
+		return umaClientKeyId;
 	}
 
-	public void setUmaClientPassword(String umaClientPassword) {
-		this.umaClientPassword = umaClientPassword;
+	public void setUmaClientKeyId(String umaClientKeyId) {
+		this.umaClientKeyId = umaClientKeyId;
 	}
 
 	public String getUmaResourceId() {
