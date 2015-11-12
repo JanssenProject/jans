@@ -15,6 +15,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_EXPONENT;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_KEY;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
 import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
@@ -723,6 +724,7 @@ public class JwtUtil {
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
         try {
+            jsonKeyValue = jsonKeyValue.getJSONObject(PUBLIC_KEY);
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
                 //String alg = jsonKeyValue.getString(ALGORITHM);
                 //String use = jsonKeyValue.getString(KEY_USE);
