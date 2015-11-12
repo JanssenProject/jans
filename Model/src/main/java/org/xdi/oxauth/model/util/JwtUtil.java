@@ -789,6 +789,8 @@ public class JwtUtil {
             	return null;
             }
 
+            String resultKeyId = jsonKeyValue.getString(JWKS_KEY_ID);
+
             JSONObject jsonPrivateKey = jsonKeyValue.getJSONObject(PRIVATE_KEY);
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
                 String exp = jsonPrivateKey.getString(PRIVATE_EXPONENT);
@@ -804,6 +806,11 @@ public class JwtUtil {
                 BigInteger d = new BigInteger(1, JwtUtil.base64urldecode(dd));
 
                 privateKey = new ECDSAPrivateKey(d);
+            }
+            
+            if (privateKey != null) {
+                privateKey.setSignatureAlgorithm(signatureAlgorithm);
+                privateKey.setKeyId(resultKeyId);
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
