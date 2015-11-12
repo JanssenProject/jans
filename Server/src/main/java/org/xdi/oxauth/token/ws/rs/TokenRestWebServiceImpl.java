@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -100,9 +99,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 Client client = sessionClient.getClient();
 
                 if (client == null) {
-                    if (gt == GrantType.CLIENT_CREDENTIALS && Strings.isNullOrEmpty(clientId)) {
-                        clientId = username;
-                    }
                     client = clientService.getClient(clientId);
                     sessionClient.setClient(client);
                     clientService.updatAccessTime(client, false);
