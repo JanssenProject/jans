@@ -15,13 +15,12 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
 import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_EXPONENT;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_KEY;
-import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
 import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -57,7 +56,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.HttpMethod;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -915,11 +913,5 @@ public class JwtUtil {
 
         return privateKey;
     }
-    
-    public static void main(String[] args) throws IOException {
-    	String jwks = FileUtils.readFileToString(new File("D:\\10\\scim-rp-openid-keys.json"));
-    	org.xdi.oxauth.model.crypto.PublicKey key = getPublicKey("", jwks, "cb9ea045-5b1a-406c-a08d-17fe445032fa");
-    	System.out.println(key);
-	}
 
 }
