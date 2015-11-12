@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.client;
 
-import javax.ws.rs.HttpMethod;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.token.ClientAssertionType;
+
+import javax.ws.rs.HttpMethod;
 
 /**
  * Encapsulates functionality to make token request calls to an authorization
@@ -279,8 +279,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         if (StringUtils.isNotBlank(getRequest().getOxAuthExchangeToken())) {
             clientRequest.formParameter("oxauth_exchange_token", getRequest().getOxAuthExchangeToken());
         }
-        if ((getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) ||
-                (getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT)) {
+        if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
             if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
                 clientRequest.formParameter("client_id", getRequest().getAuthUsername());
             }
@@ -291,6 +290,9 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
                 getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
             clientRequest.formParameter("client_assertion_type", ClientAssertionType.JWT_BEARER);
             clientRequest.formParameter("client_assertion", getRequest().getClientAssertion());
+            if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
+                clientRequest.formParameter("client_id", getRequest().getAuthUsername());
+            }
         }
         for (String key : getRequest().getCustomParameters().keySet()) {
             clientRequest.formParameter(key, getRequest().getCustomParameters().get(key));
