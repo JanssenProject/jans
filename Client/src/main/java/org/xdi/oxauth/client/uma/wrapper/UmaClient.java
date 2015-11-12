@@ -6,11 +6,13 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
+import com.google.common.base.Preconditions;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
@@ -111,9 +113,8 @@ public class UmaClient {
     }
 
     public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType, String... scopeArray) throws Exception {
-        String umaScope = scopeType.getValue();
 
-        String scope = umaScope;
+        String scope = scopeType.getValue();
         if (scopeArray != null && scopeArray.length > 0) {
             for (String s : scopeArray) {
                 scope = scope + " " + s;
@@ -127,7 +128,54 @@ public class UmaClient {
             final String patToken = response.getAccessToken();
             final Integer expiresIn = response.getExpiresIn();
             if (Util.allNotBlank(patToken)) {
-                return new Token(null, null, patToken, umaScope, expiresIn);
+                return new Token(null, null, patToken, scopeType.getValue(), expiresIn);
+            }
+        }
+
+        return null;
+    }
+
+    public static Token requestWithClientSecretJwt(final String tokenUrl,
+                                                   final String umaClientId,
+                                                   final String umaClientSecret,
+                                                   AuthenticationMethod authenticationMethod,
+                                                   SignatureAlgorithm signatureAlgorithm,
+                                                   String audience,
+                                                   UmaScopeType scopeType,
+                                                   String... scopeArray) throws Exception {
+
+        String scope = scopeType.getValue();
+        if (scopeArray != null && scopeArray.length > 0) {
+            for (String s : scopeArray) {
+                scope = scope + " " + s;
+            }
+        }
+
+        TokenRequest request = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        request.setAuthUsername(umaClientId);
+        request.setAuthPassword(umaClientSecret);
+        request.setScope(scope);
+        request.setAuthenticationMethod(authenticationMethod);
+        request.setAlgorithm(signatureAlgorithm);
+        request.setAudience(audience);
+
+        return request(tokenUrl, request);
+    }
+
+    public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
+        Preconditions.checkState(tokenRequest.getGrantType() == GrantType.CLIENT_CREDENTIALS);
+
+        TokenClient tokenClient = new TokenClient(tokenUrl);
+
+        tokenClient.setRequest(tokenRequest);
+
+        TokenResponse response = tokenClient.exec();
+
+        if (response.getStatus() == 200) {
+            final String patToken = response.getAccessToken();
+            final Integer expiresIn = response.getExpiresIn();
+            if (Util.allNotBlank(patToken)) {
+                return new Token(null, null, patToken, response.getScope(), expiresIn);
             }
         }
 
