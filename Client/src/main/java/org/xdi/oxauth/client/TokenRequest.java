@@ -6,19 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -32,6 +19,19 @@ import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.token.ClientAssertionType;
+import org.xdi.oxauth.model.uma.UmaScopeType;
+
+import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * Represents a token request to send to the authorization server.
@@ -39,6 +39,48 @@ import org.xdi.oxauth.model.token.ClientAssertionType;
  * @author Javier Rojas Blum Date: 10.17.2011
  */
 public class TokenRequest extends BaseRequest {
+
+    public static class Builder {
+
+        private GrantType grantType;
+        private String scope;
+
+        public Builder grantType(GrantType grantType) {
+            this.grantType = grantType;
+            return this;
+        }
+
+        public Builder scope(String scope) {
+            this.scope = scope;
+            return this;
+        }
+
+        public Builder pat(String... scopeArray) {
+            String scope = UmaScopeType.PROTECTION.getValue();
+            if (scopeArray != null && scopeArray.length > 0) {
+                for (String s : scopeArray) {
+                    scope = scope + " " + s;
+                }
+            }
+            return scope(scope);
+        }
+
+        public Builder aat(String... scopeArray) {
+            String scope = UmaScopeType.AUTHORIZATION.getValue();
+            if (scopeArray != null && scopeArray.length > 0) {
+                for (String s : scopeArray) {
+                    scope = scope + " " + s;
+                }
+            }
+            return scope(scope);
+        }
+
+        public TokenRequest build() {
+            final TokenRequest request = new TokenRequest(grantType);
+            request.setScope(scope);
+            return request;
+        }
+    }
 
     private GrantType grantType;
     private String code;
@@ -70,6 +112,14 @@ public class TokenRequest extends BaseRequest {
 
         setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder umaBuilder() {
+        return new Builder().grantType(GrantType.CLIENT_CREDENTIALS);
     }
 
     /**
