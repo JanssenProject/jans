@@ -279,7 +279,8 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         if (StringUtils.isNotBlank(getRequest().getOxAuthExchangeToken())) {
             clientRequest.formParameter("oxauth_exchange_token", getRequest().getOxAuthExchangeToken());
         }
-        if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
+        if ((getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) ||
+                (getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT)) {
             if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
                 clientRequest.formParameter("client_id", getRequest().getAuthUsername());
             }
