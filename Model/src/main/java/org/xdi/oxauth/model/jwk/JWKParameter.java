@@ -12,10 +12,11 @@ package org.xdi.oxauth.model.jwk;
 public interface JWKParameter {
 
     public static final String JSON_WEB_KEY_SET = "keys";
-    public static final String JSON_WEB_KEY = "key";
     public static final String PRIVATE_KEY = "privateKey";
     public static final String PUBLIC_KEY = "publicKey";
     public static final String CERTIFICATE = "certificate";
+    public static final String JWKS_KEY_ID = "keyId";
+    public static final String JWKS_ALGORITHM = "algorithm";
 
     // Common
     public static final String KEY_TYPE = "kty";
@@ -30,9 +31,11 @@ public interface JWKParameter {
     public static final String CURVE = "crv";
     public static final String X = "x";
     public static final String Y = "y";
+    public static final String D = "d";
 
     // Private Key
-    public static final String PRIVATE_EXPONENT = "d";
+    public static final String PRIVATE_MODULUS = "modulus";
+    public static final String PRIVATE_EXPONENT = "privateExponent";
 
     // Symmetric Key
     public static final String KEY_VALUE = "k";
