@@ -82,6 +82,7 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
@@ -697,7 +698,7 @@ public class JwtUtil {
                 JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
                 if (keys.length() > 0) {
                     JSONObject jsonKeyValue = null;
-                    if (keyId == null) {
+                    if (StringHelper.isEmpty(keyId)) {
                         jsonKeyValue = keys.getJSONObject(0);
                     } else {
                         for (int i = 0; i < keys.length(); i++) {
@@ -781,7 +782,7 @@ public class JwtUtil {
 				JSONObject jsonObject = new JSONObject(jwks);
 				JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
 				if (keys.length() > 0) {
-					if (keyId == null) {
+					if (StringHelper.isEmpty(keyId)) {
 						jsonKey = keys.getJSONObject(0);
 					} else {
 						for (int i = 0; i < keys.length(); i++) {
@@ -879,12 +880,12 @@ public class JwtUtil {
 
         try {
         	SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(jsonKeyValue.getString(JWKS_ALGORITHM));
+            String resultKeyId = jsonKeyValue.getString(JWKS_KEY_ID);
             if (signatureAlgorithm == null) {
-                log.error(String.format("Failed to determine key '%s' signature algorithm", keyId));
+                log.error(String.format("Failed to determine key '%s' signature algorithm", resultKeyId));
             	return null;
             }
 
-            String resultKeyId = jsonKeyValue.getString(JWKS_KEY_ID);
 
             JSONObject jsonPrivateKey = jsonKeyValue.getJSONObject(PRIVATE_KEY);
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
