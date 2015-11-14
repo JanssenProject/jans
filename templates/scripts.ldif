@@ -84,7 +84,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample UMA Authorization policy
-displayName: uma_autorization_policy
+displayName: uma_authorization_policy
 gluuStatus: true
 inum: %(inumOrg)s!0011!2DAF.F995
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s","description":""}
