@@ -94,10 +94,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 GrantType gt = GrantType.fromString(grantType);
 
                 Client client = sessionClient.getClient();
-                if (client == null) {
-                    builder = error(400, TokenErrorResponseType.INVALID_GRANT);
-                    return sendResponse(builder);
-                }
 
                 if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                     if (!federationDataService.hasAnyActiveTrust(client)) {
@@ -108,6 +104,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 }
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
+                    if (client == null) {
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                        return sendResponse(builder);
+                    }
+
                     GrantService grantService = GrantService.instance();
                     AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
 
@@ -151,6 +152,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.REFRESH_TOKEN) {
+                    if (client == null) {
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                        return sendResponse(builder);
+                    }
+
                     AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                     if (authorizationGrant != null) {
@@ -178,6 +184,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(401, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.CLIENT_CREDENTIALS) {
+                    if (client == null) {
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                        return sendResponse(builder);
+                    }
+
                     ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
 
                     AccessToken accessToken = clientCredentialsGrant.createAccessToken();
@@ -215,6 +226,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
                     if (user != null) {
+                        if (client == null) {
+                            builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                            return sendResponse(builder);
+                        }
+
                         ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
                         AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken();
                         RefreshToken reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();

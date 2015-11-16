@@ -376,16 +376,20 @@ public class AuthenticationService {
     }
 
     public void configureSessionClient(Context context) {
+        Client client = clientService.getClient(credentials.getUsername());
+        configureSessionClient(context, client);
+    }
+
+    public void configureSessionClient(Context context, Client client) {
         identity.addRole("client");
 
-        Client client = clientService.getClient(credentials.getUsername());
-        SessionClient sessionClient = new SessionClient();
+		SessionClient sessionClient = new SessionClient();
         sessionClient.setClient(client);
 
         context.set("sessionClient", sessionClient);
 
         clientService.updatAccessTime(client, true);
-    }
+	}
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
