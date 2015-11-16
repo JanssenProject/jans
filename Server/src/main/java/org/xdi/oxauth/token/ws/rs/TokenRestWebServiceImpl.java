@@ -41,7 +41,7 @@ import java.util.List;
  * Provides interface for token REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version November 16, 2015
  */
 @Name("requestTokenRestWebService")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -97,12 +97,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 GrantType gt = GrantType.fromString(grantType);
 
                 Client client = sessionClient.getClient();
-
-                if (client == null) {
-                    client = clientService.getClient(clientId);
-                    sessionClient.setClient(client);
-                    clientService.updatAccessTime(client, false);
-                }
 
                 if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                     if (!federationDataService.hasAnyActiveTrust(client)) {
