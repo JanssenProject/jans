@@ -140,7 +140,7 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0IEF1d
  lIChpIDwgY291bnQpOg0KICAgICAgICAgICAgY2xpZW50ID0gYWxsb3dlZENsaWVudHNMaXN0QXJyYX
  lbaV0NCiAgICAgICAgICAgIGNsaWVudHNTZXQuYWRkKGNsaWVudCkNCiAgICAgICAgICAgIGkgPSBpI
  CsgMQ0KDQogICAgICAgIHJldHVybiBjbGllbnRzU2V0DQo=
- oxScriptType: uma_authorization_policy
+oxScriptType: uma_authorization_policy
 programmingLanguage: python
 
 dn: inum=%(inumOrg)s!0011!522F.CDC5,ou=scripts,o=%(inumOrg)s,o=gluu
