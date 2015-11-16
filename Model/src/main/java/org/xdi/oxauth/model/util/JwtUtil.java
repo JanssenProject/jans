@@ -677,7 +677,23 @@ public class JwtUtil {
     @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
-        log.debug("Retrieving JWK...");
+    	org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
+    	
+    	// TODO: Temporary solution. Testing jwks is in old format!!!
+    	try {
+			publicKey = getPublicKeyOldImpl(jwksUri, jwks, signatureAlgorithm, keyId);
+		} catch (Exception ex) {}
+
+    	if (publicKey == null) {
+    		publicKey = getPublicKey(jwksUri, jwks, keyId);
+    	}
+    	
+    	return publicKey;
+    }
+
+    @Deprecated
+	private static org.xdi.oxauth.model.crypto.PublicKey getPublicKeyOldImpl(String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
+		log.debug("Retrieving JWK...");
 
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
@@ -760,7 +776,7 @@ public class JwtUtil {
         }
 
         return publicKey;
-    }
+	}
 
 	public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
 		log.debug("Retrieving JWK Key...");
