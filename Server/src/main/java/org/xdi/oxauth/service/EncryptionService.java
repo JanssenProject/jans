@@ -16,6 +16,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
@@ -41,7 +42,11 @@ public class EncryptionService {
     }
 
 	public String encrypt(String unencryptedString) throws EncryptionException {
-        return stringEncrypter.encrypt(unencryptedString);
+		if (StringHelper.isEmpty(unencryptedString)) {
+			return null;
+		}
+
+		return stringEncrypter.encrypt(unencryptedString);
 	}
 
 	public Properties decryptProperties(Properties connectionProperties) {
