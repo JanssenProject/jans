@@ -175,8 +175,8 @@ public class Authenticator implements Serializable {
         }
 
         boolean loggedIn = skipPassword;
-        if (!skipPassword) {
-        	skipPassword = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
+        if (!loggedIn) {
+        	loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
         }
         if (loggedIn) {
         	authenticationService.configureSessionClient(context);
