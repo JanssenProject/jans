@@ -297,7 +297,7 @@ public class AuthenticationFilter extends AbstractFilter {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
 
-                        getAuthenticator().authenticateWebService();
+                        getAuthenticator().authenticateWebService(true);
                         authorized = true;
                     }
                 }
