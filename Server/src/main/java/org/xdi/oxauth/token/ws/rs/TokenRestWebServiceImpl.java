@@ -207,10 +207,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope,
                             idToken));
                 } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-//    				if (client == null) {
-//    					return sendResponse(error(401, TokenErrorResponseType.INVALID_CLIENT));
-//    				}
-//
+    				if (client == null) {
+    					return sendResponse(error(401, TokenErrorResponseType.INVALID_CLIENT));
+    				}
+
                     User user = null;
                     if (authenticationFilterService.isEnabled()) {
                         String userDn = authenticationFilterService.processAuthenticationFilters(request.getParameterMap());
