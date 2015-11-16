@@ -200,8 +200,8 @@
     "clientAuthenticationFilters":[
         {
             "filter":"myCustomAttr1={0}",
-            "bind":null,
-            "bindPasswordAttribute":null,
+            "bind":${config.oxauth.authentication.filter.bindDn},
+            "bindPasswordAttribute":${config.oxauth.authentication.filter.bindPassword},
             "baseDn":"ou=clients,o=${config.oxauth.organization},o=gluu"
         }
     ],
