@@ -38,7 +38,11 @@ public class EncryptionService {
     private StringEncrypter stringEncrypter;
 
     public String decrypt(String encryptedString) throws EncryptionException {
-        return stringEncrypter.decrypt(encryptedString);
+		if (StringHelper.isEmpty(encryptedString)) {
+			return null;
+		}
+
+		return stringEncrypter.decrypt(encryptedString);
     }
 
 	public String encrypt(String unencryptedString) throws EncryptionException {
