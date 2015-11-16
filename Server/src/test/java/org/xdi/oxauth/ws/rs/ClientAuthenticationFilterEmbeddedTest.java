@@ -229,7 +229,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
     }
 
     @Parameters({"tokenPath", "userId", "userSecret"})
-    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
+    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes", enabled = false)
     public void requestAccessTokenCustomClientAuth3(final String tokenPath,
                                                     final String userId, final String userSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
