@@ -165,7 +165,6 @@ public class AuthenticationFilter extends AbstractFilter {
                             if (client == null || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
                                 throw new Exception("The Token Authentication Method is not valid.");
                             }
-                            getAuthenticator().configureSessionClient(client);
                         }
 
                         identity.getCredentials().setUsername(username);
