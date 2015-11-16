@@ -38,6 +38,7 @@ import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
@@ -532,6 +533,10 @@ public class Authenticator implements Serializable {
 		}
 
 		return true;
+	}
+
+	public void configureSessionClient(Client client) {
+       	authenticationService.configureSessionClient(getWebServiceContext(), client);
 	}
 
 }
