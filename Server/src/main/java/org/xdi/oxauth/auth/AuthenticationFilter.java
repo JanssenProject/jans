@@ -248,6 +248,8 @@ public class AuthenticationFilter extends AbstractFilter {
                             identity.getCredentials().setPassword(clientSecret);
 
                             requireAuth = !getAuthenticator().authenticateWebService();
+                        } else {
+                        	getAuthenticator().configureSessionClient(client);
                         }
                     }
                 }
