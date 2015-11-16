@@ -13,10 +13,12 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JWKS_ALGORITHM;
 import static org.xdi.oxauth.model.jwk.JWKParameter.JWKS_KEY_ID;
 import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
 import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_EXPONENT;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_KEY;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PRIVATE_EXPONENT;
 import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_EXPONENT;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X;
 import static org.xdi.oxauth.model.jwk.JWKParameter.X5C;
 import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
@@ -814,26 +816,22 @@ public class JwtUtil {
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
         try {
-            jsonKeyValue = jsonKeyValue.getJSONObject(PUBLIC_KEY);
         	SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(jsonKeyValue.getString(JWKS_ALGORITHM));
             if (signatureAlgorithm == null) {
                 log.error(String.format("Failed to determine key '%s' signature algorithm", keyId));
             	return null;
             }
+
+            jsonKeyValue = jsonKeyValue.getJSONObject(PUBLIC_KEY);
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
-                String exp = jsonKeyValue.getString(EXPONENT);
-                String mod = jsonKeyValue.getString(MODULUS);
+                String exp = jsonKeyValue.getString(PUBLIC_EXPONENT);
+                String mod = jsonKeyValue.getString(PUBLIC_MODULUS);
 
                 BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
                 BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
-                //String crv = jsonKeyValue.getString(CURVE);
                 String xx = jsonKeyValue.getString(X);
                 String yy = jsonKeyValue.getString(Y);
 
@@ -885,7 +883,6 @@ public class JwtUtil {
                 log.error(String.format("Failed to determine key '%s' signature algorithm", resultKeyId));
             	return null;
             }
-
 
             JSONObject jsonPrivateKey = jsonKeyValue.getJSONObject(PRIVATE_KEY);
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {

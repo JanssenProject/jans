@@ -32,6 +32,8 @@ public interface JWKParameter {
     public static final String X = "x";
     public static final String Y = "y";
     public static final String D = "d";
+    public static final String PUBLIC_MODULUS = "modulus";
+    public static final String PUBLIC_EXPONENT = "exponent";
 
     // Private Key
     public static final String PRIVATE_MODULUS = "modulus";
