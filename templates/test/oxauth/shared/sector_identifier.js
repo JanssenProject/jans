@@ -1,4 +1,5 @@
 [ "https://www.gluu.org",
+    "http://localhost:80/oxauth-rp/home.seam",
     "https://localhost:8443/oxauth-rp/home.seam",
     "https://%(hostname)s/oxauth-rp/home.seam",
     "https://client.example.org/callback",
