@@ -65,9 +65,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private UserService userService;
 
     @In
-    private ClientService clientService;
-
-    @In
     private AuthenticationFilterService authenticationFilterService;
 
     @In

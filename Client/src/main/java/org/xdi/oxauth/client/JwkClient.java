@@ -6,23 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.ALGORITHM;
-import static org.xdi.oxauth.model.jwk.JWKParameter.CURVE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
-import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_TYPE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_USE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -33,15 +16,23 @@ import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * Encapsulates functionality to make JWK request calls to an authorization
  * server via REST Services.
  *
- * @author Javier Rojas Blum Date: 11.15.2011
+ * @author Javier Rojas Blum
+ * @version November 16, 2015
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
-    private static final String mediaType = MediaType.TEXT_PLAIN;
+    private static final String mediaType = MediaType.APPLICATION_JSON;
 
     /**
      * Constructs a JSON Web Key (JWK) client by providing a REST url where the
