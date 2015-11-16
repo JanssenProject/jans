@@ -30,7 +30,6 @@ import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.util.StringHelper;
@@ -41,7 +40,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -74,7 +72,8 @@ public class AuthenticationFilter extends AbstractFilter {
             @Override
             public void process() {
                 try {
-                    if (httpRequest.getRequestURL().toString().equals(ConfigurationFactory.instance().getConfiguration().getTokenEndpoint())) {
+                    final String requestUrl = httpRequest.getRequestURL().toString();
+                    if (requestUrl.equals(ConfigurationFactory.instance().getConfiguration().getTokenEndpoint()) || isLocalEmbeddedTest(requestUrl)) {
                         if (httpRequest.getParameter("client_assertion") != null
                                 && httpRequest.getParameter("client_assertion_type") != null) {
                             processJwtAuth(httpRequest, httpResponse, filterChain);
@@ -114,6 +113,11 @@ public class AuthenticationFilter extends AbstractFilter {
                 }
             }
         }.run();
+    }
+
+    private boolean isLocalEmbeddedTest(String requestUrl) {
+        return Boolean.parseBoolean(System.getProperty("seam.local.test")) &&
+                requestUrl.equals("http://localhost:80/seam/resource/restv1/oxauth/token");
     }
 
     private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {

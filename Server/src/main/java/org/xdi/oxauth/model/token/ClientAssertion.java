@@ -115,7 +115,7 @@ public class ClientAssertion {
                             throw new InvalidJwtException("JWT has expired");
                         }
                     } else {
-                        throw new InvalidJwtException("Invalid audience");
+                        throw new InvalidJwtException("Invalid audience: " + audience + ", tokenUrl: " + tokenUrl);
                     }
                 } else {
                     throw new InvalidJwtException("Invalid clientId");
