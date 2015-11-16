@@ -38,6 +38,8 @@ public class JwsValidator {
             if (StringUtils.isNotBlank(jwksUri) || StringUtils.isNotBlank(jwks)) {
                 String keyId = jwt.getHeader().getKeyId();
                 publicKey = JwtUtil.getPublicKey(jwksUri, jwks, keyId);
+                
+                //TODO: Compare algorithm and publicKey.algorithm
             }
         }
     }
