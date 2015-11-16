@@ -20,7 +20,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 14, 2015
+ * @version November 16, 2015
  */
 public class ClientCredentialsGrantHttpTest extends BaseTest {
 
@@ -289,8 +289,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
 
     @Parameters({"redirectUris"})
     @Test
-    public void clientSecretPostAuthenticationMethodFail(final String redirectUris) throws Exception {
-        showTitle("clientSecretPostAuthenticationMethodFail");
+    public void clientSecretPostAuthenticationMethodFail1(final String redirectUris) throws Exception {
+        showTitle("clientSecretPostAuthenticationMethodFail1");
 
         List<String> scopes = Arrays.asList("clientinfo");
 
@@ -319,6 +319,96 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword("INVALID_CLIENT_SECRET");
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType());
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
+        assertNotNull(tokenResponse.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void clientSecretPostAuthenticationMethodFail2(final String redirectUris) throws Exception {
+        showTitle("clientSecretPostAuthenticationMethodFail2");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScopes(scopes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(null);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType());
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.INVALID_CLIENT);
+        assertNotNull(tokenResponse.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void clientSecretPostAuthenticationMethodFail3(final String redirectUris) throws Exception {
+        showTitle("clientSecretPostAuthenticationMethodFail3");
+
+        List<String> scopes = Arrays.asList("clientinfo");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScopes(scopes);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Client Credentials Grant
+        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+        tokenRequest.setScope("clientinfo");
+        tokenRequest.setAuthUsername(null);
+        tokenRequest.setAuthPassword(null);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
