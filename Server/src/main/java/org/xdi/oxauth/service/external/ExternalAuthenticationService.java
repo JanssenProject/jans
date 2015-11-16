@@ -233,7 +233,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public boolean isEnabled(AuthenticationScriptUsageType usageType) {
-		return this.customScriptConfigurationsMapByUsageType.get(usageType).size() > 0;
+		return this.customScriptConfigurationsMapByUsageType != null &&
+                this.customScriptConfigurationsMapByUsageType.get(usageType).size() > 0;
 	}
 
 	public CustomScriptConfiguration getExternalAuthenticatorByAuthLevel(AuthenticationScriptUsageType usageType, int authLevel) {
