@@ -37,7 +37,7 @@ public class JwsValidator {
             SignatureAlgorithm algorithm = jwt.getHeader().getAlgorithm();
             if (StringUtils.isNotBlank(jwksUri) || StringUtils.isNotBlank(jwks)) {
                 String keyId = jwt.getHeader().getKeyId();
-                publicKey = JwtUtil.getPublicKey(jwksUri, jwks, algorithm, keyId);
+                publicKey = JwtUtil.getPublicKey(jwksUri, jwks, keyId);
             }
         }
     }
