@@ -8,7 +8,7 @@ oxAuthAppType: native
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthJwks:: %(scim_rs_client_base64_jwks)s
-oxAuthTokenEndpointAuthMethod: client_secret_jwt
+oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
@@ -23,7 +23,7 @@ oxAuthAppType: native
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthJwks:: %(scim_rp_client_base64_jwks)s
-oxAuthTokenEndpointAuthMethod: client_secret_jwt
+oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
