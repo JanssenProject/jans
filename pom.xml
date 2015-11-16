@@ -675,7 +675,7 @@
                         <skipTests>false</skipTests>
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
-                        <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true</argLine>
+                        <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true -Dseam.local.test=true</argLine>
                         <suiteXmlFiles>
                             <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
                         </suiteXmlFiles>
@@ -748,7 +748,7 @@
 		                        <skipTests>false</skipTests>
 		                        <failIfNoTests>false</failIfNoTests>
 		                        <trimStackTrace>false</trimStackTrace>
-		                        <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true</argLine>
+		                        <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true -Dseam.local.test=true</argLine>
 		                        <suiteXmlFiles>
 		                            <suiteXmlFile>target/test-classes/testng-benchmark.xml</suiteXmlFile>
 		                        </suiteXmlFiles>
