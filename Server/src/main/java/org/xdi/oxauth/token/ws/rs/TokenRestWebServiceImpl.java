@@ -94,6 +94,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 GrantType gt = GrantType.fromString(grantType);
 
                 Client client = sessionClient.getClient();
+                if (client == null) {
+                    builder = error(400, TokenErrorResponseType.INVALID_GRANT);
+                    return sendResponse(builder);
+                }
 
                 if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
                     if (!federationDataService.hasAnyActiveTrust(client)) {
@@ -288,13 +292,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.error(e.getMessage(), e);
         }
 
-        CacheControl cacheControl = new CacheControl();
+        return sendResponse(builder);
+    }
+
+	private Response sendResponse(ResponseBuilder builder) {
+		CacheControl cacheControl = new CacheControl();
         cacheControl.setNoTransform(false);
         cacheControl.setNoStore(true);
         builder.cacheControl(cacheControl);
         builder.header("Pragma", "no-cache");
         return builder.build();
-    }
+	}
 
     private ResponseBuilder error(int p_status, TokenErrorResponseType p_type) {
         return Response.status(p_status).entity(errorResponseFactory.getErrorAsJson(p_type));
