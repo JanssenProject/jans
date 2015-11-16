@@ -72,7 +72,7 @@ class MyLDIF(LDIFParser):
                 updated = False
                 updated_value = []
                 for value in entry[attr]:
-                    if value.find(targetString)>0:
+                    if value.find(targetString)>=0:
                         updated_value.append(value.replace(targetString, replaceString))
                         updated = True
                         log("dn: %s\nattr: %s\nvalue: %s\n" % (dn, attr, value))
