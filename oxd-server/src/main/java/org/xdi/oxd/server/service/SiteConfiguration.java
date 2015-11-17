@@ -18,6 +18,11 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "oxd_id")
     private String oxdId;
 
+    @JsonProperty(value = "id_token")
+    private String idToken;
+    @JsonProperty(value = "access_token")
+    private String accessToken;
+
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
     @JsonProperty(value = "logout_redirect_uri")
@@ -64,6 +69,9 @@ public class SiteConfiguration implements Serializable {
     public SiteConfiguration(SiteConfiguration conf) {
         this.oxdId = conf.oxdId;
 
+        this.idToken = conf.idToken;
+        this.accessToken = conf.accessToken;
+
         this.authorizationRedirectUri = conf.authorizationRedirectUri;
         this.logoutRedirectUri = conf.logoutRedirectUri;
 
@@ -85,6 +93,22 @@ public class SiteConfiguration implements Serializable {
         this.acrValues = conf.acrValues;
         this.grantType = conf.grantType;
         this.contacts = conf.contacts;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
     public String getLogoutRedirectUri() {
