@@ -56,8 +56,11 @@ public class ConfigurationService implements Provider<Configuration> {
             return confFilePath.substring(0, confFilePath.lastIndexOf(File.separator));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            throw new RuntimeException("System property " + CONF_SYS_PROPERTY_NAME + " must point to valid directory path and must contain "
-                    + FILE_NAME + " file. Current value: " + confFilePath, e);
+
+            final String workingDirectory = System.getProperty("user.dir") ;
+            return workingDirectory + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
+//            throw new RuntimeException("System property " + CONF_SYS_PROPERTY_NAME + " must point to valid directory path and must contain "
+//                    + FILE_NAME + " file. Current value: " + confFilePath, e);
         }
     }
 
