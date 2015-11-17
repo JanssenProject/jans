@@ -63,6 +63,8 @@ public class OperationFactory {
                     return new RegisterSiteOperation(command, injector);
                 case GET_AUTHORIZATION_CODE:
                     return new GetAuthorizationCodeOperation(command, injector);
+                case LOGOUT:
+                    return new LogoutOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
