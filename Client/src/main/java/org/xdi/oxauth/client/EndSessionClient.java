@@ -148,6 +148,9 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
+
+                    // http based logout : http://openid.net/specs/openid-connect-logout-1_0.html
+                    getResponse().setHtmlPage(entity);
                 }
             }
         } catch (Exception e) {
