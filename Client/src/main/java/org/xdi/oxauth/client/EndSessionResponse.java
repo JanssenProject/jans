@@ -18,6 +18,7 @@ public class EndSessionResponse extends BaseResponse {
 
     private String location;
     private String state;
+    private String htmlPage; // http-based logout
 
     private EndSessionErrorResponseType errorType;
     private String errorDescription;
@@ -48,6 +49,24 @@ public class EndSessionResponse extends BaseResponse {
      */
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    /**
+     * Html page of http based logout
+     *
+     * @return html
+     */
+    public String getHtmlPage() {
+        return htmlPage;
+    }
+
+    /**
+     * Sets html of the page
+     *
+     * @param htmlPage html
+     */
+    public void setHtmlPage(String htmlPage) {
+        this.htmlPage = htmlPage;
     }
 
     /**
