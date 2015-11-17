@@ -71,6 +71,12 @@ public class GetTokensByCodeOperation extends BaseOperation {
                     if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse())) {
                         final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
                         opResponse.setIdTokenClaims(claims);
+
+                        // persist tokens
+                        site.setIdToken(response.getIdToken());
+                        site.setAccessToken(response.getAccessToken());
+                        getSiteService().update(site);
+
                         return okResponse(opResponse);
                     } else {
                         LOG.error("ID Token is not valid, token: " + response.getIdToken());
