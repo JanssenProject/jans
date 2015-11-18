@@ -59,7 +59,7 @@ public class ConfigurationService implements Provider<Configuration> {
             LOG.error(e.getMessage(), e);
 
             final String workingDirectory = System.getProperty("user.dir") ;
-            return workingDirectory + File.separator + "conf";
+            return workingDirectory + File.separator + ".." + File.separator + "conf";
 //            throw new RuntimeException("System property " + CONF_SYS_PROPERTY_NAME + " must point to valid directory path and must contain "
 //                    + FILE_NAME + " file. Current value: " + confFilePath, e);
         }
