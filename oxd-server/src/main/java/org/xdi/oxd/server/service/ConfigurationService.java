@@ -42,6 +42,7 @@ public class ConfigurationService implements Provider<Configuration> {
 
     public File getConfDirectoryFile() {
         final String path = getConfDirectoryPath();
+        LOG.info("Configuration directory: " + path);
         File file = new File(path);
         if (file.exists() && file.isDirectory()) {
             return file;
@@ -58,7 +59,7 @@ public class ConfigurationService implements Provider<Configuration> {
             LOG.error(e.getMessage(), e);
 
             final String workingDirectory = System.getProperty("user.dir") ;
-            return workingDirectory + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
+            return workingDirectory + File.separator + "conf";
 //            throw new RuntimeException("System property " + CONF_SYS_PROPERTY_NAME + " must point to valid directory path and must contain "
 //                    + FILE_NAME + " file. Current value: " + confFilePath, e);
         }
