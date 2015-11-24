@@ -66,7 +66,7 @@ public class AuthenticationService {
     @In
     private Identity identity;
 
-    @In(create=true)
+    @In
     private OAuthCredentials credentials;
 
     @In(required = false, value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
