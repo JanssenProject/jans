@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.common.User;
  * We're using this custom credentials class instead of built-in one to allow storing user DN
  */
 @Name("org.jboss.seam.security.credentials")
-@Scope(ScopeType.EVENT)
+@Scope(ScopeType.SESSION)
 @Install(precedence = Install.APPLICATION)
 @BypassInterceptors
 public class OAuthCredentials extends Credentials {
