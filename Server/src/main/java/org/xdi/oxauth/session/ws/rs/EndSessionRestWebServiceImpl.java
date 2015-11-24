@@ -63,7 +63,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private SessionIdService sessionIdService;
     @In
     private ClientService clientService;
-    @In
+    @In(required = false)
     private Identity identity;
 
     @Override
@@ -120,7 +120,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         authorizationGrant.revokeAllTokens();
-        identity.logout();
+        if (identity != null) {
+            identity.logout();
+        }
 
         return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
     }
