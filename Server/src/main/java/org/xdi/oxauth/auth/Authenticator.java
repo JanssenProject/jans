@@ -66,7 +66,7 @@ public class Authenticator implements Serializable {
     @In
     private Identity identity;
 
-    @In(create = true)
+    @In
     private OAuthCredentials credentials;
 
     @In
