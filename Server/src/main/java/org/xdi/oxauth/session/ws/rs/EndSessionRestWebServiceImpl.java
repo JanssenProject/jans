@@ -14,6 +14,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionId;
@@ -62,6 +63,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private SessionIdService sessionIdService;
     @In
     private ClientService clientService;
+    @In
+    private Identity identity;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
@@ -117,6 +120,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         authorizationGrant.revokeAllTokens();
+        identity.logout();
 
         return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
     }
