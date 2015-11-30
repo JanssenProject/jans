@@ -116,5 +116,11 @@
             <class name="org.xdi.oxd.client.GetUserInfoTest"/>
         </classes>
     </test>
+    <test name="Log out" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.LogoutTest"/>
+        </classes>
+    </test>
+
 
 </suite>
