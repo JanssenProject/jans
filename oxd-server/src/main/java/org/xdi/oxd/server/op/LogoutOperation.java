@@ -49,7 +49,7 @@ public class LogoutOperation extends BaseOperation {
 
             ClientUtils.showClient(client);
             if (response != null) {
-                return okResponse(new LogoutResponse("")); // todo return html once it is ready on oxauth client side (after 2.4.0)
+                return okResponse(new LogoutResponse(response.getHtmlPage()));
             } else {
                 LOG.error("Failed to get response from oxauth client.");
             }
