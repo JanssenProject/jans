@@ -30,20 +30,25 @@ public class GetTokensByCodeTest {
             client = new CommandClient(host, port);
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl);
-
-            final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
-            commandParams.setOxdId(site.getSiteId());
-            commandParams.setCode(codeRequest(client, site.getSiteId(), userId, userSecret));
-
-            final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
-
-            final GetTokensByCodeResponse resp = client.send(command).dataAsResponse(GetTokensByCodeResponse.class);
-            assertNotNull(resp);
-            notEmpty(resp.getAccessToken());
-            notEmpty(resp.getIdToken());
+            tokenByCode(client, site, redirectUrl, userId, userSecret);
         } finally {
             CommandClient.closeQuietly(client);
         }
+    }
+
+    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret) {
+
+        final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
+        commandParams.setOxdId(site.getSiteId());
+        commandParams.setCode(codeRequest(client, site.getSiteId(), userId, userSecret));
+
+        final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
+
+        final GetTokensByCodeResponse resp = client.send(command).dataAsResponse(GetTokensByCodeResponse.class);
+        assertNotNull(resp);
+        notEmpty(resp.getAccessToken());
+        notEmpty(resp.getIdToken());
+        return resp;
     }
 
     public static String codeRequest(CommandClient client, String siteId, String userId, String userSecret) {
