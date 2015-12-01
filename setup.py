@@ -121,7 +121,7 @@ class Setup(object):
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
-        self.encode_salt = "123456789012345678901234"
+        self.encode_salt = None
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
