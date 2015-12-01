@@ -1,5 +1,5 @@
 /*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -8,164 +8,144 @@ package org.xdi.ldap.model;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.unboundid.util.StaticUtils;
 
 /**
- * Custom attribute
- * 
+ * @author Javier Rojas Date: 12.5.2011
  * @author Yuriy Movchan Date: 04/08/2014
- */
+*/
 public class CustomAttribute implements Serializable, Comparable<CustomAttribute> {
 
-	private static final long serialVersionUID = 1468440094325406153L;
+    private static final long serialVersionUID = 1468450094325306154L;
 
-	private String name;
-	private String[] values;
+    private static final Logger log = LoggerFactory.getLogger(CustomAttribute.class);
 
-	public CustomAttribute() {
-	}
+    private String name;
+    private List<String> values;
 
-	public CustomAttribute(String name, String value) {
-		this.name = name;
-		setValue(value);
-	}
+    public CustomAttribute() {
+    }
 
-	public CustomAttribute(String name, Date value) {
+    public CustomAttribute(String name) {
+        this.name = name;
+    }
+
+    public CustomAttribute(String name, String value) {
+        this.name = name;
+        setValue(value);
+    }
+
+    public CustomAttribute(String name, Date value) {
 		this.name = name;
 		setDate(value);
 	}
 
-	public CustomAttribute(String name, String[] values) {
-		this.name = name;
-		this.values = values;
-	}
+    public CustomAttribute(String name, List<String> values) {
+        this.name = name;
+        this.values = values;
+    }
+    
+    public String getValue() {
+        if (this.values == null) {
+            return null;
+        }
 
-	public CustomAttribute(String name, Set<String> values) {
-		this.name = name;
-		this.values = values.toArray(new String[0]);
-	}
+        if (this.values.size() > 0) {
+            return this.values.get(0);
+        }
 
-	public final String getName() {
-		return name;
-	}
+        return null;
+    }
 
-	public final void setName(String name) {
-		this.name = name;
-	}
+    public void setValue(String value) {
+        this.values = new ArrayList<String>();
+        this.values.add(value);
+    }
 
-	public String getValue() {
-		if (this.values == null) {
-			return null;
-		}
+    public Date getDate() {
+        if (this.values == null) {
+            return null;
+        }
 
-		if (this.values.length > 0) {
-			return this.values[0];
-		}
+        if (!this.values.isEmpty()) {
+            try {
+                return StaticUtils.decodeGeneralizedTime(values.get(0));
+            } catch (ParseException e) {
+            	log.trace(e.getMessage(), e);
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public void setValue(String value) {
-		if (this.values == null) {
-			this.values = new String[0];
-		}
+    public void setDate(Date date) {
+        this.values = new ArrayList<String>();
+        this.values.add(StaticUtils.encodeGeneralizedTime(date));
+    }
 
-		if (this.values.length != 1) {
-			this.values = new String[1];
-		}
-		this.values[0] = value;
-	}
+    public List<String> getValues() {
+        return values;
+    }
 
-	public Date getDate() {
-		if (this.values == null) {
-			return null;
-		}
+    public void setValues(List<String> values) {
+        this.values = values;
+    }
 
-		if (this.values.length > 0 && values[0] != null) {
-			try {
-				return StaticUtils.decodeGeneralizedTime((String) values[0]);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		}
+    public final String getName() {
+        return name;
+    }
 
-		return null;
-	}
+    public final void setName(String name) {
+        this.name = name;
+    }
 
-	public void setDate(Date date) {
-		if (this.values == null) {
-			this.values = new String[0];
-		}
+    public String getDisplayValue() {
+        if (values == null) {
+            return "";
+        }
 
-		if (this.values.length != 1) {
-			this.values = new String[1];
-		}
-		this.values[0] = StaticUtils.encodeGeneralizedTime(date);
-	}
+        if (values.size() == 1) {
+            return values.get(0);
+        }
 
-	public String[] getValues() {
-		return values;
-	}
+        StringBuilder sb = new StringBuilder(values.get(0));
+        for (int i = 1; i < values.size(); i++) {
+            sb.append(", ").append(values.get(i));
+        }
 
-	public void setValues(String[] values) {
-		this.values = values;
-	}
+        return sb.toString();
+    }
 
-	public void setValues(Collection<String> values) {
-		this.values = values.toArray(new String[0]);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	public void setValues(Set<String> values) {
-		this.values = values.toArray(new String[0]);
-	}
+        CustomAttribute that = (CustomAttribute) o;
 
-	public String getDisplayValue() {
-		if (values == null) {
-			return "";
-		}
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
 
-		if (values.length == 1) {
-			return values[0];
-		}
+        return true;
+    }
 
-		StringBuilder sb = new StringBuilder(values[0]);
-		for (int i = 1; i < values.length; i++) {
-			sb.append(", ").append(values[i]);
-		}
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
 
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        return String.format("Attribute [name=%s, values=%s]", name, values);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		CustomAttribute that = (CustomAttribute) o;
-
-		return !(name != null ? !name.equalsIgnoreCase(that.name) : that.name != null);
-
-	}
-
-	@Override
-	public int hashCode() {
-		return name != null ? name.hashCode() : 0;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("Attribute [name=%s, values=%s]", name, Arrays.toString(values));
-	}
-
-	public int compareTo(CustomAttribute o) {
-		return name.compareTo(o.name);
-	}
-
+    public int compareTo(CustomAttribute o) {
+        return name.compareTo(o.name);
+    }
 }

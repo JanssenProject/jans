@@ -59,9 +59,6 @@ import com.unboundid.util.StaticUtils;
  */
 public class LdapEntryManager extends AbstractEntryManager implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2544614410981223105L;
 
 	private static final Logger log = LoggerFactory.getLogger(LdapEntryManager.class);
