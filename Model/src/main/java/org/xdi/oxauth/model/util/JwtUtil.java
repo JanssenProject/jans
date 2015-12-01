@@ -673,12 +673,12 @@ public class JwtUtil {
         signature.update(signingInput);
         return signature.verify(sigBytes);
     }
-    
+
     @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
     	org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
-    	
+
     	// TODO: Temporary solution. Testing jwks is in old format!!!
     	try {
 			publicKey = getPublicKeyOldImpl(jwksUri, jwks, signatureAlgorithm, keyId);
@@ -687,7 +687,7 @@ public class JwtUtil {
     	if (publicKey == null) {
     		publicKey = getPublicKey(jwksUri, jwks, keyId);
     	}
-    	
+
     	return publicKey;
     }
 

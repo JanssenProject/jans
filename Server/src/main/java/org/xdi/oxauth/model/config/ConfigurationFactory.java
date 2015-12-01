@@ -202,6 +202,11 @@ public class ConfigurationFactory {
         return m_jwks;
     }
 
+    public ErrorMessages getErrorResponses() {
+        final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
+        return f.getMessages();
+    }
+
     public String getCryptoConfigurationSalt() {
 		return cryptoConfigurationSalt;
 	}
