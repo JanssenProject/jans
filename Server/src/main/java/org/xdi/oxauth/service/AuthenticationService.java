@@ -17,13 +17,13 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
@@ -38,6 +38,7 @@ import org.xdi.util.StringHelper;
 
 import javax.annotation.Nonnull;
 import javax.faces.context.FacesContext;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -327,7 +328,7 @@ public class AuthenticationService {
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
 
-        org.xdi.ldap.model.CustomAttribute customAttribute = new org.xdi.ldap.model.CustomAttribute("oxLastLogonTime", new Date());
+        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
 
         try {
