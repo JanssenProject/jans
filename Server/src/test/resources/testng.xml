@@ -303,7 +303,7 @@
     <parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2"/>
     <parameter name="postLogoutRedirectUri" value="https://client.example.com/pl"/>
     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
-    <parameter name="audience" value="${config.oxauth.issuer}/seam/resource/restv1/oxauth/token"/>
+    <parameter name="audience" value="${test.server.url}/seam/resource/restv1/oxauth/token"/>
     <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js"/>
     <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
