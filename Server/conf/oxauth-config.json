@@ -171,7 +171,7 @@
     "organizationInum":"${config.oxauth.organization}",
     "oxId":"https://${server.name}/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
-    "dynamicRegistrationExpirationTime":0,
+    "dynamicRegistrationExpirationTime":120,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
