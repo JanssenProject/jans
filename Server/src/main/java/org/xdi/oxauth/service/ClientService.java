@@ -210,8 +210,8 @@ public class ClientService {
 		return client;
     }
 
-	public org.xdi.oxauth.model.common.CustomAttribute getCustomAttribute(Client client, String attributeName) {
-		for (org.xdi.oxauth.model.common.CustomAttribute customAttribute : client.getCustomAttributes()) {
+	public org.xdi.ldap.model.CustomAttribute getCustomAttribute(Client client, String attributeName) {
+		for (org.xdi.ldap.model.CustomAttribute customAttribute : client.getCustomAttributes()) {
 			if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
 				return customAttribute;
 			}
@@ -221,10 +221,10 @@ public class ClientService {
 	}
 
 	public void setCustomAttribute(Client client, String attributeName, String attributeValue) {
-		org.xdi.oxauth.model.common.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
+		org.xdi.ldap.model.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
 		
 		if (customAttribute == null) {
-			customAttribute = new org.xdi.oxauth.model.common.CustomAttribute(attributeName);
+			customAttribute = new org.xdi.ldap.model.CustomAttribute(attributeName);
 			client.getCustomAttributes().add(customAttribute);
 		}
 		
