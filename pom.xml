@@ -21,7 +21,7 @@
         <jboss-embedded.version>beta3</jboss-embedded.version>
         <drools.version>5.0.1</drools.version>
         <faces-jsf.version>1.2_12</faces-jsf.version>
-        <richfaces.version>3.3.3.Final</richfaces.version>
+        <richfaces.version>3.3.4.Final</richfaces.version>
         <spring.version>2.5.6.SEC01</spring.version>
     </properties>
 
@@ -278,7 +278,7 @@
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
-                <version>3.2</version>
+                <version>3.2.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
