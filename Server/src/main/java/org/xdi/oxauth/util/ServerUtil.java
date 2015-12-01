@@ -30,7 +30,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
-import org.xdi.oxauth.model.common.CustomAttribute;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
