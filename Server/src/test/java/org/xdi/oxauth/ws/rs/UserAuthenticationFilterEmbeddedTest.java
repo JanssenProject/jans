@@ -473,10 +473,10 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience"})
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth4Step1")
     public void requestAccessTokenCustomAuth4Step2(final String tokenPath,
-                                                   final String userId, final String userSecret) throws Exception {
+                                                   final String userId, final String userSecret, final String audience) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
@@ -490,7 +490,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId4);
                 tokenRequest.setAuthPassword(clientSecret4);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAudience("https://localhost:8443/seam/resource/restv1/oxauth/token");
+                tokenRequest.setAudience(audience);
                 tokenRequest.addCustomParameter("uid", userId);
                 tokenRequest.addCustomParameter("pwd", userSecret);
 
