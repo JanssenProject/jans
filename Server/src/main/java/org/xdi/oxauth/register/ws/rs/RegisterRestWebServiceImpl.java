@@ -15,9 +15,9 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
@@ -45,6 +45,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
 import java.net.URI;
 import java.util.*;
 
