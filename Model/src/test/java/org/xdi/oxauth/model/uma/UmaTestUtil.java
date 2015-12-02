@@ -66,7 +66,7 @@ public class UmaTestUtil {
         //assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
     }
 
-    public static void assert_(ResourceSetStatus p_status) {
+    public static void assert_(ResourceSetResponse p_status) {
         assertNotNull(p_status, "Resource set status is null");
         assertNotNull(p_status.getId(), "Resource set description id is null");
     }

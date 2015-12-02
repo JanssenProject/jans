@@ -27,7 +27,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     private Token m_pat;
     private Token m_aat;
     private RPTResponse m_rpt;
-    private ResourceSetStatus m_resourceSet;
+    private ResourceSetResponse m_resourceSet;
     private ResourceSetPermissionTicket m_ticket;
 
     @Test
