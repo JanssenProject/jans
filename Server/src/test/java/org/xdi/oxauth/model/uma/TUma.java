@@ -53,12 +53,12 @@ public class TUma {
         return c.getConfiguration(configurationPath);
     }
 
-    public static ResourceSetStatus registerResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, ResourceSet p_resourceSet) {
+    public static ResourceSetResponse registerResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
         return s.registerResourceSet(p_pat, p_umaRegisterResourcePath, p_resourceSet);
     }
 
-    public static ResourceSetStatus modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
+    public static ResourceSetResponse modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
                                                       final String p_rsid, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
         return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);

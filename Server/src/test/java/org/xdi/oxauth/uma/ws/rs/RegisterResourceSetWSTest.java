@@ -10,7 +10,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -28,7 +28,7 @@ import static org.testng.Assert.*;
 public class RegisterResourceSetWSTest extends BaseTest {
 
     private Token m_pat;
-    private ResourceSetStatus m_resourceSetStatus;
+    private ResourceSetResponse m_resourceSetStatus;
     private String m_umaRegisterResourcePath;
 
     @Test
@@ -53,7 +53,7 @@ public class RegisterResourceSetWSTest extends BaseTest {
         resourceSet.setIconUri("http://www.example.com/icons/flower.png");
         resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-        final ResourceSetStatus status = TUma.modifyResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId(), resourceSet);
+        final ResourceSetResponse status = TUma.modifyResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSetStatus.getId(), resourceSet);
         UmaTestUtil.assert_(status);
     }
 

@@ -14,9 +14,9 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -71,7 +71,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Add resource set description
-        ResourceSetStatus resourceSetStatus = null;
+        ResourceSetResponse resourceSetStatus = null;
         try {
             ResourceSet resourceSet = new ResourceSet();
             resourceSet.setName("Photo Album");
@@ -100,7 +100,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Modify resource set description
-        ResourceSetStatus resourceSetStatus = null;
+        ResourceSetResponse resourceSetStatus = null;
         try {
             ResourceSet resourceSet = new ResourceSet();
             resourceSet.setName("Photo Album 2");
@@ -128,7 +128,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Modify resource set description with non existing Id
-        ResourceSetStatus resourceSetStatus = null;
+        ResourceSetResponse resourceSetStatus = null;
         try {
             ResourceSet resourceSet = new ResourceSet();
             resourceSet.setName("Photo Album 3");
@@ -154,7 +154,7 @@ public class RegisterResourceSetFlowHttpTest extends BaseTest {
         ResourceSetRegistrationService resourceSetRegistrationService = UmaClientFactory.instance().createResourceSetRegistrationService(this.metadataConfiguration);
 
         // Modify resource set description with invalid PAT
-        ResourceSetStatus resourceSetStatus = null;
+        ResourceSetResponse resourceSetStatus = null;
         try {
             ResourceSet resourceSet = new ResourceSet();
             resourceSet.setName("Photo Album 4");
