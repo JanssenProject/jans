@@ -22,7 +22,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -339,7 +339,7 @@ public class ResourceSetRegistrationWS {
         // Load resource set description
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapUpdatedResourceSet = resourceSetService
                 .getResourceSetByDn(resourceSetDn);
-        ResourceSetStatus resourceSetStatus = new ResourceSetStatus();
+        ResourceSetResponse resourceSetStatus = new ResourceSetResponse();
 
 
         BeanUtils.copyProperties(resourceSetStatus, ldapUpdatedResourceSet);
