@@ -128,7 +128,7 @@ public class ResourceSetRegistrationWS {
         try {
             umaValidationService.validateAuthorizationWithProtectScope(authorization);
 
-            return putResourceSetImpl(Response.Status.NO_CONTENT, authorization, rsid, resourceSet);
+            return putResourceSetImpl(Response.Status.OK, authorization, rsid, resourceSet);
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
@@ -339,18 +339,13 @@ public class ResourceSetRegistrationWS {
         // Load resource set description
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapUpdatedResourceSet = resourceSetService
                 .getResourceSetByDn(resourceSetDn);
-        ResourceSetResponse resourceSetStatus = new ResourceSetResponse();
+        ResourceSetResponse response = new ResourceSetResponse();
 
+        BeanUtils.copyProperties(response, ldapUpdatedResourceSet);
 
-        BeanUtils.copyProperties(resourceSetStatus, ldapUpdatedResourceSet);
-
-        // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-        final String entity = ServerUtil.asJson(resourceSetStatus);
-
-        final ResponseBuilder builder = Response.status(status);
-        builder.entity(entity);
-
-        return builder.build();
+        return Response.status(status).
+                entity(ServerUtil.asJson(response)).
+                build();
     }
 
     private String addResourceSet(String rsid, ResourceSet resourceSet, String userDn, String clientInum,
