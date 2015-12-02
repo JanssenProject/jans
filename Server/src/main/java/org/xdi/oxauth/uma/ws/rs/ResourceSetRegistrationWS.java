@@ -59,6 +59,8 @@ import java.util.List;
 @Api(value = "/host/rsrc/resource_set", description = "The resource server uses the RESTful API at the authorization server's resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public class ResourceSetRegistrationWS {
 
+    private static final int NOT_ALLOWED_STATUS = 405;
+
     @Logger
     private Log log;
 
@@ -210,7 +212,7 @@ public class ResourceSetRegistrationWS {
             @ApiParam(value = "Scope uri", required = false)
             String scope) {
         try {
-            log.trace("Getting resource set descriptions.");
+            log.trace("Getting list of resource set descriptions.");
 
             final AuthorizationGrant authorizationGrant = umaValidationService.validateAuthorizationWithProtectScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
@@ -221,7 +223,7 @@ public class ResourceSetRegistrationWS {
             final List<String> result = new ArrayList<String>(ldapResourceSets.size());
             for (org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet : ldapResourceSets) {
 
-                // if scope paremeter is not null then filter by it, otherwise just add to result
+                // if scope parameter is not null then filter by it, otherwise just add to result
                 if (StringUtils.isNotBlank(scope)) {
                     final List<String> scopeUrlsByDns = umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes());
                     if (scopeUrlsByDns != null && scopeUrlsByDns.contains(scope)) {
@@ -233,7 +235,6 @@ public class ResourceSetRegistrationWS {
             }
 
             return result;
-
 
         } catch (Exception ex) {
             log.error("Exception happened on getResourceSetList()", ex);
@@ -298,9 +299,9 @@ public class ResourceSetRegistrationWS {
         // Load resource set description
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapUpdatedResourceSet = resourceSetService
                 .getResourceSetByDn(resourceSetDn);
-        ResourceSetResponse response = new ResourceSetResponse();
 
-        BeanUtils.copyProperties(response, ldapUpdatedResourceSet);
+        ResourceSetResponse response = new ResourceSetResponse();
+        response.setId(ldapUpdatedResourceSet.getId());
 
         return Response.status(status).
                 entity(ServerUtil.asJson(response)).
@@ -384,14 +385,14 @@ public class ResourceSetRegistrationWS {
     @ApiOperation(value = "Not allowed")
     public Response unsupportedHeadMethod() {
         log.error("HEAD method is not allowed");
-        throw new WebApplicationException(Response.status(405).entity("HEAD Method Not Allowed").build());
+        throw new WebApplicationException(Response.status(NOT_ALLOWED_STATUS).entity("HEAD Method Not Allowed").build());
     }
 
     @OPTIONS
     @ApiOperation(value = "Not allowed")
     public Response unsupportedOptionsMethod() {
         log.error("OPTIONS method is not allowed");
-        throw new WebApplicationException(Response.status(405).entity("OPTIONS Method Not Allowed").build());
+        throw new WebApplicationException(Response.status(NOT_ALLOWED_STATUS).entity("OPTIONS Method Not Allowed").build());
     }
 
 }
