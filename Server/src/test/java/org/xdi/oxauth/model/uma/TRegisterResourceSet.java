@@ -31,15 +31,15 @@ import static org.testng.Assert.*;
 class TRegisterResourceSet {
 
     private final BaseTest m_baseTest;
-    private ResourceSetStatus m_registerStatus;
-    private ResourceSetStatus m_modifyStatus;
+    private ResourceSetResponse m_registerStatus;
+    private ResourceSetResponse m_modifyStatus;
 
     public TRegisterResourceSet(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
         m_baseTest = p_baseTest;
     }
 
-    public ResourceSetStatus registerResourceSet(final Token p_pat, String umaRegisterResourcePath, ResourceSet p_resourceSet) {
+    public ResourceSetResponse registerResourceSet(final Token p_pat, String umaRegisterResourcePath, ResourceSet p_resourceSet) {
         try {
             m_registerStatus = registerResourceSetInternal(p_pat, umaRegisterResourcePath, p_resourceSet);
         } catch (Exception e) {
@@ -50,7 +50,7 @@ class TRegisterResourceSet {
         return m_registerStatus;
     }
 
-    public ResourceSetStatus modifyResourceSet(final Token p_pat, String umaRegisterResourcePath, final String p_rsId,
+    public ResourceSetResponse modifyResourceSet(final Token p_pat, String umaRegisterResourcePath, final String p_rsId,
                                                ResourceSet p_resourceSet) {
         try {
             m_modifyStatus = modifyResourceSetInternal(p_pat, umaRegisterResourcePath, p_rsId, p_resourceSet);
@@ -62,7 +62,7 @@ class TRegisterResourceSet {
         return m_modifyStatus;
     }
 
-    private ResourceSetStatus registerResourceSetInternal(final Token p_pat, String umaRegisterResourcePath, final ResourceSet p_resourceSet) throws Exception {
+    private ResourceSetResponse registerResourceSetInternal(final Token p_pat, String umaRegisterResourcePath, final ResourceSet p_resourceSet) throws Exception {
         String path = umaRegisterResourcePath;
         System.out.println("Path: " + path);
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {
@@ -95,7 +95,7 @@ class TRegisterResourceSet {
 
                 assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
 
-                m_registerStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetStatus.class);
+                m_registerStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
 
                 UmaTestUtil.assert_(m_registerStatus);
             }
@@ -103,7 +103,7 @@ class TRegisterResourceSet {
         return m_registerStatus;
     }
 
-    private ResourceSetStatus modifyResourceSetInternal(final Token p_pat, String umaRegisterResourcePath,
+    private ResourceSetResponse modifyResourceSetInternal(final Token p_pat, String umaRegisterResourcePath,
                                                         final String p_rsId, final ResourceSet p_resourceSet) throws Exception {
         String path = umaRegisterResourcePath + "/" + p_rsId + "/";
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.PUT, path) {
@@ -132,7 +132,7 @@ class TRegisterResourceSet {
                 BaseTest.showResponse("UMA : TRegisterResourceSet.modifyResourceSetInternal() : ", response);
 
                 assertEquals(response.getStatus(), Response.Status.NO_CONTENT.getStatusCode(), "Unexpected response code.");
-                m_modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetStatus.class);
+                m_modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
 
                 UmaTestUtil.assert_(m_modifyStatus);
             }
@@ -213,7 +213,7 @@ class TRegisterResourceSet {
 
         final String j = "{\"resourceSetStatus\":{\"_id\":1364301527462,\"_rev\":1,\"status\":\"created\"}}";
 //        final String j = "{\"_id\":1364301527462,\"_rev\":1,\"status\":\"created\"}";
-        final ResourceSetStatus newR = TUma.readJsonValue(j, ResourceSetStatus.class);
+        final ResourceSetResponse newR = TUma.readJsonValue(j, ResourceSetResponse.class);
         System.out.println();
     }
 }

@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
 public class RegisterPermissionWSTest extends BaseTest {
 
     private Token m_pat;
-    private ResourceSetStatus m_resourceSet;
+    private ResourceSetResponse m_resourceSet;
     private String m_umaRegisterResourcePath;
     private String m_umaPermissionPath;
 
