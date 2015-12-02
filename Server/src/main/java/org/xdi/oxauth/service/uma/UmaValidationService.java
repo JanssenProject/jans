@@ -38,6 +38,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 04/02/2013
@@ -65,7 +69,7 @@ public class UmaValidationService {
     public String validateAmHost(String host) {
         if (StringHelper.isEmpty(host)) {
             log.error("AM host is invalid");
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+            throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
 
@@ -73,7 +77,7 @@ public class UmaValidationService {
             new URI(host);
         } catch (URISyntaxException ex) {
             log.error("Failed to parse AM host: '{0}'", ex, host);
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+            throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
 
@@ -81,12 +85,12 @@ public class UmaValidationService {
             URI umaBaseEndpoint = new URI(ConfigurationFactory.instance().getConfiguration().getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(host, umaBaseEndpoint.getHost())) {
                 log.error("Get request for another AM: '{0}'", host);
-                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+                throw new WebApplicationException(Response.status(BAD_REQUEST)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
             }
         } catch (URISyntaxException ex) {
             log.error("Failed to parse AM host: '{0}'", ex, host);
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+            throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
 
@@ -96,7 +100,7 @@ public class UmaValidationService {
     public String validateHost(String host) {
    		if (StringHelper.isEmpty(host)) {
    			log.error("Host is invalid");
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
    		}
 
@@ -104,7 +108,7 @@ public class UmaValidationService {
    			new URI(host);
    		} catch (URISyntaxException ex) {
    			log.error("Failed to parse host: '{0}'", ex, host);
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
    		}
 
@@ -123,26 +127,26 @@ public class UmaValidationService {
     private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
         log.trace("Validate authorization: {0}", authorization);
         if (StringHelper.isEmpty(authorization)) {
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.UNAUTHORIZED_CLIENT)).build());
+            throw new WebApplicationException(Response.status(UNAUTHORIZED)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());
         }
 
         String token = tokenService.getTokenFromAuthorizationParameter(authorization);
         if (StringHelper.isEmpty(token)) {
             log.debug("Token is invalid");
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.UNAUTHORIZED_CLIENT)).build());
+            throw new WebApplicationException(Response.status(UNAUTHORIZED)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());
         }
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         if (authorizationGrant == null) {
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.ACCESS_DENIED)).build());
+            throw new WebApplicationException(Response.status(UNAUTHORIZED)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(ACCESS_DENIED)).build());
         }
 
         if (!authorizationGrant.isValid()) {
-            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TOKEN)).build());
+            throw new WebApplicationException(Response.status(UNAUTHORIZED)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(INVALID_TOKEN)).build());
         }
 
         final Client client = authorizationGrant.getClient();
@@ -151,7 +155,7 @@ public class UmaValidationService {
 
             if (list == null || list.isEmpty()) {
                 log.error("Client is not in any federation trust, client: {0}", client.getDn());
-                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
+                throw new WebApplicationException(Response.status(UNAUTHORIZED)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.CLIENT_NOT_IN_FEDERATED_TRUST)).build());
             }
         }
@@ -166,26 +170,26 @@ public class UmaValidationService {
 
     public void validateRPT(UmaRPT requesterPermissionToken) {
    		if (requesterPermissionToken == null) {
-   			throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
+   			throw new WebApplicationException(Response.status(UNAUTHORIZED)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
    		}
 
    		requesterPermissionToken.checkExpired();
    		if (!requesterPermissionToken.isValid()) {
-   			throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
+   			throw new WebApplicationException(Response.status(UNAUTHORIZED)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
    		}
    	}
 
     public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
    		if (resourceSetPermission == null) {
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
 
    		resourceSetPermission.checkExpired();
    		if (!resourceSetPermission.isValid()) {
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_TICKET)).build());
    		}
    	}
@@ -194,7 +198,7 @@ public class UmaValidationService {
    		String resourceSetId = resourceSetPermissionRequest.getResourceSetId();
    		if (StringHelper.isEmpty(resourceSetId)) {
    			log.error("Resource set id is empty");
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
 
@@ -206,20 +210,20 @@ public class UmaValidationService {
             List<ResourceSet> resourceSets = resourceSetService.findResourceSets(exampleResourceSet);
             if (resourceSets.size() != 1) {
        			log.error("Resource set isn't registered or there are two resource set with same Id");
-       			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+       			throw new WebApplicationException(Response.status(BAD_REQUEST)
        					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
             }
             resourceSet = resourceSets.get(0);
    		} catch (EntryPersistenceException ex) {
    			log.error("Resource set isn't registered");
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
 
         final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resourceSet.getScopes());
         if (!scopeUrls.containsAll(resourceSetPermissionRequest.getScopes())) {
    			log.error("At least one of the scope isn't registered");
-   			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+   			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_SCOPE)).build());
    		}
    	}
