@@ -177,9 +177,7 @@ public class ResourceSetRegistrationWS {
             final List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
                     .findResourceSets(ldapResourceSet);
             if (ldapResourceSets.size() != 1) {
-                log.error("Specified resource set description isn't exist");
-                throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
+                throwNotFoundException(rsid);
             }
 
             ldapResourceSet = ldapResourceSets.get(0);
@@ -303,9 +301,7 @@ public class ResourceSetRegistrationWS {
             List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
                     .findResourceSets(ldapResourceSet);
             if (ldapResourceSets.isEmpty()) {
-                log.error("Specified resource set description doesn't exist");
-                throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-                        .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
+                throwNotFoundException(rsid);
             }
 
             resourceSetService.remove(ldapResourceSets);
@@ -398,9 +394,7 @@ public class ResourceSetRegistrationWS {
         List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
                 .findResourceSets(ldapResourceSet);
         if (ldapResourceSets.size() != 1) {
-            log.error("Specified resource set description doesn't exist");
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_FOUND)).build());
+            throwNotFoundException(rsid);
         }
 
         ldapResourceSet = ldapResourceSets.get(0);
@@ -434,6 +428,10 @@ public class ResourceSetRegistrationWS {
         }
     }
 
+    private void throwNotFoundException(String rsid) {
+        log.error("Specified resource set description doesn't exist, id: " + rsid);
+        errorResponseFactory.throwUmaNotFoundException();
+    }
 
     @HEAD
     @ApiOperation(value = "Not allowed")
