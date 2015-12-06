@@ -55,7 +55,7 @@ class MyLDIF(LDIFParser):
                 for json_key in json_object.keys():
                     value = json_object[json_key]
                     if type(value) == type([]):
-			if len(value) == 1:
+                        if len(value) == 1:
                             value = value[0]
                     if type(value) != type(unicode("")):
                         continue
