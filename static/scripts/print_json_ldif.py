@@ -20,8 +20,8 @@ class MyLDIF(LDIFParser):
         self.writer = LDIFWriter(output)
 
     def handle(self, dn, entry):
-	s = (len(dn)+4) * "="
-	print "\n\n%s\ndn: %s\n%s" % (s, dn, s)
+        s = (len(dn)+4) * "="
+        print "\n\n%s\ndn: %s\n%s" % (s, dn, s)
         for attr in entry.keys():
             print "\nattr: %s\n%s" % (attr, (len(attr)+6) * "-")
             for value in entry[attr]:
