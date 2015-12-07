@@ -13,10 +13,22 @@ log = "./import23.log"
 logError = "./import23.error"
 
 service = "/usr/sbin/service"
+ldapmodify = "/opt/opendj/bin/ldapmodify"
 
 ignore_files = ['101-ox.ldif']
 
-ldif_files =  [ "groups.ldif",
+ldap_creds = ['-h',
+              'localhost',
+              '-p',
+              '1389',
+              '-D',
+              '"cn=directory',
+              'manager"',
+              '-j',
+              password_file
+              ]
+
+bulk_ldif_files =  [ "groups.ldif",
                 "people.ldif",
                 "u2f.ldif",
                 "attributes.ldif",
@@ -24,8 +36,8 @@ ldif_files =  [ "groups.ldif",
                 "scopes.ldif",
                 "uma.ldif",
                 "clients.ldif",
-                "organization.ldif",
-                "scripts.ldif"
+                "scripts.ldif",
+                "site.ldif"
                 ]
 
 class MyLDIF(LDIFParser):
@@ -64,15 +76,17 @@ def logIt(msg, errorLog=False):
     f.write('%s %s\n' % (time.strftime('%X %x'), msg))
     f.close()
 
-def uploadLDIF():
+def updateConfiguration():
+    if not os.path.exists("./output_ldif"):
+        os.mkdir("./output_ldif")
+    fn = "./ldif/%s" % ldif_file
+    parser = MyLDIF(open(fn, 'rb'), sys.stdout)
+    parser.parse()
+
+def startOpenDJ():
     output, error = getOutput([service, 'opendj', 'start'])
-    if not error and out.index("Directory Server has started successfully") > 0:
-        if not os.path.exists("./output_ldif"):
-            os.mkdir("./output_ldif")
-        for ldif_file in ldif_files:
-            fn = "./ldif/%s" % ldif_file
-            parser = MyLDIF(open(fn, 'rb'), sys.stdout)
-            parser.parse()
+    if not error and output.index("Directory Server has started successfully") > 0:
+        logIt("Directory Server has started successfully")
     else:
         if error:
             login("Error starting OpenDJ:\t%s" % error)
@@ -80,6 +94,27 @@ def uploadLDIF():
         else:
             logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors")
             sys.exit(3)
+
+def stopOpenDJ():
+    output, error = getOutput([service, 'opendj', 'start'])
+    if not error and output.index("Directory Server is now stopped") > 0:
+        logIt("Directory Server is now stopped")
+    else:
+        if error:
+            login("Error stopping OpenDJ:\t%s" % error)
+            sys.exit(2)
+        else:
+            logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
+            sys.exit(3)
+
+def uploadBulkLDIF():
+    for ldif_file in ldif_files:
+        cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f' './ldif/%s' % ldif_file]
+        output, error = getOutput(cmd)
+        if output:
+            logIt(output)
+        if error:
+            logIt("Error uploading %s\n" % ldif_file + error, True)
 
 def walk_function(a, dir, files):
     for file in files:
@@ -98,5 +133,8 @@ def walk_function(a, dir, files):
             except:
                 logIt("Error copying %s" % targetFn, True)
 
+stopOpenDJ()
 copyFiles()
-uploadLDIF()
+startOpenDJ()
+uploadBulkLDIF()
+updateConfiguration()

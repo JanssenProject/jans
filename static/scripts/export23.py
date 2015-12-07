@@ -73,6 +73,13 @@ def getLdif():
     f.write(output)
     f.close()
 
+    # Backup o=site
+    args = [ldapsearch] + ldap_creds + ['-b', 'o=site', 'objectclass=*']
+    output = getOutput(args)
+    f = open("%s/ldif/site.ldif" % bu_folder, 'w')
+    f.write(output)
+    f.close()
+
 def getOutput(args):
         try:
             logIt("Running command : %s" % " ".join(args))
