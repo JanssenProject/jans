@@ -73,22 +73,25 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug("Attempting to end session, idTokenHint: {0}, postLogoutRedirectUri: {1}, sessionId: {2}, Is Secure = {3}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
-        EndSessionParamsValidator.validateParams(idTokenHint, postLogoutRedirectUri, errorResponseFactory);
+        EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
 
         final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
 
-        // Validate redirectUri
-        String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+        if (!Strings.isNullOrEmpty(postLogoutRedirectUri)) {
 
-        if (StringUtils.isNotBlank(redirectUri)) {
-            RedirectUri redirectUriResponse = new RedirectUri(redirectUri);
-            if (StringUtils.isNotBlank(state)) {
-                redirectUriResponse.addResponseParameter(EndSessionResponseParam.STATE, state);
+            // Validate redirectUri
+            String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+
+            if (StringUtils.isNotBlank(redirectUri)) {
+                RedirectUri redirectUriResponse = new RedirectUri(redirectUri);
+                if (StringUtils.isNotBlank(state)) {
+                    redirectUriResponse.addResponseParameter(EndSessionResponseParam.STATE, state);
+                }
+
+                return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
+            } else {
+                errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
             }
-
-            return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
-        } else {
-            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
         }
         return Response.ok().build();
     }
