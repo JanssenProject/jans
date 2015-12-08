@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 import traceback
-from ldif import LDIFParser, LDIFWriter
+from ldif import LDIFParser, CreateLDIF
 
 log = "./import23.log"
 logError = "./import23.error"
@@ -15,7 +15,15 @@ logError = "./import23.error"
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 
-ignore_files = ['101-ox.ldif']
+ignore_files = ['101-ox.ldif',
+                'gluuImportPerson.properties',
+                'oxTrust.properties',
+                'oxauth-config.xml',
+                'oxauth-errors.json',
+                'oxauth.config.reload',
+                'oxauth-static-conf.json',
+                'oxtrust.config.reload'
+                ]
 
 ldap_creds = ['-h',
               'localhost',
@@ -27,6 +35,13 @@ ldap_creds = ['-h',
               '-j',
               password_file
               ]
+
+fixManagerGroupLdif = """dn: %s
+changetype: modify
+replace: gluuManagerGroup
+gluuManagerGroup: %s
+
+"""
 
 bulk_ldif_files =  [ "groups.ldif",
                 "people.ldif",
@@ -40,17 +55,31 @@ bulk_ldif_files =  [ "groups.ldif",
                 "site.ldif"
                 ]
 
-class MyLDIF(LDIFParser):
+class ConfigLDIF(LDIFParser):
     def __init__(self, input, output):
         LDIFParser.__init__(self, input)
-        self.writer = LDIFWriter(output)
+        self.targetDN = None
+        self.targetAttr = None
+        self.DNs = []
+        self.lastDN = None
+        self.lastEntry = None
+
+    def getResults(self):
+        return (self.targetDN, self.targetAttr)
+
+    def getDNs(self):
+        return self.DNs
+
+    def getLastEntry(self):
+        return self.lastEntry
 
     def handle(self, dn, entry):
-        for attr in entry.keys():
-            pass
-            # search current ldap server
-            # if entry not present... add it
-            # if entry is present: compare attributes - and union values
+        self.lastDN = dn
+        self.DNs.append(dn)
+        self.lastEntry = entry
+        if dn.lower().strip() == targetDN.lower().strip():
+            if entry.has_key(self.targetAttr):
+                self.targetAttr = entry(self.targetAttr)
 
 def copyFiles():
     os.path.walk ("./etc", walk_function, None)
@@ -77,11 +106,20 @@ def logIt(msg, errorLog=False):
     f.close()
 
 def updateConfiguration():
-    if not os.path.exists("./output_ldif"):
-        os.mkdir("./output_ldif")
-    fn = "./ldif/%s" % ldif_file
-    parser = MyLDIF(open(fn, 'rb'), sys.stdout)
+    ouputFolder = "./output_ldif"
+    if not os.path.exists(ouputFolder):
+        os.mkdir(ouputFolder)
+
+    fn = "./ldif/organization.ldif"
+    parser = ConfigLDIF(open(fn, 'rb'), sys.stdout)
     parser.parse()
+    orgDN = parser.lastDN
+    gluuManagerGroup = parser.lastEntry['gluuManagerGroup'][0]
+    f = open("%s/updateManagerGroup.ldif" % ouputFolder, 'w')
+    f.write(fixManagerGroupLdif % (orgDN, gluuManagerGroup))
+    f.close()
+
+    # Iterate through configuration entries and make changes...
 
 def startOpenDJ():
     output, error = getOutput([service, 'opendj', 'start'])
