@@ -21,6 +21,7 @@ import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.Provider;
 import java.security.Security;
 
@@ -60,9 +61,14 @@ public class ServerLauncher {
     }
 
     private static void startOxd() {
-        INJECTOR.getInstance(ConfigurationService.class).load();
-        INJECTOR.getInstance(SiteConfigurationService.class).load();
-        INJECTOR.getInstance(SocketService.class).listenSocket();
+        try {
+            INJECTOR.getInstance(ConfigurationService.class).load();
+            INJECTOR.getInstance(SiteConfigurationService.class).load();
+            INJECTOR.getInstance(SocketService.class).listenSocket();
+            LOG.info("oxd server started successfully.");
+        } catch (IOException e) {
+            LOG.error("Failed to start oxd server.", e);
+        }
     }
 
     private static void checkConfiguration() {
