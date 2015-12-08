@@ -36,8 +36,13 @@ public class RegisterSiteTest {
     }
 
     public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl) {
+        return registerSite(client, redirectUrl, redirectUrl);
+    }
+
+    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl, String logoutRedirectUrl) {
         final RegisterSiteParams commandParams = new RegisterSiteParams();
         commandParams.setAuthorizationRedirectUri(redirectUrl);
+        commandParams.setLogoutRedirectUri(logoutRedirectUrl);
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(commandParams);
