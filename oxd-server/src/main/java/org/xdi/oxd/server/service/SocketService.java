@@ -52,7 +52,7 @@ public class SocketService {
         this.conf = conf;
     }
 
-    public void listenSocket() {
+    public void listenSocket() throws IOException {
         final int port = conf.getPort();
 
         final LicenseService licenseService = new LicenseService(conf);
@@ -91,6 +91,7 @@ public class SocketService {
             }
         } catch (IOException e) {
             LOG.error("Could not listen on port: {}.", port);
+            throw e;
         } finally {
             IOUtils.closeQuietly(serverSocket);
         }
