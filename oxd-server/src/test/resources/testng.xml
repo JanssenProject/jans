@@ -10,7 +10,7 @@
     <parameter name="clientName" value="oxD Client"/>
     <parameter name="userId" value="test_user"/>
     <parameter name="userSecret" value="test_user_password"/>
-    <parameter name="clientId" value="@!0035.934F.1A51.77B0!0001!402D.66D0!0008!FF81!2D39"/>
+    <parameter name="clientId" value="@!B080.D627.BA42.613D!0001!A1FA.7250!0008!FF81!2D39"/>
     <parameter name="clientSecret" value="oxauth_client_test_password"/>
     <parameter name="amHost" value="ce-dev.gluu.org"/>
     <parameter name="rsHost" value="photoz.example.com"/>

@@ -77,6 +77,9 @@ public class ObtainAatOperation extends BaseOperation {
         tokenClient.setExecutor(getHttpService().getClientExecutor());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(getScope().getValue() + " openid", params.getClientId(), params.getClientSecret());
         if (response != null) {
+
+            ClientUtils.showClient(tokenClient);
+
             final String patToken = response.getAccessToken();
             if (Util.allNotBlank(patToken)) {
                 final ObtainAatOpResponse opResponse = new ObtainAatOpResponse();
