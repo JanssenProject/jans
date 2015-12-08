@@ -44,11 +44,12 @@ public class LogoutOperation extends BaseOperation {
                     getIdToken(params, site), params.getPostLogoutRedirectUri(), UUID.randomUUID().toString());
 
             final EndSessionClient client = new EndSessionClient(getDiscoveryService().getConnectDiscoveryResponse().getEndSessionEndpoint());
+            client.setExecutor(getHttpService().getClientExecutor());
             client.setRequest(request);
             final EndSessionResponse response = client.exec();
 
             ClientUtils.showClient(client);
-            if (response != null) {
+            if (response != null && response.getErrorType() == null) {
                 return okResponse(new LogoutResponse(response.getHtmlPage()));
             } else {
                 LOG.error("Failed to get response from oxauth client.");

@@ -7,6 +7,7 @@
     <parameter name="discoveryUrl" value="https://ce-dev.gluu.org/.well-known/openid-configuration"/>
     <parameter name="umaDiscoveryUrl" value="https://ce-dev.gluu.org/.well-known/uma-configuration"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
+    <parameter name="logoutRedirectUrl" value="https://client.example.com/cb/logout"/>
     <parameter name="clientName" value="oxD Client"/>
     <parameter name="userId" value="test_user"/>
     <parameter name="userSecret" value="test_user_password"/>
