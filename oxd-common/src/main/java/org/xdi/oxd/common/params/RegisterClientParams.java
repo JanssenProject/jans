@@ -16,7 +16,7 @@ public class RegisterClientParams implements IParams {
 
     @JsonProperty(value = "discovery_url")
     private String discoveryUrl;
-    @JsonProperty(value = "redirect_uri")
+    @JsonProperty(value = "redirect_uris")
     private List<String> redirectUrl;
     @JsonProperty(value = "logout_redirect_url")
     private String logoutRedirectUrl;
