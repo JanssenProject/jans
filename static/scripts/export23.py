@@ -19,6 +19,7 @@ folders_to_backup = ['/opt/tomcat/conf',
                      '/opt/tomcat/endorsed',
                      '/opt/opendj/config',
                      '/etc/certs',
+                     '/etc/pki/java', # Added by Zico for testing
                      '/opt/idp/conf',
                      '/opt/idp/metadata']
 
