@@ -80,6 +80,7 @@ public class UmaConfigurationWS {
                     GrantType.CLIENT_CREDENTIALS.getName()
             });
             c.setClaimTokenProfilesSupported(new String[]{"openid"});
+            c.setUmaProfilesSupported(new String[0]);
             c.setDynamicClientEndpoint(baseEndpointUri + "/oxauth/register");
             c.setTokenEndpoint(baseEndpointUri + "/oxauth/token");
             c.setAuthorizationEndpoint(baseEndpointUri + "/requester/perm");
