@@ -77,15 +77,19 @@ public enum GrantType {
      */
     OXAUTH_EXCHANGE_TOKEN("oxauth_exchange_token");
 
-    private final String paramName;
+    private final String name;
     private String uri;
 
     private GrantType() {
-        this.paramName = null;
+        this.name = null;
     }
 
-    private GrantType(String paramName) {
-        this.paramName = paramName;
+    private GrantType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
@@ -100,7 +104,7 @@ public enum GrantType {
     public static GrantType fromString(String param) {
         if (param != null) {
             for (GrantType gt : GrantType.values()) {
-                if (param.equals(gt.paramName)) {
+                if (param.equals(gt.name)) {
                     return gt;
                 }
             }
@@ -127,7 +131,7 @@ public enum GrantType {
         if (this == EXTENSION) {
             return uri;
         } else {
-            return paramName;
+            return name;
         }
     }
 }
