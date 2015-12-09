@@ -116,11 +116,11 @@ public class UmaValidationService {
    	}
 
 
-    public AuthorizationGrant validateAuthorizationWithProtectScope(String authorization) {
+    public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
     }
 
-    public AuthorizationGrant validateAuthorizationWithAuthScope(String authorization) {
+    public AuthorizationGrant assertHasAuthorizationScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.AUTHORIZATION);
     }
 
