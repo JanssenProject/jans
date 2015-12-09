@@ -94,7 +94,7 @@ public class ResourceSetRegistrationWS {
             String id = generatedId();
             log.trace("Try to create resource set, id: {0}", id);
 
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
             return putResourceSetImpl(Response.Status.CREATED, authorization, id, resourceSet);
         } catch (Exception ex) {
             log.error("Exception during resource creation", ex);
@@ -123,7 +123,7 @@ public class ResourceSetRegistrationWS {
                                       @ApiParam(value = "Resource set description JSON object", required = true)
                                       ResourceSet resourceSet) {
         try {
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
 
             return putResourceSetImpl(Response.Status.OK, authorization, rsid, resourceSet);
         } catch (Exception ex) {
@@ -158,7 +158,7 @@ public class ResourceSetRegistrationWS {
             @ApiParam(value = "Resource set description object ID", required = true)
             String rsid) {
         try {
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
 
             log.debug("Getting resource set description: '{0}'", rsid);
 
@@ -214,7 +214,7 @@ public class ResourceSetRegistrationWS {
         try {
             log.trace("Getting list of resource set descriptions.");
 
-            final AuthorizationGrant authorizationGrant = umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
 
             final List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
@@ -264,7 +264,7 @@ public class ResourceSetRegistrationWS {
         try {
             log.debug("Deleting resource set descriptions'");
 
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
             resourceSetService.remove(rsid);
 
             return Response.status(Response.Status.NO_CONTENT).build();

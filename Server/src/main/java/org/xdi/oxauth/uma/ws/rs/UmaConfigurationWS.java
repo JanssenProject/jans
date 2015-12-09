@@ -85,12 +85,11 @@ public class UmaConfigurationWS {
             c.setTokenEndpoint(baseEndpointUri + "/oxauth/token");
             c.setAuthorizationEndpoint(baseEndpointUri + "/requester/perm");
             c.setRequestingPartyClaimsEndpoint("");
-            c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setIntrospectionEndpoint(baseEndpointUri + "/rpt/status");
+            c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionRegistrationEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
-            c.setUserEndpoint(baseEndpointUri + "/oxauth/authorize");
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);
