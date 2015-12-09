@@ -114,7 +114,7 @@ public class RedirectionUriService {
         if (client != null) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
 
-            if (postLogoutRedirectUris != null & StringUtils.isNotBlank(postLogoutRedirectUri)) {
+            if (postLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
                 log.debug("Validating post logout redirect URI: clientId = {0}, postLogoutRedirectUri = {1}",
                         clientId, postLogoutRedirectUri);
 
