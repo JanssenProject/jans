@@ -28,7 +28,6 @@ ldap_creds = ['-h', 'localhost', '-p', '1389', '-D', '"cn=directory', 'manager"'
 base_dns = ['ou=people',
             'ou=groups',
             'ou=attributes',
-            'ou=trustRelationships', #Added by Zico for test
             'ou=scopes',
             'ou=clients',
             'ou=scripts',
