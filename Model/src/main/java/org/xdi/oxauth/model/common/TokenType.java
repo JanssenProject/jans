@@ -20,10 +20,14 @@ public enum TokenType {
      */
     BEARER("bearer");
 
-    private final String paramName;
+    private final String name;
 
-    private TokenType(String paramName) {
-        this.paramName = paramName;
+    private TokenType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
@@ -36,7 +40,7 @@ public enum TokenType {
     public static TokenType fromString(String param) {
         if (param != null) {
             for (TokenType rt : TokenType.values()) {
-                if (param.equals(rt.paramName)) {
+                if (param.equals(rt.name)) {
                     return rt;
                 }
             }
@@ -50,6 +54,6 @@ public enum TokenType {
      */
     @Override
     public String toString() {
-        return paramName;
+        return name;
     }
 }

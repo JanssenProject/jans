@@ -14,9 +14,12 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.RptProfiles;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -63,11 +66,19 @@ public class UmaConfigurationWS {
             final UmaConfiguration c = new UmaConfiguration();
             c.setVersion("1.0");
             c.setIssuer(configuration.getIssuer());
-            c.setPatProfilesSupported(new String[]{"bearer"});
-            c.setAatProfilesSupported(new String[]{"bearer"});
-            c.setRptProfilesSupported(new String[]{"https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0"});
-            c.setPatGrantTypesSupported(new String[]{"authorization_code"});
-            c.setAatGrantTypesSupported(new String[]{"authorization_code"});
+            c.setPatProfilesSupported(new String[]{TokenType.BEARER.getName()});
+            c.setAatProfilesSupported(new String[]{TokenType.BEARER.getName()});
+            c.setRptProfilesSupported(new String[]{RptProfiles.BEARER.getIdentifyingUri()});
+            c.setPatGrantTypesSupported(new String[]{
+                    GrantType.AUTHORIZATION_CODE.getName(),
+                    GrantType.IMPLICIT.getName(),
+                    GrantType.CLIENT_CREDENTIALS.getName()
+            });
+            c.setAatGrantTypesSupported(new String[]{
+                    GrantType.AUTHORIZATION_CODE.getName(),
+                    GrantType.IMPLICIT.getName(),
+                    GrantType.CLIENT_CREDENTIALS.getName()
+            });
             c.setClaimTokenProfilesSupported(new String[]{"openid"});
             c.setDynamicClientEndpoint(baseEndpointUri + "/oxauth/register");
             c.setTokenEndpoint(baseEndpointUri + "/oxauth/token");
