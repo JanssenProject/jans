@@ -33,6 +33,7 @@ import java.util.Arrays;
         "pat_grant_types_supported",
         "aat_grant_types_supported",
         "claim_token_profiles_supported",
+        "uma_profiles_supported",
         "dynamic_client_endpoint",
         "token_endpoint",
         "authorization_endpoint",
@@ -77,8 +78,12 @@ public class UmaConfiguration {
     private String[] aatGrantTypesSupported;
 
     @ApiModelProperty(value = "Claim formats and associated sub-protocols for gathering claims from requesting parties, as supported by this authorization server. The property value is an array of string values, which each string value is either a reserved keyword defined in this specification or a URI identifying a claim profile defined elsewhere.",
-            required = true)
+            required = false)
     private String[] claimTokenProfilesSupported;
+
+    @ApiModelProperty(value = "UMA profiles supported by this authorization server. The property value is an array of string values, where each string value is a URI identifying an UMA profile. Examples of UMA profiles are the API extensibility profiles defined in Section 5.",
+            required = false)
+    private String[] umaProfilesSupported;
 
     @ApiModelProperty(value = "The endpoint to use for performing dynamic client registration. Usage of this endpoint is defined by [DynClientReg]. The presence of this property indicates authorization server support for the dynamic client registration feature and its absence indicates a lack of support.",
             required = true)
@@ -223,6 +228,16 @@ public class UmaConfiguration {
         this.claimTokenProfilesSupported = claimTokenProfilesSupported;
     }
 
+    @JsonProperty(value = "uma_profiles_supported")
+    @XmlElement(name = "uma_profiles_supported")
+    public String[] getUmaProfilesSupported() {
+        return umaProfilesSupported;
+    }
+
+    public void setUmaProfilesSupported(String[] umaProfilesSupported) {
+        this.umaProfilesSupported = umaProfilesSupported;
+    }
+
     @JsonProperty(value = "dynamic_client_endpoint")
     @XmlElement(name = "dynamic_client_endpoint")
     public String getDynamicClientEndpoint() {
@@ -322,6 +337,8 @@ public class UmaConfiguration {
         builder.append(Arrays.toString(aatGrantTypesSupported));
         builder.append(", claimProfilesSupported=");
         builder.append(Arrays.toString(claimTokenProfilesSupported));
+        builder.append(", umaProfilesSupported=");
+        builder.append(Arrays.toString(umaProfilesSupported));
         builder.append(", tokenEndpoint=");
         builder.append(tokenEndpoint);
         builder.append(", userEndpoint=");
