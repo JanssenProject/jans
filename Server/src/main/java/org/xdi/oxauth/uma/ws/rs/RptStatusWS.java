@@ -98,7 +98,7 @@ public class RptStatusWS {
                                              "      Token Revocation [RFC7009].", required = false)
                                      String tokenTypeHint) {
         try {
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
 
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 

@@ -93,10 +93,6 @@ public class UmaConfiguration {
             required = true)
     private String tokenEndpoint;
 
-    @ApiModelProperty(value = "The endpoint URI at which the resource server gathers the consent of the end-user resource owner or the client gathers the consent of the end-user requesting party, if the \"authorization_code\" grant type is used. Usage of this endpoint is defined by [OAuth2].",
-            required = true)
-    private String userEndpoint;
-
     @ApiModelProperty(value = "The endpoint URI at which the resource server introspects an RPT presented to it by a client. Usage of this endpoint is defined by [OAuth-introspection] and Section 3.3.1. A valid PAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String resourceSetRegistrationEndpoint;
@@ -258,16 +254,6 @@ public class UmaConfiguration {
         this.tokenEndpoint = tokenEndpoint;
     }
 
-    @JsonProperty(value = "user_endpoint")
-    @XmlElement(name = "user_endpoint")
-    public String getUserEndpoint() {
-        return userEndpoint;
-    }
-
-    public void setUserEndpoint(String userEndpoint) {
-        this.userEndpoint = userEndpoint;
-    }
-
     @JsonProperty(value = "resource_set_registration_endpoint")
     @XmlElement(name = "resource_set_registration_endpoint")
     public String getResourceSetRegistrationEndpoint() {
@@ -341,8 +327,6 @@ public class UmaConfiguration {
         builder.append(Arrays.toString(umaProfilesSupported));
         builder.append(", tokenEndpoint=");
         builder.append(tokenEndpoint);
-        builder.append(", userEndpoint=");
-        builder.append(userEndpoint);
         builder.append(", introspection_endpoint=");
         builder.append(introspectionEndpoint);
         builder.append(", resourceSetRegistrationEndpoint=");
