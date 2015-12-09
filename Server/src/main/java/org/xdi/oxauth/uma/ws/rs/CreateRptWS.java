@@ -62,7 +62,7 @@ public class CreateRptWS {
     public Response getRequesterPermissionToken(@HeaderParam("Authorization") String authorization,
                                                 @HeaderParam("Host") String amHost) {
         try {
-            umaValidationService.validateAuthorizationWithAuthScope(authorization);
+            umaValidationService.assertHasAuthorizationScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
 
             return createRpt(authorization, validatedAmHost);

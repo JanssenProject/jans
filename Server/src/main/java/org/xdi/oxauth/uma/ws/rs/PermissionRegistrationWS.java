@@ -91,9 +91,8 @@ public class PermissionRegistrationWS {
                                                   @ApiParam(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
                                                   RegisterPermissionRequest resourceSetPermissionRequest) {
         try {
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
             umaValidationService.validateResourceSet(resourceSetPermissionRequest);
 
             return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, resourceSetPermissionRequest);
