@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.uma;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -47,6 +48,7 @@ import java.util.Arrays;
 })
 @XmlRootElement
 @ApiModel(value = "UMA Configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UmaConfiguration {
 
     @ApiModelProperty(value = "The version of the UMA core protocol to which this authorization server conforms. The value MUST be the string \"1.0\"."
