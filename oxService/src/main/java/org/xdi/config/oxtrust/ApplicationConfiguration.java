@@ -5,8 +5,11 @@
  */package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 
 /**
  * oxTrust configuration
@@ -136,6 +139,17 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String cssLocation;
 	private String jsLocation;
+	
+	//issue 102 chabged by shekhar
+    private Map<String, String> gluuImportPerson;
+
+	public Map<String, String> getGluuImportPerson() {
+		return gluuImportPerson;
+	}
+
+	public void setGluuImportPerson(Map<String, String> gluuImportPerson) {
+		this.gluuImportPerson = gluuImportPerson;
+	}
 
 	public String getBaseDN() {
 		return baseDN;
