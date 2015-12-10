@@ -122,6 +122,7 @@ class Setup(object):
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
         self.encode_salt = None
+        self.oxauth_jsf_salt = None
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
@@ -183,6 +184,7 @@ class Setup(object):
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
+        self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
@@ -252,6 +254,7 @@ class Setup(object):
 
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_json: False,
+                     self.oxauth_context_xml: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
                      self.oxidp_config_json: False,
@@ -1149,6 +1152,9 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
             sys.exit()
 
+    def make_oxauth_salt(self):
+        self.oxauth_jsf_salt = os.urandom(16).encode('hex') 
+
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
         if self.components['httpd']['enabled']:
@@ -1650,6 +1656,7 @@ if __name__ == '__main__':
         try:
             installObject.makeFolders()
             installObject.make_salt()
+            installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
             installObject.writeLdapPW()
             installObject.copy_scripts()
