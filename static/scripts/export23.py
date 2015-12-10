@@ -61,9 +61,19 @@ def getLdif():
         f.close()
 
     # Backup the config
-    args = [ldapsearch] + ldap_creds + ['-b', 'ou=appliances,o=gluu', 'objectclass=*']
+    args = [ldapsearch] + ldap_creds + \
+           ['-b',
+           'ou=appliances,o=gluu',
+           '(|(objectclass=oxTrustConfiguration)(objectclass=oxAuthConfiguration)']
     output = getOutput(args)
-    f = open("%s/ldif/appliance.ldif" % bu_folder, 'w')
+    f = open("%s/ldif/config.ldif" % bu_folder, 'w')
+    f.write(output)
+    f.close()
+
+    # Backup the trust relationships
+    args = [ldapsearch] + ldap_creds + ['-b', 'ou=appliances,o=gluu', 'objectclass=gluuSAMLconfig']
+    output = getOutput(args)
+    f = open("%s/ldif/trust_relationships.ldif" % bu_folder, 'w')
     f.write(output)
     f.close()
 
@@ -84,13 +94,12 @@ def getLdif():
 def getOutput(args):
         try:
             logIt("Running command : %s" % " ".join(args))
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=None)
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
             logIt("Error running command : %s" % " ".join(args), True)
             logIt(traceback.format_exc(), True)
-            sys.exit(2)
+            sys.exit(1)
 
 def genProperties():
     props = {}

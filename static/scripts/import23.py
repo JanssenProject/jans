@@ -3,7 +3,6 @@
 import os
 import os.path
 import shutil
-import subprocess
 import sys
 import time
 import traceback
@@ -88,7 +87,6 @@ def copyFiles():
 def getOutput(args):
         try:
             logIt("Running command : %s" % " ".join(args))
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=None)
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
@@ -119,40 +117,37 @@ def updateConfiguration():
     f.write(fixManagerGroupLdif % (orgDN, gluuManagerGroup))
     f.close()
 
+    # Load SAML Trust Relationships
+    fn = "./ldif/trust_relationships.ldif"
+    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', fn]
+    output = getOutput(cmd)
+    if output:
+        logIt(output)
+
     # Iterate through configuration entries and make changes...
 
 def startOpenDJ():
-    output, error = getOutput([service, 'opendj', 'start'])
-    if not error and output.index("Directory Server has started successfully") > 0:
+    output = getOutput([service, 'opendj', 'start'])
+    if output.index("Directory Server has started successfully") > 0:
         logIt("Directory Server has started successfully")
     else:
-        if error:
-            login("Error starting OpenDJ:\t%s" % error)
-            sys.exit(2)
-        else:
-            logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors")
-            sys.exit(3)
+        logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors")
+        sys.exit(2)
 
 def stopOpenDJ():
-    output, error = getOutput([service, 'opendj', 'start'])
-    if not error and output.index("Directory Server is now stopped") > 0:
+    output = getOutput([service, 'opendj', 'start'])
+    if output.index("Directory Server is now stopped") > 0:
         logIt("Directory Server is now stopped")
     else:
-        if error:
-            login("Error stopping OpenDJ:\t%s" % error)
-            sys.exit(2)
-        else:
-            logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
-            sys.exit(3)
+        logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
+        sys.exit(3)
 
 def uploadBulkLDIF():
     for ldif_file in ldif_files:
-        cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f' './ldif/%s' % ldif_file]
-        output, error = getOutput(cmd)
+        cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', './ldif/%s' % ldif_file]
+        output = getOutput(cmd)
         if output:
             logIt(output)
-        if error:
-            logIt("Error uploading %s\n" % ldif_file + error, True)
 
 def walk_function(a, dir, files):
     for file in files:
