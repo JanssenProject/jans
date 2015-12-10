@@ -60,13 +60,23 @@ def getLdif():
         f.write(output)
         f.close()
 
-    # Backup the config
+    # Backup the oxtrust config
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
-           '(|(objectclass=oxTrustConfiguration)(objectclass=oxAuthConfiguration)']
+           '(objectclass=oxTrustConfiguration)']
     output = getOutput(args)
-    f = open("%s/ldif/config.ldif" % bu_folder, 'w')
+    f = open("%s/ldif/oxtrust_config.ldif" % bu_folder, 'w')
+    f.write(output)
+    f.close()
+
+    # Backup the oxauth config
+    args = [ldapsearch] + ldap_creds + \
+           ['-b',
+           'ou=appliances,o=gluu',
+           '(objectclass=oxAuthConfiguration)']
+    output = getOutput(args)
+    f = open("%s/ldif/oxauth_config.ldif" % bu_folder, 'w')
     f.write(output)
     f.close()
 

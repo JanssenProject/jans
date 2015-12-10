@@ -10,6 +10,7 @@ from ldif import LDIFParser, CreateLDIF
 
 log = "./import23.log"
 logError = "./import23.error"
+ouputFolder = "./output_ldif"
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
@@ -104,27 +105,15 @@ def logIt(msg, errorLog=False):
     f.close()
 
 def updateConfiguration():
-    ouputFolder = "./output_ldif"
-    if not os.path.exists(ouputFolder):
-        os.mkdir(ouputFolder)
-
-    fn = "./ldif/organization.ldif"
+    # Load Config From LDIF
+    fn = "./ldif/config.ldif"
     parser = ConfigLDIF(open(fn, 'rb'), sys.stdout)
     parser.parse()
-    orgDN = parser.lastDN
-    gluuManagerGroup = parser.lastEntry['gluuManagerGroup'][0]
-    f = open("%s/updateManagerGroup.ldif" % ouputFolder, 'w')
-    f.write(fixManagerGroupLdif % (orgDN, gluuManagerGroup))
-    f.close()
 
-    # Load SAML Trust Relationships
-    fn = "./ldif/trust_relationships.ldif"
-    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', fn]
-    output = getOutput(cmd)
-    if output:
-        logIt(output)
+    # Update oxAuth Config
 
-    # Iterate through configuration entries and make changes...
+    # Update oxTrust Config
+
 
 def startOpenDJ():
     output = getOutput([service, 'opendj', 'start'])
@@ -142,12 +131,35 @@ def stopOpenDJ():
         logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
         sys.exit(3)
 
-def uploadBulkLDIF():
+def uploadLDIF():
     for ldif_file in ldif_files:
         cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', './ldif/%s' % ldif_file]
         output = getOutput(cmd)
         if output:
             logIt(output)
+    if not os.path.exists(ouputFolder):
+        os.mkdir(ouputFolder)
+
+    # Load SAML Trust Relationships
+    fn = "./ldif/trust_relationships.ldif"
+    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', fn]
+    output = getOutput(cmd)
+    if output:
+        logIt(output)
+
+    # Update Organization
+    fn = "./ldif/organization.ldif"
+    parser = ConfigLDIF(open(fn, 'rb'), sys.stdout)
+    parser.parse()
+    orgDN = parser.lastDN
+    gluuManagerGroup = parser.lastEntry['gluuManagerGroup'][0]
+    f = open("%s/updateManagerGroup.ldif" % ouputFolder, 'w')
+    f.write(fixManagerGroupLdif % (orgDN, gluuManagerGroup))
+    f.close()
+    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', fn]
+    output = getOutput(cmd)
+    if output:
+        logIt(output)
 
 def walk_function(a, dir, files):
     for file in files:
@@ -169,5 +181,5 @@ def walk_function(a, dir, files):
 stopOpenDJ()
 copyFiles()
 startOpenDJ()
-uploadBulkLDIF()
+uploadLDIF()
 updateConfiguration()
