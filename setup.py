@@ -167,7 +167,7 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
-        self.init_files_centos7 = ['%s/static/tomcat/centos7/tomcat' % self.install_dir]
+        self.init_files_centos7 = ['%s/static/tomcat/systemd/tomcat' % self.install_dir]
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
