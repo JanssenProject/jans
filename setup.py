@@ -167,7 +167,8 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
-        self.service_file_tomcat_centos7 = '%s/static/tomcat/systemd/tomcat' % self.install_dir
+        self.tomcat_template_centos7 = '%s/static/tomcat/systemd/tomcat' % self.install_dir
+        self.tomcat_service_centos7 = "%s/bin/tomcat" % self.tomcatHome
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
@@ -1500,14 +1501,13 @@ class Setup(object):
 
     def setup_init_scripts(self):
         if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
-                init_file = self.service_file_tomcat_centos7
-                script_name = os.path.split(init_file)[-1]
-                dest_folder = "%s/bin" % self.tomcatHome
+                script_name = os.path.split(self.tomcat_template_centos7)[-1]
+                dest_folder = os.path.dirname(self.tomcat_service_centos7)
                 try:
-                    self.copyFile(init_file, dest_folder)
-                    self.run(["chmod", "755", "%s/%s" % dest_folder, script_name])
+                    self.copyFile(self.tomcat_template_centos7, dest_folder)
+                    self.run(["chmod", "755", self.tomcat_service_centos7])
                 except:
-                    self.logIt("Error copying script file %s to %s" % init_file, dest_folder)
+                    self.logIt("Error copying script file %s to %s" % (self.tomcat_template_centos7, dest_folder))
                     self.logIt(traceback.format_exc(), True)
         else:
             for init_file in self.init_files:
@@ -1561,7 +1561,7 @@ class Setup(object):
                 print ".",
                 i = i + 1
             if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
-               self.run(["/etc/init.d/tomcat", "install"])
+               self.run([self.tomcat_service_centos7, "install"])
                self.run([service_path, 'enable', 'tomcat'])
                self.run([service_path, 'start', 'tomcat'])
             else:
