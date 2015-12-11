@@ -167,7 +167,7 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
-        self.init_files_centos7 = ['%s/static/tomcat/systemd/tomcat' % self.install_dir]
+        self.service_file_tomcat_centos7 = '%s/static/tomcat/systemd/tomcat' % self.install_dir
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
@@ -1499,18 +1499,25 @@ class Setup(object):
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
-        init_files_to_install = self.init_files
         if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
-            init_files_to_install = self.init_files_centos7
-
-        for init_file in init_files_to_install:
-            try:
+                init_file = self.service_file_tomcat_centos7
                 script_name = os.path.split(init_file)[-1]
-                self.copyFile(init_file, "/etc/init.d")
-                self.run(["chmod", "755", "/etc/init.d/%s" % script_name])
-            except:
-                self.logIt("Error copying script file %s to /etc/init.d" % init_file)
-                self.logIt(traceback.format_exc(), True)
+                dest_folder = "%s/bin" % self.tomcatHome
+                try:
+                    self.copyFile(init_file, dest_folder)
+                    self.run(["chmod", "755", "%s/%s" % dest_folder, script_name])
+                except:
+                    self.logIt("Error copying script file %s to %s" % init_file, dest_folder)
+                    self.logIt(traceback.format_exc(), True)
+        else:
+            for init_file in self.init_files:
+                try:
+                    script_name = os.path.split(init_file)[-1]
+                    self.copyFile(init_file, "/etc/init.d")
+                    self.run(["chmod", "755", "/etc/init.d/%s" % script_name])
+                except:
+                    self.logIt("Error copying script file %s to /etc/init.d" % init_file)
+                    self.logIt(traceback.format_exc(), True)
 
         if self.os_type in ['centos', 'redhat', 'fedora']:
             for service in self.redhat_services:
