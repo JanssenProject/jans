@@ -6,6 +6,7 @@
 
 package org.xdi.config.oxtrust;
 
+import java.util.List;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
@@ -36,8 +37,12 @@ public class LdapOxTrustConfiguration extends Entry {
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
+    
+    @LdapJsonObject //issue 102 - begin  : changed by shekhar
+    @LdapAttribute(name = "oxTrustConfImportPerson")
+    private ImportPersonConfig importPersonConfig; //issue 102 - end  : changed by shekhar
 
-    public LdapOxTrustConfiguration() {
+	public LdapOxTrustConfiguration() {
 	}
 
 	public ApplicationConfiguration getApplication() {
@@ -63,6 +68,15 @@ public class LdapOxTrustConfiguration extends Entry {
 	public void setRevision(long revision) {
 		this.revision = revision;
 	}
+
+	//issue 102 - begin  : changed by shekhar
+	public ImportPersonConfig getImportPersonConfig() {
+		return importPersonConfig;
+	}
+
+	public void setImportPersonConfig(ImportPersonConfig importPersonConfig) {
+		this.importPersonConfig = importPersonConfig;
+	}//issue 102 - end  : changed by shekhar
 
 	@Override
 	public String toString() {
