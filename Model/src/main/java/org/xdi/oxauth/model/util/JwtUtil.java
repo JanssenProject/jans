@@ -59,7 +59,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -698,7 +697,7 @@ public class JwtUtil {
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
         try {
-            if (StringUtils.isBlank(jwks)) {
+            if (StringHelper.isEmpty(jwks)) {
                 ClientRequest clientRequest = new ClientRequest(jwksUri);
                 clientRequest.setHttpMethod(HttpMethod.GET);
                 ClientResponse<String> clientResponse = clientRequest.get(String.class);
@@ -783,7 +782,7 @@ public class JwtUtil {
 
 		JSONObject jsonKey = null;
 		try {
-			if (StringUtils.isBlank(jwks)) {
+			if (StringHelper.isEmpty(jwks)) {
 				ClientRequest clientRequest = new ClientRequest(jwksUri);
 				clientRequest.setHttpMethod(HttpMethod.GET);
 				ClientResponse<String> clientResponse = clientRequest.get(String.class);
