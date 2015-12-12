@@ -710,7 +710,7 @@ public class JwtUtil {
                     log.debug(String.format("JWK: %s", jwks));
                 }
             }
-            if (org.apache.commons.lang.StringUtils.isNotBlank(jwks)) {
+            if (StringHelper.isNotEmpty(jwks)) {
                 JSONObject jsonObject = new JSONObject(jwks);
                 JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
                 if (keys.length() > 0) {
@@ -795,7 +795,7 @@ public class JwtUtil {
 					log.debug(String.format("JWK: %s", jwks));
 				}
 			}
-			if (org.apache.commons.lang.StringUtils.isNotBlank(jwks)) {
+			if (StringHelper.isNotEmpty(jwks)) {
 				JSONObject jsonObject = new JSONObject(jwks);
 				JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
 				if (keys.length() > 0) {
