@@ -7,6 +7,8 @@
 import java.io.Serializable;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 
 /**
  * oxTrust configuration
@@ -136,7 +138,7 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String cssLocation;
 	private String jsLocation;
-
+	
 	public String getBaseDN() {
 		return baseDN;
 	}
