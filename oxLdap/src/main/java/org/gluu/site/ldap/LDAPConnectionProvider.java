@@ -132,6 +132,10 @@ public class LDAPConnectionProvider {
 
 	private int determineSupportedLdapVersion() {
 		int resultSupportedLDAPVersion = LDAPConnectionProvider.DEFAULT_SUPPORTED_LDAP_VERSION;
+		
+		if (StringHelper.isEmptyString(bindDn) || StringHelper.isEmptyString(bindPassword)) {
+			return resultSupportedLDAPVersion;
+		}
 
 		if (connectionPool == null) {
 			return resultSupportedLDAPVersion;
