@@ -207,10 +207,10 @@ def makeFolders():
             logIt(traceback.format_exc(), True)
             sys.exit(3)
 
-#makeFolders()
-#backupFiles()
-#getLdif()
-#genProperties()
+makeFolders()
+backupFiles()
+getLdif()
+genProperties()
 backupCustomizations()
 
 
