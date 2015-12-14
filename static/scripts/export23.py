@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import time, subprocess, traceback, sys, os, shutil
+import time, subprocess, traceback, sys, os, shutil, hashlib
+
+ 
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -8,8 +10,17 @@ cat = '/bin/cat'
 hostname = '/bin/hostname'
 grep = '/bin/grep'
 ldapsearch = "/opt/opendj/bin/ldapsearch"
+unzip = "/usr/bin/unzip"
+find = "/usr/bin/find"
+mkdir = "/bin/mkdir"
 
 # File system stuff
+oxauth_war = "/opt/tomcat/webapps/oxauth.war"
+oxtrust_war = "/opt/tomcat/webapps/identity.war"
+oxauth_original_dir = "/tmp/oxauth-original"
+oxtrust_original_dir = "/tmp/oxtrust-original"
+oxauth_modified_dir =  "/opt/tomcat/webapps/oxauth"
+oxtrust_modified_dir = "/opt/tomcat/webapps/identity"
 log = "./export23.log"
 logError = "./export23.error"
 bu_folder = "./backup23"
@@ -35,12 +46,48 @@ base_dns = ['ou=people',
             'ou=hosts',
             'ou=u2f']
 
+def backupCustomizations():
+    dirs = [oxauth_original_dir, oxtrust_original_dir]
+    for dir in dirs:
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+    output = getOutput([unzip, oxauth_war, '-d', oxauth_original_dir])
+    output = getOutput([unzip, oxtrust_war, '-d', oxtrust_original_dir])
+    dirs = [(oxauth_modified_dir, oxauth_original_dir), (oxtrust_modified_dir, oxtrust_original_dir)]
+    for dir_tup in dirs:
+        modified_dir = dir_tup[0]
+        original_dir = dir_tup[1]
+        files = getOutput([find, modified_dir], True)
+        for modified_file in files:
+            modified_file = modified_file.strip()
+            original_file = modified_file.replace(modified_dir, original_dir)
+            if not os.path.isdir(modified_file):
+                if not os.path.exists(original_file):
+                    logIt("Found new file: %s" % modified_file)
+                    copyFile(modified_file, bu_folder) 
+                else:
+                    modified_hash = hash_file(modified_file)
+                    original_hash = hash_file(original_file)
+                    if not modified_hash == original_hash:
+                        logIt("Found changed file: %s" % modified_file)
+                        copyFile(modified_file, bu_folder)
+    shutil.rmtree(oxauth_original_dir)
+    shutil.rmtree(oxtrust_original_dir)
+
 def backupFiles():
     for folder in folders_to_backup:
         shutil.copytree(folder, bu_folder + folder)
 
 def clean(s):
     return s.replace('@', '').replace('!', '').replace('.', '')
+
+def copyFile(fn, dir):
+    parent_Dir = os.path.split(fn)[0]
+    bu_dir = "%s/%s" % (bu_folder, parent_Dir)
+    if not os.path.exists(bu_dir):
+        output = getOutput([mkdir, "-p", bu_dir])
+    bu_fn = os.path.join(bu_dir, os.path.split(fn)[-1])
+    shutil.copyfile(fn, bu_fn)
 
 def getOrgInum():
     args = [ldapsearch] + ldap_creds + ['-s', 'one', '-b', 'o=gluu', 'o=*', 'dn']
@@ -101,10 +148,14 @@ def getLdif():
     f.write(output)
     f.close()
 
-def getOutput(args):
+def getOutput(args, return_list=False):
         try:
             logIt("Running command : %s" % " ".join(args))
-            output = os.popen(" ".join(args)).read().strip()
+            output = None
+            if return_list: 
+                output = os.popen(" ".join(args)).readlines()
+            else: 
+                output = os.popen(" ".join(args)).read().strip()
             return output
         except:
             logIt("Error running command : %s" % " ".join(args), True)
@@ -126,6 +177,16 @@ def genProperties():
         f.write("%s=%s\n" % (key, props[key]))
     f.close()
 
+def hash_file(filename):
+    # From http://www.programiz.com/python-programming/examples/hash-file
+    h = hashlib.sha1()
+    with open(filename,'rb') as file:
+        chunk = 0
+        while chunk != b'':
+            chunk = file.read(1024)
+            h.update(chunk)
+    return h.hexdigest()
+
 def logIt(msg, errorLog=False):
     if errorLog:
         f = open(logError, 'a')
@@ -136,16 +197,20 @@ def logIt(msg, errorLog=False):
     f.close()
 
 def makeFolders():
-    try:
-        output = getOutput([mkdir, '-p', bu_folder])
-        output = getOutput([mkdir, '-p', "%s/ldif" % bu_folder])
-    except:
-        logIt("Error making folders", True)
-        logIt(traceback.format_exc(), True)
-        sys.exit(3)
+    folders = [bu_folder, "%s/ldif" % bu_folder]
+    for folder in folders: 
+        try:
+            if not os.path.exists(folder):
+                output = getOutput([mkdir, '-p', bu_folder])
+        except:
+            logIt("Error making folders", True)
+            logIt(traceback.format_exc(), True)
+            sys.exit(3)
 
-makeFolders()
-backupFiles()
-getLdif()
-genProperties()
+#makeFolders()
+#backupFiles()
+#getLdif()
+#genProperties()
+backupCustomizations()
+
 
