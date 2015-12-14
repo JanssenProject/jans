@@ -53,6 +53,7 @@ public class RegisterSiteOperation extends BaseOperation {
         try {
             String siteId = UUID.randomUUID().toString();
 
+            LOG.info("Create site");
             persistSiteConfiguration(siteId);
 
             RegisterSiteResponse opResponse = new RegisterSiteResponse();

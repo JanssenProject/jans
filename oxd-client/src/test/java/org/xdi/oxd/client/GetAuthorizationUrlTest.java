@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import junit.framework.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
@@ -38,6 +39,7 @@ public class GetAuthorizationUrlTest {
             final GetAuthorizationUrlResponse resp = client.send(command).dataAsResponse(GetAuthorizationUrlResponse.class);
             assertNotNull(resp);
             notEmpty(resp.getAuthorizationUrl());
+            Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
         } finally {
             CommandClient.closeQuietly(client);
         }

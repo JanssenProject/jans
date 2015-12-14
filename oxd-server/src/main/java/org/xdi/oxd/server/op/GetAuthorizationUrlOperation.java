@@ -10,6 +10,8 @@ import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
@@ -43,6 +45,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
             authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
             authorizationEndpoint += "&state=" + state();
             authorizationEndpoint += "&nonce=" + nonce();
+            authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site));
 
 
             return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
@@ -50,6 +53,11 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
+    }
+
+    private List<String> acrValues(SiteConfiguration site) {
+        final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
+        return params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
     }
 
     private String nonce() {
