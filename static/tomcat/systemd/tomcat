@@ -120,7 +120,7 @@ RUN_AS_USER=tomcat
 #  SU_BIN=/bin/su
 # NOTE - For Red Hat, the script will use '/sbin/runuser' if it is present and 
 #  ignore the value of SU_BIN.
-SU_BIN=su
+SU_BIN=/bin/su
 
 # Set option for 'su'.
 # In case the user set in RUN_AS_USER has no bash set, the 'su' command will fail.
@@ -258,6 +258,12 @@ if [ "$FIRST_CHAR" != "/" ]
 then
     PIDDIR=$REALDIR/$PIDDIR
 fi
+
+if [ ! -d "$PIDDIR" ]
+then
+    mkdir -p "$PIDDIR"
+fi
+
 # Same test for WRAPPER_CMD
 FIRST_CHAR=`echo $WRAPPER_CMD | cut -c1,1`
 if [ "$FIRST_CHAR" != "/" ]
