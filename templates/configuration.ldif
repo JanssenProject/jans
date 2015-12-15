@@ -21,6 +21,7 @@ objectClass: oxTrustConfiguration
 ou: oxtrust
 oxTrustConfApplication::%(oxtrust_config_base64)s
 oxTrustConfCacheRefresh::%(oxtrust_cache_refresh_base64)s
+oxTrustConfImportPerson::%(oxtrust_import_person_base64)s
 oxRevision: 1
 
 dn: ou=oxidp,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu

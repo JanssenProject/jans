@@ -2047,7 +2047,7 @@ attributeTypes: ( oxPersistClientAuthorizations-oid NAME 'oxPersistClientAuthori
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxTrustConfImportPerson-oid NAME 'oxTrustConfImportPerson'
-  DESC 'oxTrust Application Configuration'
+  DESC 'oxTrust Import Person Configuration'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
