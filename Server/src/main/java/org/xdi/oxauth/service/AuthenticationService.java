@@ -24,7 +24,7 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -38,18 +38,19 @@ import org.xdi.util.StringHelper;
 
 import javax.annotation.Nonnull;
 import javax.faces.context.FacesContext;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
+
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
 
 /**
  * Authentication service methods
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version December 15, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("authenticationService")
@@ -58,7 +59,7 @@ public class AuthenticationService {
 
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             "scope", "response_type", "client_id", "redirect_uri", "state", "response_mode", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_id", "request", "request_uri",
+            "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_state", "request", "request_uri",
             AuthorizeRequestParam.ORIGIN_HEADERS));
 
     @Logger
@@ -87,13 +88,13 @@ public class AuthenticationService {
     private ClientService clientService;
 
     @In
-    private SessionIdService sessionIdService;
+    private SessionStateService sessionStateService;
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
 
     @In
-    private SessionId sessionUser;
+    private SessionState sessionUser;
 
     @In
     private MetricService metricService;
@@ -316,11 +317,11 @@ public class AuthenticationService {
     private boolean checkUserStatus(User user) {
         CustomAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
 
-		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
-			return true;
-		}
+        if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
+            return true;
+        }
 
-		log.warn("User '{0}' was disabled", user.getUserId());
+        log.warn("User '{0}' was disabled", user.getUserId());
         return false;
     }
 
@@ -338,42 +339,42 @@ public class AuthenticationService {
         }
     }
 
-    public void configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
+    public void configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
         User user = credentials.getUser();
 
-        SessionId newSessionId;
-        if (sessionId == null) {
-            newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
+        SessionState newSessionState;
+        if (sessionState == null) {
+            newSessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn(), sessionIdAttributes);
         } else {
-            newSessionId = sessionIdService.setSessionIdAuthenticated(sessionId, user.getDn());
+            newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
         }
 
-        configureEventUserContext(newSessionId);
+        configureEventUserContext(newSessionState);
     }
 
-    public SessionId configureEventUser() {
+    public SessionState configureEventUser() {
         User user = credentials.getUser();
         if (user == null) {
             return null;
         }
 
-        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
+        SessionState sessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn());
 
-        configureEventUserContext(sessionId);
+        configureEventUserContext(sessionState);
 
-        return sessionId;
+        return sessionState;
     }
 
-    public void configureEventUser(SessionId sessionId) {
-        sessionIdService.updateSessionId(sessionId);
+    public void configureEventUser(SessionState sessionState) {
+        sessionStateService.updateSessionState(sessionState);
 
-        configureEventUserContext(sessionId);
+        configureEventUserContext(sessionState);
     }
 
-    private void configureEventUserContext(SessionId sessionId) {
+    private void configureEventUserContext(SessionState sessionState) {
         identity.addRole("user");
 
-        Contexts.getEventContext().set("sessionUser", sessionId);
+        Contexts.getEventContext().set("sessionUser", sessionState);
     }
 
     public void configureSessionClient(Context context) {
@@ -384,13 +385,13 @@ public class AuthenticationService {
     public void configureSessionClient(Context context, Client client) {
         identity.addRole("client");
 
-		SessionClient sessionClient = new SessionClient();
+        SessionClient sessionClient = new SessionClient();
         sessionClient.setClient(client);
 
         context.set("sessionClient", sessionClient);
 
         clientService.updatAccessTime(client, true);
-	}
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
@@ -409,7 +410,7 @@ public class AuthenticationService {
             final Map<String, String> result = sessionUser.getSessionAttributes();
             Map<String, String> allowedParameters = getAllowedParameters(result);
 
-            result.put("session_id", sessionUser.getId());
+            result.put(SESSION_STATE, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, allowedParameters);
             FacesManager.instance().redirect("/authorize.xhtml", (Map) allowedParameters, false);
@@ -430,18 +431,18 @@ public class AuthenticationService {
         return result;
     }
 
-    public User getUserOrRemoveSession(SessionId p_sessionId) {
-        if (p_sessionId != null) {
+    public User getUserOrRemoveSession(SessionState p_sessionState) {
+        if (p_sessionState != null) {
             try {
-                if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
-                    final User user = userService.getUserByDn(p_sessionId.getUserDn());
+                if (StringUtils.isNotBlank(p_sessionState.getUserDn())) {
+                    final User user = userService.getUserByDn(p_sessionState.getUserDn());
                     if (user != null) {
                         return user;
                     } else { // if there is no user than session is invalid
-                        sessionIdService.remove(p_sessionId);
+                        sessionStateService.remove(p_sessionState);
                     }
                 } else { // if there is no user than session is invalid
-                    sessionIdService.remove(p_sessionId);
+                    sessionStateService.remove(p_sessionState);
                 }
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);
