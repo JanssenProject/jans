@@ -187,6 +187,7 @@ class Setup(object):
         self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
+        self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
@@ -227,6 +228,7 @@ class Setup(object):
         self.oxauth_openid_key_base64 = None
         self.oxtrust_config_base64 = None
         self.oxtrust_cache_refresh_base64 = None
+        self.oxtrust_import_person_base64 = None
         self.oxidp_config_base64 = None
 
         # oxTrust SCIM configuration
@@ -257,6 +259,7 @@ class Setup(object):
                      self.oxauth_context_xml: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
+                     self.oxtrust_import_person_json: False,
                      self.oxidp_config_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
@@ -1385,6 +1388,7 @@ class Setup(object):
 
         self.oxtrust_config_base64 = self.generate_base64_ldap_file(self.oxtrust_config_json);
         self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
+        self.oxtrust_import_person_base64 = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
 
         self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
 
