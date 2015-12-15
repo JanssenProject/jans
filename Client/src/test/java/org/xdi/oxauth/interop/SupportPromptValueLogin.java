@@ -28,7 +28,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Support prompt value login
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version December 15, 2015
  */
 public class SupportPromptValueLogin extends BaseTest {
 
@@ -62,7 +62,7 @@ public class SupportPromptValueLogin extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionId = null;
+        String sessionState = null;
         {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -81,7 +81,7 @@ public class SupportPromptValueLogin extends BaseTest {
             assertNotNull(authorizationResponse.getScope());
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionId = authorizationResponse.getSessionId();
+            sessionState = authorizationResponse.getSessionState();
 
             // 3. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -113,7 +113,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
             authorizationRequest.getPrompts().add(Prompt.LOGIN);
-            authorizationRequest.setSessionId(sessionId);
+            authorizationRequest.setSessionState(sessionState);
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
