@@ -83,7 +83,7 @@ def backupFiles():
 
 def backupTrustStores():
     pass
-    copyFile(defaultJavaTrustStore, "%s/%s" (bu_folder, os.path.split(defaultJavaTrustStore)[0]))
+    copyFile(defaultJavaTrustStore, "%s/%s" % (bu_folder, os.path.split(defaultJavaTrustStore)[0]))
     if os.path.exists("/etc/pki/java"):
         files = getOutput([find, "/etc/pki/java"], True)
         for file in files():
@@ -123,7 +123,19 @@ def getLdif():
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
-           '(objectclass=oxTrustConfiguration)']
+            '-s',
+            'one',
+           'objectclass=*']
+    output = getOutput(args)
+    f = open("%s/ldif/appliance.ldif" % bu_folder, 'w')
+    f.write(output)
+    f.close()
+
+    # Backup the oxtrust config
+    args = [ldapsearch] + ldap_creds + \
+           ['-b',
+           'ou=appliances,o=gluu',
+           'objectclass=oxTrustConfiguration']
     output = getOutput(args)
     f = open("%s/ldif/oxtrust_config.ldif" % bu_folder, 'w')
     f.write(output)
@@ -133,7 +145,7 @@ def getLdif():
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
-           '(objectclass=oxAuthConfiguration)']
+           'objectclass=oxAuthConfiguration']
     output = getOutput(args)
     f = open("%s/ldif/oxauth_config.ldif" % bu_folder, 'w')
     f.write(output)
@@ -213,7 +225,7 @@ def makeFolders():
     for folder in folders: 
         try:
             if not os.path.exists(folder):
-                output = getOutput([mkdir, '-p', bu_folder])
+                output = getOutput([mkdir, '-p', folder])
         except:
             logIt("Error making folders", True)
             logIt(traceback.format_exc(), True)
