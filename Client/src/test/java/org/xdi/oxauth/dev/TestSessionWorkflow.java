@@ -6,10 +6,7 @@
 
 package org.xdi.oxauth.dev;
 
-import java.util.Arrays;
-
 import junit.framework.Assert;
-
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -18,15 +15,11 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+
+import java.util.Arrays;
 
 
 public class TestSessionWorkflow extends BaseTest {
@@ -57,7 +50,7 @@ public class TestSessionWorkflow extends BaseTest {
             authorizationRequest1.setAuthPassword(userSecret);
             authorizationRequest1.getPrompts().add(Prompt.NONE);
             authorizationRequest1.setState("af0ifjsldkj");
-            authorizationRequest1.setRequestSessionId(true);
+            authorizationRequest1.setRequestSessionState(true);
 
             AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
             authorizeClient1.setRequest(authorizationRequest1);
@@ -66,9 +59,9 @@ public class TestSessionWorkflow extends BaseTest {
             //        showClient(authorizeClient1, cookieStore);
 
             String code1 = authorizationResponse1.getCode();
-            String sessionId = authorizationResponse1.getSessionId();
+            String sessionState = authorizationResponse1.getSessionState();
             Assert.assertNotNull("code1 is null", code1);
-            Assert.assertNotNull("sessionId is null", sessionId);
+            Assert.assertNotNull("sessionState is null", sessionState);
 
             // TV sends the code to the Backend
             // We don't use httpClient and cookieStore during this call
@@ -107,7 +100,7 @@ public class TestSessionWorkflow extends BaseTest {
 
             authorizationRequest2.getPrompts().add(Prompt.NONE);
             authorizationRequest2.setState("af0ifjsldkj");
-            authorizationRequest2.setSessionId(sessionId);
+            authorizationRequest2.setSessionState(sessionState);
 
             AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
             authorizeClient2.setRequest(authorizationRequest2);
