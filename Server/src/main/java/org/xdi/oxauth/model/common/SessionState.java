@@ -7,11 +7,7 @@
 package org.xdi.oxauth.model.common;
 
 import com.google.common.collect.Maps;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.site.ldap.persistence.annotation.*;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
 
@@ -24,17 +20,17 @@ import java.util.Map;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 05/28/2013
+ * @version December 15, 2015
  */
 @Name("sessionUser")
 @AutoCreate
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
-public class SessionId implements Serializable {
+public class SessionState implements Serializable {
 
-	private static final long serialVersionUID = -237476411915686378L;
+    private static final long serialVersionUID = -237476411915686378L;
 
-	@LdapDN
+    @LdapDN
     private String dn;
 
     @LdapAttribute(name = "uniqueIdentifier")
@@ -66,7 +62,7 @@ public class SessionId implements Serializable {
     @Transient
     private transient boolean persisted;
 
-    public SessionId() {
+    public SessionState() {
     }
 
     public String getDn() {
@@ -149,27 +145,27 @@ public class SessionId implements Serializable {
         if (sessionAttributes == null) {
             sessionAttributes = Maps.newHashMap();
         }
-		return sessionAttributes;
-	}
+        return sessionAttributes;
+    }
 
-	public void setSessionAttributes(Map<String, String> sessionAttributes) {
-		this.sessionAttributes = sessionAttributes;
-	}
+    public void setSessionAttributes(Map<String, String> sessionAttributes) {
+        this.sessionAttributes = sessionAttributes;
+    }
 
     public boolean isPersisted() {
-		return persisted;
-	}
+        return persisted;
+    }
 
-	public void setPersisted(boolean persisted) {
-		this.persisted = persisted;
-	}
+    public void setPersisted(boolean persisted) {
+        this.persisted = persisted;
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SessionId id1 = (SessionId) o;
+        SessionState id1 = (SessionState) o;
 
         return !(id != null ? !id.equals(id1.id) : id1.id != null);
     }
@@ -182,7 +178,7 @@ public class SessionId implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SessionId");
+        sb.append("SessionState");
         sb.append(", dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);
