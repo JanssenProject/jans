@@ -6,6 +6,15 @@
 
 package org.xdi.oxauth.client;
 
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.common.Display;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.util.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -13,20 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.Parameters;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.util.Util;
-
 /**
  * Represents an authorization request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 10.17.2011
+ * @author Javier Rojas Blum
+ * @version December 15, 2015
  */
 public class AuthorizationRequest extends BaseRequest {
 
@@ -51,8 +51,8 @@ public class AuthorizationRequest extends BaseRequest {
     private String request;
     private String requestUri;
 
-    private boolean requestSessionId;
-    private String sessionId;
+    private boolean requestSessionState;
+    private String sessionState;
 
     private String accessToken;
     private boolean useNoRedirectHeader;
@@ -350,39 +350,39 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     /**
-     * Returns whether session id is requested.
+     * Returns whether session state is requested.
      *
-     * @return whether session id is requested
+     * @return whether session state is requested
      */
-    public boolean isRequestSessionId() {
-        return requestSessionId;
+    public boolean isRequestSessionState() {
+        return requestSessionState;
     }
 
     /**
-     * Sets whether session id should be requested.
+     * Sets whether session state should be requested.
      *
-     * @param p_requestSessionId session id
+     * @param p_requestSessionState session state.
      */
-    public void setRequestSessionId(boolean p_requestSessionId) {
-        requestSessionId = p_requestSessionId;
+    public void setRequestSessionState(boolean p_requestSessionState) {
+        requestSessionState = p_requestSessionState;
     }
 
     /**
-     * Gets session id.
+     * Gets session state.
      *
-     * @return session id
+     * @return session state.
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getSessionState() {
+        return sessionState;
     }
 
     /**
-     * Sets session id.
+     * Sets session state.
      *
-     * @param p_sessionId session id
+     * @param p_sessionState session state
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionState(String p_sessionState) {
+        sessionState = p_sessionState;
     }
 
     public String getAccessToken() {
@@ -533,15 +533,17 @@ public class AuthorizationRequest extends BaseRequest {
                         .append("=").append(URLEncoder.encode(requestUri, Util.UTF8_STRING_ENCODING));
             }
 
-            if (requestSessionId) {
-                queryStringBuilder.append(Parameters.REQUEST_SESSION_ID.nameToAppend()).append(requestSessionId);
+            if (requestSessionState) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_SESSION_STATE)
+                        .append("=").append(URLEncoder.encode(Boolean.toString(requestSessionState), Util.UTF8_STRING_ENCODING));
             }
-            if (StringUtils.isNotBlank(sessionId)) {
-                queryStringBuilder.append(Parameters.SESSION_ID.nameToAppend()).append(sessionId);
+            if (StringUtils.isNotBlank(sessionState)) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.SESSION_STATE)
+                        .append("=").append(URLEncoder.encode(sessionState, Util.UTF8_STRING_ENCODING));
             }
             if (StringUtils.isNotBlank(accessToken)) {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.ACCESS_TOKEN)
-                        .append("=").append(accessToken);
+                        .append("=").append(URLEncoder.encode(accessToken, Util.UTF8_STRING_ENCODING));
             }
             for (String key : getCustomParameters().keySet()) {
                 queryStringBuilder.append("&");
@@ -633,11 +635,11 @@ public class AuthorizationRequest extends BaseRequest {
             parameters.put(AuthorizeRequestParam.REQUEST_URI, requestUri);
         }
 
-        if (requestSessionId) {
-            parameters.put(Parameters.REQUEST_SESSION_ID.getParamName(), Boolean.toString(requestSessionId));
+        if (requestSessionState) {
+            parameters.put(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(requestSessionState));
         }
-        if (StringUtils.isNotBlank(sessionId)) {
-            parameters.put(Parameters.SESSION_ID.getParamName(), sessionId);
+        if (StringUtils.isNotBlank(sessionState)) {
+            parameters.put(AuthorizeRequestParam.SESSION_STATE, sessionState);
         }
         if (StringUtils.isNotBlank(accessToken)) {
             parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
