@@ -24,8 +24,8 @@ import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -48,7 +48,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 16, 2015
+ * @version December 15, 2015
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -70,7 +70,7 @@ public class AuthorizeAction {
     private FederationDataService federationDataService;
 
     @In
-    private SessionIdService sessionIdService;
+    private SessionStateService sessionStateService;
 
     @In
     private UserService userService;
@@ -118,7 +118,7 @@ public class AuthorizeAction {
     private String requestUri;
 
     // custom oxAuth parameters
-    private String sessionId;
+    private String sessionState;
 
     public void checkUiLocales() {
         List<String> uiLocalesList = null;
@@ -139,11 +139,11 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
-        SessionId session = getSession();
+        SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
         try {
-            session = sessionIdService.updateSessionIfNeeded(session, redirectUri, acrValues);
+            session = sessionStateService.updateSessionIfNeeded(session, redirectUri, acrValues);
         } catch (AcrChangedException e) {
             log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
             log.error("Please perform logout in order to be able login with new ACR value.");
@@ -193,15 +193,15 @@ public class AuthorizeAction {
             }
 
             // Create unauthenticated session
-            SessionId unauthenticatedSession = sessionIdService.generateSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
-            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
+            boolean persisted = sessionStateService.persistSessionState(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
                 log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
             }
 
-            this.sessionId = unauthenticatedSession.getId();
-            sessionIdService.createSessionIdCookie(this.sessionId);
+            this.sessionState = unauthenticatedSession.getId();
+            sessionStateService.createSessionStateCookie(this.sessionState);
 
             FacesManager.instance().redirect(redirectTo, null, false);
             return;
@@ -277,25 +277,25 @@ public class AuthorizeAction {
         return acrs;
     }
 
-    private SessionId getSession() {
-        if (StringUtils.isBlank(this.sessionId)) {
-            this.sessionId = sessionIdService.getSessionIdFromCookie();
-            if (StringUtils.isBlank(this.sessionId)) {
+    private SessionState getSession() {
+        if (StringUtils.isBlank(sessionState)) {
+            sessionState = sessionStateService.getSessionStateFromCookie();
+            if (StringUtils.isBlank(this.sessionState)) {
                 return null;
             }
         }
 
         if (!identity.isLoggedIn()) {
             final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-            authenticator.authenticateBySessionId(sessionId);
+            authenticator.authenticateBySessionState(sessionState);
         }
 
-        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
-        if (ldapSessionId == null) {
+        SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
+        if (ldapSessionState == null) {
             identity.logout();
         }
 
-        return ldapSessionId;
+        return ldapSessionState;
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
@@ -568,20 +568,20 @@ public class AuthorizeAction {
         this.requestUri = requestUri;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getSessionState() {
+        return sessionState;
     }
 
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionState(String p_sessionState) {
+        sessionState = p_sessionState;
     }
 
     public void permissionGranted() {
-        final SessionId session = getSession();
+        final SessionState session = getSession();
         permissionGranted(session);
     }
 
-    public void permissionGranted(SessionId session) {
+    public void permissionGranted(SessionState session) {
         try {
             final User user = userService.getUserByDn(session.getUserDn());
             final Client client = clientService.getClient(clientId);
@@ -589,10 +589,10 @@ public class AuthorizeAction {
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
             session.addPermission(clientId, true);
-            sessionIdService.updateSessionId(session);
+            sessionStateService.updateSessionState(session);
 
-            // OXAUTH-297 - set session_id cookie, secure=true
-            SessionIdService.instance().createSessionIdCookie(sessionId);
+            // OXAUTH-297 - set session_state cookie
+            SessionStateService.instance().createSessionStateCookie(sessionState);
 
             Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
 
