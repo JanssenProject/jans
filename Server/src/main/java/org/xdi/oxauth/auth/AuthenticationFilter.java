@@ -21,6 +21,7 @@ import org.jboss.seam.security.NotLoggedInException;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -31,7 +32,7 @@ import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.util.StringHelper;
 
 import javax.servlet.FilterChain;
@@ -46,7 +47,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * @author Javier Rojas Blum
- * @version November 16, 2015
+ * @version December 15, 2015
  */
 @Scope(ScopeType.APPLICATION)
 @Name("org.jboss.seam.web.authenticationFilter")
@@ -94,14 +95,14 @@ public class AuthenticationFilter extends AbstractFilter {
                             httpResponse.sendError(401, "Not authorized");
                         }
                     } else {
-                        SessionIdService sessionIdService = SessionIdService.instance();
-                        String sessionId = httpRequest.getParameter("session_id");
-                        if (StringUtils.isBlank(sessionId)) {
-                            // OXAUTH-297 : check whether session_id is present in cookie
-                            sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
+                        SessionStateService sessionStateService = SessionStateService.instance();
+                        String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+                        if (StringUtils.isBlank(sessionState)) {
+                            // OXAUTH-297 : check whether session_state is present in cookie
+                            sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
                         }
-                        if (StringUtils.isNotBlank(sessionId)) {
-                            processSessionAuth(sessionId, sessionIdService, httpRequest, httpResponse, filterChain);
+                        if (StringUtils.isNotBlank(sessionState)) {
+                            processSessionAuth(sessionState, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);
                         }
@@ -120,11 +121,11 @@ public class AuthenticationFilter extends AbstractFilter {
                 requestUrl.equals("http://localhost:80/seam/resource/restv1/oxauth/token");
     }
 
-    private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
+    private void processSessionAuth(String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
         boolean requireAuth;
 
-        requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
-        log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+        requireAuth = !getAuthenticator().authenticateBySessionState(p_sessionState);
+        log.trace("Process Session Auth, sessionState = {0}, requireAuth = {1}", p_sessionState, requireAuth);
 
         if (!requireAuth) {
             try {
@@ -253,7 +254,7 @@ public class AuthenticationFilter extends AbstractFilter {
 
                             requireAuth = !getAuthenticator().authenticateWebService();
                         } else {
-                        	getAuthenticator().configureSessionClient(client);
+                            getAuthenticator().configureSessionClient(client);
                         }
                     }
                 }

@@ -36,7 +36,11 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
+<<<<<<< HEAD
  * @version December 17, 2015
+=======
+ * @version December 15, 2015
+>>>>>>> master
  */
 public class JwtAuthorizationRequest {
 
@@ -179,7 +183,7 @@ public class JwtAuthorizationRequest {
             this.loginHint = authorizationRequest.getLoginHint();
             this.acrValues = authorizationRequest.getAcrValues();
             this.registration = authorizationRequest.getRegistration();
-            this.requestUniqueId = authorizationRequest.isRequestSessionId();
+            this.requestUniqueId = authorizationRequest.isRequestSessionState();
         }
     }
 
