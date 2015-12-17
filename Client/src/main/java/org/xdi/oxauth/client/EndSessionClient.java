@@ -9,7 +9,6 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
@@ -23,7 +22,7 @@ import java.util.Map;
  * authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 28, 2015
+ * @version December 15, 2015
  */
 public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionResponse> {
 
@@ -106,8 +105,8 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
         if (StringUtils.isNotBlank(getRequest().getState())) {
             clientRequest.queryParameter(EndSessionRequestParam.STATE, getRequest().getState());
         }
-        if (StringUtils.isNotBlank(getRequest().getSessionId())) {
-            clientRequest.queryParameter(Parameters.SESSION_ID.getParamName(), getRequest().getSessionId());
+        if (StringUtils.isNotBlank(getRequest().getSessionState())) {
+            clientRequest.queryParameter(EndSessionRequestParam.SESSION_STATE, getRequest().getSessionState());
         }
 
         // Call REST Service and handle response
