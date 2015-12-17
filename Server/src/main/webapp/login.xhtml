@@ -110,6 +110,10 @@
                                             <h:commandButton id="loginButton"
                                                              value="#{messages['login.login']}"
                                                              action="#{authenticator.authenticate}"/>
+                                            <h:commandButton id="registerButton"
+                                                             value="#{messages['login.register']}"
+                                                             action="#{authenticator.authenticate}"
+                                                             rendered="#{display_register_action}"/>
                                         </div>
                                     </div>
                                 </div>
