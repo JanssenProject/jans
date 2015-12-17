@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.client.model.authorize;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.SecureRandom;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -34,8 +29,14 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 03.07.2012
+ * @author Javier Rojas Blum
+ * @version December 15, 2015
  */
 public class JwtAuthorizationRequest {
 
@@ -178,7 +179,7 @@ public class JwtAuthorizationRequest {
             this.loginHint = authorizationRequest.getLoginHint();
             this.acrValues = authorizationRequest.getAcrValues();
             this.registration = authorizationRequest.getRegistration();
-            this.requestUniqueId = authorizationRequest.isRequestSessionId();
+            this.requestUniqueId = authorizationRequest.isRequestSessionState();
         }
     }
 
