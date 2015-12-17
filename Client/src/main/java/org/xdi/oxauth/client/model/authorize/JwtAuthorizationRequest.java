@@ -36,11 +36,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
-<<<<<<< HEAD
  * @version December 17, 2015
-=======
- * @version December 15, 2015
->>>>>>> master
  */
 public class JwtAuthorizationRequest {
 
@@ -523,9 +519,12 @@ public class JwtAuthorizationRequest {
         JwtHeader jwtHeader = new JwtHeader();
 
         jwtHeader.setType(type);
-        jwtHeader.setAlgorithm(keyEncryptionAlgorithm);
-        jwtHeader.setEncryptionMethod(blockEncryptionAlgorithm);
-        jwtHeader.setAlgorithm(signatureAlgorithm);
+        if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
+            jwtHeader.setAlgorithm(keyEncryptionAlgorithm);
+            jwtHeader.setEncryptionMethod(blockEncryptionAlgorithm);
+        } else {
+            jwtHeader.setAlgorithm(signatureAlgorithm);
+        }
         jwtHeader.setKeyId(keyId);
 
         return jwtHeader.toJsonObject();
