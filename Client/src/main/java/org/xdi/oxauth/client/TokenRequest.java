@@ -25,18 +25,13 @@ import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a token request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 10.17.2011
+ * @author Javier Rojas Blum
+ * @version December 17, 2015
  */
 public class TokenRequest extends BaseRequest {
 
@@ -314,7 +309,7 @@ public class TokenRequest extends BaseRequest {
         Date expirationTime = calendar.getTime();
 
         // Header
-        clientAssertion.getHeader().setType(JwtType.JWS);
+        clientAssertion.getHeader().setType(JwtType.JWT);
         clientAssertion.getHeader().setAlgorithm(algorithm);
         if (StringUtils.isNotBlank(keyId)) {
             clientAssertion.getHeader().setKeyId(keyId);
