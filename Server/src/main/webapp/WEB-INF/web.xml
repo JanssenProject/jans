@@ -115,8 +115,8 @@
     -->
 
 	<env-entry>
-		<env-entry-name>ClientStateSavingPassword</env-entry-name>
+		<env-entry-name>com.sun.faces.ClientStateSavingPassword</env-entry-name>
 		<env-entry-type>java.lang.String</env-entry-type>
-		<env-entry-value>1234567890</env-entry-value>
+		<env-entry-value>qLIsT+20NUPIyAp0SXHIUEWaXfYqdgM5EWYSx9VE4b0=</env-entry-value>
 	</env-entry>
 </web-app>
