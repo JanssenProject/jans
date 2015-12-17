@@ -22,7 +22,6 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +36,7 @@ import static org.testng.Assert.assertTrue;
  * http://openid.net/specs/openid-connect-messages-1_0.html#sigs
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/11/2012
+ * @version December 17, 2015
  */
 
 public class FederationSigningTest extends BaseComponentTestAdapter {
@@ -69,7 +68,7 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
         final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
         final JSONObject jsonHeader = JwtHeader.instance().
-                setType(JwtType.JWS).setAlgorithm(algorithm).setKeyId(keyId).
+                setType(JwtType.JWT).setAlgorithm(algorithm).setKeyId(keyId).
                 toJsonObject();
         final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
 
