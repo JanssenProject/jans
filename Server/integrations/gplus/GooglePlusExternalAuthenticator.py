@@ -402,8 +402,8 @@ class PersonAuthentication(PersonAuthenticationType):
             # Attempt to determine client_id from event context
             if (clientId == None):
                 eventContext = Contexts.getEventContext()
-                if (eventContext.isSet("stored_request_parameters")):
-                    clientId = eventContext.get("stored_request_parameters").get("client_id")
+                if (eventContext.isSet("sessionAttributes")):
+                    clientId = eventContext.get("sessionAttributes").get("client_id")
 
             if (clientId == None):
                 print "Google+ GetClientConfiguration. client_id is empty"
