@@ -197,7 +197,7 @@
 
     <test name="Session ID service test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.comp.SessionIdServiceTest"/>
+            <class name="org.xdi.oxauth.comp.SessionStateServiceTest"/>
         </classes>
     </test>
 
