@@ -44,8 +44,8 @@ import java.util.concurrent.TimeUnit;
 @AutoCreate
 public class SessionStateService {
 
-    private static final String SESSION_STATE_COOKIE_NAME = "session_state";
-    private static final String STORED_ORIGIN_PARAMETERS = "stored_origin_parameters";
+    public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+    public static final String SESSION_AUTHENTICATION_STATE = "auth_state";
 
     @Logger
     private Log log;
@@ -148,7 +148,11 @@ public class SessionStateService {
 
     public String getSessionStateFromCookie() {
         try {
-            final HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		    FacesContext facesContext = FacesContext.getCurrentInstance();
+		    if (facesContext == null) {
+		    	return null;
+		    }
+            final HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
             return getSessionStateFromCookie(request);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
