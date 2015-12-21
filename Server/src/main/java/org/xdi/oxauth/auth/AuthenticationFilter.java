@@ -130,7 +130,8 @@ public class AuthenticationFilter extends AbstractFilter {
         if (!requireAuth) {
             try {
                 p_filterChain.doFilter(p_httpRequest, p_httpResponse);
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                log.error("Failed to process session authentication", ex);
                 requireAuth = true;
             }
         }
