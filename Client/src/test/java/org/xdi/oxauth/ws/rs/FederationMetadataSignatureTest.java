@@ -6,19 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
 import org.bouncycastle.jce.provider.JCERSAPublicKey;
 import org.codehaus.jettison.json.JSONException;
@@ -33,9 +20,21 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.spec.InvalidKeySpecException;
+
+import static org.testng.Assert.assertTrue;
+
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 07/11/2012
+ * @version December 17, 2015
  */
 
 public class FederationMetadataSignatureTest {
@@ -59,7 +58,7 @@ public class FederationMetadataSignatureTest {
 
     @Test
     public void test() throws JSONException, NoSuchProviderException, NoSuchAlgorithmException, IOException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException, InvalidJwtException {
-        final JSONObject jsonHeader = JwtHeader.instance().setType(JwtType.JWS).setAlgorithm(SignatureAlgorithm.RS512).toJsonObject();
+        final JSONObject jsonHeader = JwtHeader.instance().setType(JwtType.JWT).setAlgorithm(SignatureAlgorithm.RS512).toJsonObject();
         final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
 
         final KeyPair keyPair = JwtUtil.generateRsaKey();
