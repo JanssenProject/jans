@@ -67,6 +67,7 @@ public abstract class BaseTest {
     protected WebDriver driver;
 
     protected String authorizationEndpoint;
+    protected String authorizationPageEndpoint;
     protected String tokenEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
@@ -486,7 +487,13 @@ public abstract class BaseTest {
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
+
+        authorizationPageEndpoint = determineAuthorizationPageEndpoint();
     }
+
+	private String determineAuthorizationPageEndpoint() {
+		return authorizationPageEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+	}
 
     public void showTitle(String title) {
         title = "TEST: " + title;
