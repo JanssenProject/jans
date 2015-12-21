@@ -7,6 +7,57 @@
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
+
+        <link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/jquery-ui-1.11.4.min.css"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.11.4.min.js"/>
+        <script src="./js/oxpush2.js"/>
+
+        <script>
+			var helper = (function() {
+				var authResult = undefined;
+
+				return {
+	 			    /**
+	 			    * Resume on getting authentication result from server
+	 			    */
+					onSignInCallback: function(authResult) {
+				        console.log('Get authentication result: ' + authResult);
+						helper.resumeAuthentication(authResult);
+					},
+
+					/**
+					* Send form to server to resume authentication workflow
+					*/
+					resumeAuthentication: function(authResult) {
+						$('input#auth_result').val(authResult);
+						$('form#response').submit();
+					},
+				};
+			})();
+			
+			/**
+			 * Calls the helper method that handles the authentication flow.
+			 */
+			function onSignInCallback(authResult) {
+			  helper.onSignInCallback(authResult);
+			}
+
+			var request = '${oxpush2_request}';
+			$(document).ready(function() {
+
+				if (request == '') {
+					onSignInCallback('error');
+				}
+
+				oxpush2.renderQrCode('#container', request);
+		        oxpush2.startProgressBar('#progressbar', 60);
+		        oxpush2.startSessionChecker(onSignInCallback, 60);
+			});
+
+        </script>
+
         <style type="text/css">
             .login-panel {
                 border-style: solid;
@@ -40,11 +91,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">
-        <h:outputText value="#{messages['login.pageTitle']}"/>
-    </ui:define>
+    <ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
 
     <ui:define name="body">
+        <form method="post" action="#{request.contextPath}/postlogin" id="response">
+            <input type="hidden" id="auth_result" />
+        </form>
+
         <table border="0" align="center">
             <tr>
                 <td>
@@ -63,29 +116,11 @@
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
                                         </s:div>
 
-                                        <p class="info">
-                                            <h:outputText value="#{messages['login.pleaseLoginHere']}"/>
-                                        </p>
-
                                         <div class="dialog">
-                                            <h:panelGrid columns="3" border="0" rowClasses="prop"
-                                                         columnClasses="name,value,hint">
-                                                <h:outputLabel for="username" value="#{messages['login.username']}"/>
-                                                <h:inputText id="username"
-                                                             value="#{credentials.username}" autocomplete="off"/>
-                                                <h:outputText value=""/>
-
-                                                <h:outputLabel for="password" value="#{messages['login.password']}"/>
-                                                <h:inputSecret id="password"
-                                                               value="#{credentials.password}" autocomplete="off"/>
-                                                <h:outputText value=""/>
-
-                                                <h:outputLabel for="rememberMe"
-                                                               value="#{messages['login.rememberMe']}"/>
-                                                <h:selectBooleanCheckbox id="rememberMe"
-                                                                         value="#{rememberMe.enabled}"/>
-                                                <h:outputText value=""/>
-                                            </h:panelGrid>
+                                        	<p>Scan QR code using oxPush2</p>
+                                        	<div id="container"></div>
+                                        	<div id="progressbar"></div>
+                                        	<span id="result">Test</span>
                                         </div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
@@ -105,25 +140,7 @@
                                                 </a>
                                             </p>
                                         </s:div>
-
-                                        <div class="actionButtons">
-                                            <h:commandButton id="loginButton"
-                                                             value="#{messages['login.login']}"
-                                                             action="#{authenticator.authenticate}"/>
-                                            <h:commandButton id="registerButton"
-                                                             value="#{messages['login.register']}"
-                                                             action="#{authenticator.authenticate}"
-                                                             rendered="#{display_register_action}"/>
-                                        </div>
                                     </div>
-                                </div>
-                                <div class="login-panel">
-                                	<s:fragment rendered="#{external_auth_request_uri != Null}">
-                                		<a id="externalAuthButton"
-											href="#{external_auth_request_uri}">
-                                            <input type="button" value="Use External Authentification" />
-										</a>
-                                	</s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>
@@ -131,10 +148,6 @@
                 </td>
             </tr>
         </table>
-        <script type="text/javascript">
-            window.onload = function() {
-                document.getElementById("loginForm:username").focus();
-            };
-        </script>
     </ui:define>
+
 </ui:composition>
