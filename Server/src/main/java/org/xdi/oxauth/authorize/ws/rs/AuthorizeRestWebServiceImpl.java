@@ -152,7 +152,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
-        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
+//        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
 
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
