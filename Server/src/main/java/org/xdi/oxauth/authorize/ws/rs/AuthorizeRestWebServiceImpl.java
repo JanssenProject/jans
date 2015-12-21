@@ -157,6 +157,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
     	if ((sessionUser == null) || (SessionIdState.UNAUTHENTICATED == sessionUser.getState())) {
+            log.debug("Session is not authentication. Session user should be null");
     		user = null;
     	}
 
