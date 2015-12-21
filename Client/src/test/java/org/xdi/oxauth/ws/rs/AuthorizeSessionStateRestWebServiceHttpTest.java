@@ -44,7 +44,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
     public void requestAuthorizationCode(
             final String userId, final String userSecret,
             final String redirectUris, final String redirectUri) throws Exception {
-        showTitle("requestAuthorizationCode");
+        showTitle("requestSessionStateAuthorizationCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
