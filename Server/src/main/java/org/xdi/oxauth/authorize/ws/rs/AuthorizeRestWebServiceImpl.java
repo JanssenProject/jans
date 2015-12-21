@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -63,51 +64,34 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Logger
     private Log log;
-
     @In
     private ErrorResponseFactory errorResponseFactory;
-
     @In
     private RedirectionUriService redirectionUriService;
-
     @In
     private AuthorizationGrantList authorizationGrantList;
-
     @In
     private ClientService clientService;
-
     @In
     private UserService userService;
-
     @In
     private UserGroupService userGroupService;
-
     @In
     private FederationDataService federationDataService;
-
-    @In
-    private ScopeService scopeService;
-
-    @In
-    private AttributeService attributeService;
-
     @In
     private Identity identity;
-
     @In
     private AuthenticationFilterService authenticationFilterService;
-
     @In
     private SessionStateService sessionStateService;
-
     @In
     private ScopeChecker scopeChecker;
-
     @In
     private SessionState sessionUser;
-
     @In
     private ClientAuthorizationsService clientAuthorizationsService;
+    @In
+    private AuthenticationService authenticationService;
 
     @Override
     public Response requestAuthorizationGet(
@@ -167,6 +151,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
+
+        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
 
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
@@ -576,6 +562,33 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return builder.build();
+    }
+
+    /**
+     * 1) https://ce-dev.gluu.org/oxauth/authorize -> session created with parameter list 1
+     * 2) https://ce-dev.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize -> with parameter list 2
+     *
+     * Second call will try to reuse session data from call 1 (parameter list1). Here we overriding them.
+     *
+     * @param httpRequest http request
+     * @param prompts prompts
+     */
+    private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
+        if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
+            Map<String, String> parameterMap = Maps.newHashMap(httpRequest.getParameterMap());
+            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+
+            sessionUser.setUserDn(null);
+            sessionUser.setSessionAttributes(requestParameterMap);
+            boolean persisted = sessionStateService.persistSessionState(sessionUser, !prompts.contains(Prompt.NONE));
+            if (persisted) {
+                if (log.isTraceEnabled()) {
+                    log.trace("Session '{0}' persisted to LDAP", sessionUser.getId());
+                }
+            } else {
+                log.error("Failed to persisted session: {0}", sessionUser.getId());
+            }
+        }
     }
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
