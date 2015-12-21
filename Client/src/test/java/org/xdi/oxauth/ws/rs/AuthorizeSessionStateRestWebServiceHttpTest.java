@@ -98,6 +98,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes1, redirectUri, null);
         authorizationRequest1.setState(state1);
         String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint, authorizationRequest1, false);
+        assertNotNull(sessionState, "The sessionState is null");
 
         // 4. Request authorization and receive the authorization code.
         // Application should returns new session_state
