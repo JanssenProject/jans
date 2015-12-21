@@ -143,11 +143,6 @@ public class AuthenticationFilter extends AbstractFilter {
                 requireAuth = true;
             }
         }
-
-        final String requestUrl = p_httpRequest.getRequestURL().toString();
-        if (requestUrl.equals(ConfigurationFactory.instance().getConfiguration().getAuthorizationEndpoint())) {
-        	requireAuth = false;
-        }
         
 
         if (requireAuth) {
