@@ -41,11 +41,26 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
-    public void requestAuthorizationCode(
+    public void requestSessionStateAuthorizationCode1(
             final String userId, final String userSecret,
             final String redirectUris, final String redirectUri) throws Exception {
-        showTitle("requestSessionStateAuthorizationCode");
+		showTitle("requestSessionStateAuthorizationCode1");
 
+        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationEndpoint, authorizationEndpoint);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Test
+    public void requestSessionStateAuthorizationCode2(
+            final String userId, final String userSecret,
+            final String redirectUris, final String redirectUri) throws Exception {
+		showTitle("requestSessionStateAuthorizationCode2");
+
+        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationPageEndpoint, authorizationEndpoint);
+    }
+
+	private void requestSessionStateAuthorizationCode(final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+			final String authorizationEndpoint1, final String authorizationEndpoint2) {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
@@ -97,7 +112,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes1, redirectUri, null);
         authorizationRequest1.setState(state1);
-        String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint, authorizationRequest1, false);
+        String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint1, authorizationRequest1, false);
         assertNotNull(sessionState, "The sessionState is null");
 
         // 4. Request authorization and receive the authorization code.
@@ -109,13 +124,13 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         authorizationRequest2.setState(state2);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest2, userId, userSecret, false);
+                authorizationEndpoint2, authorizationRequest2, userId, userSecret, false);
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
         assertNotEquals(sessionState, authorizationResponse.getSessionState(), "The session_state is the same for 2 different authorization requests");
-    }
+	}
 
 }
