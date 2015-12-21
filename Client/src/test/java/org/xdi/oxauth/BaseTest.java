@@ -488,11 +488,11 @@ public abstract class BaseTest {
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
 
-        authorizationPageEndpoint = determineAuthorizationPageEndpoint();
+        authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
     }
 
-	private String determineAuthorizationPageEndpoint() {
-		return authorizationPageEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+	private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
+		return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
 	}
 
     public void showTitle(String title) {
