@@ -69,8 +69,8 @@ public class SessionStateService {
     // 2) acr change -> send error
     // 3) client_id change -> do nothing
     // https://github.com/GluuFederation/oxAuth/issues/34
-    public SessionState updateSessionIfNeeded(SessionState session, String redirectUri, String acrValuesStr) throws AcrChangedException {
-        if (session != null && !session.getSessionAttributes().isEmpty()) {
+    public SessionState assertAuthenticatedSessionCorrespondsToNewRequest(SessionState session, String redirectUri, String acrValuesStr) throws AcrChangedException {
+        if (session != null && !session.getSessionAttributes().isEmpty() && session.getState() == SessionIdState.AUTHENTICATED) {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
