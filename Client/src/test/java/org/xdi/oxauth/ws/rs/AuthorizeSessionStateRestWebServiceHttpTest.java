@@ -97,7 +97,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes1, redirectUri, null);
         authorizationRequest1.setState(state1);
-        String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint, authorizationRequest1);
+        String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint, authorizationRequest1, false);
 
         // 4. Request authorization and receive the authorization code.
         // Application should returns new session_state
@@ -108,7 +108,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         authorizationRequest2.setState(state2);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest2, userId, userSecret);
+                authorizationEndpoint, authorizationRequest2, userId, userSecret, false);
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
