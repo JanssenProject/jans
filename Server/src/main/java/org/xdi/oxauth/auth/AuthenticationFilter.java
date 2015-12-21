@@ -23,6 +23,8 @@ import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -97,11 +99,17 @@ public class AuthenticationFilter extends AbstractFilter {
                     } else {
                         SessionStateService sessionStateService = SessionStateService.instance();
                         String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+
                         if (StringUtils.isBlank(sessionState)) {
                             // OXAUTH-297 : check whether session_state is present in cookie
                             sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
                         }
+
+                        SessionState sessionStateObject = null;
                         if (StringUtils.isNotBlank(sessionState)) {
+                            sessionStateObject = sessionStateService.getSessionState(sessionState);
+                        }
+                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState()) {
                             processSessionAuth(sessionState, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);
@@ -109,7 +117,7 @@ public class AuthenticationFilter extends AbstractFilter {
                     }
                 } catch (IOException ex) {
                     log.error(ex.getMessage(), ex);
-                } catch (ServletException ex) {
+                } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
             }
