@@ -104,7 +104,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         List<String> scopes2 = Arrays.asList("openid", "profile", "address", "email");
         String state2 = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes1, redirectUri, null);
+        AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes2, redirectUri, null);
         authorizationRequest2.setState(state2);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
