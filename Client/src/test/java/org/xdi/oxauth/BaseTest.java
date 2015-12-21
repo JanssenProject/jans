@@ -317,14 +317,14 @@ public abstract class BaseTest {
             authorizationResponseStr = driver.getCurrentUrl();
         }
 
-        stopSelenium();
-
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
         	sessionState = sessionStateCookie.getValue();
         }
-        System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
+        System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionState);
+
+        stopSelenium();
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
@@ -369,13 +369,14 @@ public abstract class BaseTest {
         	return null;
         }
 
-        stopSelenium();
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
         	sessionState = sessionStateCookie.getValue();
         }
         System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
+
+        stopSelenium();
 
         showClientUserAgent(authorizeClient);
 
