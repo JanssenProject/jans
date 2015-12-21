@@ -161,6 +161,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     	}
 
         try {
+            sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, redirectUri, acrValuesStr);
+
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
