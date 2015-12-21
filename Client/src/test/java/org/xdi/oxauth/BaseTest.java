@@ -281,6 +281,7 @@ public abstract class BaseTest {
         System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
         if (cleanupCookies) {
+            System.out.println("authenticateResourceOwnerAndGrantAccess: Cleaning cookies");
         	deleteAllCookies();
         }
         driver.navigate().to(authorizationRequestUrl);
@@ -357,6 +358,7 @@ public abstract class BaseTest {
         System.out.println("waitForResourceOwnerAndGrantLoginForm: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
         if (cleanupCookies) {
+            System.out.println("waitForResourceOwnerAndGrantLoginForm: Cleaning cookies");
         	deleteAllCookies();
         }
         driver.navigate().to(authorizationRequestUrl);
@@ -369,18 +371,18 @@ public abstract class BaseTest {
         	return null;
         }
 
-        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
-        String sessionState = null;
-        if (sessionStateCookie != null) {
-        	sessionState = sessionStateCookie.getValue();
-        }
-        System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
+//        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
+//        String sessionState = null;
+//        if (sessionStateCookie != null) {
+//        	sessionState = sessionStateCookie.getValue();
+//        }
+//        System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
 
         stopSelenium();
 
         showClientUserAgent(authorizeClient);
 
-        return sessionState;
+        return null;
     }
 
     /**
