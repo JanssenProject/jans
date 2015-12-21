@@ -161,7 +161,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     	}
 
         try {
-            if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
+        	sessionStateService.updateSessionIfNeeded(sessionUser, redirectUri, acrValuesStr);
+        	
+        	if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
@@ -541,10 +543,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
                 }
             }
-//        } catch (AcrChangedException e) {
-//            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
-//                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
-//            log.error(e.getMessage(), e);
+        } catch (AcrChangedException e) {
+            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
+                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
+            log.error(e.getMessage(), e);
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
             log.error(e.getMessage(), e);
