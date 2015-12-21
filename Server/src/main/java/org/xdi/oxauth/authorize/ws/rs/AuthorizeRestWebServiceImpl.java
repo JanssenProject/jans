@@ -158,11 +158,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
         try {
-            SessionState persistedSessionState = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, redirectUri, acrValuesStr);
-        	if ((persistedSessionState == null) || (SessionIdState.UNAUTHENTICATED == persistedSessionState.getState())) {
-                log.debug("Session is not authentication. Session user should be null");
-        		user = null;
-        	}
+            sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, redirectUri, acrValuesStr);
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
