@@ -66,7 +66,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version August 21, 2015
+ * @version December 17, 2015
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -199,11 +199,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
 
         // Header
-        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
-            jwt.getHeader().setType(JwtType.JWT);
-        } else {
-            jwt.getHeader().setType(JwtType.JWS);
-        }
+        jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
         List<JSONWebKey> availableKeys = jwks.getKeys(signatureAlgorithm);
@@ -343,7 +339,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         Jwe jwe = new Jwe();
 
         // Header
-        jwe.getHeader().setType(JwtType.JWE);
+        jwe.getHeader().setType(JwtType.JWT);
         jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 

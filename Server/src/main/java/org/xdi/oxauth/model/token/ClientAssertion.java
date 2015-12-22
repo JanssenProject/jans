@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version December 17, 2015
  */
 public class ClientAssertion {
 
@@ -93,7 +93,7 @@ public class ClientAssertion {
                                     jwtType = signatureAlgorithm.getJwtType();
                                 }
 
-                                if (jwtType == JwtType.JWS && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
+                                if (jwtType != null && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
                                         ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && signatureAlgorithm.getFamily().equals("HMAC"))
                                                 || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (signatureAlgorithm.getFamily().equals("RSA") || signatureAlgorithm.getFamily().equals("EC"))))) {
                                     clientSecret = client.getClientSecret();

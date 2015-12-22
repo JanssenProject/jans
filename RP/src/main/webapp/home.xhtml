@@ -1024,7 +1024,7 @@
                 document.getElementById("mainForm:endSessionIdTokenHint").value = param[1];
             } else if (param[0] == "scope") {
                 document.getElementById("mainForm:scope").value = param[1];
-            } else if (param[0] == "session_id") {
+            } else if (param[0] == "session_state") {
                 var rp = document.getElementById("rp");
                 var clientId = document.getElementById("mainForm:authorizationClientId").value;
                 rp.src = "./rpiframe.seam?session_state=" + param[1]
