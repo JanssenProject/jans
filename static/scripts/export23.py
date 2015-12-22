@@ -86,7 +86,7 @@ def backupTrustStores():
     copyFile(defaultJavaTrustStore, "%s/%s" % (bu_folder, os.path.split(defaultJavaTrustStore)[0]))
     if os.path.exists("/etc/pki/java"):
         files = getOutput([find, "/etc/pki/java"], True)
-        for file in files():
+        for file in files[1:]:
             file = file.strip()
             copyFile(file, "%s/etc/ssh/certs/java" % bu_folder)
 
