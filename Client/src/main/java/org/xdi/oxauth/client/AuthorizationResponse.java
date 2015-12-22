@@ -11,7 +11,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.util.Util;
@@ -28,7 +27,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.*;
  * Represents an authorization response received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version December 15, 2015
  */
 public class AuthorizationResponse extends BaseResponse {
 
@@ -39,7 +38,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String scope;
     private String idToken;
     private String state;
-    private String sessionId;
+    private String sessionState;
     private Map<String, String> customParams;
     private ResponseMode responseMode;
 
@@ -109,9 +108,9 @@ public class AuthorizationResponse extends BaseResponse {
                         code = params.get(CODE);
                         params.remove(CODE);
                     }
-                    if (params.containsKey(Parameters.SESSION_ID.getParamName())) {
-                        sessionId = params.get(Parameters.SESSION_ID.getParamName());
-                        params.remove(Parameters.SESSION_ID.getParamName());
+                    if (params.containsKey(SESSION_STATE)) {
+                        sessionState = params.get(SESSION_STATE);
+                        params.remove(SESSION_STATE);
                     }
                     if (params.containsKey(ACCESS_TOKEN)) {
                         accessToken = params.get(ACCESS_TOKEN);
@@ -197,21 +196,21 @@ public class AuthorizationResponse extends BaseResponse {
     }
 
     /**
-     * Gets session id.
+     * Gets session state.
      *
-     * @return session id
+     * @return session state.
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getSessionState() {
+        return sessionState;
     }
 
     /**
-     * Sets session id.
+     * Sets session state.
      *
-     * @param p_sessionId session id
+     * @param p_sessionState session state.
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionState(String p_sessionState) {
+        sessionState = p_sessionState;
     }
 
     public Map<String, String> getCustomParams() {

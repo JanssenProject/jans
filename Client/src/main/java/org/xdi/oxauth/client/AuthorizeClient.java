@@ -6,27 +6,26 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encapsulates functionality to make authorization request calls to an
  * authorization server via REST Services.
  *
- * @author Javier Rojas Blum Date: 10.19.2011
+ * @author Javier Rojas Blum
+ * @version December 15, 2015
  */
 public class AuthorizeClient extends BaseClient<AuthorizationRequest, AuthorizationResponse> {
 
@@ -263,10 +262,10 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.REQUEST_URI, getRequest().getRequestUri());
         addReqParam(AuthorizeRequestParam.ACCESS_TOKEN, getRequest().getAccessToken());
 
-        if (getRequest().isRequestSessionId()) {
-            addReqParam(Parameters.REQUEST_SESSION_ID.getParamName(), Boolean.toString(getRequest().isRequestSessionId()));
+        if (getRequest().isRequestSessionState()) {
+            addReqParam(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(getRequest().isRequestSessionState()));
         }
-        addReqParam(Parameters.SESSION_ID.getParamName(), getRequest().getSessionId());
+        addReqParam(AuthorizeRequestParam.SESSION_STATE, getRequest().getSessionState());
 
         // Custom params
         for (String key : request.getCustomParameters().keySet()) {

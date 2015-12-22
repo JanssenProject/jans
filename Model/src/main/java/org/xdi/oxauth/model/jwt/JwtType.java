@@ -7,11 +7,12 @@
 package org.xdi.oxauth.model.jwt;
 
 /**
- * @author Javier Rojas Blum Date: 11.03.2012
+ * @author Javier Rojas Blum
+ * @version December 17, 2015
  */
 public enum JwtType {
 
-    JWT, JWS, JWE;
+    JWT;
 
     /**
      * Returns the corresponding {@link JwtType} for a parameter.
