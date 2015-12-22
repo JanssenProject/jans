@@ -27,7 +27,7 @@ import javax.ws.rs.core.SecurityContext;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version December 15, 2015
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
@@ -36,50 +36,50 @@ public interface AuthorizeRestWebService {
     /**
      * Requests authorization.
      *
-     * @param scope            The scope of the access request.
-     * @param responseType     The response type informs the authorization server of the desired response type:
-     *                         <strong>code</strong>, <strong>token</strong>, <strong>id_token</strong>
-     *                         a combination of them. The response type parameter is mandatory.
-     * @param clientId         The client identifier.
-     * @param redirectUri      Redirection URI
-     * @param state            An opaque value used by the client to maintain state between
-     *                         the request and callback. The authorization server includes
-     *                         this value when redirecting the user-agent back to the client.
-     *                         The parameter should be used for preventing cross-site request
-     *                         forgery.
-     * @param responseMode     Informs the Authorization Server of the mechanism to be used for returning parameters
-     *                         from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the
-     *                         Response Mode that would be requested is the default mode specified for the Response Type.
-     * @param nonce            A string value used to associate a user agent session with an ID Token,
-     *                         and to mitigate replay attacks.
-     * @param display          An ASCII string value that specifies how the Authorization Server displays the
-     *                         authentication page to the End-User.
-     * @param prompt           A space delimited list of ASCII strings that can contain the values login, consent,
-     *                         select_account, and none.
-     * @param maxAge           Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the
-     *                         last time the End-User was actively authenticated.
-     * @param uiLocales        End-User's preferred languages and scripts for the user interface, represented as a
-     *                         space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
-     * @param idTokenHint      Previously issued ID Token passed to the Authorization Server as a hint about the
-     *                         End-User's current or past authenticated session with the Client.
-     * @param loginHint        Hint to the Authorization Server about the login identifier the End-User might use to
-     *                         log in (if necessary).
-     * @param acrValues        Requested Authentication Context Class Reference values. Space-separated string that
-     *                         specifies the acr values that the Authorization Server is being requested to use for
-     *                         processing this Authentication Request, with the values appearing in order of preference.
-     * @param amrValues        Requested Authentication Methods References. JSON array of strings that are identifiers
-     *                         for authentication methods used in the authentication. For instance, values might indicate
-     *                         that both password and OTP authentication methods were used. The definition of particular
-     *                         values to be used in the amr Claim is beyond the scope of this specification.The amr value
-     *                         is an array of case sensitive strings.
-     * @param request          A JWT  encoded OpenID Request Object.
-     * @param requestUri       An URL that points to an OpenID Request Object.
-     * @param requestSessionId
-     * @param sessionId
+     * @param scope               The scope of the access request.
+     * @param responseType        The response type informs the authorization server of the desired response type:
+     *                            <strong>code</strong>, <strong>token</strong>, <strong>id_token</strong>
+     *                            a combination of them. The response type parameter is mandatory.
+     * @param clientId            The client identifier.
+     * @param redirectUri         Redirection URI
+     * @param state               An opaque value used by the client to maintain state between
+     *                            the request and callback. The authorization server includes
+     *                            this value when redirecting the user-agent back to the client.
+     *                            The parameter should be used for preventing cross-site request
+     *                            forgery.
+     * @param responseMode        Informs the Authorization Server of the mechanism to be used for returning parameters
+     *                            from the Authorization Endpoint. This use of this parameter is NOT RECOMMENDED when the
+     *                            Response Mode that would be requested is the default mode specified for the Response Type.
+     * @param nonce               A string value used to associate a user agent session with an ID Token,
+     *                            and to mitigate replay attacks.
+     * @param display             An ASCII string value that specifies how the Authorization Server displays the
+     *                            authentication page to the End-User.
+     * @param prompt              A space delimited list of ASCII strings that can contain the values login, consent,
+     *                            select_account, and none.
+     * @param maxAge              Maximum Authentication Age. Specifies the allowable elapsed time in seconds since the
+     *                            last time the End-User was actively authenticated.
+     * @param uiLocales           End-User's preferred languages and scripts for the user interface, represented as a
+     *                            space-separated list of BCP47 [RFC5646] language tag values, ordered by preference.
+     * @param idTokenHint         Previously issued ID Token passed to the Authorization Server as a hint about the
+     *                            End-User's current or past authenticated session with the Client.
+     * @param loginHint           Hint to the Authorization Server about the login identifier the End-User might use to
+     *                            log in (if necessary).
+     * @param acrValues           Requested Authentication Context Class Reference values. Space-separated string that
+     *                            specifies the acr values that the Authorization Server is being requested to use for
+     *                            processing this Authentication Request, with the values appearing in order of preference.
+     * @param amrValues           Requested Authentication Methods References. JSON array of strings that are identifiers
+     *                            for authentication methods used in the authentication. For instance, values might indicate
+     *                            that both password and OTP authentication methods were used. The definition of particular
+     *                            values to be used in the amr Claim is beyond the scope of this specification.The amr value
+     *                            is an array of case sensitive strings.
+     * @param request             A JWT  encoded OpenID Request Object.
+     * @param requestUri          An URL that points to an OpenID Request Object.
+     * @param requestSessionState
+     * @param sessionState
      * @param accessToken
      * @param httpRequest
-     * @param securityContext  An injectable interface that provides access to security
-     *                         related information.
+     * @param securityContext     An injectable interface that provides access to security
+     *                            related information.
      * @return <p>
      * When the responseType parameter is set to <strong>code</strong>:
      * </p>
@@ -207,12 +207,12 @@ public interface AuthorizeRestWebService {
             @QueryParam("request_uri")
             @ApiParam(value = "This parameter enables OpenID Connect requests to be passed by reference, rather than by value. The request_uri value is a URL using the https scheme referencing a resource containing a Request Object value, which is a JWT containing the request parameters. ", required = false)
             String requestUri,
-            @QueryParam("request_session_id")
-            @ApiParam(value = "Request session id", required = false)
-            String requestSessionId,
-            @QueryParam("session_id")
-            @ApiParam(value = "Session id of this call", required = false)
-            String sessionId,
+            @QueryParam("request_session_state")
+            @ApiParam(value = "Request session state", required = false)
+            String requestSessionState,
+            @QueryParam("session_state")
+            @ApiParam(value = "Session state of this call", required = false)
+            String sessionState,
             @QueryParam("access_token")
             @ApiParam(value = "Access token", required = false)
             String accessToken,
@@ -304,12 +304,12 @@ public interface AuthorizeRestWebService {
             @FormParam("request_uri")
             @ApiParam(value = "This parameter enables OpenID Connect requests to be passed by reference, rather than by value. The request_uri value is a URL using the https scheme referencing a resource containing a Request Object value, which is a JWT containing the request parameters. ", required = false)
             String requestUri,
-            @FormParam("request_session_id")
-            @ApiParam(value = "Request session id", required = false)
-            String requestSessionId,
-            @FormParam("session_id")
-            @ApiParam(value = "Session id of this call", required = false)
-            String sessionId,
+            @FormParam("request_session_state")
+            @ApiParam(value = "Request session state", required = false)
+            String requestSessionState,
+            @FormParam("session_state")
+            @ApiParam(value = "Session state of this call", required = false)
+            String sessionState,
             @FormParam("access_token")
             @ApiParam(value = "Access token", required = false)
             String accessToken,

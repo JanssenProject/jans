@@ -17,7 +17,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -25,7 +25,7 @@ import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
@@ -44,7 +44,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- * @version October 1, 2015
+ * @version December 15, 2015
  */
 @Name("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
@@ -60,22 +60,22 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @In
     private ExternalApplicationSessionService externalApplicationSessionService;
     @In
-    private SessionIdService sessionIdService;
+    private SessionStateService sessionStateService;
     @In
     private ClientService clientService;
     @In(required = false)
     private Identity identity;
 
     @Override
-    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
+    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
 
-        log.debug("Attempting to end session, idTokenHint: {0}, postLogoutRedirectUri: {1}, sessionId: {2}, Is Secure = {3}",
-                idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
+        log.debug("Attempting to end session, idTokenHint: {0}, postLogoutRedirectUri: {1}, sessionState: {2}, Is Secure = {3}",
+                idTokenHint, postLogoutRedirectUri, sessionState, sec.isSecure());
 
         EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
 
-        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
+        final Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
 
         if (!Strings.isNullOrEmpty(postLogoutRedirectUri)) {
 
@@ -96,20 +96,20 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return Response.ok().build();
     }
 
-    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId,
-                                                           HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
+    private Pair<SessionState, AuthorizationGrant> endSession(String idTokenHint, String sessionState,
+                                                              HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
 
         EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-            log.info("Failed to find out authorization grant for id_token_hing '{0}'", idTokenHint);
+            log.info("Failed to find out authorization grant for id_token_hint '{0}'", idTokenHint);
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
         boolean isExternalLogoutPresent = false;
         boolean externalLogoutResult = false;
-        SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
+        SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
         if (isExternalLogoutPresent) {
@@ -127,7 +127,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             identity.logout();
         }
 
-        return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
+        return new Pair<SessionState, AuthorizationGrant>(ldapSessionState, authorizationGrant);
     }
 
     @Override
@@ -135,17 +135,17 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             @ApiParam(value = "Previously issued ID Token (id_token) passed to the logout endpoint as a hint about the End-User's current authenticated session with the Client. This is used as an indication of the identity of the End-User that the RP is requesting be logged out by the OP. The OP need not be listed as an audience of the ID Token when it is used as an id_token_hint value.", required = true)
             String idTokenHint,
             String postLogoutRedirectUri,
-            @ApiParam(value = "Session ID", required = false)
-            String sessionId,
+            @ApiParam(value = "Session State", required = false)
+            String sessionState,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext sec) {
 
-        log.debug("Attempting to end session, idTokenHint: {0}, sessionId: {1}, Is Secure = {2}",
-                idTokenHint, sessionId, sec.isSecure());
+        log.debug("Attempting to end session, idTokenHint: {0}, sessionState: {1}, Is Secure = {2}",
+                idTokenHint, sessionState, sec.isSecure());
 
 
-        Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
+        Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
 
         // Validate redirectUri
         String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
@@ -156,9 +156,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return Response.ok().type(MediaType.TEXT_HTML_TYPE).entity(html).build();
     }
 
-    private Set<String> getRpLogoutUris(SessionId sessionId) {
+    private Set<String> getRpLogoutUris(SessionState sessionState) {
         final Set<String> result = Sets.newHashSet();
-        final Set<Client> clientsByDns = clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true);
+        final Set<Client> clientsByDns = clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true);
         for (Client client : clientsByDns) {
             String logoutUri = client.getLogoutUri();
 
@@ -168,9 +168,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
                 if (logoutUri.contains("?")) {
-                    logoutUri = logoutUri + "&sid=" + sessionId.getId();
+                    logoutUri = logoutUri + "&sid=" + sessionState.getId();
                 } else {
-                    logoutUri = logoutUri + "?sid=" + sessionId.getId();
+                    logoutUri = logoutUri + "?sid=" + sessionState.getId();
                 }
             }
             result.add(logoutUri);
@@ -178,33 +178,33 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return result;
     }
 
-    private SessionId removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private SessionState removeSessionState(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 
-        SessionId ldapSessionId = null;
+        SessionState ldapSessionState = null;
 
         try {
-            String id = sessionId;
+            String id = sessionState;
             if (StringHelper.isEmpty(id)) {
-                id = sessionIdService.getSessionIdFromCookie(httpRequest);
+                id = sessionStateService.getSessionStateFromCookie(httpRequest);
             }
 
             if (StringHelper.isNotEmpty(id)) {
-                ldapSessionId = sessionIdService.getSessionId(id);
-                if (ldapSessionId != null) {
-                    boolean result = sessionIdService.remove(ldapSessionId);
+                ldapSessionState = sessionStateService.getSessionState(id);
+                if (ldapSessionState != null) {
+                    boolean result = sessionStateService.remove(ldapSessionState);
                     if (!result) {
-                        log.error("Failed to remove session_id '{0}' from LDAP", id);
+                        log.error("Failed to remove session_state '{0}' from LDAP", id);
                     }
                 } else {
-                    log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+                    log.error("Failed to load session from LDAP by session_state: '{0}'", id);
                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionIdService.removeSessionIdCookie(httpResponse);
+            sessionStateService.removeSessionStateCookie(httpResponse);
         }
-        return ldapSessionId;
+        return ldapSessionState;
     }
 
     private String constructPage(Set<String> logoutUris, String postLogoutUrl) {
