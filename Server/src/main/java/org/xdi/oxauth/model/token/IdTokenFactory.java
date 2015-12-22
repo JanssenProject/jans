@@ -65,7 +65,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 21, 2015
+ * @version December 17, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -100,11 +100,7 @@ public class IdTokenFactory {
                 && authorizationGrant.getClient().getIdTokenSignedResponseAlg() != null) {
             signatureAlgorithm = SignatureAlgorithm.fromName(authorizationGrant.getClient().getIdTokenSignedResponseAlg());
         }
-        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
-            jwt.getHeader().setType(JwtType.JWT);
-        } else {
-            jwt.getHeader().setType(JwtType.JWS);
-        }
+        jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
         List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
         if (jsonWebKeys.size() > 0) {
@@ -301,7 +297,7 @@ public class IdTokenFactory {
         // Header
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseAlg());
         BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseEnc());
-        jwe.getHeader().setType(JwtType.JWE);
+        jwe.getHeader().setType(JwtType.JWT);
         jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
