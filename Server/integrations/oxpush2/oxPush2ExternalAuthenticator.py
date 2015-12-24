@@ -2,14 +2,13 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service import UserService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.service import SessionStateService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
+from org.xdi.util import StringHelper
+from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from javax.ws.rs.core import Response
 from java.util import Arrays
 
 import sys
@@ -26,7 +25,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, configurationAttributes):
         print "oxPush2. Initialization"
-        
+
+        self.u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
+        if StringHelper.isEmpty(self.u2f_application_id):
+            print "oxPush2. Initialization. Failed to determine application_id. u2f_application_id configuration parameter is empty"
+            return False
+
         print "oxPush2. Initialized successfully"
         return True   
 
@@ -48,13 +52,13 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials = Identity.instance().getCredentials()
         user_name = credentials.getUsername()
 
+        userService = UserService.instance()
         if (step == 1):
             print "oxPush2. Authenticate for step 1"
 
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -63,6 +67,69 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
             print "oxPush2. Authenticate for step 2"
+
+            credentials = Identity.instance().getCredentials()
+            user = credentials.getUser()
+            if (user == None):
+                print "oxPush2. Authenticate for step 2. Failed to determine user name"
+                return False
+
+            # Find user by uid
+            userService = UserService.instance()
+            find_user_by_uid = userService.getUser(user_name)
+            if (find_user_by_uid == None):
+                print "oxPush. Authenticate for step 1. Failed to find user"
+                return False
+
+            eventContext = Contexts.getEventContext()
+            session_attributes = eventContext.get("sessionAttributes")
+            if (not session_attributes.containsKey("oxpush2_request")):
+                print "oxPush2. Authenticate for step 2. There is no oxPush2 request in session attributes"
+                return False
+            
+            oxpush2_request_json = session_attributes.get("oxpush2_request")
+            oxpush2_request = json.loads(oxpush2_request_json)
+
+            auth_method = oxpush2_request['auth_method']
+            if (auth_method in ['enroll', 'authenticate']):
+                print "oxPush2. Authenticate for step 2. Validation U2F user device. auth_method: '%s'" % auth_method
+
+                # Check session state extended
+                if (not session_attributes.containsKey("session_custom_state")):
+                    print "oxPush2. Authenticate for step 2. There is no session_custom_state in session attributes"
+                    return False
+
+                session_custom_state = session_attributes.get("session_custom_state")
+                if(not StringHelper.equalsIgnoreCase("approved", session_custom_state)):
+                    print "oxPush2. Authenticate for step 2. User '%s' not approve or pass U2F authentication. session_custom_state: '%s'" % (user_name, session_custom_state)
+                    return False
+
+                # Try to find device_id in session attribute
+                if (not session_attributes.containsKey("oxpush2_u2f_device_id")):
+                    print "oxPush2. Authenticate for step 2. There is no u2f_device associated with this request"
+                    return False
+                
+                u2f_device_id = session_attributes.get("oxpush2_u2f_device_id")
+
+                # Validate if user has specified device_id enrollment
+                user_inum = userService.getUserInum(find_user_by_uid)
+                deviceRegistrationService = DeviceRegistrationService.instance()
+
+                u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id)
+                if (u2f_device == None):
+                    print "oxPush2. Authenticate for step 2. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
+                    return False
+
+                if (not StringHelper.equalsIgnoreCase(self.u2f_application_id, u2f_device.application)):
+                    print "oxPush2. Authenticate for step 2. U2F user device '%s' associated with other application '%s'" % (user_name, u2f_device.application)
+                    return False
+
+                print "oxPush2. Authenticate for step 2. User '%s' authenticated successfully with U2F device '%s'" % (user_name, u2f_device_id)
+
+                return True
+            else:
+                print "oxPush2. Authenticate for step 2. U2F auth_method is invalid"
+
             return False
         else:
             return False
@@ -88,23 +155,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 auth_method = 'enroll'
                 return False
             
-            u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
-            if StringHelper.isEmpty(u2f_application_id):
-                print "oxPush2. Failed to determine application_id. u2f_application_id parameter is empty"
-                return False
-
             session_state = SessionStateService.instance().getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "oxPush2. Failed to determine session_state"
                 return False
 
-            print "oxPush2. Authenticate for step 2. auth_method: " + auth_method
+            print "oxPush2. Authenticate for step 2. auth_method: '%s'" % auth_method
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
             oxpush2_request = json.dumps({'session_state': session_state,
                                'auth_method': auth_method,
                                'issuer': issuer,
-                               'app': u2f_application_id,
+                               'app': self.u2f_application_id,
                                'user': user.getUserId()}, separators=(',',':'))
 
             print "oxPush2. Prepared oxpush2_request:", oxpush2_request
@@ -112,14 +174,13 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("oxpush2_request", oxpush2_request)
 
             return True
-        elif (step == 3):
-            print "oxPush2. Prepare for step 2"
-
-            return True
         else:
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):        
+        if (step == 2):
+            return Arrays.asList("oxpush2_request")
+        
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):

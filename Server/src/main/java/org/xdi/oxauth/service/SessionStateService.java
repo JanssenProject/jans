@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class SessionStateService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
-    public static final String SESSION_AUTHENTICATION_STATE = "auth_state";
+    public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Logger
     private Log log;
