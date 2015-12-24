@@ -13,8 +13,9 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -68,7 +69,7 @@ public class RegisterPermissionWSTest extends BaseTest {
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        final ResourceSetPermissionTicket ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, m_umaPermissionPath);
+        final PermissionTicket ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, m_umaPermissionPath);
         UmaTestUtil.assert_(ticket);
     }
 
@@ -107,7 +108,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 
                     assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response code.");
                     try {
-                        final ResourceSetPermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetPermissionTicket.class);
+                        final PermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), PermissionTicket.class);
                         Assert.assertNull(t);
                     } catch (Exception e) {
                         // it's ok if it fails here, we expect ticket as null.
