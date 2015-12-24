@@ -17,7 +17,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -106,7 +106,7 @@ public class RptStatusWS {
                 return Response.status(Response.Status.OK).entity(new RptIntrospectionResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
             }
 
-            final List<RegisterPermissionRequest> permissions = buildStatusResponsePermissions(rpt);
+            final List<UmaPermission> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
@@ -146,14 +146,14 @@ public class RptStatusWS {
         return false;
     }
 
-    private List<RegisterPermissionRequest> buildStatusResponsePermissions(UmaRPT p_rpt) {
-        final List<RegisterPermissionRequest> result = new ArrayList<RegisterPermissionRequest>();
+    private List<UmaPermission> buildStatusResponsePermissions(UmaRPT p_rpt) {
+        final List<UmaPermission> result = new ArrayList<UmaPermission>();
         if (p_rpt != null) {
             final List<ResourceSetPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (ResourceSetPermission permission : rptPermissions) {
                     if (isValid(permission)) {
-                        final RegisterPermissionRequest toAdd = ServerUtil.convert(permission, umaScopeService);
+                        final UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                         if (toAdd != null) {
                             result.add(toAdd);
                         }

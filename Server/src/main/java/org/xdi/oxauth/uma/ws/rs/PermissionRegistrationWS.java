@@ -17,7 +17,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -89,7 +89,7 @@ public class PermissionRegistrationWS {
                                                   @HeaderParam("Authorization") String authorization,
                                                   @HeaderParam("Host") String amHost,
                                                   @ApiParam(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
-                                                  RegisterPermissionRequest resourceSetPermissionRequest) {
+                                                  UmaPermission resourceSetPermissionRequest) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
