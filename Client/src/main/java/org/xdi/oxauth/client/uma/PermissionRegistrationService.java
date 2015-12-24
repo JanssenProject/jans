@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -35,5 +35,5 @@ public interface PermissionRegistrationService {
 	public ResourceSetPermissionTicket registerResourceSetPermission(
             @HeaderParam("Authorization") String authorization,
             @HeaderParam("Host") String amHost,
-			RegisterPermissionRequest resourceSetPermissionRequest);
+			UmaPermission resourceSetPermissionRequest);
 }
