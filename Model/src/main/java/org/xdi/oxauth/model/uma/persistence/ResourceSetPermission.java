@@ -13,7 +13,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 
 /**
  * Registered at the AM resource set permission
@@ -85,8 +85,8 @@ public class ResourceSetPermission {
 		return !expired;
 	}
 
-	public RegisterPermissionRequest getResourceSetPermissionRequest() {
-		return new RegisterPermissionRequest(this.resourceSetId, this.scopeDns);
+	public UmaPermission getResourceSetPermissionRequest() {
+		return new UmaPermission(this.resourceSetId, this.scopeDns);
 	}
 
 	public String getAmHost() {

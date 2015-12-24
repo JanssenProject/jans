@@ -51,7 +51,7 @@ public class TrustElevationWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost", "umaPermissionPath"})
     public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath) throws Exception {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+        final UmaPermission r = new UmaPermission();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
