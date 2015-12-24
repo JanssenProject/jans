@@ -38,10 +38,10 @@ import java.util.List;
 public class RegisterPermissionRequest implements Serializable {
 
     @ApiModelProperty(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered."
-                  , required = true)
+            , required = true)
     private String resourceSetId;
     @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource set. Each scope identifier MUST correspond to a scope that was registered by this resource server for the referenced resource set."
-                  , required = true)
+            , required = true)
     private List<String> scopes;
     private Date expiresAt;
     private Date issuedAt;
@@ -66,7 +66,7 @@ public class RegisterPermissionRequest implements Serializable {
     }
 
     @JsonProperty(value = "nbf")
-       @XmlElement(name = "nbf")
+    @XmlElement(name = "nbf")
     public Date getNbf() {
         return nbf;
     }

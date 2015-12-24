@@ -95,7 +95,10 @@ public class PermissionRegistrationWS {
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
             umaValidationService.validateResourceSet(resourceSetPermissionRequest);
 
-            return registerResourceSetPermissionImpl(request, authorization, validatedAmHost, resourceSetPermissionRequest);
+            final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
+            resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
+
+            return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions);
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -105,13 +108,6 @@ public class PermissionRegistrationWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
-    }
-
-    private Response registerResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, RegisterPermissionRequest resourceSetPermissionRequest) {
-        final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
-        resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
-
-        return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions);
     }
 
     public static Date rptExpirationDate() {
@@ -128,13 +124,7 @@ public class PermissionRegistrationWS {
     private Response prepareResourceSetPermissionTicketResponse(HttpServletRequest request,
                                                                 ResourceSetPermission resourceSetPermissions) {
         ResponseBuilder builder = Response.status(Response.Status.CREATED);
-
         builder.entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket()));
-
-        // Add location
-        StringBuffer location = request.getRequestURL().append("/").append(resourceSetPermissions.getConfigurationCode());
-        builder.header("Location", location);
-
         return builder.build();
     }
 
