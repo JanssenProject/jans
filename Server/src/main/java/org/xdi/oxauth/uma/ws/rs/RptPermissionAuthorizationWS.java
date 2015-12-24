@@ -19,8 +19,8 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
@@ -96,10 +96,10 @@ public class RptPermissionAuthorizationWS {
     }
 
     private UmaRPT authorizeRptPermission(String authorization,
-                                                         RptAuthorizationRequest rptAuthorizationRequest,
-                                                         HttpServletRequest httpRequest,
-                                                         AuthorizationGrant grant,
-                                                         String amHost) {
+                                          RptAuthorizationRequest rptAuthorizationRequest,
+                                          HttpServletRequest httpRequest,
+                                          AuthorizationGrant grant,
+                                          String amHost) {
         UmaRPT rpt;
         if (Strings.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
             rpt = rptManager.createRPT(authorization, amHost);
@@ -110,7 +110,7 @@ public class RptPermissionAuthorizationWS {
         // Validate RPT
         try {
             umaValidationService.validateRPT(rpt);
-        } catch(WebApplicationException e) {
+        } catch (WebApplicationException e) {
             // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
             // it's up to impelementation whether to create new RPT for each request or pass back requests RPT.
             // Here we decided to pass back new RPT if request's RPT in invalid.
