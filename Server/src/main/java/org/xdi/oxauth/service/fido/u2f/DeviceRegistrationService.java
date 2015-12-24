@@ -62,6 +62,14 @@ public class DeviceRegistrationService {
 		}
 	}
 
+	public DeviceRegistration findUserDeviceRegistration(String userInum, String deviceId, String... returnAttributes) {
+		prepareBranch(userInum);
+		
+		String deviceDn = getDnForU2fDevice(userInum, deviceId);
+
+		return ldapEntryManager.find(DeviceRegistration.class, deviceDn);
+	}
+
 	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String... returnAttributes) {
 		prepareBranch(userInum);
 
@@ -86,7 +94,7 @@ public class DeviceRegistrationService {
 	/**
 	 * Build DN string for U2F user device
 	 */
-	public String getDnForU2fDevice(String oxId, String userInum) {
+	public String getDnForU2fDevice(String userInum, String oxId) {
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
 		if (StringHelper.isEmpty(oxId)) {
 			return baseDnForU2fDevices;

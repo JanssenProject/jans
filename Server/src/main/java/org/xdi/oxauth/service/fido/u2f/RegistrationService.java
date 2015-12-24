@@ -147,7 +147,7 @@ public class RegistrationService extends RequestService {
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
-		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(deviceRegistrationId, userInum));
+		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
 
 		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
 
