@@ -6,15 +6,20 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class allows to enumerate and identify the possible values of the
  * parameter grant_type for access token requests.
  *
- * @author Javier Rojas Date: 09.21.2011
+ * @author Javier Rojas Blum
+ * @version December 9, 2015
  */
-public enum GrantType {
+public enum GrantType implements HasParamName, LdapEnum {
 
     /**
      * The authorization code is obtained by using an authorization server as an
@@ -77,15 +82,37 @@ public enum GrantType {
      */
     OXAUTH_EXCHANGE_TOKEN("oxauth_exchange_token");
 
-    private final String paramName;
+    private final String value;
     private String uri;
 
-    private GrantType() {
-        this.paramName = null;
+    private static Map<String, GrantType> mapByValues = new HashMap<String, GrantType>();
+
+    static {
+        for (GrantType enumType : values()) {
+            mapByValues.put(enumType.getValue(), enumType);
+        }
     }
 
-    private GrantType(String paramName) {
-        this.paramName = paramName;
+    private GrantType() {
+        this.value = null;
+    }
+
+    private GrantType(String value) {
+        this.value = value;
+    }
+
+    /**
+     * Gets param name.
+     *
+     * @return param name
+     */
+    public String getParamName() {
+        return value;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
     }
 
     /**
@@ -95,12 +122,12 @@ public enum GrantType {
      *
      * @param param The grant_type parameter.
      * @return The corresponding grant type if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     public static GrantType fromString(String param) {
         if (param != null) {
             for (GrantType gt : GrantType.values()) {
-                if (param.equals(gt.paramName)) {
+                if (param.equals(gt.value)) {
                     return gt;
                 }
             }
@@ -116,6 +143,14 @@ public enum GrantType {
         return null;
     }
 
+    public static GrantType getByValue(String value) {
+        return mapByValues.get(value);
+    }
+
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
+
     /**
      * Returns a string representation of the object. In this case the parameter
      * name for the grant_type parameter.
@@ -127,7 +162,7 @@ public enum GrantType {
         if (this == EXTENSION) {
             return uri;
         } else {
-            return paramName;
+            return value;
         }
     }
 }
