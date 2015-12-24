@@ -162,6 +162,7 @@
     "umaRequesterPermissionTokenLifetime":3600,
     "umaAddScopesAutomatically":false,
     "umaKeepClientDuringResourceSetRegistration":true,
+    "umaRptAsJwt":true,
     "cleanServiceInterval":600,
     "federationCheckInterval":86400,
     "keyRegenerationEnabled":false,
