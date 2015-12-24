@@ -17,10 +17,10 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
@@ -35,7 +35,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -98,7 +97,9 @@ public class PermissionRegistrationWS {
             final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
             resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
-            return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions);
+            return Response.status(Response.Status.CREATED).
+                            entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket())).
+                            build();
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -120,50 +121,4 @@ public class PermissionRegistrationWS {
         calendar.add(Calendar.SECOND, lifeTime);
         return calendar.getTime();
     }
-
-    private Response prepareResourceSetPermissionTicketResponse(HttpServletRequest request,
-                                                                ResourceSetPermission resourceSetPermissions) {
-        ResponseBuilder builder = Response.status(Response.Status.CREATED);
-        builder.entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket()));
-        return builder.build();
-    }
-
-    //	public Response getResourceSetPermission(HttpServletRequest request, String authorization,
-    //			String amHost, String host, String configurationCode) {
-    //		try {
-    //            umaValidationService.validateAuthorizationWithProtectScope(authorization);
-    //			String validatedAmHost = umaValidationService.validateAmHost(amHost);
-    //			String validatedHost = umaValidationService.validateHost(host);
-    //
-    //			return getResourceSetPermissionImpl(request, authorization, validatedAmHost, validatedHost, configurationCode);
-    //		} catch (Exception ex) {
-    //			if (ex instanceof WebApplicationException) {
-    //				throw (WebApplicationException) ex;
-    //			}
-    //
-    //			log.error("Exception happened", ex);
-    //			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-    //					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
-    //		}
-    //	}
-
-//	private Response getResourceSetPermissionImpl(HttpServletRequest request, String authorization, String validatedAmHost, String validatedHost, String configurationCode) {
-//        final AuthorizationGrant authorizationGrant = tokenService.getAuthorizationGrant(authorization);
-//
-//		String resourceSetPermissionTicket = resourceSetPermissionManager.getResourceSetPermissionTicketByConfigurationCode(configurationCode, authorizationGrant.getClientDn());
-//		if (StringHelper.isEmpty(resourceSetPermissionTicket)) {
-//			log.error("Failed to get resourceSetPermissionTicket by configurationCode: '{0}'", configurationCode);
-//			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-//					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-//		}
-//
-//        ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.getResourceSetPermissionByTicket(resourceSetPermissionTicket);
-//		if (resourceSetPermissions == null) {
-//			log.error("Failed to get resourceSetPermissions by resourceSetPermissionTicket: '{0}'", resourceSetPermissionTicket);
-//			throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-//					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-//		}
-//
-//		return prepareResourceSetPermissionTicketResponse(request, resourceSetPermissions, Response.Status.OK);
-//	}
 }
