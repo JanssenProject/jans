@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version December 17, 2015
  */
 public class JwtAuthorizationRequest {
 
@@ -117,7 +117,7 @@ public class JwtAuthorizationRequest {
     public JwtAuthorizationRequest(
             AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
             BlockEncryptionAlgorithm blockEncryptionAlgorithm, RSAPublicKey rsaPublicKey) {
-        this.type = JwtType.JWE;
+        this.type = JwtType.JWT;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
 
@@ -132,7 +132,7 @@ public class JwtAuthorizationRequest {
     public JwtAuthorizationRequest(
             AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
             BlockEncryptionAlgorithm blockEncryptionAlgorithm, byte[] sharedSymmetricKey) {
-        this.type = JwtType.JWE;
+        this.type = JwtType.JWT;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
 
@@ -146,7 +146,7 @@ public class JwtAuthorizationRequest {
 
     private JwtAuthorizationRequest(SignatureAlgorithm signatureAlgorithm, String sharedKey,
                                     RSAPrivateKey rsaPrivateKey, ECDSAPrivateKey ecPrivateKey) {
-        this.type = JwtType.JWS;
+        this.type = JwtType.JWT;
         this.sharedKey = sharedKey;
         this.rsaPrivateKey = rsaPrivateKey;
         this.ecPrivateKey = ecPrivateKey;
@@ -519,7 +519,7 @@ public class JwtAuthorizationRequest {
         JwtHeader jwtHeader = new JwtHeader();
 
         jwtHeader.setType(type);
-        if (type == JwtType.JWE) {
+        if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             jwtHeader.setAlgorithm(keyEncryptionAlgorithm);
             jwtHeader.setEncryptionMethod(blockEncryptionAlgorithm);
         } else {

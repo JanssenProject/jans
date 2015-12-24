@@ -25,7 +25,7 @@
         <url-pattern>/seam/resource/*</url-pattern>
     </servlet-mapping>
 
-    <servlet>
+    <servlet>   https://ce-dev.gluu.org/
         <servlet-name>OpenIdConfiguration</servlet-name>
         <servlet-class>org.xdi.oxauth.servlet.OpenIdConfiguration</servlet-class>
     </servlet>

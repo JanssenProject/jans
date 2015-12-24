@@ -143,7 +143,7 @@ public class AuthorizeAction {
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
         try {
-            session = sessionStateService.updateSessionIfNeeded(session, redirectUri, acrValues);
+            session = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(session, redirectUri, acrValues);
         } catch (AcrChangedException e) {
             log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
             log.error("Please perform logout in order to be able login with new ACR value.");
