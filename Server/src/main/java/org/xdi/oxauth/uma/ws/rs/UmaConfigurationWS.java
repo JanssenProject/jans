@@ -70,14 +70,14 @@ public class UmaConfigurationWS {
             c.setAatProfilesSupported(new String[]{TokenType.BEARER.getName()});
             c.setRptProfilesSupported(new String[]{RptProfiles.BEARER.getIdentifyingUri()});
             c.setPatGrantTypesSupported(new String[]{
-                    GrantType.AUTHORIZATION_CODE.getName(),
-                    GrantType.IMPLICIT.getName(),
-                    GrantType.CLIENT_CREDENTIALS.getName()
+                    GrantType.AUTHORIZATION_CODE.getValue(),
+                    GrantType.IMPLICIT.getValue(),
+                    GrantType.CLIENT_CREDENTIALS.getValue()
             });
             c.setAatGrantTypesSupported(new String[]{
-                    GrantType.AUTHORIZATION_CODE.getName(),
-                    GrantType.IMPLICIT.getName(),
-                    GrantType.CLIENT_CREDENTIALS.getName()
+                    GrantType.AUTHORIZATION_CODE.getValue(),
+                    GrantType.IMPLICIT.getValue(),
+                    GrantType.CLIENT_CREDENTIALS.getValue()
             });
             c.setClaimTokenProfilesSupported(new String[]{"openid"});
             c.setUmaProfilesSupported(new String[0]);
