@@ -29,8 +29,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.IOException;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
@@ -65,7 +63,11 @@ public class CreateRptWS {
             umaValidationService.assertHasAuthorizationScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
 
-            return createRpt(authorization, validatedAmHost);
+            UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);
+
+            return Response.status(Response.Status.CREATED).
+                    entity(ServerUtil.asJson(new RPTResponse(rpt.getCode()))).
+                    build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
@@ -75,16 +77,5 @@ public class CreateRptWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
-    }
-
-    private Response createRpt(String authorization, String amHost) throws IOException {
-        UmaRPT rpt = rptManager.createRPT(authorization, amHost);
-
-        // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-        final String entity = ServerUtil.asJson(new RPTResponse(rpt.getCode()));
-
-        final ResponseBuilder builder = Response.status(Response.Status.CREATED);
-        builder.entity(entity);
-        return builder.build();
     }
 }

@@ -47,7 +47,13 @@ public class Configuration {
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+
     private String umaConfigurationEndpoint;
+    private Boolean umaRptAsJwt = false;
+    private int umaRequesterPermissionTokenLifetime;
+    private Boolean umaAddScopesAutomatically;
+    private Boolean umaKeepClientDuringResourceSetRegistration;
+
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
@@ -80,9 +86,7 @@ public class Configuration {
     private int idTokenLifetime;
     private int shortLivedAccessTokenLifetime;
     private int longLivedAccessTokenLifetime;
-    private int umaRequesterPermissionTokenLifetime;
-    private Boolean umaAddScopesAutomatically;
-    private Boolean umaKeepClientDuringResourceSetRegistration;
+
     private int cleanServiceInterval;
     private int federationCheckInterval;
     private Boolean keyRegenerationEnabled;
@@ -121,6 +125,15 @@ public class Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
+
+    @XmlElement(name = "uma-rpt-as-jwt")
+    public Boolean getUmaRptAsJwt() {
+        return umaRptAsJwt;
+    }
+
+    public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
+        this.umaRptAsJwt = umaRptAsJwt;
+    }
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
