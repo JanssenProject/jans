@@ -35,7 +35,7 @@ class TRegisterPermission {
     }
 
     public ResourceSetPermissionTicket registerPermission(final Token p_pat, final String p_umaAmHost, String p_umaHost,
-                                     final RegisterPermissionRequest p_request, String path) {
+                                     final UmaPermission p_request, String path) {
         final Holder<ResourceSetPermissionTicket> ticketH = new Holder<ResourceSetPermissionTicket>();
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {

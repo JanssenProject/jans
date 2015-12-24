@@ -22,7 +22,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
@@ -194,7 +194,7 @@ public class UmaValidationService {
    		}
    	}
 
-    public void validateResourceSet(RegisterPermissionRequest resourceSetPermissionRequest) {
+    public void validateResourceSet(UmaPermission resourceSetPermissionRequest) {
    		String resourceSetId = resourceSetPermissionRequest.getResourceSetId();
    		if (StringHelper.isEmpty(resourceSetId)) {
    			log.error("Resource set id is empty");

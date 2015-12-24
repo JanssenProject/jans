@@ -13,7 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
@@ -64,7 +64,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+        final UmaPermission r = new UmaPermission();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
@@ -88,7 +88,7 @@ public class RegisterPermissionWSTest extends BaseTest {
                     request.addHeader("Host", umaAmHost);
 
                     try {
-                        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+                        final UmaPermission r = new UmaPermission();
                         r.setResourceSetId(m_resourceSet.getId() + "x");
 
                         final String json = ServerUtil.createJsonMapper().writeValueAsString(r);

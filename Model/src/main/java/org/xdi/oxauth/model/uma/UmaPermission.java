@@ -20,12 +20,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Resource set that needs protection by registering a resource set description
- * at the AM.
+ * UMA Permission. Used for both:
+ * 1. register permission ticket
+ * 2. by introspection RPT endpoint to return RPT status.
  *
- * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- *         Date: 10/03/2012
+ * @author Yuriy Movchan
+ *         Date: 24/12/2015
  */
 
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
@@ -35,7 +36,7 @@ import java.util.List;
 //@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
 @ApiModel(value = "Register permission request.")
-public class RegisterPermissionRequest implements Serializable {
+public class UmaPermission implements Serializable {
 
     @ApiModelProperty(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered."
             , required = true)
@@ -47,10 +48,10 @@ public class RegisterPermissionRequest implements Serializable {
     private Date issuedAt;
     private Date nbf;
 
-    public RegisterPermissionRequest() {
+    public UmaPermission() {
     }
 
-    public RegisterPermissionRequest(String p_resourceSetId, List<String> p_scopes) {
+    public UmaPermission(String p_resourceSetId, List<String> p_scopes) {
         resourceSetId = p_resourceSetId;
         scopes = p_scopes;
     }
@@ -112,6 +113,7 @@ public class RegisterPermissionRequest implements Serializable {
         sb.append("{resourceSetId='").append(resourceSetId).append('\'');
         sb.append(", scopes=").append(scopes);
         sb.append(", expiresAt=").append(expiresAt);
+        sb.append(", issuedAt=").append(issuedAt);
         sb.append(", nbf=").append(nbf);
         sb.append('}');
         return sb.toString();
