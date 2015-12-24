@@ -90,6 +90,7 @@ public class UmaConfigurationWS {
             c.setPermissionRegistrationEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
+            c.setRptAsJwt(configuration.getUmaRptAsJwt());
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);
