@@ -512,8 +512,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if (client_id == None):
                 eventContext = Contexts.getEventContext()
-                if (eventContext.isSet("stored_request_parameters")):
-                    client_id = eventContext.get("stored_request_parameters").get("client_id")
+                if (eventContext.isSet("sessionAttributes")):
+                    client_id = eventContext.get("sessionAttributes").get("client_id")
 
             if (client_id == None):
                 print "Saml. GetClientConfiguration. client_id is empty"

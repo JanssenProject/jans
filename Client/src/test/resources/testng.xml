@@ -30,6 +30,13 @@
         </classes>
     </test>
 
+    <!-- Authorize test -->
+    <test name="Authorize session state test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionStateRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+    
     <!-- Client Authentication Filter test -->
     <test name="Client Authentication Filter test (HTTP)" enabled="false">
         <classes>
