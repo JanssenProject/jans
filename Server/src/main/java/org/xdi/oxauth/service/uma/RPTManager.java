@@ -14,9 +14,8 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.AbstractToken;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
@@ -65,10 +64,9 @@ public class RPTManager implements IRPTManager {
     @Override
     public UmaRPT createRPT(String authorization, String amHost) {
         String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
-        AbstractToken accessToken = authorizationGrant.getAccessToken(aatToken);
+        IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
 
-        UmaRPT rpt = createRPT(accessToken, authorizationGrant.getUserId(), authorizationGrant.getClientId(), amHost);
+        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken);
 
         addRPT(rpt, authorizationGrant.getClientDn());
         return rpt;
@@ -82,8 +80,8 @@ public class RPTManager implements IRPTManager {
         return manager.getRPTByCode(requesterPermissionTokenCode);
     }
 
-    public UmaRPT createRPT(AbstractToken authorizationApiToken, String userId, String clientId, String amHost) {
-        return manager.createRPT(authorizationApiToken, userId, clientId, amHost);
+    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat) {
+        return manager.createRPT(grant, amHost, aat);
     }
 
     public void deleteRPT(String rptCode) {
