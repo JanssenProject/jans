@@ -178,7 +178,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):        
-        if (step == 2):
+        if (step == 1):
+            return Arrays.asList("display_register_action")
+        elif (step == 2):
             return Arrays.asList("oxpush2_request")
         
         return None
