@@ -21,7 +21,7 @@ public class TrustElevationWSTest extends BaseTest {
     private Token m_aat;
     private RPTResponse m_rpt;
     private ResourceSetResponse m_resourceSet;
-    private ResourceSetPermissionTicket m_ticket;
+    private PermissionTicket m_ticket;
 
     @Test
     @Parameters({"authorizePath", "tokenPath", "umaUserId", "umaUserSecret",

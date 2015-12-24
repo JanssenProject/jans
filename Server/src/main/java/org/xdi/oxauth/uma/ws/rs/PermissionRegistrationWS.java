@@ -17,7 +17,8 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -98,7 +99,7 @@ public class PermissionRegistrationWS {
             resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
-                            entity(new ResourceSetPermissionTicket(resourceSetPermissions.getTicket())).
+                            entity(new PermissionTicket(resourceSetPermissions.getTicket())).
                             build();
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
