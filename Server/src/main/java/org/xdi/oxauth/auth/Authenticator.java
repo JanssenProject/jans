@@ -228,6 +228,7 @@ public class Authenticator implements Serializable {
             boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
             log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
             if (!result) {
+            	prepareAuthenticationForStep();
                 return false;
             }
 

@@ -6,6 +6,22 @@
 
 package org.xdi.oxauth;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.scheme.Scheme;
@@ -16,6 +32,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -25,25 +42,21 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.BaseClient;
+import org.xdi.oxauth.client.BaseResponseWithErrors;
+import org.xdi.oxauth.client.ClientUtils;
+import org.xdi.oxauth.client.OpenIdConfigurationClient;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -54,6 +67,7 @@ public abstract class BaseTest {
     protected WebDriver driver;
 
     protected String authorizationEndpoint;
+    protected String authorizationPageEndpoint;
     protected String tokenEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
@@ -259,7 +273,7 @@ public abstract class BaseTest {
      * and establishes whether the resource owner grants or denies the client's access request.
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
-            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
         String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
@@ -267,7 +281,10 @@ public abstract class BaseTest {
 
         System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
         startSelenium();
-        deleteAllCookies();
+        if (cleanupCookies) {
+            System.out.println("authenticateResourceOwnerAndGrantAccess: Cleaning cookies");
+        	deleteAllCookies();
+        }
         driver.navigate().to(authorizationRequestUrl);
 
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
@@ -302,6 +319,13 @@ public abstract class BaseTest {
             authorizationResponseStr = driver.getCurrentUrl();
         }
 
+        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
+        String sessionState = null;
+        if (sessionStateCookie != null) {
+        	sessionState = sessionStateCookie.getValue();
+        }
+        System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionState);
+
         stopSelenium();
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
@@ -312,6 +336,62 @@ public abstract class BaseTest {
         showClientUserAgent(authorizeClient);
 
         return authorizationResponse;
+    }
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * and establishes whether the resource owner grants or denies the client's access request.
+     */
+    public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true);
+    }
+
+    /**
+     * Try to open login form (via the user-agent)
+     */
+    public String waitForResourceOwnerAndGrantLoginForm(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, boolean cleanupCookies) {
+        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
+        authorizeClient.setRequest(authorizationRequest);
+
+        System.out.println("waitForResourceOwnerAndGrantLoginForm: authorizationRequestUrl:" + authorizationRequestUrl);
+        startSelenium();
+        if (cleanupCookies) {
+            System.out.println("waitForResourceOwnerAndGrantLoginForm: Cleaning cookies");
+        	deleteAllCookies();
+        }
+        driver.navigate().to(authorizationRequestUrl);
+
+        WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
+        WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
+        WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
+        
+        if ((usernameElement == null) || (passwordElement == null) || (loginButton == null)) {
+        	return null;
+        }
+
+        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
+        String sessionState = null;
+        if (sessionStateCookie != null) {
+        	sessionState = sessionStateCookie.getValue();
+        }
+        System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
+
+        stopSelenium();
+
+        showClientUserAgent(authorizeClient);
+
+        return sessionState;
+    }
+
+    /**
+     * Try to open login form (via the user-agent)
+     */
+    public String waitForResourceOwnerAndGrantLoginForm(
+            String authorizeUrl, AuthorizationRequest authorizationRequest) {
+    	return waitForResourceOwnerAndGrantLoginForm(authorizeUrl, authorizationRequest, true);
     }
 
     private void deleteAllCookies() {
@@ -407,7 +487,13 @@ public abstract class BaseTest {
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
+
+        authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
     }
+
+	private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
+		return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+	}
 
     public void showTitle(String title) {
         title = "TEST: " + title;
