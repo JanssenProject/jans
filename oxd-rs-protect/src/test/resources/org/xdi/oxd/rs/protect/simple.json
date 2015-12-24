@@ -1,0 +1,17 @@
+{"resources":[
+    {
+        "id":"/photo",
+        "scopes":[
+            "http://photoz.example.com/dev/actions/print",
+            "http://photoz.example.com/dev/actions/add"
+        ]
+    },
+    {
+        "id":"/document",
+        "scopes":[
+            "http://example.com/dev/actions/remove",
+            "http://example.com/dev/actions/add"
+        ]
+    }
+]
+}
