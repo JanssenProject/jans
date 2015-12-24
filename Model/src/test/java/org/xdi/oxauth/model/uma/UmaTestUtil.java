@@ -78,7 +78,7 @@ public class UmaTestUtil {
         return resourceSet;
     }
 
-    public static void assert_(ResourceSetPermissionTicket p_t) {
+    public static void assert_(PermissionTicket p_t) {
         assertNotNull(p_t, "Ticket is null");
         assertTrue(StringUtils.isNotBlank(p_t.getTicket()), "Ticket is empty");
     }

@@ -74,7 +74,7 @@ public class TUma {
         s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id);
     }
 
-    public static ResourceSetPermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,
+    public static PermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,
                                                                 UmaPermission p_request, String p_umaPermissionPath) {
         final TRegisterPermission p = new TRegisterPermission(p_test);
         return p.registerPermission(p_pat, p_umaAmHost, p_umaHost, p_request, p_umaPermissionPath);
