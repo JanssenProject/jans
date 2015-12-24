@@ -44,7 +44,8 @@ import java.util.Arrays;
         "permission_registration_endpoint",
         "rpt_endpoint",
         "scope_endpoint",
-        "user_endpoint"
+        "user_endpoint",
+        "rpt_as_jwt"
 })
 @XmlRootElement
 @ApiModel(value = "UMA Configuration")
@@ -122,6 +123,19 @@ public class UmaConfiguration {
     @ApiModelProperty(value = "The endpoint URI at which the authorization server interacts with the end-user requesting party to gather claims. If this property is absent, the authorization server does not interact with the end-user requesting party for claims gathering.",
             required = false)
     private String requestingPartyClaimsEndpoint;
+
+    @ApiModelProperty(value = "RPT as JWT", required = false)
+    private Boolean rptAsJwt = false;
+
+    @JsonProperty(value = "rpt_as_jwt")
+    @XmlElement(name = "rpt_as_jwt")
+    public Boolean getRptAsJwt() {
+        return rptAsJwt;
+    }
+
+    public void setRptAsJwt(Boolean rptAsJwt) {
+        this.rptAsJwt = rptAsJwt;
+    }
 
     @JsonProperty(value = "requesting_party_claims_endpoint")
     @XmlElement(name = "requesting_party_claims_endpoint")
@@ -339,6 +353,8 @@ public class UmaConfiguration {
         builder.append(rptEndpoint);
         builder.append(", authorization_request_endpoint=");
         builder.append(authorizationEndpoint);
+        builder.append(", rpt_as_jwt=");
+        builder.append(rptAsJwt);
         builder.append("]");
         return builder.toString();
     }
