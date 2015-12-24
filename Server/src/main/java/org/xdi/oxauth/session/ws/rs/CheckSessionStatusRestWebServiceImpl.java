@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -29,7 +30,6 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -78,9 +78,9 @@ public class CheckSessionStatusRestWebServiceImpl {
 			response.setState(sessionState.getState().getValue());
 			response.setAuthTime(sessionState.getAuthenticationTime());
 
-			String authState = sessionState.getSessionAttributes().get(SessionStateService.SESSION_AUTHENTICATION_STATE);
-			if (StringHelper.isNotEmpty(authState)) {
-				response.setAuthState(authState);
+			String sessionCustomState = sessionState.getSessionAttributes().get(SessionStateService.SESSION_CUSTOM_STATE);
+			if (StringHelper.isNotEmpty(sessionCustomState)) {
+				response.setCustomState(sessionCustomState);
 			}
 		}
 
@@ -95,15 +95,15 @@ public class CheckSessionStatusRestWebServiceImpl {
 		@JsonProperty(value = "state")
 		String state;
 		
-		@JsonProperty(value = "auth_state")
-		String authState;
+		@JsonProperty(value = "custom_state")
+		String customState;
 
 		@JsonProperty(value = "auth_time")
 		Date authTime;
 
-		public CheckSessionResponse(String state, String authState) {
+		public CheckSessionResponse(String state, String stateExt) {
 			this.state = state;
-			this.authState = authState;
+			this.customState = stateExt;
 		}
 
 		public String getState() {
@@ -114,12 +114,12 @@ public class CheckSessionStatusRestWebServiceImpl {
 			this.state = state;
 		}
 
-		public String getAuthState() {
-			return authState;
+		public String getCustomState() {
+			return customState;
 		}
 
-		public void setAuthState(String authState) {
-			this.authState = authState;
+		public void setCustomState(String customState) {
+			this.customState = customState;
 		}
 
 		public Date getAuthTime() {

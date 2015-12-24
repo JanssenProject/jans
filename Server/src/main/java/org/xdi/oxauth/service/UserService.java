@@ -112,9 +112,7 @@ public class UserService {
 		}
 	}
 
-	public String getUserInum(String userId) {
-		User user = getUser(userId, "inum");
-		
+	public String getUserInum(User user) {
 		if (user == null) {
 			return null;
 		}
@@ -122,6 +120,12 @@ public class UserService {
 		String inum = user.getAttribute("inum");
 
 		return inum;
+	}
+
+	public String getUserInum(String userId) {
+		User user = getUser(userId, "inum");
+
+		return getUserInum(user);
 	}
 
     public User updateUser(User user) {
