@@ -29,9 +29,9 @@
                     <h:outputLabel for="resource">Resource</h:outputLabel>
                     <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
                     <h:outputText>eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443</h:outputText>
-                    <h:outputLabel for="acceptUntrastedCertificate">Accept Untrasted Certificate</h:outputLabel>
-                    <h:selectBooleanCheckbox id="acceptUntrastedCertificate"
-                                             value="#{openIdConnectDiscoveryAction.acceptUntrastedCertificate}"/>
+                    <h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
+                    <h:selectBooleanCheckbox id="acceptUntrustedCertificate"
+                                             value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}"/>
                 </h:panelGrid>
             </div>
         </s:div>
