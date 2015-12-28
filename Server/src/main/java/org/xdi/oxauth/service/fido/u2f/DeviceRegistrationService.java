@@ -20,6 +20,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.service.UserService;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -87,6 +88,12 @@ public class DeviceRegistrationService {
 
 	public void updateDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
+
+		ldapEntryManager.merge(deviceRegistration);
+	}
+
+	public void disableUserDeviceRegistration(DeviceRegistration deviceRegistration) {
+		deviceRegistration.setStatus(DeviceRegistrationStatus.COMPROMISED);
 
 		ldapEntryManager.merge(deviceRegistration);
 	}

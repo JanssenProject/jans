@@ -21,6 +21,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -30,7 +31,9 @@ import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RegistrationService;
+import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
 
 import com.wordnik.swagger.annotations.Api;
 
@@ -56,12 +59,16 @@ public class U2fRegistrationWS {
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
+	@In
+	private UserSessionStateService userSessionStateService;
+
 	@GET
 	@Produces({ "application/json" })
-	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId) {
+	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		try {
+			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
 			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userName);
-			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage);
+			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -82,7 +89,9 @@ public class U2fRegistrationWS {
 	@POST
 	@Produces({ "application/json" })
 	public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
+		String sessionState = null;
 		try {
+			log.debug("Finishing registration for username '{0}' with response '{1}'", userName, registerResponseString);
 			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
 
 			String requestId = registerResponse.getRequestId();
@@ -91,10 +100,17 @@ public class U2fRegistrationWS {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
+			sessionState = registerRequestMessageLdap.getSessionState();
 			u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
 			RegisterRequestMessage registerRequestMessage = registerRequestMessageLdap.getRegisterRequestMessage();
-			u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
+			DeviceRegistration deviceRegistration = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
+			
+			// If sessionState is not empty update session
+			if (StringHelper.isNotEmpty(sessionState)) {
+				log.debug("There is session state. Setting session state attributes");
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, deviceRegistration);
+			}
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);
 
@@ -105,6 +121,17 @@ public class U2fRegistrationWS {
 			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
 		} catch (Exception ex) {
 			log.error("Exception happened", ex);
+
+			try {
+				// If sessionState is not empty update session
+				if (StringHelper.isNotEmpty(sessionState)) {
+					log.debug("There is session state. Setting session state status to 'declined'");
+					userSessionStateService.updateUserSessionStateOnError(sessionState);
+				}
+			} catch (Exception ex2) {
+				log.error("Failed to update session state status", ex2);
+			}
+
 			if (ex instanceof WebApplicationException) {
 				throw (WebApplicationException) ex;
 			}
