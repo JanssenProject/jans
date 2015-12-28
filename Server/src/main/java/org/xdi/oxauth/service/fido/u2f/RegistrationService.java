@@ -154,16 +154,21 @@ public class RegistrationService extends RequestService {
 		return deviceRegistration;
 	}
 
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String registerRequestMessageId = UUID.randomUUID().toString();
 
 		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(requestMessage);
-		registerRequestMessageLdap.setCreationDate(now);
 		registerRequestMessageLdap.setId(registerRequestMessageId);
 		registerRequestMessageLdap.setDn(getDnForRegisterRequestMessage(registerRequestMessageId));
+		registerRequestMessageLdap.setCreationDate(now);
+		registerRequestMessageLdap.setSessionState(sessionState);
 
 		ldapEntryManager.persist(registerRequestMessageLdap);
+	}
+
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+		storeRegisterRequestMessage(requestMessage, null);
 	}
 
 	public RegisterRequestMessage getRegisterRequestMessage(String oxId) {
