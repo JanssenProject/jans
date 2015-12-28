@@ -25,7 +25,7 @@ public class RequestMessageLdap extends BaseEntry {
 	@LdapAttribute(name = "creationDate")
 	protected Date creationDate;
 
-	@LdapAttribute(name = "oxSessionState")
+	@LdapAttribute(name = "oxSessionStateId")
 	protected String sessionState;
 
 	public RequestMessageLdap() {}
