@@ -52,6 +52,8 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials = Identity.instance().getCredentials()
         user_name = credentials.getUsername()
 
+        context = Contexts.getEventContext()
+
         userService = UserService.instance()
         if (step == 1):
             print "oxPush2. Authenticate for step 1"
@@ -63,6 +65,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if (not logged_in):
                 return False
+
+            auth_method = 'authenticate'
+            enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
+            if StringHelper.isNotEmpty(enrollment_mode):
+                auth_method = 'enroll'
+
+            print "oxPush2. Authenticate for step 1. auth_method: '%s'" % auth_method
+            
+            context.set("oxpush2_auth_method", auth_method)
 
             return True
         elif (step == 2):
@@ -78,11 +89,10 @@ class PersonAuthentication(PersonAuthenticationType):
             userService = UserService.instance()
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
-                print "oxPush. Authenticate for step 1. Failed to find user"
+                print "oxPush. Authenticate for step 2. Failed to find user"
                 return False
 
-            eventContext = Contexts.getEventContext()
-            session_attributes = eventContext.get("sessionAttributes")
+            session_attributes = context.get("sessionAttributes")
             if (not session_attributes.containsKey("oxpush2_request")):
                 print "oxPush2. Authenticate for step 2. There is no oxPush2 request in session attributes"
                 return False
@@ -90,7 +100,7 @@ class PersonAuthentication(PersonAuthenticationType):
             oxpush2_request_json = session_attributes.get("oxpush2_request")
             oxpush2_request = json.loads(oxpush2_request_json)
 
-            auth_method = oxpush2_request['auth_method']
+            auth_method = oxpush2_request['method']
             if (auth_method in ['enroll', 'authenticate']):
                 print "oxPush2. Authenticate for step 2. Validation U2F user device. auth_method: '%s'" % auth_method
 
@@ -121,10 +131,10 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 if (not StringHelper.equalsIgnoreCase(self.u2f_application_id, u2f_device.application)):
-                    print "oxPush2. Authenticate for step 2. U2F user device '%s' associated with other application '%s'" % (user_name, u2f_device.application)
+                    print "oxPush2. Authenticate for step 2. U2F user's '%s' device associated with other application '%s'" % (user_name, u2f_device.application)
                     return False
 
-                print "oxPush2. Authenticate for step 2. User '%s' authenticated successfully with U2F device '%s'" % (user_name, u2f_device_id)
+                print "oxPush2. Authenticate for step 2. U2F user's '%s' device authenticated successfully with U2F device '%s'" % (user_name, u2f_device_id)
 
                 return True
             else:
@@ -149,27 +159,30 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Prepare for step 2. Failed to determine user name"
                 return False
 
-            auth_method = 'authenticate'
-            enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
-            if StringHelper.isNotEmpty(enrollment_mode):
-                auth_method = 'enroll'
-                return False
+            session_attributes = context.get("sessionAttributes")
+            if session_attributes.containsKey("oxpush2_request"):
+                print "oxPush2. Prepare for step 2. Request was generated already"
+                return True
             
             session_state = SessionStateService.instance().getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
-                print "oxPush2. Failed to determine session_state"
+                print "oxPush2. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            print "oxPush2. Authenticate for step 2. auth_method: '%s'" % auth_method
+            auth_method = session_attributes.get("oxpush2_auth_method")
+            if StringHelper.isEmpty(auth_method):
+                print "oxPush2. Prepare for step 2. Failed to determine auth_method"
+                return False
+
+            print "oxPush2. Prepare for step 2. auth_method: '%s'" % auth_method
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-            oxpush2_request = json.dumps({'session_state': session_state,
-                               'auth_method': auth_method,
-                               'issuer': issuer,
+            oxpush2_request = json.dumps({'username': user.getUserId(),
                                'app': self.u2f_application_id,
-                               'user': user.getUserId()}, separators=(',',':'))
-
-            print "oxPush2. Prepared oxpush2_request:", oxpush2_request
+                               'issuer': issuer,
+                               'method': auth_method,
+                               'state': session_state}, separators=(',',':'))
+            print "oxPush2. Prepare for step 2. Prepared oxpush2_request:", oxpush2_request
 
             context.set("oxpush2_request", oxpush2_request)
 
@@ -181,7 +194,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             return Arrays.asList("display_register_action")
         elif (step == 2):
-            return Arrays.asList("oxpush2_request")
+            return Arrays.asList("oxpush2_auth_method", "oxpush2_request")
         
         return None
 
