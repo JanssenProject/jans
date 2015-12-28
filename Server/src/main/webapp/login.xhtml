@@ -109,11 +109,13 @@
                                         <div class="actionButtons">
                                             <h:commandButton id="loginButton"
                                                              value="#{messages['login.login']}"
-                                                             action="#{authenticator.authenticate}"/>
-                                            <h:commandButton id="registerButton"
-                                                             value="#{messages['login.register']}"
-                                                             action="#{authenticator.authenticate}"
-                                                             rendered="#{display_register_action} or sessionAttributes['display_register_action']"/>
+                                                             action="#{authenticator.authenticate}" />
+
+	                                        <s:div id="registerId" style="display:none">
+	                                            <h:commandButton id="registerButton"
+	                                                             value="#{messages['login.register']}"
+	                                                             action="#{authenticator.authenticate}" />
+	                                        </s:div>
                                         </div>
                                     </div>
                                 </div>
@@ -134,6 +136,11 @@
         <script type="text/javascript">
             window.onload = function() {
                 document.getElementById("loginForm:username").focus();
+
+                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    document.getElementById("loginForm:registerId").style.display = 'inline';
+                }
             };
         </script>
     </ui:define>
