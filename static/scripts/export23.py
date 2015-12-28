@@ -2,8 +2,6 @@
 
 import time, subprocess, traceback, sys, os, shutil, hashlib
 
- 
-
 # Unix commands
 mkdir = '/bin/mkdir'
 cat = '/bin/cat'
@@ -30,9 +28,11 @@ folders_to_backup = ['/opt/tomcat/conf',
                      '/opt/tomcat/endorsed',
                      '/opt/opendj/config',
                      '/etc/certs',
-                     '/etc/pki/java', # Added by Zico for testing
+                     '/etc/pki/java',
                      '/opt/idp/conf',
                      '/opt/idp/metadata']
+
+defaultJavaTrustStore = "/usr/java/latest/lib/security/cacerts"
 
 # LDAP Stuff
 ldap_creds = ['-h', 'localhost', '-p', '1389', '-D', '"cn=directory', 'manager"', '-j', password_file]
@@ -76,7 +76,19 @@ def backupCustomizations():
 
 def backupFiles():
     for folder in folders_to_backup:
-        shutil.copytree(folder, bu_folder + folder)
+        try:
+            shutil.copytree(folder, bu_folder + folder)
+        except:
+            logIt("Failed to backup %s" % folder)
+
+def backupTrustStores():
+    pass
+    copyFile(defaultJavaTrustStore, "%s/%s" % (bu_folder, os.path.split(defaultJavaTrustStore)[0]))
+    if os.path.exists("/etc/pki/java"):
+        files = getOutput([find, "/etc/pki/java"], True)
+        for file in files[1:]:
+            file = file.strip()
+            copyFile(file, "%s/etc/ssh/certs/java" % bu_folder)
 
 def clean(s):
     return s.replace('@', '').replace('!', '').replace('.', '')
@@ -111,7 +123,19 @@ def getLdif():
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
-           '(objectclass=oxTrustConfiguration)']
+            '-s',
+            'one',
+           'objectclass=*']
+    output = getOutput(args)
+    f = open("%s/ldif/appliance.ldif" % bu_folder, 'w')
+    f.write(output)
+    f.close()
+
+    # Backup the oxtrust config
+    args = [ldapsearch] + ldap_creds + \
+           ['-b',
+           'ou=appliances,o=gluu',
+           'objectclass=oxTrustConfiguration']
     output = getOutput(args)
     f = open("%s/ldif/oxtrust_config.ldif" % bu_folder, 'w')
     f.write(output)
@@ -121,7 +145,7 @@ def getLdif():
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
-           '(objectclass=oxAuthConfiguration)']
+           'objectclass=oxAuthConfiguration']
     output = getOutput(args)
     f = open("%s/ldif/oxauth_config.ldif" % bu_folder, 'w')
     f.write(output)
@@ -201,7 +225,7 @@ def makeFolders():
     for folder in folders: 
         try:
             if not os.path.exists(folder):
-                output = getOutput([mkdir, '-p', bu_folder])
+                output = getOutput([mkdir, '-p', folder])
         except:
             logIt("Error making folders", True)
             logIt(traceback.format_exc(), True)
@@ -212,5 +236,5 @@ backupFiles()
 getLdif()
 genProperties()
 backupCustomizations()
-
+backupTrustStores()
 
