@@ -55,7 +55,7 @@ public class U2fConfigurationWS {
 			final String baseEndpointUri = configuration.getBaseEndpoint();
 
 			final U2fConfiguration conf = new U2fConfiguration();
-			conf.setVersion("1.0");
+			conf.setVersion("2.0");
 			conf.setIssuer(configuration.getIssuer());
 
 			conf.setRegistrationEndpoint(baseEndpointUri + "/fido/u2f/registration");
