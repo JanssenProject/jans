@@ -112,7 +112,7 @@ public class UmaConfiguration {
             required = true)
     private String rptEndpoint;
 
-    @ApiModelProperty( value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
+    @ApiModelProperty(value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String authorizationEndpoint;
 
@@ -127,6 +127,15 @@ public class UmaConfiguration {
     @ApiModelProperty(value = "RPT as JWT", required = false)
     private Boolean rptAsJwt = false;
 
+    @ApiModelProperty(value = "RPT signing algorithm values supported", required = false)
+    private Boolean rptSigningAlgValuesSupported = true;
+
+    @ApiModelProperty(value = "RPT encryption algorithm values supported", required = false)
+    private Boolean rptEncryptionAlgValuesSupported = true;
+
+    @ApiModelProperty(value = "RPT encryption enc values supported", required = false)
+    private Boolean rptEncryptionEncValuesSupported = true;
+
     @JsonProperty(value = "rpt_as_jwt")
     @XmlElement(name = "rpt_as_jwt")
     public Boolean getRptAsJwt() {
@@ -135,6 +144,36 @@ public class UmaConfiguration {
 
     public void setRptAsJwt(Boolean rptAsJwt) {
         this.rptAsJwt = rptAsJwt;
+    }
+
+    @JsonProperty(value = "rpt_signing_alg_values_supported")
+    @XmlElement(name = "rpt_signing_alg_values_supported")
+    public Boolean getRptSigningAlgValuesSupported() {
+        return rptSigningAlgValuesSupported;
+    }
+
+    public void setRptSigningAlgValuesSupported(Boolean rptSigningAlgValuesSupported) {
+        this.rptSigningAlgValuesSupported = rptSigningAlgValuesSupported;
+    }
+
+    @JsonProperty(value = "rpt_encryption_alg_values_supported")
+    @XmlElement(name = "rpt_encryption_alg_values_supported")
+    public Boolean getRptEncryptionAlgValuesSupported() {
+        return rptEncryptionAlgValuesSupported;
+    }
+
+    public void setRptEncryptionAlgValuesSupported(Boolean rptEncryptionAlgValuesSupported) {
+        this.rptEncryptionAlgValuesSupported = rptEncryptionAlgValuesSupported;
+    }
+
+    @JsonProperty(value = "rpt_encryption_enc_values_supported")
+    @XmlElement(name = "rpt_encryption_enc_values_supported")
+    public Boolean getRptEncryptionEncValuesSupported() {
+        return rptEncryptionEncValuesSupported;
+    }
+
+    public void setRptEncryptionEncValuesSupported(Boolean rptEncryptionEncValuesSupported) {
+        this.rptEncryptionEncValuesSupported = rptEncryptionEncValuesSupported;
     }
 
     @JsonProperty(value = "requesting_party_claims_endpoint")
