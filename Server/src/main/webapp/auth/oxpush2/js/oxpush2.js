@@ -145,10 +145,9 @@ var oxpush2 = {
 				url: '/oxauth/seam/resource/restv1/oxauth/session_status',
 				timeout: oxpush2.checker.timeout,
 				success: function(result, status, xhr) {
-					$('#result').html(result.state);
-					if ((result.state == 'unknown') || ((result.state == 'unauthenticated') && (((result.auth_state == 'declined') || (result.auth_state == 'expired'))))) {
+					if ((result.state == 'unknown') || ((result.state == 'unauthenticated') && ((result.custom_state == 'declined') || (result.custom_state == 'expired')))) {
 						callCallback(callback, 'error');
-					} else if ((result.state == 'authenticated') || ((result.state == 'unauthenticated') && ((result.auth_state == 'approved')))) {
+					} else if ((result.state == 'authenticated') || ((result.state == 'unauthenticated') && (result.custom_state == 'approved'))) {
 						callCallback(callback, 'success');
 					}
 				},

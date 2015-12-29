@@ -25,6 +25,9 @@ public class RequestMessageLdap extends BaseEntry {
 	@LdapAttribute(name = "creationDate")
 	protected Date creationDate;
 
+	@LdapAttribute(name = "oxSessionStateId")
+	protected String sessionState;
+
 	public RequestMessageLdap() {}
 
 	public RequestMessageLdap(String dn) {
@@ -53,6 +56,14 @@ public class RequestMessageLdap extends BaseEntry {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getSessionState() {
+		return sessionState;
+	}
+
+	public void setSessionState(String sessionState) {
+		this.sessionState = sessionState;
 	}
 
 }

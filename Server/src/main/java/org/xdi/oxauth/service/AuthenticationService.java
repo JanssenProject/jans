@@ -528,6 +528,10 @@ public class AuthenticationService {
         return null;
     }
 
+    public boolean isParameterExists(String p_name) {
+        return Contexts.getEventContext().isSet(p_name);
+    }
+
 
     public static AuthenticationService instance() {
         return ServerUtil.instance(AuthenticationService.class);
