@@ -2052,6 +2052,12 @@ attributeTypes: ( oxTrustConfImportPerson-oid NAME 'oxTrustConfImportPerson'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxSessionStateId-oid NAME 'oxSessionStateId'
+  DESC 'oxSessionStateId'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
    ( oxId $ oxSectorIdentifierURI )
     X-ORIGIN 'Gluu created objectclass' )
@@ -2268,7 +2274,7 @@ objectclasses: ( oxDeviceRegistration-oid NAME 'oxDeviceRegistration' SUP top ST
  ( oxId $ oxApplication $ oxDeviceRegistrationConf $ oxCounter $ oxStatus $ creationDate ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxU2fRequest-oid NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
- ( oxId $ oxRequestId $ oxRequest $ creationDate ) 
+ ( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ creationDate ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxMetric-oid NAME 'oxMetric' SUP top STRUCTURAL MUST objectclass MAY 
  ( uniqueIdentifier $ oxStartDate $ oxEndDate $ oxApplicationType $ oxMetricType $ creationDate $ oxData ) 

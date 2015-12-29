@@ -56,15 +56,14 @@ class Setup(object):
 
         self.downloadWars = None
 
-        self.components = {'oxauth':  {'enabled': True},
-                           'oxtrust': {'enabled': True},
-                           'ldap':    {'enabled': True},
-                           'httpd':   {'enabled': True},
-                           'saml':    {'enabled': False},
-                           'asimba':  {'enabled': False},
-                           'cas':     {'enabled': False},
-                           'oxauth_rp':  {'enabled': False}
-        }
+        self.installOxAuth = True
+        self.installOxTrust = True
+        self.installLdap = True
+        self.installHttpd = True
+        self.installSaml = False
+        self.installAsimba = False
+        self.installCas = False
+        self.installOxAuthRP = False
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -299,14 +298,14 @@ class Setup(object):
                 + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
                 + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
                 + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-                + 'Install oxAuth'.ljust(30) + `self.components['oxauth']['enabled']`.rjust(35) + "\n" \
-                + 'Install oxTrust'.ljust(30) + `self.components['oxtrust']['enabled']`.rjust(35) + "\n" \
-                + 'Install LDAP'.ljust(30) + `self.components['ldap']['enabled']`.rjust(35) + "\n" \
-                + 'Install Apache 2 web server'.ljust(30) + `self.components['httpd']['enabled']`.rjust(35) + "\n" \
-                + 'Install Shibboleth 2 SAML IDP'.ljust(30) + `self.components['saml']['enabled']`.rjust(35) + "\n" \
-                + 'Install Asimba SAML Proxy'.ljust(30) + `self.components['asimba']['enabled']`.rjust(35) + "\n" \
-                + 'Install CAS'.ljust(30) + `self.components['cas']['enabled']`.rjust(35) + "\n" \
-                + 'Install oxAuth RP'.ljust(30) + `self.components['oxauth_rp']['enabled']`.rjust(35) + "\n"
+                + 'Install oxAuth'.ljust(30) + `self.installOxAuth`.rjust(35) + "\n" \
+                + 'Install oxTrust'.ljust(30) + `self.installOxAuth`.rjust(35) + "\n" \
+                + 'Install LDAP'.ljust(30) + `self.installLdap`.rjust(35) + "\n" \
+                + 'Install Apache 2 web server'.ljust(30) + `self.installHttpd`.rjust(35) + "\n" \
+                + 'Install Shibboleth 2 SAML IDP'.ljust(30) + `self.installSaml`.rjust(35) + "\n" \
+                + 'Install Asimba SAML Proxy'.ljust(30) + `self.installAsimba`.rjust(35) + "\n" \
+                + 'Install CAS'.ljust(30) + `self.installCas`.rjust(35) + "\n" \
+                + 'Install oxAuth RP'.ljust(30) + `self.installOxAuthRP`.rjust(35) + "\n"
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -519,14 +518,14 @@ class Setup(object):
 
     def copy_static(self):
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
-        if self.components['saml']['enabled']: 
+        if self.installSaml:
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
             self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/" % self.tomcatHome)
             self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
-        if self.components['oxauth']['enabled']: 
+        if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
@@ -971,7 +970,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def install_asimba_war(self):
-        if self.components['asimba']['enabled']:
+        if self.installAsimba:
             asimbaWar = 'oxasimba.war'
             distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
 
@@ -1010,7 +1009,7 @@ class Setup(object):
             self.removeFile('%s/asimba.war' % self.distFolder)
 
     def install_cas_war(self):
-        if self.components['cas']['enabled']:
+        if self.installCas:
             casWar = 'oxcas.war'
             distCasPath = '%s/%s' % (self.distFolder, casWar)
             tmpCasDir = '%s/tmp_cas' % self.distFolder
@@ -1045,7 +1044,7 @@ class Setup(object):
             self.removeFile('%s/cas.war' % self.distFolder)
 
     def install_oxauth_rp_war(self):
-        if self.components['oxauth_rp']['enabled']:
+        if self.installOxAuthRP:
             oxAuthRPWar = 'oxauth-rp.war'
             distOxAuthRpPath = '%s/%s' % (self.distFolder, oxAuthRPWar)
 
@@ -1120,7 +1119,7 @@ class Setup(object):
             self.run([mkdir, '-p', self.certFolder])
             self.run([mkdir, '-p', self.outputFolder])
 
-            if self.components['oxtrust']['enabled'] | self.components['oxauth']['enabled']:
+            if self.installOxTrust | self.installOxAuth:
                 self.run([mkdir, '-p', self.gluuOptFolder])
                 self.run([mkdir, '-p', self.gluuOptBinFolder])
                 self.run([mkdir, '-p', self.tomcat_user_home_lib])
@@ -1128,7 +1127,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
 
-            if self.components['saml']['enabled']:
+            if self.installSaml:
                 self.run([mkdir, '-p', self.idpFolder])
                 self.run([mkdir, '-p', self.idpMetadataFolder])
                 self.run([mkdir, '-p', self.idpLogsFolder])
@@ -1158,7 +1157,7 @@ class Setup(object):
 
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
-        if self.components['httpd']['enabled']:
+        if self.installHttpd:
             detectedIP = None
             try:
                 testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -1219,51 +1218,51 @@ class Setup(object):
 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
         if promptForOxAuth == 'y':
-            installObject.components['oxauth']['enabled'] = True
+            installObject.installOxAuth = True
         else:
-            installObject.components['oxauth']['enabled'] = False
+            installObject.installOxAuth = False
 
         promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
         if promptForOxTrust == 'y':
-            installObject.components['oxtrust']['enabled'] = True
+            installObject.installOxTrust = True
         else:
-            installObject.components['oxtrust']['enabled'] = False
+            installObject.installOxTrust = False
 
         promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
-            installObject.components['ldap']['enabled'] = True
+            installObject.installLdap = True
         else:
-            installObject.components['ldap']['enabled'] = False
+            installObject.installLdap = False
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
-            installObject.components['httpd']['enabled'] = True
+            installObject.installHttpd = True
         else:
-            installObject.components['httpd']['enabled'] = False
+            installObject.installHttpd = False
 
         promptForShibIDP = self.getPrompt("Install Shibboleth 2 SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
-            installObject.components['saml']['enabled'] = True
+            installObject.installSaml = True
         else:
-            installObject.components['saml']['enabled'] = False
+            installObject.installSaml = False
 
         promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
         if promptForAsimba == 'y':
-            installObject.components['asimba']['enabled'] = True
+            installObject.installAsimba = True
         else:
-            installObject.components['asimba']['enabled'] = False
+            installObject.installAsimba = False
 
         promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
         if promptForCAS == 'y':
-            installObject.components['cas']['enabled'] = True
+            installObject.installCas = True
         else:
-            installObject.components['cas']['enabled'] = False
+            installObject.installCas = False
 
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
         if promptForOxAuthRP == 'y':
-            installObject.components['oxauth_rp']['enabled'] = True
+            installObject.installOxAuthRP = True
         else:
-            installObject.components['oxauth_rp']['enabled'] = False
+            installObject.installOxAuthRP = False
 
     def removeDirs(self, name):
         try:
@@ -1304,7 +1303,7 @@ class Setup(object):
         newFn.close()
 
     def render_templates(self):
-        if self.components['saml']['enabled']: 
+        if self.installSaml:
             self.oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
@@ -1612,14 +1611,14 @@ if __name__ == '__main__':
 
     installObject.downloadWars = setupOptions['downloadWars']
 
-    installObject.components['oxauth']['enabled'] = setupOptions['installOxAuth']
-    installObject.components['oxtrust']['enabled'] = setupOptions['installOxTrust']
-    installObject.components['ldap']['enabled'] = setupOptions['installLDAP']
-    installObject.components['httpd']['enabled'] = setupOptions['installHTTPD']
-    installObject.components['saml']['enabled'] = setupOptions['installSAML']
-    installObject.components['asimba']['enabled'] = setupOptions['installAsimba']
-    installObject.components['cas']['enabled'] = setupOptions['installCAS']
-    installObject.components['oxauth_rp']['enabled'] = setupOptions['installOxAuthRP']
+    installObject.installOxAuth = setupOptions['installOxAuth']
+    installObject.installOxTrust = setupOptions['installOxTrust']
+    installObject.installLdap = setupOptions['installLDAP']
+    installObject.installHttpd = setupOptions['installHTTPD']
+    installObject.installSaml = setupOptions['installSAML']
+    installObject.installAsimba = setupOptions['installAsimba']
+    installObject.installCas = setupOptions['installCAS']
+    installObject.installOxAuthRP = setupOptions['installOxAuthRP']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
