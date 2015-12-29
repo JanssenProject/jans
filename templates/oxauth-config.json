@@ -160,7 +160,7 @@
     "shortLivedAccessTokenLifetime":300,
     "longLivedAccessTokenLifetime":31536000,
     "umaRequesterPermissionTokenLifetime":3600,
-    "umaAddScopesAutomatically":false,
+    "umaAddScopesAutomatically":true,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":true,
     "cleanServiceInterval":600,
