@@ -183,16 +183,21 @@ public class AuthenticationService extends RequestService {
 		throw new BadInputException("Responses keyHandle does not match any contained request");
 	}
 
-	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage) {
+	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String authenticateRequestMessageId = UUID.randomUUID().toString();
 
 		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(requestMessage);
-		authenticateRequestMessageLdap.setCreationDate(now);
 		authenticateRequestMessageLdap.setId(authenticateRequestMessageId);
 		authenticateRequestMessageLdap.setDn(getDnForAuthenticateRequestMessage(authenticateRequestMessageId));
+		authenticateRequestMessageLdap.setCreationDate(now);
+		authenticateRequestMessageLdap.setSessionState(sessionState);
 
 		ldapEntryManager.persist(authenticateRequestMessageLdap);
+	}
+
+	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage) {
+		storeAuthenticationRequestMessage(requestMessage, null);
 	}
 
 	public AuthenticateRequestMessage getAuthenticationRequestMessage(String oxId) {

@@ -147,23 +147,28 @@ public class RegistrationService extends RequestService {
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
-		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(deviceRegistrationId, userInum));
+		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
 
 		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
 
 		return deviceRegistration;
 	}
 
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String registerRequestMessageId = UUID.randomUUID().toString();
 
 		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(requestMessage);
-		registerRequestMessageLdap.setCreationDate(now);
 		registerRequestMessageLdap.setId(registerRequestMessageId);
 		registerRequestMessageLdap.setDn(getDnForRegisterRequestMessage(registerRequestMessageId));
+		registerRequestMessageLdap.setCreationDate(now);
+		registerRequestMessageLdap.setSessionState(sessionState);
 
 		ldapEntryManager.persist(registerRequestMessageLdap);
+	}
+
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+		storeRegisterRequestMessage(requestMessage, null);
 	}
 
 	public RegisterRequestMessage getRegisterRequestMessage(String oxId) {

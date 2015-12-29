@@ -20,6 +20,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.service.UserService;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -62,6 +63,14 @@ public class DeviceRegistrationService {
 		}
 	}
 
+	public DeviceRegistration findUserDeviceRegistration(String userInum, String deviceId, String... returnAttributes) {
+		prepareBranch(userInum);
+		
+		String deviceDn = getDnForU2fDevice(userInum, deviceId);
+
+		return ldapEntryManager.find(DeviceRegistration.class, deviceDn);
+	}
+
 	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String... returnAttributes) {
 		prepareBranch(userInum);
 
@@ -83,10 +92,16 @@ public class DeviceRegistrationService {
 		ldapEntryManager.merge(deviceRegistration);
 	}
 
+	public void disableUserDeviceRegistration(DeviceRegistration deviceRegistration) {
+		deviceRegistration.setStatus(DeviceRegistrationStatus.COMPROMISED);
+
+		ldapEntryManager.merge(deviceRegistration);
+	}
+
 	/**
 	 * Build DN string for U2F user device
 	 */
-	public String getDnForU2fDevice(String oxId, String userInum) {
+	public String getDnForU2fDevice(String userInum, String oxId) {
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
 		if (StringHelper.isEmpty(oxId)) {
 			return baseDnForU2fDevices;
