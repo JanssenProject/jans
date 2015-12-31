@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+# Requires JSON Merge library
+# wget https://github.com/avian2/jsonmerge/archive/master.zip
+# unzip master.zip
+# cd jsonmerge-master
+# python setup.py install
+
+# Also requires ldif.py in same folder
+
 import os
 import os.path
 import shutil
@@ -11,9 +19,14 @@ from ldif import LDIFParser, CreateLDIF
 log = "./import23.log"
 logError = "./import23.error"
 ouputFolder = "./output_ldif"
+oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % ouputFolder
+oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % ouputFolder
+password_file = "/root/.pw"
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
+ldapsearch = "/opt/opendj/bin/ldapsearch"
+ldapdelete = "/opt/opendj/bin/ldapdelete"
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -55,7 +68,38 @@ bulk_ldif_files =  [ "groups.ldif",
                 "site.ldif"
                 ]
 
-class ConfigLDIF(LDIFParser):
+
+def backupEntry(dn, fn):
+    # Backup the appliance config just in case!
+    args = [ldapsearch] + ldap_creds + \
+           ['-b',
+           dn,
+            '-s',
+            'base',
+           'objectclass=*']
+    output = getOutput(args)
+    f = open(fn, 'w')
+    f.write(output)
+    f.close()
+    if output.find('dn') < 0:
+        logIt("Error backing up current appliance entry", True)
+        print "Error backing up %s... exiting" % dn
+        sys.exit(1)
+    else:
+        logIt("Wrote %s to %s" % (dn, fn))
+
+def backupCurrentConfig(fn):
+    inum =  getAttributeValue(fn, 'inum')[0]
+    # Backup Appliance
+    backupEntry("inum=%s,ou=appliances,o=gluu" % inum, "%s.backup" % fn)
+    # Backup oxAuth Config
+    dn = 'ou=oxauth,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
+    backupEntry(dn, oxAuth_config_new_fn)
+    # Backup oxTrust Config
+    dn = 'ou=oxtrust,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
+    backupEntry(dn, oxTrust_config_new_fn)
+
+class MyLDIF(LDIFParser):
     def __init__(self, input, output):
         LDIFParser.__init__(self, input)
         self.targetDN = None
@@ -104,20 +148,9 @@ def logIt(msg, errorLog=False):
     f.write('%s %s\n' % (time.strftime('%X %x'), msg))
     f.close()
 
-def updateConfiguration():
-    # Load Config From LDIF
-    fn = "./ldif/config.ldif"
-    parser = ConfigLDIF(open(fn, 'rb'), sys.stdout)
-    parser.parse()
-
-    # Update oxAuth Config
-
-    # Update oxTrust Config
-
-
 def startOpenDJ():
     output = getOutput([service, 'opendj', 'start'])
-    if output.index("Directory Server has started successfully") > 0:
+    if output.find("Directory Server has started successfully") > 0:
         logIt("Directory Server has started successfully")
     else:
         logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors")
@@ -125,7 +158,7 @@ def startOpenDJ():
 
 def stopOpenDJ():
     output = getOutput([service, 'opendj', 'start'])
-    if output.index("Directory Server is now stopped") > 0:
+    if output.find("Directory Server is now stopped") > 0:
         logIt("Directory Server is now stopped")
     else:
         logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
@@ -149,7 +182,7 @@ def uploadLDIF():
 
     # Update Organization
     fn = "./ldif/organization.ldif"
-    parser = ConfigLDIF(open(fn, 'rb'), sys.stdout)
+    parser = MyLDIF(open(fn, 'rb'), sys.stdout)
     parser.parse()
     orgDN = parser.lastDN
     gluuManagerGroup = parser.lastEntry['gluuManagerGroup'][0]
@@ -182,4 +215,4 @@ stopOpenDJ()
 copyFiles()
 startOpenDJ()
 uploadLDIF()
-updateConfiguration()
+backupCurrentConfig("./appliance.ldif")
