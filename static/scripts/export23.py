@@ -119,7 +119,7 @@ def getLdif():
         f.write(output)
         f.close()
 
-    # Backup the oxtrust config
+    # Backup the appliance config
     args = [ldapsearch] + ldap_creds + \
            ['-b',
            'ou=appliances,o=gluu',
