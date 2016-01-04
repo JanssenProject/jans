@@ -87,13 +87,14 @@ class MyLDIF(LDIFParser):
         return self.lastEntry
 
     def handle(self, dn, entry):
+        if targetDN == None:
+            targetDN = dn
         self.lastDN = dn
         self.DNs.append(dn)
         self.lastEntry = entry
-        if self.targetDN:
-            if dn.lower().strip() == self.targetDN.lower().strip():
-                if entry.has_key(self.targetAttr):
-                    self.targetAttr = entry(self.targetAttr)
+        if dn.lower().strip() == self.targetDN.lower().strip():
+            if entry.has_key(self.targetAttr):
+                self.targetAttr = entry(self.targetAttr)
 
 def backupEntry(dn, fn):
     # Backup the appliance config just in case!
@@ -137,7 +138,7 @@ def getAttributeValue(fn, targetAttr):
     parser = MyLDIF(open(fn, 'rb'), sys.stdout)
     parser.targetAttr = targetAttr
     parser.parse()
-    value = parser.targetAttrValue
+    value = parser.targetAttr
     return value
 
 def getEntry(fn):
