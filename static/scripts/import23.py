@@ -178,12 +178,15 @@ def restoreConfig(oldFn, newFn, configLdifFolder, fn_base):
             mod_list = None
             if old_entry[attr] != new_entry[attr]:
                 counter = counter + 1
-                if len(new_entry[attr]) == 1:
-                    old_json = json.loads(old_entry[attr][0])
-                    new_json = json.loads(new_entry[attr][0])
-                    new_json = merge(new_json, old_json)
-                    mod_list = [json.dumps(new_json)]
-                    logIt("Merging json value for %s " % attr)
+                if len(old_entry[attr]) == 1:
+                    try:
+                        logIt("Merging json value for %s " % attr)
+                        old_json = json.loads(old_entry[attr][0])
+                        new_json = json.loads(new_entry[attr][0])
+                        new_json = merge(new_json, old_json)
+                        mod_list = [json.dumps(new_json)]
+                    except:
+                        mod_list = old_entry[attr][0]
                 else:
                     mod_list = old_entry[attr]
                     logIt("Keeping multiple old values for %s" % attr)
@@ -228,7 +231,7 @@ def tab_attr(attr, base64text, encoded=False):
     return "\n".join(lines)
 
 def uploadLDIF():
-    for ldif_file in ldif_files:
+    for ldif_file in bulk_ldif_files:
         cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', '%s/%s' % (ldif_folder, ldif_file)]
         output = getOutput(cmd)
         if output:
@@ -282,6 +285,7 @@ changetype: modify
             modLdif = modLdif + "%s\n" % tab_attr(attr, val)
         else:
             modLdif = modLdif + "%s: %s\n" % (attr, val)
+    modLdif = modLdif + "\n"
     f = open(fn, 'w')
     f.write(modLdif)
     f.close()
