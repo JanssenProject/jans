@@ -87,14 +87,14 @@ class MyLDIF(LDIFParser):
         return self.lastEntry
 
     def handle(self, dn, entry):
-        if targetDN == None:
-            targetDN = dn
+        if self.targetDN == None:
+            self.targetDN = dn
         self.lastDN = dn
         self.DNs.append(dn)
         self.lastEntry = entry
         if dn.lower().strip() == self.targetDN.lower().strip():
             if entry.has_key(self.targetAttr):
-                self.targetAttr = entry(self.targetAttr)
+                self.targetAttr = entry[self.targetAttr]
 
 def backupEntry(dn, fn):
     # Backup the appliance config just in case!
@@ -165,7 +165,7 @@ def logIt(msg, errorLog=False):
     f.write('%s %s\n' % (time.strftime('%X %x'), msg))
     f.close()
 
-def restoreConfig(oldFn, newFn, fn_base):
+def restoreConfig(oldFn, newFn, configLdifFolder, fn_base):
     ignoreList = ['objectClass', 'ou']
     counter = 0
     old_dn, old_entry = getEntry(oldFn)
@@ -190,10 +190,10 @@ def restoreConfig(oldFn, newFn, fn_base):
             else:
                 logIt("%s config update: no changes found for %s" % (fn_base, attr))
                 continue
-            writeMod(old_dn, attr, mod_list, '%s/%s%i.ldif' % (bu_folder, fn_base, counter))
+            writeMod(old_dn, attr, mod_list, '%s/%s%i.ldif' % (configLdifFolder, fn_base, counter))
         else:
             counter = counter + 1
-            writeMod(old_dn, attr, old_entry[attr], '%s/%s%i.ldif' % (bu_folder, fn_base, counter), True)
+            writeMod(old_dn, attr, old_entry[attr], '%s/%s%i.ldif' % (configLdifFolder, fn_base, counter), True)
             logIt("Adding attr %s which was not found in new ldif" % attr)
 
 def startOpenDJ():
@@ -336,8 +336,8 @@ stopOpenDJ()
 copyFiles(backup23_folder)
 startOpenDJ()
 backupCurrentConfig(configMap)
-restoreConfig(oxAuth_config_old_fn, oxAuth_config_new_fn, "oxauth")
-restoreConfig(oxTrust_config_old_fn, oxAuth_config_new_fn, "oxtrust")
-restoreConfig(organization_config_old_fn, organization_config_new_fn, "organization")
-restoreConfig(appliance_config_old_fn, appliance_config_new_fn, "appliance")
+restoreConfig(oxAuth_config_old_fn, oxAuth_config_new_fn, configLdifFolder, "oxauth")
+restoreConfig(oxTrust_config_old_fn, oxAuth_config_new_fn, configLdifFolder, "oxtrust")
+restoreConfig(organization_config_old_fn, organization_config_new_fn, configLdifFolder, "organization")
+restoreConfig(appliance_config_old_fn, appliance_config_new_fn, configLdifFolder, "appliance")
 uploadLDIF()
