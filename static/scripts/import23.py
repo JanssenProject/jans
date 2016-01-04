@@ -127,9 +127,10 @@ def backupCurrentConfig(configMap):
     dn = 'ou=oxtrust,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
     backupEntry(dn, configMap["oxtrust"])
 
-def copyFiles():
-    os.path.walk ("./etc", walk_function, None)
-    os.path.walk ("./opt", walk_function, None)
+def copyFiles(backup23_folder):
+    os.path.walk ("%s/etc" % backup23_folder, walk_function, None)
+    os.path.walk ("%s/opt" % backup23_folder, walk_function, None)
+    os.path.walk ("%s/usr" % backup23_folder, walk_function, None)
 
 def getAttributeValue(fn, targetAttr):
     # Load oxAuth Config From LDIF
@@ -331,7 +332,7 @@ if not os.path.exists(configLdifFolder):
     os.mkdir(configLdifFolder)
 
 stopOpenDJ()
-copyFiles()
+copyFiles(backup23_folder)
 startOpenDJ()
 backupCurrentConfig(configMap)
 restoreConfig(oxAuth_config_old_fn, oxAuth_config_new_fn, "oxauth")
