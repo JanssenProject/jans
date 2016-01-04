@@ -21,22 +21,22 @@ import json
 
 ldif_folder = None
 
+log = "./import23.log"
+logError = "./import23.error"
+outputFolder = "./output_ldif"
+configLdifFolder = "%s/config" % outputFolder
+password_file = "/root/.pw"
+
 # Old Config
 appliance_config_old_fn = "%s/appliance.ldif" % ldif_folder
 organization_config_old_fn = "%s/organization.ldif" % ldif_folder
 oxAuth_config_old_fn = "%s/oxauth_config.ldif" % ldif_folder
 oxTrust_config_old_fn = "%s/oxtrust_config.ldif" % ldif_folder
 # New config
-appliance_config_new_fn = "%s/appliance_config_new.ldif" % ouputFolder
-organization_config_new_fn = "%s/organization_config_new.ldif" % ouputFolder
-oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % ouputFolder
-oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % ouputFolder
-
-log = "./import23.log"
-logError = "./import23.error"
-ouputFolder = "./output_ldif"
-configLdifFolder = "%s/config" % outputFolder
-password_file = "/root/.pw"
+appliance_config_new_fn = "%s/appliance_config_new.ldif" % outputFolder
+organization_config_new_fn = "%s/organization_config_new.ldif" % outputFolder
+oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % outputFolder
+oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % outputFolder
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
@@ -311,8 +311,8 @@ if error:
     print "Usage: ./import.py path_to_ldif_folder"
     sys.exit(1)
 
-if not os.path.exists(ouputFolder):
-    os.mkdir(ouputFolder)
+if not os.path.exists(outputFolder):
+    os.mkdir(outputFolder)
 
 if not os.path.exists(configLdifFolder):
     os.mkdir(configLdifFolder)
