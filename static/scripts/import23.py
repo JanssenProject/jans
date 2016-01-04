@@ -19,24 +19,9 @@ from jsonmerge import merge
 import base64
 import json
 
-ldif_folder = None
-
 log = "./import23.log"
 logError = "./import23.error"
-outputFolder = "./output_ldif"
-configLdifFolder = "%s/config" % outputFolder
 password_file = "/root/.pw"
-
-# Old Config
-appliance_config_old_fn = "%s/appliance.ldif" % ldif_folder
-organization_config_old_fn = "%s/organization.ldif" % ldif_folder
-oxAuth_config_old_fn = "%s/oxauth_config.ldif" % ldif_folder
-oxTrust_config_old_fn = "%s/oxtrust_config.ldif" % ldif_folder
-# New config
-appliance_config_new_fn = "%s/appliance_config_new.ldif" % outputFolder
-organization_config_new_fn = "%s/organization_config_new.ldif" % outputFolder
-oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % outputFolder
-oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % outputFolder
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
@@ -105,9 +90,10 @@ class MyLDIF(LDIFParser):
         self.lastDN = dn
         self.DNs.append(dn)
         self.lastEntry = entry
-        if dn.lower().strip() == targetDN.lower().strip():
-            if entry.has_key(self.targetAttr):
-                self.targetAttr = entry(self.targetAttr)
+        if self.targetDN:
+            if dn.lower().strip() == self.targetDN.lower().strip():
+                if entry.has_key(self.targetAttr):
+                    self.targetAttr = entry(self.targetAttr)
 
 def backupEntry(dn, fn):
     # Backup the appliance config just in case!
@@ -127,19 +113,19 @@ def backupEntry(dn, fn):
     else:
         logIt("Wrote %s to %s" % (dn, fn))
 
-def backupCurrentConfig():
+def backupCurrentConfig(configMap):
     # Backup Appliance
-    inum =  getAttributeValue(appliance_config_old_fn, 'inum')[0]
-    backupEntry("inum=%s,ou=appliances,o=gluu" % inum, appliance_config_new_fn)
+    inum =  getAttributeValue(configMap["appliance"][0], 'inum')[0]
+    backupEntry("inum=%s,ou=appliances,o=gluu" % inum, configMap["appliance"][1])
     # Backup Organization
-    orgInum =  getAttributeValue(organization_config_old_fn, 'o')[0]
-    backupEntry("o=%s,o=gluu" % orgInum, organization_config_new_fn)
+    orgInum =  getAttributeValue(configMap["organization"][0], 'o')[0]
+    backupEntry("o=%s,o=gluu" % orgInum, configMap["organization"][1])
     # Backup oxAuth Config
     dn = 'ou=oxauth,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
-    backupEntry(dn, oxAuth_config_new_fn)
+    backupEntry(dn, configMap["oxauth"])
     # Backup oxTrust Config
     dn = 'ou=oxtrust,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
-    backupEntry(dn, oxTrust_config_new_fn)
+    backupEntry(dn, configMap["oxtrust"])
 
 def copyFiles():
     os.path.walk ("./etc", walk_function, None)
@@ -213,15 +199,15 @@ def startOpenDJ():
     if output.find("Directory Server has started successfully") > 0:
         logIt("Directory Server has started successfully")
     else:
-        logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors")
+        logIt("OpenDJ did not start properly... exiting. Check /opt/opendj/logs/errors", True)
         sys.exit(2)
 
 def stopOpenDJ():
-    output = getOutput([service, 'opendj', 'start'])
+    output = getOutput([service, 'opendj', 'stop'])
     if output.find("Directory Server is now stopped") > 0:
         logIt("Directory Server is now stopped")
     else:
-        logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors")
+        logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors", True)
         sys.exit(3)
 
 def tab_attr(attr, base64text, encoded=False):
@@ -298,18 +284,45 @@ changetype: modify
     f.write(modLdif)
     f.close()
 
+backup23_folder = None
 error = False
 try:
-    ldif_folder = sys.argv[1]
-    if not os.path.exists(ldif_folder):
+    backup23_folder = sys.argv[1]
+    if (not os.path.exists("%s/ldif" % backup23_folder)):
+        error = True
+    if (not os.path.exists("%s/etc" % backup23_folder)):
+        error = True
+    if (not os.path.exists("%s/opt" % backup23_folder)):
         error = True
 except:
     error = True
 
 if error:
-    print "ldif folder not found"
-    print "Usage: ./import.py path_to_ldif_folder"
+    print "backup folders not found"
+    print "Usage: ./import.py <path_to_backup_folders>"
     sys.exit(1)
+
+ldif_folder = "%s/ldif" % backup23_folder
+outputFolder = "./output_ldif"
+configLdifFolder = "%s/config" % outputFolder
+
+# Old Config
+appliance_config_old_fn = "%s/appliance.ldif" % ldif_folder
+organization_config_old_fn = "%s/organization.ldif" % ldif_folder
+oxAuth_config_old_fn = "%s/oxauth_config.ldif" % ldif_folder
+oxTrust_config_old_fn = "%s/oxtrust_config.ldif" % ldif_folder
+
+# New config
+appliance_config_new_fn = "%s/appliance_config_new.ldif" % outputFolder
+organization_config_new_fn = "%s/organization_config_new.ldif" % outputFolder
+oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % outputFolder
+oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % outputFolder
+
+configMap = {"appliance": (appliance_config_old_fn, appliance_config_new_fn),
+             "organization": (organization_config_old_fn, organization_config_new_fn),
+             "oxauth": oxAuth_config_new_fn,
+             "oxtrust": oxTrust_config_new_fn
+            }
 
 if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
@@ -320,6 +333,7 @@ if not os.path.exists(configLdifFolder):
 stopOpenDJ()
 copyFiles()
 startOpenDJ()
+backupCurrentConfig(configMap)
 restoreConfig(oxAuth_config_old_fn, oxAuth_config_new_fn, "oxauth")
 restoreConfig(oxTrust_config_old_fn, oxAuth_config_new_fn, "oxtrust")
 restoreConfig(organization_config_old_fn, organization_config_new_fn, "organization")
