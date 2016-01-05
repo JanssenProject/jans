@@ -151,7 +151,7 @@ def getOldEntryMap(folder):
     for fn in files:
         if fn == "people.ldif":
             continue
-        dnList = getDns(fn)
+        dnList = getDns("%s/%s" % (folder,fn))
         for dn in dnList:
             dnMap[dn] = fn
     return dnMap
@@ -198,11 +198,10 @@ def logIt(msg, errorLog=False):
 
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     ignoreList = ['objectClass', 'ou']
-    counter = 0
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
     for dn in oldDnMap.keys():
-        old_entry = getEntry(oldDnMap[dn], dn)
+        old_entry = getEntry("%s/%s" % (ldifFolder, oldDnMap[dn]), dn)
         if dn not in current_config_dns:
             addEntry(dn, old_entry, ldifModFolder)
             continue
@@ -216,7 +215,6 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             else:
                 mod_list = None
                 if old_entry[attr] != new_entry[attr]:
-                    counter = counter + 1
                     if len(old_entry[attr]) == 1:
                         try:
                             logIt("Merging json value for %s " % attr)
@@ -225,7 +223,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                             new_json = merge(new_json, old_json)
                             mod_list = [json.dumps(new_json)]
                         except:
-                            mod_list = old_entry[attr][0]
+                            mod_list = old_entry[attr]
                     else:
                         mod_list = old_entry[attr]
                         logIt("Keeping multiple old values for %s" % attr)
@@ -277,8 +275,6 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
     # delete people organizational unit and default admin user
     # so add doesn't throw error
     dn_list = getDns("/opt/opendj/ldif/people.ldif")
-    people_ou = ",".join(dn_list[0].split(",")[1:])
-    dn_list.append(people_ou)
     deleteEntries(dn_list)
     cmd = [ldapmodify] + ldap_creds + ['-a', '-f', "%s/%s" % (ldifFolder, "people.ldif")]
     output = getOutput(cmd)

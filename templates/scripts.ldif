@@ -223,7 +223,7 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51c2VyIGltcG9yd
 oxScriptType: user_registration
 programmingLanguage: python
 
-dn: inum=%(inumOrg)s!A51E.76DA,ou=scripts,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0011!A51E.76DA,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Sample Authentication script
