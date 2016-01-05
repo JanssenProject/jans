@@ -14,10 +14,11 @@ import shutil
 import sys
 import time
 import traceback
-from ldif import LDIFParser, CreateLDIF
+from ldif import LDIFParser
 from jsonmerge import merge
 import base64
 import json
+import uuid
 
 log = "./import23.log"
 logError = "./import23.error"
@@ -73,6 +74,7 @@ class MyLDIF(LDIFParser):
         LDIFParser.__init__(self, input)
         self.targetDN = None
         self.targetAttr = None
+        self.targetEntry = None
         self.DNs = []
         self.lastDN = None
         self.lastEntry = None
@@ -93,45 +95,47 @@ class MyLDIF(LDIFParser):
         self.DNs.append(dn)
         self.lastEntry = entry
         if dn.lower().strip() == self.targetDN.lower().strip():
+            self.targetEntry = entry
             if entry.has_key(self.targetAttr):
                 self.targetAttr = entry[self.targetAttr]
 
-def backupEntry(dn, fn):
+def addEntry(dn, entry, ldifModFolder):
+    newLdif = """dn: %s
+changetype: add
+""" % dn
+    for attr in entry.keys():
+        for value in entry[attr]:
+            newLdif = newLdif + getMod(attr, value)
+    newLdif = newLdif + "\n"
+    f = open("%s/%s.ldif" % (ldifModFolder, str(uuid.uuid4())), 'w')
+    f.write(newLdif)
+    f.close()
+
+def getNewConfig(fn):
     # Backup the appliance config just in case!
     args = [ldapsearch] + ldap_creds + \
            ['-b',
-           dn,
-            '-s',
-            'base',
+           'o=gluu',
            'objectclass=*']
     output = getOutput(args)
     f = open(fn, 'w')
     f.write(output)
     f.close()
-    if output.find('dn') < 0:
-        logIt("Error backing up entry %s" % dn, True)
-        sys.exit(1)
-    else:
-        logIt("Wrote %s to %s" % (dn, fn))
-
-def backupCurrentConfig(configMap):
-    # Backup Appliance
-    inum =  getAttributeValue(configMap["appliance"][0], 'inum')[0]
-    backupEntry("inum=%s,ou=appliances,o=gluu" % inum, configMap["appliance"][1])
-    # Backup Organization
-    orgInum =  getAttributeValue(configMap["organization"][0], 'o')[0]
-    backupEntry("o=%s,o=gluu" % orgInum, configMap["organization"][1])
-    # Backup oxAuth Config
-    dn = 'ou=oxauth,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
-    backupEntry(dn, configMap["oxauth"])
-    # Backup oxTrust Config
-    dn = 'ou=oxtrust,ou=configuration,inum=%s,ou=appliances,o=gluu' % inum
-    backupEntry(dn, configMap["oxtrust"])
+    logIt("Wrote new ldif to %s" % fn)
 
 def copyFiles(backup23_folder):
     os.path.walk ("%s/etc" % backup23_folder, walk_function, None)
     os.path.walk ("%s/opt" % backup23_folder, walk_function, None)
     os.path.walk ("%s/usr" % backup23_folder, walk_function, None)
+
+def deleteEntries(dn_list):
+    for dn in dn_list:
+        cmd = [ldapdelete] + ldap_creds + [dn]
+        output = getOutput(cmd)
+        if output:
+            logIt(output)
+        else:
+            logIt("Error deleting %s" % dn)
 
 def getAttributeValue(fn, targetAttr):
     # Load oxAuth Config From LDIF
@@ -141,10 +145,37 @@ def getAttributeValue(fn, targetAttr):
     value = parser.targetAttr
     return value
 
-def getEntry(fn):
+def getOldEntryMap(folder):
+    files = os.listdir(folder)
+    dnMap = {}
+    for fn in files:
+        if fn == "people.ldif":
+            continue
+        dnList = getDns(fn)
+        for dn in dnList:
+            dnMap[dn] = fn
+    return dnMap
+
+def getEntry(fn, dn):
+    parser = MyLDIF(open(fn, 'rb'), sys.stdout)
+    parser.targetDN = dn
+    parser.parse()
+    return parser.targetEntry
+
+def getDns(fn):
     parser = MyLDIF(open(fn, 'rb'), sys.stdout)
     parser.parse()
-    return parser.lastDN, parser.lastEntry
+    return parser.DNs
+
+def getMod(attr, s):
+    val = str(s).strip()
+    if val.find('\n') > -1:
+        val = base64.b64encode(val)
+        return "%s\n" % tab_attr(attr, val, True)
+    elif len(val) > (78 - len(attr)):
+        return "%s\n" % tab_attr(attr, val)
+    else:
+        return "%s: %s\n" % (attr, val)
 
 def getOutput(args):
         try:
@@ -165,39 +196,42 @@ def logIt(msg, errorLog=False):
     f.write('%s %s\n' % (time.strftime('%X %x'), msg))
     f.close()
 
-def restoreConfig(oldFn, newFn, configLdifFolder, fn_base):
+def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     ignoreList = ['objectClass', 'ou']
     counter = 0
-    old_dn, old_entry = getEntry(oldFn)
-    new_dn, new_entry = getEntry(newFn)
-    for attr in old_entry.keys():
-        if attr in ignoreList:
+    current_config_dns = getDns(newLdif)
+    oldDnMap = getOldEntryMap(ldifFolder)
+    for dn in oldDnMap.keys():
+        old_entry = getEntry(oldDnMap[dn], dn)
+        if dn not in current_config_dns:
+            addEntry(dn, old_entry, ldifModFolder)
             continue
-        logIt("%s config update: updating %s" % (fn_base, attr))
-        if new_entry.has_key(attr):
-            mod_list = None
-            if old_entry[attr] != new_entry[attr]:
-                counter = counter + 1
-                if len(old_entry[attr]) == 1:
-                    try:
-                        logIt("Merging json value for %s " % attr)
-                        old_json = json.loads(old_entry[attr][0])
-                        new_json = json.loads(new_entry[attr][0])
-                        new_json = merge(new_json, old_json)
-                        mod_list = [json.dumps(new_json)]
-                    except:
-                        mod_list = old_entry[attr][0]
-                else:
-                    mod_list = old_entry[attr]
-                    logIt("Keeping multiple old values for %s" % attr)
-            else:
-                logIt("%s config update: no changes found for %s" % (fn_base, attr))
+        new_entry = getEntry(newLdif, dn)
+        for attr in old_entry.keys():
+            if attr in ignoreList:
                 continue
-            writeMod(old_dn, attr, mod_list, '%s/%s%i.ldif' % (configLdifFolder, fn_base, counter))
-        else:
-            counter = counter + 1
-            writeMod(old_dn, attr, old_entry[attr], '%s/%s%i.ldif' % (configLdifFolder, fn_base, counter), True)
-            logIt("Adding attr %s which was not found in new ldif" % attr)
+            if not new_entry.has_key(attr):
+                writeMod(dn, attr, old_entry[attr], '%s/%s.ldif' % (ldifModFolder, str(uuid.uuid4())), True)
+                logIt("Adding attr %s to %s" % (attr, dn))
+            else:
+                mod_list = None
+                if old_entry[attr] != new_entry[attr]:
+                    counter = counter + 1
+                    if len(old_entry[attr]) == 1:
+                        try:
+                            logIt("Merging json value for %s " % attr)
+                            old_json = json.loads(old_entry[attr][0])
+                            new_json = json.loads(new_entry[attr][0])
+                            new_json = merge(new_json, old_json)
+                            mod_list = [json.dumps(new_json)]
+                        except:
+                            mod_list = old_entry[attr][0]
+                    else:
+                        mod_list = old_entry[attr]
+                        logIt("Keeping multiple old values for %s" % attr)
+                else:
+                    continue
+                writeMod(dn, attr, mod_list, '%s/%s.ldif' % (ldifModFolder, str(uuid.uuid4())))
 
 def startOpenDJ():
     output = getOutput([service, 'opendj', 'start'])
@@ -230,26 +264,28 @@ def tab_attr(attr, base64text, encoded=False):
             lines.append(" " + char)
     return "\n".join(lines)
 
-def uploadLDIF():
-    for ldif_file in bulk_ldif_files:
-        cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', '%s/%s' % (ldif_folder, ldif_file)]
+def uploadLDIF(ldifFolder, outputLdifFolder):
+    files = os.listdir(outputLdifFolder)
+    for fn in files:
+        cmd = [ldapmodify] + ldap_creds + ['-a', '-f', "%s/%s" % (outputLdifFolder, fn)]
         output = getOutput(cmd)
         if output:
             logIt(output)
+        else:
+            logIt("Error adding file %s" % fn, True)
 
-    # Load SAML Trust Relationships
-    fn = "./ldif/trust_relationships.ldif"
-    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', fn]
+    # delete people organizational unit and default admin user
+    # so add doesn't throw error
+    dn_list = getDns("/opt/opendj/ldif/people.ldif")
+    people_ou = ",".join(dn_list[0].split(",")[1:])
+    dn_list.append(people_ou)
+    deleteEntries(dn_list)
+    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', "%s/%s" % (ldifFolder, "people.ldif")]
     output = getOutput(cmd)
     if output:
         logIt(output)
-
-    files = os.listdir(configLdifFolder)
-    for fn in files:
-        cmd = [ldapmodify] + ldap_creds + ['-a', '-f', "%s/%s" % (configLdifFolder, fn)]
-        output = getOutput(cmd)
-        if output:
-            logIt(output)
+    else:
+        logIt("Error adding people.ldif", True)
 
 def walk_function(a, dir, files):
     for file in files:
@@ -277,14 +313,7 @@ changetype: modify
 %s: %s\n""" % (dn, operation, attr)
     if value_list == None: return
     for val in value_list:
-        val = str(val).strip()
-        if val.find('\n') > -1:
-            val = base64.b64encode(val)
-            modLdif = modLdif + "%s\n" % tab_attr(attr, val, True)
-        elif len(val) > (78 - len(attr)):
-            modLdif = modLdif + "%s\n" % tab_attr(attr, val)
-        else:
-            modLdif = modLdif + "%s: %s\n" % (attr, val)
+        modLdif = modLdif + getMod(attr, val)
     modLdif = modLdif + "\n"
     f = open(fn, 'w')
     f.write(modLdif)
@@ -310,38 +339,19 @@ if error:
 
 ldif_folder = "%s/ldif" % backup23_folder
 outputFolder = "./output_ldif"
-configLdifFolder = "%s/config" % outputFolder
-
-# Old Config
-appliance_config_old_fn = "%s/appliance.ldif" % ldif_folder
-organization_config_old_fn = "%s/organization.ldif" % ldif_folder
-oxAuth_config_old_fn = "%s/oxauth_config.ldif" % ldif_folder
-oxTrust_config_old_fn = "%s/oxtrust_config.ldif" % ldif_folder
-
-# New config
-appliance_config_new_fn = "%s/appliance_config_new.ldif" % outputFolder
-organization_config_new_fn = "%s/organization_config_new.ldif" % outputFolder
-oxAuth_config_new_fn = "%s/oxauth_config_new.ldif" % outputFolder
-oxTrust_config_new_fn = "%s/oxtrust_config_new.ldif" % outputFolder
-
-configMap = {"appliance": (appliance_config_old_fn, appliance_config_new_fn),
-             "organization": (organization_config_old_fn, organization_config_new_fn),
-             "oxauth": oxAuth_config_new_fn,
-             "oxtrust": oxTrust_config_new_fn
-            }
+outputLdifFolder = "%s/config" % outputFolder
 
 if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
 
-if not os.path.exists(configLdifFolder):
-    os.mkdir(configLdifFolder)
+if not os.path.exists(outputLdifFolder):
+    os.mkdir(outputLdifFolder)
+
+newLdif = "%s/current_config.ldif" % outputFolder
 
 stopOpenDJ()
 copyFiles(backup23_folder)
 startOpenDJ()
-backupCurrentConfig(configMap)
-restoreConfig(oxAuth_config_old_fn, oxAuth_config_new_fn, configLdifFolder, "oxauth")
-restoreConfig(oxTrust_config_old_fn, oxAuth_config_new_fn, configLdifFolder, "oxtrust")
-restoreConfig(organization_config_old_fn, organization_config_new_fn, configLdifFolder, "organization")
-restoreConfig(appliance_config_old_fn, appliance_config_new_fn, configLdifFolder, "appliance")
-uploadLDIF()
+getNewConfig(newLdif)
+restoreConfig(ldif_folder, newLdif, outputLdifFolder)
+uploadLDIF(ldif_folder, outputLdifFolder)
