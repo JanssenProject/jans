@@ -149,7 +149,7 @@ def getOldEntryMap(folder):
     files = os.listdir(folder)
     dnMap = {}
     for fn in files:
-        if fn == "people.ldif":
+        if (fn == "site.ldif") or (fn == "people.ldif"):
             continue
         dnList = getDns("%s/%s" % (folder,fn))
         for dn in dnList:
@@ -272,16 +272,26 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
         else:
             logIt("Error adding file %s" % fn, True)
 
-    # delete people organizational unit and default admin user
-    # so add doesn't throw error
+    # delete default admin user created in 2.4 install
     dn_list = getDns("/opt/opendj/ldif/people.ldif")
     deleteEntries(dn_list)
-    cmd = [ldapmodify] + ldap_creds + ['-a', '-f', "%s/%s" % (ldifFolder, "people.ldif")]
+
+    # Add People
+    cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', "%s/people.ldif" % ldifFolder]
     output = getOutput(cmd)
     if output:
         logIt(output)
     else:
         logIt("Error adding people.ldif", True)
+
+    dn_list = getDns("%s/site.ldif" % ldifFolder)
+    if dn_list > 2:
+        cmd = [ldapmodify] + ldap_creds + ['-a', '-c', '-f', "%s/site.ldif" % ldifFolder]
+        output = getOutput(cmd)
+        if output:
+            logIt(output)
+        else:
+            logIt("Error adding site.ldif", True)
 
 def walk_function(a, dir, files):
     for file in files:
