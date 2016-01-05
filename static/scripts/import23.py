@@ -228,12 +228,12 @@ def stopOpenDJ():
         logIt("OpenDJ did not stop properly... exiting. Check /opt/opendj/logs/errors", True)
         sys.exit(3)
 
-def tab_attr(attr, base64text, encoded=False):
+def tab_attr(attr, value, encoded=False):
     targetLength = 80
     lines = ['%s: ' % attr]
     if encoded:
         lines = ['%s:: ' % attr]
-    for char in base64text:
+    for char in value:
         current_line = lines[-1]
         if len(current_line) < 80:
             new_line = current_line + char
