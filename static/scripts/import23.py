@@ -50,25 +50,6 @@ ldap_creds = ['-h',
               password_file
               ]
 
-fixManagerGroupLdif = """dn: %s
-changetype: modify
-replace: gluuManagerGroup
-gluuManagerGroup: %s
-
-"""
-
-bulk_ldif_files =  [ "groups.ldif",
-                "people.ldif",
-                "u2f.ldif",
-                "attributes.ldif",
-                "hosts.ldif",
-                "scopes.ldif",
-                "uma.ldif",
-                "clients.ldif",
-                "scripts.ldif",
-                "site.ldif"
-                ]
-
 class MyLDIF(LDIFParser):
     def __init__(self, input, output):
         LDIFParser.__init__(self, input)
