@@ -55,6 +55,7 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
 
         userService = UserService.instance()
+        deviceRegistrationService = DeviceRegistrationService.instance()
         if (step == 1):
             print "oxPush2. Authenticate for step 1"
 
@@ -70,6 +71,18 @@ class PersonAuthentication(PersonAuthenticationType):
             enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
             if StringHelper.isNotEmpty(enrollment_mode):
                 auth_method = 'enroll'
+            
+            if (auth_method == 'authenticate'):
+                find_user_by_uid = userService.getUser(user_name)
+                if (find_user_by_uid == None):
+                    print "oxPush. Authenticate for step 1. Failed to find user"
+                    return False
+
+                user_inum = userService.getUserInum(find_user_by_uid)
+                u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.u2f_application_id, "oxId")
+                if (u2f_devices_list.size() == 0):
+                    auth_method = 'enroll'
+                    print "oxPush2. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, self.u2f_application_id, auth_method)
 
             print "oxPush2. Authenticate for step 1. auth_method: '%s'" % auth_method
             
@@ -123,7 +136,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # Validate if user has specified device_id enrollment
                 user_inum = userService.getUserInum(find_user_by_uid)
-                deviceRegistrationService = DeviceRegistrationService.instance()
 
                 u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id)
                 if (u2f_device == None):
