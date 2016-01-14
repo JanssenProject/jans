@@ -66,11 +66,18 @@ public class U2fAuthenticationWS {
 
 	@GET
 	@Produces({ "application/json" })
-	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+	public Response startAuthentication(@QueryParam("username") String userName, @FormParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		try {
-			log.debug("Startig authentication with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
+			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
 
-			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, userName);
+			String foundUserName = userName;
+			boolean oneStep = StringHelper.isEmpty(foundUserName);
+			if (oneStep) {
+				// In one step we expects empty username and not empty keyhandle
+				foundUserName = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandle);
+			}
+
+			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, foundUserName);
 			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
@@ -96,10 +103,11 @@ public class U2fAuthenticationWS {
 
 	@POST
 	@Produces({ "application/json" })
-	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("keyhandle") String keyHandle, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
 			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
+
 			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
 
 			String requestId = authenticateResponse.getRequestId();
@@ -112,7 +120,15 @@ public class U2fAuthenticationWS {
 			u2fAuthenticationService.removeAuthenticationRequestMessage(authenticateRequestMessageLdap);
 
 			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
-			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
+
+			String foundUserName = userName;
+			boolean oneStep = StringHelper.isEmpty(foundUserName);
+			if (oneStep) {
+				// In one step we expects empty username and not empty keyhandle
+				foundUserName = u2fAuthenticationService.getUserInumByKeyHandle(authenticateRequestMessage.getAppId(), keyHandle);
+			}
+
+			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserName);
 
 			// If sessionState is not empty update session
 			if (StringHelper.isNotEmpty(sessionState)) {
