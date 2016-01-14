@@ -306,6 +306,31 @@ public class UserService {
 		return String.format("inum=%s,%s", inum, peopleDn);
 	}
 
+	public String getUserInumByDn(String dn) {
+		if (StringHelper.isEmpty(dn)) {
+			return null;
+		}
+
+		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
+		if (!dn.toLowerCase().endsWith(peopleDn.toLowerCase())) {
+			return null;
+		}
+		String firstDnPart = dn.substring(0, dn.length() - peopleDn.length());
+		
+		String[] dnParts = firstDnPart.split(",");
+		if (dnParts.length == 0) {
+			return null;
+		}
+		
+		String userInumPart = dnParts[dnParts.length - 1];
+		String[] userInumParts = userInumPart.split("=");
+		if ((userInumParts.length == 2) && StringHelper.equalsIgnoreCase(userInumParts[0], "inum")) {
+			return userInumParts[1];
+		}
+
+		return null;
+	}
+
     public static UserService instance() {
         return (UserService) Component.getInstance(UserService.class);
     }
