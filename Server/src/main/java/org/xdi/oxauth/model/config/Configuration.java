@@ -21,7 +21,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 16, 2015
+ * @version January 15, 2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -48,6 +48,7 @@ public class Configuration {
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
     private String umaConfigurationEndpoint;
+    private String sectorIdentifierEndpoint;
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
@@ -452,6 +453,15 @@ public class Configuration {
 
     public void setUmaConfigurationEndpoint(String p_umaConfigurationEndpoint) {
         umaConfigurationEndpoint = p_umaConfigurationEndpoint;
+    }
+
+    @XmlElement(name = "sector-identifier-endpoint")
+    public String getSectorIdentifierEndpoint() {
+        return sectorIdentifierEndpoint;
+    }
+
+    public void setSectorIdentifierEndpoint(String sectorIdentifierEndpoint) {
+        this.sectorIdentifierEndpoint = sectorIdentifierEndpoint;
     }
 
     @XmlElement(name = "openid-sub-attribute")
