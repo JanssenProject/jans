@@ -111,6 +111,7 @@
     "oxAuthEndSessionUrl":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session",
     "oxAuthUserInfo":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/userinfo",
     "oxAuthLogoutUrl":"https://%(hostname)s/oxauth/logout",
+    "oxAuthSectorIdentifierUrl":"https://%(hostname)s/oxauth/sectoridentifier",
 
     "oxAuthClientId":"%(oxauth_client_id)s",
     "oxAuthClientPassword":"%(oxauthClient_encoded_pw)s",
