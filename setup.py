@@ -561,7 +561,7 @@ class Setup(object):
             return self.os_types[3]
 
         else:
-            return installObject.choose_from_list(self.os_types, "Operating System")
+            return self.choose_from_list(self.os_types, "Operating System")
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1093,7 +1093,7 @@ class Setup(object):
                     self.__dict__[prop] = p[prop]
                 except:
                     self.logIt("Error loading property %s" % prop)
-                    installObject.logIt(traceback.format_exc(), True)
+                    self.logIt(traceback.format_exc(), True)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -1165,12 +1165,12 @@ class Setup(object):
                                testSocket.getsockname()[0],
                                testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
             except:
-                installObject.logIt("No detected IP address", True)
+                self.logIt("No detected IP address", True)
                 self.logIt(traceback.format_exc(), True)
             if detectedIP:
-                installObject.ip = installObject.getPrompt("Enter IP Address", detectedIP)
+                self.ip = self.getPrompt("Enter IP Address", detectedIP)
             else:
-                installObject.ip = installObject.getPrompt("Enter IP Address")
+                self.ip = self.getPrompt("Enter IP Address")
 
         detectedHostname = None
         try:
@@ -1179,90 +1179,90 @@ class Setup(object):
             try:
                 detectedHostname = os.popen("/bin/hostname").read().strip()
             except:
-                installObject.logIt("No detected hostname", True)
+                self.logIt("No detected hostname", True)
                 self.logIt(traceback.format_exc(), True)
         if detectedHostname:
-            installObject.hostname = installObject.getPrompt("Enter hostname", detectedHostname)
+            self.hostname = self.getPrompt("Enter hostname", detectedHostname)
         else:
-            installObject.hostname = installObject.getPrompt("Enter hostname")
+            self.hostname = self.getPrompt("Enter hostname")
 
         # Get the OS type
-        installObject.os_type = installObject.detect_OS_type()
+        self.os_type = self.detect_OS_type()
 
         # Get city and state|province code
-        installObject.city = installObject.getPrompt("Enter your city or locality")
+        self.city = self.getPrompt("Enter your city or locality")
         long_enough = False
         while not long_enough:
-            state = installObject.getPrompt("Enter your state or province two letter code")
+            state = self.getPrompt("Enter your state or province two letter code")
             if len(state) != 2:
                 print "State or province code must be two characters"
             else:
-                installObject.state = state
+                self.state = state
                 long_enough = True
 
         # Get the Country Code
         long_enough = False
         while not long_enough:
-            countryCode = installObject.getPrompt("Enter two letter Country Code")
+            countryCode = self.getPrompt("Enter two letter Country Code")
             if len(countryCode) != 2:
                 print "Country code must be two characters"
             else:
-                installObject.countryCode = countryCode
+                self.countryCode = countryCode
                 long_enough = True
 
-        installObject.orgName = installObject.getPrompt("Enter Organization Name")
-        installObject.admin_email = installObject.getPrompt('Enter email address for support at your organization')
-        installObject.tomcat_max_ram = installObject.getPrompt("Enter maximum RAM for tomcat in MB", '1536')
-        randomPW = installObject.getPW()
-        installObject.ldapPass = installObject.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
+        self.orgName = self.getPrompt("Enter Organization Name")
+        self.admin_email = self.getPrompt('Enter email address for support at your organization')
+        self.tomcat_max_ram = self.getPrompt("Enter maximum RAM for tomcat in MB", '1536')
+        randomPW = self.getPW()
+        self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", "Yes")[0].lower()
         if promptForOxAuth == 'y':
-            installObject.installOxAuth = True
+            self.installOxAuth = True
         else:
-            installObject.installOxAuth = False
+            self.installOxAuth = False
 
         promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?", "Yes")[0].lower()
         if promptForOxTrust == 'y':
-            installObject.installOxTrust = True
+            self.installOxTrust = True
         else:
-            installObject.installOxTrust = False
+            self.installOxTrust = False
 
         promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
-            installObject.installLdap = True
+            self.installLdap = True
         else:
-            installObject.installLdap = False
+            self.installLdap = False
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
-            installObject.installHttpd = True
+            self.installHttpd = True
         else:
-            installObject.installHttpd = False
+            self.installHttpd = False
 
         promptForShibIDP = self.getPrompt("Install Shibboleth 2 SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
-            installObject.installSaml = True
+            self.installSaml = True
         else:
-            installObject.installSaml = False
+            self.installSaml = False
 
         promptForAsimba = self.getPrompt("Install Asimba SAML Proxy?", "No")[0].lower()
         if promptForAsimba == 'y':
-            installObject.installAsimba = True
+            self.installAsimba = True
         else:
-            installObject.installAsimba = False
+            self.installAsimba = False
 
         promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
         if promptForCAS == 'y':
-            installObject.installCas = True
+            self.installCas = True
         else:
-            installObject.installCas = False
+            self.installCas = False
 
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
         if promptForOxAuthRP == 'y':
-            installObject.installOxAuthRP = True
+            self.installOxAuthRP = True
         else:
-            installObject.installOxAuthRP = False
+            self.installOxAuthRP = False
 
     def removeDirs(self, name):
         try:
@@ -1559,7 +1559,7 @@ def getOpts(argv, setupOptions):
         if opt == '-a':
             setupOptions['installAsimba'] = True
         elif opt == '-c':
-            setupOptions['installCAS'] = True
+            setupOptions['installCas'] = True
         elif opt == '-d':
             if os.path.exists(arg):
                 setupOptions['install_dir'] = arg
@@ -1582,7 +1582,7 @@ def getOpts(argv, setupOptions):
         elif opt == "-N":
             setupOptions['installHTTPD'] = False
         elif opt == "-s":
-            setupOptions['installSAML'] = True
+            setupOptions['installSaml'] = True
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == '-r':
@@ -1599,9 +1599,9 @@ if __name__ == '__main__':
         'installOxTrust': True,
         'installLDAP': True,
         'installHTTPD': True,
-        'installSAML': False,
+        'installSaml': False,
         'installAsimba': False,
-        'installCAS': False,
+        'installCas': False,
         'installOxAuthRP': False
     }
     if len(sys.argv) > 1:
@@ -1615,9 +1615,9 @@ if __name__ == '__main__':
     installObject.installOxTrust = setupOptions['installOxTrust']
     installObject.installLdap = setupOptions['installLDAP']
     installObject.installHttpd = setupOptions['installHTTPD']
-    installObject.installSaml = setupOptions['installSAML']
+    installObject.installSaml = setupOptions['installSaml']
     installObject.installAsimba = setupOptions['installAsimba']
-    installObject.installCas = setupOptions['installCAS']
+    installObject.installCas = setupOptions['installCas']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
