@@ -111,9 +111,9 @@ public final class ApplicationConfiguration implements Serializable {
 	private String oxAuthTokenUrl;
 	private String oxAuthEndSessionUrl;
 	private String oxAuthLogoutUrl;
-
 	private String oxAuthTokenValidationUrl;
 	private String oxAuthUserInfo;
+    private String oxAuthSectorIdentifierUrl;
 
 	private String oxAuthClientId;
 	private String oxAuthClientPassword;
@@ -635,7 +635,15 @@ public final class ApplicationConfiguration implements Serializable {
 		this.oxAuthUserInfo = oxAuthUserInfo;
 	}
 
-	public String getOxAuthClientId() {
+    public String getOxAuthSectorIdentifierUrl() {
+        return oxAuthSectorIdentifierUrl;
+    }
+
+    public void setOxAuthSectorIdentifierUrl(String oxAuthSectorIdentifierUrl) {
+        this.oxAuthSectorIdentifierUrl = oxAuthSectorIdentifierUrl;
+    }
+
+    public String getOxAuthClientId() {
 		return oxAuthClientId;
 	}
 
