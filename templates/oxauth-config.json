@@ -21,6 +21,7 @@
     "idGenerationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/id",
     "introspectionEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/introspection",
     "umaConfigurationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/uma-configuration",
+    "sectorIdentifierEndpoint":"https://%(hostname)s/oxauth/sectoridentifier",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         "code",
