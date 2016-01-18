@@ -770,7 +770,7 @@
             <id>toopher</id>
             <activation>
                 <property>
-                    <name>toopher-enabled</name>
+                    <name>!toopher-disabled</name>
                 </property>
             </activation>
             <properties>
@@ -804,7 +804,7 @@
             <id>twilio</id>
             <activation>
                 <property>
-                    <name>twilio-enabled</name>
+                    <name>!twilio-disabled</name>
                 </property>
             </activation>
             <properties>
