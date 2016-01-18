@@ -5,7 +5,7 @@
     "jetty_port":8098,
     "start_jetty":false,
     "register_client_app_type":"web",
-    "register_client_response_types":"code id_token token",
+    "register_client_response_types":"code",
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
@@ -15,5 +15,5 @@
     "public_key":"",
     "public_password":"",
     "license_password":"",
-    "op_host":"https://ce-dev.gluu.org"
+    "op_host":""
 }
