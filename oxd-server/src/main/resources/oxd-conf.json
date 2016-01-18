@@ -4,8 +4,6 @@
     "time_out_in_seconds":0,
     "jetty_port":8098,
     "start_jetty":false,
-    "register_client_app_type":"web",
-    "register_client_response_types":"code",
     "use_client_authentication_for_pat":true,
     "trust_all_certs":true,
     "trust_store_path":"",

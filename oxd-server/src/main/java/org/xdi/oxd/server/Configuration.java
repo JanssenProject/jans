@@ -21,10 +21,10 @@ public class Configuration {
     private int jettyPort;
     @JsonProperty(value = "start_jetty")
     private boolean startJetty;
-    @JsonProperty(value = "register_client_app_type")
-    private String registerClientAppType;
-    @JsonProperty(value = "register_client_response_types")
-    private String registerClientResponesType;
+    //@JsonProperty(value = "register_client_app_type")
+    private String registerClientAppType = "web";
+//    @JsonProperty(value = "register_client_response_types")
+    private String registerClientResponesType = "code";
     @JsonProperty(value = "localhost_only")
     private Boolean localhostOnly;
     @JsonProperty(value = "use_client_authentication_for_pat")
