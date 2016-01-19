@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
  *
  * @author Yuriy Zabrovarnyy
  */
-@Path("/requester/rpt")
+@Path("/requester")
 @Api(value = "/requester/rpt", description = "The endpoint at which the requester asks the AM to issue an RPT")
 @Name("rptRestWebService")
 public class CreateRptWS {
@@ -49,6 +49,7 @@ public class CreateRptWS {
     @In
     private UmaValidationService umaValidationService;
 
+    @Path("rpt")
     @POST
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     @ApiOperation(value = "The endpoint at which the requester asks the AM to issue an RPT",
@@ -57,8 +58,39 @@ public class CreateRptWS {
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Unauthorized")
     })
-    public Response getRequesterPermissionToken(@HeaderParam("Authorization") String authorization,
-                                                @HeaderParam("Host") String amHost) {
+    public Response getRpt(@HeaderParam("Authorization") String authorization,
+                           @HeaderParam("Host") String amHost) {
+        try {
+            umaValidationService.assertHasAuthorizationScope(authorization);
+            String validatedAmHost = umaValidationService.validateAmHost(amHost);
+
+            UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);
+
+            return Response.status(Response.Status.CREATED).
+                    entity(ServerUtil.asJson(new RPTResponse(rpt.getCode()))).
+                    build();
+        } catch (Exception ex) {
+            log.error("Exception happened", ex);
+            if (ex instanceof WebApplicationException) {
+                throw (WebApplicationException) ex;
+            }
+
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+        }
+    }
+
+    @Path("gat")
+    @POST
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @ApiOperation(value = "The endpoint at which the requester asks the AM to issue an GAT",
+            produces = UmaConstants.JSON_MEDIA_TYPE,
+            notes = "The endpoint at which the requester asks the AM to issue an GAT")
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Unauthorized")
+    })
+    public Response getGat(@HeaderParam("Authorization") String authorization,
+                           @HeaderParam("Host") String amHost) {
         try {
             umaValidationService.assertHasAuthorizationScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
