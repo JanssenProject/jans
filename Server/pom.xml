@@ -801,10 +801,32 @@
         </profile>
 
         <profile>
+            <id>twilio</id>
+            <activation>
+                <property>
+                    <name>!twilio-disabled</name>
+                </property>
+            </activation>
+            <properties>
+            </properties>
+            <build>
+                <plugins>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.twilio.sdk</groupId>
+                    <artifactId>twilio-java-sdk</artifactId>
+                    <version>3.4.5</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>oxpush</id>
             <activation>
                 <property>
-                    <name>!oxpush-disabled</name>
+                    <name>oxpush-enabled</name>
                 </property>
             </activation>
             <properties>
