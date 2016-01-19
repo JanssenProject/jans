@@ -72,8 +72,8 @@ public class RPTManager implements IRPTManager {
         return rpt;
     }
 
-    public void addRPT(UmaRPT requesterPermissionToken, String clientDn) {
-        manager.addRPT(requesterPermissionToken, clientDn);
+    public void addRPT(UmaRPT rpt, String clientDn) {
+        manager.addRPT(rpt, clientDn);
     }
 
     public UmaRPT getRPTByCode(String requesterPermissionTokenCode) {
