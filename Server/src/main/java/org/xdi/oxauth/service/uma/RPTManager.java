@@ -62,11 +62,11 @@ public class RPTManager implements IRPTManager {
     }
 
     @Override
-    public UmaRPT createRPT(String authorization, String amHost) {
+    public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
         String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
 
-        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken);
+        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken, isGat);
 
         addRPT(rpt, authorizationGrant.getClientDn());
         return rpt;
@@ -80,8 +80,8 @@ public class RPTManager implements IRPTManager {
         return manager.getRPTByCode(requesterPermissionTokenCode);
     }
 
-    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat) {
-        return manager.createRPT(grant, amHost, aat);
+    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat, boolean isGat) {
+        return manager.createRPT(grant, amHost, aat, isGat);
     }
 
     public void deleteRPT(String rptCode) {

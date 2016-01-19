@@ -112,7 +112,7 @@ public class RptPermissionAuthorizationWS {
             umaValidationService.validateRPT(rpt);
         } catch (WebApplicationException e) {
             // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
-            // it's up to impelementation whether to create new RPT for each request or pass back requests RPT.
+            // it's up to implementation whether to create new RPT for each request or pass back requests RPT.
             // Here we decided to pass back new RPT if request's RPT in invalid.
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
@@ -146,7 +146,7 @@ public class RptPermissionAuthorizationWS {
         }
 
         // Add permission to RPT
-        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest)) {
+        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest.getClaims())) {
             rptManager.addPermissionToRPT(rpt, resourceSetPermission);
             return rpt;
         }
