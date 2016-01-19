@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -14,14 +15,24 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
+import org.xdi.oxauth.model.exception.InvalidJweException;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.token.JsonWebResponse;
+import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.security.StringEncrypter;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -29,6 +40,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.security.SignatureException;
+import java.util.List;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
@@ -48,6 +61,8 @@ public class CreateRptWS {
     private RPTManager rptManager;
     @In
     private UmaValidationService umaValidationService;
+    @In
+    private TokenService tokenService;
 
     @Path("rpt")
     @POST
@@ -66,8 +81,14 @@ public class CreateRptWS {
 
             UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);
 
+            String rptResponse = rpt.getCode();
+            final Boolean umaRptAsJwt = ConfigurationFactory.instance().getConfiguration().getUmaRptAsJwt();
+            if (umaRptAsJwt != null && umaRptAsJwt) {
+                rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
+            }
+
             return Response.status(Response.Status.CREATED).
-                    entity(ServerUtil.asJson(new RPTResponse(rpt.getCode()))).
+                    entity(ServerUtil.asJson(new RPTResponse(rptResponse))).
                     build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
@@ -78,6 +99,22 @@ public class CreateRptWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
+    }
+
+    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException, InvalidClaimException {
+        final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
+
+        JwtSigner jwtSigner = new JwtSigner(grant.getClient());
+        Jwt jwt = jwtSigner.newJwt();
+
+        jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
+        jwt.getClaims().setIssuedAt(rpt.getCreationDate());
+
+        if (!gluuAccessTokenScopes.isEmpty()) {
+            jwt.getClaims().setClaim("scopes", gluuAccessTokenScopes);
+        }
+
+        return jwtSigner.sign();
     }
 
     @Path("gat")
@@ -97,8 +134,14 @@ public class CreateRptWS {
 
             UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);
 
+            String rptResponse = rpt.getCode();
+            final Boolean umaRptAsJwt = ConfigurationFactory.instance().getConfiguration().getUmaRptAsJwt();
+            if (umaRptAsJwt != null && umaRptAsJwt) {
+                rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
+            }
+
             return Response.status(Response.Status.CREATED).
-                    entity(ServerUtil.asJson(new RPTResponse(rpt.getCode()))).
+                    entity(ServerUtil.asJson(new RPTResponse(rptResponse))).
                     build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
