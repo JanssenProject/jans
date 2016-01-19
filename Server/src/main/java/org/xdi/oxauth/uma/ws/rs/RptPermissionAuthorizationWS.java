@@ -102,7 +102,7 @@ public class RptPermissionAuthorizationWS {
                                           String amHost) {
         UmaRPT rpt;
         if (Strings.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-            rpt = rptManager.createRPT(authorization, amHost);
+            rpt = rptManager.createRPT(authorization, amHost, false);
         } else {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
