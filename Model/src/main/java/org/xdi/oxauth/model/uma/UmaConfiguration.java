@@ -112,6 +112,10 @@ public class UmaConfiguration {
             required = true)
     private String rptEndpoint;
 
+    @ApiModelProperty(value = "The endpoint URI at which the client asks the authorization server for an GAT. Usage of this endpoint is defined by Gluu documentation.",
+            required = true)
+    private String gatEndpoint;
+
     @ApiModelProperty(value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String authorizationEndpoint;
@@ -347,6 +351,16 @@ public class UmaConfiguration {
 
     public void setRptEndpoint(String rptEndpoint) {
         this.rptEndpoint = rptEndpoint;
+    }
+
+    @JsonProperty(value = "gat_endpoint")
+    @XmlElement(name = "gat_endpoint")
+    public String getGatEndpoint() {
+        return gatEndpoint;
+    }
+
+    public void setGatEndpoint(String gatEndpoint) {
+        this.gatEndpoint = gatEndpoint;
     }
 
     @JsonProperty(value = "authorization_endpoint")

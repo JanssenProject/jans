@@ -89,6 +89,7 @@ public class UmaConfigurationWS {
             c.setResourceSetRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionRegistrationEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
+            c.setGatEndpoint(baseEndpointUri + "/requester/gat");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
             c.setRptAsJwt(configuration.getUmaRptAsJwt());
 
