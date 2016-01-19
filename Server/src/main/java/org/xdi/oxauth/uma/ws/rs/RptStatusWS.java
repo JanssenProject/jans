@@ -17,11 +17,13 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.GatIntrospectionResponse;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.service.uma.AbstractRPTManager;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
@@ -29,6 +31,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,8 +105,14 @@ public class RptStatusWS {
 
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
+            if (AbstractRPTManager.isGat(rpt.getCode())) {
+                return gatResponse(rpt);
+            }
             if (!isValid(rpt)) {
-                return Response.status(Response.Status.OK).entity(new RptIntrospectionResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
+                return Response.status(Response.Status.OK).
+                        entity(new RptIntrospectionResponse(false)).
+                        cacheControl(ServerUtil.cacheControl(true)).
+                        build();
             }
 
             final List<UmaPermission> permissions = buildStatusResponsePermissions(rpt);
@@ -128,6 +137,30 @@ public class RptStatusWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
+    }
+
+    private Response gatResponse(UmaRPT rpt) throws IOException {
+        if (!isValid(rpt)) {
+            return Response.status(Response.Status.OK).
+                    entity(new GatIntrospectionResponse(false)).
+                    cacheControl(ServerUtil.cacheControl(true)).
+                    build();
+        }
+
+        final GatIntrospectionResponse statusResponse = new GatIntrospectionResponse();
+        statusResponse.setActive(true);
+        statusResponse.setExpiresAt(rpt.getExpirationDate());
+        statusResponse.setIssuedAt(rpt.getCreationDate());
+        statusResponse.setScopes(rpt.getPermissions());
+
+        // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
+        final String entity = ServerUtil.asJson(statusResponse);
+
+        return Response.status(Response.Status.OK).
+                entity(entity).
+                cacheControl(ServerUtil.cacheControl(true)).
+                build();
+
     }
 
     private boolean isValid(UmaRPT p_rpt) {
