@@ -21,7 +21,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 16, 2015
+ * @version January 15, 2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -53,7 +53,8 @@ public class Configuration {
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
-
+    
+    private String sectorIdentifierEndpoint;
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
