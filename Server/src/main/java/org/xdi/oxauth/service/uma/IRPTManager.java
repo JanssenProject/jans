@@ -24,7 +24,7 @@ public interface IRPTManager {
 
     public UmaRPT getRPTByCode(String requesterPermissionTokenCode);
 
-    UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat);
+    UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat, boolean isGat);
 
     public void deleteRPT(String rptCode);
 
@@ -36,5 +36,5 @@ public interface IRPTManager {
 
     public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt);
 
-    UmaRPT createRPT(String authorization, String amHost);
+    UmaRPT createRPT(String authorization, String amHost, boolean isGat);
 }
