@@ -139,26 +139,10 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
             Set<String> scopes)
             throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
             InvalidClaimException {
-        JsonWebResponse jwr = createJwr(grant, nonce, authorizationCode, accessToken, scopes);
+        JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
-    }
-
-    public static JsonWebResponse createJwr(
-            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-            Set<String> scopes)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException {
-        IdTokenFactory idTokenFactory = IdTokenFactory.instance();
-
-        final Client grantClient = grant.getClient();
-        if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
-                && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            return idTokenFactory.generateEncryptedIdToken(grant, nonce, authorizationCode, accessToken, scopes);
-        } else {
-            return idTokenFactory.generateSignedIdToken(grant, nonce, authorizationCode, accessToken, scopes);
-        }
     }
 
     @Override
