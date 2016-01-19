@@ -120,7 +120,7 @@ public class AuthenticationService extends RequestService {
 			throw new DeviceCompromisedException(device, "Device has been marked as compromised, cannot authenticate");
 		}
 
-		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getDeviceRegistrationConfiguration().getKeyHandle());
+		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getKeyHandle());
 	}
 
 	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName)
@@ -141,7 +141,7 @@ public class AuthenticationService extends RequestService {
 
 		DeviceRegistration usedDeviceRegistration = null;
 		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
-			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getDeviceRegistrationConfiguration().getKeyHandle())) {
+			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getKeyHandle())) {
 				usedDeviceRegistration = deviceRegistration;
 				break;
 			}
@@ -226,6 +226,21 @@ public class AuthenticationService extends RequestService {
 
 	public void removeAuthenticationRequestMessage(AuthenticateRequestMessageLdap authenticateRequestMessageLdap) {
 		removeRequestMessage(authenticateRequestMessageLdap);
+	}
+
+	public String getUserInumByKeyHandle(String appId, String keyHandle) {
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "oxId");
+		if (deviceRegistrations.isEmpty()) {
+			throw new BadInputException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
+		}
+
+		if (deviceRegistrations.size() != 1) {
+			throw new BadInputException(String.format("There are '%d' devices with keyHandle '%s' in LDAP", deviceRegistrations.size(), keyHandle));
+		}
+		
+		DeviceRegistration deviceRegistration = deviceRegistrations.get(0);
+
+		return userService.getUserInumByDn(deviceRegistration.getDn());
 	}
 
 	/**
