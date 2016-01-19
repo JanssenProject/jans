@@ -168,14 +168,14 @@ public class UmaValidationService {
         return authorizationGrant;
     }
 
-    public void validateRPT(UmaRPT requesterPermissionToken) {
-   		if (requesterPermissionToken == null) {
+    public void validateRPT(UmaRPT rpt) {
+   		if (rpt == null) {
    			throw new WebApplicationException(Response.status(UNAUTHORIZED)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
    		}
 
-   		requesterPermissionToken.checkExpired();
-   		if (!requesterPermissionToken.isValid()) {
+   		rpt.checkExpired();
+   		if (!rpt.isValid()) {
    			throw new WebApplicationException(Response.status(UNAUTHORIZED)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
    		}
