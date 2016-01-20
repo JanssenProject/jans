@@ -144,23 +144,21 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         elif (step == 2):
             print "oxPush2. Authenticate for step 2"
-            if self.oneStep:
-                session_attributes = context.get("sessionAttributes")
+            session_attributes = context.get("sessionAttributes")
 
-                session_device_status = self.getSessionDeviceStatus(session_attributes);
-                if session_device_status == None:
-                    return False
+            session_device_status = self.getSessionDeviceStatus(session_attributes);
+            if session_device_status == None:
+                return False
 
-                # There are two steps only in enrollment mode
-                if not session_device_status['enroll']:
-                    return False
+            u2f_device_id = session_device_status['device_id']
 
+            # There are two steps only in enrollment mode
+            if self.oneStep and session_device_status['enroll']:
                 authenticated_user = self.processBasicAuthentication(credentials)
                 if authenticated_user == None:
                     return False
 
                 user_inum = userService.getUserInum(authenticated_user)
-                u2f_device_id = session_device_status['device_id']
                 
                 attach_result = deviceRegistrationService.attachUserDeviceRegistration(user_inum, u2f_device_id)
 
@@ -172,24 +170,18 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "oxPush2. Authenticate for step 2. Failed to determine user name"
                     return False
 
-                session_device_status = self.getSessionDeviceStatus(session_attributes);
-                if session_device_status == None:
-                    return
-
-                u2f_device_id = session_device_status['device_id']
-
                 validation_result = self.validateSessionDeviceStatus(session_device_status, user_name)
                 if validation_result:
                     print "oxPush2. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 else:
                     return False
                 
-                oxpush2_request = session_device_status['oxpush2_request']
+                oxpush2_request = json.loads(session_device_status['oxpush2_request'])
                 auth_method = oxpush2_request['method']
                 if auth_method in ['enroll', 'authenticate']:
                     return validation_result
-                else:
-                    print "oxPush2. Authenticate for step 2. U2F auth_method is invalid"
+
+                print "oxPush2. Authenticate for step 2. U2F auth_method is invalid"
 
             return False
         else:
