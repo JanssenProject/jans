@@ -82,8 +82,9 @@ public class U2fAuthenticationWS {
 			boolean oneStep = StringHelper.isEmpty(userName);
 			String foundUserName = userName;
 			if (oneStep) {
-				// Convert to non URL safe string
+				// Convert to non URL safe base64 string
 				String keyHandleWithoutPading = Base64Util.base64urlencode(Base64Util.base64urldecode(keyHandle));
+
 				// In one step we expects empty username and not empty keyhandle
 				String userInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
 				foundUserName = userService.getUserNameByInum(userInum);
