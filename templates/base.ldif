@@ -237,3 +237,10 @@ objectclass: top
 objectclass: organizationalunit
 ou: metric
 
+################################
+
+# Sector Identifiers - LEVEL 3
+dn: ou=sector_identifiers,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
+ou: sector_identifiers

@@ -1601,3 +1601,6 @@ olcObjectClasses: ( 2.5.7.8.4 NAME 'oxLiteralNode' SUP top STRUCTURAL MUST objec
 olcObjectClasses: ( 2.5.7.8.5 NAME 'oxClientAuthorizations' SUP top STRUCTURAL MUST objectclass MAY
  ( oxId $ oxAuthClientId $ oxAuthScope )
   X-ORIGIN 'Gluu created objectclass' )
+olcObjectClasses: ( 2.5.7.8.6 NAME 'oxSectorIdentifier' SUP top STRUCTURAL MUST objectclass MAY
+ ( inum $ oxAuthRedirectURI $ oxAuthClientId )
+  X-ORIGIN 'Gluu created objectclass' )

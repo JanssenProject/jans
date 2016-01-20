@@ -2294,3 +2294,6 @@ objectclasses: ( oxMetric-oid NAME 'oxMetric' SUP top STRUCTURAL MUST objectclas
 objectclasses: ( oxClientAuthorizations-oid NAME 'oxClientAuthorizations' SUP top STRUCTURAL MUST objectclass MAY
   ( oxId $ oxAuthClientId $ oxAuthScope )
   X-ORIGIN 'Gluu created objectclass' )
+objectclasses: ( oxSectorIdentifier-oid NAME 'oxSectorIdentifier' SUP top STRUCTURAL MUST objectclass MAY
+  ( inum $ oxAuthRedirectURI $ oxAuthClientId )
+  X-ORIGIN 'Gluu created objectclass' )
