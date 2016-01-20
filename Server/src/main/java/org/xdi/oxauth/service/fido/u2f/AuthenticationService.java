@@ -24,6 +24,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
@@ -183,21 +184,14 @@ public class AuthenticationService extends RequestService {
 		throw new BadInputException("Responses keyHandle does not match any contained request");
 	}
 
-	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String sessionState) {
+	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String userName, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String authenticateRequestMessageId = UUID.randomUUID().toString();
 
-		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(requestMessage);
-		authenticateRequestMessageLdap.setId(authenticateRequestMessageId);
-		authenticateRequestMessageLdap.setDn(getDnForAuthenticateRequestMessage(authenticateRequestMessageId));
-		authenticateRequestMessageLdap.setCreationDate(now);
-		authenticateRequestMessageLdap.setSessionState(sessionState);
+		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(getDnForAuthenticateRequestMessage(authenticateRequestMessageId),
+				authenticateRequestMessageId, now, sessionState, userName, requestMessage);
 
 		ldapEntryManager.persist(authenticateRequestMessageLdap);
-	}
-
-	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage) {
-		storeAuthenticationRequestMessage(requestMessage, null);
 	}
 
 	public AuthenticateRequestMessage getAuthenticationRequestMessage(String oxId) {
@@ -228,10 +222,15 @@ public class AuthenticationService extends RequestService {
 		removeRequestMessage(authenticateRequestMessageLdap);
 	}
 
-	public String getUserInumByKeyHandle(String appId, String keyHandle) {
+
+	public String getUserInumByKeyHandle(String appId, String keyHandle) throws InvalidKeyHandleDeviceException {
+		if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+			return null;
+		}
+
 		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "oxId");
 		if (deviceRegistrations.isEmpty()) {
-			throw new BadInputException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
+			throw new InvalidKeyHandleDeviceException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
 		}
 
 		if (deviceRegistrations.size() != 1) {
