@@ -13,6 +13,7 @@ from java.util import Arrays
 
 import sys
 import java
+import datetime
 
 try:
     import json
@@ -28,7 +29,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if not (configurationAttributes.containsKey("u2f_application_id") and
                 configurationAttributes.containsKey("u2f_authentication_mode")):
-            print "oxPush2. Initialization. Properties u2f_application_id and u2f_authentication_mod are mandatory"
+            print "oxPush2. Initialization. Properties u2f_application_id and u2f_authentication_mode are mandatory"
             return False
 
         self.u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
@@ -48,7 +49,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Initialization. Valid authentication_mode values are one_step and two_step"
             return False
 
-        print "oxPush2. Initialized successfully"
+        print "oxPush2. Initialized successfully. oneStep: '%s', twoStep: '%s'" % (self.oneStep, self.twoStep)
+
         return True   
 
     def destroy(self, configurationAttributes):
@@ -87,6 +89,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 validation_result = self.validateSessionDeviceStatus(session_device_status)
                 if validation_result:
                     print "oxPush2. Authenticate for step 1. User successfully authenticated with u2f_device '%s'" % u2f_device_id
+                else:
+                    return False
                     
                 if not session_device_status['one_step']:
                     print "oxPush2. Authenticate for step 1. u2f_device '%s' is not one step device" % u2f_device_id
@@ -167,25 +171,22 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (user_name == None):
                     print "oxPush2. Authenticate for step 2. Failed to determine user name"
                     return False
-    
-                session_attributes = context.get("sessionAttributes")
-                if (not session_attributes.containsKey("oxpush2_request")):
-                    print "oxPush2. Authenticate for step 2. There is no oxPush2 request in session attributes"
+
+                session_device_status = self.getSessionDeviceStatus(session_attributes);
+                if session_device_status == None:
+                    return
+
+                u2f_device_id = session_device_status['device_id']
+
+                validation_result = self.validateSessionDeviceStatus(session_device_status, user_name)
+                if validation_result:
+                    print "oxPush2. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
+                else:
                     return False
                 
-                oxpush2_request_json = session_attributes.get("oxpush2_request")
-                oxpush2_request = json.loads(oxpush2_request_json)
-    
+                oxpush2_request = session_device_status['oxpush2_request']
                 auth_method = oxpush2_request['method']
                 if auth_method in ['enroll', 'authenticate']:
-                    session_device_status = self.getSessionDeviceStatus(session_attributes);
-                    if session_device_status == None:
-                        return
-    
-                    validation_result = self.validateSessionDeviceStatus(session_device_status, user_name)
-                    if validation_result:
-                        print "oxPush2. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, session_device_status['device_id'])
-    
                     return validation_result
                 else:
                     print "oxPush2. Authenticate for step 2. U2F auth_method is invalid"
@@ -208,7 +209,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
                 oxpush2_request = json.dumps({'app': self.u2f_application_id,
                                    'issuer': issuer,
-                                   'state': session_state}, separators=(',',':'))
+                                   'state': session_state,
+                                   'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
                 print "oxPush2. Prepare for step 1. Prepared oxpush2_request:", oxpush2_request
     
                 context.set("oxpush2_request", oxpush2_request)
@@ -249,7 +251,8 @@ class PersonAuthentication(PersonAuthenticationType):
                                'app': self.u2f_application_id,
                                'issuer': issuer,
                                'method': auth_method,
-                               'state': session_state}, separators=(',',':'))
+                               'state': session_state,
+                                'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
             print "oxPush2. Prepare for step 2. Prepared oxpush2_request:", oxpush2_request
 
             context.set("oxpush2_request", oxpush2_request)
@@ -376,10 +379,11 @@ class PersonAuthentication(PersonAuthenticationType):
         if session_attributes.containsKey("oxpush2_u2f_device_one_step"):
             one_step = StringHelper.equalsIgnoreCase("true", session_attributes.get("oxpush2_u2f_device_one_step"))
                         
+        oxpush2_request = session_attributes.get("oxpush2_request")
         u2f_device_id = session_attributes.get("oxpush2_u2f_device_id")
         user_name = session_attributes.get("oxpush2_u2f_device_user_name")
 
-        session_device_status = {"device_id": u2f_device_id, "user_name" : user_name, "enroll" : enroll, "one_step" : one_step}
+        session_device_status = {"oxpush2_request": oxpush2_request, "device_id": u2f_device_id, "user_name" : user_name, "enroll" : enroll, "one_step" : one_step}
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
         
         return session_device_status
