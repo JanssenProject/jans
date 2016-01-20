@@ -69,6 +69,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	}
 
 	public DeviceRegistration(String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
+		this.keyHandle = keyHandle;
 		try {
 			String attestationCertDecoded = Base64Util.base64urlencode(attestationCert.getEncoded());
 			this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(publicKey, attestationCertDecoded);
@@ -127,11 +128,11 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.keyHandle = keyHandle;
 	}
 
-	public Integer getKeyHandlHashCode() {
+	public Integer getKeyHandleHashCode() {
 		return keyHandleHashCode;
 	}
 
-	public void setKeyHandlHashCode(Integer keyHandleHashCode) {
+	public void setKeyHandleHashCode(Integer keyHandleHashCode) {
 		this.keyHandleHashCode = keyHandleHashCode;
 	}
 
