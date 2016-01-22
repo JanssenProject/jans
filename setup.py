@@ -37,6 +37,7 @@ import subprocess
 import sys
 import getopt
 import hashlib
+import re
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -67,6 +68,8 @@ class Setup(object):
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
+        self.os_initdaemon = None
+        self.apache_version = None
 
         self.distFolder = "/opt/dist"
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
@@ -164,6 +167,7 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
+        self.init_files_centos7 = ['%s/static/tomcat/centos7/tomcat' % self.install_dir]
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
         self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
 
@@ -199,6 +203,8 @@ class Setup(object):
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
         self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
+        self.apache2_24_conf = '%s/httpd_2.4.conf' % self.outputFolder
+        self.apache2_ssl_24_conf = '%s/https_gluu_2.4.conf' % self.outputFolder
         self.ldif_base = '%s/base.ldif' % self.outputFolder
         self.ldif_appliance = '%s/appliance.ldif' % self.outputFolder
         self.ldif_attributes = '%s/attributes.ldif' % self.outputFolder
@@ -269,6 +275,8 @@ class Setup(object):
                      self.org_custom_schema: False,
                      self.apache2_conf: False,
                      self.apache2_ssl_conf: False,
+                     self.apache2_24_conf: False,
+                     self.apache2_ssl_24_conf: False,
                      self.etc_hosts: False,
                      self.etc_hostname: False,
                      self.ldif_base: False,
@@ -428,7 +436,16 @@ class Setup(object):
         return return_value
 
     def configure_httpd(self):
-        if self.os_type in ['centos', 'redhat', 'fedora']:
+        # CentOS 7.* + systemd + apache 2.4
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
+
+        # CentOS 6.* + init + apache 2.2
+        if self.os_type == 'centos' and self.os_initdaemon == 'init':
+            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
+        if self.os_type in ['redhat', 'fedora']:
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
@@ -547,7 +564,7 @@ class Setup(object):
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
             self.logIt(traceback.format_exc(), True)
 
-    def detect_OS_type(self):
+    def detect_os_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         try:
@@ -562,6 +579,23 @@ class Setup(object):
 
         else:
             return self.choose_from_list(self.os_types, "Operating System")
+
+    def detect_initd(self):
+        return open(os.path.join('/proc/1/status'), 'r').read().split()[1]
+
+    def determineApacheVersion(self):
+        # httpd -v
+        # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
+        # OR
+        # Server version: Apache/2.4.6 (CentOS) /etc/redhat-release  CentOS Linux release 7.1.1503 (Core)
+        cmd = "httpd -v | egrep '^Server version'"
+        PIPE = subprocess.PIPE
+        p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
+        apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
+        if re.match(r'2\.4\..*', apache_version):
+            return "2.4"
+
+        return "2.2"
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -594,7 +628,7 @@ class Setup(object):
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
-        self.logIt("Reding OpenDJ truststore")
+        self.logIt("Reading OpenDJ truststore")
 
         openDjPinFn = '%s/config/keystore.pin' % self.ldapBaseFolder
         openDjTruststoreFn = '%s/config/truststore' % self.ldapBaseFolder
@@ -1186,9 +1220,6 @@ class Setup(object):
         else:
             self.hostname = self.getPrompt("Enter hostname")
 
-        # Get the OS type
-        self.os_type = self.detect_OS_type()
-
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
         long_enough = False
@@ -1460,9 +1491,19 @@ class Setup(object):
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
+        
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+              self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+              self.run(["/usr/sbin/chkconfig", "--add", "opendj"])
+        else:
+              self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
-        for init_file in self.init_files:
+        init_files_to_install = self.init_files
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+            init_files_to_install = self.init_files_centos7
+
+        for init_file in init_files_to_install:
             try:
                 script_name = os.path.split(init_file)[-1]
                 self.copyFile(init_file, "/etc/init.d")
@@ -1470,6 +1511,7 @@ class Setup(object):
             except:
                 self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                 self.logIt(traceback.format_exc(), True)
+
         if self.os_type in ['centos', 'redhat', 'fedora']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
@@ -1481,17 +1523,26 @@ class Setup(object):
     def start_services(self):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
-
         apache_service_name = 'httpd'
-        if self.os_type in ['debian', 'ubuntu']:
-            service_path = '/usr/sbin/service'
-            apache_service_name = 'apache2'
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+           service_path = '/usr/bin/systemctl'
+           apache_service_name = 'httpd'
+        elif self.os_type in ['debian', 'ubuntu']:
+           service_path = '/usr/sbin/service'
+           apache_service_name = 'apache2'
 
         # Apache HTTPD
-        self.run([service_path, apache_service_name, 'start'])
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+           self.run([service_path, 'enable', apache_service_name])
+           self.run([service_path, 'start', apache_service_name])
+        else:
+           self.run([service_path, apache_service_name, 'start'])
 
         # Memcached
-        self.run([service_path, 'memcached', 'start'])
+        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+           self.run([service_path, 'start', 'memcached.service'])
+        else:
+           self.run([service_path, 'memcached', 'start'])
 
         # Apache Tomcat
         try:
@@ -1502,7 +1553,12 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            self.run([service_path, 'tomcat', 'start'])
+            if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+               self.run(["/etc/init.d/tomcat", "install"])
+               self.run([service_path, 'enable', 'tomcat'])
+               self.run([service_path, 'start', 'tomcat'])
+            else:
+               self.run([service_path, 'tomcat', 'start'])
         except:
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
@@ -1510,13 +1566,16 @@ class Setup(object):
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
             
-        if self.os_type in ['debian', 'ubuntu']:
-            self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
+        if self.os_initdaemon == 'systemd':
+            self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
+        else:
+            if self.os_type in ['debian', 'ubuntu']:
+                self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
 
-        if self.os_type in ['centos', 'redhat', 'fedora']:
-            self.copyFile("%s/network" % self.outputFolder, self.network)
+            if self.os_type in ['centos', 'redhat', 'fedora']:
+                self.copyFile("%s/network" % self.outputFolder, self.network)
 
-        self.run(['/bin/hostname', self.hostname])
+            self.run(['/bin/hostname', self.hostname])
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
 
@@ -1619,6 +1678,18 @@ if __name__ == '__main__':
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCas = setupOptions['installCas']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
+
+    # Get the OS type
+    installObject.os_type = installObject.detect_os_type()
+    # Get the init type   
+    installObject.os_initdaemon = installObject.detect_initd()
+    # Get apache version   
+    installObject.apache_version = installObject.determineApacheVersion()
+
+    print "\nInstalling Gluu Server..."
+    print "Detected OS  :  %s" % installObject.os_type
+    print "Detected init:  %s" % installObject.os_initdaemon
+    print "Detected Apache:  %s" % installObject.apache_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
