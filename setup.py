@@ -188,7 +188,7 @@ class Setup(object):
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
-        self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.outputFolder
+        self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.tomcatHome
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
