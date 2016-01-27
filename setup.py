@@ -704,7 +704,7 @@ class Setup(object):
                   '-out',
                   csr,
                   '-subj',
-                  '/CN=%s/O=%s/C=%s/ST=%s/L=%s' % (self.hostname, self.orgName, self.countryCode, self.state, self.city)
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (self.countryCode, self.state, self.city, self.orgName, self.hostname, self.admin_email)
         ])
         self.run([self.opensslCommand,
                   'x509',
