@@ -1227,14 +1227,7 @@ class Setup(object):
 
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
-        long_enough = False
-        while not long_enough:
-            state = self.getPrompt("Enter your state or province two letter code")
-            if len(state) != 2:
-                print "State or province code must be two characters"
-            else:
-                self.state = state
-                long_enough = True
+        self.state = self.getPrompt("Enter your state or province two letter code")
 
         # Get the Country Code
         long_enough = False
