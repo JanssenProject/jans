@@ -170,6 +170,13 @@
         </classes>
     </test>
 
+    <!-- Validate Token Endpoint test -->
+    <test name="Validate Token Endpoint test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ValidateTokenEndpointHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Federation tests -->
     <test name="Federation metadata test (HTTP)" enabled="true">
         <classes>
