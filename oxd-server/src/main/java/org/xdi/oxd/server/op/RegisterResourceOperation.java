@@ -9,14 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.ResourceSetRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterResourceParams;
 import org.xdi.oxd.common.response.RegisterResourceOpResponse;
-import org.xdi.oxd.server.service.DiscoveryService;
-import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,8 +41,7 @@ public class RegisterResourceOperation extends BaseOperation {
                 resourceSet.setName(params.getName());
                 resourceSet.setScopes(params.getScopes());
 
-                final ResourceSetStatus addResponse = registrationService.addResourceSet("Bearer " + params.getPatToken(), resourceSet);
-
+                ResourceSetResponse addResponse = registrationService.addResourceSet("Bearer " + params.getPatToken(), resourceSet);
                 if (addResponse != null) {
                     final RegisterResourceOpResponse opResponse = new RegisterResourceOpResponse();
                     opResponse.setId(addResponse.getId());
