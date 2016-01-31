@@ -4,7 +4,7 @@
 package org.xdi.oxd.common.response;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 
 import java.util.Date;
 import java.util.List;
@@ -23,7 +23,7 @@ public class RptStatusOpResponse implements IOpResponse {
     @JsonProperty(value = "issued_at")
     private Date issuedAt;
     @JsonProperty(value = "permissions")
-    private List<RegisterPermissionRequest> permissions;
+    private List<UmaPermission> permissions;
 
     public RptStatusOpResponse() {
     }
@@ -52,11 +52,11 @@ public class RptStatusOpResponse implements IOpResponse {
         issuedAt = p_issuedAt != null ? new Date(p_issuedAt.getTime()) : null;
     }
 
-    public List<RegisterPermissionRequest> getPermissions() {
+    public List<UmaPermission> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<RegisterPermissionRequest> p_permissions) {
+    public void setPermissions(List<UmaPermission> p_permissions) {
         permissions = p_permissions;
     }
 
