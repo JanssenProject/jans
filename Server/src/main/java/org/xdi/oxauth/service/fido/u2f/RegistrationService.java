@@ -112,7 +112,6 @@ public class RegistrationService extends RequestService {
 		registerRequests.add(request);
 
 		return new RegisterRequestMessage(authenticateRequests, registerRequests);
-
 	}
 
 	public RegisterRequest startRegistration(String appId) {
@@ -145,7 +144,7 @@ public class RegistrationService extends RequestService {
 		deviceRegistration.setCreationDate(now);
 		
 		int keyHandleHashCode = deviceRegistrationService.getKeyHandleHashCode(rawRegisterResponse.getKeyHandle());
-		deviceRegistration.setKeyHandlHashCode(keyHandleHashCode);
+		deviceRegistration.setKeyHandleHashCode(keyHandleHashCode);
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
@@ -175,21 +174,14 @@ public class RegistrationService extends RequestService {
 		return deviceRegistration;
 	}
 
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String sessionState) {
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userName, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String registerRequestMessageId = UUID.randomUUID().toString();
 
-		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(requestMessage);
-		registerRequestMessageLdap.setId(registerRequestMessageId);
-		registerRequestMessageLdap.setDn(getDnForRegisterRequestMessage(registerRequestMessageId));
-		registerRequestMessageLdap.setCreationDate(now);
-		registerRequestMessageLdap.setSessionState(sessionState);
+		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(getDnForRegisterRequestMessage(registerRequestMessageId),
+				registerRequestMessageId, now, sessionState, userName, requestMessage);
 
 		ldapEntryManager.persist(registerRequestMessageLdap);
-	}
-
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
-		storeRegisterRequestMessage(requestMessage, null);
 	}
 
 	public RegisterRequestMessage getRegisterRequestMessage(String oxId) {
