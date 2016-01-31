@@ -8,15 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterPermissionTicketParams;
 import org.xdi.oxd.common.response.RegisterPermissionTicketOpResponse;
-import org.xdi.oxd.server.service.DiscoveryService;
-import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -40,11 +38,11 @@ public class RegisterTicketOperation extends BaseOperation {
                 final PermissionRegistrationService registrationService = UmaClientFactory.instance().
                         createResourceSetPermissionRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
 
-                final RegisterPermissionRequest request = new RegisterPermissionRequest();
+                final UmaPermission request = new UmaPermission();
                 request.setResourceSetId(params.getResourceSetId());
                 request.setScopes(params.getScopes());
 
-                final ResourceSetPermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
+                final PermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
                         "Bearer " + params.getPatToken(), params.getAmHost(), request);
 
                 if (ticketResponse != null) {
