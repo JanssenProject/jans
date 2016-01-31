@@ -131,7 +131,7 @@ class TRegisterResourceSet {
                 super.onResponse(response);
                 BaseTest.showResponse("UMA : TRegisterResourceSet.modifyResourceSetInternal() : ", response);
 
-                assertEquals(response.getStatus(), Response.Status.NO_CONTENT.getStatusCode(), "Unexpected response code.");
+                assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
                 m_modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
 
                 UmaTestUtil.assert_(m_modifyStatus);
