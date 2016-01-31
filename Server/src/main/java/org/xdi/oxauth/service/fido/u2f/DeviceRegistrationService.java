@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -83,6 +85,10 @@ public class DeviceRegistrationService {
 	}
 
 	public List<DeviceRegistration> findDeviceRegistrationsByKeyHandle(String appId, String keyHandle, String ... returnAttributes) {
+		if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+			return new ArrayList<DeviceRegistration>(0);
+		}
+
 		byte[] keyHandleDecoded = Base64Util.base64urldecode(keyHandle);
 
 		String baseDn = userService.getDnForUser(null);
@@ -97,10 +103,37 @@ public class DeviceRegistrationService {
 		return ldapEntryManager.findEntries(baseDn, DeviceRegistration.class, returnAttributes, filter);
 	}
 
+	public DeviceRegistration findOneStepUserDeviceRegistration(String deviceId, String... returnAttributes) {
+		String deviceDn = getDnForOneStepU2fDevice(deviceId);
+
+		return ldapEntryManager.find(DeviceRegistration.class, deviceDn);
+	}
+
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
 
 		ldapEntryManager.persist(deviceRegistration);
+	}
+
+	public boolean attachUserDeviceRegistration(String userInum, String oneStepDeviceId) {
+		String oneStepDeviceDn = getDnForOneStepU2fDevice(oneStepDeviceId);
+
+		// Load temporary stored device registration
+		DeviceRegistration deviceRegistration = ldapEntryManager.find(DeviceRegistration.class, oneStepDeviceDn);
+		if (deviceRegistration == null) {
+			return false;
+		}
+		
+		// Remove temporary stored device registration
+		removeUserDeviceRegistration(deviceRegistration);
+		
+		// Attach user device registration to user
+		String deviceDn = getDnForU2fDevice(userInum, deviceRegistration.getId());
+
+		deviceRegistration.setDn(deviceDn);
+		addUserDeviceRegistration(userInum, deviceRegistration);
+		
+		return true;
 	}
 
 	public void addOneStepDeviceRegistration(DeviceRegistration deviceRegistration) {
@@ -117,6 +150,19 @@ public class DeviceRegistrationService {
 		deviceRegistration.setStatus(DeviceRegistrationStatus.COMPROMISED);
 
 		ldapEntryManager.merge(deviceRegistration);
+	}
+
+	public void removeUserDeviceRegistration(DeviceRegistration deviceRegistration) {
+		ldapEntryManager.remove(deviceRegistration);
+	}
+
+	public List<DeviceRegistration> getExpiredDeviceRegistrations(Date expirationDate) {
+		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
+		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
+
+		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter);
+
+		return deviceRegistrations;
 	}
 
 	/**
@@ -138,7 +184,7 @@ public class DeviceRegistrationService {
 	public String getDnForOneStepU2fDevice(String deviceRegistrationId) {
 		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(deviceRegistrationId)) {
-			return String.format("ou=registrered_devices,%s", u2fBaseDn);
+			return String.format("ou=registered_devices,%s", u2fBaseDn);
 		}
 
 		return String.format("oxid=%s,ou=registered_devices,%s", deviceRegistrationId, u2fBaseDn);
