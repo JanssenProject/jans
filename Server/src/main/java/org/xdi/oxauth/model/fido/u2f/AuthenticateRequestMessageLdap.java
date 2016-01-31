@@ -6,6 +6,7 @@
 package org.xdi.oxauth.model.fido.u2f;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
@@ -29,6 +30,12 @@ public class AuthenticateRequestMessageLdap extends RequestMessageLdap implement
 	public AuthenticateRequestMessageLdap(AuthenticateRequestMessage authenticateRequestMessage) {
 		this.authenticateRequestMessage = authenticateRequestMessage;
 		this.requestId = authenticateRequestMessage.getRequestId();
+	}
+
+	public AuthenticateRequestMessageLdap(String dn, String id, Date creationDate, String sessionState, String userName,
+			AuthenticateRequestMessage authenticateRequestMessage) {
+		super(dn, id, authenticateRequestMessage.getRequestId(), creationDate, sessionState, userName);
+		this.authenticateRequestMessage = authenticateRequestMessage;
 	}
 
 	public AuthenticateRequestMessage getAuthenticateRequestMessage() {

@@ -68,7 +68,7 @@ public class U2fRegistrationWS {
 		try {
 			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
 			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userName);
-			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, sessionState);
+			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, userName, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -92,6 +92,7 @@ public class U2fRegistrationWS {
 		String sessionState = null;
 		try {
 			log.debug("Finishing registration for username '{0}' with response '{1}'", userName, registerResponseString);
+
 			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
 
 			String requestId = registerResponse.getRequestId();
@@ -100,16 +101,19 @@ public class U2fRegistrationWS {
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
 			}
-			sessionState = registerRequestMessageLdap.getSessionState();
 			u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
+			String foundUserName = registerRequestMessageLdap.getUserName();
+			boolean oneStep = StringHelper.isEmpty(foundUserName);
+
 			RegisterRequestMessage registerRequestMessage = registerRequestMessageLdap.getRegisterRequestMessage();
-			DeviceRegistration deviceRegistration = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, userName);
+			DeviceRegistration deviceRegistration = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, foundUserName);
 			
 			// If sessionState is not empty update session
+			sessionState = registerRequestMessageLdap.getSessionState();
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, deviceRegistration);
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserName, deviceRegistration, true, oneStep);
 			}
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);

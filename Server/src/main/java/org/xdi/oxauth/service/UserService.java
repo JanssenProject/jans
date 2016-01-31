@@ -89,8 +89,8 @@ public class UserService {
      *
      * @return User
      */
-    public User getUserByDn(String dn) {
-        return ldapEntryManager.find(User.class, dn);
+    public User getUserByDn(String dn, String... returnAttributes) {
+        return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
 
 	public User getUser(String userId, String... returnAttributes) {
@@ -126,6 +126,20 @@ public class UserService {
 		User user = getUser(userId, "inum");
 
 		return getUserInum(user);
+	}
+
+	public String getUserNameByInum(String inum) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, "uid");
+		if (user == null) {
+			return null;
+		}
+
+		return user.getUserId();
 	}
 
     public User updateUser(User user) {
