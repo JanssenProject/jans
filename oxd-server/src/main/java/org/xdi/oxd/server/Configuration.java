@@ -195,8 +195,7 @@ public class Configuration {
         sb.append("Configuration");
         sb.append("{port=").append(port);
         sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
-        sb.append(", registerClientAppType='").append(registerClientAppType).append('\'');
-        sb.append(", registerClientResponesType='").append(registerClientResponesType).append('\'');
+        sb.append(", opHost=").append(opHost);
         sb.append(", localhostOnly=").append(localhostOnly);
         sb.append(", licenseServerEndpoint=").append(licenseServerEndpoint);
         sb.append(", licenseId=").append(licenseId);
