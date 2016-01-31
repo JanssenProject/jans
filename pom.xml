@@ -4,7 +4,7 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxauth</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>3.0.3-SNAPSHOT</version>
     <name>oxAuth</name>
     <url>http://ox.gluu.org</url>
 
