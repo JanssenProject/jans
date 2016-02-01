@@ -121,7 +121,7 @@ public class LDAPConnectionProvider {
 		
 		this.binaryAttributes = new ArrayList<String>();
 		if (props.containsKey("binaryAttributes")) {
-			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
+			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase().toLowerCase(), ",");
 			this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
 		}
 		
