@@ -146,6 +146,7 @@ public class RegisterSiteOperation extends BaseOperation {
         request.setJwksUri(params.getClientJwksUri());
         request.setPostLogoutRedirectUris(Lists.newArrayList(params.getLogoutRedirectUri()));
         request.setContacts(params.getContacts());
+        request.setScopes(params.getScope());
 
         request.setGrantTypes(grantTypes());
 
