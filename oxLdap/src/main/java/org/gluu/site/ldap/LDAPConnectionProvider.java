@@ -121,7 +121,7 @@ public class LDAPConnectionProvider {
 		
 		this.binaryAttributes = new ArrayList<String>();
 		if (props.containsKey("binaryAttributes")) {
-			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString(), ",");
+			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
 			this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
 		}
 		
@@ -269,7 +269,11 @@ public class LDAPConnectionProvider {
 	}
 
 	public boolean isBinaryAttribute(String attributeName) {
-		return binaryAttributes.contains(attributeName);
+		if (StringHelper.isEmpty(attributeName)) {
+			return false;
+		}
+
+		return binaryAttributes.contains(attributeName.toLowerCase());
 	}
 
 }
