@@ -149,6 +149,7 @@ public class RegisterSiteOperation extends BaseOperation {
         request.setScopes(params.getScope());
 
         request.setGrantTypes(grantTypes());
+        request.setLogoutUri(params.getClientLogoutUri());
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getClientTokenEndpointAuthMethod());
