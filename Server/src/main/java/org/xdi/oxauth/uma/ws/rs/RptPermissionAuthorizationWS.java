@@ -8,6 +8,7 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import com.google.common.base.Strings;
 import com.wordnik.swagger.annotations.Api;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -42,6 +43,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -67,6 +69,8 @@ public class RptPermissionAuthorizationWS {
     private FederationDataService federationDataService;
     @In
     private ClientService clientService;
+    @In
+    private LdapEntryManager ldapEntryManager;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -133,6 +137,7 @@ public class RptPermissionAuthorizationWS {
                         // grant access directly, client is in trust and skipAuthorization=true
                         log.trace("grant access directly, client is in trust and skipAuthorization=true");
                         rptManager.addPermissionToRPT(rpt, resourceSetPermission);
+                        invalidateTicket(resourceSetPermission);
                         return rpt;
                     }
                 }
@@ -148,11 +153,21 @@ public class RptPermissionAuthorizationWS {
         // Add permission to RPT
         if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest.getClaims())) {
             rptManager.addPermissionToRPT(rpt, resourceSetPermission);
+            invalidateTicket(resourceSetPermission);
             return rpt;
         }
 
         // throw not authorized exception
         throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
+    }
+
+    private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
+        try {
+            resourceSetPermission.setTicket(UUID.randomUUID().toString()); // invalidate ticket and persist
+            ldapEntryManager.persist(resourceSetPermission);
+        } catch (Exception e) {
+            log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
+        }
     }
 }
