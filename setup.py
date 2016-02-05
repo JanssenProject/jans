@@ -125,6 +125,7 @@ class Setup(object):
         self.oxauthClient_encoded_pw = None
         self.encode_salt = None
         self.oxauth_jsf_salt = None
+        self.oxTrustConfigGeneration = "true"
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
@@ -337,11 +338,13 @@ class Setup(object):
         realCertFolder = os.path.realpath(self.certFolder)
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
+        realIdpFolder = os.path.realpath(self.idpFolder)
 
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
@@ -453,6 +456,10 @@ class Setup(object):
             self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
             self.run(['ln', '-s', '/etc/apache2/sites-available/https_gluu.conf',
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
+
+    def configure_oxtrust(self):
+        if not self.installSaml:
+            self.oxTrustConfigGeneration = "false"
 
     def configure_opendj(self):
         try:
@@ -1738,6 +1745,7 @@ if __name__ == '__main__':
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
+            installObject.configure_oxtrust()
             installObject.render_templates()
             installObject.render_test_templates()
             installObject.generate_crypto()
