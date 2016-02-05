@@ -1774,7 +1774,7 @@ if __name__ == '__main__':
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
-        print "\n\n Gluu Server installation successful! Point your broswer to https://%s\n\n" % installObject.hostname
+        print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
     else:
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
