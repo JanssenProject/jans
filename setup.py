@@ -118,7 +118,6 @@ class Setup(object):
         self.inumAppliance = None
         self.inumOrgFN = None
         self.inumApplianceFN = None
-        self.oxTrustConfigGeneration = "disabled"
         self.ldapBaseFolderldapPass = None
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
@@ -1339,8 +1338,6 @@ class Setup(object):
         newFn.close()
 
     def render_templates(self):
-        if self.installSaml:
-            self.oxTrustConfigGeneration = "enabled"
         self.logIt("Rendering templates")
         for fullPath in self.ce_templates.keys():
             try:
