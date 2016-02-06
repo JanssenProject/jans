@@ -18,6 +18,7 @@ import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
@@ -291,6 +292,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         if (requestObject.getTokenEndpointAuthMethod() != null) {
             p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
+        } else { // If omitted, the default is client_secret_basic
+            p_client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
             p_client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
