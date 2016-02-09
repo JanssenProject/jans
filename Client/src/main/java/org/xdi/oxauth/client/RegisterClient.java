@@ -26,10 +26,10 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
  *
- * @author Javier Rojas Blum
+ * @author Javier Rojas Blum Date: 01.17.2012
  * @author Yuriy Zabrovarnyy
- * @author Yuriy Movchan
- * @version February 5, 2016
+ * @author Yuriy Movchan Date: 08/06/2013
+ * @version 0.1, 01.17.2012
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -151,6 +151,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (StringUtils.isNotBlank(getRequest().getClientUri())) {
                     requestBody.put(CLIENT_URI.toString(), getRequest().getClientUri());
                 }
+                if (getRequest().getTokenEndpointAuthMethod() != null) {
+                    requestBody.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), getRequest().getTokenEndpointAuthMethod());
+                }
                 if (StringUtils.isNotBlank(getRequest().getPolicyUri())) {
                     requestBody.put(POLICY_URI.toString(), getRequest().getPolicyUri());
                 }
@@ -169,14 +172,8 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getSubjectType() != null) {
                     requestBody.put(SUBJECT_TYPE.toString(), getRequest().getSubjectType());
                 }
-                if (getRequest().getIdTokenSignedResponseAlg() != null) {
-                    requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
-                }
-                if (getRequest().getIdTokenEncryptedResponseAlg() != null) {
-                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), getRequest().getIdTokenEncryptedResponseAlg().getName());
-                }
-                if (getRequest().getIdTokenEncryptedResponseEnc() != null) {
-                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), getRequest().getIdTokenEncryptedResponseEnc().getName());
+                if (getRequest().getRequestObjectSigningAlg() != null) {
+                    requestBody.put(REQUEST_OBJECT_SIGNING_ALG.toString(), getRequest().getRequestObjectSigningAlg().getName());
                 }
                 if (getRequest().getUserInfoSignedResponseAlg() != null) {
                     requestBody.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), getRequest().getUserInfoSignedResponseAlg().getName());
@@ -187,20 +184,14 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getUserInfoEncryptedResponseEnc() != null) {
                     requestBody.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), getRequest().getUserInfoEncryptedResponseEnc().getName());
                 }
-                if (getRequest().getRequestObjectSigningAlg() != null) {
-                    requestBody.put(REQUEST_OBJECT_SIGNING_ALG.toString(), getRequest().getRequestObjectSigningAlg().getName());
+                if (getRequest().getIdTokenSignedResponseAlg() != null) {
+                    requestBody.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), getRequest().getIdTokenSignedResponseAlg().getName());
                 }
-                if (getRequest().getRequestObjectEncryptionAlg() != null) {
-                    requestBody.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), getRequest().getRequestObjectEncryptionAlg().getName());
+                if (getRequest().getIdTokenEncryptedResponseAlg() != null) {
+                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), getRequest().getIdTokenEncryptedResponseAlg().getName());
                 }
-                if (getRequest().getRequestObjectEncryptionEnc() != null) {
-                    requestBody.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), getRequest().getRequestObjectEncryptionEnc().getName());
-                }
-                if (getRequest().getTokenEndpointAuthMethod() != null) {
-                    requestBody.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), getRequest().getTokenEndpointAuthMethod());
-                }
-                if (getRequest().getTokenEndpointAuthSigningAlg() != null) {
-                    requestBody.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), getRequest().getTokenEndpointAuthSigningAlg());
+                if (getRequest().getIdTokenEncryptedResponseEnc() != null) {
+                    requestBody.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), getRequest().getIdTokenEncryptedResponseEnc().getName());
                 }
                 if (getRequest().getDefaultMaxAge() != null) {
                     requestBody.put(DEFAULT_MAX_AGE.toString(), getRequest().getDefaultMaxAge());

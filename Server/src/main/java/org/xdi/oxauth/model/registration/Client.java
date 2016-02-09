@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version October 16, 2015
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -80,6 +80,9 @@ public class Client {
     @LdapAttribute(name = "oxAuthClientURI")
     private String clientUri;
 
+    @LdapAttribute(name = "oxAuthTokenEndpointAuthMethod")
+    private String tokenEndpointAuthMethod;
+
     @LdapAttribute(name = "oxAuthPolicyURI")
     private String policyUri;
 
@@ -98,14 +101,8 @@ public class Client {
     @LdapAttribute(name = "oxAuthSubjectType")
     private String subjectType;
 
-    @LdapAttribute(name = "oxAuthIdTokenSignedResponseAlg")
-    private String idTokenSignedResponseAlg;
-
-    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseAlg")
-    private String idTokenEncryptedResponseAlg;
-
-    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseEnc")
-    private String idTokenEncryptedResponseEnc;
+    @LdapAttribute(name = "oxAuthRequestObjectSigningAlg")
+    private String requestObjectSigningAlg;
 
     @LdapAttribute(name = "oxAuthSignedResponseAlg")
     private String userInfoSignedResponseAlg;
@@ -116,20 +113,14 @@ public class Client {
     @LdapAttribute(name = "oxAuthUserInfoEncryptedResponseEnc")
     private String userInfoEncryptedResponseEnc;
 
-    @LdapAttribute(name = "oxAuthRequestObjectSigningAlg")
-    private String requestObjectSigningAlg;
+    @LdapAttribute(name = "oxAuthIdTokenSignedResponseAlg")
+    private String idTokenSignedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthRequestObjectEncryptionAlg")
-    private String requestObjectEncryptionAlg;
+    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseAlg")
+    private String idTokenEncryptedResponseAlg;
 
-    @LdapAttribute(name = "oxAuthRequestObjectEncryptionEnc")
-    private String requestObjectEncryptionEnc;
-
-    @LdapAttribute(name = "oxAuthTokenEndpointAuthMethod")
-    private String tokenEndpointAuthMethod;
-
-    @LdapAttribute(name = "oxAuthTokenEndpointAuthSigningAlg")
-    private String tokenEndpointAuthSigningAlg;
+    @LdapAttribute(name = "oxAuthIdTokenEncryptedResponseEnc")
+    private String idTokenEncryptedResponseEnc;
 
     @LdapAttribute(name = "oxAuthDefaultMaxAge")
     private Integer defaultMaxAge;
@@ -500,6 +491,24 @@ public class Client {
     }
 
     /**
+     * Returns the Requested authentication method for the Token Endpoint.
+     *
+     * @return The authentication type for the Token Endpoint.
+     */
+    public String getTokenEndpointAuthMethod() {
+        return tokenEndpointAuthMethod;
+    }
+
+    /**
+     * Sets the Requested authentication method for the Token Endpoint.
+     *
+     * @param tokenEndpointAuthMethod The authentication type for the Token Endpoint.
+     */
+    public void setTokenEndpointAuthMethod(String tokenEndpointAuthMethod) {
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
+    }
+
+    /**
      * Returns an that the Relying Party Client provides to the End-User to read about the how the profile data will
      * be used.
      *
@@ -630,57 +639,21 @@ public class Client {
     }
 
     /**
-     * Returns the JWS alg algorithm (JWA)0 required for the issued ID Token.
+     * Returns the JWS alg algorithm (JWA) that must be required by the Authorization Server.
      *
-     * @return The JWS signing algorithm required for the ID Token issued.
+     * @return The JWS signature algorithm that must be required by the Authorization Server.
      */
-    public String getIdTokenSignedResponseAlg() {
-        return idTokenSignedResponseAlg;
+    public String getRequestObjectSigningAlg() {
+        return requestObjectSigningAlg;
     }
 
     /**
-     * Sets the JWS alg algorithm (JWA)0 required for the issued ID Token.
+     * Sets the JWS alg algorithm (JWA) that must be required by the Authorization Server.
      *
-     * @param idTokenSignedResponseAlg The JWS signing algorithm required for the ID Token issued.
+     * @param requestObjectSigningAlg The JWS signature algorithm that must be required by the Authorization Server.
      */
-    public void setIdTokenSignedResponseAlg(String idTokenSignedResponseAlg) {
-        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
-    }
-
-    /**
-     * Returns the JWE alg algorithm (JWA) required for encrypting the ID Token.
-     *
-     * @return The JWE alg algorithm required for the ID Token issued.
-     */
-    public String getIdTokenEncryptedResponseAlg() {
-        return idTokenEncryptedResponseAlg;
-    }
-
-    /**
-     * Sets the JWE alg algorithm (JWA) required for encrypting the ID Token.
-     *
-     * @param idTokenEncryptedResponseAlg The JWE alg algorithm required for the ID Token issued.
-     */
-    public void setIdTokenEncryptedResponseAlg(String idTokenEncryptedResponseAlg) {
-        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
-    }
-
-    /**
-     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
-     *
-     * @return The JWE enc algorithm required for the ID token issued.
-     */
-    public String getIdTokenEncryptedResponseEnc() {
-        return idTokenEncryptedResponseEnc;
-    }
-
-    /**
-     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
-     *
-     * @param idTokenEncryptedResponseEnc The JWE enc algorithm required for the ID token issued.
-     */
-    public void setIdTokenEncryptedResponseEnc(String idTokenEncryptedResponseEnc) {
-        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
+    public void setRequestObjectSigningAlg(String requestObjectSigningAlg) {
+        this.requestObjectSigningAlg = requestObjectSigningAlg;
     }
 
     /**
@@ -738,97 +711,57 @@ public class Client {
     }
 
     /**
-     * Returns the JWS alg algorithm (JWA) that must be required by the Authorization Server.
+     * Returns the JWS alg algorithm (JWA)0 required for the issued ID Token.
      *
-     * @return The JWS signature algorithm that must be required by the Authorization Server.
+     * @return The JWS signing algorithm required for the ID Token issued.
      */
-    public String getRequestObjectSigningAlg() {
-        return requestObjectSigningAlg;
+    public String getIdTokenSignedResponseAlg() {
+        return idTokenSignedResponseAlg;
     }
 
     /**
-     * Sets the JWS alg algorithm (JWA) that must be required by the Authorization Server.
+     * Sets the JWS alg algorithm (JWA)0 required for the issued ID Token.
      *
-     * @param requestObjectSigningAlg The JWS signature algorithm that must be required by the Authorization Server.
+     * @param idTokenSignedResponseAlg The JWS signing algorithm required for the ID Token issued.
      */
-    public void setRequestObjectSigningAlg(String requestObjectSigningAlg) {
-        this.requestObjectSigningAlg = requestObjectSigningAlg;
+    public void setIdTokenSignedResponseAlg(String idTokenSignedResponseAlg) {
+        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
     }
 
     /**
-     * Returns the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
-     * sent to the OP.
+     * Returns the JWE alg algorithm (JWA) required for encrypting the ID Token.
      *
-     * @return The JWE alg algorithm (JWA).
+     * @return The JWE alg algorithm required for the ID Token issued.
      */
-    public String getRequestObjectEncryptionAlg() {
-        return requestObjectEncryptionAlg;
+    public String getIdTokenEncryptedResponseAlg() {
+        return idTokenEncryptedResponseAlg;
     }
 
     /**
-     * Sets the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
-     * sent to the OP.
+     * Sets the JWE alg algorithm (JWA) required for encrypting the ID Token.
      *
-     * @param requestObjectEncryptionAlg The JWE alg algorithm (JWA).
+     * @param idTokenEncryptedResponseAlg The JWE alg algorithm required for the ID Token issued.
      */
-    public void setRequestObjectEncryptionAlg(String requestObjectEncryptionAlg) {
-        this.requestObjectEncryptionAlg = requestObjectEncryptionAlg;
+    public void setIdTokenEncryptedResponseAlg(String idTokenEncryptedResponseAlg) {
+        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
     }
 
     /**
-     * Returns the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
-     * sent to the OP.
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
      *
-     * @return The JWE enc algorithm (JWA).
+     * @return The JWE enc algorithm required for the ID token issued.
      */
-    public String getRequestObjectEncryptionEnc() {
-        return requestObjectEncryptionEnc;
+    public String getIdTokenEncryptedResponseEnc() {
+        return idTokenEncryptedResponseEnc;
     }
 
     /**
-     * Sets the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
-     * sent to the OP.
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
      *
-     * @param requestObjectEncryptionEnc The JWE enc algorithm (JWA).
+     * @param idTokenEncryptedResponseEnc The JWE enc algorithm required for the ID token issued.
      */
-    public void setRequestObjectEncryptionEnc(String requestObjectEncryptionEnc) {
-        this.requestObjectEncryptionEnc = requestObjectEncryptionEnc;
-    }
-
-    /**
-     * Returns the Requested authentication method for the Token Endpoint.
-     *
-     * @return The authentication type for the Token Endpoint.
-     */
-    public String getTokenEndpointAuthMethod() {
-        return tokenEndpointAuthMethod;
-    }
-
-    /**
-     * Sets the Requested authentication method for the Token Endpoint.
-     *
-     * @param tokenEndpointAuthMethod The authentication type for the Token Endpoint.
-     */
-    public void setTokenEndpointAuthMethod(String tokenEndpointAuthMethod) {
-        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
-    }
-
-    /**
-     * Returns the Requested Client Authentication method for the Token Endpoint.
-     *
-     * @return The Requested Client Authentication method for the Token Endpoint.
-     */
-    public String getTokenEndpointAuthSigningAlg() {
-        return tokenEndpointAuthSigningAlg;
-    }
-
-    /**
-     * Sets the Requested Client Authentication method for the Token Endpoint.
-     *
-     * @param tokenEndpointAuthSigningAlg The Requested Client Authentication method for the Token Endpoint.
-     */
-    public void setTokenEndpointAuthSigningAlg(String tokenEndpointAuthSigningAlg) {
-        this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
+    public void setIdTokenEncryptedResponseEnc(String idTokenEncryptedResponseEnc) {
+        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
     }
 
     /**
