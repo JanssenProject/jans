@@ -86,12 +86,14 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getExpiresIn(), "The expires in value is null");
         assertNotNull(response1.getScope(), "The scope must be null");
+        assertNotNull(response1.getSessionState(), "The session_state is null");
 
         String idToken = response1.getIdToken();
 
         // 3. End session
         String endSessionState = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
+        endSessionRequest.setSessionState(response1.getSessionState());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest);
@@ -104,8 +106,8 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
         // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
         assertTrue(endSessionResponse.getHtmlPage().contains("<html>"), "The HTML page is null");
-        assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri), "The HTML page is null");
-        assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri), "The HTML page is null");
+        assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
+        assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
         // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
     }
 
