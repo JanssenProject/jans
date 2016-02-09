@@ -195,7 +195,8 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertNotNull(response.getContentAsString(), "Unexpected html.");
-                assertTrue(response.getContentAsString().contains("postLogoutRedirectUri"));
+                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
+                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
 
             }
 
