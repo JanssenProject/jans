@@ -25,7 +25,6 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
@@ -149,4 +148,5 @@ public class U2fRegistrationWS {
 					.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
 		}
 	}
+
 }
