@@ -146,12 +146,15 @@ public class RegisterSiteOperation extends BaseOperation {
         redirectUris.add(params.getAuthorizationRedirectUri());
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
+            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+                redirectUris.add(params.getPostLogoutRedirectUri());
+            }
         }
 
         final RegisterRequest request = new RegisterRequest(applicationType, clientName, Lists.newArrayList(redirectUris));
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
-        request.setPostLogoutRedirectUris(Lists.newArrayList(params.getPostLogoutRedirectUri()));
+        request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
 
