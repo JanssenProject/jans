@@ -147,11 +147,11 @@ public class RegisterSiteOperation extends BaseOperation {
         final RegisterRequest request = new RegisterRequest(applicationType, clientName, Lists.newArrayList(redirectUris));
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
-        request.setPostLogoutRedirectUris(Lists.newArrayList(params.getLogoutRedirectUri()));
+        request.setPostLogoutRedirectUris(Lists.newArrayList(params.getPostLogoutRedirectUri()));
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
 
-        request.setGrantTypes(grantTypes());
+        request.setGrantTypes(grantTypes(params));
         request.setLogoutUri(params.getClientLogoutUri());
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
@@ -166,17 +166,25 @@ public class RegisterSiteOperation extends BaseOperation {
         }
 
         siteConfiguration.setResponseTypes(asString(responseTypes));
-        siteConfiguration.setLogoutRedirectUri(params.getLogoutRedirectUri());
+        siteConfiguration.setLogoutRedirectUri(params.getPostLogoutRedirectUri());
         siteConfiguration.setContacts(params.getContacts());
         siteConfiguration.setRedirectUris(Lists.newArrayList(redirectUris));
         return request;
     }
 
-    private List<GrantType> grantTypes() {
+    private List<GrantType> grantTypes(RegisterSiteParams params) {
+
         List<GrantType> grantTypes = Lists.newArrayList();
-        grantTypes.add(GrantType.AUTHORIZATION_CODE);
-        grantTypes.add(GrantType.IMPLICIT);
-        grantTypes.add(GrantType.REFRESH_TOKEN);
+
+        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
+            for (String grantType : params.getGrantType()) {
+                grantTypes.add(GrantType.fromString(grantType));
+            }
+        } else {
+            grantTypes.add(GrantType.AUTHORIZATION_CODE);
+            grantTypes.add(GrantType.IMPLICIT);
+            grantTypes.add(GrantType.REFRESH_TOKEN);
+        }
         return grantTypes;
     }
 

@@ -19,20 +19,20 @@ import static junit.framework.Assert.assertNotNull;
 
 public class LogoutTest {
 
-    @Parameters({"host", "port", "redirectUrl", "userId", "userSecret", "logoutRedirectUrl"})
+    @Parameters({"host", "port", "redirectUrl", "userId", "userSecret", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, int port, String redirectUrl, String userId, String userSecret, String logoutRedirectUrl) throws IOException {
+    public void test(String host, int port, String redirectUrl, String userId, String userSecret, String postLogoutRedirectUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl, logoutRedirectUrl);
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl, postLogoutRedirectUrl, "");
 
             GetTokensByCodeTest.tokenByCode(client, site, redirectUrl, userId, userSecret);
 
             final LogoutParams commandParams = new LogoutParams();
             commandParams.setOxdId(site.getSiteId());
-            commandParams.setPostLogoutRedirectUri(logoutRedirectUrl);
+            commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
 
             final Command command = new Command(CommandType.LOGOUT).setParamsObject(commandParams);
 
