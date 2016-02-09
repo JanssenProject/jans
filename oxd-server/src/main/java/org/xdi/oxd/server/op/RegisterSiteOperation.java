@@ -180,7 +180,16 @@ public class RegisterSiteOperation extends BaseOperation {
             for (String grantType : params.getGrantType()) {
                 grantTypes.add(GrantType.fromString(grantType));
             }
-        } else {
+        }
+
+        final SiteConfiguration fallback = siteService.defaultSiteConfiguration();
+        if (fallback != null && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
+            for (String grantType : fallback.getGrantType()) {
+                grantTypes.add(GrantType.fromString(grantType));
+            }
+        }
+
+        if (grantTypes.isEmpty()) {
             grantTypes.add(GrantType.AUTHORIZATION_CODE);
             grantTypes.add(GrantType.IMPLICIT);
             grantTypes.add(GrantType.REFRESH_TOKEN);
