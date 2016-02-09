@@ -6,23 +6,30 @@
 
 package org.xdi.oxauth.action;
 
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+
+import java.net.URISyntaxException;
+
 import org.apache.http.client.HttpClient;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.net.SslDefaultHttpClient;
 import org.xdi.net.TrustAllTrustManager;
-import org.xdi.oxauth.client.*;
-
-import java.net.URISyntaxException;
-
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import org.xdi.oxauth.client.OpenIdConfigurationClient;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 
 /**
- * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @author Javier Rojas Blum Date: 02.22.2013
  */
 @Name("openIdConnectDiscoveryAction")
 @Scope(ScopeType.SESSION)
@@ -37,7 +44,7 @@ public class OpenIdConnectDiscoveryAction {
     private String rel;
 
     private boolean showResults;
-    private boolean acceptUntrustedCertificate;
+    private boolean acceptUntrastedCertificate;
     private String requestString1;
     private String responseString1;
     private String requestString2;
@@ -59,7 +66,7 @@ public class OpenIdConnectDiscoveryAction {
     public void exec() {
         try {
             ClientExecutor clientExecutor = null;
-            if (acceptUntrustedCertificate) {
+            if (acceptUntrastedCertificate) {
                 HttpClient httpClient = new SslDefaultHttpClient(new TrustAllTrustManager());
                 clientExecutor = new ApacheHttpClient4Executor(httpClient);
             }
@@ -174,11 +181,11 @@ public class OpenIdConnectDiscoveryAction {
         this.responseString2 = responseString2;
     }
 
-    public boolean isAcceptUntrustedCertificate() {
-        return acceptUntrustedCertificate;
+    public boolean isAcceptUntrastedCertificate() {
+        return acceptUntrastedCertificate;
     }
 
-    public void setAcceptUntrustedCertificate(boolean acceptUntrustedCertificate) {
-        this.acceptUntrustedCertificate = acceptUntrustedCertificate;
+    public void setAcceptUntrastedCertificate(boolean acceptUntrastedCertificate) {
+        this.acceptUntrastedCertificate = acceptUntrastedCertificate;
     }
 }
