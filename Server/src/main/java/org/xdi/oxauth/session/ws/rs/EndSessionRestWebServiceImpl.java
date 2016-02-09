@@ -218,7 +218,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "<head>";
 
         if (!Strings.isNullOrEmpty(postLogoutUrl)) {
-            html += "<meta http-equiv=\"refresh\" content=\"5; url=" + postLogoutUrl + "\">";
+            html += "<script>" +
+                    "window.onload=function() {" +
+                    "window.location='" + postLogoutUrl + "'" +
+                    "}" +
+                    "</script>";
         }
 
         html += "<title>Gluu Generated logout page</title>" +
