@@ -6,8 +6,14 @@
 
 package org.xdi.oxauth.action;
 
+import java.util.List;
+
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
@@ -22,11 +28,8 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import java.util.List;
-
 /**
- * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @author Javier Rojas Blum Date: 02.20.2012
  */
 @Name("registrationAction")
 @Scope(ScopeType.SESSION)
@@ -45,25 +48,19 @@ public class RegistrationAction {
     private String clientName;
     private String logoUri;
     private String clientUri;
+    private AuthenticationMethod tokenEndpointAuthMethod;
     private String policyUri;
-    private String logoutUri;
-    private Boolean logoutSessionRequired;
     private String tosUri;
     private String jwksUri;
     private String sectorIdentifierUri;
     private SubjectType subjectType;
-    private SignatureAlgorithm idTokenSignedResponseAlg;
-    private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
-    private BlockEncryptionAlgorithm idTokenEncryptedResponseEnc;
+    private SignatureAlgorithm requestObjectSigningAlg;
     private SignatureAlgorithm userInfoSignedResponseAlg;
     private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
     private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
-    private SignatureAlgorithm requestObjectSigningAlg;
-    private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
-    private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
-    private AuthenticationMethod tokenEndpointAuthMethod;
-    private SignatureAlgorithm tokenEndpointAuthSigningAlg;
-
+    private SignatureAlgorithm idTokenSignedResponseAlg;
+    private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm idTokenEncryptedResponseEnc;
     private Integer defaultMaxAge;
     private Boolean requireAuthTime;
     private String defaultAcrValues;
@@ -95,30 +92,25 @@ public class RegistrationAction {
             request.setContacts(StringUtils.spaceSeparatedToList(contacts));
             request.setLogoUri(logoUri);
             request.setClientUri(clientUri);
+            request.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
             request.setPolicyUri(policyUri);
             request.setTosUri(tosUri);
             request.setJwksUri(jwksUri);
             request.setSectorIdentifierUri(sectorIdentifierUri);
             request.setSubjectType(subjectType);
-            request.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
-            request.setIdTokenEncryptedResponseAlg(idTokenEncryptedResponseAlg);
-            request.setIdTokenEncryptedResponseEnc(idTokenEncryptedResponseEnc);
+            request.setRequestObjectSigningAlg(requestObjectSigningAlg);
             request.setUserInfoSignedResponseAlg(userInfoSignedResponseAlg);
             request.setUserInfoEncryptedResponseAlg(userInfoEncryptedResponseAlg);
             request.setUserInfoEncryptedResponseEnc(userInfoEncryptedResponseEnc);
-            request.setRequestObjectSigningAlg(requestObjectSigningAlg);
-            request.setRequestObjectEncryptionAlg(requestObjectEncryptionAlg);
-            request.setRequestObjectEncryptionEnc(requestObjectEncryptionEnc);
-            request.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
-            request.setTokenEndpointAuthSigningAlg(tokenEndpointAuthSigningAlg);
+            request.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
+            request.setIdTokenEncryptedResponseAlg(idTokenEncryptedResponseAlg);
+            request.setIdTokenEncryptedResponseEnc(idTokenEncryptedResponseEnc);
             request.setDefaultMaxAge(defaultMaxAge);
             request.setRequireAuthTime(requireAuthTime);
             request.setDefaultAcrValues(StringUtils.spaceSeparatedToList(defaultAcrValues));
             request.setInitiateLoginUri(initiateLoginUri);
             request.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUris));
             request.setRequestUris(StringUtils.spaceSeparatedToList(requestUris));
-            request.setLogoutUri(logoutUri);
-            request.setLogoutSessionRequired(logoutSessionRequired);
 
             RegisterClient client = new RegisterClient(registrationEndpoint);
             client.setRequest(request);
@@ -232,28 +224,20 @@ public class RegistrationAction {
         this.clientUri = clientUri;
     }
 
+    public AuthenticationMethod getTokenEndpointAuthMethod() {
+        return tokenEndpointAuthMethod;
+    }
+
+    public void setTokenEndpointAuthMethod(AuthenticationMethod tokenEndpointAuthMethod) {
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
+    }
+
     public String getPolicyUri() {
         return policyUri;
     }
 
     public void setPolicyUri(String policyUri) {
         this.policyUri = policyUri;
-    }
-
-    public String getLogoutUri() {
-        return logoutUri;
-    }
-
-    public void setLogoutUri(String logoutUri) {
-        this.logoutUri = logoutUri;
-    }
-
-    public Boolean getLogoutSessionRequired() {
-        return logoutSessionRequired;
-    }
-
-    public void setLogoutSessionRequired(Boolean logoutSessionRequired) {
-        this.logoutSessionRequired = logoutSessionRequired;
     }
 
     public String getTosUri() {
@@ -288,28 +272,12 @@ public class RegistrationAction {
         this.subjectType = subjectType;
     }
 
-    public SignatureAlgorithm getIdTokenSignedResponseAlg() {
-        return idTokenSignedResponseAlg;
+    public SignatureAlgorithm getRequestObjectSigningAlg() {
+        return requestObjectSigningAlg;
     }
 
-    public void setIdTokenSignedResponseAlg(SignatureAlgorithm idTokenSignedResponseAlg) {
-        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
-    }
-
-    public KeyEncryptionAlgorithm getIdTokenEncryptedResponseAlg() {
-        return idTokenEncryptedResponseAlg;
-    }
-
-    public void setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm idTokenEncryptedResponseAlg) {
-        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
-    }
-
-    public BlockEncryptionAlgorithm getIdTokenEncryptedResponseEnc() {
-        return idTokenEncryptedResponseEnc;
-    }
-
-    public void setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm idTokenEncryptedResponseEnc) {
-        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
+    public void setRequestObjectSigningAlg(SignatureAlgorithm requestObjectSigningAlg) {
+        this.requestObjectSigningAlg = requestObjectSigningAlg;
     }
 
     public SignatureAlgorithm getUserInfoSignedResponseAlg() {
@@ -336,44 +304,28 @@ public class RegistrationAction {
         this.userInfoEncryptedResponseEnc = userInfoEncryptedResponseEnc;
     }
 
-    public SignatureAlgorithm getRequestObjectSigningAlg() {
-        return requestObjectSigningAlg;
+    public SignatureAlgorithm getIdTokenSignedResponseAlg() {
+        return idTokenSignedResponseAlg;
     }
 
-    public void setRequestObjectSigningAlg(SignatureAlgorithm requestObjectSigningAlg) {
-        this.requestObjectSigningAlg = requestObjectSigningAlg;
+    public void setIdTokenSignedResponseAlg(SignatureAlgorithm idTokenSignedResponseAlg) {
+        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
     }
 
-    public KeyEncryptionAlgorithm getRequestObjectEncryptionAlg() {
-        return requestObjectEncryptionAlg;
+    public KeyEncryptionAlgorithm getIdTokenEncryptedResponseAlg() {
+        return idTokenEncryptedResponseAlg;
     }
 
-    public void setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm requestObjectEncryptionAlg) {
-        this.requestObjectEncryptionAlg = requestObjectEncryptionAlg;
+    public void setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm idTokenEncryptedResponseAlg) {
+        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
     }
 
-    public BlockEncryptionAlgorithm getRequestObjectEncryptionEnc() {
-        return requestObjectEncryptionEnc;
+    public BlockEncryptionAlgorithm getIdTokenEncryptedResponseEnc() {
+        return idTokenEncryptedResponseEnc;
     }
 
-    public void setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm requestObjectEncryptionEnc) {
-        this.requestObjectEncryptionEnc = requestObjectEncryptionEnc;
-    }
-
-    public AuthenticationMethod getTokenEndpointAuthMethod() {
-        return tokenEndpointAuthMethod;
-    }
-
-    public void setTokenEndpointAuthMethod(AuthenticationMethod tokenEndpointAuthMethod) {
-        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
-    }
-
-    public SignatureAlgorithm getTokenEndpointAuthSigningAlg() {
-        return tokenEndpointAuthSigningAlg;
-    }
-
-    public void setTokenEndpointAuthSigningAlg(SignatureAlgorithm tokenEndpointAuthSigningAlg) {
-        this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
+    public void setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm idTokenEncryptedResponseEnc) {
+        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
     }
 
     public Integer getDefaultMaxAge() {
