@@ -109,7 +109,11 @@ public class RegisterSiteOperation extends BaseOperation {
         } else {
             LOG.error("RegisterClient response is null.");
         }
-        throw new RuntimeException("Failed to register client for site.");
+        if (!Strings.isNullOrEmpty(response.getErrorDescription())) {
+            LOG.error(response.getErrorDescription());
+        }
+
+        throw new RuntimeException("Failed to register client for site. Details:" + response.getEntity());
     }
 
     private RegisterRequest createRegisterClientRequest() {
