@@ -160,7 +160,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     private Set<String> getRpLogoutUris(SessionState sessionState) {
         final Set<String> result = Sets.newHashSet();
-        final Set<Client> clientsByDns = clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true);
+        final Set<Client> clientsByDns = sessionState != null && sessionState.getPermissionGrantedMap() != null ?
+                clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true) :
+                Sets.<Client>newHashSet();
         for (Client client : clientsByDns) {
             String logoutUri = client.getLogoutUri();
 
