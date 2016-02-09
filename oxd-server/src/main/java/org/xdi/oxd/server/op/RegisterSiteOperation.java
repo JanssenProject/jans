@@ -53,8 +53,10 @@ public class RegisterSiteOperation extends BaseOperation {
         try {
             String siteId = UUID.randomUUID().toString();
 
-            LOG.info("Create site");
+            LOG.info("Creating site configuration ...");
             persistSiteConfiguration(siteId);
+
+            LOG.info("Site configuration created: " + siteConfiguration);
 
             RegisterSiteResponse opResponse = new RegisterSiteResponse();
             opResponse.setSiteId(siteId);
@@ -99,6 +101,7 @@ public class RegisterSiteOperation extends BaseOperation {
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
+                LOG.trace("Registered client for site - client_id: " + response.getClientId());
                 return response;
             } else {
                 LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());

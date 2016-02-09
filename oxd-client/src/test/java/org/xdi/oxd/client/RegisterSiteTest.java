@@ -19,14 +19,14 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class RegisterSiteTest {
 
-    @Parameters({"host", "port", "redirectUrl"})
+    @Parameters({"host", "port", "redirectUrl", "logoutUrl"})
     @Test
-    public void test(String host, int port, String redirectUrl) throws IOException {
+    public void test(String host, int port, String redirectUrl, String logoutUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse resp = registerSite(client, redirectUrl);
+            final RegisterSiteResponse resp = registerSite(client, redirectUrl, logoutUrl);
             assertNotNull(resp);
 
             notEmpty(resp.getSiteId());
@@ -40,9 +40,11 @@ public class RegisterSiteTest {
     }
 
     public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl, String logoutRedirectUrl) {
+
         final RegisterSiteParams commandParams = new RegisterSiteParams();
         commandParams.setAuthorizationRedirectUri(redirectUrl);
         commandParams.setLogoutRedirectUri(logoutRedirectUrl);
+        commandParams.setClientLogoutUri("");
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(commandParams);
