@@ -56,6 +56,40 @@ public class RegisterSiteTest {
         }
     }
 
+    @Test(enabled = false)
+    public void manual() throws IOException {
+        CommandClient client = null;
+        try {
+            client = new CommandClient("localhost", 8099);
+
+            final RegisterSiteParams commandParams = new RegisterSiteParams();
+
+            commandParams.setAuthorizationRedirectUri("https://gluu.loc/wp-login.php?option=oxdOpenId");
+            commandParams.setPostLogoutRedirectUri("https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129");
+            commandParams.setApplicationType("web");
+
+            commandParams.setRedirectUris(Arrays.asList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
+            commandParams.setAcrValues(new ArrayList<String>());
+            commandParams.setContacts(Arrays.asList("vlad.karapetyan.1988@gmail.com"));
+
+//            commandParams.setClientLogoutUri("https://mag.gluu/index.php/customer/account/logout/");
+            commandParams.setClientLogoutUri("https://gluu.loc/index.php/customer/account/logout/");
+            commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
+            commandParams.setGrantType(Lists.newArrayList("authorization_code"));
+
+            commandParams.setResponseTypes(Lists.newArrayList("code"));
+
+            final Command command = new Command(CommandType.REGISTER_SITE);
+            command.setParamsObject(commandParams);
+
+            RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+            assertNotNull(resp);
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+
     public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl) {
         return registerSite(client, redirectUrl, redirectUrl, "");
     }
