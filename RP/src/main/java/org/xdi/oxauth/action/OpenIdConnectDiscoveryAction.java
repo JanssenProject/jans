@@ -6,10 +6,6 @@
 
 package org.xdi.oxauth.action;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-
-import java.net.URISyntaxException;
-
 import org.apache.http.client.HttpClient;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
@@ -28,6 +24,10 @@ import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
 import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 
+import java.net.URISyntaxException;
+
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+
 /**
  * @author Javier Rojas Blum Date: 02.22.2013
  */
@@ -44,7 +44,7 @@ public class OpenIdConnectDiscoveryAction {
     private String rel;
 
     private boolean showResults;
-    private boolean acceptUntrastedCertificate;
+    private boolean acceptUntrustedCertificate;
     private String requestString1;
     private String responseString1;
     private String requestString2;
@@ -66,7 +66,7 @@ public class OpenIdConnectDiscoveryAction {
     public void exec() {
         try {
             ClientExecutor clientExecutor = null;
-            if (acceptUntrastedCertificate) {
+            if (acceptUntrustedCertificate) {
                 HttpClient httpClient = new SslDefaultHttpClient(new TrustAllTrustManager());
                 clientExecutor = new ApacheHttpClient4Executor(httpClient);
             }
@@ -181,11 +181,11 @@ public class OpenIdConnectDiscoveryAction {
         this.responseString2 = responseString2;
     }
 
-    public boolean isAcceptUntrastedCertificate() {
-        return acceptUntrastedCertificate;
+    public boolean isAcceptUntrustedCertificate() {
+        return acceptUntrustedCertificate;
     }
 
-    public void setAcceptUntrastedCertificate(boolean acceptUntrastedCertificate) {
-        this.acceptUntrastedCertificate = acceptUntrastedCertificate;
+    public void setAcceptUntrustedCertificate(boolean acceptUntrustedCertificate) {
+        this.acceptUntrustedCertificate = acceptUntrustedCertificate;
     }
 }
