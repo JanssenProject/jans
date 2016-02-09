@@ -28,6 +28,7 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
@@ -93,7 +94,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         final Set<String> logoutUris = getRpLogoutUris(pair.getFirst());
         final String html = constructPage(logoutUris, redirectUri, state);
         log.debug("Constructed http logout page: " + html);
-        return Response.ok().type(MediaType.TEXT_HTML_TYPE).entity(html).build();
+        return Response.ok().
+                cacheControl(ServerUtil.cacheControl(true, true)).
+                header("Pragma", "no-cache").
+                type(MediaType.TEXT_HTML_TYPE).entity(html).
+                build();
     }
 
     private Response simpleLogout(String postLogoutRedirectUri, String state, HttpServletRequest httpRequest, Pair<SessionState, AuthorizationGrant> pair) {
@@ -113,7 +118,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
             }
         }
-        return Response.ok().build();
+        return Response.ok().
+                cacheControl(ServerUtil.cacheControl(true, true)).
+                header("Pragma", "no-cache").
+                build();
     }
 
     private Pair<SessionState, AuthorizationGrant> endSession(String idTokenHint, String sessionState,
@@ -215,9 +223,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             if (!Strings.isNullOrEmpty(state)) {
                 if (postLogoutUrl.contains("?")) {
-                    postLogoutUrl += "&state="+state;
+                    postLogoutUrl += "&state=" + state;
                 } else {
-                    postLogoutUrl += "?state="+state;
+                    postLogoutUrl += "?state=" + state;
                 }
             }
 
