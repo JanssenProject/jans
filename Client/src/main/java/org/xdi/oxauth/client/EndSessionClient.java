@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.client;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -117,6 +118,7 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
             setResponse(new EndSessionResponse(status));
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
+            getResponse().setHtmlPage(entity);
             getResponse().setHeaders(clientResponse.getHeaders());
             if (clientResponse.getLocation() != null) {
                 String location = clientResponse.getLocation().getHref();
@@ -133,7 +135,7 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
                 }
             }
 
-            if (entity != null && !entity.equals("")) {
+            if (!Strings.isNullOrEmpty(entity) && !entity.contains("<html>")) {
                 try {
                     JSONObject jsonObj = new JSONObject(entity);
                     if (jsonObj.has("error")) {
