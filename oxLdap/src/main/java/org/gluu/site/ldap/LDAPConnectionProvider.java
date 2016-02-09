@@ -269,6 +269,10 @@ public class LDAPConnectionProvider {
 		return useSSL;
 	}
 
+	public ArrayList<String> getBinaryAttributes() {
+		return binaryAttributes;
+	}
+
 	public boolean isBinaryAttribute(String attributeName) {
 		if (StringHelper.isEmpty(attributeName)) {
 			return false;
