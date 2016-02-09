@@ -19,7 +19,6 @@ public interface ConfigurationResponseClaim {
     public static final String CLIENT_INFO_ENDPOINT = "clientinfo_endpoint";
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
     public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
-    public static final String END_SESSION_PAGE = "end_session_page";
     public static final String JWKS_URI = "jwks_uri";
     public static final String VALIDATE_TOKEN_ENDPOINT = "validate_token_endpoint";
     public static final String REGISTRATION_ENDPOINT = "registration_endpoint";
