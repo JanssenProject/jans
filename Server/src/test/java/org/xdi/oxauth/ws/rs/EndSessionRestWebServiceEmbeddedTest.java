@@ -48,6 +48,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
     private String clientId;
     private String idToken;
+    private String sessionState;
 
     @Parameters({"registerPath", "redirectUris", "postLogoutRedirectUri"})
     @Test
@@ -156,6 +157,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                         assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
                         idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
+                        sessionState = params.get(AuthorizeResponseParam.SESSION_STATE);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -173,14 +175,15 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     public void requestEndSessionStep3(final String endSessionPath, final String postLogoutRedirectUri) throws Exception {
         new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, endSessionPath) {
 
-            String endSessionState = UUID.randomUUID().toString();
+            String state = UUID.randomUUID().toString();
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
                 request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
+                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
+                endSessionRequest.setSessionState(sessionState);
 
                 request.setQueryString(endSessionRequest.getQueryString());
             }
@@ -191,7 +194,6 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 showResponse("requestEndSessionStep3", response);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertEquals(response.getContentAsString(), 200, "Unexpected response code.");
                 assertNotNull(response.getContentAsString(), "Unexpected html.");
                 assertTrue(response.getContentAsString().contains("postLogoutRedirectUri"));
 
