@@ -453,7 +453,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			String attributeName = attribute.getName();
 			if (log.isTraceEnabled()) {
 				if (attribute.needsBase64Encoding()) {
-					log.trace("Found binary attribute: " + attribute.getName() + ". Is defined in LDAP config: " + ldapOperationService.isBinaryAttribute(attributeName));
+					log.trace("Found binary attribute: " + attributeName + ". Is defined in LDAP config: " + ldapOperationService.isBinaryAttribute(attributeName));
 				}
 			}
 
