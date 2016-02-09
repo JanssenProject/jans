@@ -15,8 +15,6 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -34,7 +32,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version February 5, 2016
+ * @version 0.9 March 11, 2015
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -59,10 +57,9 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClientSecretExpiresAt());
     }
 
-    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestClientAssociate2(final String redirectUris, final String sectorIdentifierUri,
-                                        final String logoutUri) throws Exception {
+    public void requestClientAssociate2(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientAssociate2");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -75,20 +72,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setJwksUri("http://www.gluu.org/jwks");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
-        registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
-        registerRequest.setLogoutUri(logoutUri);
-        registerRequest.setLogoutSessionRequired(true);
-        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
-        registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
-        registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
-        registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
-        registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
-        registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.A256KW);
-        registerRequest.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -101,43 +86,6 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getClaims().get(SCOPES.toString()));
-        assertNotNull(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString()));
-        assertTrue(Boolean.parseBoolean(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString())));
-        assertNotNull(response.getClaims().get(LOGOUT_URI.toString()));
-        assertEquals(logoutUri, response.getClaims().get(LOGOUT_URI.toString()));
-        assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS512,
-                SignatureAlgorithm.fromName(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
-        assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.RSA1_5,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
-        assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
-        assertNotNull(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS384,
-                SignatureAlgorithm.fromName(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())));
-        assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.A128KW,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
-        assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A128GCM,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
-        assertNotNull(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS256,
-                SignatureAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())));
-        assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.A256KW,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
-        assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
-        assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
-        assertEquals(AuthenticationMethod.CLIENT_SECRET_JWT,
-                AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
-        assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
-        assertEquals(SignatureAlgorithm.ES256,
-                SignatureAlgorithm.fromName(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
         JSONArray scopesJsonArray = new JSONArray(response.getClaims().get(SCOPES.toString()));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {
