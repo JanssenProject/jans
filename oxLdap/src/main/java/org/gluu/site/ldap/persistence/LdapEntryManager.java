@@ -453,16 +453,20 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			String attributeName = attribute.getName();
 			if (log.isTraceEnabled()) {
 				if (attribute.needsBase64Encoding()) {
-					log.trace("Found binary attribute: " + attribute.getName() + ". Is defined in LDAP config: " + ldapOperationService.isBinaryAttribute(StringHelper.toLowerCase(attributeName)));
+					log.trace("Found binary attribute: " + attribute.getName() + ". Is defined in LDAP config: " + ldapOperationService.isBinaryAttribute(attributeName));
 				}
 			}
 
-			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(StringHelper.toLowerCase(attributeName))) {
+			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(attributeName)) {
 				byte[][] attributeValues = attribute.getValueByteArrays();
 				if (attributeValues != null) {
 					attributeValueStrings = new String[attributeValues.length];
 					for (int i = 0; i < attributeValues.length; i++) {
 						attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
+						if (log.isTraceEnabled()) {
+							log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
+									 " value (base64): " + attributeValueStrings[i]);
+						}
 					}
 				}
 			} else {
