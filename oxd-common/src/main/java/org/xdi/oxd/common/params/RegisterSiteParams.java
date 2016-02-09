@@ -13,8 +13,8 @@ public class RegisterSiteParams implements IParams {
 
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
-    @JsonProperty(value = "logout_redirect_uri")
-    private String logoutRedirectUri;
+    @JsonProperty(value = "post_logout_redirect_uri")
+    private String postLogoutRedirectUri;
 
     @JsonProperty(value = "application_type")
     private String applicationType;
@@ -77,12 +77,12 @@ public class RegisterSiteParams implements IParams {
         this.clientTokenEndpointAuthMethod = clientTokenEndpointAuthMethod;
     }
 
-    public String getLogoutRedirectUri() {
-        return logoutRedirectUri;
+    public String getPostLogoutRedirectUri() {
+        return postLogoutRedirectUri;
     }
 
-    public void setLogoutRedirectUri(String logoutRedirectUri) {
-        this.logoutRedirectUri = logoutRedirectUri;
+    public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
+        this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
     public String getClientJwksUri() {
