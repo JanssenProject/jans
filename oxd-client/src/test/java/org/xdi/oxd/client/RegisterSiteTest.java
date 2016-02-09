@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
@@ -8,6 +9,8 @@ import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
@@ -19,32 +22,50 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class RegisterSiteTest {
 
-    @Parameters({"host", "port", "redirectUrl", "logoutUrl"})
+    @Parameters({"host", "port", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, int port, String redirectUrl, String logoutUrl) throws IOException {
+    public void test(String host, int port, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse resp = registerSite(client, redirectUrl, logoutUrl);
+            RegisterSiteResponse resp = registerSite(client, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
 
             notEmpty(resp.getSiteId());
+
+            // more specific site registration
+            final RegisterSiteParams commandParams = new RegisterSiteParams();
+            commandParams.setAuthorizationRedirectUri(redirectUrl);
+            commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+            commandParams.setClientLogoutUri(logoutUrl);
+            commandParams.setApplicationType("web");
+            commandParams.setRedirectUris(Arrays.asList(redirectUrl));
+            commandParams.setAcrValues(new ArrayList<String>());
+            commandParams.setScope(Lists.newArrayList("openid", "profile"));
+            commandParams.setGrantType(Lists.newArrayList("authorization_code"));
+            commandParams.setResponseTypes(Lists.newArrayList("code"));
+
+            final Command command = new Command(CommandType.REGISTER_SITE);
+            command.setParamsObject(commandParams);
+
+            resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+            assertNotNull(resp);
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
     public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl) {
-        return registerSite(client, redirectUrl, redirectUrl);
+        return registerSite(client, redirectUrl, redirectUrl, "");
     }
 
-    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl, String logoutRedirectUrl) {
+    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
         final RegisterSiteParams commandParams = new RegisterSiteParams();
         commandParams.setAuthorizationRedirectUri(redirectUrl);
-        commandParams.setLogoutRedirectUri(logoutRedirectUrl);
-        commandParams.setClientLogoutUri("");
+        commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        commandParams.setClientLogoutUri(logoutUri);
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(commandParams);
