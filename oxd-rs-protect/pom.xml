@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-rs-protect</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.6-SNAPSHOT</version>
+    <version>3.0.7-SNAPSHOT</version>
     <name>oxD RS Protect</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>3.0.6-SNAPSHOT</version>
+        <version>3.0.7-SNAPSHOT</version>
     </parent>
 
     <build>
