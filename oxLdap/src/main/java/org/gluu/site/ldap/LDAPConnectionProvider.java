@@ -124,6 +124,7 @@ public class LDAPConnectionProvider {
 			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
 			this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
 		}
+		log.debug("Using next binary attributes: " + this.binaryAttributes);
 		
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();

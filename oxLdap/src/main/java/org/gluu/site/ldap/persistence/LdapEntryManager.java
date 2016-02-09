@@ -451,6 +451,11 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		for (Attribute attribute : entry.getAttributes()) {
 			String[] attributeValueStrings = NO_STRINGS;
 			String attributeName = attribute.getName();
+			if (log.isTraceEnabled()) {
+				if (attribute.needsBase64Encoding()) {
+					log.trace("Found binary attribute: " + attribute.getName() + " Is it defined in LDAP config: " + ldapOperationService.isBinaryAttribute(StringHelper.toLowerCase(attributeName)));
+				}
+			}
 
 			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(StringHelper.toLowerCase(attributeName))) {
 				byte[][] attributeValues = attribute.getValueByteArrays();
