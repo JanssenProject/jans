@@ -6,22 +6,6 @@
 
 package org.xdi.oxauth;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.conn.scheme.Scheme;
@@ -42,21 +26,25 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.BaseClient;
-import org.xdi.oxauth.client.BaseResponseWithErrors;
-import org.xdi.oxauth.client.ClientUtils;
-import org.xdi.oxauth.client.OpenIdConfigurationClient;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.error.IErrorType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.util.StringHelper;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -99,6 +87,7 @@ public abstract class BaseTest {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
+//            propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
         }
 
         // Load test paramters

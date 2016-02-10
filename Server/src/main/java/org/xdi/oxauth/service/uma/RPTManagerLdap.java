@@ -132,7 +132,7 @@ public class RPTManagerLdap extends AbstractRPTManager {
     }
 
     @Override
-    public UmaRPT createRPT(String authorization, String amHost) {
+    public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
        throw new UnsupportedOperationException("We don't need this method implementation in delegated manager");
     }
 

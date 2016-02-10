@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -22,14 +15,18 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.io.IOException;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -40,7 +37,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
 
     private Token m_aat;
     private RPTResponse m_rpt;
-    private final Holder<ResourceSetPermissionTicket> m_ticketH = new Holder<ResourceSetPermissionTicket>();
+    private final Holder<PermissionTicket> m_ticketH = new Holder<PermissionTicket>();
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
@@ -79,7 +76,7 @@ public class IdGenRestWSEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 403); // forbidden
                 try {
-                    final ResourceSetPermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetPermissionTicket.class);
+                    final PermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), PermissionTicket.class);
                     UmaTestUtil.assert_(t);
                     m_ticketH.setT(t);
                 } catch (IOException e) {

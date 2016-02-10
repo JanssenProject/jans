@@ -8,7 +8,6 @@ package org.xdi.oxauth.session.ws.rs;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.wordnik.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -29,12 +28,12 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -48,6 +47,8 @@ import java.util.Set;
  */
 @Name("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
+
+    private static final boolean HTTP_BASED = true; // for now always true but maybe we will want to make is configurable?
 
     @Logger
     private Log log;
@@ -77,6 +78,30 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
 
+        if (HTTP_BASED) {
+            return httpBased(postLogoutRedirectUri, state, pair);
+        } else {
+            return simpleLogout(postLogoutRedirectUri, state, httpRequest, pair);
+        }
+    }
+
+
+    public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionState, AuthorizationGrant> pair) {
+
+        // Validate redirectUri
+        String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+
+        final Set<String> logoutUris = getRpLogoutUris(pair);
+        final String html = constructPage(logoutUris, redirectUri, state);
+        log.debug("Constructed http logout page: " + html);
+        return Response.ok().
+                cacheControl(ServerUtil.cacheControl(true, true)).
+                header("Pragma", "no-cache").
+                type(MediaType.TEXT_HTML_TYPE).entity(html).
+                build();
+    }
+
+    private Response simpleLogout(String postLogoutRedirectUri, String state, HttpServletRequest httpRequest, Pair<SessionState, AuthorizationGrant> pair) {
         if (!Strings.isNullOrEmpty(postLogoutRedirectUri)) {
 
             // Validate redirectUri
@@ -93,7 +118,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
             }
         }
-        return Response.ok().build();
+        return Response.ok().
+                cacheControl(ServerUtil.cacheControl(true, true)).
+                header("Pragma", "no-cache").
+                build();
     }
 
     private Pair<SessionState, AuthorizationGrant> endSession(String idTokenHint, String sessionState,
@@ -130,35 +158,21 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return new Pair<SessionState, AuthorizationGrant>(ldapSessionState, authorizationGrant);
     }
 
-    @Override
-    public Response requestEndSessionPage(
-            @ApiParam(value = "Previously issued ID Token (id_token) passed to the logout endpoint as a hint about the End-User's current authenticated session with the Client. This is used as an indication of the identity of the End-User that the RP is requesting be logged out by the OP. The OP need not be listed as an audience of the ID Token when it is used as an id_token_hint value.", required = true)
-            String idTokenHint,
-            String postLogoutRedirectUri,
-            @ApiParam(value = "Session State", required = false)
-            String sessionState,
-            @Context HttpServletRequest httpRequest,
-            @Context HttpServletResponse httpResponse,
-            @Context SecurityContext sec) {
-
-        log.debug("Attempting to end session, idTokenHint: {0}, sessionState: {1}, Is Secure = {2}",
-                idTokenHint, sessionState, sec.isSecure());
-
-
-        Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
-
-        // Validate redirectUri
-        String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
-
-        final Set<String> logoutUris = getRpLogoutUris(pair.getFirst());
-        final String html = constructPage(logoutUris, redirectUri);
-        log.debug("Constructed http logout page: " + html);
-        return Response.ok().type(MediaType.TEXT_HTML_TYPE).entity(html).build();
-    }
-
-    private Set<String> getRpLogoutUris(SessionState sessionState) {
+    private Set<String> getRpLogoutUris(Pair<SessionState, AuthorizationGrant> pair) {
         final Set<String> result = Sets.newHashSet();
-        final Set<Client> clientsByDns = clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true);
+
+        SessionState sessionState = pair.getFirst();
+        if (sessionState == null) {
+            log.error("session_state is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_state." +
+                    "Http based html will contain no iframes.");
+            return result;
+        }
+
+        final Set<Client> clientsByDns = sessionState.getPermissionGrantedMap() != null ?
+                clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true) :
+                Sets.<Client>newHashSet();
+        clientsByDns.add(pair.getSecond().getClient());
+
         for (Client client : clientsByDns) {
             String logoutUri = client.getLogoutUri();
 
@@ -207,7 +221,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return ldapSessionState;
     }
 
-    private String constructPage(Set<String> logoutUris, String postLogoutUrl) {
+    private String constructPage(Set<String> logoutUris, String postLogoutUrl, String state) {
         String iframes = "";
         for (String logoutUri : logoutUris) {
             iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\"></iframe>", logoutUri);
@@ -218,7 +232,20 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "<head>";
 
         if (!Strings.isNullOrEmpty(postLogoutUrl)) {
-            html += "<meta http-equiv=\"refresh\" content=\"5; url=" + postLogoutUrl + "\">";
+
+            if (!Strings.isNullOrEmpty(state)) {
+                if (postLogoutUrl.contains("?")) {
+                    postLogoutUrl += "&state=" + state;
+                } else {
+                    postLogoutUrl += "?state=" + state;
+                }
+            }
+
+            html += "<script>" +
+                    "window.onload=function() {" +
+                    "window.location='" + postLogoutUrl + "'" +
+                    "}" +
+                    "</script>";
         }
 
         html += "<title>Gluu Generated logout page</title>" +

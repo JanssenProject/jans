@@ -6,13 +6,8 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
@@ -32,8 +27,11 @@ import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -114,13 +112,13 @@ public class ScopeService {
         }
     }
 
-    public List<String> getScopeDNsByUrlsAndAddToLdapIfNeeded(List<String> p_scopeUrls) {
+    public List<String> getScopeDNsByUrlsAndAddToLdapIfNeeded(List<String> scopeUrls) {
         final List<String> result = new ArrayList<String>();
-        if (p_scopeUrls != null && !p_scopeUrls.isEmpty()) {
+        if (scopeUrls != null && !scopeUrls.isEmpty()) {
             try {
-                List<String> sourceScopeUrls = handleInternalScopes(p_scopeUrls, result);
-                if (sourceScopeUrls.size() > 0) {
-                	handleExternalScopes(sourceScopeUrls, result);
+                List<String> notInternalScopeUrls = handleInternalScopes(scopeUrls, result);
+                if (notInternalScopeUrls.size() > 0) {
+                	handleExternalScopes(notInternalScopeUrls, result);
                 }
             } catch (WebApplicationException e) {
                 throw e;
@@ -154,8 +152,8 @@ public class ScopeService {
         return notProcessedScopeUrls;
     }
 
-    private void handleExternalScopes(List<String> p_scopeUrls, List<String> result) throws LDAPException {
-        for (String scopeUrl : p_scopeUrls) {
+    private void handleExternalScopes(List<String> scopeUrls, List<String> result) throws LDAPException {
+        for (String scopeUrl : scopeUrls) {
             final Filter filter = Filter.create(String.format("&(oxUrl=%s)", scopeUrl));
             final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {

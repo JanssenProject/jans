@@ -17,7 +17,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
@@ -49,17 +49,29 @@ public class AuthorizationService {
     @In
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
 
-    public boolean allowToAddPermission(AuthorizationGrant p_grant, UmaRPT p_rpt, ResourceSetPermission p_permission, HttpServletRequest httpRequest, RptAuthorizationRequest rptAuthorizationRequest) {
-        log.trace("Check policies for permission, id: '{0}'", p_permission.getDn());
-        List<ScopeDescription> scopes = umaScopeService.getScopesByDns(p_permission.getScopeDns());
+    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+        log.trace("Check policies for permission, id: '{0}'", permission.getDn());
+        List<ScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
+        return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
+    }
+
+    public boolean allowToAddPermissionForGat(AuthorizationGrant grant, UmaRPT rpt, List<String> scopes, HttpServletRequest httpRequest, ClaimTokenList claims) {
+        List<ScopeDescription> scopesByUrls = umaScopeService.getScopesByUrls(scopes);
+        return allowToAddPermission(grant, rpt, scopesByUrls, new ResourceSetPermission(), httpRequest, claims);
+    }
+
+    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
+                                        ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+        log.trace("Check policies for scopes: '{0}'", scopes);
+
         Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
 
         if (authorizationPolicies == null || authorizationPolicies.isEmpty()) {
             log.trace("No policies protection, allowed to grant permission.");
             return true;
         } else {
-            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(p_grant);
-            final AuthorizationContext context = new AuthorizationContext(p_rpt, p_permission, unmodifiableAuthorizationGrant, httpRequest, rptAuthorizationRequest.getClaims());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(grant);
+            final AuthorizationContext context = new AuthorizationContext(rpt, permission, unmodifiableAuthorizationGrant, httpRequest, claims);
             for (String authorizationPolicy : authorizationPolicies) {
                 // if at least one policy returns false then whole result is false
                 if (!applyPolicy(authorizationPolicy, context)) {

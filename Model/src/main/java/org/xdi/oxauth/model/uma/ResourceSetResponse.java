@@ -26,10 +26,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonIgnoreProperties(ignoreUnknown = true)
 //@JsonRootName(value = "resourceSetStatus")
 @XmlRootElement
-public class ResourceSetStatus {
+public class ResourceSetResponse {
 
 	private String id;
-	private String policyUri;
+	private String userAccessPolicyUri;
 
 	@JsonProperty(value = "_id")
 	@XmlElement(name = "_id")
@@ -43,17 +43,17 @@ public class ResourceSetStatus {
 
     @JsonProperty(value = "user_access_policy_uri")
 	@XmlElement(name = "user_access_policy_uri")
-	public String getPolicyUri() {
-		return policyUri;
+	public String getUserAccessPolicyUri() {
+		return userAccessPolicyUri;
 	}
 
-	public void setPolicyUri(String policyUri) {
-		this.policyUri = policyUri;
+	public void setUserAccessPolicyUri(String userAccessPolicyUri) {
+		this.userAccessPolicyUri = userAccessPolicyUri;
 	}
 
 	@Override
 	public String toString() {
-		return "ResourceSetStatus [id=" + id + ", user_access_policy_uri=" + policyUri + "]";
+		return "ResourceSetStatus [id=" + id + ", user_access_policy_uri=" + userAccessPolicyUri + "]";
 	}
 
 }
