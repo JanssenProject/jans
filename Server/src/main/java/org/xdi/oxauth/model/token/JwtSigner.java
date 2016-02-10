@@ -60,7 +60,7 @@ public class JwtSigner {
 
     public Jwt sign() throws SignatureException, InvalidJwtException, StringEncrypter.EncryptionException {
          // Signature
-        JSONWebKey jwk = null;
+        JSONWebKey jwk;
         switch (signatureAlgorithm) {
             case HS256:
             case HS384:

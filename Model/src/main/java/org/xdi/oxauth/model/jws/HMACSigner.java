@@ -44,7 +44,7 @@ public class HMACSigner extends AbstractJwsSigner {
             throw new SignatureException("The signing input is null");
         }
 
-        String algorithm = null;
+        String algorithm;
         switch (getSignatureAlgorithm()) {
             case HS256:
                 algorithm = "HMACSHA256";

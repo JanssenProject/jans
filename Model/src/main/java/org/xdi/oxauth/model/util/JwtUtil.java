@@ -212,7 +212,7 @@ public class JwtUtil {
     }
 
     public static boolean verifySignatureHS256(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature = false;
+        boolean validSignature;
 
         validSignature = Arrays.equals(sigBytes, getSignatureHS256(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
 
@@ -220,7 +220,7 @@ public class JwtUtil {
     }
 
     public static boolean verifySignatureHS384(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature = false;
+        boolean validSignature;
 
         validSignature = Arrays.equals(sigBytes, getSignatureHS384(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
 
@@ -228,7 +228,7 @@ public class JwtUtil {
     }
 
     public static boolean verifySignatureHS512(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature = false;
+        boolean validSignature;
 
         validSignature = Arrays.equals(sigBytes, getSignatureHS512(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
 
