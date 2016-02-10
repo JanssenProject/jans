@@ -26,7 +26,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -145,7 +145,7 @@ public class DebugContentEncodingTest extends BaseTest {
                         System.out.println("ERROR: Unexpected response code.");
                     }
                     try {
-                        final ResourceSetStatus status = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetStatus.class);
+                        final ResourceSetResponse status = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetResponse.class);
                         System.out.println("Status: " + status);
                     } catch (IOException e) {
                         e.printStackTrace();

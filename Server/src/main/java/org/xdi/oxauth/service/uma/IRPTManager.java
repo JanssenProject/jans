@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.uma;
 
-import org.xdi.oxauth.model.common.AbstractToken;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 
@@ -24,7 +24,7 @@ public interface IRPTManager {
 
     public UmaRPT getRPTByCode(String requesterPermissionTokenCode);
 
-    public UmaRPT createRPT(AbstractToken authorizationApiToken, String userId, String clientId, String amHost);
+    UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat, boolean isGat);
 
     public void deleteRPT(String rptCode);
 
@@ -36,5 +36,5 @@ public interface IRPTManager {
 
     public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt);
 
-    UmaRPT createRPT(String authorization, String amHost);
+    UmaRPT createRPT(String authorization, String amHost, boolean isGat);
 }

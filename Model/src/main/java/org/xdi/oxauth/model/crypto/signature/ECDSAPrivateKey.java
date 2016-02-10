@@ -6,18 +6,19 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
-import java.math.BigInteger;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PrivateKey;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.math.BigInteger;
+
 /**
  * The Private Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version February 9, 2016
  */
 public class ECDSAPrivateKey extends PrivateKey {
 
@@ -28,7 +29,7 @@ public class ECDSAPrivateKey extends PrivateKey {
     }
 
     public ECDSAPrivateKey(String d) {
-        this.d = new BigInteger(JwtUtil.base64urldecode(d));
+        this.d = new BigInteger(1, JwtUtil.base64urldecode(d));
     }
 
     public BigInteger getD() {
@@ -44,7 +45,7 @@ public class ECDSAPrivateKey extends PrivateKey {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("modulus", JSONObject.NULL);
         jsonObject.put("privateExponent", JSONObject.NULL);
-        jsonObject.put("d", JwtUtil.base64urlencode(d.toByteArray()));
+        jsonObject.put("d", JwtUtil.base64urlencodeUnsignedBigInt(d));
 
         return jsonObject;
     }
