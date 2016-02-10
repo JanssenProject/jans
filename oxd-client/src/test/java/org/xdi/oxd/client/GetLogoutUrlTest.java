@@ -36,6 +36,7 @@ public class GetLogoutUrlTest {
 
             final GetLogoutUrlParams commandParams = new GetLogoutUrlParams();
             commandParams.setOxdId(site.getSiteId());
+            commandParams.setIdTokenHint("dummy_token");
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setState(UUID.randomUUID().toString());
             commandParams.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
