@@ -72,7 +72,7 @@
 
     ],
 
-    "configGeneration":true,
+    "configGeneration":%(oxTrustConfigGeneration)s,
     "ignoreValidation":false,
 
     "idpSecurityCert":"/etc/certs/shibIDP.crt",

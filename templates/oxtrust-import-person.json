@@ -1,6 +1,7 @@
 {
 	"mappings": [{
 		"ldapName": "uid",
+		"displayName": "Username",
 		"dataType": "string",
 		"required": "true"
 	},
