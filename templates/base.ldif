@@ -223,6 +223,12 @@ objectclass: top
 objectclass: organizationalUnit
 ou: authentication_requests
 
+# U2F registered devices - LEVEL 4
+dn: ou=registered_devices,ou=u2f,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalUnit
+ou: registered_devices
+
 ################################
 
 # Metric data - LEVEL 3
@@ -231,3 +237,10 @@ objectclass: top
 objectclass: organizationalunit
 ou: metric
 
+################################
+
+# Sector Identifiers - LEVEL 3
+dn: ou=sector_identifiers,o=%(inumOrg)s,o=gluu
+objectclass: top
+objectclass: organizationalunit
+ou: sector_identifiers
