@@ -35,7 +35,7 @@ public class GetLogoutUrlOperation extends BaseOperation {
             final SiteConfiguration site = getSite(params.getOxdId());
 
             String uri = getDiscoveryService().getConnectDiscoveryResponse().getEndSessionEndpoint() +
-                    "&id_token_hint=" + getIdToken(params, site);
+                    "?id_token_hint=" + getIdToken(params, site);
             if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
                 uri += "&post_logout_redirect_uri=" + params.getPostLogoutRedirectUri();
             }
