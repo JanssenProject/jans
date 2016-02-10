@@ -9,29 +9,29 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class LogoutResponse implements IOpResponse {
 
-    @JsonProperty(value = "html")
-    private String html;
+    @JsonProperty(value = "uri")
+    private String uri;
 
     public LogoutResponse() {
     }
 
-    public LogoutResponse(String html) {
-        this.html = html;
+    public LogoutResponse(String uri) {
+        this.uri = uri;
     }
 
-    public String getHtml() {
-        return html;
+    public String getUri() {
+        return uri;
     }
 
-    public void setHtml(String html) {
-        this.html = html;
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("LogoutResponse");
-        sb.append("{html='").append(html).append('\'');
+        sb.append("{uri='").append(uri).append('\'');
         sb.append('}');
         return sb.toString();
     }
