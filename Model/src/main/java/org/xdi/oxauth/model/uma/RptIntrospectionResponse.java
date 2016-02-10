@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -28,6 +29,7 @@ import java.util.List;
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({"active", "exp", "iat", "nbf", "permissions", "client_id", "sub", "aud", "iss", "jti"})
 @XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RptIntrospectionResponse {
 
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
@@ -39,7 +41,7 @@ public class RptIntrospectionResponse {
     private String aud;
     private String iss;
     private String jti;
-    private List<RegisterPermissionRequest> permissions;
+    private List<UmaPermission> permissions;
 
     public RptIntrospectionResponse() {
     }
@@ -140,11 +142,11 @@ public class RptIntrospectionResponse {
 
     @JsonProperty(value = "permissions")
     @XmlElement(name = "permissions")
-    public List<RegisterPermissionRequest> getPermissions() {
+    public List<UmaPermission> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<RegisterPermissionRequest> p_permissions) {
+    public void setPermissions(List<UmaPermission> p_permissions) {
         permissions = p_permissions;
     }
 

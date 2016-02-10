@@ -90,7 +90,7 @@ public class RPTManagerInMemory extends AbstractRPTManager implements Serializab
     }
 
     @Override
-    public UmaRPT createRPT(String authorization, String amHost) {
+    public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
         throw new UnsupportedOperationException(); // we don't need to support this method in delegated object
     }
 

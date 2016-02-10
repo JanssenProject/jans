@@ -53,12 +53,12 @@ public class TUma {
         return c.getConfiguration(configurationPath);
     }
 
-    public static ResourceSetStatus registerResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, ResourceSet p_resourceSet) {
+    public static ResourceSetResponse registerResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
         return s.registerResourceSet(p_pat, p_umaRegisterResourcePath, p_resourceSet);
     }
 
-    public static ResourceSetStatus modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
+    public static ResourceSetResponse modifyResourceSet(BaseTest p_test, Token p_pat, String p_umaRegisterResourcePath,
                                                       final String p_rsid, ResourceSet p_resourceSet) {
         final TRegisterResourceSet s = new TRegisterResourceSet(p_test);
         return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
@@ -74,8 +74,8 @@ public class TUma {
         s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id);
     }
 
-    public static ResourceSetPermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,
-                                                                RegisterPermissionRequest p_request, String p_umaPermissionPath) {
+    public static PermissionTicket registerPermission(BaseTest p_test, Token p_pat, String p_umaAmHost, String p_umaHost,
+                                                                UmaPermission p_request, String p_umaPermissionPath) {
         final TRegisterPermission p = new TRegisterPermission(p_test);
         return p.registerPermission(p_pat, p_umaAmHost, p_umaHost, p_request, p_umaPermissionPath);
     }

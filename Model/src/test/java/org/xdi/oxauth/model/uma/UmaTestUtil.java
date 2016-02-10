@@ -39,25 +39,25 @@ public class UmaTestUtil {
         assertNotNull(p_rptStatus.getExpiresAt(), "Expiration date is null");
     }
 
-    public static void assert_(UmaConfiguration p_configuration) {
-        assertNotNull(p_configuration, "Meta data configuration is null");
-        assertEquals(p_configuration.getVersion(), "1.0", "Version isn't correct");
-        assertNotNull(p_configuration.getIssuer(), "Issuer isn't correct");
-        assertEquals(p_configuration.getPatProfilesSupported(), new String[]{"bearer"}, "Supported PAT profiles aren't correct");
-        assertEquals(p_configuration.getAatProfilesSupported(), new String[]{"bearer"}, "Supported AAT profiles aren't correct");
-        assertTrue(Arrays.equals(p_configuration.getRptProfilesSupported(), new String[]{"bearer"}) ||
-                Arrays.equals(p_configuration.getRptProfilesSupported(), new String[]{"https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0"})
+    public static void assert_(UmaConfiguration configuration) {
+        assertNotNull(configuration, "Meta data configuration is null");
+        assertEquals(configuration.getVersion(), "1.0", "Version isn't correct");
+        assertNotNull(configuration.getIssuer(), "Issuer isn't correct");
+        assertEquals(configuration.getPatProfilesSupported(), new String[]{"bearer"}, "Supported PAT profiles aren't correct");
+        assertEquals(configuration.getAatProfilesSupported(), new String[]{"bearer"}, "Supported AAT profiles aren't correct");
+        assertTrue(Arrays.equals(configuration.getRptProfilesSupported(), new String[]{"bearer"}) ||
+                Arrays.equals(configuration.getRptProfilesSupported(), new String[]{"https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0"})
                 , "Supported RPT profiles aren't correct");
-        assertEquals(p_configuration.getPatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported PAT grant types aren't correct");
-        assertEquals(p_configuration.getAatGrantTypesSupported(), new String[]{"authorization_code"}, "Supported AAT grant types aren't correct");
-        assertEquals(p_configuration.getClaimTokenProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
-        assertNotNull(p_configuration.getTokenEndpoint(), "Token endpoint isn't correct");
-        assertNotNull(p_configuration.getUserEndpoint(), "User endpoint isn't correct");
-        assertNotNull(p_configuration.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
-        assertNotNull(p_configuration.getResourceSetRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
-        assertNotNull(p_configuration.getPermissionRegistrationEndpoint(), "Permission registration endpoint isn't correct");
-        assertNotNull(p_configuration.getRptEndpoint(), "RPT endpoint isn't correct");
-        assertNotNull(p_configuration.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
+        assertTrue(Arrays.asList(configuration.getPatGrantTypesSupported()).contains("authorization_code"), "Supported PAT grant types aren't correct");
+        assertTrue(Arrays.asList(configuration.getAatGrantTypesSupported()).contains("authorization_code"), "Supported AAT grant types aren't correct");
+        assertEquals(configuration.getClaimTokenProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
+        assertNotNull(configuration.getTokenEndpoint(), "Token endpoint isn't correct");
+        assertNotNull(configuration.getGatEndpoint(), "Token endpoint isn't correct");
+        assertNotNull(configuration.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
+        assertNotNull(configuration.getResourceSetRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
+        assertNotNull(configuration.getPermissionRegistrationEndpoint(), "Permission registration endpoint isn't correct");
+        assertNotNull(configuration.getRptEndpoint(), "RPT endpoint isn't correct");
+        assertNotNull(configuration.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
     }
 
     public static void assert_(Token p_token) {
@@ -66,7 +66,7 @@ public class UmaTestUtil {
         //assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
     }
 
-    public static void assert_(ResourceSetStatus p_status) {
+    public static void assert_(ResourceSetResponse p_status) {
         assertNotNull(p_status, "Resource set status is null");
         assertNotNull(p_status.getId(), "Resource set description id is null");
     }
@@ -79,7 +79,7 @@ public class UmaTestUtil {
         return resourceSet;
     }
 
-    public static void assert_(ResourceSetPermissionTicket p_t) {
+    public static void assert_(PermissionTicket p_t) {
         assertNotNull(p_t, "Ticket is null");
         assertTrue(StringUtils.isNotBlank(p_t.getTicket()), "Ticket is empty");
     }

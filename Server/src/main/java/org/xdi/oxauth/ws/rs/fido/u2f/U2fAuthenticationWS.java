@@ -20,6 +20,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -30,7 +31,8 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.fido.u2f.AuthenticationService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
@@ -56,6 +58,9 @@ public class U2fAuthenticationWS {
 	private ErrorResponseFactory errorResponseFactory;
 
 	@In
+	private UserService userService;
+
+	@In
 	private AuthenticationService u2fAuthenticationService;
 
 	@In
@@ -66,12 +71,27 @@ public class U2fAuthenticationWS {
 
 	@GET
 	@Produces({ "application/json" })
-	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		try {
-			log.debug("Startig authentication with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
+			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
 
-			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, userName);
-			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage, sessionState);
+			if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
+				throw new BadInputException(String.format("The request should contains either username or keyhandle"));
+			}
+
+			boolean oneStep = StringHelper.isEmpty(userName);
+			String foundUserName = userName;
+			if (oneStep) {
+				// Convert to non URL safe base64 string
+				String keyHandleWithoutPading = Base64Util.base64urlencode(Base64Util.base64urldecode(keyHandle));
+
+				// In one step we expects empty username and not empty keyhandle
+				String userInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
+				foundUserName = userService.getUserNameByInum(userInum);
+			}
+
+			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, foundUserName);
+			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage, foundUserName, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -84,7 +104,7 @@ public class U2fAuthenticationWS {
 				throw (WebApplicationException) ex;
 			}
 
-			if (ex instanceof NoEligableDevicesException) {
+			if ((ex instanceof NoEligableDevicesException) || (ex instanceof InvalidKeyHandleDeviceException)) {
 				throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
 						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.NO_ELIGABLE_DEVICES)).build());
 			}
@@ -96,10 +116,11 @@ public class U2fAuthenticationWS {
 
 	@POST
 	@Produces({ "application/json" })
-	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("keyhandle") String keyHandle, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
 			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
+
 			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
 
 			String requestId = authenticateResponse.getRequestId();
@@ -112,12 +133,16 @@ public class U2fAuthenticationWS {
 			u2fAuthenticationService.removeAuthenticationRequestMessage(authenticateRequestMessageLdap);
 
 			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
-			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, userName);
+
+			boolean oneStep = StringHelper.isEmpty(userName);
+			String foundUserName = authenticateRequestMessageLdap.getUserName();
+
+			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserName);
 
 			// If sessionState is not empty update session
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, deviceRegistration);
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserName, deviceRegistration, false, oneStep);
 			}
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);

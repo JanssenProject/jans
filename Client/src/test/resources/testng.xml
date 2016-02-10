@@ -58,6 +58,13 @@
         </classes>
     </test>
 
+    <!-- Client Secret Basic test -->
+    <test name="Client Secret Basic test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientSecretBasicTest"/>
+        </classes>
+    </test>
+
     <!-- Configuration test -->
     <test name="Configuration test (HTTP)" enabled="true">
         <classes>
@@ -160,6 +167,13 @@
     <test name="User Info test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.UserInfoRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+
+    <!-- Validate Token Endpoint test -->
+    <test name="Validate Token Endpoint test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ValidateTokenEndpointHttpTest"/>
         </classes>
     </test>
 

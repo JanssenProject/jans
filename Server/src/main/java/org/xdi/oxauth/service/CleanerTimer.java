@@ -17,8 +17,10 @@ import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
@@ -59,6 +61,9 @@ public class CleanerTimer {
 
     @In
     private MetricService metricService;
+	
+	@In
+	private DeviceRegistrationService deviceRegistrationService;
 
     private AtomicBoolean isActive;
 
@@ -96,6 +101,7 @@ public class CleanerTimer {
             this.resourceSetPermissionManager.cleanupResourceSetPermissions(now);
 
             processU2fRequests();
+            processU2fDeviceRegistrations();
 
             processMetricEntries();
         } finally {
@@ -169,6 +175,26 @@ public class CleanerTimer {
                         requestMessageLdap.getRequestId(),
                         requestMessageLdap.getCreationDate());
                 u2fRequestService.removeRequestMessage(requestMessageLdap);
+            }
+        }
+
+        log.debug("End U2F request clean up");
+    }
+
+    private void processU2fDeviceRegistrations() {
+        log.debug("Start U2F request clean up");
+
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.add(Calendar.SECOND, -90);
+        Date expirationDate = calendar.getTime();
+
+        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.getExpiredDeviceRegistrations(expirationDate);
+        if ((deviceRegistrations != null) && !deviceRegistrations.isEmpty()) {
+            for (DeviceRegistration deviceRegistration : deviceRegistrations) {
+                log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                		deviceRegistration.getId(),
+                		deviceRegistration.getCreationDate());
+                deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
             }
         }
 

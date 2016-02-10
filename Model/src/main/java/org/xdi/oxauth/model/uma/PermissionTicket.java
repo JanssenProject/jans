@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.uma;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Resource set permission ticket
@@ -24,14 +24,14 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 @JsonPropertyOrder({ "ticket" })
 //@JsonRootName(value = "resourceSetPermissionTicket")
 @XmlRootElement
-public class ResourceSetPermissionTicket {
+public class PermissionTicket {
 
 	private String ticket;
 
-	public ResourceSetPermissionTicket() {
+	public PermissionTicket() {
     }
 
-	public ResourceSetPermissionTicket(String ticket) {
+	public PermissionTicket(String ticket) {
 		this.ticket = ticket;
 	}
 
@@ -57,7 +57,7 @@ public class ResourceSetPermissionTicket {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ResourceSetPermissionTicket other = (ResourceSetPermissionTicket) obj;
+		PermissionTicket other = (PermissionTicket) obj;
 		if (ticket == null) {
 			if (other.ticket != null)
 				return false;
