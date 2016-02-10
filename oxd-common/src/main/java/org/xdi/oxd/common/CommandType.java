@@ -33,7 +33,7 @@ public enum CommandType {
     GET_AUTHORIZATION_CODE("get_authorization_code"),
     GET_TOKENS_BY_CODE("get_tokens_by_code"),
     GET_USER_INFO("get_user_info"),
-    LOGOUT("logout"),
+    GET_LOGOUT_URI("get_logout_uri"),
     REGISTER_SITE("register_site");
 
     private final String value;

@@ -120,7 +120,7 @@
     </test>
     <test name="Log out" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.client.LogoutTest"/>
+            <class name="org.xdi.oxd.client.GetLogoutUrlTest"/>
         </classes>
     </test>
 
