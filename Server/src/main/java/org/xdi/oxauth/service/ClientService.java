@@ -112,6 +112,11 @@ public class ClientService {
 
     public Set<Client> getClient(Collection<String> clientIds, boolean silent) {
         Set<Client> set = Sets.newHashSet();
+
+        if (clientIds == null) {
+            return set;
+        }
+
         for (String clientId : clientIds) {
             try {
                 set.add(getClient(clientId));

@@ -6,12 +6,15 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-import java.util.UUID;
-
-import org.xdi.oxauth.model.common.AbstractToken;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.util.INumGenerator;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,15 +23,25 @@ import org.xdi.util.INumGenerator;
 
 public abstract class AbstractRPTManager implements IRPTManager {
 
-//    public String getRequesterPermissionTokenKey(String userId, String clientId, String amHost) {
-//		return new StringBuilder("_rp_").append(userId.hashCode())
-//				.append("_client_").append(clientId.hashCode())
-//				.append("_am_host_").append(amHost.hashCode()).toString();
-//	}
+    private static final Log LOG = Logging.getLog(AbstractRPTManager.class);
+    private static final String GAT_MARKER = "gat_";
 
-    public UmaRPT createRPT(AbstractToken authorizationApiToken, String userId, String clientId, String amHost) {
-   		String token = UUID.randomUUID().toString() + "/" + INumGenerator.generate(8);
+    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat, boolean isGat) {
+        final AccessToken accessToken = (AccessToken) grant.getAccessToken(aat);
 
-   		return new UmaRPT(token, new Date(), authorizationApiToken.getExpirationDate(), userId, clientId, amHost);
-   	}
+        try {
+            String code = UUID.randomUUID().toString() + "/" + INumGenerator.generate(8);
+            if (isGat) {
+                code = GAT_MARKER + code;
+            }
+            return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId(), amHost);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new RuntimeException("Failed to generate RPT, aat: " + aat, e);
+        }
+    }
+
+    public static boolean isGat(String rptCode) {
+        return rptCode.startsWith(GAT_MARKER);
+    }
 }

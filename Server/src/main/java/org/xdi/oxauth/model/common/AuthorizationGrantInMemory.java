@@ -9,11 +9,10 @@ package org.xdi.oxauth.model.common;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.util.security.StringEncrypter;
 
 import java.security.SignatureException;
@@ -136,25 +135,14 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
     }
 
     public static IdToken createIdToken(
-            IAuthorizationGrant p_grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
+            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
             throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
             InvalidClaimException {
-    	IdTokenFactory idTokenFactory = IdTokenFactory.instance();
-
-    	final Client grantClient = p_grant.getClient();
-        if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
-                && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            Jwe jwe = idTokenFactory.generateEncryptedIdToken(p_grant, nonce, authorizationCode, accessToken, scopes);
-            return new IdToken(jwe.toString(),
-                    jwe.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
-                    jwe.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
-        } else {
-            Jwt jwt = idTokenFactory.generateSignedIdToken(p_grant, nonce, authorizationCode, accessToken, scopes);
-            return new IdToken(jwt.toString(),
-                    jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
-                    jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
-        }
+        JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
+        return new IdToken(jwr.toString(),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
 
     @Override

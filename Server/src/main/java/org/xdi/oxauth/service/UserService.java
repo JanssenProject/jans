@@ -89,8 +89,8 @@ public class UserService {
      *
      * @return User
      */
-    public User getUserByDn(String dn) {
-        return ldapEntryManager.find(User.class, dn);
+    public User getUserByDn(String dn, String... returnAttributes) {
+        return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
 
 	public User getUser(String userId, String... returnAttributes) {
@@ -126,6 +126,20 @@ public class UserService {
 		User user = getUser(userId, "inum");
 
 		return getUserInum(user);
+	}
+
+	public String getUserNameByInum(String inum) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, "uid");
+		if (user == null) {
+			return null;
+		}
+
+		return user.getUserId();
 	}
 
     public User updateUser(User user) {
@@ -304,6 +318,31 @@ public class UserService {
 		}
 
 		return String.format("inum=%s,%s", inum, peopleDn);
+	}
+
+	public String getUserInumByDn(String dn) {
+		if (StringHelper.isEmpty(dn)) {
+			return null;
+		}
+
+		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
+		if (!dn.toLowerCase().endsWith(peopleDn.toLowerCase())) {
+			return null;
+		}
+		String firstDnPart = dn.substring(0, dn.length() - peopleDn.length());
+		
+		String[] dnParts = firstDnPart.split(",");
+		if (dnParts.length == 0) {
+			return null;
+		}
+		
+		String userInumPart = dnParts[dnParts.length - 1];
+		String[] userInumParts = userInumPart.split("=");
+		if ((userInumParts.length == 2) && StringHelper.equalsIgnoreCase(userInumParts[0], "inum")) {
+			return userInumParts[1];
+		}
+
+		return null;
 	}
 
     public static UserService instance() {

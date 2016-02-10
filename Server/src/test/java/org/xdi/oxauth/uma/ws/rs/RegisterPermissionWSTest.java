@@ -13,9 +13,10 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -37,7 +38,7 @@ import static org.testng.Assert.*;
 public class RegisterPermissionWSTest extends BaseTest {
 
     private Token m_pat;
-    private ResourceSetStatus m_resourceSet;
+    private ResourceSetResponse m_resourceSet;
     private String m_umaRegisterResourcePath;
     private String m_umaPermissionPath;
 
@@ -64,11 +65,11 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+        final UmaPermission r = new UmaPermission();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        final ResourceSetPermissionTicket ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, m_umaPermissionPath);
+        final PermissionTicket ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, m_umaPermissionPath);
         UmaTestUtil.assert_(ticket);
     }
 
@@ -88,7 +89,7 @@ public class RegisterPermissionWSTest extends BaseTest {
                     request.addHeader("Host", umaAmHost);
 
                     try {
-                        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+                        final UmaPermission r = new UmaPermission();
                         r.setResourceSetId(m_resourceSet.getId() + "x");
 
                         final String json = ServerUtil.createJsonMapper().writeValueAsString(r);
@@ -107,7 +108,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 
                     assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response code.");
                     try {
-                        final ResourceSetPermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetPermissionTicket.class);
+                        final PermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), PermissionTicket.class);
                         Assert.assertNull(t);
                     } catch (Exception e) {
                         // it's ok if it fails here, we expect ticket as null.

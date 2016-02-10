@@ -9,6 +9,7 @@ package org.xdi.oxauth.service.fido.u2f;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -17,6 +18,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.python.antlr.PythonParser.or_test_return;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
 import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;

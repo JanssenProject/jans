@@ -14,8 +14,9 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.uma.PermissionRegistrationService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
@@ -81,11 +82,11 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
                 createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
-        RegisterPermissionRequest resourceSetPermissionRequest = new RegisterPermissionRequest();
+        UmaPermission resourceSetPermissionRequest = new UmaPermission();
         resourceSetPermissionRequest.setResourceSetId(resourceSetId);
         resourceSetPermissionRequest.setScopes(scopes);
 
-        ResourceSetPermissionTicket t = null;
+        PermissionTicket t = null;
         try {
             t = resourceSetPermissionRegistrationService.registerResourceSetPermission(
                     "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);
@@ -110,12 +111,12 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
         PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
 
         // Register permissions for resource set
-        RegisterPermissionRequest resourceSetPermissionRequest = new RegisterPermissionRequest();
+        UmaPermission resourceSetPermissionRequest = new UmaPermission();
         resourceSetPermissionRequest.setResourceSetId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId + "1");
         resourceSetPermissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
 
-        ResourceSetPermissionTicket resourceSetPermissionTiket = null;
+        PermissionTicket resourceSetPermissionTiket = null;
         try {
             resourceSetPermissionTiket = resourceSetPermissionRegistrationService.registerResourceSetPermission(
                     "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);

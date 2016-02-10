@@ -27,8 +27,8 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     private Token m_pat;
     private Token m_aat;
     private RPTResponse m_rpt;
-    private ResourceSetStatus m_resourceSet;
-    private ResourceSetPermissionTicket m_ticket;
+    private ResourceSetResponse m_resourceSet;
+    private PermissionTicket m_ticket;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
@@ -101,7 +101,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_3_hostDeterminesRptStatus"})
     @Parameters({"umaAmHost", "umaHost", "umaPermissionPath"})
     public void _4_registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath) throws Exception {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+        final UmaPermission r = new UmaPermission();
         r.setResourceSetId(m_resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 

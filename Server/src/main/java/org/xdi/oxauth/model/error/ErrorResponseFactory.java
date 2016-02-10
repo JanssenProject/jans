@@ -97,6 +97,19 @@ public class ErrorResponseFactory {
         throw new WebApplicationException(response);
     }
 
+    public void throwUmaNotFoundException() throws WebApplicationException {
+        throwUmaWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND);
+    }
+
+    public void throwUmaInternalErrorException() throws WebApplicationException {
+        throwUmaWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR);
+    }
+
+    public void throwUmaWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
+        final Response response = Response.status(status).entity(getUmaJsonErrorResponse(type)).build();
+        throw new WebApplicationException(response);
+    }
+
     public String getErrorAsJson(IErrorType p_type, String p_state) {
         return getErrorResponse(p_type, p_state).toJSonString();
     }
