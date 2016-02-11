@@ -536,50 +536,50 @@ attributeTypes: ( gluuShibSuccessfulAuths-oid NAME 'gluuShibSuccessfulAuths'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpFromEmailAddress-oid NAME 'gluuSmtpFromEmailAddress' DESC 'SMTP From Email Address'
+attributeTypes: ( gluuSmtpFromEmailAddress-oid NAME 'gluuSmtpFromEmailAddress'
   DESC 'Gluu Server SMTP configuration'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpFromName-oid NAME 'gluuSmtpFromName' DESC 'SMTP From Name'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpFromName-oid NAME 'gluuSmtpFromName'
+  DESC 'SMTP From Name'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpHost-oid NAME 'gluuSmtpHost' DESC 'SMTP Host'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpHost-oid NAME 'gluuSmtpHost'
+  DESC 'SMTP Host'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpPassword-oid NAME 'gluuSmtpPassword' DESC 'SMTP User Password'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpPassword-oid NAME 'gluuSmtpPassword'
+  DESC 'SMTP User Password'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpPort-oid NAME 'gluuSmtpPort' DESC 'SMTP Port'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpPort-oid NAME 'gluuSmtpPort'
+  DESC 'SMTP Port'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpRequiresAuthentication-oid NAME 'gluuSmtpRequiresAuthentication' DESC 'SMTP Requires Authentication'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpRequiresAuthentication-oid NAME 'gluuSmtpRequiresAuthentication'
+  DESC 'SMTP Requires Authentication'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpRequiresSsl-oid NAME 'gluuSmtpRequiresSsl' DESC 'SMTP Requires SSL'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpRequiresSsl-oid NAME 'gluuSmtpRequiresSsl'
+  DESC 'SMTP Requires SSL'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( gluuSmtpUserName-oid NAME 'gluuSmtpUserName' DESC 'SMTP User Name'
-  DESC 'Gluu Server SMTP configuration'
+attributeTypes: ( gluuSmtpUserName-oid NAME 'gluuSmtpUserName'
+  DESC 'SMTP User Name'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
