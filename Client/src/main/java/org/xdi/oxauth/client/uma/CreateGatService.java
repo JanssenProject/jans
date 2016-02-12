@@ -22,7 +22,7 @@ public interface CreateGatService {
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public RPTResponse createRPT(@HeaderParam("Authorization") String authorization,
+    public RPTResponse createGAT(@HeaderParam("Authorization") String authorization,
                                  @HeaderParam("Host") String host,
                                  GatRequest request);
 
