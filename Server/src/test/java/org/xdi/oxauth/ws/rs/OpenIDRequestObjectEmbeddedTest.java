@@ -957,6 +957,9 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "dynamicClientRegistration")
     public void requestFileMethodFail2(final String authorizePath, final String userId, final String userSecret,
                                        final String redirectUri, @Optional final String requestFileBaseUrl) throws Exception {
+        if (StringHelper.isEmpty(requestFileBaseUrl)) {
+        	return;
+        }
 
         final String state = UUID.randomUUID().toString();
 
