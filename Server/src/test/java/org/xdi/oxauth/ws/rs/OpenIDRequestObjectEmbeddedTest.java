@@ -1016,8 +1016,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "dynamicClientRegistration")
     // This test requires a place to publish a request object via HTTPS
     public void requestFileMethodFail3(final String authorizePath, final String userId, final String userSecret,
-                                       final String redirectUri, final String requestFileBasePath,
-                                       @Optional final String requestFileBaseUrl) throws Exception {
+                                       final String redirectUri, @Optional final String requestFileBasePath,
+                                       final String requestFileBaseUrl) throws Exception {
     	if (StringHelper.isEmpty(requestFileBasePath)) {
     		return;
     	}
