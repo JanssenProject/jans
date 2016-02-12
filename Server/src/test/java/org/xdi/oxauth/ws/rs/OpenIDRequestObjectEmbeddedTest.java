@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -28,8 +29,10 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
+import org.xdi.util.StringHelper;
 
 import javax.ws.rs.core.MediaType;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -796,7 +799,10 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     public void requestFileMethod(final String authorizePath,
                                   final String userId, final String userSecret,
                                   final String redirectUri,
-                                  final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+                                  @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+    	if (StringHelper.isEmpty(requestFileBasePath)) {
+    		return;
+    	}
 
         final String state = UUID.randomUUID().toString();
 
@@ -1011,7 +1017,10 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     // This test requires a place to publish a request object via HTTPS
     public void requestFileMethodFail3(final String authorizePath, final String userId, final String userSecret,
                                        final String redirectUri, final String requestFileBasePath,
-                                       final String requestFileBaseUrl) throws Exception {
+                                       @Optional final String requestFileBaseUrl) throws Exception {
+    	if (StringHelper.isEmpty(requestFileBasePath)) {
+    		return;
+    	}
 
         final String state = UUID.randomUUID().toString();
 
