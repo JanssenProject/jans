@@ -91,7 +91,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         // Validate redirectUri
         String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
 
-        final Set<String> logoutUris = getRpLogoutUris(pair.getFirst());
+        final Set<String> logoutUris = getRpLogoutUris(pair);
         final String html = constructPage(logoutUris, redirectUri, state);
         log.debug("Constructed http logout page: " + html);
         return Response.ok().
@@ -158,9 +158,21 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return new Pair<SessionState, AuthorizationGrant>(ldapSessionState, authorizationGrant);
     }
 
-    private Set<String> getRpLogoutUris(SessionState sessionState) {
+    private Set<String> getRpLogoutUris(Pair<SessionState, AuthorizationGrant> pair) {
         final Set<String> result = Sets.newHashSet();
-        final Set<Client> clientsByDns = clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true);
+
+        SessionState sessionState = pair.getFirst();
+        if (sessionState == null) {
+            log.error("session_state is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_state." +
+                    "Http based html will contain no iframes.");
+            return result;
+        }
+
+        final Set<Client> clientsByDns = sessionState.getPermissionGrantedMap() != null ?
+                clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true) :
+                Sets.<Client>newHashSet();
+        clientsByDns.add(pair.getSecond().getClient());
+
         for (Client client : clientsByDns) {
             String logoutUri = client.getLogoutUri();
 
