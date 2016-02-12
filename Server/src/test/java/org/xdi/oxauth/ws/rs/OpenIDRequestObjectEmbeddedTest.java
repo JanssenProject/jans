@@ -799,8 +799,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     public void requestFileMethod(final String authorizePath,
                                   final String userId, final String userSecret,
                                   final String redirectUri,
-                                  @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
-    	if (StringHelper.isEmpty(requestFileBasePath)) {
+                                  @Optional final String requestFileBasePath, @Optional final String requestFileBaseUrl) throws Exception {
+    	if (StringHelper.isEmpty(requestFileBasePath) || StringHelper.isEmpty(requestFileBaseUrl)) {
     		return;
     	}
 
@@ -1017,8 +1017,8 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
     // This test requires a place to publish a request object via HTTPS
     public void requestFileMethodFail3(final String authorizePath, final String userId, final String userSecret,
                                        final String redirectUri, @Optional final String requestFileBasePath,
-                                       final String requestFileBaseUrl) throws Exception {
-    	if (StringHelper.isEmpty(requestFileBasePath)) {
+                                       @Optional final String requestFileBaseUrl) throws Exception {
+    	if (StringHelper.isEmpty(requestFileBasePath) || StringHelper.isEmpty(requestFileBaseUrl)) {
     		return;
     	}
 
