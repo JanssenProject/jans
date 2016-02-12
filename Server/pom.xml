@@ -395,6 +395,11 @@
             <artifactId>oxUtil</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxTomcat</artifactId>
+        </dependency>
+ 
+        <dependency>
             <groupId>com.unboundid</groupId>
             <artifactId>unboundid-ldapsdk</artifactId>
         </dependency>

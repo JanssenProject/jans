@@ -134,6 +134,17 @@
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>oxTomcat</artifactId>
+                <version>${oxCore.version}</version>
+				<exclusions>
+				    <exclusion>
+				        <groupId>*</groupId>
+				        <artifactId>*</artifactId>
+				    </exclusion>
+				</exclusions>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
                 <version>${jettison.version}</version>
