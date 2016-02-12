@@ -21,7 +21,6 @@ import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.Provider;
 import java.security.Security;
 
@@ -66,7 +65,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(SiteConfigurationService.class).load();
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxd server started successfully.");
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);
         }
     }
@@ -87,10 +86,14 @@ public class ServerLauncher {
     }
 
     private static void startJetty() {
-        final Configuration conf = INJECTOR.getInstance(Configuration.class);
-        if (conf.isStartJetty()) {
-            JettyServer server = new JettyServer(conf.getJettyPort());
-            server.start();
+        try {
+            final Configuration conf = INJECTOR.getInstance(Configuration.class);
+            if (conf.isStartJetty()) {
+                JettyServer server = new JettyServer(conf.getJettyPort());
+                server.start();
+            }
+        } catch (Throwable e) {
+            LOG.error("Failed to start jetty server.", e);
         }
     }
 
