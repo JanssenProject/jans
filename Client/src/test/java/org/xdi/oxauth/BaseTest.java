@@ -8,12 +8,20 @@ package org.xdi.oxauth;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.SingleClientConnManager;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -38,6 +46,12 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +101,7 @@ public abstract class BaseTest {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
-//            propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
+            //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
         }
 
         // Load test paramters
@@ -543,5 +557,31 @@ public abstract class BaseTest {
             }
         }
         return new DefaultHttpClient();
+    }
+
+    public static ClientExecutor clientExecutor() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        return clientExecutor(false);
+    }
+
+    public static ClientExecutor clientExecutor(boolean trustAll) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        if (trustAll) {
+            return new ApacheHttpClient4Executor(createHttpClientTrustAll());
+        }
+        return ClientRequest.getDefaultExecutor();
+    }
+
+    public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true;
+            }
+        }, new AllowAllHostnameVerifier());
+
+        SchemeRegistry registry = new SchemeRegistry();
+        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+        registry.register(new Scheme("https", 443, sf));
+        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
+        return new DefaultHttpClient(ccm);
     }
 }
