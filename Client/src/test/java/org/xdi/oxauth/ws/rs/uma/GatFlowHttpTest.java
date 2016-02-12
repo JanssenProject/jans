@@ -29,8 +29,6 @@ public class GatFlowHttpTest extends BaseTest {
 
     protected UmaConfiguration metadataConfiguration;
 
-    protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
-
     protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
     protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
 
@@ -39,6 +37,7 @@ public class GatFlowHttpTest extends BaseTest {
 
     protected Token aat;
     protected Token pat;
+    protected String gat;
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl"})
@@ -46,7 +45,6 @@ public class GatFlowHttpTest extends BaseTest {
         this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl, clientExecutor()).getMetadataConfiguration();
         UmaTestUtil.assert_(this.metadataConfiguration);
 
-        this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourceSetPermissionFlowHttpTest(this.metadataConfiguration);
 
@@ -93,9 +91,6 @@ public class GatFlowHttpTest extends BaseTest {
         showTitle("testRequesterObtainAat");
         aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(aat);
-
-        // Init UmaPatTokenAwareHttpTest test
-        this.umaObtainRptTokenFlowHttpTest.m_aat = this.aat;
     }
 
     /**
@@ -110,39 +105,22 @@ public class GatFlowHttpTest extends BaseTest {
 
         GatRequest gatRequest = new GatRequest();
 
-        gatService.createGAT("Bearer " + aat.getAccessToken(), umaAmHost, gatRequest);
-
-        this.umaObtainRptTokenFlowHttpTest.testObtainRptTokenFlow(umaAmHost);
+        gat = gatService.createGAT("Bearer " + aat.getAccessToken(), umaAmHost, gatRequest).getRpt();
     }
 
-    //** 3 ******************************************************************************
-
     /**
-     * Requesting party access protected resource at host via requester
+     * Host determines GAT status
      */
     @Test(dependsOnMethods = {"testRequesterObtainsRpt"})
-    public void testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt() throws Exception {
-        showTitle("testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt");
-        // Scenario for case when there is no valid RPT in request or not enough permissions
-        // In this case we have RPT without permissions
-    }
-
-    /**
-     * Host determines RPT status
-     */
-    @Test(dependsOnMethods = {"testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
-    @Parameters({"umaAmHost"})
-    public void testHostDetermineRptStatus1(final String umaAmHost) throws Exception {
+    public void testHostDetermineRptStatus1() throws Exception {
         showTitle("testHostDetermineRptStatus1");
 
-        String resourceSetId = umaRegisterResourceSetFlowHttpTest.resourceSetId;
-
-        // Determine RPT token to status
+        // Determine GAT status
         RptIntrospectionResponse tokenStatusResponse = null;
         try {
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + pat.getAccessToken(),
-                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
+                    gat, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
 //			assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
@@ -184,10 +162,10 @@ public class GatFlowHttpTest extends BaseTest {
     public void testRequesterAsksForAuthorization(final String umaAmHost) throws Exception {
         showTitle("testRequesterAsksForAuthorization");
 
-        // Authorize RPT token to access permission ticket
+        // Authorize GAT to access permission ticket
         RptAuthorizationResponse authorizationResponse = null;
         try {
-            RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
+            RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(gat, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
 
             authorizationResponse = this.authorizationService.requestRptPermissionAuthorization(
                     "Bearer " + aat.getAccessToken(),
@@ -213,36 +191,23 @@ public class GatFlowHttpTest extends BaseTest {
     }
 
     /**
-     * Host determines RPT status
+     * Host determines GAT status
      */
     @Test(dependsOnMethods = {"testRequesterAccessProtectedResourceWithEnoughPermissionsRpt"})
-    @Parameters({"umaAmHost"})
-    public void testHostDetermineRptStatus2(final String umaAmHost) throws Exception {
+    public void testHostDetermineRptStatus2() throws Exception {
         showTitle("testHostDetermineRptStatus2");
 
-        // Determine RPT token to status
+        // Determine GAT status
         RptIntrospectionResponse tokenStatusResponse = null;
         try {
             tokenStatusResponse = this.rptStatusService.requestRptStatus(
                     "Bearer " + pat.getAccessToken(),
-                    this.umaObtainRptTokenFlowHttpTest.rptToken, "");
+                    gat, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
         UmaTestUtil.assert_(tokenStatusResponse);
-
-        // Requester RPT has permission to access this resource set with scope http://photoz.example.com/dev/scopes/view. Hence host should allow him to download this resource.
-    }
-
-    /**
-     * "
-     * Host send protected resource to requester
-     */
-    @Test(dependsOnMethods = {"testHostDetermineRptStatus2"})
-    public void testReturnProtectedResource() throws Exception {
-        showTitle("testReturnProtectedResource");
-        // RPT has enough permissions. Hence host should returns resource
-    }
+ }
 }
