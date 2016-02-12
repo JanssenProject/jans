@@ -651,10 +651,10 @@ public class JwtUtil {
         org.xdi.oxauth.model.crypto.PublicKey publicKey = null;
 
         // TODO: Temporary solution. Testing jwks is in old format!!!
-        try {
-            publicKey = getPublicKeyOldImpl(jwksUri, jwks, signatureAlgorithm, keyId);
-        } catch (Exception ex) {
-        }
+//        try {
+//            publicKey = getPublicKeyOldImpl(jwksUri, jwks, signatureAlgorithm, keyId);
+//        } catch (Exception ex) {
+//        }
 
         if (publicKey == null) {
             publicKey = getPublicKey(jwksUri, jwks, keyId);
