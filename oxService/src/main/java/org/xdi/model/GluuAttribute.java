@@ -6,6 +6,7 @@
 package org.xdi.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -372,4 +373,82 @@ public class GluuAttribute extends Entry implements Serializable {
     public boolean isUserCanEdit() {
         return allowEditBy(GluuUserRole.USER);
     }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (custom ? 1231 : 1237);
+		result = prime * result
+				+ ((dataType == null) ? 0 : dataType.hashCode());
+		result = prime * result
+				+ ((description == null) ? 0 : description.hashCode());
+		result = prime * result
+				+ ((displayName == null) ? 0 : displayName.hashCode());
+		result = prime * result + Arrays.hashCode(editType);
+		result = prime * result
+				+ ((gluuTooltip == null) ? 0 : gluuTooltip.hashCode());
+		result = prime * result + ((inum == null) ? 0 : inum.hashCode());
+		result = prime * result
+				+ ((lifetime == null) ? 0 : lifetime.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((nameIdType == null) ? 0 : nameIdType.hashCode());
+		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result
+				+ ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
+		result = prime
+				* result
+				+ ((oxMultivaluedAttribute == null) ? 0
+						: oxMultivaluedAttribute.hashCode());
+		result = prime
+				* result
+				+ ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute
+						.hashCode());
+		result = prime * result + ((regExp == null) ? 0 : regExp.hashCode());
+		result = prime * result + (requred ? 1231 : 1237);
+		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
+		result = prime * result
+				+ ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
+		result = prime * result
+				+ ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
+		result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());
+		result = prime * result
+				+ ((sourceAttribute == null) ? 0 : sourceAttribute.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((urn == null) ? 0 : urn.hashCode());
+		result = prime * result + Arrays.hashCode(usageType);
+		result = prime * result + Arrays.hashCode(viewType);
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */    
+	@Override
+    public boolean equals(Object obj){
+        if (!(obj instanceof GluuAttribute)){
+            return false;
+        }
+        GluuAttribute other = (GluuAttribute) obj;
+        if (inum == null) {
+			if (other.inum != null)
+				return false;
+		} else if (!inum.equals(other.inum))
+			return false;
+        if (custom != other.custom)
+			return false;
+		if (dataType != other.dataType)
+			return false;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
+			return false;
+        return true;
+	}
 }
