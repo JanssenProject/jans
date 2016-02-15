@@ -6,10 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.base.Strings;
+import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -26,7 +24,10 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides operations with users.
@@ -89,7 +90,11 @@ public class UserService {
      *
      * @return User
      */
+    @Nullable
     public User getUserByDn(String dn, String... returnAttributes) {
+        if (Strings.isNullOrEmpty(dn)) {
+            return null;
+        }
         return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
 
