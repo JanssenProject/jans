@@ -36,7 +36,7 @@ public class RedirectUtil {
     static int HTTP_REDIRECT = 302;
 
     public static ResponseBuilder getRedirectResponseBuilder(RedirectUri redirectUriResponse, HttpServletRequest httpRequest) {
-        ResponseBuilder builder = null;
+        ResponseBuilder builder;
 
         if (httpRequest != null && httpRequest.getHeader(NO_REDIRECT_HEADER) != null) {
             try {
