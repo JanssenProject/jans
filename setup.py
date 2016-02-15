@@ -194,6 +194,7 @@ class Setup(object):
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
+        self.tomcat_python_readme = '%s/python/python.txt' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
         self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
         self.oxidp_ldap_properties = '%s/conf/oxidp-ldap.properties' % self.tomcatHome
@@ -263,6 +264,7 @@ class Setup(object):
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_json: False,
                      self.oxauth_context_xml: True,
+                     self.tomcat_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
                      self.oxtrust_import_person_json: False,
@@ -530,6 +532,12 @@ class Setup(object):
                 output_fn = os.path.join(self.outputFolder, fn)
                 try:
                     self.logIt("Copying %s to %s" % (output_fn, dest_fn))
+
+                    dest_dir = os.path.dirname(dest_fn)
+                    if not os.path.exists(dest_dir):
+                        self.logIt("Created destination folder %s" % dest_dir)
+                        os.makedirs(dest_dir);
+
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
