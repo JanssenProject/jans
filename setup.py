@@ -505,6 +505,14 @@ class Setup(object):
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
             self.logIt(traceback.format_exc(), True)
 
+    def copyTree(self, inFolder, destFolder):
+        try:
+            shutil.copytree(inFolder, destFolder)
+            self.logIt("Copied tree %s to %s" % (inFolder, destFolder))
+        except:
+            self.logIt("Error copying tree %s to %s" % (inFolder, destFolder), True)
+            self.logIt(traceback.format_exc(), True)
+
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
 
@@ -1015,6 +1023,36 @@ class Setup(object):
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
+
+    def install_saml(self):
+        if self.installSaml:
+            identityWar = 'identity.war'
+            distIdentityPath = '%s/%s' % (self.tomcatWebAppFolder, identityWar)
+
+            tmpIdentityDir = '%s/tmp_identity' % self.distFolder
+
+            self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
+            self.removeDirs(identityWar)
+            self.createDirs(identityWar)
+
+            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-*.jar'
+
+            self.run([self.jarCommand,
+                      'xf',
+                      distIdentityPath, identityConfFilePattern], tmpIdentityDir)
+
+            self.logIt("Unpacking %s..." % 'oxtrust-configuration.jar')
+            self.run([self.jarCommand,
+                      'xf',
+                      identityConfFilePattern], tmpIdentityDir)
+
+            self.logIt("Preparing Saml templates...")
+            self.removeDirs(samlTemplatesFolder)
+            self.createDirs(samlTemplatesFolder)
+
+            self.copyTree('./shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
+
+            self.removeDirs(tmpIdentityDir)
 
     def install_asimba_war(self):
         if self.installAsimba:
@@ -1763,6 +1801,7 @@ if __name__ == '__main__':
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.copy_static()
+            installObject.install_saml()
             installObject.install_cas_war()
             installObject.install_asimba_war()
             installObject.install_oxauth_rp_war()
