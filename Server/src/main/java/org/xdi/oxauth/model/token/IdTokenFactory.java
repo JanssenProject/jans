@@ -141,7 +141,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -161,7 +161,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -298,7 +298,7 @@ public class IdTokenFactory {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue = null;
+                    String attributeValue;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -345,7 +345,7 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
