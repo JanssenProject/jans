@@ -17,6 +17,8 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Date;
@@ -27,7 +29,7 @@ import java.util.Set;
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version February 15, 2015
  */
 public class AuthorizationGrant implements IAuthorizationGrant {
 
@@ -131,7 +133,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
                                  String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
-            InvalidClaimException {
+            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
         return grant.createIdToken(nonce, authorizationCode, accessToken, authMode);
     }
 
