@@ -584,6 +584,12 @@ public class AuthorizeAction {
     public void permissionGranted(SessionState session) {
         try {
             final User user = userService.getUserByDn(session.getUserDn());
+            if (user == null) {
+                log.error("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
+                permissionDenied();
+                return;
+            }
+
             final Client client = clientService.getClient(clientId);
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
