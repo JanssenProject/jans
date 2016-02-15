@@ -194,7 +194,7 @@ class Setup(object):
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
-        self.tomcat_python_readme = '%s/python/python.txt' % self.tomcatHome
+        self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
         self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
         self.oxidp_ldap_properties = '%s/conf/oxidp-ldap.properties' % self.tomcatHome
@@ -507,12 +507,23 @@ class Setup(object):
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
             self.logIt(traceback.format_exc(), True)
 
-    def copyTree(self, inFolder, destFolder):
+    def copyTree(self, src, dst, symlinks=False, ignore=None):
         try:
-            shutil.copytree(inFolder, destFolder)
-            self.logIt("Copied tree %s to %s" % (inFolder, destFolder))
+            if not os.path.exists(dst):
+                os.makedirs(dst)
+
+            for item in os.listdir(src):
+                s = os.path.join(src, item)
+                d = os.path.join(dst, item)
+                if os.path.isdir(s):
+                    self.copyTree(s, d, symlinks, ignore)
+                else:
+                    if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                        shutil.copy2(s, d)
+
+            self.logIt("Copied tree %s to %s" % (src, dst))
         except:
-            self.logIt("Error copying tree %s to %s" % (inFolder, destFolder), True)
+            self.logIt("Error copying tree %s to %s" % (src, dst), True)
             self.logIt(traceback.format_exc(), True)
 
     def copy_output(self):
@@ -1040,10 +1051,10 @@ class Setup(object):
             tmpIdentityDir = '%s/tmp_identity' % self.distFolder
 
             self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
-            self.removeDirs(identityWar)
-            self.createDirs(identityWar)
+            self.removeDirs(tmpIdentityDir)
+            self.createDirs(tmpIdentityDir)
 
-            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-*.jar'
+            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
 
             self.run([self.jarCommand,
                       'xf',
@@ -1055,10 +1066,10 @@ class Setup(object):
                       identityConfFilePattern], tmpIdentityDir)
 
             self.logIt("Preparing Saml templates...")
-            self.removeDirs(samlTemplatesFolder)
-            self.createDirs(samlTemplatesFolder)
+            self.removeDirs('%s/conf/shibboleth2' % self.tomcatHome)
+            self.createDirs('%s/conf/shibboleth2' % self.tomcatHome)
 
-            self.copyTree('./shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
+            self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
 
             self.removeDirs(tmpIdentityDir)
 
@@ -1705,6 +1716,7 @@ def getOpts(argv, setupOptions):
     return setupOptions
 
 if __name__ == '__main__':
+
     setupOptions = {
         'install_dir': '.',
         'setup_properties': None,
@@ -1806,10 +1818,10 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.export_opendj_public_cert()
+            installObject.install_saml()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.copy_static()
-            installObject.install_saml()
             installObject.install_cas_war()
             installObject.install_asimba_war()
             installObject.install_oxauth_rp_war()
