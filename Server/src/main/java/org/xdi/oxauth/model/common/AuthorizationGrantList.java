@@ -72,7 +72,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 Client client = clientService.getClient(persistentJwt.getClientId());
                 Date authenticationTime = persistentJwt.getAuthenticationTime();
 
-                AuthorizationGrant authorizationGrant = null;
+                AuthorizationGrant authorizationGrant;
                 switch (persistentJwt.getAuthorizationGrantType()) {
                     case AUTHORIZATION_CODE:
                         authorizationGrant = new AuthorizationCodeGrant(user, client, authenticationTime);

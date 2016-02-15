@@ -222,7 +222,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue = null;
+                    String attributeValue;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -269,7 +269,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -298,7 +298,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Signature
-        JSONWebKey jwk = null;
+        JSONWebKey jwk;
         switch (signatureAlgorithm) {
             case HS256:
             case HS384:
@@ -358,7 +358,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue = null;
+                    String attributeValue;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -405,7 +405,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -543,7 +543,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -583,7 +583,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 String claimName = gluuAttribute.getOxAuthClaimName();
                 String ldapName = gluuAttribute.getName();
-                Object attribute = null;
+                Object attribute;
 
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
