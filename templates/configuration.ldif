@@ -89,7 +89,7 @@ objectClass: oxAsimbaSPRequestor
 objectClass: top
 friendlyname: Gluu Test SP
 inum: @!2B96.42E9.2953.68ED!0002!D21C.8343!869E.85EC.BEC2.B1A6.0ECC.4987.7891.5325
-oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!869E.85EC.BEC2.B1A6.0ECC.4987.7891.5325","id":"http://sptest2.gluu.org/secure","friendlyName":"Gluu Test SP","metadataUrl":null,metadataTimeout":-1,"metadataFile":"${webapp.root}/WEB-INF/sample-data/sptest2.xml","poolID":"requestorpool.1","properties":null,"enabled":true,"signing":false,"lastModified":1455524077539}
+oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!869E.85EC.BEC2.B1A6.0ECC.4987.7891.5325","id":"http://sptest2.gluu.org/secure","friendlyName":"Gluu Test SP","metadataUrl":null,"metadataTimeout":-1,"metadataFile":"${webapp.root}/WEB-INF/sample-data/sptest2.xml","poolID":"requestorpool.1","properties":null,"enabled":true,"signing":false,"lastModified":1455524077539}
 uniqueIdentifier: http://sptest2.gluu.org/secure
 
 dn: inum=@!2B96.42E9.2953.68ED!0002!D21C.8343!3627.987E.69FE.6A8B.C478.2586.E944.04C0,ou=selectors,ou=oxasimba,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
