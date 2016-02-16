@@ -157,7 +157,8 @@ public class RegistrationService extends RequestService {
 		String responseDeviceData = response.getDeviceData();
 		if (StringHelper.isNotEmpty(responseDeviceData)) {
 			try {
-				DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceData, DeviceData.class);
+				String responseDeviceDataDecoded = new String(Base64Util.base64urldecode(responseDeviceData));
+				DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceDataDecoded, DeviceData.class);
 				deviceRegistration.setDeviceData(deviceData);
 			} catch (Exception ex) {
 				throw new BadInputException(String.format("Device data is invalid: %s", responseDeviceData), ex);
