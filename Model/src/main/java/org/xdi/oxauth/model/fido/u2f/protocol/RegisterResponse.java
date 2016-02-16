@@ -48,10 +48,6 @@ public class RegisterResponse implements Serializable {
 	@JsonIgnore
 	private transient ClientData clientDataRef;
 
-	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData) throws BadInputException {
-		this(registrationData, clientData, null);
-	}
-
 	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData, @JsonProperty("deviceData") String deviceData) throws BadInputException {
 		this.registrationData = registrationData;
 		this.clientData = clientData;
