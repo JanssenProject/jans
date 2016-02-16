@@ -15,6 +15,8 @@ import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,7 +27,7 @@ import java.util.Set;
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version February 15, 2015
  */
 
 public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
@@ -122,7 +124,7 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
     public IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
-            InvalidClaimException {
+            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException {
         if (getIdToken() == null) {
             IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, getScopes());
             setIdToken(idToken);
@@ -138,7 +140,7 @@ public class AuthorizationGrantInMemory extends AbstractAuthorizationGrant {
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
             throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException {
+            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
         JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
