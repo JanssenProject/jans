@@ -9,8 +9,7 @@ package org.xdi.oxauth.model.fido.u2f.protocol;
 import java.io.Serializable;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * FIDO U2F device data
@@ -23,72 +22,56 @@ public class DeviceData implements Serializable {
 	private static final long serialVersionUID = -8173244116167488365L;
 
 	@JsonProperty(value = "device_uuid")
-	private String deviceUuid;
+	private final String deviceUuid;
 
 	@JsonProperty(value = "device_token")
-	private String deviceToken;
+	private final String deviceToken;
 
 	@JsonProperty(value = "device_type")
-	private String deviceType;
+	private final String deviceType;
 
 	@JsonProperty(value = "device_name")
-	private String deviceName;
+	private final String deviceName;
 
 	@JsonProperty(value = "os_name")
-	private String osName;
+	private final String osName;
 
 	@JsonProperty(value = "os_version")
-	private String osVersion;
+	private final String osVersion;
 
-	public DeviceData() {
+	public DeviceData(@JsonProperty(value = "device_uuid") String deviceUuid, @JsonProperty(value = "device_token")String deviceToken,
+			@JsonProperty(value = "device_type") String deviceType, @JsonProperty(value = "device_name") String deviceName,
+			@JsonProperty(value = "os_name") String osName, @JsonProperty(value = "os_version") String osVersion) {
+		this.deviceUuid = deviceUuid;
+		this.deviceToken = deviceToken;
+		this.deviceType = deviceType;
+		this.deviceName = deviceName;
+		this.osName = osName;
+		this.osVersion = osVersion;
 	}
 
 	public String getDeviceUuid() {
 		return deviceUuid;
 	}
 
-	public void setDeviceUuid(String deviceUuid) {
-		this.deviceUuid = deviceUuid;
-	}
-
 	public String getDeviceToken() {
 		return deviceToken;
-	}
-
-	public void setDeviceToken(String deviceToken) {
-		this.deviceToken = deviceToken;
 	}
 
 	public String getDeviceType() {
 		return deviceType;
 	}
 
-	public void setDeviceType(String deviceType) {
-		this.deviceType = deviceType;
-	}
-
 	public String getDeviceName() {
 		return deviceName;
-	}
-
-	public void setDeviceName(String deviceName) {
-		this.deviceName = deviceName;
 	}
 
 	public String getOsName() {
 		return osName;
 	}
 
-	public void setOsName(String osName) {
-		this.osName = osName;
-	}
-
 	public String getOsVersion() {
 		return osVersion;
-	}
-
-	public void setOsVersion(String osVersion) {
-		this.osVersion = osVersion;
 	}
 
 	@Override
