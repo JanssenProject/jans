@@ -16,7 +16,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
+import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
@@ -42,8 +42,8 @@ public class RawAuthenticationService {
 	@Logger
 	private Log log;
 
-	@In(value = "bouncyCastleSignatureVerification")
-	private BouncyCastleSignatureVerification signatureVerification;
+	@In(value = "sha256withECDSASignatureVerification")
+	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {
 		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));
