@@ -45,11 +45,11 @@
 
     <!-- ############### oxAuth #################  -->
     <category name="org.xdi.oxauth">
-        <priority value="TRACE"/>
+        <priority value="${log4j.default.log.level}"/>
     </category>
 
     <category name="org.xdi.service">
-        <priority value="TRACE"/>
+        <priority value="${log4j.default.log.level}"/>
     </category>
 
     <!-- ############### Embedded JBoss AS #################  -->
@@ -153,22 +153,22 @@
     <!-- ================ -->
 
     <logger name="org.xdi.oxauth.service.status.ldap" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
     </logger>
 
     <logger name="org.xdi.service.PythonService" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
     <logger name="org.xdi.service.custom.script" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
     <logger name="org.xdi.oxauth.service.custom" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
