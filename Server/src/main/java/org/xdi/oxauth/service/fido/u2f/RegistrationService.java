@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -14,6 +15,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -33,11 +36,13 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -148,6 +153,16 @@ public class RegistrationService extends RequestService {
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
+		
+		String responseDeviceData = response.getDeviceData();
+		if (StringHelper.isNotEmpty(responseDeviceData)) {
+			try {
+				DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceData, DeviceData.class);
+				deviceRegistration.setDeviceData(deviceData);
+			} catch (Exception ex) {
+				throw new BadInputException(String.format("Device data is invalid: %s", responseDeviceData), ex);
+			}
+		}
 
 		boolean twoStep = StringHelper.isNotEmpty(userName);
 		if (twoStep) {
