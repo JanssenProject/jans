@@ -21,6 +21,7 @@
         <finalName>oxauth</finalName>
 
         <filters>
+            <filter>profiles/${cfg}/config-build.properties</filter>
             <filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
         </filters>
 
