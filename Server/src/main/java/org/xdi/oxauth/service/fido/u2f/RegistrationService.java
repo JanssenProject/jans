@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -15,8 +14,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
