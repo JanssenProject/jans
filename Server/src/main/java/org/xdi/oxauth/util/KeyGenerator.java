@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.util.UUID;
-
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,18 +14,16 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.crypto.signature.*;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+
+import java.util.UUID;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 14, 2015
+ * @version February 17, 2016
  */
 public class KeyGenerator {
 
@@ -57,7 +53,7 @@ public class KeyGenerator {
         keys.put(generateES512Keys(null));
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("keys", keys);
+        jsonObject.put(JSON_WEB_KEY_SET, keys);
 
         System.out.println(jsonObject.toString(4).replace("\\/", "/"));
     }

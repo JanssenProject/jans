@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 16, 2015
+ * @version February 17, 2016
  */
 public class JSONWebKeySet {
 
@@ -31,7 +31,7 @@ public class JSONWebKeySet {
 
     public JSONWebKey getKey(String keyId) {
         for (JSONWebKey jsonWebKey : keys) {
-            if (jsonWebKey.getKeyId().equals(keyId)) {
+            if (jsonWebKey.getKid().equals(keyId)) {
                 return jsonWebKey;
             }
         }
@@ -44,13 +44,13 @@ public class JSONWebKeySet {
 
         if (SignatureAlgorithmFamily.RSA.equals(algorithm.getFamily())) {
             for (JSONWebKey jsonWebKey : keys) {
-                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                if (jsonWebKey.getAlg().equals(algorithm.getName())) {
                     jsonWebKeys.add(jsonWebKey);
                 }
             }
         } else if (SignatureAlgorithmFamily.EC.equals(algorithm.getFamily())) {
             for (JSONWebKey jsonWebKey : keys) {
-                if (jsonWebKey.getAlgorithm().equals(algorithm.getName())) {
+                if (jsonWebKey.getAlg().equals(algorithm.getName())) {
                     jsonWebKeys.add(jsonWebKey);
                 }
             }
