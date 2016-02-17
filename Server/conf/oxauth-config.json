@@ -212,9 +212,12 @@
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":false,
     "configurationUpdateInterval":3600,
-    "cssLocation":"/${config.oxauth.contextPath}/stylesheet",
-    "jsLocation":"/${config.oxauth.contextPath}/js",
-    "imgLocation":"/${config.oxauth.contextPath}/img",
+    "cssLocation":"${config.oxauth.contextPath}/stylesheet",
+    "jsLocation":"${config.oxauth.contextPath}/js",
+    "imgLocation":"${config.oxauth.contextPath}/img",
     "metricReporterInterval":300,
-    "metricReporterKeepDataDays":15
+    "metricReporterKeepDataDays":15,
+    "pairwiseIdType":"${config.oxauth.pairwiseIdType}",
+    "pairwiseCalculationKey":"${config.oxauth.pairwiseCalculationKey}",
+    "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}"
 }

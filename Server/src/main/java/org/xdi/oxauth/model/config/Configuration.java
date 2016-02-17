@@ -21,7 +21,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version January 15, 2015
+ * @version February 15, 2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -53,7 +53,7 @@ public class Configuration {
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
-    
+
     private String sectorIdentifierEndpoint;
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
@@ -126,6 +126,9 @@ public class Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
+    private String pairwiseIdType;
+    private String pairwiseCalculationKey;
+    private String pairwiseCalculationSalt;
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -1119,4 +1122,30 @@ public class Configuration {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
     }
 
+    @XmlElement(name = "pairwise-id-type")
+    public String getPairwiseIdType() {
+        return pairwiseIdType;
+    }
+
+    public void setPairwiseIdType(String pairwiseIdType) {
+        this.pairwiseIdType = pairwiseIdType;
+    }
+
+    @XmlElement(name = "pairwise-calculation-key")
+    public String getPairwiseCalculationKey() {
+        return pairwiseCalculationKey;
+    }
+
+    public void setPairwiseCalculationKey(String pairwiseCalculationKey) {
+        this.pairwiseCalculationKey = pairwiseCalculationKey;
+    }
+
+    @XmlElement(name = "pairwise-calculation-salt")
+    public String getPairwiseCalculationSalt() {
+        return pairwiseCalculationSalt;
+    }
+
+    public void setPairwiseCalculationSalt(String pairwiseCalculationSalt) {
+        this.pairwiseCalculationSalt = pairwiseCalculationSalt;
+    }
 }

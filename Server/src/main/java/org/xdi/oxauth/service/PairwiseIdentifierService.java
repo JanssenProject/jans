@@ -8,13 +8,18 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.common.PairwiseIdType;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
+import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version October 16, 2015
+ * @version February 15, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("pairwiseIdentifierService")
@@ -49,22 +54,36 @@ public class PairwiseIdentifierService {
         }
     }
 
-    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) {
-        prepareBranch(userInum);
+    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) throws InvalidKeyException, NoSuchAlgorithmException {
+        PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(ConfigurationFactory.instance().getConfiguration().getPairwiseIdType());
 
-        String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
-        Filter filter = Filter.createEqualityFilter("oxSectorIdentifierURI", sectorIdentifierUri);
+        if (PairwiseIdType.PERSISTENT == pairwiseIdType) {
+            prepareBranch(userInum);
 
-        List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
-        if (entries != null && !entries.isEmpty()) {
-            // if more then one entry then it's problem, non-deterministic behavior, id must be unique
-            if (entries.size() > 1) {
-                log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifierUri);
-                for (PairwiseIdentifier pairwiseIdentifier : entries) {
-                    log.error(pairwiseIdentifier);
+            String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
+            Filter filter = Filter.createEqualityFilter("oxSectorIdentifierURI", sectorIdentifierUri);
+
+            List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                // if more then one entry then it's problem, non-deterministic behavior, id must be unique
+                if (entries.size() > 1) {
+                    log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifierUri);
+                    for (PairwiseIdentifier pairwiseIdentifier : entries) {
+                        log.error(pairwiseIdentifier);
+                    }
                 }
+                return entries.get(0);
             }
-            return entries.get(0);
+        } else { // PairwiseIdType.ALGORITHMIC
+            String key = ConfigurationFactory.instance().getConfiguration().getPairwiseCalculationKey();
+            String salt = ConfigurationFactory.instance().getConfiguration().getPairwiseCalculationSalt();
+
+            String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(sectorIdentifierUri, userInum, key, salt);
+
+            PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
+            pairwiseIdentifier.setId(calculatedSub);
+
+            return pairwiseIdentifier;
         }
 
         return null;

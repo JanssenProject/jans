@@ -21,6 +21,7 @@
         <finalName>oxauth</finalName>
 
         <filters>
+            <filter>profiles/${cfg}/config-build.properties</filter>
             <filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
         </filters>
 
@@ -394,6 +395,11 @@
             <groupId>org.xdi</groupId>
             <artifactId>oxUtil</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxTomcat</artifactId>
+        </dependency>
+ 
         <dependency>
             <groupId>com.unboundid</groupId>
             <artifactId>unboundid-ldapsdk</artifactId>
