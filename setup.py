@@ -444,7 +444,7 @@ class Setup(object):
 
     def configure_httpd(self):
         # CentOS 7.* + systemd + apache 2.4
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
@@ -1553,14 +1553,14 @@ class Setup(object):
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
         
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
               self.run(["/usr/sbin/chkconfig", "--add", "opendj"])
         else:
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
                 script_name = os.path.split(self.tomcat_template_centos7)[-1]
                 dest_folder = os.path.dirname(self.tomcat_service_centos7)
                 try:
@@ -1592,7 +1592,7 @@ class Setup(object):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
         apache_service_name = 'httpd'
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
            service_path = '/usr/bin/systemctl'
            apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
@@ -1600,14 +1600,14 @@ class Setup(object):
            apache_service_name = 'apache2'
 
         # Apache HTTPD
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
            self.run([service_path, 'enable', apache_service_name])
            self.run([service_path, 'start', apache_service_name])
         else:
            self.run([service_path, apache_service_name, 'start'])
 
         # Memcached
-        if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
            self.run([service_path, 'start', 'memcached.service'])
         else:
            self.run([service_path, 'memcached', 'start'])
@@ -1621,7 +1621,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            if self.os_type == 'centos' and self.os_initdaemon == 'systemd':
+            if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
                self.run([service_path, 'enable', 'tomcat'])
                self.run([service_path, 'start', 'tomcat'])
             else:
