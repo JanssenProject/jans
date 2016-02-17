@@ -100,7 +100,7 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
         }
 
         if (!ConfigurationFactory.instance().getWebKeys().getKeys().isEmpty()) {
-            return ConfigurationFactory.instance().getWebKeys().getKeys().get(0).getKeyId();
+            return ConfigurationFactory.instance().getWebKeys().getKeys().get(0).getKid();
         }
 
         throw new RuntimeException("Failed to identify key id for signing");
