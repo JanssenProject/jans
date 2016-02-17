@@ -179,7 +179,7 @@ public class AuthorizationGrantListLdap implements IAuthorizationGrantList {
                 final Date authenticationTime = org.xdi.oxauth.model.util.StringUtils.parseSilently(tokenLdap.getAuthenticationTime());
                 final String nonce = tokenLdap.getNonce();
 
-                AuthorizationGrant result = null;
+                AuthorizationGrant result;
                 switch (grantType) {
                     case AUTHORIZATION_CODE:
                         result = new AuthorizationCodeGrant(user, client, authenticationTime);
