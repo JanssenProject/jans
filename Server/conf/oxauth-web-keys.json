@@ -3,7 +3,7 @@
         "kty": "RSA",
         "use": "SIGNATURE",
         "alg": "RS256",
-        "keyId": "6898cff9-4f92-4b58-b37c-2a2b6779b0b3",
+        "kid": "6898cff9-4f92-4b58-b37c-2a2b6779b0b3",
         "exp": null,
         "crv": null,
         "privateKey": {
@@ -23,7 +23,7 @@
         "kty": "RSA",
         "use": "SIGNATURE",
         "alg": "RS384",
-        "keyId": "da6d4b6d-7076-426c-a516-fc962fe9ad89",
+        "kid": "da6d4b6d-7076-426c-a516-fc962fe9ad89",
         "exp": null,
         "crv": null,
         "privateKey": {
@@ -43,7 +43,7 @@
         "kty": "RSA",
         "use": "SIGNATURE",
         "alg": "RS512",
-        "keyId": "511f368a-1933-4e67-8905-cc2469089cef",
+        "kid": "511f368a-1933-4e67-8905-cc2469089cef",
         "exp": null,
         "crv": null,
         "privateKey": {
@@ -63,7 +63,7 @@
         "kty": "EC",
         "use": "SIGNATURE",
         "alg": "ES256",
-        "keyId": "a7f67c6c-c965-4798-9058-1ef49cb6735a",
+        "kid": "a7f67c6c-c965-4798-9058-1ef49cb6735a",
         "exp": null,
         "crv": "P-256",
         "privateKey": {
@@ -83,7 +83,7 @@
         "kty": "EC",
         "use": "SIGNATURE",
         "alg": "ES384",
-        "keyId": "46663699-1f33-49e4-9158-f49eeb511a7c",
+        "kid": "46663699-1f33-49e4-9158-f49eeb511a7c",
         "exp": null,
         "crv": "P-384",
         "privateKey": {
@@ -103,7 +103,7 @@
         "kty": "EC",
         "use": "SIGNATURE",
         "alg": "ES512",
-        "keyId": "90f51699-2df5-47bc-9dfa-2419b46cb23d",
+        "kid": "90f51699-2df5-47bc-9dfa-2419b46cb23d",
         "exp": null,
         "crv": "P-521",
         "privateKey": {
