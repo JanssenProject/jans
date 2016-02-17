@@ -14,14 +14,13 @@ import org.xdi.oxauth.model.util.StringUtils;
 
 import java.math.BigInteger;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * The Public Key for the RSA Algorithm
  *
  * @author Javier Rojas Blum
- * @version February 9, 2016
+ * @version February 17, 2016
  */
 public class RSAPublicKey extends PublicKey {
 
@@ -61,8 +60,8 @@ public class RSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("modulus", JwtUtil.base64urlencodeUnsignedBigInt(modulus));
-        jsonObject.put("exponent", JwtUtil.base64urlencodeUnsignedBigInt(publicExponent));
+        jsonObject.put(MODULUS, JwtUtil.base64urlencodeUnsignedBigInt(modulus));
+        jsonObject.put(EXPONENT, JwtUtil.base64urlencodeUnsignedBigInt(publicExponent));
         jsonObject.put(X, JSONObject.NULL);
         jsonObject.put(Y, JSONObject.NULL);
 
