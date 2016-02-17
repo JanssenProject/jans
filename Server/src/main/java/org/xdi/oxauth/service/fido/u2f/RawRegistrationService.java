@@ -20,7 +20,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.python.antlr.PythonParser.or_test_return;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
-import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
+import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -50,8 +50,8 @@ public class RawRegistrationService {
 	@Logger
 	private Log log;
 
-	@In(value = "bouncyCastleSignatureVerification")
-	private BouncyCastleSignatureVerification signatureVerification;
+	@In(value = "sha256withECDSASignatureVerification")
+	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawRegisterResponse parseRawRegisterResponse(String rawDataBase64) throws BadInputException {
 		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));

@@ -54,7 +54,7 @@ public class ClientAssertion {
 
     private boolean load(String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException, StringEncrypter.EncryptionException {
-        boolean result = false;
+        boolean result;
 
         if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
             if (StringUtils.isNotBlank(encodedAssertion)) {

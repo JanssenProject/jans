@@ -33,11 +33,13 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -148,6 +150,17 @@ public class RegistrationService extends RequestService {
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
+		
+		String responseDeviceData = response.getDeviceData();
+		if (StringHelper.isNotEmpty(responseDeviceData)) {
+			try {
+				String responseDeviceDataDecoded = new String(Base64Util.base64urldecode(responseDeviceData));
+				DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceDataDecoded, DeviceData.class);
+				deviceRegistration.setDeviceData(deviceData);
+			} catch (Exception ex) {
+				throw new BadInputException(String.format("Device data is invalid: %s", responseDeviceData), ex);
+			}
+		}
 
 		boolean twoStep = StringHelper.isNotEmpty(userName);
 		if (twoStep) {

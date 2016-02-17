@@ -135,7 +135,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
-        boolean isExternalLogoutPresent = false;
+        boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;
         SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
 

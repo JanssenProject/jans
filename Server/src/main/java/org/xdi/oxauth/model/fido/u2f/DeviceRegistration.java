@@ -17,6 +17,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 import org.xdi.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.util.Base64Util;
 
 /**
@@ -51,6 +52,10 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	@LdapAttribute(name = "oxDeviceHashCode")
 	private Integer keyHandleHashCode;
+
+    @LdapJsonObject
+	@LdapAttribute(name = "oxDeviceData")
+	private DeviceData deviceData;
 	
 	@LdapAttribute(name = "creationDate")
 	private Date creationDate;
@@ -142,6 +147,14 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public DeviceData getDeviceData() {
+		return deviceData;
+	}
+
+	public void setDeviceData(DeviceData deviceData) {
+		this.deviceData = deviceData;
 	}
 
 	public boolean isCompromised() {
