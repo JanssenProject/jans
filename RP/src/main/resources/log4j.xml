@@ -3,7 +3,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
 
     <appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
-    <param name="File" value="${catalina.home}/logs/oxauth-rp.log"/>
+    <param name="File" value="${catalina.base}/logs/oxauth-rp.log"/>
     <param name="DatePattern" value="'.'yyyy-MM-dd"/>
         <layout class="org.apache.log4j.PatternLayout">
             <!-- The default pattern: Date Priority [Category] Message\n -->

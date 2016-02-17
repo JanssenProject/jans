@@ -49,13 +49,10 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -67,7 +64,7 @@ import java.util.UUID;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 17, 2015
+ * @version February 15, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -92,7 +89,7 @@ public class IdTokenFactory {
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
                                      Set<String> scopes) throws SignatureException, InvalidJwtException,
-            StringEncrypter.EncryptionException, InvalidClaimException {
+            StringEncrypter.EncryptionException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
 
         JwtSigner jwtSigner = new JwtSigner(authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
@@ -144,7 +141,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -164,7 +161,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -244,7 +241,7 @@ public class IdTokenFactory {
 
     public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                         AuthorizationCode authorizationCode, AccessToken accessToken,
-                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException {
+                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
         Jwe jwe = new Jwe();
 
         // Header
@@ -301,7 +298,7 @@ public class IdTokenFactory {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue = null;
+                    String attributeValue;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -348,7 +345,7 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -422,7 +419,7 @@ public class IdTokenFactory {
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
             throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException {
+            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException {
         IdTokenFactory idTokenFactory = IdTokenFactory.instance();
 
         final Client grantClient = grant.getClient();

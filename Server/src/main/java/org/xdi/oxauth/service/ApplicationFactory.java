@@ -16,7 +16,7 @@ import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
-import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
+import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
@@ -42,9 +42,9 @@ public class ApplicationFactory {
         return new RandomChallengeGenerator();
     }
 
-    @Factory(value = "bouncyCastleSignatureVerification", scope = ScopeType.APPLICATION, autoCreate = true)
-    public BouncyCastleSignatureVerification createBouncyCastleSignatureVerification() {
-        return new BouncyCastleSignatureVerification();
+    @Factory(value = "sha256withECDSASignatureVerification", scope = ScopeType.APPLICATION, autoCreate = true)
+    public SHA256withECDSASignatureVerification createBouncyCastleSignatureVerification() {
+        return new SHA256withECDSASignatureVerification();
     }
 
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
