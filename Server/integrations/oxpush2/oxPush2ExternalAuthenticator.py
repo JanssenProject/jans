@@ -11,9 +11,13 @@ from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
 from java.util import Arrays
 
+from com.devsu.push.sender.service.async import AsyncAndroidPushService
+from com.devsu.push.sender.service.async import AsyncApplePushService
+
 import sys
 import java
 import datetime
+import base64
 
 try:
     import json
@@ -27,29 +31,31 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "oxPush2. Initialization"
 
-        if not (configurationAttributes.containsKey("u2f_application_id") and
-                configurationAttributes.containsKey("u2f_authentication_mode")):
-            print "oxPush2. Initialization. Properties u2f_application_id and u2f_authentication_mode are mandatory"
+        if not (configurationAttributes.containsKey("application_id") and
+                configurationAttributes.containsKey("authentication_mode")):
+            print "oxPush2. Initialization. Properties application_id and authentication_mode are mandatory"
             return False
 
-        self.u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
-        if StringHelper.isEmpty(self.u2f_application_id):
-            print "oxPush2. Initialization. Failed to determine application_id. u2f_application_id configuration parameter is empty"
+        self.application_id = configurationAttributes.get("application_id").getValue2()
+        if StringHelper.isEmpty(self.application_id):
+            print "oxPush2. Initialization. Failed to determine application_id. application_id configuration parameter is empty"
             return False
 
-        u2f_authentication_mode = configurationAttributes.get("u2f_authentication_mode").getValue2()
-        if StringHelper.isEmpty(u2f_authentication_mode):
+        authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
+        if StringHelper.isEmpty(authentication_mode):
             print "oxPush2. Initialization. Failed to determine authentication_mode. authentication_mode configuration parameter is empty"
             return False
         
-        self.oneStep = StringHelper.equalsIgnoreCase(u2f_authentication_mode, "one_step")
-        self.twoStep = StringHelper.equalsIgnoreCase(u2f_authentication_mode, "two_step")
+        self.oneStep = StringHelper.equalsIgnoreCase(authentication_mode, "one_step")
+        self.twoStep = StringHelper.equalsIgnoreCase(authentication_mode, "two_step")
 
         if not (self.oneStep or self.twoStep):
             print "oxPush2. Initialization. Valid authentication_mode values are one_step and two_step"
             return False
+        
+        self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
 
-        print "oxPush2. Initialized successfully. oneStep: '%s', twoStep: '%s'" % (self.oneStep, self.twoStep)
+        print "oxPush2. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications)
 
         return True   
 
@@ -130,10 +136,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 if (auth_method == 'authenticate'):
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.u2f_application_id, "oxId")
+                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId")
                     if (u2f_devices_list.size() == 0):
                         auth_method = 'enroll'
-                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, self.u2f_application_id, auth_method)
+                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, self.application_id, auth_method)
     
                 print "oxPush2. Authenticate for step 1. auth_method: '%s'" % auth_method
                 
@@ -199,7 +205,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
                 issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-                oxpush2_request = json.dumps({'app': self.u2f_application_id,
+                oxpush2_request = json.dumps({'app': self.application_id,
                                    'issuer': issuer,
                                    'state': session_state,
                                    'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
@@ -240,7 +246,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
             oxpush2_request = json.dumps({'username': user.getUserId(),
-                               'app': self.u2f_application_id,
+                               'app': self.application_id,
                                'issuer': issuer,
                                'method': auth_method,
                                'state': session_state,
@@ -248,6 +254,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Prepare for step 2. Prepared oxpush2_request:", oxpush2_request
 
             context.set("oxpush2_request", oxpush2_request)
+
+            if auth_method in ['authenticate']:
+                self.sendPushNotification(user, oxpush2_request)
 
             return True
         else:
@@ -330,7 +339,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Validate session device status. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
                 return False
 
-        if not StringHelper.equalsIgnoreCase(self.u2f_application_id, u2f_device.application):
+        if not StringHelper.equalsIgnoreCase(self.application_id, u2f_device.application):
             print "oxPush2. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.application)
             return False
         
@@ -379,4 +388,82 @@ class PersonAuthentication(PersonAuthenticationType):
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
         
         return session_device_status
+    
+    def initPushNotificationService(self, configurationAttributes):
+        print "oxPush2. Initialize notification services"
+        if not configurationAttributes.containsKey("credentials_file"):
+            return False
+
+        oxpush2_creds_file = configurationAttributes.get("credentials_file").getValue2()
+
+        # Load credentials from file
+        f = open(oxpush2_creds_file, 'r')
+        try:
+            creds = json.loads(f.read())
+        except:
+            print "oxPush2. Initialize notification services. Failed to load credentials from file:", oxpush2_creds_file
+            return False
+        finally:
+            f.close()
+        
+        try:
+            android_creds = creds["android"]["gcm"]
+            ios_creads = creds["ios"]["apns"]
+        except:
+            print "oxPush2. Initialize notification services. Invalid credentials file '%s' format:" % oxpush2_creds_file
+            return False
+        
+        self.asyncAndroidService = None
+        self.asyncAppleService = None
+        if android_creds["enabled"]:
+            self.asyncAndroidService = AsyncAndroidPushService(android_creds["api_key"])
+            print "oxPush2. Initialize notification services. Created Android notification service"
+            
+        if ios_creads["enabled"]:
+            self.asyncAppleService = AsyncApplePushService(ios_creads["p12_file"], ios_creads["p12_passowrd"], ios_creads["production"])
+            print "oxPush2. Initialize notification services. Created iOS notification service"
+
+        enabled = self.asyncAndroidService != None or self.asyncAppleService != None
+
+        return enabled
+
+    def sendPushNotification(self, user, oxpush2_request):
+        if not self.enabledPushNotifications:
+            return
+
+        print "oxPush2. Send push notification. Loading user '%s' devices" % user.getUserId()
+
+        send_notification = False
+
+        user_inum = userService.getUserInum(user_name)
+        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId", "oxDeviceData")
+        if (u2f_devices_list.size() == 0):
+            for u2f_device in u2f_devices_list:
+                device_data_json = u2f_device.getDeviceData()
+
+                if StringHelper.isEmpty(device_data):
+                    continue
+
+                # Device data which oxPush2 gets during enrollment
+                device_data = json.loads(device_data_json)
+
+                type = device_data["type"]
+                os_name = device_data["os_name"]
+                push_token = device_data["push_token"]
+
+                if not StringHelper.equalsIgnoreCase(type, "mobile"):
+                    continue
+
+                if StringHelper.equalsIgnoreCase(os_name, "ios") and StringHelper.isNotEmpty(push_token):
+                    # Sending notification to iOS user's device
+                    send_notification = True
+                    self.asyncAppleService.sendPush("oxPush2", oxpush2_request, push_token)
+
+                if StringHelper.equalsIgnoreCase(os_name, "android") and StringHelper.isNotEmpty(push_token):
+                    # Sending notification to Android user's device
+                    send_notification = True
+                    self.asyncAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
+
+
+        print "oxPush2. Send push notification. Result: '%s'" % send_notification
         

@@ -21,16 +21,16 @@ public class DeviceData implements Serializable {
 
 	private static final long serialVersionUID = -8173244116167488365L;
 
-	@JsonProperty(value = "device_uuid")
+	@JsonProperty(value = "uuid")
 	private final String deviceUuid;
 
-	@JsonProperty(value = "device_token")
+	@JsonProperty(value = "push_token")
 	private final String deviceToken;
 
-	@JsonProperty(value = "device_type")
+	@JsonProperty(value = "type")
 	private final String deviceType;
 
-	@JsonProperty(value = "device_name")
+	@JsonProperty(value = "name")
 	private final String deviceName;
 
 	@JsonProperty(value = "os_name")
@@ -39,8 +39,8 @@ public class DeviceData implements Serializable {
 	@JsonProperty(value = "os_version")
 	private final String osVersion;
 
-	public DeviceData(@JsonProperty(value = "device_uuid") String deviceUuid, @JsonProperty(value = "device_token")String deviceToken,
-			@JsonProperty(value = "device_type") String deviceType, @JsonProperty(value = "device_name") String deviceName,
+	public DeviceData(@JsonProperty(value = "uuid") String deviceUuid, @JsonProperty(value = "token")String deviceToken,
+			@JsonProperty(value = "type") String deviceType, @JsonProperty(value = "name") String deviceName,
 			@JsonProperty(value = "os_name") String osName, @JsonProperty(value = "os_version") String osVersion) {
 		this.deviceUuid = deviceUuid;
 		this.deviceToken = deviceToken;
