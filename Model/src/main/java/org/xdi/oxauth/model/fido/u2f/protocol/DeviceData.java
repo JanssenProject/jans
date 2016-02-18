@@ -30,6 +30,9 @@ public class DeviceData implements Serializable {
 	@JsonProperty(value = "type")
 	private final String type;
 
+	@JsonProperty(value = "platform")
+	private final String platform;
+
 	@JsonProperty(value = "name")
 	private final String name;
 
@@ -40,11 +43,13 @@ public class DeviceData implements Serializable {
 	private final String osVersion;
 
 	public DeviceData(@JsonProperty(value = "uuid") String uuid, @JsonProperty(value = "token") String pushToken,
-			@JsonProperty(value = "type") String type, @JsonProperty(value = "name") String name,
-			@JsonProperty(value = "os_name") String osName, @JsonProperty(value = "os_version") String osVersion) {
+			@JsonProperty(value = "type") String type, @JsonProperty(value = "platform") String platform,
+			@JsonProperty(value = "name") String name, @JsonProperty(value = "os_name") String osName,
+			@JsonProperty(value = "os_version") String osVersion) {
 		this.uuid = uuid;
 		this.pushToken = pushToken;
 		this.type = type;
+		this.platform = platform;
 		this.name = name;
 		this.osName = osName;
 		this.osVersion = osVersion;
@@ -62,6 +67,10 @@ public class DeviceData implements Serializable {
 		return type;
 	}
 
+	public String getPlatform() {
+		return platform;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -77,8 +86,8 @@ public class DeviceData implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceData [uuid=").append(uuid).append(", pushToken=").append(pushToken).append(", type=").append(type).append(", name=").append(name)
-				.append(", osName=").append(osName).append(", osVersion=").append(osVersion).append("]");
+		builder.append("DeviceData [uuid=").append(uuid).append(", pushToken=").append(pushToken).append(", type=").append(type).append(", platform=")
+				.append(platform).append(", name=").append(name).append(", osName=").append(osName).append(", osVersion=").append(osVersion).append("]");
 		return builder.toString();
 	}
 

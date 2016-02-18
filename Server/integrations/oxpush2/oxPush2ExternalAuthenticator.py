@@ -458,13 +458,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Device data which oxPush2 gets during enrollment
                 device_data = json.loads(device_data_json)
 
-                type = device_data["type"]
+                platform = device_data["platform"]
                 push_token = device_data["push_token"]
 
-                if not StringHelper.equalsIgnoreCase(type, "mobile"):
-                    continue
-
-                if StringHelper.equalsIgnoreCase(type, "iphone") and StringHelper.isNotEmpty(push_token):
+                if StringHelper.equalsIgnoreCase(platform, "iphone") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
                     if (self.asyncAppleService == None):
                         print "oxPush2. Send push notification. Apple push notification service is not enabled"
@@ -472,7 +469,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
                         self.asyncAppleService.sendPush("oxPush2", oxpush2_request, push_token)
 
-                if StringHelper.equalsIgnoreCase(type, "android") and StringHelper.isNotEmpty(push_token):
+                if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
                     if (self.asyncAndroidService == None):
                         print "oxPush2. Send push notification. Android push notification service is not enabled"
