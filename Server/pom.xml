@@ -870,6 +870,34 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <profile>
+            <id>push_sender</id>
+            <activation>
+                <property>
+                    <name>!push_sender</name>
+                </property>
+            </activation>
+            <properties>
+            </properties>
+            <build>
+                <plugins>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.devsu</groupId>
+                    <artifactId>push-sender</artifactId>
+                    <version>1.0.1</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.slf4j</groupId>
+            		<artifactId>slf4j-simple</artifactId>
+            	</exclusion>
+            </exclusions>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 
 </project>
