@@ -21,7 +21,8 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 19/01/2016
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 
 public class JwtSigner {
@@ -49,7 +50,7 @@ public class JwtSigner {
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
         List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
         if (jsonWebKeys.size() > 0) {
-            jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKeyId());
+            jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKid());
         }
 
         // Claims
@@ -59,8 +60,8 @@ public class JwtSigner {
     }
 
     public Jwt sign() throws SignatureException, InvalidJwtException, StringEncrypter.EncryptionException {
-         // Signature
-        JSONWebKey jwk;
+        // Signature
+        JSONWebKey jwk = null;
         switch (signatureAlgorithm) {
             case HS256:
             case HS384:
@@ -73,8 +74,8 @@ public class JwtSigner {
             case RS512:
                 jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
                 RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getModulus(),
-                        jwk.getPrivateKey().getPrivateExponent());
+                        jwk.getPrivateKey().getN(),
+                        jwk.getPrivateKey().getE());
                 RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
                 jwt = rsaSigner.sign(jwt);
                 break;
