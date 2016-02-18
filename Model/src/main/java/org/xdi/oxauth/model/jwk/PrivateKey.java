@@ -7,28 +7,37 @@
 package org.xdi.oxauth.model.jwk;
 
 /**
- * @author Javier Rojas Blum Date: 04.26.2012
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 public class PrivateKey {
 
-    private String modulus;
-    private String privateExponent;
+    /**
+     * Modulus
+     */
+    private String n;
+
+    /**
+     * Exponent
+     */
+    private String e;
+
     private String d;
 
-    public String getModulus() {
-        return modulus;
+    public String getN() {
+        return n;
     }
 
-    public void setModulus(String modulus) {
-        this.modulus = modulus;
+    public void setN(String n) {
+        this.n = n;
     }
 
-    public String getPrivateExponent() {
-        return privateExponent;
+    public String getE() {
+        return e;
     }
 
-    public void setPrivateExponent(String privateExponent) {
-        this.privateExponent = privateExponent;
+    public void setE(String e) {
+        this.e = e;
     }
 
     public String getD() {

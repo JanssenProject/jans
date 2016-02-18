@@ -68,7 +68,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version February 15, 2015
+ * @version February 17, 2016
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -206,7 +206,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         List<JSONWebKey> availableKeys = jwks.getKeys(signatureAlgorithm);
         if (availableKeys.size() > 0) {
-            jwt.getHeader().setKeyId(availableKeys.get(0).getKeyId());
+            jwt.getHeader().setKeyId(availableKeys.get(0).getKid());
         }
 
         // Claims
@@ -224,7 +224,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue;
+                    String attributeValue = null;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -271,7 +271,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier;
+            String sectorIdentifier = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -313,8 +313,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             case RS512:
                 jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
                 RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getModulus(),
-                        jwk.getPrivateKey().getPrivateExponent());
+                        jwk.getPrivateKey().getN(),
+                        jwk.getPrivateKey().getE());
                 RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
                 jwt = rsaSigner.sign(jwt);
                 break;
@@ -360,7 +360,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue;
+                    String attributeValue = null;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -407,7 +407,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier;
+            String sectorIdentifier = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -545,7 +545,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier;
+            String sectorIdentifier = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -585,7 +585,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                 String claimName = gluuAttribute.getOxAuthClaimName();
                 String ldapName = gluuAttribute.getName();
-                Object attribute;
+                Object attribute = null;
 
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
