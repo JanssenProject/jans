@@ -442,26 +442,29 @@ class PersonAuthentication(PersonAuthenticationType):
         if not self.enabledPushNotifications:
             return
 
+        user_name = user.getUserId()
         print "oxPush2. Send push notification. Loading user '%s' devices" % user.getUserId()
 
         send_notification = False
 
-        user_inum = userService.getUserInum(user_name)
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId", "oxDeviceData")
-        if (u2f_devices_list.size() == 0):
-            for u2f_device in u2f_devices_list:
-                device_data_json = u2f_device.getDeviceData()
+        userService = UserService.instance()
+        deviceRegistrationService = DeviceRegistrationService.instance()
 
-                if StringHelper.isEmpty(device_data):
-                    continue
+        user_inum = userService.getUserInum(user_name)
+
+        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId", "oxDeviceData")
+        if u2f_devices_list.size() > 0:
+            for u2f_device in u2f_devices_list:
+                device_data = u2f_device.getDeviceData()
 
                 # Device data which oxPush2 gets during enrollment
-                device_data = json.loads(device_data_json)
+                if device_data == None:
+                    continue
 
-                platform = device_data["platform"]
-                push_token = device_data["push_token"]
+                platform = device_data.getPlatform()
+                push_token = device_data.getPushToken()
 
-                if StringHelper.equalsIgnoreCase(platform, "iphone") and StringHelper.isNotEmpty(push_token):
+                if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
                     if (self.asyncAppleService == None):
                         print "oxPush2. Send push notification. Apple push notification service is not enabled"
