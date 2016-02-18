@@ -421,10 +421,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Initialize notification services. Created Android notification service"
             
         if ios_creads["enabled"]:
-            p12_file_base64 = ios_creads["p12_file"]
-            p12_file = base64.decode(p12_file_base64)
+            p12_file_path = ios_creads["p12_file_path"]
+            p12_passowrd = ios_creads["p12_password"]
 
-            p12_passowrd = ios_creads["p12_passowrd"]
             try:
                 stringEncrypter = StringEncrypter.defaultInstance()
                 p12_passowrd = stringEncrypter.decrypt(p12_passowrd)
@@ -432,7 +431,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Ignore exception. Password is not encrypted
                 print "oxPush2. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"
 
-            self.asyncAppleService = AsyncApplePushService(p12_file, p12_passowrd, ios_creads["production"])
+            self.asyncAppleService = AsyncApplePushService(p12_file_path, p12_passowrd, ios_creads["production"])
             print "oxPush2. Initialize notification services. Created iOS notification service"
 
         enabled = self.asyncAndroidService != None or self.asyncAppleService != None
@@ -460,13 +459,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 device_data = json.loads(device_data_json)
 
                 type = device_data["type"]
-                os_name = device_data["os_name"]
                 push_token = device_data["push_token"]
 
                 if not StringHelper.equalsIgnoreCase(type, "mobile"):
                     continue
 
-                if StringHelper.equalsIgnoreCase(os_name, "ios") and StringHelper.isNotEmpty(push_token):
+                if StringHelper.equalsIgnoreCase(type, "iphone") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
                     if (self.asyncAppleService == None):
                         print "oxPush2. Send push notification. Apple push notification service is not enabled"
@@ -474,7 +472,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
                         self.asyncAppleService.sendPush("oxPush2", oxpush2_request, push_token)
 
-                if StringHelper.equalsIgnoreCase(os_name, "android") and StringHelper.isNotEmpty(push_token):
+                if StringHelper.equalsIgnoreCase(type, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
                     if (self.asyncAndroidService == None):
                         print "oxPush2. Send push notification. Android push notification service is not enabled"

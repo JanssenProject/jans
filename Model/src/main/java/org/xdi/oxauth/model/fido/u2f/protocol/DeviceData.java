@@ -22,16 +22,16 @@ public class DeviceData implements Serializable {
 	private static final long serialVersionUID = -8173244116167488365L;
 
 	@JsonProperty(value = "uuid")
-	private final String deviceUuid;
+	private final String uuid;
 
 	@JsonProperty(value = "push_token")
-	private final String deviceToken;
+	private final String pushToken;
 
 	@JsonProperty(value = "type")
-	private final String deviceType;
+	private final String type;
 
 	@JsonProperty(value = "name")
-	private final String deviceName;
+	private final String name;
 
 	@JsonProperty(value = "os_name")
 	private final String osName;
@@ -39,31 +39,31 @@ public class DeviceData implements Serializable {
 	@JsonProperty(value = "os_version")
 	private final String osVersion;
 
-	public DeviceData(@JsonProperty(value = "uuid") String deviceUuid, @JsonProperty(value = "token")String deviceToken,
-			@JsonProperty(value = "type") String deviceType, @JsonProperty(value = "name") String deviceName,
+	public DeviceData(@JsonProperty(value = "uuid") String uuid, @JsonProperty(value = "token") String pushToken,
+			@JsonProperty(value = "type") String type, @JsonProperty(value = "name") String name,
 			@JsonProperty(value = "os_name") String osName, @JsonProperty(value = "os_version") String osVersion) {
-		this.deviceUuid = deviceUuid;
-		this.deviceToken = deviceToken;
-		this.deviceType = deviceType;
-		this.deviceName = deviceName;
+		this.uuid = uuid;
+		this.pushToken = pushToken;
+		this.type = type;
+		this.name = name;
 		this.osName = osName;
 		this.osVersion = osVersion;
 	}
 
-	public String getDeviceUuid() {
-		return deviceUuid;
+	public String getUuid() {
+		return uuid;
 	}
 
-	public String getDeviceToken() {
-		return deviceToken;
+	public String getPushToken() {
+		return pushToken;
 	}
 
-	public String getDeviceType() {
-		return deviceType;
+	public String getType() {
+		return type;
 	}
 
-	public String getDeviceName() {
-		return deviceName;
+	public String getName() {
+		return name;
 	}
 
 	public String getOsName() {
@@ -77,8 +77,8 @@ public class DeviceData implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceData [deviceUuid=").append(deviceUuid).append(", deviceToken=").append(deviceToken).append(", deviceType=").append(deviceType)
-				.append(", deviceName=").append(deviceName).append(", osName=").append(osName).append(", osVersion=").append(osVersion).append("]");
+		builder.append("DeviceData [uuid=").append(uuid).append(", pushToken=").append(pushToken).append(", type=").append(type).append(", name=").append(name)
+				.append(", osName=").append(osName).append(", osVersion=").append(osVersion).append("]");
 		return builder.toString();
 	}
 
