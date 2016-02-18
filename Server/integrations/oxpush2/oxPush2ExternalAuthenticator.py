@@ -10,10 +10,9 @@ from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from java.util import Arrays
+from java.util import HashMap, Arrays
 
-from com.devsu.push.sender.service.async import AsyncAndroidPushService
-from com.devsu.push.sender.service.async import AsyncApplePushService
+from com.devsu.push.sender.service.sync import SyncAndroidPushService, SyncApplePushService
 
 import sys
 import java
@@ -414,10 +413,10 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Initialize notification services. Invalid credentials file '%s' format:" % oxpush2_creds_file
             return False
         
-        self.asyncAndroidService = None
-        self.asyncAppleService = None
+        self.pushAndroidService = None
+        self.pushAppleService = None
         if android_creds["enabled"]:
-            self.asyncAndroidService = AsyncAndroidPushService(android_creds["api_key"])
+            self.pushAndroidService = SyncAndroidPushService(android_creds["api_key"])
             print "oxPush2. Initialize notification services. Created Android notification service"
             
         if ios_creads["enabled"]:
@@ -431,10 +430,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Ignore exception. Password is not encrypted
                 print "oxPush2. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"
 
-            self.asyncAppleService = AsyncApplePushService(p12_file_path, p12_passowrd, ios_creads["production"])
+            self.pushAppleService = SyncApplePushService(p12_file_path, p12_passowrd, ios_creads["production"])
             print "oxPush2. Initialize notification services. Created iOS notification service"
 
-        enabled = self.asyncAndroidService != None or self.asyncAppleService != None
+        enabled = self.pushAndroidService != None or self.pushAppleService != None
 
         return enabled
 
@@ -446,6 +445,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "oxPush2. Send push notification. Loading user '%s' devices" % user.getUserId()
 
         send_notification = False
+        send_notification_result = True
 
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
@@ -466,20 +466,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
-                    if (self.asyncAppleService == None):
+                    if (self.pushAppleService == None):
                         print "oxPush2. Send push notification. Apple push notification service is not enabled"
                     else:
                         send_notification = True
-                        self.asyncAppleService.sendPush("oxPush2", oxpush2_request, push_token)
+                        
+                        title = "oxPush2"
+                        message = "oxPush2 login request to: %s" % self.application_id
+
+                        additional_fields = HashMap()
+                        additional_fields.put("request", oxpush2_request)
+
+                        send_notification_result = self.pushAppleService.sendPush(title, message, additional_fields, push_token)
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
-                    if (self.asyncAndroidService == None):
+                    if (self.pushAndroidService == None):
                         print "oxPush2. Send push notification. Android push notification service is not enabled"
                     else:
                         send_notification = True
-                        self.asyncAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
+                        send_notification_result= self.pushAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
 
 
-        print "oxPush2. Send push notification. Result: '%s'" % send_notification
+        print "oxPush2. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
         
