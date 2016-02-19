@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.xdi.oxauth.model.registration.Client;
+
 import java.util.Date;
 import java.util.List;
-
-import org.xdi.oxauth.model.registration.Client;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -17,8 +17,6 @@ import org.xdi.oxauth.model.registration.Client;
  */
 
 public interface IAuthorizationGrantList {
-
-    public List<AuthorizationGrant> getAuthorizationGrants();
 
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants);
 
