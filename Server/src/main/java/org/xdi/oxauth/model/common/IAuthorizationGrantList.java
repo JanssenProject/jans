@@ -20,8 +20,6 @@ public interface IAuthorizationGrantList {
 
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants);
 
-    public void addAuthorizationGrant(AuthorizationGrant authorizationGrant);
-
     public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime);
 
     public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime);

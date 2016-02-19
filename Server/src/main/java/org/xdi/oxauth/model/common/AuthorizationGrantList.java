@@ -63,11 +63,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public void addAuthorizationGrant(AuthorizationGrant authorizationGrant) {
-        // do nothing
-    }
-
-    @Override
     public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime) {
         return new AuthorizationGrant(user, null, client, authenticationTime);
     }
