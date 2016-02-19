@@ -27,7 +27,19 @@ class PersonAuthentication(PersonAuthenticationType):
         u2f_server_metadata_uri = u2f_server_uri + "/.well-known/fido-u2f-configuration"
 
         metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
-        self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
+
+        max_attempts = 3
+        for attempt in range(1, max_attempts):
+            try:
+                self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
+                break
+            except ClientResponseFailure, ex:
+                # Detect if last try or we still get Service Unavailable HTTP error
+                if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
+                    raise ex
+
+                java.lang.Thread.sleep(3000)
+                print "Attempting to load metadata: %d" % attempt
         
         print "U2F. Initialized successfully"
         return True   
