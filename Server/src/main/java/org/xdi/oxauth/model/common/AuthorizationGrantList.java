@@ -8,17 +8,10 @@ package org.xdi.oxauth.model.common;
 
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.token.PersistentJwt;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.UserService;
 
 import java.util.Date;
 import java.util.List;
@@ -33,13 +26,6 @@ import java.util.List;
 @Scope(ScopeType.APPLICATION)
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
-    @Logger
-    private Log log;
-    @In
-    private UserService userService;
-    @In
-    private ClientService clientService;
-
     private IAuthorizationGrantList grant;
 
     /**
@@ -47,59 +33,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
      */
     @Create
     public void init() {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                grant = new AuthorizationGrantListInMemory();
-                loadPersistentJwts();
-                log.info("Created IN-MEMORY authorization grant list");
-                break;
-            case LDAP:
-                grant = AuthorizationGrantListLdap.instance();
-                log.info("Created LDAP authorization grant list");
-                break;
-            default:
-                log.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.)");
-        }
-    }
-
-    private void loadPersistentJwts() {
-        final List<User> users = userService.getUsersWithPersistentJwts();
-
-        for (User user : users) {
-            for (String persistentJwtCode : user.getOxAuthPersistentJwt()) {
-                PersistentJwt persistentJwt = new PersistentJwt(persistentJwtCode);
-                Client client = clientService.getClient(persistentJwt.getClientId());
-                Date authenticationTime = persistentJwt.getAuthenticationTime();
-
-                AuthorizationGrant authorizationGrant;
-                switch (persistentJwt.getAuthorizationGrantType()) {
-                    case AUTHORIZATION_CODE:
-                        authorizationGrant = new AuthorizationCodeGrant(user, client, authenticationTime);
-                        break;
-                    case IMPLICIT:
-                        authorizationGrant = new ImplicitGrant(user, client, authenticationTime);
-                        break;
-                    case RESOURCE_OWNER_PASSWORD_CREDENTIALS:
-                        authorizationGrant = new ResourceOwnerPasswordCredentialsGrant(user, client);
-                        break;
-                    case CLIENT_CREDENTIALS:
-                        authorizationGrant = new ClientCredentialsGrant(user, client);
-                        break;
-                    default:
-                        authorizationGrant = new AuthorizationGrant(user, null, client, authenticationTime);
-                        break;
-                }
-
-                authorizationGrant.setScopes(persistentJwt.getScopes());
-                authorizationGrant.setAccessTokens(persistentJwt.getAccessTokens());
-                authorizationGrant.setRefreshTokens(persistentJwt.getRefreshTokens());
-                authorizationGrant.setLongLivedAccessToken(persistentJwt.getLongLivedAccessToken());
-                authorizationGrant.setIdToken(persistentJwt.getIdToken());
-
-                grant.addAuthorizationGrant(authorizationGrant);
-            }
-        }
+        grant = AuthorizationGrantListLdap.instance();
     }
 
     @Override
@@ -198,7 +132,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
      *
      * @param clientId          An application making protected resource requests on behalf of
      *                          the resource owner and with its authorization.
-     * @param authorizationCode
+     * @param authorizationCode authorization code
      * @return The authorization code grant, otherwise <code>null</code>.
      */
     @Override
