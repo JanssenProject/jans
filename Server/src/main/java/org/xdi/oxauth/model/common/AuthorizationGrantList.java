@@ -70,8 +70,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
         final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime);
-        final AuthorizationGrantLdap ldapGrant = (AuthorizationGrantLdap) grant.getGrant();
-        ldapGrant.persist(grant.getAuthorizationCode());
+        grant.persist(grant.getAuthorizationCode());
         return grant;
     }
 
