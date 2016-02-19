@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.Date;
-import java.util.List;
-
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.In;
@@ -22,6 +19,9 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.UserService;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -82,15 +82,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         break;
                     case RESOURCE_OWNER_PASSWORD_CREDENTIALS:
                         authorizationGrant = new ResourceOwnerPasswordCredentialsGrant(user, client);
-                        if (authorizationGrant.getGrant() instanceof AuthorizationGrantInMemory) {
-                            ((AuthorizationGrantInMemory) authorizationGrant.getGrant()).setAuthenticationTime(authenticationTime);
-                        }
                         break;
                     case CLIENT_CREDENTIALS:
                         authorizationGrant = new ClientCredentialsGrant(user, client);
-                        if (authorizationGrant.getGrant() instanceof AuthorizationGrantInMemory) {
-                            ((AuthorizationGrantInMemory) authorizationGrant.getGrant()).setAuthenticationTime(authenticationTime);
-                        }
                         break;
                     default:
                         authorizationGrant = new AuthorizationGrant(user, null, client, authenticationTime);

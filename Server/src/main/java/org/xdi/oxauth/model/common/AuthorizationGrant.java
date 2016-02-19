@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.common;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -48,18 +47,7 @@ public class AuthorizationGrant implements IAuthorizationGrant {
      */
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                               Date authenticationTime) {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                grant = new AuthorizationGrantInMemory(user, authorizationGrantType, client, authenticationTime);
-                ((AuthorizationGrantInMemory) grant).setParentRef(this);
-                break;
-            case LDAP:
-                grant = new AuthorizationGrantLdap(user, authorizationGrantType, client, authenticationTime);
-                break;
-            default:
-                LOGGER.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.) " + ConfigurationFactory.instance().getConfiguration().getModeEnum());
-        }
+        grant = new AuthorizationGrantLdap(user, authorizationGrantType, client, authenticationTime);
     }
 
     public IAuthorizationGrant getGrant() {
