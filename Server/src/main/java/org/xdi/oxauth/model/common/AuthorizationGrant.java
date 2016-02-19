@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class AuthorizationGrant implements IAuthorizationGrant {
 
-    private static final Log LOGGER = Logging.getLog(AuthorizationGrantListLdap.class);
+    private static final Log LOGGER = Logging.getLog(AuthorizationGrant.class);
 
     private IAuthorizationGrant grant;
 
