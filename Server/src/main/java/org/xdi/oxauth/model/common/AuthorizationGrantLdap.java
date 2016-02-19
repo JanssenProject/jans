@@ -9,17 +9,24 @@ package org.xdi.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.token.IdTokenFactory;
+import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -46,6 +53,17 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
     public AuthorizationGrantLdap(User user, AuthorizationGrantType authorizationGrantType, Client client,
                                   Date authenticationTime) {
         super(user, authorizationGrantType, client, authenticationTime);
+    }
+
+    public static IdToken createIdToken(
+            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
+            Set<String> scopes)
+            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
+            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+        JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
+        return new IdToken(jwr.toString(),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
 
     @Override
@@ -136,7 +154,7 @@ public class AuthorizationGrantLdap extends AbstractAuthorizationGrant {
                                  String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
-            final IdToken idToken = AuthorizationGrantInMemory.createIdToken(this, nonce, authorizationCode,
+            final IdToken idToken = createIdToken(this, nonce, authorizationCode,
                     accessToken, getScopes());
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);

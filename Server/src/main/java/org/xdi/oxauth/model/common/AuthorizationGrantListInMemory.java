@@ -6,26 +6,25 @@
 
 package org.xdi.oxauth.model.common;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.model.registration.Client;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-import org.xdi.oxauth.model.registration.Client;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 08/01/2013
  */
 
-public class AuthorizationGrantListInMemory implements TokenIssuerObserver, IAuthorizationGrantList {
+public class AuthorizationGrantListInMemory implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantListInMemory.class);
 
@@ -78,30 +77,6 @@ public class AuthorizationGrantListInMemory implements TokenIssuerObserver, IAut
 
     @Override
     public void addAuthorizationGrant(AuthorizationGrant authorizationGrant) {
-        if (authorizationGrant != null) {
-            final IAuthorizationGrant grant = authorizationGrant.getGrant();
-            if (grant instanceof AuthorizationGrantInMemory) {
-                AuthorizationGrantInMemory inMemory = (AuthorizationGrantInMemory) grant;
-                inMemory.setTokenIssuerObserver(this);
-
-                if (authorizationGrant instanceof AuthorizationCodeGrant) {
-                    AuthorizationCode authorizationCode = authorizationGrant.getAuthorizationCode();
-                    indexByAuthorizationCode(authorizationCode, authorizationGrant);
-                }
-                if (authorizationGrant.getIdToken() != null) {
-                    indexByIdToken(authorizationGrant.getIdToken(), authorizationGrant);
-                }
-                for (AccessToken accessToken : authorizationGrant.getAccessTokens()) {
-                    indexByAccessToken(accessToken, authorizationGrant);
-                }
-                for (RefreshToken refreshToken : authorizationGrant.getRefreshTokens()) {
-                    indexByRefreshToken(refreshToken, authorizationGrant);
-                }
-                if (authorizationGrant.getClient() != null) {
-                    indexByClient(authorizationGrant.getClient(), authorizationGrant);
-                }
-            }
-        }
     }
 
     /**
@@ -335,40 +310,5 @@ public class AuthorizationGrantListInMemory implements TokenIssuerObserver, IAut
         }
 
         return null;
-    }
-
-    @Override
-    public synchronized void indexByAuthorizationCode(AuthorizationCode authorizationCode, AuthorizationGrant authorizationGrant) {
-        if (authorizationCode != null && authorizationGrant != null) {
-            authorizationGrantsByCode.put(authorizationCode.getCode(), authorizationGrant);
-        }
-    }
-
-    @Override
-    public synchronized void indexByAccessToken(AccessToken accessToken, AuthorizationGrant authorizationGrant) {
-        if (accessToken != null && authorizationGrant != null) {
-            authorizationGrantsByAccessToken.put(accessToken.getCode(), authorizationGrant);
-        }
-    }
-
-    @Override
-    public synchronized void indexByRefreshToken(RefreshToken refreshToken, AuthorizationGrant authorizationGrant) {
-        if (refreshToken != null && authorizationGrant != null) {
-            authorizationGrantsByRefreshToken.put(refreshToken.getCode(), authorizationGrant);
-        }
-    }
-
-    @Override
-    public synchronized void indexByIdToken(IdToken idToken, AuthorizationGrant authorizationGrant) {
-        if (idToken != null && authorizationGrant != null) {
-            authorizationGrantsByIdToken.put(idToken.getCode(), authorizationGrant);
-        }
-    }
-
-    @Override
-    public synchronized void indexByClient(Client client, AuthorizationGrant authorizationGrant) {
-        if (client != null && authorizationGrant != null) {
-            authorizationGrantsByClientId.put(client.getClientId(), authorizationGrant);
-        }
     }
 }
