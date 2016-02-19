@@ -111,27 +111,7 @@ public class CleanerTimer {
 
     private void processAuthorizationGrantList() {
         log.debug("Start AuthorizationGrant clean up");
-
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                final List<AuthorizationGrant> grantList = authorizationGrantList.getAuthorizationGrants();
-
-                if (grantList != null && !grantList.isEmpty()) {
-                    final List<AuthorizationGrant> toRemove = new ArrayList<AuthorizationGrant>();
-                    for (AuthorizationGrant grant : grantList) {
-                        if (!grant.isValid()) {
-                            toRemove.add(grant);
-                            log.debug("Removing AuthorizationGrant, Client {0}", grant.getClient().getClientId());
-                        }
-                    }
-                    authorizationGrantList.removeAuthorizationGrants(toRemove);
-                }
-                break;
-            case LDAP:
-                grantService.cleanUp();
-                break;
-
-        }
+        grantService.cleanUp();
         log.debug("End AuthorizationGrant clean up");
     }
 

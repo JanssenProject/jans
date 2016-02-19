@@ -28,7 +28,6 @@ import org.xdi.oxauth.service.UserService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -52,11 +51,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         m_grantServive = GrantService.instance();
         m_userService = (UserService) Component.getInstance(UserService.class);
         m_clientService = (ClientService) Component.getInstance(ClientService.class);
-    }
-
-    @Override
-    public List<AuthorizationGrant> getAuthorizationGrants() {
-        return Collections.emptyList(); // return nothing in LDAP case
     }
 
     @Override
