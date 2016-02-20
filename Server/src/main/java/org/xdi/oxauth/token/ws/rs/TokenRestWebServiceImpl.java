@@ -247,26 +247,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     if (authorizationGrant != null) {
                         final AccessToken accessToken = authorizationGrant.createLongLivedAccessToken();
-                        final List<String> scopes = new ArrayList<String>();
-                        if (authorizationGrant.getScopes() != null) {
-                            scopes.addAll(authorizationGrant.getScopes());
-                        }
-
-
-                        PersistentJwt persistentJwt = new PersistentJwt();
-                        persistentJwt.setUserId(authorizationGrant.getUserId());
-                        persistentJwt.setClientId(authorizationGrant.getClient().getClientId());
-                        persistentJwt.setAuthorizationGrantType(authorizationGrant.getAuthorizationGrantType());
-                        persistentJwt.setAuthenticationTime(authorizationGrant.getAuthenticationTime());
-                        persistentJwt.setScopes(scopes);
-                        persistentJwt.setAccessTokens(authorizationGrant.getAccessTokens());
-                        persistentJwt.setRefreshTokens(authorizationGrant.getRefreshTokens());
-                        persistentJwt.setLongLivedAccessToken(authorizationGrant.getLongLivedAccessToken());
-                        persistentJwt.setIdToken(authorizationGrant.getIdToken());
-
-                        if (ConfigurationFactory.instance().getConfiguration().getModeEnum() == Mode.IN_MEMORY) {
-                            userService.saveLongLivedToken(authorizationGrant.getUserId(), persistentJwt);
-                        }
 
                         builder.entity(getJSonResponse(accessToken,
                                 accessToken.getTokenType(),
