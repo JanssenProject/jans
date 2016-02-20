@@ -76,8 +76,8 @@ public class RegisterRequest extends BaseRequest {
     private Map<String, String> customAttributes;
 
     // internal state
-    private JSONObject m_jsonObject;
-    private String m_httpMethod;
+    private JSONObject jsonObject;
+    private String httpMethod;
 
     /**
      * Private common constructor.
@@ -799,11 +799,11 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public String getHttpMethod() {
-        return m_httpMethod;
+        return httpMethod;
     }
 
     public void setHttpMethod(String p_httpMethod) {
-        m_httpMethod = p_httpMethod;
+        httpMethod = p_httpMethod;
     }
 
     /**
@@ -1239,11 +1239,11 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public JSONObject getJsonObject() {
-        return m_jsonObject;
+        return jsonObject;
     }
 
     public void setJsonObject(JSONObject p_jsonObject) {
-        m_jsonObject = p_jsonObject;
+        jsonObject = p_jsonObject;
     }
 
     @Override
