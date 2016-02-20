@@ -17,7 +17,6 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -46,19 +45,7 @@ public class RPTManager implements IRPTManager {
 
     @Create
     public void init() {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                manager = new RPTManagerInMemory();
-                log.info("Created IN-MEMORY UMA RPT manager");
-                break;
-            case LDAP:
-                manager = new RPTManagerLdap();
-                log.info("Created LDAP UMA RPT manager");
-                break;
-            default:
-                log.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.)");
-        }
+        manager = new RPTManagerLdap();
     }
 
     @Override
