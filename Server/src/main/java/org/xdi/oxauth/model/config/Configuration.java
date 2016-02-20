@@ -6,9 +6,7 @@
 
 package org.xdi.oxauth.model.config;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.xdi.oxauth.model.common.Mode;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -164,11 +162,6 @@ public class Configuration {
 
     public void setMode(String p_mode) {
         mode = p_mode;
-    }
-
-    @JsonIgnore
-    public Mode getModeEnum() {
-        return Mode.fromValueWithDefault(getMode());
     }
 
     /**
