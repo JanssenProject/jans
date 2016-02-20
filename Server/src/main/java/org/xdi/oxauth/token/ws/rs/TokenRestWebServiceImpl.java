@@ -82,7 +82,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         log.debug(
                 "Attempting to request access token: grantType = {0}, code = {1}, redirectUri = {2}, username = {3}, refreshToken = {4}, clientId = {5}, ExtraParams = {6}, isSecure = {7}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(), sec.isSecure());
-        final Mode serverMode = ConfigurationFactory.instance().getConfiguration().getModeEnum();
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
 
@@ -135,19 +134,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 scope,
                                 idToken));
 
-                        switch (serverMode) {
-                            case IN_MEMORY:
-                                authorizationCodeGrant.getAuthorizationCode().setUsed(true);
-                                break;
-                            case LDAP:
-                                grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
-                                break;
-                        }
+                        grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
-                        // if authorization code is not found and mode is LDAP then code was already used = remove all grants with this auth code
-                        if (serverMode == Mode.LDAP) {
-                            grantService.removeAllByAuthorizationCode(code);
-                        }
+                        // if authorization code is not found then code was already used = remove all grants with this auth code
+                        grantService.removeAllByAuthorizationCode(code);
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.REFRESH_TOKEN) {
