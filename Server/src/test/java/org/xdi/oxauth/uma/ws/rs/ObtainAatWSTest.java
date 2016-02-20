@@ -20,21 +20,21 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 
 public class ObtainAatWSTest extends BaseTest {
 
-    private Token m_aat;
+    private Token aat;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
             "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
     public void requestAat(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                            String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
-        UmaTestUtil.assert_(m_aat);
+        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        UmaTestUtil.assert_(aat);
     }
 
     @Test(dependsOnMethods = "requestAat")
     @Parameters({"tokenPath", "umaAatClientId", "umaAatClientSecret"})
     public void requestNewAatByRefreshTokne(String tokenPath, String umaAatClientId, String umaAatClientSecret) {
-        final Token newAat = TUma.newTokenByRefreshToken(this, tokenPath, m_aat, umaAatClientId, umaAatClientSecret);
+        final Token newAat = TUma.newTokenByRefreshToken(this, tokenPath, aat, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(newAat);
     }
 }
