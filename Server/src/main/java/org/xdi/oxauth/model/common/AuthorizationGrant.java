@@ -47,7 +47,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 //        }
 //    });
 
-    private final GrantService m_grantService = GrantService.instance();
+    private final GrantService grantService = GrantService.instance();
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                                   Date authenticationTime) {
@@ -86,7 +86,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private void saveImpl() {
         String grantId = getGrantId();
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
-            final List<TokenLdap> grants = m_grantService.getGrantsByGrantId(grantId);
+            final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
                 final String nonce = getNonce();
                 final String scopes = getScopesAsString();
@@ -100,7 +100,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
-                    m_grantService.mergeSilently(t);
+                    grantService.mergeSilently(t);
                 }
             }
         }
@@ -172,7 +172,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public void persist(TokenLdap p_token) {
-        m_grantService.persist(p_token);
+        grantService.persist(p_token);
     }
 
     public void persist(AuthorizationCode p_code) {
@@ -266,7 +266,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public void revokeAllTokens() {
         final TokenLdap tokenLdap = getTokenLdap();
         if (tokenLdap != null && StringUtils.isNotBlank(tokenLdap.getGrantId())) {
-            m_grantService.removeAllByGrantId(tokenLdap.getGrantId());
+            grantService.removeAllByGrantId(tokenLdap.getGrantId());
         }
     }
 
