@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-
-import javax.ws.rs.core.Response;
-
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
@@ -23,6 +15,11 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import static org.testng.Assert.*;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 18/03/2013
@@ -30,18 +27,18 @@ import org.xdi.oxauth.util.ServerUtil;
 
 class TAuthorization {
 
-    private final BaseTest m_baseTest;
+    private final BaseTest baseTest;
 
     public TAuthorization(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
-        m_baseTest = p_baseTest;
+        baseTest = p_baseTest;
     }
 
     public RptAuthorizationResponse requestAuthorization(String p_umaPermissionAuthorizationPath, final String p_umaAmHost, final Token p_aat, final RptAuthorizationRequest p_request) {
         final Holder<RptAuthorizationResponse> h = new Holder<RptAuthorizationResponse>();
 
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_umaPermissionAuthorizationPath) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, p_umaPermissionAuthorizationPath) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
