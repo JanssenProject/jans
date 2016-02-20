@@ -43,21 +43,21 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
 
-    private final GrantService m_grantServive;
-    private final UserService m_userService;
-    private final ClientService m_clientService;
+    private final GrantService grantServive;
+    private final UserService userService;
+    private final ClientService clientService;
 
     private AuthorizationGrantList() {
-        m_grantServive = GrantService.instance();
-        m_userService = (UserService) Component.getInstance(UserService.class);
-        m_clientService = (ClientService) Component.getInstance(ClientService.class);
+        grantServive = GrantService.instance();
+        userService = (UserService) Component.getInstance(UserService.class);
+        clientService = (ClientService) Component.getInstance(ClientService.class);
     }
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
         if (authorizationGrants != null && !authorizationGrants.isEmpty()) {
             for (AuthorizationGrant r : authorizationGrants) {
-                m_grantServive.remove(r);
+                grantServive.remove(r);
             }
         }
     }
@@ -103,7 +103,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     public List<AuthorizationGrant> getAuthorizationGrant(String clientId) {
         final List<AuthorizationGrant> result = new ArrayList<AuthorizationGrant>();
         try {
-            final List<TokenLdap> entries = m_grantServive.getGrantsOfClient(clientId);
+            final List<TokenLdap> entries = grantServive.getGrantsOfClient(clientId);
             if (entries != null && !entries.isEmpty()) {
                 for (TokenLdap t : entries) {
                     final AuthorizationGrant grant = asGrant(t);
@@ -120,7 +120,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
-        final TokenLdap tokenLdap = m_grantServive.getGrantsByCode(accessToken);
+        final TokenLdap tokenLdap = grantServive.getGrantsByCode(accessToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
@@ -129,11 +129,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        return asGrant(m_grantServive.getGrantsByCode(idToken));
+        return asGrant(grantServive.getGrantsByCode(idToken));
     }
 
     public AuthorizationGrant load(String clientId, String p_code) {
-        return asGrant(m_grantServive.getGrantsByCodeAndClient(p_code, clientId));
+        return asGrant(grantServive.getGrantsByCodeAndClient(p_code, clientId));
     }
 
     public static String extractClientIdFromTokenDn(String p_dn) {
@@ -163,8 +163,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (tokenLdap != null) {
             final AuthorizationGrantType grantType = AuthorizationGrantType.fromString(tokenLdap.getGrantType());
             if (grantType != null) {
-                final User user = m_userService.getUser(tokenLdap.getUserId());
-                final Client client = m_clientService.getClient(extractClientIdFromTokenDn(tokenLdap.getDn()));
+                final User user = userService.getUser(tokenLdap.getUserId());
+                final Client client = clientService.getClient(extractClientIdFromTokenDn(tokenLdap.getDn()));
                 final Date authenticationTime = org.xdi.oxauth.model.util.StringUtils.parseSilently(tokenLdap.getAuthenticationTime());
                 final String nonce = tokenLdap.getNonce();
 
