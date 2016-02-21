@@ -98,6 +98,20 @@ public class UserService {
         return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
 
+	public User getUserByInum(String inum, String... returnAttributes) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, returnAttributes);
+		if (user == null) {
+			return null;
+		}
+
+		return user;
+	}
+
 	public User getUser(String userId, String... returnAttributes) {
 		log.debug("Getting user information from LDAP: userId = {0}", userId);
 

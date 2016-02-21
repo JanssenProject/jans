@@ -32,9 +32,9 @@ public class RegisterRequestMessageLdap extends RequestMessageLdap implements Se
 		this.requestId = registerRequestMessage.getRequestId();
 	}
 
-	public RegisterRequestMessageLdap(String dn, String id, Date creationDate, String sessionState, String userName,
+	public RegisterRequestMessageLdap(String dn, String id, Date creationDate, String sessionState, String userInum,
 			RegisterRequestMessage registerRequestMessage) {
-		super(dn, id, registerRequestMessage.getRequestId(), creationDate, sessionState, userName);
+		super(dn, id, registerRequestMessage.getRequestId(), creationDate, sessionState, userInum);
 		this.registerRequestMessage = registerRequestMessage;
 	}
 
