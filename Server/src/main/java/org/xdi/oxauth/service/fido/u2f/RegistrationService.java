@@ -81,7 +81,7 @@ public class RegistrationService extends RequestService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userName) {
+	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
 		}
@@ -89,14 +89,9 @@ public class RegistrationService extends RequestService {
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
 
-		boolean twoStep = StringHelper.isNotEmpty(userName);
+		boolean twoStep = StringHelper.isNotEmpty(userInum);
 		if (twoStep) {
-			// In two steps we expects not empty username
-			String userInum = userService.getUserInum(userName);
-			if (StringHelper.isEmpty(userInum)) {
-				throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
-			}
-
+			// In two steps we expects not empty userInum
 			List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
 			for (DeviceRegistration deviceRegistration : deviceRegistrations) {
 				if (!deviceRegistration.isCompromised()) {
@@ -124,11 +119,11 @@ public class RegistrationService extends RequestService {
 		return new RegisterRequest(Base64Util.base64urlencode(challenge), appId);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName) throws BadInputException {
-		return finishRegistration(requestMessage, response, userName, null);
+	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum) throws BadInputException {
+		return finishRegistration(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName, Set<String> facets)
+	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum, Set<String> facets)
 			throws BadInputException {
 		RegisterRequest request = requestMessage.getRegisterRequest();
 		String appId = request.getAppId();
@@ -162,14 +157,8 @@ public class RegistrationService extends RequestService {
 			}
 		}
 
-		boolean twoStep = StringHelper.isNotEmpty(userName);
+		boolean twoStep = StringHelper.isNotEmpty(userInum);
 		if (twoStep) {
-			// In two steps we expects not empty username
-			String userInum = userService.getUserInum(userName);
-			if (StringHelper.isEmpty(userInum)) {
-				throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
-			}
-
 			deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
 			
 			// Check if there is device registration with keyHandle in LDAP already
@@ -187,12 +176,12 @@ public class RegistrationService extends RequestService {
 		return deviceRegistration;
 	}
 
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userName, String sessionState) {
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userInum, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String registerRequestMessageId = UUID.randomUUID().toString();
 
 		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(getDnForRegisterRequestMessage(registerRequestMessageId),
-				registerRequestMessageId, now, sessionState, userName, requestMessage);
+				registerRequestMessageId, now, sessionState, userInum, requestMessage);
 
 		ldapEntryManager.persist(registerRequestMessageLdap);
 	}

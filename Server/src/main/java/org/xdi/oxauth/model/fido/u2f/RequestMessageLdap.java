@@ -28,8 +28,8 @@ public class RequestMessageLdap extends BaseEntry {
 	@LdapAttribute(name = "oxSessionStateId")
 	protected String sessionState;
 
-	@LdapAttribute(name = "uid")
-	protected String userName;
+	@LdapAttribute(name = "personInum")
+	protected String userInum;
 
 	public RequestMessageLdap() {}
 
@@ -37,13 +37,13 @@ public class RequestMessageLdap extends BaseEntry {
 		super(dn);
 	}
 
-	public RequestMessageLdap(String dn, String id, String requestId, Date creationDate, String sessionState, String userName) {
+	public RequestMessageLdap(String dn, String id, String requestId, Date creationDate, String sessionState, String userInum) {
 		super(dn);
 		this.id = id;
 		this.requestId = requestId;
 		this.creationDate = creationDate;
 		this.sessionState = sessionState;
-		this.userName = userName;
+		this.userInum = userInum;
 	}
 
 	public String getId() {
@@ -78,12 +78,12 @@ public class RequestMessageLdap extends BaseEntry {
 		this.sessionState = sessionState;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getUserInum() {
+		return userInum;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUserInum(String userInum) {
+		this.userInum = userInum;
 	}
 
 }
