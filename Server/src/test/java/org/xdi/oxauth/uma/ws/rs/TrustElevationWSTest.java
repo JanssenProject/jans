@@ -17,11 +17,11 @@ import static org.testng.Assert.assertNotNull;
 
 public class TrustElevationWSTest extends BaseTest {
 
-    private Token m_pat;
-    private Token m_aat;
-    private RPTResponse m_rpt;
-    private ResourceSetResponse m_resourceSet;
-    private PermissionTicket m_ticket;
+    private Token pat;
+    private Token aat;
+    private RPTResponse rpt;
+    private ResourceSetResponse resourceSet;
+    private PermissionTicket ticket;
 
     @Test
     @Parameters({"authorizePath", "tokenPath", "umaUserId", "umaUserSecret",
@@ -35,39 +35,39 @@ public class TrustElevationWSTest extends BaseTest {
                      String umaAatClientId, String umaAatClientSecret,
                      String umaRedirectUri, String umaRptPath, String umaAmHost,
                      String umaRegisterResourcePath) {
-        m_pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        m_aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
 
-        m_rpt = TUma.requestRpt(this, m_aat, umaRptPath, umaAmHost);
+        rpt = TUma.requestRpt(this, aat, umaRptPath, umaAmHost);
 
-        UmaTestUtil.assert_(m_pat);
-        UmaTestUtil.assert_(m_aat);
-        UmaTestUtil.assert_(m_rpt);
+        UmaTestUtil.assert_(pat);
+        UmaTestUtil.assert_(aat);
+        UmaTestUtil.assert_(rpt);
 
-        m_resourceSet = TUma.registerResourceSet(this, m_pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
-        UmaTestUtil.assert_(m_resourceSet);
+        resourceSet = TUma.registerResourceSet(this, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+        UmaTestUtil.assert_(resourceSet);
     }
 
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost", "umaPermissionPath"})
     public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath) throws Exception {
         final UmaPermission r = new UmaPermission();
-        r.setResourceSetId(m_resourceSet.getId());
+        r.setResourceSetId(resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        m_ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, umaPermissionPath);
-        UmaTestUtil.assert_(m_ticket);
+        ticket = TUma.registerPermission(this, pat, umaAmHost, umaHost, r, umaPermissionPath);
+        UmaTestUtil.assert_(ticket);
     }
 
     @Test(dependsOnMethods = {"registerPermissionForRpt"})
     @Parameters({"umaPermissionAuthorizationPath", "umaAmHost"})
     public void authorizePermission(String umaPermissionAuthorizationPath, String umaAmHost) {
         final RptAuthorizationRequest request = new RptAuthorizationRequest();
-        request.setRpt(m_rpt.getRpt());
-        request.setTicket(m_ticket.getTicket());
+        request.setRpt(rpt.getRpt());
+        request.setTicket(ticket.getTicket());
         request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
-        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, m_aat, request);
+        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, aat, request);
         assertNotNull(response, "Token response status is null");
 
 //        final RptIntrospectionResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
@@ -79,8 +79,8 @@ public class TrustElevationWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_7_requesterAccessProtectedResourceWithEnoughPermissionsRpt"})
     @Parameters({"umaRegisterResourcePath"})
     public void cleanUp(String umaRegisterResourcePath) {
-        if (m_resourceSet != null) {
-            TUma.deleteResourceSet(this, m_pat, umaRegisterResourcePath, m_resourceSet.getId());
+        if (resourceSet != null) {
+            TUma.deleteResourceSet(this, pat, umaRegisterResourcePath, resourceSet.getId());
         }
     }
 

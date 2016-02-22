@@ -30,42 +30,42 @@ import static org.testng.Assert.*;
 
 class TRegisterResourceSet {
 
-    private final BaseTest m_baseTest;
-    private ResourceSetResponse m_registerStatus;
-    private ResourceSetResponse m_modifyStatus;
+    private final BaseTest baseTest;
+    private ResourceSetResponse registerStatus;
+    private ResourceSetResponse modifyStatus;
 
     public TRegisterResourceSet(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
-        m_baseTest = p_baseTest;
+        baseTest = p_baseTest;
     }
 
     public ResourceSetResponse registerResourceSet(final Token p_pat, String umaRegisterResourcePath, ResourceSet p_resourceSet) {
         try {
-            m_registerStatus = registerResourceSetInternal(p_pat, umaRegisterResourcePath, p_resourceSet);
+            registerStatus = registerResourceSetInternal(p_pat, umaRegisterResourcePath, p_resourceSet);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
-        UmaTestUtil.assert_(m_registerStatus);
-        return m_registerStatus;
+        UmaTestUtil.assert_(registerStatus);
+        return registerStatus;
     }
 
     public ResourceSetResponse modifyResourceSet(final Token p_pat, String umaRegisterResourcePath, final String p_rsId,
                                                ResourceSet p_resourceSet) {
         try {
-            m_modifyStatus = modifyResourceSetInternal(p_pat, umaRegisterResourcePath, p_rsId, p_resourceSet);
+            modifyStatus = modifyResourceSetInternal(p_pat, umaRegisterResourcePath, p_rsId, p_resourceSet);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
-        UmaTestUtil.assert_(m_modifyStatus);
-        return m_modifyStatus;
+        UmaTestUtil.assert_(modifyStatus);
+        return modifyStatus;
     }
 
     private ResourceSetResponse registerResourceSetInternal(final Token p_pat, String umaRegisterResourcePath, final ResourceSet p_resourceSet) throws Exception {
         String path = umaRegisterResourcePath;
         System.out.println("Path: " + path);
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, path) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -95,18 +95,18 @@ class TRegisterResourceSet {
 
                 assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
 
-                m_registerStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
+                registerStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
 
-                UmaTestUtil.assert_(m_registerStatus);
+                UmaTestUtil.assert_(registerStatus);
             }
         }.run();
-        return m_registerStatus;
+        return registerStatus;
     }
 
     private ResourceSetResponse modifyResourceSetInternal(final Token p_pat, String umaRegisterResourcePath,
                                                         final String p_rsId, final ResourceSet p_resourceSet) throws Exception {
         String path = umaRegisterResourcePath + "/" + p_rsId + "/";
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.PUT, path) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.PUT, path) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -132,18 +132,18 @@ class TRegisterResourceSet {
                 BaseTest.showResponse("UMA : TRegisterResourceSet.modifyResourceSetInternal() : ", response);
 
                 assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
-                m_modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
+                modifyStatus = TUma.readJsonValue(response.getContentAsString(), ResourceSetResponse.class);
 
-                UmaTestUtil.assert_(m_modifyStatus);
+                UmaTestUtil.assert_(modifyStatus);
             }
         }.run();
-        return m_modifyStatus;
+        return modifyStatus;
     }
 
     public List<String> getResourceSetList(final Token p_pat, String p_umaRegisterResourcePath) {
         final List<String> result = new ArrayList<String>();
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.GET, p_umaRegisterResourcePath) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, p_umaRegisterResourcePath) {
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                     super.prepareRequest(request);
@@ -176,7 +176,7 @@ class TRegisterResourceSet {
     public void deleteResourceSet(final Token p_pat, String p_umaRegisterResourcePath, String p_id) {
         String path = p_umaRegisterResourcePath + "/" + p_id + "/";
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.DELETE, path) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.DELETE, path) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
