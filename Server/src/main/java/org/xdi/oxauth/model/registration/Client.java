@@ -42,7 +42,7 @@ public class Client {
     private String encodedClientSecret;
 
     @LdapAttribute(name = "oxAuthLogoutURI")
-    private String logoutUri;
+    private String[] logoutUri;
 
     @LdapAttribute(name = "oxAuthLogoutSessionRequired")
     private Boolean logoutSessionRequired;
@@ -214,7 +214,7 @@ public class Client {
      *
      * @return logout uri
      */
-    public String getLogoutUri() {
+    public String[] getLogoutUri() {
         return logoutUri;
     }
 
@@ -223,7 +223,7 @@ public class Client {
      *
      * @param logoutUri logout uri
      */
-    public void setLogoutUri(String logoutUri) {
+    public void setLogoutUri(String[] logoutUri) {
         this.logoutUri = logoutUri;
     }
 
