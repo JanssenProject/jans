@@ -105,7 +105,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(LOGOUT_URI.toString()));
-        assertEquals(logoutUri, response.getClaims().get(LOGOUT_URI.toString()));
+        assertTrue(response.getClaims().get(LOGOUT_URI.toString()).contains(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromName(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
