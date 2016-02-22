@@ -1,5 +1,4 @@
 {
-    "mode":"ldap",
     "issuer":"https://%(hostname)s",
     "loginPage":"https://%(hostname)s/oxauth/login",
     "authorizationPage":"https://%(hostname)s/oxauth/authorize",
