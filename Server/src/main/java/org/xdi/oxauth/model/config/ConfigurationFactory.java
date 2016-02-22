@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
@@ -34,6 +31,9 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.properties.FileConfiguration;
+
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -82,9 +82,9 @@ public class ConfigurationFactory {
     private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
     private FileConfiguration ldapConfiguration;
-    private Configuration m_conf;
-    private StaticConf m_staticConf;
-    private JSONWebKeySet m_jwks;
+    private Configuration conf;
+    private StaticConf staticConf;
+    private JSONWebKeySet jwks;
 	private String cryptoConfigurationSalt;
 
     private AtomicBoolean isActive;
@@ -187,11 +187,11 @@ public class ConfigurationFactory {
     }
 
     public Configuration getConfiguration() {
-        return m_conf;
+        return conf;
     }
 
     public StaticConf getStaticConfiguration() {
-        return m_staticConf;
+        return staticConf;
     }
 
     public BaseDnConfiguration getBaseDn() {
@@ -199,7 +199,7 @@ public class ConfigurationFactory {
     }
 
     public JSONWebKeySet getWebKeys() {
-        return m_jwks;
+        return jwks;
     }
 
     public ErrorMessages getErrorResponses() {
@@ -221,7 +221,7 @@ public class ConfigurationFactory {
         final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
         if (webKeysFromFile != null) {
             LOG.info("Reloaded web keys from file: " + webKeysFilePath);
-            m_jwks = webKeysFromFile;
+            jwks = webKeysFromFile;
             return true;
         } else {
             LOG.error("Failed to load web keys configuration from file: " + webKeysFilePath);
@@ -234,7 +234,7 @@ public class ConfigurationFactory {
         final StaticConf staticConfFromFile = loadStaticConfFromFile();
         if (staticConfFromFile != null) {
             LOG.info("Reloaded static conf from file: " + staticConfFilePath);
-            m_staticConf = staticConfFromFile;
+            staticConf = staticConfFromFile;
             return true;
         } else {
             LOG.error("Failed to load static configuration from file: " + staticConfFilePath);
@@ -261,7 +261,7 @@ public class ConfigurationFactory {
         final Configuration configFromFile = loadConfFromFile();
         if (configFromFile != null) {
             LOG.info("Reloaded configuration from file: " + configFilePath);
-            m_conf = configFromFile;
+            conf = configFromFile;
             return true;
         } else {
             LOG.error("Failed to load configuration from file: " + configFilePath);
@@ -319,7 +319,7 @@ public class ConfigurationFactory {
         try {
             final JSONWebKeySet k = ServerUtil.createJsonMapper().readValue(p_webKeys, JSONWebKeySet.class);
             if (k != null) {
-            	m_jwks = k;
+            	jwks = k;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -330,7 +330,7 @@ public class ConfigurationFactory {
         try {
             final StaticConf c = ServerUtil.createJsonMapper().readValue(p_statics, StaticConf.class);
             if (c != null) {
-            	m_staticConf = c;
+            	staticConf = c;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -341,7 +341,7 @@ public class ConfigurationFactory {
         try {
             final Configuration c = ServerUtil.createJsonMapper().readValue(p_configurationJson, Configuration.class);
             if (c != null) {
-            	m_conf = c;
+            	conf = c;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

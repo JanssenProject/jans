@@ -29,15 +29,15 @@ import java.util.Set;
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
-    private final IAuthorizationGrant m_grant;
+    private final IAuthorizationGrant grant;
 
-    public UnmodifiableAuthorizationGrant(IAuthorizationGrant p_grant) {
-        m_grant = p_grant;
+    public UnmodifiableAuthorizationGrant(IAuthorizationGrant grant) {
+        this.grant = grant;
     }
 
     @Override
     public String getGrantId() {
-        return m_grant.getGrantId();
+        return grant.getGrantId();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public AuthorizationCode getAuthorizationCode() {
-        return m_grant.getAuthorizationCode();
+        return grant.getAuthorizationCode();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public String getNonce() {
-        return m_grant.getNonce();
+        return grant.getNonce();
     }
 
     @Override
@@ -89,17 +89,17 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public RefreshToken getRefreshToken(String refreshTokenCode) {
-        return m_grant.getRefreshToken(refreshTokenCode);
+        return grant.getRefreshToken(refreshTokenCode);
     }
 
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
-        return m_grant.getAccessToken(tokenCode);
+        return grant.getAccessToken(tokenCode);
     }
 
     @Override
     public boolean isValid() {
-        return m_grant.isValid();
+        return grant.isValid();
     }
 
     @Override
@@ -119,62 +119,62 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public User getUser() {
-        return m_grant.getUser();
+        return grant.getUser();
     }
 
     @Override
     public String getUserId() {
-        return m_grant.getUserId();
+        return grant.getUserId();
     }
 
     @Override
     public String getUserDn() {
-        return m_grant.getUserDn();
+        return grant.getUserDn();
     }
 
     @Override
     public AuthorizationGrantType getAuthorizationGrantType() {
-        return m_grant.getAuthorizationGrantType();
+        return grant.getAuthorizationGrantType();
     }
 
     @Override
     public String getClientId() {
-        return m_grant.getClientId();
+        return grant.getClientId();
     }
 
     @Override
     public Client getClient() {
-        return m_grant.getClient();
+        return grant.getClient();
     }
 
     @Override
     public String getClientDn() {
-        return m_grant.getClientDn();
+        return grant.getClientDn();
     }
 
     @Override
     public List<AccessToken> getAccessTokens() {
-        return m_grant.getAccessTokens();
+        return grant.getAccessTokens();
     }
 
     @Override
     public Set<String> getScopes() {
-        return m_grant.getScopes();
+        return grant.getScopes();
     }
 
     @Override
     public Set<String> getRefreshTokensCodes() {
-        return m_grant.getRefreshTokensCodes();
+        return grant.getRefreshTokensCodes();
     }
 
     @Override
     public Set<String> getAccessTokensCodes() {
-        return m_grant.getAccessTokensCodes();
+        return grant.getAccessTokensCodes();
     }
 
     @Override
     public List<RefreshToken> getRefreshTokens() {
-        return m_grant.getRefreshTokens();
+        return grant.getRefreshTokens();
     }
 
     @Override
@@ -184,17 +184,17 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public AccessToken getLongLivedAccessToken() {
-        return m_grant.getLongLivedAccessToken();
+        return grant.getLongLivedAccessToken();
     }
 
     @Override
     public IdToken getIdToken() {
-        return m_grant.getIdToken();
+        return grant.getIdToken();
     }
 
     @Override
     public JwtAuthorizationRequest getJwtAuthorizationRequest() {
-        return m_grant.getJwtAuthorizationRequest();
+        return grant.getJwtAuthorizationRequest();
     }
 
     @Override
@@ -204,12 +204,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public Date getAuthenticationTime() {
-        return m_grant.getAuthenticationTime();
+        return grant.getAuthenticationTime();
     }
 
     @Override
     public TokenLdap getTokenLdap() {
-        return m_grant.getTokenLdap();
+        return grant.getTokenLdap();
     }
 
     @Override
@@ -239,7 +239,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public String getAcrValues() {
-        return m_grant.getAcrValues();
+        return grant.getAcrValues();
     }
 
     @Override
