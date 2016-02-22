@@ -210,8 +210,11 @@ public class OperationsFacade {
 			searchRequest = new SearchRequest(dn, scope, filter, attributes);
 		}
 
-		if (sizeLimit > 0) {
-			searchRequest.setSizeLimit(sizeLimit);
+		boolean useSizeLimit = sizeLimit > 0;
+
+		if (useSizeLimit) {
+			// Use paged result to limit search
+			searchLimit = sizeLimit;
 		}
 
 		SearchResult searchResult = null;
@@ -236,6 +239,10 @@ public class OperationsFacade {
 					}
 				} catch (LDAPException ex) {
 					log.error("Error while accessing cookies" + ex.getMessage());
+				}
+				
+				if (useSizeLimit) {
+					break;
 				}
 			} while ((cookie != null) && (cookie.getValueLength() > 0));
 			SearchResult searchResultTemp = searchResultList.get(0);
