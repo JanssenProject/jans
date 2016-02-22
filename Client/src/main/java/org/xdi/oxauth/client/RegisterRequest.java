@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -46,7 +45,7 @@ public class RegisterRequest extends BaseRequest {
     private String logoUri;
     private String clientUri;
     private String policyUri;
-    private String logoutUri;
+    private List<String> logoutUris;
     private Boolean logoutSessionRequired;
     private String tosUri;
     private String jwksUri;
@@ -145,17 +144,17 @@ public class RegisterRequest extends BaseRequest {
      *
      * @return logout uri
      */
-    public String getLogoutUri() {
-        return logoutUri;
+    public List<String> getLogoutUris() {
+        return logoutUris;
     }
 
     /**
      * Sets logout uri
      *
-     * @param logoutUri logout uri
+     * @param logoutUris logout uri
      */
-    public void setLogoutUri(String logoutUri) {
-        this.logoutUri = logoutUri;
+    public void setLogoutUris(List<String> logoutUris) {
+        this.logoutUris = logoutUris;
     }
 
     /**
@@ -922,8 +921,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
         }
-        if (!Strings.isNullOrEmpty(logoutUri)) {
-            parameters.put(LOGOUT_URI.toString(), logoutUri);
+        if (logoutUris != null && !logoutUris.isEmpty()) {
+            parameters.put(LOGOUT_URI.toString(), toJSONArray(logoutUris).toString());
         }
         if (logoutSessionRequired != null) {
             parameters.put(LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());
@@ -1057,6 +1056,14 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> logoutUris = new ArrayList<String>();
+        if (requestObject.has(LOGOUT_URI.toString())) {
+            JSONArray logoutUriJsonArray = requestObject.getJSONArray(LOGOUT_URI.toString());
+            for (int i = 0; i < logoutUriJsonArray.length(); i++) {
+                logoutUris.add(logoutUriJsonArray.getString(i));
+            }
+        }
+
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
         result.setFederationUrl(requestObject.optString(FEDERATION_METADATA_URL.toString()));
@@ -1066,7 +1073,7 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
-        result.setLogoutUri(requestObject.optString(LOGOUT_URI.toString()));
+        result.setLogoutUris(logoutUris);
         result.setLogoutSessionRequired(requestObject.optBoolean(LOGOUT_SESSION_REQUIRED.toString()));
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
@@ -1206,8 +1213,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
-        if (!Strings.isNullOrEmpty(logoutUri)) {
-            parameters.put(LOGOUT_URI.toString(), logoutUri);
+        if (logoutUris != null && !logoutUris.isEmpty()) {
+            parameters.put(LOGOUT_URI.toString(), toJSONArray(logoutUris));
         }
         if (logoutSessionRequired != null) {
             parameters.put(LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());

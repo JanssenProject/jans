@@ -182,6 +182,15 @@ public class RegisterParamsValidator {
         return true;
     }
 
+    public static void validateLogoutUri(List<String> logoutUris, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
+        if (logoutUris == null || logoutUris.isEmpty()) { // logout uri is optional so null or empty list is valid
+            return;
+        }
+        for (String logoutUri : logoutUris) {
+            validateLogoutUri(logoutUri, redirectUris, errorResponseFactory);
+        }
+    }
+
     public static void validateLogoutUri(String logoutUri, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
         if (Strings.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
             return;
