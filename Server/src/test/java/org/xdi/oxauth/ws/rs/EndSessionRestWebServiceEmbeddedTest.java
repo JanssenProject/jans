@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -67,7 +68,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
                     registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-                    registerRequest.setLogoutUri(postLogoutRedirectUri);
+                    registerRequest.setLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
