@@ -137,12 +137,16 @@
                 <groupId>org.xdi</groupId>
                 <artifactId>oxTomcat</artifactId>
                 <version>${oxCore.version}</version>
-				<exclusions>
-				    <exclusion>
-				        <groupId>*</groupId>
-				        <artifactId>*</artifactId>
-				    </exclusion>
-				</exclusions>
+	            <exclusions>
+	            	<exclusion>
+	            		<artifactId>tomcat-catalina</artifactId>
+	            		<groupId>org.apache.tomcat</groupId>
+	            	</exclusion>
+	            	<exclusion>
+	            		<artifactId>tomcat-coyote</artifactId>
+	            		<groupId>org.apache.tomcat</groupId>
+	            	</exclusion>
+	            </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jettison</groupId>
