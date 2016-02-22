@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
@@ -50,6 +51,9 @@ public class U2fRegistrationWS {
 	private Log log;
 
 	@In
+	private UserService userService;
+
+	@In
 	private ErrorResponseFactory errorResponseFactory;
 
 	@In
@@ -66,8 +70,19 @@ public class U2fRegistrationWS {
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		try {
 			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
-			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userName);
-			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, userName, sessionState);
+
+			String userInum = null;
+
+			boolean twoStep = StringHelper.isNotEmpty(userName);
+			if (twoStep) {
+				userInum = userService.getUserInum(userName);
+				if (StringHelper.isEmpty(userInum)) {
+					throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+				}
+			}
+
+			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userInum);
+			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, userInum, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -102,17 +117,17 @@ public class U2fRegistrationWS {
 			}
 			u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
-			String foundUserName = registerRequestMessageLdap.getUserName();
-			boolean oneStep = StringHelper.isEmpty(foundUserName);
+			String foundUserInum = registerRequestMessageLdap.getUserInum();
+			boolean oneStep = StringHelper.isEmpty(foundUserInum);
 
 			RegisterRequestMessage registerRequestMessage = registerRequestMessageLdap.getRegisterRequestMessage();
-			DeviceRegistration deviceRegistration = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, foundUserName);
+			DeviceRegistration deviceRegistration = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, foundUserInum);
 			
 			// If sessionState is not empty update session
 			sessionState = registerRequestMessageLdap.getSessionState();
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserName, deviceRegistration, true, oneStep);
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistration, true, oneStep);
 			}
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);

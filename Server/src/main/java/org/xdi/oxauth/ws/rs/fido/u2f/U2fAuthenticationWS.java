@@ -79,19 +79,25 @@ public class U2fAuthenticationWS {
 				throw new BadInputException(String.format("The request should contains either username or keyhandle"));
 			}
 
+			String foundUserInum = null;
+
 			boolean oneStep = StringHelper.isEmpty(userName);
-			String foundUserName = userName;
 			if (oneStep) {
 				// Convert to non padding URL base64 string
 				String keyHandleWithoutPading = Base64Util.base64urlencode(Base64Util.base64urldecode(keyHandle));
 
 				// In one step we expects empty username and not empty keyhandle
-				String userInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
-				foundUserName = userService.getUserNameByInum(userInum);
+				foundUserInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
+			} else {
+				foundUserInum = userService.getUserInum(userName);
 			}
 
-			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, foundUserName);
-			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage, foundUserName, sessionState);
+			if (StringHelper.isEmpty(foundUserInum)) {
+				throw new BadInputException(String.format("Failed to find user by userName '%s' or keyHandle '%s' in LDAP", userName, keyHandle));
+			}
+
+			AuthenticateRequestMessage authenticateRequestMessage = u2fAuthenticationService.buildAuthenticateRequestMessage(appId, foundUserInum);
+			u2fAuthenticationService.storeAuthenticationRequestMessage(authenticateRequestMessage, foundUserInum, sessionState);
 
 			// convert manually to avoid possible conflict between resteasy
 			// providers, e.g. jettison, jackson
@@ -134,15 +140,15 @@ public class U2fAuthenticationWS {
 
 			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
 
-			boolean oneStep = StringHelper.isEmpty(userName);
-			String foundUserName = authenticateRequestMessageLdap.getUserName();
-
-			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserName);
+			String foundUserInum = authenticateRequestMessageLdap.getUserInum();
+			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserInum);
 
 			// If sessionState is not empty update session
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserName, deviceRegistration, false, oneStep);
+
+				boolean oneStep = StringHelper.isEmpty(userName);
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistration, false, oneStep);
 			}
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
