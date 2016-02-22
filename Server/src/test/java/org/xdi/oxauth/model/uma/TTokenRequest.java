@@ -35,12 +35,12 @@ import static org.testng.Assert.*;
 
 class TTokenRequest {
 
-    private final BaseTest m_baseTest;
-    private final Token m_token = new Token();
+    private final BaseTest baseTest;
+    private final Token token = new Token();
 
     public TTokenRequest(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
-        m_baseTest = p_baseTest;
+        baseTest = p_baseTest;
     }
 
     public Token pat(final String authorizePath, final String tokenPath,
@@ -63,7 +63,7 @@ class TTokenRequest {
         }
         final Holder<Token> t = new Holder<Token>();
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, tokenPath) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -133,8 +133,8 @@ class TTokenRequest {
             fail(e.getMessage());
         }
 
-        UmaTestUtil.assert_(m_token);
-        return m_token;
+        UmaTestUtil.assert_(token);
+        return token;
     }
 
     private void requestAuthorizationCode(final String authorizePath,
@@ -148,7 +148,7 @@ class TTokenRequest {
                                           final String userId, final String userSecret,
                                           final String umaClientId, final String umaRedirectUri,
                                           final String p_scopeType) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, authorizePath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -205,8 +205,8 @@ class TTokenRequest {
                         assertNotNull(params.get("scope"), "The scope is null");
                         assertNotNull(params.get("state"), "The state is null");
 
-                        m_token.setAuthorizationCode(params.get("code"));
-                        m_token.setScope(params.get("scope"));
+                        token.setAuthorizationCode(params.get("code"));
+                        token.setScope(params.get("scope"));
                     } catch (Exception e) {
                         e.printStackTrace();
                         fail(e.getMessage());
@@ -219,23 +219,23 @@ class TTokenRequest {
     private void requestToken(final String tokenPath,
                               final String umaClientId, final String umaClientSecret,
                               final String umaRedirectUri) throws Exception {
-        if (m_token == null || StringUtils.isBlank(m_token.getAuthorizationCode())) {
+        if (token == null || StringUtils.isBlank(token.getAuthorizationCode())) {
             throw new IllegalArgumentException("Authorization code is not initialized.");
         }
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, tokenPath) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
                 TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setCode(m_token.getAuthorizationCode());
+                tokenRequest.setCode(token.getAuthorizationCode());
                 tokenRequest.setRedirectUri(umaRedirectUri);
                 tokenRequest.setAuthUsername(umaClientId);
                 tokenRequest.setAuthPassword(umaClientSecret);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-                tokenRequest.setScope(m_token.getScope());
+                tokenRequest.setScope(token.getScope());
 
                 request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
                 request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
@@ -260,8 +260,8 @@ class TTokenRequest {
                     String refreshToken = jsonObj.getString("refresh_token");
 //                    String idToken = jsonObj.getString("id_token");
 
-                    m_token.setAccessToken(accessToken);
-                    m_token.setRefreshToken(refreshToken);
+                    token.setAccessToken(accessToken);
+                    token.setRefreshToken(refreshToken);
 //                    m_token.setIdToken(idToken);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -278,7 +278,7 @@ class TTokenRequest {
         final Holder<RPTResponse> h = new Holder<RPTResponse>();
 
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_rptPath) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, p_rptPath) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -326,7 +326,7 @@ class TTokenRequest {
         final Holder<RptIntrospectionResponse> h = new Holder<RptIntrospectionResponse>();
 
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, p_umaRptStatusPath) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, p_umaRptStatusPath) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {

@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.client;
 
-import java.util.List;
-
 import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationMetadata;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,23 +18,23 @@ import org.xdi.oxauth.model.federation.FederationMetadata;
 
 public class FederationMetadataResponse extends BaseResponseWithErrors<FederationErrorResponseType> {
 
-    private List<String> m_existingMetadataIdList;
-    private FederationMetadata m_metadata;
+    private List<String> existingMetadataIdList;
+    private FederationMetadata metadata;
 
     public FederationMetadata getMetadata() {
-        return m_metadata;
+        return metadata;
     }
 
     public void setMetadata(FederationMetadata p_metadata) {
-        m_metadata = p_metadata;
+        metadata = p_metadata;
     }
 
     public List<String> getExistingMetadataIdList() {
-        return m_existingMetadataIdList;
+        return existingMetadataIdList;
     }
 
     public void setExistingMetadataIdList(List<String> p_existingMetadataIdList) {
-        m_existingMetadataIdList = p_existingMetadataIdList;
+        existingMetadataIdList = p_existingMetadataIdList;
     }
 
     @Override
