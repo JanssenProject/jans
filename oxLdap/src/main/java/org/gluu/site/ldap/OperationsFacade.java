@@ -183,7 +183,7 @@ public class OperationsFacade {
 	 */
 	protected String lookupDnByUid(String uid, String baseDN) throws LDAPSearchException {
 		Filter filter = Filter.createEqualityFilter(OperationsFacade.uid, uid);
-		SearchResult searchResult = search(baseDN, filter, 1);
+		SearchResult searchResult = search(baseDN, filter, 1, 1);
 		if ((searchResult != null) && searchResult.getEntryCount() > 0) {
 			return searchResult.getSearchEntries().get(0).getDN();
 		}
@@ -191,16 +191,16 @@ public class OperationsFacade {
 		return null;
 	}
 
-	public SearchResult search(String dn, Filter filter, int sizeLimit) throws LDAPSearchException {
-		return search(dn, filter, sizeLimit, null, (String[]) null);
+	public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws LDAPSearchException {
+		return search(dn, filter, searchLimit, sizeLimit, null, (String[]) null);
 	}
 
-	public SearchResult search(String dn, Filter filter, int sizeLimit, Control[] controls, String... attributes)
+	public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
-		return search(dn, filter, SearchScope.SUB, sizeLimit, controls, attributes);
+		return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
 	}
 
-	public SearchResult search(String dn, Filter filter, SearchScope scope, int sizeLimit, Control[] controls, String... attributes)
+	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
 
@@ -210,14 +210,19 @@ public class OperationsFacade {
 			searchRequest = new SearchRequest(dn, scope, filter, attributes);
 		}
 
+		if (sizeLimit > 0) {
+			searchRequest.setSizeLimit(sizeLimit);
+		}
+
 		SearchResult searchResult = null;
 		List<SearchResult> searchResultList = new ArrayList<SearchResult>();
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
-		if (sizeLimit > 0) {
+		
+		if (searchLimit > 0) {
 			ASN1OctetString cookie = null;
 			do {
-				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(sizeLimit, cookie) });
+				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
 				searchResult = getConnectionPool().search(searchRequest);
 				searchResultList.add(searchResult);

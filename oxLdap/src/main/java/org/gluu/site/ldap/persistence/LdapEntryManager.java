@@ -254,7 +254,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> findEntries(Object entry, int sizeLimit) {
+	public <T> List<T> findEntries(Object entry, int searchLimit) {
 		if (entry == null) {
 			throw new MappingException("Entry to find is null");
 		}
@@ -269,7 +269,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 		Filter searchFilter = createFilterByEntry(entry, entryClass, attributes);
 
-		return findEntries(dnValue.toString(), entryClass, searchFilter, null, sizeLimit);
+		return findEntries(dnValue.toString(), entryClass, searchFilter, null, searchLimit);
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter) {
@@ -280,11 +280,19 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return findEntries(baseDN, entryClass, filter, ldapReturnAttributes, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, null, sizeLimit);
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int searchLimit) {
+		return findEntries(baseDN, entryClass, filter, null, searchLimit, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit) {
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int searchLimit, int sizeLimit) {
+		return findEntries(baseDN, entryClass, filter, null, searchLimit, sizeLimit);
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int searchLimit) {
+		return findEntries(baseDN, entryClass, filter, ldapReturnAttributes, searchLimit, 0); 
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -307,7 +315,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
@@ -364,7 +372,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, 1, null, ldapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, 1, 1, null, ldapReturnAttributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
@@ -540,7 +548,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		do {
 			Control[] controls = new Control[] { new SimplePagedResultsControl(100, cookie) };
 			try {
-				searchResult = this.ldapOperationService.search(baseDN, searchFilter, 0, controls, ldapReturnAttributes);
+				searchResult = this.ldapOperationService.search(baseDN, searchFilter, 0, 0, controls, ldapReturnAttributes);
 				if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 					throw new EntryPersistenceException(String.format("Failed to calculate count entries with baseDN: %s, filter: %s",
 							baseDN, searchFilter));
@@ -871,7 +879,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	public List<String[]> getLDIF(String dn, String[] attributes) {
 		SearchResult searchResult;
 		try {
-			searchResult = this.ldapOperationService.search(dn, Filter.create("objectclass=*"), SearchScope.BASE, -1, null, attributes);
+			searchResult = this.ldapOperationService.search(dn, Filter.create("objectclass=*"), SearchScope.BASE, -1, 0, null, attributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s", dn));
 			}
@@ -895,7 +903,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
 		SearchResult searchResult;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, -1, null, attributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, -1, 0, null, attributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
@@ -919,21 +927,6 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 	public int getSupportedLDAPVersion() {
 		return this.ldapOperationService.getSupportedLDAPVersion();
-	}
-
-	/**
-	 * @param dnForPerson
-	 * @param class1
-	 * @param attribute
-	 */
-	public <T> void  removeAttributeFromEntries(String baseDN, Class<T> entryClass, String attributeName) {
-		try {
-			SearchResult searchResult = this.ldapOperationService.search(baseDN, null, 0, null, "dn");
-		} catch (LDAPSearchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
 }
