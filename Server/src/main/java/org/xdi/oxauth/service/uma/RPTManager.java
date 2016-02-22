@@ -11,15 +11,19 @@ import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import java.util.ArrayList;
@@ -42,6 +46,11 @@ public class RPTManager extends AbstractRPTManager {
     private static final Log LOG = Logging.getLog(RPTManager.class);
 
     private final LdapEntryManager ldapEntryManager;
+
+    @In
+    private TokenService tokenService;
+    @In
+    private AuthorizationGrantList authorizationGrantList;
 
     public RPTManager() {
         ldapEntryManager = ServerUtil.getLdapManager();
@@ -140,7 +149,13 @@ public class RPTManager extends AbstractRPTManager {
 
     @Override
     public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
-        throw new UnsupportedOperationException("We don't need this method implementation in delegated manager");
+        String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+        IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
+
+        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken, isGat);
+
+        addRPT(rpt, authorizationGrant.getClientDn());
+        return rpt;
     }
 
     @Override
