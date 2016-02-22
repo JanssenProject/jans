@@ -75,14 +75,9 @@ public class AuthenticationService extends RequestService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userName) throws BadInputException, NoEligableDevicesException {
+	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
-		}
-
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
 		}
 
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
@@ -124,18 +119,13 @@ public class AuthenticationService extends RequestService {
 		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getKeyHandle());
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName)
+	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum)
 			throws BadInputException, DeviceCompromisedException {
-		return finishAuthentication(requestMessage, response, userName, null);
+		return finishAuthentication(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName, Set<String> facets)
+	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum, Set<String> facets)
 			throws BadInputException, DeviceCompromisedException {
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
-		}
-
 		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, requestMessage.getAppId());
 
 		final AuthenticateRequest request = getAuthenticateRequest(requestMessage, response);
@@ -184,12 +174,12 @@ public class AuthenticationService extends RequestService {
 		throw new BadInputException("Responses keyHandle does not match any contained request");
 	}
 
-	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String userName, String sessionState) {
+	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String userInum, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String authenticateRequestMessageId = UUID.randomUUID().toString();
 
 		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(getDnForAuthenticateRequestMessage(authenticateRequestMessageId),
-				authenticateRequestMessageId, now, sessionState, userName, requestMessage);
+				authenticateRequestMessageId, now, sessionState, userInum, requestMessage);
 
 		ldapEntryManager.persist(authenticateRequestMessageLdap);
 	}

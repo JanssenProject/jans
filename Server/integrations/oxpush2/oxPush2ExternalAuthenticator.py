@@ -108,8 +108,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 context.set("oxpush2_count_login_steps", 1)
 
-                user_name = session_device_status['user_name']
-                user_inum = userService.getUserInum(user_name)
+                user_inum = session_device_status['user_inum']
 
                 u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id, "oxId")
                 if u2f_device == None:
@@ -328,11 +327,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Validate session device status. There is no one step u2f_device '%s'" % u2f_device_id
                 return False
         else:
-            if session_device_status['one_step']:
-                user_name = session_device_status['user_name']
-
             # Validate if user has specified device_id enrollment
             user_inum = userService.getUserInum(user_name)
+
+            if session_device_status['one_step']:
+                user_inum = session_device_status['user_inum']
     
             u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id)
             if u2f_device == None:
@@ -367,9 +366,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Get session device status. There is no u2f_device associated with this request"
             return None
 
-        # Try to find user_name in session attribute
-        if not session_attributes.containsKey("oxpush2_u2f_device_user_name"):
-            print "oxPush2. Get session device status. There is no user_name associated with this request"
+        # Try to find user_inum in session attribute
+        if not session_attributes.containsKey("oxpush2_u2f_device_user_inum"):
+            print "oxPush2. Get session device status. There is no user_inum associated with this request"
             return None
         
         enroll = False
@@ -384,7 +383,7 @@ class PersonAuthentication(PersonAuthenticationType):
         u2f_device_id = session_attributes.get("oxpush2_u2f_device_id")
         user_name = session_attributes.get("oxpush2_u2f_device_user_name")
 
-        session_device_status = {"oxpush2_request": oxpush2_request, "device_id": u2f_device_id, "user_name" : user_name, "enroll" : enroll, "one_step" : one_step}
+        session_device_status = {"oxpush2_request": oxpush2_request, "device_id": u2f_device_id, "user_inum" : user_inum, "enroll" : enroll, "one_step" : one_step}
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
         
         return session_device_status
