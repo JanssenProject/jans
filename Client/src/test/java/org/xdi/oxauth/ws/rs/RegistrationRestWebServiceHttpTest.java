@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONArray;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -76,7 +77,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
-        registerRequest.setLogoutUri(logoutUri);
+        registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
