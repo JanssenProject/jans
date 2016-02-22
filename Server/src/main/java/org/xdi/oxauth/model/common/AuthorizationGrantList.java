@@ -43,9 +43,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
 
-    private final GrantService grantServive;
-    private final UserService userService;
-    private final ClientService clientService;
+    final GrantService grantServive;
+    final UserService userService;
+    final ClientService clientService;
 
     private AuthorizationGrantList() {
         grantServive = GrantService.instance();
