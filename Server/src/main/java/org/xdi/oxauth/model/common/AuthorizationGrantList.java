@@ -47,7 +47,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     final UserService userService;
     final ClientService clientService;
 
-    private AuthorizationGrantList() {
+    public AuthorizationGrantList() {
         grantServive = GrantService.instance();
         userService = (UserService) Component.getInstance(UserService.class);
         clientService = (ClientService) Component.getInstance(ClientService.class);
