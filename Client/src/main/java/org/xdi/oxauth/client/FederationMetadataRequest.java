@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.client;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,31 +18,31 @@ import org.apache.commons.lang.StringUtils;
 
 public class FederationMetadataRequest extends BaseRequest {
 
-    private String m_federationId;
-    private boolean m_signed = true;
+    private String federationId;
+    private boolean signed = true;
 
     public FederationMetadataRequest() {
         this("");
     }
 
     public FederationMetadataRequest(String p_federationId) {
-        m_federationId = p_federationId;
+        federationId = p_federationId;
     }
 
     public boolean isSigned() {
-        return m_signed;
+        return signed;
     }
 
     public void setSigned(boolean p_signed) {
-        m_signed = p_signed;
+        signed = p_signed;
     }
 
     public String getFederationId() {
-        return m_federationId;
+        return federationId;
     }
 
     public void setFederationId(String p_federationId) {
-        m_federationId = p_federationId;
+        federationId = p_federationId;
     }
 
     /**
@@ -56,11 +56,11 @@ public class FederationMetadataRequest extends BaseRequest {
         final StringBuilder sb = new StringBuilder();
 
         try {
-            if (StringUtils.isNotBlank(m_federationId)) {
-                sb.append("federation_id=").append(URLEncoder.encode(m_federationId, "UTF-8"));
+            if (StringUtils.isNotBlank(federationId)) {
+                sb.append("federation_id=").append(URLEncoder.encode(federationId, "UTF-8"));
             }
-            if (!m_signed) {
-                sb.append("&signed=").append(URLEncoder.encode(Boolean.valueOf(m_signed).toString(), "UTF-8"));
+            if (!signed) {
+                sb.append("&signed=").append(URLEncoder.encode(Boolean.valueOf(signed).toString(), "UTF-8"));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
