@@ -192,7 +192,7 @@ public class FederationDataService {
                 } else {
                     filter = Filter.create(String.format("&(%s)(oxAuthFederationTrustStatus=%s)", createFilter(p_redirectUri), p_status.getValue()));
                 }
-                final List<FederationTrust> result = ldapEntryManager.findEntries(baseDn, FederationTrust.class, filter, 100);
+                final List<FederationTrust> result = ldapEntryManager.findEntries(baseDn, FederationTrust.class, filter, 0, 100);
                 if (result != null) {
                     return result;
                 }
