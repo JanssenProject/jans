@@ -9,6 +9,7 @@
 
 override_dh_auto_build:
 		mvn clean package -Dmaven.test.skip=true
+#		mvn clean install -U -Dmaven.test.skip=true
 override_dh_auto_install:
 		mkdir -p debian/gluu-oxd-server/opt/oxd-server/conf/
 		mkdir -p debian/gluu-oxd-server/opt/oxd-server/bin/
