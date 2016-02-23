@@ -381,7 +381,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         
         oxpush2_request = session_attributes.get("oxpush2_request")
         u2f_device_id = session_attributes.get("oxpush2_u2f_device_id")
-        user_name = session_attributes.get("oxpush2_u2f_device_user_name")
+        user_inum = session_attributes.get("oxpush2_u2f_device_user_inum")
 
         session_device_status = {"oxpush2_request": oxpush2_request, "device_id": u2f_device_id, "user_inum" : user_inum, "enroll" : enroll, "one_step" : one_step}
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
