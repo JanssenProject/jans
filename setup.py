@@ -586,6 +586,7 @@ class Setup(object):
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/oxpush2_creds.json" % self.install_dir, "%s/" % self.certFolder)
 
     def createDirs(self, name):
         try:
