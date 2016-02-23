@@ -253,8 +253,12 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return findEntries(entry, 0);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> List<T> findEntries(Object entry, int searchLimit) {
+		return findEntries(entry, searchLimit, 0);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> List<T> findEntries(Object entry, int searchLimit, int sizeLimit) {
 		if (entry == null) {
 			throw new MappingException("Entry to find is null");
 		}
