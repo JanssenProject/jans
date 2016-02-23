@@ -44,7 +44,7 @@ public class AttributeService {
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
     	  String[] targetArray = new String[] { attributeValue };
     	  Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
-    	  List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter, 0);
+    	  List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
     	  return result;
     }
     
