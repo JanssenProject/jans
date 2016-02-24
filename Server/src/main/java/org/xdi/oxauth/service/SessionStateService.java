@@ -148,10 +148,10 @@ public class SessionStateService {
 
     public String getSessionStateFromCookie() {
         try {
-		    FacesContext facesContext = FacesContext.getCurrentInstance();
-		    if (facesContext == null) {
-		    	return null;
-		    }
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            if (facesContext == null) {
+                return null;
+            }
             final HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
             return getSessionStateFromCookie(request);
         } catch (Exception e) {
@@ -165,15 +165,14 @@ public class SessionStateService {
         try {
             final Object response = FacesContext.getCurrentInstance().getExternalContext().getResponse();
             if (response instanceof HttpServletResponse) {
-                final Cookie sessionStateCookie = new Cookie(SESSION_STATE_COOKIE_NAME, sessionState);
-                sessionStateCookie.setPath("/");
-
-                // ATTENTION : we have to set also HttpOnly flag but it's supported from Servlet 3.0
-                // we need to upgrade to Servlet 3.0 and target to Tomcat 7 : http://tomcat.apache.org/whichversion.html
-                // sessionStateCookie.setSecure(true);
-                // sessionStateCookie.setHttpOnly(true);
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
-                httpResponse.addCookie(sessionStateCookie);
+
+                // Create the special cookie header with secure flag but not HttpOnly because the session_state
+                // needs to be read from the OP iframe using JavaScript
+                String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
+                header += "; Path=/";
+                header += "; Secure";
+                httpResponse.addHeader("Set-Cookie", header);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
