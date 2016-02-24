@@ -65,7 +65,7 @@ objectClass: oxAsimbaIDP
 objectClass: top
 friendlyname: Gluu Server CE
 inum: @!2B96.42E9.2953.68ED!0002!D21C.8343!EEDB.B1D4.DFBF.3A38.21EE.2B81.2510.2CC8
-oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!EEDB.B1D4.DFBF.3A38.21EE.2B81.2510.2CC8","id":"https://ce.gluu.info/idp/shibboleth","sourceId":null,"friendlyName":"Gluu Server CE","metadataUrl":"https://ce.gluu.info/idp/shibboleth","metadataTimeout":-1,"metadataFile":"","enabled":true,"acsIndex":true,"scoping":false,"nameIdPolicy":false,"allowCreate":true,"nameIdFormat":null,"avoidSubjectConfirmations":false,"disableSSOForIDP":false,"lastModified":1455524023953,"identificationURL":null}
+oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!EEDB.B1D4.DFBF.3A38.21EE.2B81.2510.2CC8","id":"https://ce.gluu.info/idp/shibboleth","sourceId":null,"friendlyName":"Gluu Server CE","metadataUrl":"https://ce.gluu.info/idp/shibboleth","metadataTimeout":-1,"metadataFile":"","enabled":true,"acsIndex":true,"scoping":false,"nameIdPolicy":false,"allowCreate":true,"nameIdFormat":null,"avoidSubjectConfirmations":false,"disableSSOForIDP":false,"lastModified":1455524023953}
 uniqueIdentifier: https://ce.gluu.info/idp/shibboleth
 
 dn: inum=@!2B96.42E9.2953.68ED!0002!D21C.8343!1975.CC4F.ACC1.A803.A40D.AEC1.1C3A.285D,ou=requestorpools,ou=oxasimba,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
