@@ -16,9 +16,9 @@
             var session_state = message.split(' ')[1];
 
             var salt = session_state.split('.')[1];
-            var opbs = getCookie("opbs");
+            var op_browser_state = getCookie("session_state");
 
-            var ss = CryptoJS.SHA256(client_id + ' ' + e.origin + ' ' + opbs + ' ' + salt) + "." + salt;
+            var ss = CryptoJS.SHA256(client_id + ' ' + e.origin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
 
             if (session_state == ss) {
                 stat = "unchanged";
