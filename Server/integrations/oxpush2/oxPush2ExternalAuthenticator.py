@@ -441,7 +441,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return
 
         user_name = user.getUserId()
-        print "oxPush2. Send push notification. Loading user '%s' devices" % user.getUserId()
+        print "oxPush2. Send push notification. Loading user '%s' devices" % user_name
 
         send_notification = False
         send_notification_result = True
@@ -462,6 +462,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 platform = device_data.getPlatform()
                 push_token = device_data.getPushToken()
+                debug = False
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
@@ -477,6 +478,8 @@ class PersonAuthentication(PersonAuthenticationType):
                         additional_fields.put("request", oxpush2_request)
 
                         send_notification_result = self.pushAppleService.sendPush(title, message, additional_fields, push_token)
+                        if debug:
+                            print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
@@ -485,6 +488,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         send_notification = True
                         send_notification_result= self.pushAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
+                        if debug:
+                            print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
 
         print "oxPush2. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
