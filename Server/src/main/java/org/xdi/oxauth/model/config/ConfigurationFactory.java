@@ -6,7 +6,13 @@
 
 package org.xdi.oxauth.model.config;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.Component;
@@ -29,11 +35,9 @@ import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.util.KeyGenerator;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.properties.FileConfiguration;
-
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -317,14 +321,43 @@ public class ConfigurationFactory {
 
     private void initWebKeysFromJson(String p_webKeys) {
         try {
-            final JSONWebKeySet k = ServerUtil.createJsonMapper().readValue(p_webKeys, JSONWebKeySet.class);
-            if (k != null) {
-            	jwks = k;
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            initJwksFromString(p_webKeys);
+        } catch (JsonParseException ex) {
+            log.error("Failed to load JWKS. Attempting to generate new JWKS...", ex);
+
+            String newWebKeys = null;
+        	try {
+        		// Generate new JWKS
+				newWebKeys = KeyGenerator.generateJWKS().toString();
+				
+				// Attempt to load new JWKS
+				initJwksFromString(newWebKeys);
+
+				// Store new JWKS in LDAP
+				Conf conf = loadConfigurationFromLdap();
+				conf.setWebKeys(newWebKeys);
+
+				long nextRevision = conf.getRevision() + 1;
+				conf.setRevision(nextRevision);
+
+				final LdapEntryManager ldapManager = ServerUtil.getLdapManager();
+				ldapManager.merge(conf);
+
+				log.info("New JWKS generated successfully");
+			} catch (Exception ex2) {
+	            log.error("Failed to re-generate JWKS keys", ex2);
+			}
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
+
+	public void initJwksFromString(String p_webKeys) throws IOException, JsonParseException, JsonMappingException {
+		final JSONWebKeySet k = ServerUtil.createJsonMapper().readValue(p_webKeys, JSONWebKeySet.class);
+		if (k != null) {
+			jwks = k;
+		}
+	}
 
     private void initStaticConfigurationFromJson(String p_statics) {
         try {

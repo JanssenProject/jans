@@ -11,6 +11,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
@@ -39,10 +40,8 @@ public class KeyGenerator {
 		log = Logger.getLogger(KeyGenerator.class);
 	}
 
-    public static void main(String[] args) throws Exception {
-    	SecurityProviderUtility.installBCProvider(true);
-
-    	JSONArray keys = new JSONArray();
+	public static JSONObject generateJWKS() throws Exception, JSONException {
+		JSONArray keys = new JSONArray();
 
         keys.put(generateRS256Keys(null));
         keys.put(generateRS384Keys(null));
@@ -54,6 +53,14 @@ public class KeyGenerator {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JSON_WEB_KEY_SET, keys);
+
+        return jsonObject;
+	}
+
+    public static void main(String[] args) throws Exception {
+    	SecurityProviderUtility.installBCProvider(true);
+
+    	JSONObject jsonObject = generateJWKS();
 
         System.out.println(jsonObject.toString(4).replace("\\/", "/"));
     }
