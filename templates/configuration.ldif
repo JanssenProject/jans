@@ -95,8 +95,8 @@ uniqueIdentifier: http://sptest2.gluu.org/secure
 dn: inum=@!2B96.42E9.2953.68ED!0002!D21C.8343!3627.987E.69FE.6A8B.C478.2586.E944.04C0,ou=selectors,ou=oxasimba,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: oxAsimbaSelector
 objectClass: top
-friendlyname: Selector 1, shibboleth SP -> shibboleth IDP
+friendlyname: Selector rule 1, shibboleth SP -> shibboleth IDP
 inum: @!2B96.42E9.2953.68ED!0002!D21C.8343!3627.987E.69FE.6A8B.C478.2586.E944.04C0
 organizationid: https://ce.gluu.info/idp/shibboleth
-oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!3627.987E.69FE.6A8B.C478.2586.E944.04C0","id":"https://ce.gluu.info/shibboleth","organizationId":"https://ce.gluu.info/idp/shibboleth","friendlyName":"Selector 1, shibboleth SP -> shibboleth IDP","enabled":true,"lastModified":1455524102424}
+oxasimbaentry: {"inum":"@!2B96.42E9.2953.68ED!0002!D21C.8343!3627.987E.69FE.6A8B.C478.2586.E944.04C0","id":"https://ce.gluu.info/shibboleth","organizationId":"https://ce.gluu.info/idp/shibboleth","friendlyName":"Selector rule 1, shibboleth SP -> shibboleth IDP","enabled":true,"lastModified":1455524102424}
 uniqueIdentifier: https://ce.gluu.info/shibboleth
