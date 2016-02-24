@@ -45,6 +45,8 @@ public class Configuration {
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
 
+    private Boolean sessionAsJwt = false;
+
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
     private int umaRequesterPermissionTokenLifetime;
@@ -133,6 +135,15 @@ public class Configuration {
 
     public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
         this.umaRptAsJwt = umaRptAsJwt;
+    }
+
+    @XmlElement(name = "session-as-jwt")
+    public Boolean getSessionAsJwt() {
+        return sessionAsJwt;
+    }
+
+    public void setSessionAsJwt(Boolean sessionAsJwt) {
+        this.sessionAsJwt = sessionAsJwt;
     }
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
