@@ -51,9 +51,16 @@ public class SessionState implements Serializable {
     @LdapAttribute(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
+    @LdapAttribute(name = "oxAsJwt")
+    private Boolean isJwt;
+
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
+
+    @LdapJsonObject
+    @LdapAttribute(name = "oxInvolvedClients")
+    private SessionIdAccessMap involvedClients;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthSessionAttribute")
@@ -71,6 +78,22 @@ public class SessionState implements Serializable {
 
     public void setDn(String p_dn) {
         dn = p_dn;
+    }
+
+    public Boolean getJwt() {
+        return isJwt;
+    }
+
+    public void setJwt(Boolean jwt) {
+        isJwt = jwt;
+    }
+
+    public SessionIdAccessMap getInvolvedClients() {
+        return involvedClients;
+    }
+
+    public void setInvolvedClients(SessionIdAccessMap involvedClients) {
+        this.involvedClients = involvedClients;
     }
 
     public SessionIdState getState() {
@@ -181,6 +204,7 @@ public class SessionState implements Serializable {
         sb.append("SessionState");
         sb.append(", dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
+        sb.append(", isJwt=").append(isJwt);
         sb.append(", lastUsedAt=").append(lastUsedAt);
         sb.append(", userDn='").append(userDn).append('\'');
         sb.append(", authenticationTime=").append(authenticationTime);
