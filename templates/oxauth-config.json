@@ -159,6 +159,7 @@
     "idTokenLifetime":3600,
     "shortLivedAccessTokenLifetime":300,
     "longLivedAccessTokenLifetime":31536000,
+    "sessionAsJwt":false,
     "umaRequesterPermissionTokenLifetime":3600,
     "umaAddScopesAutomatically":true,
     "umaKeepClientDuringResourceSetRegistration":true,
