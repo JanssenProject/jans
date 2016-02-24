@@ -1,10 +1,25 @@
 package org.xdi.oxauth.service;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
@@ -12,12 +27,6 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.util.KeyGenerator;
-
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -47,7 +56,7 @@ public class KeyGeneratorTimer {
         log.debug("Initializing KeyGeneratorTimer");
         this.isActive = new AtomicBoolean(false);
 
-        long interval = ConfigurationFactory.instance().getConfiguration().getKeyRegenerationInterval();
+        long interval = configurationFactory.getConfiguration().getKeyRegenerationInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
@@ -59,7 +68,7 @@ public class KeyGeneratorTimer {
     @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
-        if (!ConfigurationFactory.instance().getConfiguration().getKeyRegenerationEnabled()) {
+        if (!configurationFactory.getConfiguration().getKeyRegenerationEnabled()) {
             return;
         }
 
@@ -72,21 +81,27 @@ public class KeyGeneratorTimer {
         }
 
         try {
-            String dn = ConfigurationFactory.instance().getLdapConfiguration().getString("configurationEntryDN");
-            Conf conf = ldapEntryManager.find(Conf.class, dn);
-
-            long nextRevision = conf.getRevision() + 1;
-            JSONObject jwks = new JSONObject(conf.getWebKeys());
-            conf.setWebKeys(updateKeys(jwks).toString());
-
-            conf.setRevision(nextRevision);
-            ldapEntryManager.merge(conf);
+            updateKeys();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
             this.isActive.set(false);
         }
     }
+
+	public String updateKeys() throws JSONException, Exception {
+        String dn = configurationFactory.getLdapConfiguration().getString("configurationEntryDN");
+		Conf conf = ldapEntryManager.find(Conf.class, dn);
+
+		JSONObject jwks = new JSONObject(conf.getWebKeys());
+		conf.setWebKeys(updateKeys(jwks).toString());
+
+		long nextRevision = conf.getRevision() + 1;
+		conf.setRevision(nextRevision);
+		ldapEntryManager.merge(conf);
+		
+		return conf.getWebKeys();
+	}
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
         JSONObject jsonObject = generateJwks();
@@ -110,8 +125,8 @@ public class KeyGeneratorTimer {
                 }
             } else {
                 GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                expirationTime.add(GregorianCalendar.HOUR, ConfigurationFactory.instance().getConfiguration().getKeyRegenerationInterval());
-                expirationTime.add(GregorianCalendar.SECOND, ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime());
+                expirationTime.add(GregorianCalendar.HOUR, configurationFactory.getConfiguration().getKeyRegenerationInterval());
+                expirationTime.add(GregorianCalendar.SECOND, configurationFactory.getConfiguration().getIdTokenLifetime());
                 key.put(EXPIRATION_TIME, expirationTime.getTimeInMillis());
 
                 jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
@@ -125,8 +140,8 @@ public class KeyGeneratorTimer {
         JSONArray keys = new JSONArray();
 
         GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        expirationTime.add(GregorianCalendar.HOUR, ConfigurationFactory.instance().getConfiguration().getKeyRegenerationInterval());
-        expirationTime.add(GregorianCalendar.SECOND, ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime());
+        expirationTime.add(GregorianCalendar.HOUR, configurationFactory.getConfiguration().getKeyRegenerationInterval());
+        expirationTime.add(GregorianCalendar.SECOND, configurationFactory.getConfiguration().getIdTokenLifetime());
 
         keys.put(KeyGenerator.generateRS256Keys(expirationTime.getTimeInMillis()));
         keys.put(KeyGenerator.generateRS384Keys(expirationTime.getTimeInMillis()));
@@ -141,4 +156,14 @@ public class KeyGeneratorTimer {
 
         return jsonObject;
     }
+
+    /**
+	 * Get KeyGeneratorTimer instance
+	 * 
+	 * @return KeyGeneratorTimer instance
+	 */
+	public static KeyGeneratorTimer instance() {
+        return (KeyGeneratorTimer) Component.getInstance(KeyGeneratorTimer.class);
+	}
+
 }
