@@ -69,7 +69,7 @@ public class UserGroupService {
 
 		boolean isMemberOrOwner = false;
 		try {
-			isMemberOrOwner = ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 1).size() > 0;
+			isMemberOrOwner = ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 0, 1).size() > 0;
 
 		} catch (EntryPersistenceException ex) {
 			log.error("Failed to determine if person '{0}' memeber or owner of group '{1}'", ex, personDn, groupDn);

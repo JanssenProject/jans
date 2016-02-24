@@ -257,7 +257,7 @@ public class Authenticator implements Serializable {
 
                 log.trace("Redirect to page: '{0}'", redirectTo);
                 FacesManager.instance().redirect(redirectTo, null, false);
-                return false;
+                return true;
             }
 
             if (this.authStep == countAuthenticationSteps) {
