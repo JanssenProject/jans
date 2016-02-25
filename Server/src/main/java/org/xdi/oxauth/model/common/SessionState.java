@@ -52,7 +52,10 @@ public class SessionState implements Serializable {
     private Boolean permissionGranted;
 
     @LdapAttribute(name = "oxAsJwt")
-    private Boolean isJwt;
+    private Boolean isJwt = false;
+
+    @LdapAttribute(name = "oxJwt")
+    private String jwt;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxAuthPermissionGrantedMap")
@@ -80,12 +83,20 @@ public class SessionState implements Serializable {
         dn = p_dn;
     }
 
-    public Boolean getJwt() {
+    public String getJwt() {
+        return jwt;
+    }
+
+    public void setJwt(String jwt) {
+        this.jwt = jwt;
+    }
+
+    public Boolean getIsJwt() {
         return isJwt;
     }
 
-    public void setJwt(Boolean jwt) {
-        isJwt = jwt;
+    public void setIsJwt(Boolean isJwt) {
+        this.isJwt = isJwt;
     }
 
     public SessionIdAccessMap getInvolvedClients() {

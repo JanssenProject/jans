@@ -49,12 +49,12 @@ public class SessionStateService {
 
     @Logger
     private Log log;
-
     @In
     private LdapEntryManager ldapEntryManager;
-
     @In
     private AuthenticationService authenticationService;
+    @In
+    private ConfigurationFactory configurationFactory;
 
     public static SessionStateService instance() {
         if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
@@ -69,7 +69,7 @@ public class SessionStateService {
     // 2) acr change -> send error
     // 3) client_id change -> do nothing
     // https://github.com/GluuFederation/oxAuth/issues/34
-    public SessionState assertAuthenticatedSessionCorrespondsToNewRequest(SessionState session, String redirectUri, String acrValuesStr) throws AcrChangedException {
+    public SessionState assertAuthenticatedSessionCorrespondsToNewRequest(SessionState session, String acrValuesStr) throws AcrChangedException {
         if (session != null && !session.getSessionAttributes().isEmpty() && session.getState() == SessionIdState.AUTHENTICATED) {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
@@ -252,7 +252,7 @@ public class SessionStateService {
         return generateSessionState(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionState generateSessionState(String p_userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+    public SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
         final String uuid = UUID.randomUUID().toString();
         final String dn = dn(uuid);
 
@@ -261,7 +261,7 @@ public class SessionStateService {
         }
 
         if (SessionIdState.AUTHENTICATED == state) {
-            if (StringUtils.isBlank(p_userDn)) {
+            if (StringUtils.isBlank(userDn)) {
                 return null;
             }
         }
@@ -270,9 +270,12 @@ public class SessionStateService {
         sessionState.setId(uuid);
         sessionState.setDn(dn);
 
-        if (StringUtils.isNotBlank(p_userDn)) {
-            sessionState.setUserDn(p_userDn);
+        if (StringUtils.isNotBlank(userDn)) {
+            sessionState.setUserDn(userDn);
         }
+
+        Boolean sessionAsJwt = configurationFactory.getConfiguration().getSessionAsJwt();
+        sessionState.setIsJwt(sessionAsJwt != null && sessionAsJwt);
 
         if (authenticationDate != null) {
             sessionState.setAuthenticationTime(authenticationDate);
@@ -291,7 +294,7 @@ public class SessionStateService {
             persisted = persistSessionState(sessionState);
         }
 
-        log.trace("Generated new session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
+        log.trace("Generated new session, id = '{0}', state = '{1}', asJwt = '{2}', persisted = '{3}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
         return sessionState;
     }
 
