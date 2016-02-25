@@ -220,6 +220,16 @@ public class GrantService {
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
+
+        // Cleaning old oxAuthGrant
+        // Note: This block should be removed, it is used only to delete old legacy data.
+        try {
+            final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(numsubordinates=0))");
+            final List<Grant> entries = ldapEntryManager.findEntries(baseDn(), Grant.class, filter);
+            removeGrants(entries);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
     }
 
     private void addGrantBranch(final String p_grantId, final String p_clientId) {
