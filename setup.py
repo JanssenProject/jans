@@ -625,18 +625,26 @@ class Setup(object):
         return open(os.path.join('/proc/1/status'), 'r').read().split()[1]
 
     def determineApacheVersion(self):
-        # httpd -v
-        # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
-        # OR
-        # Server version: Apache/2.4.6 (CentOS) /etc/redhat-release  CentOS Linux release 7.1.1503 (Core)
-        cmd = "httpd -v | egrep '^Server version'"
-        PIPE = subprocess.PIPE
-        p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
-        apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
-        if re.match(r'2\.4\..*', apache_version):
-            return "2.4"
-
-        return "2.2"
+        if self.os_type in ['centos', 'redhat', 'fedora']:
+            # httpd -v
+            # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
+            # OR
+            # Server version: Apache/2.4.6 (CentOS) /etc/redhat-release  CentOS Linux release 7.1.1503 (Core)
+            cmd = "/usr/sbin/httpd -v | egrep '^Server version'"
+            PIPE = subprocess.PIPE
+            p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
+            apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
+            if re.match(r'2\.4\..*', apache_version):
+                return "2.4"
+            return "2.2"
+        else:
+            cmd = "/usr/sbin/apache2 -v | egrep '^Server version'"
+            PIPE = subprocess.PIPE
+            p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
+            apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
+            if re.match(r'2\.4\..*', apache_version):
+                return "2.4"
+            return "2.2"
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1554,14 +1562,14 @@ class Setup(object):
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
         
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
               self.run(["/usr/sbin/chkconfig", "--add", "opendj"])
         else:
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                 script_name = os.path.split(self.tomcat_template_centos7)[-1]
                 dest_folder = os.path.dirname(self.tomcat_service_centos7)
                 try:
@@ -1593,7 +1601,7 @@ class Setup(object):
         # Detect sevice path and apache service name
         service_path = '/sbin/service'
         apache_service_name = 'httpd'
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
            service_path = '/usr/bin/systemctl'
            apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
@@ -1601,14 +1609,14 @@ class Setup(object):
            apache_service_name = 'apache2'
 
         # Apache HTTPD
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
            self.run([service_path, 'enable', apache_service_name])
            self.run([service_path, 'start', apache_service_name])
         else:
            self.run([service_path, apache_service_name, 'start'])
 
         # Memcached
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
            self.run([service_path, 'start', 'memcached.service'])
         else:
            self.run([service_path, 'memcached', 'start'])
@@ -1622,7 +1630,7 @@ class Setup(object):
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd':
+            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                self.run([service_path, 'enable', 'tomcat'])
                self.run([service_path, 'start', 'tomcat'])
             else:
