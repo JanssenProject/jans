@@ -893,6 +893,24 @@
             <iframe id="op" style="visibility:hidden" height="0" width="0"
                     src="#{checkSessionAction.checkSessionEndpoint}"/>
             <iframe id="rp" style="visibility:hidden" height="0" width="0"/>
+
+            <s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="opIFrame">OP IFrame</h:outputLabel>
+                    <h:inputText id="opIFrame" value="#{checkSessionAction.checkSessionEndpoint}"
+                                 size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+
+                    <h:outputLabel for="rpIFrame">RP IFrame</h:outputLabel>
+                    <h:inputText id="rpIFrame" size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+
+                    <h:outputLabel for="checkSessionOpOrigin">OP Origin</h:outputLabel>
+                    <h:inputText id="checkSessionOpOrigin" value="https://#{openIdConnectDiscoveryAction.host}"
+                                 size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+                </h:panelGrid>
+            </s:div>
         </s:div>
     </rich:panel>
 </div>
@@ -1013,32 +1031,6 @@
                                action="#{endSessionAction.exec}"
                                reRender="endSessionResults"/>
         </div>
-        <s:div id="endSessionResults">
-            <s:div rendered="#{endSessionAction.showResults}">
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">End Session Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="5"
-                                         value="#{endSessionAction.requestString}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">End Session Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="8"
-                                         value="#{endSessionAction.responseString}"/>
-                    </s:div>
-                </rich:panel>
-            </s:div>
-        </s:div>
     </rich:panel>
 </div>
 
@@ -1065,8 +1057,14 @@
             } else if (param[0] == "session_state") {
                 var rp = document.getElementById("rp");
                 var clientId = document.getElementById("mainForm:authorizationClientId").value;
-                rp.src = "./rpiframe.seam?session_state=" + param[1]
-                        + "&client_id=" + clientId;
+                var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin").value;
+
+                var rpIFrame = "./rpiframe.seam?session_state=" + param[1]
+                        + "&client_id=" + clientId + "&op_origin=" + opOrigin;
+
+                document.getElementById("mainForm:rpIFrame").value = rpIFrame;
+
+                rp.src = rpIFrame;
             }
         }
     }
