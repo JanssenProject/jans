@@ -20,15 +20,12 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 16, 2015
+ * @version February 24, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("grantService")
@@ -76,6 +73,11 @@ public class GrantService {
         ldapEntryManager.persist(p_token);
     }
 
+    public void remove(Grant grant) {
+        ldapEntryManager.remove(grant);
+        log.trace("Removed grant, id: " + grant.getId());
+    }
+
     public void remove(TokenLdap p_token) {
         ldapEntryManager.remove(p_token);
         log.trace("Removed token, code: " + p_token.getTokenCode());
@@ -86,6 +88,14 @@ public class GrantService {
             remove(p_token);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
+        }
+    }
+
+    public void removeGrants(List<Grant> entries) {
+        if (entries != null && !entries.isEmpty()) {
+            for (Grant g : entries) {
+                remove(g);
+            }
         }
     }
 
@@ -190,10 +200,33 @@ public class GrantService {
     }
 
     public void cleanUp() {
+        // Cleaning oxAuthToken
         try {
             final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
             final List<TokenLdap> entries = ldapEntryManager.findEntries(baseDn(), TokenLdap.class, filter);
             remove(entries);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
+
+        // Cleaning oxAuthGrant
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.SECOND, 60);
+
+            final Filter filter = Filter.create(String.format("(&(oxAuthCreation<=%s)(numsubordinates=0))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
+            final List<Grant> entries = ldapEntryManager.findEntries(baseDn(), Grant.class, filter);
+            removeGrants(entries);
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+        }
+
+        // Cleaning old oxAuthGrant
+        // Note: This block should be removed, it is used only to delete old legacy data.
+        try {
+            final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(numsubordinates=0))");
+            final List<Grant> entries = ldapEntryManager.findEntries(baseDn(), Grant.class, filter);
+            removeGrants(entries);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -203,6 +236,7 @@ public class GrantService {
         Grant grant = new Grant();
         grant.setDn(getBaseDnForGrant(p_grantId, p_clientId));
         grant.setId(p_grantId);
+        grant.setCreationDate(new Date());
 
         ldapEntryManager.persist(grant);
     }
