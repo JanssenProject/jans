@@ -12,7 +12,11 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
@@ -20,6 +24,9 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
@@ -267,6 +274,11 @@ public class SessionStateService {
         }
 
         sessionState.setSessionAttributes(sessionIdAttributes);
+        sessionState.setLastUsedAt(new Date());
+
+        if (sessionState.getIsJwt()) {
+            sessionState.setJwt(generateJwt(sessionState, null).asString());
+        }
 
         boolean persisted = false;
         if (persist) {
@@ -275,6 +287,14 @@ public class SessionStateService {
 
         log.trace("Generated new session, id = '{0}', state = '{1}', asJwt = '{2}', persisted = '{3}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
         return sessionState;
+    }
+
+    private Jwt generateJwt(SessionState sessionState, Client client) {
+        JwtSigner jwtSigner = new JwtSigner(client);
+        Jwt jwt = jwtSigner.newJwt();
+
+        // generate content
+        return jwt;
     }
 
     public SessionState setSessionStateAuthenticated(SessionState sessionState, String p_userDn) {
