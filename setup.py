@@ -624,27 +624,25 @@ class Setup(object):
     def detect_initd(self):
         return open(os.path.join('/proc/1/status'), 'r').read().split()[1]
 
-    def determineApacheVersion(self):
+    def determineApacheVersion(self, apache_cmd):
+        cmd = "/usr/sbin/%s -v | egrep '^Server version'" % apache_cmd
+        PIPE = subprocess.PIPE
+        p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
+        apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
+        if re.match(r'2\.4\..*', apache_version):
+            return "2.4"
+
+        return "2.2"
+
+    def determineApacheVersionForOS(self):
         if self.os_type in ['centos', 'redhat', 'fedora']:
             # httpd -v
             # Server version: Apache/2.2.15 (Unix)  /etc/redhat-release  CentOS release 6.7 (Final)
             # OR
             # Server version: Apache/2.4.6 (CentOS) /etc/redhat-release  CentOS Linux release 7.1.1503 (Core)
-            cmd = "/usr/sbin/httpd -v | egrep '^Server version'"
-            PIPE = subprocess.PIPE
-            p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
-            apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
-            if re.match(r'2\.4\..*', apache_version):
-                return "2.4"
-            return "2.2"
+            return self.determineApacheVersion("httpd")
         else:
-            cmd = "/usr/sbin/apache2 -v | egrep '^Server version'"
-            PIPE = subprocess.PIPE
-            p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
-            apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
-            if re.match(r'2\.4\..*', apache_version):
-                return "2.4"
-            return "2.2"
+            return self.determineApacheVersion("apache2")
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1761,7 +1759,7 @@ if __name__ == '__main__':
     # Get the init type   
     installObject.os_initdaemon = installObject.detect_initd()
     # Get apache version   
-    installObject.apache_version = installObject.determineApacheVersion()
+    installObject.apache_version = installObject.determineApacheVersionForOS()
 
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
