@@ -91,7 +91,7 @@ public class IdTokenFactory {
                                      Set<String> scopes) throws SignatureException, InvalidJwtException,
             StringEncrypter.EncryptionException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
 
-        JwtSigner jwtSigner = new JwtSigner(authorizationGrant.getClient());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
         int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
