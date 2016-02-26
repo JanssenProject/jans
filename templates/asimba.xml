@@ -86,8 +86,10 @@
 		  * the attributerelease policy to apply
 		  * the pre- and post-authorization policy to apply
 		  * a property-list for each requestor 
+		  *
+		  * LDAPFactory class: reads IDPs both from XML configuration and LDAP.
 	-->
-	<requestorpoolfactory class="com.alfaariss.oa.engine.requestor.configuration.ConfigurationFactory">
+	<requestorpoolfactory class="org.gluu.asimba.engine.requestor.ldap.LDAPFactory">
 		<pool id="requestorpool.1" friendlyname="Requestor Pool 1" enabled="true">
 			<authentication forced="false">
 				<profile id="remote.saml2" />
@@ -148,10 +150,7 @@
 		                <idpprofile id="saml2" />
 		
 					    <!-- When IDP could not be automatically selected, use a selector component to select an IDP -->
-		                <selector
-		                    class="com.alfaariss.oa.authentication.remote.saml2.selector.DefaultSelector"
-		                    always_show_select_form="true" />
-
+		                <selector class="org.gluu.authentication.remote.saml2.selector.ApplicationSelectorLDAP" always_show_select_form="true" />
                   
 						<!-- Indicate whether logout is supported by the SAML-SP profile -->
 						<logout enabled="false" />
@@ -170,10 +169,12 @@
 							* scoping: false
 							* avoid_subjectconfirmation: false
 							* nameidpolicy enabled: false
-							* �file�: Provide the absolute location of metadata -->
+							* �file�: Provide the absolute location of metadata 
+							* 
+							* IDPStorageLDAP class: reads IDPs both from XML configuration and LDAP.
+						-->
 					
-						<idps id="saml2idps-chained"
-							class="com.alfaariss.oa.authentication.remote.saml2.idp.storage.config.IDPConfigStorage">
+						<idps id="saml2idps-chained" class="org.gluu.asimba.authentication.remote.saml2.idp.storage.ldap.IDPStorageLDAP">
 					
 							<idp id="https://%(hostname)s/idp/shibboleth" friendlyname="Gluu Server CE"
 								scoping="false" avoid_subjectconfirmation="false">
