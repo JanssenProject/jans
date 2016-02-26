@@ -114,7 +114,7 @@ public class CreateRptWS {
     private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException, InvalidClaimException {
         final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
 
-        JwtSigner jwtSigner = new JwtSigner(grant.getClient());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(grant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
         jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
