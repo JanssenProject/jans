@@ -8,7 +8,8 @@ from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.oxauth.model.common import User, CustomAttribute
+from org.xdi.oxauth.model.common import User
+from org.xdi.ldap.model import CustomAttribute
 
 import java
 
