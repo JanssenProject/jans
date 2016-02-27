@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.base.Strings;
+import org.xdi.oxauth.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
@@ -106,7 +106,7 @@ public class RedirectionUriService {
 
     public String validatePostLogoutRedirectUri(String clientId, String postLogoutRedirectUri) {
 
-        boolean isBlank = Strings.isNullOrEmpty(postLogoutRedirectUri);
+        boolean isBlank = Util.isNullOrEmpty(postLogoutRedirectUri);
 
         Client client = clientService.getClient(clientId);
 
