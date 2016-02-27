@@ -1,5 +1,5 @@
-gluu-oxd-server (2.4.3-SNAPSHOT-4) trusty; urgency=low
+gluu-oxd-server (3.0.7-SNAPSHOT-9) trusty; urgency=low
 
-  * Initial release (Closes: #0001)
+  * Initial release (Closes: #1232)
 
- -- Adrian Alves <adrian@gluu.org>  Thu, 25 Jun 2015 00:55:41 -0400
+ -- Adrian Alves <adrian@gluu.org>  Wed, 24 Feb 2016 23:36:36 -0500

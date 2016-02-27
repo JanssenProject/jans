@@ -5,7 +5,7 @@ Maintainer: Adrian Alves <adrian@gluu.org>
 Build-Depends: debhelper (>= 8.0.0),
  default-jdk,
  maven
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 
 Package: gluu-oxd-server
