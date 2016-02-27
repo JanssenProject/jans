@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.google.common.base.Strings;
+import org.xdi.oxauth.model.util.Util;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -102,7 +102,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private Response simpleLogout(String postLogoutRedirectUri, String state, HttpServletRequest httpRequest, Pair<SessionState, AuthorizationGrant> pair) {
-        if (!Strings.isNullOrEmpty(postLogoutRedirectUri)) {
+        if (!Util.isNullOrEmpty(postLogoutRedirectUri)) {
 
             // Validate redirectUri
             String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
@@ -181,7 +181,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
 
             for (String logoutUri : logoutUris) {
-                if (Strings.isNullOrEmpty(logoutUri)) {
+                if (Util.isNullOrEmpty(logoutUri)) {
                     continue; // skip client if logout_uri is blank
                 }
 
@@ -237,9 +237,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "<html>" +
                 "<head>";
 
-        if (!Strings.isNullOrEmpty(postLogoutUrl)) {
+        if (!Util.isNullOrEmpty(postLogoutUrl)) {
 
-            if (!Strings.isNullOrEmpty(state)) {
+            if (!Util.isNullOrEmpty(state)) {
                 if (postLogoutUrl.contains("?")) {
                     postLogoutUrl += "&state=" + state;
                 } else {
