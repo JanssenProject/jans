@@ -447,7 +447,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Gluu oxPush2 authentication module
 displayName: oxpush2
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!0011!92F0.BF9E
 oxConfigurationProperty: {"value1":"application_id","value2":"https://%(hostname)s","description":""}
 oxConfigurationProperty: {"value1":"authentication_mode","value2":"two_step","de
