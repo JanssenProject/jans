@@ -215,7 +215,10 @@
 					When a requestor is not configured here, it is not considered to be a trusted SP
                     Add metadata of remote SP
                     requestor id: entityID of remote SP/protected location
-                    �file�: Absolute path of SP metadata. -->
+                    �file�: Absolute path of SP metadata. 
+			
+			SAML2Profile reads both XML configuration and LDAP requestors.
+			-->
 
 			<requestors signing="FALSE">
 				<requestor id="http://sptest2.gluu.org/secure" 
