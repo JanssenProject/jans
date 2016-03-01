@@ -2118,19 +2118,19 @@ attributeTypes: ( oxPasswordExpirationDate-oid NAME 'oxPasswordExpirationDate'
   EQUALITY generalizedTimeMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAsimba-oid NAME 'friendlyName'
+attributeTypes: ( friendlyName-oid NAME 'friendlyName'
   DESC 'oxAsimba friendlyName field'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAsimba-oid NAME 'organizationId'
+attributeTypes: ( organizationId-oid NAME 'organizationId'
   DESC 'oxAsimba IDP organizationId field'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAsimba-oid NAME 'oxAsimbaEntry'
+attributeTypes: ( oxAsimbaEntry-oid NAME 'oxAsimbaEntry'
   DESC 'oxAsimba configuration JSON/XML serialization field'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
@@ -2366,17 +2366,17 @@ objectclasses: ( oxSectorIdentifier-oid NAME 'oxSectorIdentifier' SUP top STRUCT
   ( inum $ oxAuthRedirectURI $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ description $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ description $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaIDP' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ description $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaRequestorPool' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ description $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaSPRequestor' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ description $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
