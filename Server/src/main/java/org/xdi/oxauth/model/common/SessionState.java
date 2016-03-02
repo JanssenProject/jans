@@ -100,6 +100,9 @@ public class SessionState implements Serializable {
     }
 
     public SessionIdAccessMap getInvolvedClients() {
+        if (involvedClients == null) {
+            involvedClients = new SessionIdAccessMap();
+        }
         return involvedClients;
     }
 
