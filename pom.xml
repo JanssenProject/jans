@@ -39,7 +39,7 @@
         <repository>
             <id>gluu</id>
             <name>Gluu repository</name>
-            <url>http://ox.gluu.org/maven</url>
+            <url>https://ox.gluu.org/maven</url>
         </repository>
         <repository>
             <id>bouncycastle</id>
@@ -62,9 +62,9 @@
     <modules>
         <module>Model</module>
         <module>Client</module>
+        <module>oxAuthStatic</module>
         <module>Server</module>
         <module>RP</module>
-        <module>oxAuthStatic</module>
         <!--<module>UmaRpDemo</module>-->
     </modules>
 
