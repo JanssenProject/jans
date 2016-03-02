@@ -36,6 +36,10 @@ public class JwtSigner {
 
     private Jwt jwt;
 
+    public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience) {
+        this(signatureAlgorithm, audience, null);
+    }
+
     public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) {
         this.signatureAlgorithm = signatureAlgorithm;
         this.audience = audience;
