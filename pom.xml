@@ -301,7 +301,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-client</artifactId>
-                <version>3.0.2-SNAPSHOT</version>
+                <version>2.4.3-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
