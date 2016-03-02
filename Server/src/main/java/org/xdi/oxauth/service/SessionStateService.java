@@ -24,8 +24,9 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
@@ -35,8 +36,14 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -277,7 +284,7 @@ public class SessionStateService {
         sessionState.setLastUsedAt(new Date());
 
         if (sessionState.getIsJwt()) {
-            sessionState.setJwt(generateJwt(sessionState, null).asString());
+            sessionState.setJwt(generateJwt(sessionState, userDn).asString());
         }
 
         boolean persisted = false;
@@ -289,12 +296,31 @@ public class SessionStateService {
         return sessionState;
     }
 
-    private Jwt generateJwt(SessionState sessionState, Client client) {
-        JwtSigner jwtSigner = new JwtSigner(client);
+    private Jwt generateJwt(SessionState sessionState, String audience) {
+        JwtSigner jwtSigner = new JwtSigner(SignatureAlgorithm.RS512, audience);
         Jwt jwt = jwtSigner.newJwt();
 
-        // generate content
-        return jwt;
+        // claims
+        jwt.getClaims().setClaim("id", sessionState.getId());
+        jwt.getClaims().setClaim("authentication_time", sessionState.getAuthenticationTime());
+        jwt.getClaims().setClaim("user_dn", sessionState.getUserDn());
+        jwt.getClaims().setClaim("state", sessionState.getState() != null ?
+                sessionState.getState().getValue() : "");
+
+        jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionState.getSessionAttributes()));
+
+        jwt.getClaims().setClaim("last_used_at", sessionState.getLastUsedAt());
+        jwt.getClaims().setClaim("permission_granted", sessionState.getPermissionGranted());
+        jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionState.getPermissionGrantedMap().getPermissionGranted()));
+        jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionState.getInvolvedClients().getPermissionGranted()));
+
+        // sign
+        try {
+            return jwtSigner.sign();
+        } catch (Exception e) {
+            log.error("Failed to sign session jwt! " + e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
     }
 
     public SessionState setSessionStateAuthenticated(SessionState sessionState, String p_userDn) {
