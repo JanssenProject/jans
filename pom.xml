@@ -60,11 +60,11 @@
     </scm>
 
     <modules>
+        <module>oxAuthStatic</module>
         <module>Model</module>
         <module>Client</module>
         <module>Server</module>
         <module>RP</module>
-        <module>oxAuthStatic</module>
         <!--<module>UmaRpDemo</module>-->
     </modules>
 
