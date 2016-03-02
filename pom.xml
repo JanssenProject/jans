@@ -60,7 +60,6 @@
     </scm>
 
     <modules>
-        <module>oxAuthStatic</module>
         <module>Model</module>
         <module>Client</module>
         <module>oxAuthStatic</module>
