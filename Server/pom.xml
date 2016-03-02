@@ -786,7 +786,7 @@
             <id>toopher</id>
             <activation>
                 <property>
-                    <name>!toopher-disabled</name>
+                    <name>toopher-enabled</name>
                 </property>
             </activation>
             <properties>
