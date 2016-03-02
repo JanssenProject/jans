@@ -367,7 +367,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-<!--
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxauth-client</artifactId>
@@ -375,7 +374,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
--->
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxLdap</artifactId>
