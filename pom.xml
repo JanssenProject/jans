@@ -39,7 +39,7 @@
         <repository>
             <id>gluu</id>
             <name>Gluu repository</name>
-            <url>https://ox.gluu.org/maven</url>
+            <url>http://ox.gluu.org/maven</url>
         </repository>
         <repository>
             <id>bouncycastle</id>
