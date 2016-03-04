@@ -147,7 +147,7 @@ public class AuthenticationService extends RequestService {
 		}
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawAuthenticationService.AUTHENTICATE_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawAuthenticationService.AUTHENTICATE_GET_TYPE, request.getChallenge(), facets);
 
 		RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(response.getSignatureData());
 		rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
