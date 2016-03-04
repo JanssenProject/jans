@@ -38,7 +38,7 @@
     </test>
     
     <!-- Client Authentication Filter test -->
-    <test name="Client Authentication Filter test (HTTP)" enabled="false">
+    <test name="Client Authentication Filter test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterHttpTest"/>
         </classes>
