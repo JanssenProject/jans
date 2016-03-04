@@ -19,6 +19,7 @@ import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
@@ -30,6 +31,7 @@ import org.bouncycastle.jce.provider.JCEECPrivateKey;
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.KeyFactory;
 
@@ -40,10 +42,13 @@ import org.xdi.oxauth.model.crypto.KeyFactory;
  */
 public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> {
 
-    private ECDSAPrivateKey ecdsaPrivateKey;
+	private SignatureAlgorithm signatureAlgorithm;
+	private KeyPair keyPair;
+
+	private ECDSAPrivateKey ecdsaPrivateKey;
     private ECDSAPublicKey ecdsaPublicKey;
     private Certificate certificate;
-
+	
     public ECDSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName)
             throws InvalidParameterException, NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, SignatureException, InvalidKeyException, CertificateEncodingException {
@@ -51,12 +56,14 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
             throw new InvalidParameterException("The signature algorithm cannot be null");
         }
 
+        this.signatureAlgorithm  = signatureAlgorithm;
+
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(signatureAlgorithm.getCurve());
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
         keyGen.initialize(ecSpec, new SecureRandom());
 
-        KeyPair keyPair = keyGen.generateKeyPair();
+        this.keyPair = keyGen.generateKeyPair();
         JCEECPrivateKey privateKeySpec = (JCEECPrivateKey) keyPair.getPrivate();
         JCEECPublicKey publicKeySpec = (JCEECPublicKey) keyPair.getPublic();
 
@@ -64,8 +71,8 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
         BigInteger y = publicKeySpec.getQ().getY().toBigInteger();
         BigInteger d = privateKeySpec.getD();
 
-        ecdsaPrivateKey = new ECDSAPrivateKey(d);
-        ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
+        this.ecdsaPrivateKey = new ECDSAPrivateKey(d);
+        this.ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
 
         if (StringUtils.isNotBlank(dnName)) {
             // Create certificate
@@ -86,8 +93,27 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
             certGen.setSignatureAlgorithm("SHA256WITHECDSA");
 
             X509Certificate x509Certificate = certGen.generate(privateKeySpec, "BC");
-            certificate = new Certificate(signatureAlgorithm, x509Certificate);
+            this.certificate = new Certificate(signatureAlgorithm, x509Certificate);
         }
+    }
+    
+    public Certificate generateV3Certificate(Date startDate, Date expirationDate, String dnName) throws CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
+        // Create certificate
+        BigInteger serialNumber = new BigInteger(1024, new Random()); // serial number for certificate
+
+        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        X500Principal principal = new X500Principal(dnName);
+
+        certGen.setSerialNumber(serialNumber);
+        certGen.setIssuerDN(principal);
+        certGen.setNotBefore(startDate);
+        certGen.setNotAfter(expirationDate);
+        certGen.setSubjectDN(principal); // note: same as issuer
+        certGen.setPublicKey(keyPair.getPublic());
+        certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());
+
+        X509Certificate x509Certificate = certGen.generate(keyPair.getPrivate(), "BC");
+        return new Certificate(signatureAlgorithm, x509Certificate);
     }
 
     @Override
