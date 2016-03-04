@@ -45,7 +45,8 @@ public class RawRegistrationService {
 	public static final byte REGISTRATION_RESERVED_BYTE_VALUE = (byte) 0x05;
 	public static final byte REGISTRATION_SIGNED_RESERVED_BYTE_VALUE = (byte) 0x00;
 	public static final long INITIAL_DEVICE_COUNTER_VALUE = -1;
-	public static final String REGISTER_TYPE = "navigator.id.finishEnrollment";
+	public static final String REGISTER_FINISH_TYPE = "navigator.id.finishEnrollment";
+	public static final String REGISTER_CANCEL_TYPE = "navigator.id.cancelEnrollment";
 
 	@Logger
 	private Log log;
