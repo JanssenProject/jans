@@ -36,7 +36,18 @@
                 padding: 10px;
                 color: #000000;
                 font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
+                font-size: 13px;
+            }
+
+            .info-section, .info {
+                font-weight: bold;
+            }
+            
+            .body-section, .login-panel-body {
+                font-weight: bold;
+            }
+            .body-list, .login-panel-body {
+                font-weight: bold;
             }
         </style>
     </ui:define>
@@ -64,26 +75,25 @@
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
                                         </s:div>
 
-                                        <p class="info">
-                                            <h:outputText value="#{messages['login.pleaseLoginHere']}"/>
+                                        <p class="info-section">
+                                            <h:outputText value="Please folow next steps to login here"/>
                                         </p>
 
                                         <div class="dialog">
-                                            <h:panelGrid columns="2" border="0" rowClasses="prop"
-                                                         columnClasses="name,value">
-                                                <h:outputLabel value="1. Enter right answer:"/>
+                                            <h:panelGrid columns="2" border="0" rowClasses="prop" columnClasses="name, name">
+                                                <p class="body-list">1. Enter right answer:</p>
                                                 <h:panelGroup>
 			                                        <div id="captchaHolder">
-			                                            <h:outputText value="recaptcha form" escape="false" />
+			                                            <h:outputText value="'recaptcha form'" escape="false" />
 			                                            <h:outputText value="#{recaptcha.html}" escape="false" />
 			                                        </div>
 		                                        </h:panelGroup>
 		
-                                                <h:outputLabel value="2. Click «Login» button or «Enter» to login."/>
-                                                <h:outputText value=""/>
+                                                <p class="body-list">2. Click «Login» button.</p>
+                                                <p/>
 
-                                                <h:outputLabel value="3. If the certificates list appears then choose right certificate."/>
-                                                <h:outputText value=""/>
+                                                <p class="body-list">3. If the certificates list appears then choose right certificate.</p>
+                                                <p/>
                                             </h:panelGrid>
                                         </div>
 
