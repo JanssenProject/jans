@@ -28,23 +28,13 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "Cert. Initialization"
 
-        #if not (configurationAttributes.containsKey("authentication_mode")):
-        #    print "Cert. Initialization. Property authentication_mode is mandatory"
-        #    return False
+        if not (configurationAttributes.containsKey("map_user_cert")):
+            print "Cert. Initialization. Property map_user_cert is mandatory"
+            return False
 
-        #authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
-        #if StringHelper.isEmpty(authentication_mode):
-        #    print "Cert. Initialization. Failed to determine authentication_mode. authentication_mode configuration parameter is empty"
-        #    return False
-        
-        #self.oneStep = StringHelper.equalsIgnoreCase(authentication_mode, "one_step")
-        #self.twoStep = StringHelper.equalsIgnoreCase(authentication_mode, "two_step")
+        self.map_user_cert = StringHelper.toBoolean(configurationAttributes.get("map_user_cert").getValue2(), False)
+        print "Cert. Initialization. map_user_cert: '%s'" % self.map_user_cert
 
-        #if not (self.oneStep or self.twoStep):
-        #    print "Cert. Initialization. Valid authentication_mode values are one_step and two_step"
-        #    return False
-        
-        #print "Cert. Initialized successfully. oneStep: '%s', twoStep: '%s'" % (self.oneStep, self.twoStep)
         print "Cert. Initialized successfully"
 
         return True   
@@ -75,14 +65,14 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 1"
             login_button = ServerUtil.getFirstValue(requestParameters, "loginForm:loginButton")
             if StringHelper.isEmpty(login_button):
-                print "Cert. Authenticate for step 1. Form was submitted incorrectly"
+                print "Cert. Authenticate for step 1. Form were submitted incorrectly"
                 return False
             
             return True
         elif (step == 2):
             print "Cert. Authenticate for step 2"
-            # Validate if user selected certificate
 
+            # Validate if user selected certificate
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates == None) or (len(x509Certificates) == 0):
@@ -115,18 +105,66 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("cert_x509_fingerprint", x509CertificateFingerprint)
             print "Cert. Authenticate for step 2. Fingerprint is '%s' of certificate with DN '%s'" % (x509CertificateFingerprint, x509Certificate.getSubjectX500Principal())
             
-            # Attempt to find user by certificate's fingerprint
-            if True:
-                print "Cert. Authenticate for step 2. Find user '%s' by fingerprint '%s'" % (None, None)
-                # Authenticate user
-                # Set 2 authentication steps
-            
-            
-            return True
+            # Attempt to find user by certificate fingerprint
+            cert_user_external_uid = "cert: %s" % x509CertificateFingerprint
+            print "Cert. Authenticate for step 2. Attempting to find user by oxExternalUid attribute value %s" % cert_user_external_uid
+
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            if find_user_by_external_uid == None:
+                print "Cert. Authenticate for step 2. Failed to find user"
+                
+                if self.map_user_cert:
+                    print "Cert. Authenticate for step 2. Storing cert_user_external_uid for step 3"
+                    context.set("cert_user_external_uid", cert_user_external_uid)
+                    return True
+                else:
+                    print "Cert. Authenticate for step 2. Mapping cet to user account is not allowed"
+                    context.set("cert_count_login_steps", 2)
+                    return False
+
+            foundUserName = find_user_by_external_uid.getUserId()
+            print "Cert. Authenticate for step 2. foundUserName: " + foundUserName
+
+            logged_in = False
+            userService = UserService.instance()
+            logged_in = userService.authenticate(foundUserName)
+        
+            print "Cert. Authenticate for step 2. Setting count steps to 2"
+            context.set("cert_count_login_steps", 2)
+
+            return logged_in
         elif (step == 3):
             print "Cert. Authenticate for step 3"
-            # Map user to selected certificate
 
+            cert_user_external_uid = self.getSessionAttribute("cert_user_external_uid")
+            if cert_user_external_uid == None:
+                print "Cert. Authenticate for step 3. cert_user_external_uid is empty"
+                return False
+
+            credentials = Identity.instance().getCredentials()
+            user_name = credentials.getUsername()
+            user_password = credentials.getPassword()
+
+            logged_in = False
+            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+                logged_in = userService.authenticate(user_name, user_password)
+
+            if (not logged_in):
+                return False
+
+            # Double check just to make sure. We did checking in previous step
+            # Check if there is user which has cert_user_external_uid
+            # Avoid mapping user cert to more than one IDP account
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            if find_user_by_external_uid == None:
+                # Add cert_user_external_uid to user's external GUID list
+                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
+                if find_user_by_external_uid == None:
+                    print "Cert. Authenticate for step 3. Failed to update current user"
+                    return False
+
+                return True
+        
             return True
         else:
             return False
@@ -140,12 +178,12 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList("cert_selected", "cert_valid", "cert_x509")
+        return Arrays.asList("cert_selected", "cert_valid", "cert_x509", "cert_x509_fingerprint", "cert_count_login_steps", "cert_user_external_uid")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("cert_count_login_steps")):
-            return context.get("cert_count_login_steps")
+        cert_count_login_steps = self.getSessionAttribute("cert_count_login_steps")
+        if cert_count_login_steps != None:
+            return cert_count_login_steps
         else:
             return 3
 
@@ -155,6 +193,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 2):
             return "/cert-login.xhtml"
         elif (step == 3):
+            cert_selected = self.getSessionAttribute("cert_selected")
+            if True != cert_selected:
+                return "/auth/cert/cert-not-selected.xhtml"
+
+            cert_valid = self.getSessionAttribute("cert_valid")
+            if True != cert_valid:
+                return "/auth/cert/cert-invalid.xhtml"
+            
             return "/login.xhtml"
 
         return ""
@@ -182,12 +228,19 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return find_user_by_uid
 
-    def validateCertificate(self, x509Certificate):
-        print "Cert. Certificate with DN '%s' is valid" % x509Certificate.getSubjectX500Principal()
+    def getSessionAttribute(self, attribute_name):
+        context = Contexts.getEventContext()
+
+        # Try to get attribute value from Seam event context
+        if context.isSet(attribute_name):
+            return context.get(attribute_name)
         
-        # TODO: Implement validation
-        
-        return True
+        # Try to get attribute from persistent session
+        session_attributes = context.get("sessionAttributes")
+        if session_attributes.containsKey(attribute_name):
+            return session_attributes.get(attribute_name)
+
+        return None
 
     def calculateCertificateFingerprint(self, x509Certificate):
         print "Cert. Calculating certificate DN '%s' fingerprint" % x509Certificate.getSubjectX500Principal()
@@ -199,3 +252,18 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return fingerprint
         
+
+    def validateCertificate(self, x509Certificate):
+        print "Cert. Validating certificate with DN '%s'" % x509Certificate.getSubjectX500Principal()
+        
+        # Validate certificate date
+        valid = x509Certificate.checkValidity()
+        if not valid:
+            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
+            return False
+        
+        # Check if certificate signed by specified CA
+        # TODO: Implement validation
+        
+        
+        return True
