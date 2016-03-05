@@ -6,8 +6,13 @@
 
 package org.xdi.oxauth.action;
 
+import com.google.common.collect.Lists;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
@@ -117,7 +122,7 @@ public class RegistrationAction {
             request.setInitiateLoginUri(initiateLoginUri);
             request.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUris));
             request.setRequestUris(StringUtils.spaceSeparatedToList(requestUris));
-            request.setLogoutUri(logoutUri);
+            request.setLogoutUris(Lists.newArrayList(logoutUri));
             request.setLogoutSessionRequired(logoutSessionRequired);
 
             RegisterClient client = new RegisterClient(registrationEndpoint);

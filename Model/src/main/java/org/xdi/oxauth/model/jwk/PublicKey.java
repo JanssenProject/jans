@@ -7,12 +7,21 @@
 package org.xdi.oxauth.model.jwk;
 
 /**
- * @author Javier Rojas Blum Date: 04.26.2012
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 public class PublicKey {
 
-    private String modulus;
-    private String exponent;
+    /**
+     * Modulus
+     */
+    private String n;
+
+    /**
+     * Exponent
+     */
+    private String e;
+
     private String x;
     private String y;
 
@@ -22,17 +31,17 @@ public class PublicKey {
      *
      * @return The modulus value for the RSA public key.
      */
-    public String getModulus() {
-        return modulus;
+    public String getN() {
+        return n;
     }
 
     /**
      * Sets the modulus value for the RSA public key.
      *
-     * @param modulus The modulus value for the RSA public key.
+     * @param n The modulus value for the RSA public key.
      */
-    public void setModulus(String modulus) {
-        this.modulus = modulus;
+    public void setN(String n) {
+        this.n = n;
     }
 
     /**
@@ -40,17 +49,17 @@ public class PublicKey {
      *
      * @return The exponent value for the RSA public key.
      */
-    public String getExponent() {
-        return exponent;
+    public String getE() {
+        return e;
     }
 
     /**
      * Sets the exponent value for the RSA public key.
      *
-     * @param exponent The exponent value for the RSA public key.
+     * @param e The exponent value for the RSA public key.
      */
-    public void setExponent(String exponent) {
-        this.exponent = exponent;
+    public void setE(String e) {
+        this.e = e;
     }
 
     /**

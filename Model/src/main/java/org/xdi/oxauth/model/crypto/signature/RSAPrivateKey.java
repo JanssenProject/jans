@@ -14,11 +14,13 @@ import org.xdi.oxauth.model.util.StringUtils;
 
 import java.math.BigInteger;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * The Private Key for the RSA Algorithm
  *
  * @author Javier Rojas Blum
- * @version February 9, 2016
+ * @version February 17, 2016
  */
 public class RSAPrivateKey extends PrivateKey {
 
@@ -55,9 +57,9 @@ public class RSAPrivateKey extends PrivateKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("modulus", JwtUtil.base64urlencodeUnsignedBigInt(modulus));
-        jsonObject.put("privateExponent", JwtUtil.base64urlencodeUnsignedBigInt(privateExponent));
-        jsonObject.put("d", JSONObject.NULL);
+        jsonObject.put(MODULUS, JwtUtil.base64urlencodeUnsignedBigInt(modulus));
+        jsonObject.put(EXPONENT, JwtUtil.base64urlencodeUnsignedBigInt(privateExponent));
+        jsonObject.put(D, JSONObject.NULL);
 
         return jsonObject;
     }

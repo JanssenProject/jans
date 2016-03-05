@@ -105,7 +105,7 @@ public class RptStatusWS {
 
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
-            if (AbstractRPTManager.isGat(rpt.getCode())) {
+            if (rpt != null && AbstractRPTManager.isGat(rpt.getCode())) {
                 return gatResponse(rpt);
             }
             if (!isValid(rpt)) {

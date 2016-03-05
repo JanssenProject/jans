@@ -14,6 +14,8 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Date;
@@ -23,7 +25,7 @@ import java.util.Set;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version February 15, 2015
  */
 
 public interface IAuthorizationGrant {
@@ -49,7 +51,7 @@ public interface IAuthorizationGrant {
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
                                  String authMode)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
-            InvalidClaimException;
+            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException;
 
     public RefreshToken getRefreshToken(String refreshTokenCode);
 

@@ -11,12 +11,13 @@ import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.client.EndSessionClient;
+import org.xdi.oxauth.client.EndSessionRequest;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 28, 2015
+ * @version February 23, 2016
  */
 @Name("endSessionAction")
 @Scope(ScopeType.SESSION)
@@ -37,12 +38,10 @@ public class EndSessionAction {
 
     public void exec() {
         try {
-            EndSessionClient client = new EndSessionClient(endSessionEndpoint);
-            client.execEndSession(idTokenHint, postLogoutRedirectUri, state);
+            EndSessionRequest req = new EndSessionRequest(idTokenHint, postLogoutRedirectUri, state);
 
-            showResults = true;
-            requestString = client.getRequestAsString();
-            responseString = client.getResponseAsString();
+            String authorizationRequest = endSessionEndpoint + "?" + req.getQueryString();
+            FacesManager.instance().redirectToExternalURL(authorizationRequest);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

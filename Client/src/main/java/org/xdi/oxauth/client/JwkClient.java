@@ -28,7 +28,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version November 16, 2015
+ * @version February 17, 2016
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
@@ -115,37 +115,37 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
                     for (int i = 0; i < jwks.length(); i++) {
                         JSONObject jsonKeyValue = jwks.getJSONObject(i);
-                        JSONWebKey JSONWebKey = new JSONWebKey();
+                        JSONWebKey jsonWebKey = new JSONWebKey();
 
                         if (jsonKeyValue.has(KEY_TYPE)) {
-                            JSONWebKey.setKeyType(KeyType.fromString(jsonKeyValue.getString(KEY_TYPE)));
+                            jsonWebKey.setKty(KeyType.fromString(jsonKeyValue.getString(KEY_TYPE)));
                         }
                         if (jsonKeyValue.has(KEY_ID)) {
-                            JSONWebKey.setKeyId(jsonKeyValue.getString(KEY_ID));
+                            jsonWebKey.setKid(jsonKeyValue.getString(KEY_ID));
                         }
                         if (jsonKeyValue.has(KEY_USE)) {
-                            JSONWebKey.setUse(Use.fromString(jsonKeyValue.getString(KEY_USE)));
+                            jsonWebKey.setUse(Use.fromString(jsonKeyValue.getString(KEY_USE)));
                         }
                         if (jsonKeyValue.has(ALGORITHM)) {
-                            JSONWebKey.setAlgorithm(jsonKeyValue.getString(ALGORITHM));
+                            jsonWebKey.setAlg(jsonKeyValue.getString(ALGORITHM));
                         }
                         if (jsonKeyValue.has(MODULUS)) {
-                            JSONWebKey.getPublicKey().setModulus(jsonKeyValue.getString(MODULUS));
+                            jsonWebKey.getPublicKey().setN(jsonKeyValue.getString(MODULUS));
                         }
                         if (jsonKeyValue.has(EXPONENT)) {
-                            JSONWebKey.getPublicKey().setExponent(jsonKeyValue.getString(EXPONENT));
+                            jsonWebKey.getPublicKey().setE(jsonKeyValue.getString(EXPONENT));
                         }
                         if (jsonKeyValue.has(CURVE)) {
-                            JSONWebKey.setCurve(jsonKeyValue.getString(CURVE));
+                            jsonWebKey.setCrv(jsonKeyValue.getString(CURVE));
                         }
                         if (jsonKeyValue.has(X)) {
-                            JSONWebKey.getPublicKey().setX(jsonKeyValue.getString(X));
+                            jsonWebKey.getPublicKey().setX(jsonKeyValue.getString(X));
                         }
                         if (jsonKeyValue.has(Y)) {
-                            JSONWebKey.getPublicKey().setY(jsonKeyValue.getString(Y));
+                            jsonWebKey.getPublicKey().setY(jsonKeyValue.getString(Y));
                         }
 
-                        jwkList.add(JSONWebKey);
+                        jwkList.add(jsonWebKey);
                     }
 
                     getResponse().setKeys(jwkList);

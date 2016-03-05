@@ -24,7 +24,7 @@ public class AuthenticateRequestMessageLdap extends RequestMessageLdap implement
     @LdapJsonObject
     @LdapAttribute(name = "oxRequest")
 	private AuthenticateRequestMessage authenticateRequestMessage;
-	
+
 	public AuthenticateRequestMessageLdap() {}
 
 	public AuthenticateRequestMessageLdap(AuthenticateRequestMessage authenticateRequestMessage) {
@@ -32,9 +32,9 @@ public class AuthenticateRequestMessageLdap extends RequestMessageLdap implement
 		this.requestId = authenticateRequestMessage.getRequestId();
 	}
 
-	public AuthenticateRequestMessageLdap(String dn, String id, Date creationDate, String sessionState, String userName,
+	public AuthenticateRequestMessageLdap(String dn, String id, Date creationDate, String sessionState, String userInum,
 			AuthenticateRequestMessage authenticateRequestMessage) {
-		super(dn, id, authenticateRequestMessage.getRequestId(), creationDate, sessionState, userName);
+		super(dn, id, authenticateRequestMessage.getRequestId(), creationDate, sessionState, userInum);
 		this.authenticateRequestMessage = authenticateRequestMessage;
 	}
 

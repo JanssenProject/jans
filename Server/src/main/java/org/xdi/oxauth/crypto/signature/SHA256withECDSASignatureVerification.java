@@ -21,7 +21,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
 import org.xdi.oxauth.model.exception.SignatureException;
 
-public class BouncyCastleSignatureVerification implements SignatureVerification {
+public class SHA256withECDSASignatureVerification implements SignatureVerification {
 
     @Override
     public boolean checkSignature(X509Certificate certificate, byte[] signedBytes, byte[] signature) throws SignatureException {
@@ -32,7 +32,7 @@ public class BouncyCastleSignatureVerification implements SignatureVerification 
     public boolean checkSignature(PublicKey publicKey, byte[] signedBytes, byte[] signature) throws SignatureException {
         boolean isValid = false;
 		try {
-			Signature ecdsaSignature = Signature.getInstance("SHA256WITHECDSA");
+			Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA");
 			ecdsaSignature.initVerify(publicKey);
 			ecdsaSignature.update(signedBytes);
 
@@ -46,7 +46,7 @@ public class BouncyCastleSignatureVerification implements SignatureVerification 
 
     @Override
     public PublicKey decodePublicKey(byte[] encodedPublicKey) throws SignatureException {
-            X9ECParameters curve = SECNamedCurves.getByName("SECP256R1");
+            X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
             ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
 
             try {

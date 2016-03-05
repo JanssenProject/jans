@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version February 23, 2016
  */
 
 @Scope(ScopeType.STATELESS)
@@ -148,10 +148,10 @@ public class SessionStateService {
 
     public String getSessionStateFromCookie() {
         try {
-		    FacesContext facesContext = FacesContext.getCurrentInstance();
-		    if (facesContext == null) {
-		    	return null;
-		    }
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            if (facesContext == null) {
+                return null;
+            }
             final HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
             return getSessionStateFromCookie(request);
         } catch (Exception e) {
@@ -161,37 +161,18 @@ public class SessionStateService {
         return null;
     }
 
-    public String getSessionStateFromOpbsCookie(HttpServletRequest request) {
-        try {
-            final Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("opbs") /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_state cookie: '{0}'", cookie.getValue());
-                        return cookie.getValue();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return "";
-    }
-
     public void createSessionStateCookie(String sessionState) {
         try {
             final Object response = FacesContext.getCurrentInstance().getExternalContext().getResponse();
             if (response instanceof HttpServletResponse) {
-                final Cookie sessionStateCookie = new Cookie(SESSION_STATE_COOKIE_NAME, sessionState);
-                sessionStateCookie.setPath("/");
-
-                // ATTENTION : we have to set also HttpOnly flag but it's supported from Servlet 3.0
-                // we need to upgrade to Servlet 3.0 and target to Tomcat 7 : http://tomcat.apache.org/whichversion.html
-                // sessionStateCookie.setSecure(true);
-                // sessionStateCookie.setHttpOnly(true);
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
-                httpResponse.addCookie(sessionStateCookie);
+
+                // Create the special cookie header with secure flag but not HttpOnly because the session_state
+                // needs to be read from the OP iframe using JavaScript
+                String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
+                header += "; Path=/";
+                header += "; Secure";
+                httpResponse.addHeader("Set-Cookie", header);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -282,8 +263,6 @@ public class SessionStateService {
             sessionState.setState(state);
         }
 
-        configureOpbsCookie(sessionState);
-
         sessionState.setSessionAttributes(sessionIdAttributes);
 
         boolean persisted = false;
@@ -300,22 +279,10 @@ public class SessionStateService {
         sessionState.setAuthenticationTime(new Date());
         sessionState.setState(SessionIdState.AUTHENTICATED);
 
-        configureOpbsCookie(sessionState);
-
         boolean persisted = updateSessionState(sessionState, true, true);
 
         log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
         return sessionState;
-    }
-
-    private void configureOpbsCookie(SessionState sessionState) {
-        final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        if (facesContext != null) {
-            Cookie cookie = new Cookie("opbs", sessionState.getId());
-            cookie.setMaxAge(unusedLifetime);
-            ((HttpServletResponse) facesContext.getExternalContext().getResponse()).addCookie(cookie);
-        }
     }
 
     public boolean persistSessionState(final SessionState sessionState) {

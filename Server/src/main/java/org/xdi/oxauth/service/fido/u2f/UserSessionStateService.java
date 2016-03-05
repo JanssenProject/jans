@@ -38,7 +38,7 @@ public class UserSessionStateService {
 	@In
 	private SessionStateService sessionStateService;
 
-	public void updateUserSessionStateOnFinishRequest(String sessionState, String userName, DeviceRegistration deviceRegistration, boolean enroll, boolean oneStep)  {
+	public void updateUserSessionStateOnFinishRequest(String sessionState, String userInum, DeviceRegistration deviceRegistration, boolean enroll, boolean oneStep)  {
 		SessionState ldapSessionState = getLdapSessionState(sessionState);
 		if (ldapSessionState == null) {
 			return;
@@ -47,7 +47,7 @@ public class UserSessionStateService {
 		Map<String, String> sessionAttributes = ldapSessionState.getSessionAttributes();
 		sessionAttributes.put("session_custom_state", "approved");
 		sessionAttributes.put("oxpush2_u2f_device_id", deviceRegistration.getId());
-		sessionAttributes.put("oxpush2_u2f_device_user_name", userName);
+		sessionAttributes.put("oxpush2_u2f_device_user_inum", userInum);
 		sessionAttributes.put("oxpush2_u2f_device_enroll", Boolean.toString(enroll));
 		sessionAttributes.put("oxpush2_u2f_device_one_step", Boolean.toString(oneStep));
 		

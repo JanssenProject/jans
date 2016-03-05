@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -217,8 +216,8 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getPostLogoutRedirectUris() != null && !getRequest().getPostLogoutRedirectUris().isEmpty()) {
                     requestBody.put(POST_LOGOUT_REDIRECT_URIS.toString(), getRequest().getPostLogoutRedirectUris());
                 }
-                if (!Strings.isNullOrEmpty(getRequest().getLogoutUri())) {
-                    requestBody.put(LOGOUT_URI.getName(), getRequest().getLogoutUri());
+                if (getRequest().getLogoutUris() != null && !getRequest().getLogoutUris().isEmpty()) {
+                    requestBody.put(LOGOUT_URI.getName(), getRequest().getLogoutUris());
                 }
                 if (getRequest().getLogoutSessionRequired() != null) {
                     requestBody.put(LOGOUT_SESSION_REQUIRED.getName(), getRequest().getLogoutSessionRequired());

@@ -6,19 +6,22 @@
 
 package org.xdi.oxauth.service.uma;
 
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Holds resource set permission tokens and permissions
@@ -30,60 +33,116 @@ import java.util.Date;
 @AutoCreate
 @Scope(ScopeType.APPLICATION)
 @Name("resourceSetPermissionManager")
-public class ResourceSetPermissionManager implements IResourceSetPermissionManager {
+public class ResourceSetPermissionManager extends AbstractResourceSetPermissionManager {
 
-    @Logger
-    private Log log;
+    private static final String ORGUNIT_OF_RESOURCE_SET_PERMISSION = "uma_resource_set_permission";
 
-    private IResourceSetPermissionManager manager;
+    private static final Log LOG = Logging.getLog(ResourceSetPermissionManager.class);
 
-    @Create
-    public void init() {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                manager = new ResourceSetPermissionManagerInMemory();
-                log.info("Created IN-MEMORY UMA resource set manager");
-                break;
-            case LDAP:
-                manager = new ResourceSetPermissionManagerLdap();
-                log.info("Created LDAP UMA resource set manager");
-                break;
-            default:
-                log.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.)");
+    private final LdapEntryManager ldapEntryManager;
+
+    public ResourceSetPermissionManager() {
+        ldapEntryManager = ServerUtil.getLdapManager();
+    }
+
+    @Override
+    public void addResourceSetPermission(ResourceSetPermission resourceSetPermission, String clientDn) {
+        try {
+            addBranchIfNeeded(clientDn);
+            resourceSetPermission.setDn(getDn(clientDn, resourceSetPermission.getTicket()));
+            ldapEntryManager.persist(resourceSetPermission);
+        } catch (Exception e) {
+            LOG.trace(e.getMessage(), e);
         }
     }
 
-    public void addResourceSetPermission(ResourceSetPermission resourceSetPermission, String p_clientDn) {
-        manager.addResourceSetPermission(resourceSetPermission, p_clientDn);
+    @Override
+    public ResourceSetPermission getResourceSetPermissionByTicket(String p_ticket) {
+        try {
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
+            final Filter filter = Filter.create(String.format("&(oxTicket=%s)", p_ticket));
+            final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(baseDn, ResourceSetPermission.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                return entries.get(0);
+            }
+        } catch (Exception e) {
+            LOG.trace(e.getMessage(), e);
+        }
+        return null;
     }
 
-    public ResourceSetPermission getResourceSetPermissionByTicket(String resourceSetPermissionTicket) {
-        return manager.getResourceSetPermissionByTicket(resourceSetPermissionTicket);
-    }
-
+    @Override
     public String getResourceSetPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
-        return manager.getResourceSetPermissionTicketByConfigurationCode(configurationCode, clientDn);
+        final ResourceSetPermission permission = getResourceSetPermissionByConfigurationCode(configurationCode, clientDn);
+        if (permission != null) {
+            return permission.getTicket();
+        }
+        return null;
     }
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, UmaPermission resourceSetPermissionRequest, Date expirationDate) {
-        return manager.createResourceSetPermission(amHost, resourceSetPermissionRequest, expirationDate);
+    public ResourceSetPermission getResourceSetPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
+        try {
+            final Filter filter = Filter.create(String.format("&(oxConfigurationCode=%s)", p_configurationCode));
+            final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(clientDn, ResourceSetPermission.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                return entries.get(0);
+            }
+        } catch (Exception e) {
+            LOG.trace(e.getMessage(), e);
+        }
+        return null;
     }
 
-    public void deleteResourceSetPermission(String resourceSetPermissionTicket) {
-        manager.deleteResourceSetPermission(resourceSetPermissionTicket);
+    @Override
+    public void deleteResourceSetPermission(String p_ticket) {
+        try {
+            final ResourceSetPermission permission = getResourceSetPermissionByTicket(p_ticket);
+            if (permission != null) {
+                ldapEntryManager.remove(permission);
+            }
+        } catch (Exception e) {
+            LOG.trace(e.getMessage(), e);
+        }
     }
 
+    @Override
     public void cleanupResourceSetPermissions(Date now) {
-        manager.cleanupResourceSetPermissions(now);
+        try {
+            final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+            final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(
+                    ConfigurationFactory.instance().getBaseDn().getClients(), ResourceSetPermission.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                for (ResourceSetPermission p : entries) {
+                    ldapEntryManager.remove(p);
+                }
+            }
+        } catch (Exception e) {
+            LOG.trace(e.getMessage(), e);
+        }
     }
 
-    /**
-     * Get ResourceSetPermissionManager instance
-     *
-     * @return ResourceSetPermissionManager instance
-     */
-    public static ResourceSetPermissionManager instance() {
-        return ServerUtil.instance(ResourceSetPermissionManager.class);
+    public void addBranch(String clientDn) {
+        final SimpleBranch branch = new SimpleBranch();
+        branch.setOrganizationalUnitName(ORGUNIT_OF_RESOURCE_SET_PERMISSION);
+        branch.setDn(getBranchDn(clientDn));
+        ldapEntryManager.persist(branch);
+    }
+
+    public void addBranchIfNeeded(String clientDn) {
+        if (!containsBranch(clientDn)) {
+            addBranch(clientDn);
+        }
+    }
+
+    public boolean containsBranch(String clientDn) {
+        return ldapEntryManager.contains(SimpleBranch.class, getBranchDn(clientDn));
+    }
+
+    public static String getDn(String clientDn, String ticket) {
+        return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
+    }
+
+    public static String getBranchDn(String clientDn) {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_SET_PERMISSION, clientDn);
     }
 }

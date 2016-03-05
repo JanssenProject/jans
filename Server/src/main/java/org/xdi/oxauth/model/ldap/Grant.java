@@ -5,9 +5,11 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.util.Date;
+
 /**
  * @author Javier Rojas Blum
- * @version September 16, 2015
+ * @version February 24, 2016
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthGrant"})
@@ -17,6 +19,8 @@ public class Grant {
     private String dn;
     @LdapAttribute(name = "oxAuthGrantId")
     private String id;
+    @LdapAttribute(name = "oxAuthCreation")
+    private Date creationDate;
 
     public Grant() {
     }
@@ -35,6 +39,14 @@ public class Grant {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     @Override

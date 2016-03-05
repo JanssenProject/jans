@@ -10,7 +10,7 @@
     </appender>
 
     <appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="${catalina.home}/logs/oxauth.log"/>
+        <param name="File" value="${catalina.base}/logs/oxauth.log"/>
         <param name="DatePattern" value="'.'yyyy-MM-dd"/>
         <param name="BufferSize" value="1000"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -24,7 +24,7 @@
     <!-- ================ -->
 
     <appender name="OX_PERSISTENCE_LDAP_STATISTICS_FILE" class="org.apache.log4j.DailyRollingFileAppender">
-         <param name="File" value="${catalina.home}/logs/oxauth_persistence_ldap_statistics.log"/>
+         <param name="File" value="${catalina.base}/logs/oxauth_persistence_ldap_statistics.log"/>
          <param name="DatePattern" value="'.'yyyy-MM-dd"/>
 
          <layout class="org.apache.log4j.PatternLayout">
@@ -34,7 +34,7 @@
    </appender>
 
     <appender name="OX_SCRIPT_LOG_FILE" class="org.apache.log4j.DailyRollingFileAppender">
-         <param name="File" value="${catalina.home}/logs/oxauth_script.log"/>
+         <param name="File" value="${catalina.base}/logs/oxauth_script.log"/>
          <param name="DatePattern" value="'.'yyyy-MM-dd"/>
 
          <layout class="org.apache.log4j.PatternLayout">
@@ -45,11 +45,11 @@
 
     <!-- ############### oxAuth #################  -->
     <category name="org.xdi.oxauth">
-        <priority value="TRACE"/>
+        <priority value="${log4j.default.log.level}"/>
     </category>
 
     <category name="org.xdi.service">
-        <priority value="TRACE"/>
+        <priority value="${log4j.default.log.level}"/>
     </category>
 
     <!-- ############### Embedded JBoss AS #################  -->
@@ -153,22 +153,22 @@
     <!-- ================ -->
 
     <logger name="org.xdi.oxauth.service.status.ldap" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
     </logger>
 
     <logger name="org.xdi.service.PythonService" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
     <logger name="org.xdi.service.custom.script" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
     <logger name="org.xdi.oxauth.service.custom" additivity="false">
-        <level value="DEBUG"/>
+        <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
