@@ -116,7 +116,7 @@
         <auth-constraint/>
     </security-constraint>
     <security-constraint>
-        <display-name>Request client ceet for specific page</display-name>
+        <display-name>Request client cert for specific page</display-name>
         <web-resource-collection>
             <web-resource-name>Cert login page</web-resource-name>
             <url-pattern>/cert-login</url-pattern>
@@ -125,11 +125,10 @@
             <role-name>*</role-name>
             </auth-constraint>
     </security-constraint>
-    <login-config><auth-method>CLIENT-CERT</auth-method></login-config>
 
     <session-config>
         <session-timeout>30</session-timeout>
-	<tracking-mode>COOKIE</tracking-mode>
+        <tracking-mode>COOKIE</tracking-mode>
     </session-config>
     <!--
        <persistence-unit-ref>
@@ -137,7 +136,6 @@
           <persistence-unit-name>oxauth</persistence-unit-name>
        </persistence-unit-ref>
     -->
-
 	<env-entry>
 		<env-entry-name>com.sun.faces.ClientStateSavingPassword</env-entry-name>
 		<env-entry-type>java.lang.String</env-entry-type>

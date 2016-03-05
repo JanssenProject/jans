@@ -14,14 +14,13 @@ import org.xdi.oxauth.model.util.StringUtils;
 
 import java.math.BigInteger;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * The Public Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
  * @author Javier Rojas Blum
- * @version February 9, 2016
+ * @version February 17, 2016
  */
 public class ECDSAPublicKey extends PublicKey {
 
@@ -72,8 +71,8 @@ public class ECDSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("modulus", JSONObject.NULL);
-        jsonObject.put("exponent", JSONObject.NULL);
+        jsonObject.put(MODULUS, JSONObject.NULL);
+        jsonObject.put(EXPONENT, JSONObject.NULL);
         jsonObject.put(X, JwtUtil.base64urlencodeUnsignedBigInt(x));
         jsonObject.put(Y, JwtUtil.base64urlencodeUnsignedBigInt(y));
 

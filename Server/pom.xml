@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxauth</artifactId>
-        <version>3.0.3-SNAPSHOT</version>
+        <version>2.4.3-SNAPSHOT</version>
     </parent>
 
     <prerequisites>
@@ -21,6 +21,7 @@
         <finalName>oxauth</finalName>
 
         <filters>
+            <filter>profiles/${cfg}/config-build.properties</filter>
             <filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
         </filters>
 
@@ -394,6 +395,21 @@
             <groupId>org.xdi</groupId>
             <artifactId>oxUtil</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxTomcat</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>tomcat-catalina</artifactId>
+            		<groupId>org.apache.tomcat</groupId>
+            	</exclusion>
+            	<exclusion>
+            		<artifactId>tomcat-coyote</artifactId>
+            		<groupId>org.apache.tomcat</groupId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+ 
         <dependency>
             <groupId>com.unboundid</groupId>
             <artifactId>unboundid-ldapsdk</artifactId>
@@ -770,7 +786,7 @@
             <id>toopher</id>
             <activation>
                 <property>
-                    <name>!toopher-disabled</name>
+                    <name>toopher-enabled</name>
                 </property>
             </activation>
             <properties>
@@ -861,6 +877,34 @@
                 <dependency>
                     <groupId>org.xdi</groupId>
                     <artifactId>oxSaml</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
+            <id>push_sender</id>
+            <activation>
+                <property>
+                    <name>!push_sender</name>
+                </property>
+            </activation>
+            <properties>
+            </properties>
+            <build>
+                <plugins>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>com.devsu</groupId>
+                    <artifactId>push-sender</artifactId>
+                    <version>1.0.2</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.slf4j</groupId>
+            		<artifactId>slf4j-simple</artifactId>
+            	</exclusion>
+            </exclusions>
                 </dependency>
             </dependencies>
         </profile>

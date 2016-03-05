@@ -6,17 +6,15 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.util.ServerUtil;
+
+import java.io.IOException;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,16 +23,16 @@ import org.xdi.oxauth.util.ServerUtil;
 
 class TConfiguration {
 
-    private final BaseTest m_baseTest;
-    private UmaConfiguration m_configuration = null;
+    private final BaseTest baseTest;
+    private UmaConfiguration configuration = null;
 
     public TConfiguration(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
-        m_baseTest = p_baseTest;
+        baseTest = p_baseTest;
     }
 
     public UmaConfiguration getConfiguration(final String umaConfigurationPath) {
-        if (m_configuration == null) {
+        if (configuration == null) {
             try {
                 configuration(umaConfigurationPath);
             } catch (Exception e) {
@@ -42,12 +40,12 @@ class TConfiguration {
                 fail();
             }
         }
-        UmaTestUtil.assert_(m_configuration);
-        return m_configuration;
+        UmaTestUtil.assert_(configuration);
+        return configuration;
     }
 
     private void configuration(final String umaConfigurationPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.GET, umaConfigurationPath) {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, umaConfigurationPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -62,8 +60,8 @@ class TConfiguration {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 try {
-                    m_configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), UmaConfiguration.class);
-                    UmaTestUtil.assert_(m_configuration);
+                    configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), UmaConfiguration.class);
+                    UmaTestUtil.assert_(configuration);
                 } catch (IOException e) {
                     e.printStackTrace();
                     fail();

@@ -6,10 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import org.xdi.oxauth.model.util.Util;
+import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -26,7 +24,10 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides operations with users.
@@ -89,9 +90,27 @@ public class UserService {
      *
      * @return User
      */
+    @Nullable
     public User getUserByDn(String dn, String... returnAttributes) {
+        if (Util.isNullOrEmpty(dn)) {
+            return null;
+        }
         return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
+
+	public User getUserByInum(String inum, String... returnAttributes) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, returnAttributes);
+		if (user == null) {
+			return null;
+		}
+
+		return user;
+	}
 
 	public User getUser(String userId, String... returnAttributes) {
 		log.debug("Getting user information from LDAP: userId = {0}", userId);

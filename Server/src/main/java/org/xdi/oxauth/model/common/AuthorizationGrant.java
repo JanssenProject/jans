@@ -6,19 +6,23 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.token.IdTokenFactory;
+import org.xdi.oxauth.model.token.JsonWebResponse;
+import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -27,352 +31,247 @@ import java.util.Set;
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version February 15, 2015
  */
-public class AuthorizationGrant implements IAuthorizationGrant {
+public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
-    private static final Log LOGGER = Logging.getLog(AuthorizationGrantListLdap.class);
+    private static final Logger LOGGER = Logger.getLogger(AuthorizationGrant.class);
 
-    private IAuthorizationGrant grant;
+    //private static final int THREADS_COUNT = 200;
 
-    /**
-     * @param user                   The resource owner.
-     * @param authorizationGrantType The authorization grant type.
-     * @param client                 An application making protected resource requests on behalf
-     *                               of the resource owner and with its authorization.
-     * @param authenticationTime     The Claim Value is the number of seconds from
-     *                               1970-01-01T0:0:0Z as measured in UTC until the date/time that the
-     *                               End-User authentication occurred.
-     */
+//    private final ExecutorService executorService = Executors.newFixedThreadPool(THREADS_COUNT, new ThreadFactory() {
+//        public Thread newThread(Runnable p_r) {
+//            Thread thread = new Thread(p_r);
+//            thread.setDaemon(true);
+//            return thread;
+//        }
+//    });
+
+    private final GrantService grantService = GrantService.instance();
+
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                              Date authenticationTime) {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                grant = new AuthorizationGrantInMemory(user, authorizationGrantType, client, authenticationTime);
-                ((AuthorizationGrantInMemory) grant).setParentRef(this);
-                break;
-            case LDAP:
-                grant = new AuthorizationGrantLdap(user, authorizationGrantType, client, authenticationTime);
-                break;
-            default:
-                LOGGER.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.) " + ConfigurationFactory.instance().getConfiguration().getModeEnum());
+                                  Date authenticationTime) {
+        super(user, authorizationGrantType, client, authenticationTime);
+    }
+
+    public static IdToken createIdToken(
+            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
+            Set<String> scopes)
+            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
+            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+        JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
+        return new IdToken(jwr.toString(),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
+                jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+    }
+
+    @Override
+    public String checkScopesPolicy(String scope) {
+        final String result = super.checkScopesPolicy(scope);
+        save();
+        return result;
+    }
+
+    @Override
+    public void save() {
+// http://ox.gluu.org/jira/browse/OXAUTH-322?focusedCommentId=11620#comment-11620
+//        executorService.execute(new Runnable() {
+//            @Override
+//            public void run() {
+        saveImpl();
+//            }
+//        });
+    }
+
+    private void saveImpl() {
+        String grantId = getGrantId();
+        if (grantId != null && StringUtils.isNotBlank(grantId)) {
+            final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
+            if (grants != null && !grants.isEmpty()) {
+                final String nonce = getNonce();
+                final String scopes = getScopesAsString();
+                for (TokenLdap t : grants) {
+                    t.setNonce(nonce);
+                    t.setScope(scopes);
+                    t.setAuthMode(getAcrValues());
+                    t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+
+                    final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
+                    if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
+                        t.setJwtRequest(jwtRequest.getEncodedJwt());
+                    }
+                    grantService.mergeSilently(t);
+                }
+            }
         }
     }
 
-    public IAuthorizationGrant getGrant() {
-        return grant;
-    }
-
-    @Override
-    public String getGrantId() {
-        return grant.getGrantId();
-    }
-
-    @Override
-    public void setGrantId(String p_grantId) {
-        grant.setGrantId(p_grantId);
-    }
-
-    @Override
-    public AuthorizationCode getAuthorizationCode() {
-        return grant.getAuthorizationCode();
-    }
-
-    @Override
-    public void setAuthorizationCode(AuthorizationCode authorizationCode) {
-        grant.setAuthorizationCode(authorizationCode);
-    }
-
-    @Override
-    public String getNonce() {
-        return grant.getNonce();
-    }
-
-    @Override
-    public void setNonce(String nonce) {
-        grant.setNonce(nonce);
-    }
-
-    /**
-     * Creates a new {@link AccessToken}. By default the token has the bearer
-     * token type.
-     *
-     * @return The access token.
-     */
     @Override
     public AccessToken createAccessToken() {
-        return grant.createAccessToken();
+        try {
+            final AccessToken accessToken = super.createAccessToken();
+            if (accessToken.getExpiresIn() > 0) {
+                persist(asToken(accessToken));
+            }
+            return accessToken;
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+            return null;
+        }
     }
 
     @Override
     public AccessToken createLongLivedAccessToken() {
-        return grant.createLongLivedAccessToken();
+        try {
+            final AccessToken accessToken = super.createLongLivedAccessToken();
+            if (accessToken.getExpiresIn() > 0) {
+                persist(asToken(accessToken));
+            }
+            return accessToken;
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+            return null;
+        }
     }
 
-    /**
-     * Creates a new {@link RefreshToken} and revokes all the old refresh
-     * tokens.
-     *
-     * @return The refresh token.
-     */
     @Override
     public RefreshToken createRefreshToken() {
-        return grant.createRefreshToken();
+        try {
+            final RefreshToken refreshToken = super.createRefreshToken();
+            if (refreshToken.getExpiresIn() > 0) {
+            	persist(asToken(refreshToken));
+            }
+            return refreshToken;
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+            return null;
+        }
     }
 
-    /**
-     * Creates a new {@link IdToken} or return an existent one.
-     *
-     * @param nonce The id token.
-     * @return The id token.
-     */
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
                                  String authMode)
-            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
-            InvalidClaimException {
-        return grant.createIdToken(nonce, authorizationCode, accessToken, authMode);
+            throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
+        try {
+            final IdToken idToken = createIdToken(this, nonce, authorizationCode,
+                    accessToken, getScopes());
+            if (idToken.getExpiresIn() > 0) {
+                final TokenLdap tokenLdap = asToken(idToken);
+                tokenLdap.setAuthMode(authMode);
+                persist(tokenLdap);
+            }
+
+            // is it really neccessary to propagate to all tokens?
+            setAcrValues(authMode);
+            save(); // asynchronous save
+            return idToken;
+        } catch (Exception e) {
+            LOGGER.trace(e.getMessage(), e);
+            return null;
+        }
     }
 
-    /**
-     * Gets the refresh token instance from the refresh token list given its
-     * code.
-     *
-     * @param refreshTokenCode The code of the refresh token.
-     * @return The refresh token instance or
-     * <code>null</code> if not found.
-     */
-    @Override
-    public RefreshToken getRefreshToken(String refreshTokenCode) {
-        return grant.getRefreshToken(refreshTokenCode);
+    public void persist(TokenLdap p_token) {
+        grantService.persist(p_token);
     }
 
-    /**
-     * Gets the access token instance from the id token list or the access token
-     * list given its code.
-     *
-     * @param tokenCode The code of the access token.
-     * @return The access token instance or
-     * <code>null</code> if not found.
-     */
-    @Override
-    public AbstractToken getAccessToken(String tokenCode) {
-        return grant.getAccessToken(tokenCode);
+    public void persist(AuthorizationCode p_code) {
+        persist(asToken(p_code));
+    }
+
+    public TokenLdap asToken(IdToken p_token) {
+        final TokenLdap result = asTokenLdap(p_token);
+        result.setTokenTypeEnum(org.xdi.oxauth.model.ldap.TokenType.ID_TOKEN);
+        return result;
+    }
+
+    public TokenLdap asToken(RefreshToken p_token) {
+        final TokenLdap result = asTokenLdap(p_token);
+        result.setTokenTypeEnum(org.xdi.oxauth.model.ldap.TokenType.REFRESH_TOKEN);
+        return result;
+    }
+
+    public TokenLdap asToken(AuthorizationCode p_authorizationCode) {
+        final TokenLdap result = asTokenLdap(p_authorizationCode);
+        result.setTokenTypeEnum(org.xdi.oxauth.model.ldap.TokenType.AUTHORIZATION_CODE);
+        return result;
+    }
+
+    public TokenLdap asToken(AccessToken p_accessToken) {
+        final TokenLdap result = asTokenLdap(p_accessToken);
+        result.setTokenTypeEnum(org.xdi.oxauth.model.ldap.TokenType.ACCESS_TOKEN);
+        return result;
+    }
+
+    public String getScopesAsString() {
+        final StringBuilder scopes = new StringBuilder();
+        for (String s : getScopes()) {
+            scopes.append(s).append(" ");
+        }
+        return scopes.toString().trim();
+    }
+
+    public TokenLdap asTokenLdap(AbstractToken p_token) {
+
+        final String id = GrantService.generateGrantId();
+
+        final TokenLdap result = new TokenLdap();
+
+        result.setDn(GrantService.buildDn(id, getGrantId(), getClientId()));
+        result.setId(id);
+        result.setGrantId(getGrantId());
+        result.setCreationDate(p_token.getCreationDate());
+        result.setExpirationDate(p_token.getExpirationDate());
+        result.setTokenCode(p_token.getCode());
+        result.setUserId(getUserId());
+        result.setClientId(getClientId());
+        result.setScope(getScopesAsString());
+        result.setAuthMode(p_token.getAuthMode());
+        result.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+
+        final AuthorizationGrantType grantType = getAuthorizationGrantType();
+        if (grantType != null) {
+            result.setGrantType(grantType.getParamName());
+        }
+
+        final AuthorizationCode authorizationCode = getAuthorizationCode();
+        if (authorizationCode != null) {
+            result.setAuthorizationCode(authorizationCode.getCode());
+        }
+
+        final String nonce = getNonce();
+        if (nonce != null) {
+            result.setNonce(nonce);
+        }
+
+        final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
+        if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
+            result.setJwtRequest(jwtRequest.getEncodedJwt());
+        }
+        return result;
     }
 
     @Override
     public boolean isValid() {
-        return grant.isValid();
+//        final TokenLdap t = getTokenLdap();
+//        if (t != null) {
+//            if (new Date().after(t.getExpirationDate())) {
+//                return true;
+//            }
+//        }
+        return true;
     }
 
-    /**
-     * Revokes all the issued tokens.
-     */
     @Override
     public void revokeAllTokens() {
-        grant.revokeAllTokens();
+        final TokenLdap tokenLdap = getTokenLdap();
+        if (tokenLdap != null && StringUtils.isNotBlank(tokenLdap.getGrantId())) {
+            grantService.removeAllByGrantId(tokenLdap.getGrantId());
+        }
     }
 
-    /**
-     * Check all tokens for expiration.
-     */
     @Override
     public void checkExpiredTokens() {
-        grant.checkExpiredTokens();
+        // do nothing, clean up is made via grant service: org.xdi.oxauth.service.GrantService.cleanUp()
     }
-
-    /**
-     * Checks the scopes policy configured according to the type of the
-     * authorization grant to limit the issued token scopes.
-     *
-     * @param scope A space-delimited list of values in which the order of
-     *              values does not matter.
-     * @return A space-delimited list of scopes
-     */
-    @Override
-    public String checkScopesPolicy(String scope) {
-        return grant.checkScopesPolicy(scope);
-    }
-
-    /**
-     * Returns the resource owner's.
-     *
-     * @return The resource owner's.
-     */
-    @Override
-    public User getUser() {
-        return grant.getUser();
-    }
-
-    @Override
-    public String getUserId() {
-        return grant.getUserId();
-    }
-
-    @Override
-    public String getUserDn() {
-        return grant.getUserDn();
-    }
-
-    /**
-     * Returns the {@link AuthorizationGrantType}.
-     *
-     * @return The authorization grant type.
-     */
-    @Override
-    public AuthorizationGrantType getAuthorizationGrantType() {
-        return grant.getAuthorizationGrantType();
-    }
-
-    /**
-     * Returns the {@link org.xdi.oxauth.model.registration.Client}. An
-     * application making protected resource requests on behalf of the resource
-     * owner and with its authorization.
-     *
-     * @return The client.
-     */
-    @Override
-    public Client getClient() {
-        return grant.getClient();
-    }
-
-    @Override
-    public String getClientId() {
-        return grant.getClientId();
-    }
-
-    @Override
-    public String getClientDn() {
-        return grant.getClientDn();
-    }
-
-    /**
-     * Returns a list with all the issued access tokens.
-     *
-     * @return List with all the issued access tokens.
-     */
-    @Override
-    public List<AccessToken> getAccessTokens() {
-        return grant.getAccessTokens();
-    }
-
-    /**
-     * Returns a list with all the issued refresh tokens codes.
-     *
-     * @return List with all the issued refresh tokens codes.
-     */
-    @Override
-    public Set<String> getRefreshTokensCodes() {
-        return grant.getRefreshTokensCodes();
-    }
-
-    /**
-     * Returns a list with all the issued access tokens codes.
-     *
-     * @return List with all the issued access tokens codes.
-     */
-    @Override
-    public Set<String> getAccessTokensCodes() {
-        return grant.getAccessTokensCodes();
-    }
-
-    /**
-     * Returns a list with all the issued refresh tokens.
-     *
-     * @return List with all the issued refresh tokens.
-     */
-    @Override
-    public List<RefreshToken> getRefreshTokens() {
-        return grant.getRefreshTokens();
-    }
-
-    @Override
-    public void setRefreshTokens(List<RefreshToken> refreshTokens) {
-        grant.setRefreshTokens(refreshTokens);
-    }
-
-    @Override
-    public AccessToken getLongLivedAccessToken() {
-        return grant.getLongLivedAccessToken();
-    }
-
-    @Override
-    public IdToken getIdToken() {
-        return grant.getIdToken();
-    }
-
-    /**
-     * Returns a list of the scopes granted to the client.
-     *
-     * @return List of the scopes granted to the client.
-     */
-    @Override
-    public Set<String> getScopes() {
-        return grant.getScopes();
-    }
-
-    @Override
-    public Date getAuthenticationTime() {
-        return grant.getAuthenticationTime();
-    }
-
-    @Override
-    public TokenLdap getTokenLdap() {
-        return grant.getTokenLdap();
-    }
-
-    @Override
-    public void setTokenLdap(TokenLdap p_tokenLdap) {
-        grant.setTokenLdap(p_tokenLdap);
-    }
-
-    @Override
-    public void setLongLivedAccessToken(AccessToken longLivedAccessToken) {
-        grant.setLongLivedAccessToken(longLivedAccessToken);
-    }
-
-    @Override
-    public void setIdToken(IdToken idToken) {
-        grant.setIdToken(idToken);
-    }
-
-    @Override
-    public void setScopes(Collection<String> scopes) {
-        grant.setScopes(scopes);
-    }
-
-    @Override
-    public void setAccessTokens(List<AccessToken> accessTokens) {
-        grant.setAccessTokens(accessTokens);
-    }
-
-    @Override
-    public JwtAuthorizationRequest getJwtAuthorizationRequest() {
-        return grant.getJwtAuthorizationRequest();
-    }
-
-    @Override
-    public void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest) {
-        grant.setJwtAuthorizationRequest(p_jwtAuthorizationRequest);
-    }
-
-    @Override
-    public void setAcrValues(String authMode) {
-        grant.setAcrValues(authMode);
-    }
-
-    /**
-     * Saves changes asynchronously
-     */
-    @Override
-    public void save() {
-        grant.save();
-    }
-
-    @Override
-    public String getAcrValues() {
-        return grant.getAcrValues();
-    }
-
 }
