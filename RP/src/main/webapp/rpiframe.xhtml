@@ -8,19 +8,22 @@
     <script type="text/javascript" src="//crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha256.js"></script>
     <script>
         //<![CDATA[
-        var rpOrigin = "https://seed.gluu.org"; // "https://localhost:8443";
-        var opOrigin = "https://seed.gluu.org"; // "https://localhost:8443";
+        var rpOrigin = window.location.origin;
+        var opOrigin = null;
         var clientId = null;
-        var opbs = null;
+        var op_browser_state = null;
         var mes = null;
         var timerId = null;
 
-        function updateMes() {
-            opbs = document.getElementById("sessionState").value;
+        function loadParams() {
+            opOrigin = document.getElementById("opOrigin").value;
             clientId = document.getElementById("clientId").value;
+            op_browser_state = document.getElementById("sessionState").value;
+        }
 
+        function updateMes() {
             var salt = CryptoJS.lib.WordArray.random(128 / 8);
-            mes = clientId + ' ' + CryptoJS.SHA256(clientId + ' ' + rpOrigin + ' ' + opbs + ' ' + salt) + "." + salt;
+            mes = clientId + ' ' + CryptoJS.SHA256(clientId + ' ' + rpOrigin + ' ' + op_browser_state + ' ' + salt) + "." + salt;
         }
 
         function checkSession() {
@@ -57,8 +60,9 @@
         //]]>
     </script>
 </head>
-<body onload="updateMes(); setTimer()">
+<body onload="loadParams(); updateMes(); setTimer()">
 <input id="sessionState" type="hidden" value='#{request.getParameter("session_state")}'/>
 <input id="clientId" type="hidden" value='#{request.getParameter("client_id")}'/>
+<input id="opOrigin" type="hidden" value='#{request.getParameter("op_origin")}'/>
 </body>
 </html>

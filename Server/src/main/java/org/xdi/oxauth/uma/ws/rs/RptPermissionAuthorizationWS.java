@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.google.common.base.Strings;
+import org.xdi.oxauth.model.util.Util;
 import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
@@ -105,7 +105,7 @@ public class RptPermissionAuthorizationWS {
                                           AuthorizationGrant grant,
                                           String amHost) {
         UmaRPT rpt;
-        if (Strings.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
+        if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
             rpt = rptManager.createRPT(authorization, amHost, false);
         } else {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());

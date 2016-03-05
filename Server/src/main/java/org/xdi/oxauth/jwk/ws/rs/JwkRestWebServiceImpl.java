@@ -24,7 +24,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * Provides interface for JWK REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version February 17, 2016
  */
 @Name("requestJwkRestWebService")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
@@ -50,31 +50,31 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         try {
             for (JSONWebKey jsonWebKey : ConfigurationFactory.instance().getWebKeys().getKeys()) {
                 JSONObject jsonKeyValue = new JSONObject();
-                if (jsonWebKey.getKeyType() != null) {
-                    jsonKeyValue.put(KEY_TYPE, jsonWebKey.getKeyType());
+                if (jsonWebKey.getKty() != null) {
+                    jsonKeyValue.put(KEY_TYPE, jsonWebKey.getKty());
                 }
-                if (jsonWebKey.getKeyId() != null) {
-                    jsonKeyValue.put(KEY_ID, jsonWebKey.getKeyId());
+                if (jsonWebKey.getKid() != null) {
+                    jsonKeyValue.put(KEY_ID, jsonWebKey.getKid());
                 }
                 if (ConfigurationFactory.instance().getConfiguration().getKeyRegenerationEnabled()
-                        && jsonWebKey.getExpirationTime() != null) {
-                    jsonKeyValue.put(EXPIRATION_TIME, jsonWebKey.getExpirationTime());
+                        && jsonWebKey.getExp() != null) {
+                    jsonKeyValue.put(EXPIRATION_TIME, jsonWebKey.getExp());
                 }
                 if (jsonWebKey.getUse() != null) {
                     jsonKeyValue.put(KEY_USE, jsonWebKey.getUse());
                 }
-                if (jsonWebKey.getAlgorithm() != null) {
-                    jsonKeyValue.put(ALGORITHM, jsonWebKey.getAlgorithm());
+                if (jsonWebKey.getAlg() != null) {
+                    jsonKeyValue.put(ALGORITHM, jsonWebKey.getAlg());
                 }
-                if (jsonWebKey.getCurve() != null) {
-                    jsonKeyValue.put(CURVE, jsonWebKey.getCurve());
+                if (jsonWebKey.getCrv() != null) {
+                    jsonKeyValue.put(CURVE, jsonWebKey.getCrv());
                 }
                 if (jsonWebKey.getPublicKey() != null) {
-                    if (jsonWebKey.getPublicKey().getModulus() != null) {
-                        jsonKeyValue.put(MODULUS, jsonWebKey.getPublicKey().getModulus());
+                    if (jsonWebKey.getPublicKey().getN() != null) {
+                        jsonKeyValue.put(MODULUS, jsonWebKey.getPublicKey().getN());
                     }
-                    if (jsonWebKey.getPublicKey().getExponent() != null) {
-                        jsonKeyValue.put(EXPONENT, jsonWebKey.getPublicKey().getExponent());
+                    if (jsonWebKey.getPublicKey().getE() != null) {
+                        jsonKeyValue.put(EXPONENT, jsonWebKey.getPublicKey().getE());
                     }
                     if (jsonWebKey.getPublicKey().getX() != null) {
                         jsonKeyValue.put(X, jsonWebKey.getPublicKey().getX());
@@ -82,7 +82,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
                     if (jsonWebKey.getPublicKey().getY() != null) {
                         jsonKeyValue.put(Y, jsonWebKey.getPublicKey().getY());
                     }
-                    if (jsonWebKey.getCertificateChain() != null) {
+                    if (jsonWebKey.getX5c() != null) {
                         //jsonKeyValue.put(X5C, new JSONArray(jsonWebKey.getCertificateChain()));
                     }
 

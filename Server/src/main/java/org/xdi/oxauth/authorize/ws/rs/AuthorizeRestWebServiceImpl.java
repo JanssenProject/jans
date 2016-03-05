@@ -338,7 +338,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     identity.logout();
                                     if (prompts.contains(Prompt.NONE)) {
                                         if (authenticationFilterService.isEnabled()) {
-                                            Map<String, String> params = new HashMap<String, String>();
+                                            Map<String, String> params;
                                             if (method.equals(HttpMethod.GET)) {
                                                 params = QueryStringDecoder.decode(httpRequest.getQueryString());
                                             } else {

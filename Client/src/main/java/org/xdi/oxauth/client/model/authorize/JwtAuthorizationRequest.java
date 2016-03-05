@@ -388,7 +388,7 @@ public class JwtAuthorizationRequest {
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
                 encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadToJSONObject(), signatureAlgorithm, ecPrivateKey);
             } else if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-                JweEncrypterImpl jweEncrypter = null;
+                JweEncrypterImpl jweEncrypter;
                 if (rsaPublicKey != null) {
                     jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
                 } else {
@@ -453,7 +453,7 @@ public class JwtAuthorizationRequest {
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
                 encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm, ecPrivateKey);
             } else if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-                JweEncrypterImpl jweEncrypter = null;
+                JweEncrypterImpl jweEncrypter;
                 if (rsaPublicKey != null) {
                     jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
                 } else {

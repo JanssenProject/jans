@@ -254,7 +254,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, int authStep, String acr) {
-        CustomScriptConfiguration customScriptConfiguration = null;
+        CustomScriptConfiguration customScriptConfiguration;
         if (authStep == 1) {
             if (StringHelper.isNotEmpty(acr)) {
                 customScriptConfiguration = getCustomScriptConfiguration(usageType, acr);
