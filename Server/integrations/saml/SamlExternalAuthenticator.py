@@ -1,3 +1,9 @@
+# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+# Copyright (c) 2016, Gluu
+#
+# Author: Yuriy Movchan
+#
+
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
@@ -8,7 +14,8 @@ from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.oxauth.model.common import User, CustomAttribute
+from org.xdi.oxauth.model.common import User
+from org.xdi.ldap.model import CustomAttribute
 
 import java
 

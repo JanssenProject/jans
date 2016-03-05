@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.google.common.base.Strings;
+import org.xdi.oxauth.model.util.Util;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -102,7 +102,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private Response simpleLogout(String postLogoutRedirectUri, String state, HttpServletRequest httpRequest, Pair<SessionState, AuthorizationGrant> pair) {
-        if (!Strings.isNullOrEmpty(postLogoutRedirectUri)) {
+        if (!Util.isNullOrEmpty(postLogoutRedirectUri)) {
 
             // Validate redirectUri
             String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
@@ -135,7 +135,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
-        boolean isExternalLogoutPresent = false;
+        boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;
         SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
 
@@ -174,20 +174,26 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         clientsByDns.add(pair.getSecond().getClient());
 
         for (Client client : clientsByDns) {
-            String logoutUri = client.getLogoutUri();
+            String[] logoutUris = client.getLogoutUri();
 
-            if (Strings.isNullOrEmpty(logoutUri)) {
-                continue; // skip client if logout_uri is blank
+            if (logoutUris == null) {
+                continue;
             }
 
-            if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
-                if (logoutUri.contains("?")) {
-                    logoutUri = logoutUri + "&sid=" + sessionState.getId();
-                } else {
-                    logoutUri = logoutUri + "?sid=" + sessionState.getId();
+            for (String logoutUri : logoutUris) {
+                if (Util.isNullOrEmpty(logoutUri)) {
+                    continue; // skip client if logout_uri is blank
                 }
+
+                if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
+                    if (logoutUri.contains("?")) {
+                        logoutUri = logoutUri + "&sid=" + sessionState.getId();
+                    } else {
+                        logoutUri = logoutUri + "?sid=" + sessionState.getId();
+                    }
+                }
+                result.add(logoutUri);
             }
-            result.add(logoutUri);
         }
         return result;
     }
@@ -231,9 +237,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "<html>" +
                 "<head>";
 
-        if (!Strings.isNullOrEmpty(postLogoutUrl)) {
+        if (!Util.isNullOrEmpty(postLogoutUrl)) {
 
-            if (!Strings.isNullOrEmpty(state)) {
+            if (!Util.isNullOrEmpty(state)) {
                 if (postLogoutUrl.contains("?")) {
                     postLogoutUrl += "&state=" + state;
                 } else {

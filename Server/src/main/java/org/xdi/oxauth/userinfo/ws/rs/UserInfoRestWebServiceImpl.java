@@ -59,6 +59,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.*;
 
@@ -66,7 +68,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version December 17, 2015
+ * @version February 17, 2016
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -194,7 +196,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
-                                 Collection<String> scopes) throws StringEncrypter.EncryptionException, InvalidJwtException, InvalidClaimException, SignatureException {
+                                 Collection<String> scopes) throws StringEncrypter.EncryptionException, InvalidJwtException, InvalidClaimException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         Jwt jwt = new Jwt();
         JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
 
@@ -204,7 +206,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         List<JSONWebKey> availableKeys = jwks.getKeys(signatureAlgorithm);
         if (availableKeys.size() > 0) {
-            jwt.getHeader().setKeyId(availableKeys.get(0).getKeyId());
+            jwt.getHeader().setKeyId(availableKeys.get(0).getKid());
         }
 
         // Claims
@@ -298,7 +300,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Signature
-        JSONWebKey jwk = null;
+        JSONWebKey jwk;
         switch (signatureAlgorithm) {
             case HS256:
             case HS384:
@@ -311,8 +313,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             case RS512:
                 jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
                 RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getModulus(),
-                        jwk.getPrivateKey().getPrivateExponent());
+                        jwk.getPrivateKey().getN(),
+                        jwk.getPrivateKey().getE());
                 RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
                 jwt = rsaSigner.sign(jwt);
                 break;
@@ -335,7 +337,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     public String getJweResponse(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
                                  User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
-            throws InvalidClaimException, InvalidJweException {
+            throws InvalidClaimException, InvalidJweException, NoSuchAlgorithmException, InvalidKeyException {
         Jwe jwe = new Jwe();
 
         // Header
@@ -465,7 +467,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
-            throws JSONException, InvalidClaimException {
+            throws JSONException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
         JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
         // Claims

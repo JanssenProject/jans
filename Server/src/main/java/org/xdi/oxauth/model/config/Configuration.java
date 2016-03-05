@@ -6,9 +6,7 @@
 
 package org.xdi.oxauth.model.config;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.xdi.oxauth.model.common.Mode;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -21,12 +19,11 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version January 15, 2015
+ * @version February 15, 2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
 
-    private String mode;
     private String issuer;
     private String loginPage;
     private String authorizationPage;
@@ -48,13 +45,14 @@ public class Configuration {
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
 
+    private Boolean sessionAsJwt = false;
+
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
-    
-    private String sectorIdentifierEndpoint;
+
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
@@ -126,6 +124,9 @@ public class Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
+    private String pairwiseIdType;
+    private String pairwiseCalculationKey;
+    private String pairwiseCalculationSalt;
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -134,6 +135,15 @@ public class Configuration {
 
     public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
         this.umaRptAsJwt = umaRptAsJwt;
+    }
+
+    @XmlElement(name = "session-as-jwt")
+    public Boolean getSessionAsJwt() {
+        return sessionAsJwt;
+    }
+
+    public void setSessionAsJwt(Boolean sessionAsJwt) {
+        this.sessionAsJwt = sessionAsJwt;
     }
 
     @XmlElement(name = "uma-keep-client-during-resource-set-registration")
@@ -152,20 +162,6 @@ public class Configuration {
 
     public void setUmaAddScopesAutomatically(Boolean p_umaAddScopesAutomatically) {
         umaAddScopesAutomatically = p_umaAddScopesAutomatically;
-    }
-
-    @XmlElement(name = "mode")
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String p_mode) {
-        mode = p_mode;
-    }
-
-    @JsonIgnore
-    public Mode getModeEnum() {
-        return Mode.fromValueWithDefault(getMode());
     }
 
     /**
@@ -1119,4 +1115,30 @@ public class Configuration {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
     }
 
+    @XmlElement(name = "pairwise-id-type")
+    public String getPairwiseIdType() {
+        return pairwiseIdType;
+    }
+
+    public void setPairwiseIdType(String pairwiseIdType) {
+        this.pairwiseIdType = pairwiseIdType;
+    }
+
+    @XmlElement(name = "pairwise-calculation-key")
+    public String getPairwiseCalculationKey() {
+        return pairwiseCalculationKey;
+    }
+
+    public void setPairwiseCalculationKey(String pairwiseCalculationKey) {
+        this.pairwiseCalculationKey = pairwiseCalculationKey;
+    }
+
+    @XmlElement(name = "pairwise-calculation-salt")
+    public String getPairwiseCalculationSalt() {
+        return pairwiseCalculationSalt;
+    }
+
+    public void setPairwiseCalculationSalt(String pairwiseCalculationSalt) {
+        this.pairwiseCalculationSalt = pairwiseCalculationSalt;
+    }
 }

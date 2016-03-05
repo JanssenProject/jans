@@ -123,7 +123,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
                         builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                     } else {
-                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUri(), r.getRedirectUris(), errorResponseFactory);
+                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
                         String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
@@ -318,8 +318,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
-        if (StringUtils.isNotBlank(requestObject.getLogoutUri())) {
-            p_client.setLogoutUri(requestObject.getLogoutUri());
+        if (requestObject.getLogoutUris() != null && !requestObject.getLogoutUris().isEmpty()) {
+            p_client.setLogoutUri(requestObject.getLogoutUris().toArray(new String[requestObject.getLogoutUris().size()]));
         }
         p_client.setLogoutSessionRequired(requestObject.getLogoutSessionRequired());
 

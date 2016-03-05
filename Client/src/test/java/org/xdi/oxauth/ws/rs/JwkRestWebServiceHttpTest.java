@@ -6,20 +6,19 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.JwkClient;
 import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 
+import static org.testng.Assert.*;
+
 /**
  * Functional tests for JWK Web Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 11.15.2011
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 public class JwkRestWebServiceHttpTest extends BaseTest {
 
@@ -37,7 +36,7 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         assertTrue(response.getKeys().size() > 0, "Unexpected result: keys is empty");
 
         for (JSONWebKey JSONWebKey : response.getKeys()) {
-            assertNotNull(JSONWebKey.getKeyId(), "Unexpected result: keyId is null");
+            assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
         }
     }

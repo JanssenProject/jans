@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONArray;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -76,7 +77,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
-        registerRequest.setLogoutUri(logoutUri);
+        registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
@@ -104,7 +105,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(LOGOUT_URI.toString()));
-        assertEquals(logoutUri, response.getClaims().get(LOGOUT_URI.toString()));
+        assertTrue(new JSONArray(response.getClaims().get(LOGOUT_URI.toString())).getString(0).equals(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromName(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
