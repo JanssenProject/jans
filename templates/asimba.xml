@@ -247,7 +247,7 @@
 			 -->
 			<metadata entityID="https://%(hostname)s/asimba/profiles/saml2">
 				<signing enabled="TRUE"/>
-				<organization url="http://www.asimba.org"/>
+				<organization url="http://www.gluu.org"/>
 			</metadata>
 			
 			<!-- 
