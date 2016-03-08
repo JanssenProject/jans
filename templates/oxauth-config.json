@@ -219,6 +219,6 @@
     "metricReporterInterval":300,
     "metricReporterKeepDataDays":15,
     "pairwiseIdType":"persistent",
-    "pairwiseCalculationKey":"abcdefghijklmnopqrstuvwxyz",
-    "pairwiseCalculationSalt": "123456789012345678901234567890"
+    "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
+    "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s"
 }
