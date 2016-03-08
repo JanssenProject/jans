@@ -233,10 +233,13 @@ class Setup(object):
         self.oxauth_static_conf_base64 = None
         self.oxauth_error_base64 = None
         self.oxauth_openid_key_base64 = None
+        self.pairwiseCalculationKey = None
+        self.pairwiseCalculationSalt = None
         self.oxtrust_config_base64 = None
         self.oxtrust_cache_refresh_base64 = None
         self.oxtrust_import_person_base64 = None
         self.oxidp_config_base64 = None
+
 
         # oxTrust SCIM configuration
         self.scim_rs_client_id = None
@@ -912,6 +915,11 @@ class Setup(object):
 
         return plain_b64encoded_text
 
+    def genRandomString(self, N):
+        return ''.join(random.SystemRandom().choice(string.ascii_lowercase
+                                     + string.ascii_uppercase
+                                     + string.digits) for _ in range(N))
+
     def generate_scim_configuration(self):
         self.scim_rs_client_jwks = self.gen_openid_keys()
         self.scim_rp_client_jwks = self.gen_openid_keys()
@@ -1263,8 +1271,11 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
             sys.exit()
 
+
     def make_oxauth_salt(self):
-        self.oxauth_jsf_salt = os.urandom(16).encode('hex') 
+        self.oxauth_jsf_salt = os.urandom(16).encode('hex')
+        self.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
