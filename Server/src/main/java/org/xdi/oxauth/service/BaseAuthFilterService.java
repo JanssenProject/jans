@@ -6,16 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -24,13 +16,15 @@ import org.xdi.oxauth.model.config.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/08/2012
+ * @author Javier Rojas Blum
+ * @version March 4, 2016
  */
 
 public abstract class BaseAuthFilterService {
@@ -205,7 +199,9 @@ public abstract class BaseAuthFilterService {
         String filter = authenticationFilterWithParameters.getAuthenticationFilter().getFilter();
         for (IndexedParameter indexedParameter : authenticationFilterWithParameters.getIndexedVariables()) {
             String attributeValue = p_normalizedAttributeValues.get(indexedParameter.getParamName());
-            filter = filter.replace(indexedParameter.getParamIndex(), attributeValue);
+            if (attributeValue != null) {
+                filter = filter.replace(indexedParameter.getParamIndex(), attributeValue);
+            }
         }
         return filter;
     }
@@ -213,48 +209,48 @@ public abstract class BaseAuthFilterService {
     public static String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
-    	Filter ldapFilter;
-		try {
-			ldapFilter = Filter.create(filter);
-		} catch (LDAPException ex) {
-			LOG.error("Failed to create Ldap filter: '{0}'", ex, filter);
-			return null;
-		}
+        Filter ldapFilter;
+        try {
+            ldapFilter = Filter.create(filter);
+        } catch (LDAPException ex) {
+            LOG.error("Failed to create Ldap filter: '{0}'", ex, filter);
+            return null;
+        }
 
-    	List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
+        List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
 
-    	if (foundEntries.size() > 1) {
-    		LOG.error("Found more than one entry by filter: '{0}'. Entries:\n", ldapFilter, foundEntries);
-    		return null;
-    	}
+        if (foundEntries.size() > 1) {
+            LOG.error("Found more than one entry by filter: '{0}'. Entries:\n", ldapFilter, foundEntries);
+            return null;
+        }
 
         if (!(foundEntries.size() == 1)) {
-    		return null;
-    	}
+            return null;
+        }
 
-    	return foundEntries.get(0).getDn();
+        return foundEntries.get(0).getDn();
     }
 
     public String processAuthenticationFilters(Map<?, ?> attributeValues) {
-    	if (attributeValues == null) {
-    		return null;
-    	}
+        if (attributeValues == null) {
+            return null;
+        }
 
-    	final List<AuthenticationFilterWithParameters> allowedList = filterAttributes ?
+        final List<AuthenticationFilterWithParameters> allowedList = filterAttributes ?
                 getAllowedAuthenticationFilters(attributeValues.keySet(), getFilterWithParameters()) :
                 getFilterWithParameters();
 
-    	for (AuthenticationFilterWithParameters allowed : allowedList) {
-    		String resultDn = processAuthenticationFilter(allowed, attributeValues);
-    		if (StringHelper.isNotEmpty(resultDn)) {
-    			return resultDn;
-    		}
-    	}
+        for (AuthenticationFilterWithParameters allowed : allowedList) {
+            String resultDn = processAuthenticationFilter(allowed, attributeValues);
+            if (StringHelper.isNotEmpty(resultDn)) {
+                return resultDn;
+            }
+        }
 
-    	return null;
+        return null;
     }
 
-    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters p_allowed, Map<?,?> p_attributeValues);
+    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters p_allowed, Map<?, ?> p_attributeValues);
 
     public List<AuthenticationFilterWithParameters> getFilterWithParameters() {
         return filterWithParameters;
