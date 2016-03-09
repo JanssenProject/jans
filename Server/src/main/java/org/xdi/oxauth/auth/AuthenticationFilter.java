@@ -33,6 +33,7 @@ import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.util.StringHelper;
@@ -49,7 +50,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version March 4, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("org.jboss.seam.web.authenticationFilter")
@@ -143,7 +144,6 @@ public class AuthenticationFilter extends AbstractFilter {
                 requireAuth = true;
             }
         }
-        
 
         if (requireAuth) {
             sendError(p_httpResponse);
@@ -266,6 +266,18 @@ public class AuthenticationFilter extends AbstractFilter {
                         } else {
                             getAuthenticator().configureSessionClient(client);
                         }
+                    }
+                } else if (Boolean.TRUE.equals(ConfigurationFactory.instance().getConfiguration().getClientAuthenticationFiltersEnabled())) {
+                    String clientDn = ClientFilterService.instance().processAuthenticationFilters(servletRequest.getParameterMap());
+                    if (clientDn != null) {
+                        Client client = getClientService().getClientByDn(clientDn);
+
+                        identity.logout();
+
+                        identity.getCredentials().setUsername(client.getClientId());
+                        identity.getCredentials().setPassword(null);
+
+                        requireAuth = !getAuthenticator().authenticateWebService(true);
                     }
                 }
             }
