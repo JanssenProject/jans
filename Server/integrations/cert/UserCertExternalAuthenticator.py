@@ -20,8 +20,6 @@ from org.xdi.oxauth.model.util import FingerprintUtil
 
 import sys
 import java
-import datetime
-import base64
 
 try:
     import json
@@ -257,17 +255,16 @@ class PersonAuthentication(PersonAuthenticationType):
         # Use oxAuth implementation
         fingerprint = FingerprintUtil.getPublicKeyFingerprint(publicKey)
         
-        return fingerprint
-        
+        return fingerprint      
 
     def validateCertificate(self, x509Certificate):
         print "Cert. Validating certificate with DN '%s'" % x509Certificate.getSubjectX500Principal()
         
         # Validate certificate date
-        valid = x509Certificate.checkValidity()
-        if not valid:
-            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
-            return False
+#        valid = x509Certificate.checkValidity(java.util.Date())
+#        if not valid:
+#            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
+#            return False
         
         # Check if certificate signed by specified CA
         # TODO: Implement validation
