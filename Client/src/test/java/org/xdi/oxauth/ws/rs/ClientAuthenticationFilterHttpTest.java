@@ -31,10 +31,11 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version March 4, 2016
  */
 public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
+    private String clientId;
     private String customAttrValue1;
 
     @Parameters({"redirectUris"})
@@ -64,6 +65,8 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
+
+        clientId = response.getClientId();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -76,15 +79,12 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, customAttrValue1, scopes, redirectUri, nonce);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
@@ -128,8 +128,8 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
-        tokenRequest.setAuthUsername(customAttrValue1);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
@@ -144,80 +144,33 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
-    public void requestAccessTokenCustomClientAuth2(final String userId, final String userSecret,
-                                                    final String redirectUri) throws Exception {
-        showTitle("requestAccessTokenCustomClientAuth2");
-
-        List<ResponseType> responseTypes = Arrays.asList(
-                ResponseType.TOKEN,
-                ResponseType.ID_TOKEN);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, customAttrValue1, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
-
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
-
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getAccessToken(), "The accessToken is null");
-        assertNotNull(response.getTokenType(), "The tokenType is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
-
-        String accessToken = response.getAccessToken();
-        String idToken = response.getIdToken();
-
-        Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
-    }
-
     @Parameters({"userId", "userSecret"})
     @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
-    public void requestAccessTokenCustomClientAuth3(final String userId, final String userSecret) throws Exception {
-        showTitle("requestAccessTokenCustomClientAuth3");
+    public void requestAccessTokenCustomClientAuth2(final String userId, final String userSecret) throws Exception {
+        showTitle("requestAccessTokenCustomClientAuth2");
 
         String username = userId;
         String password = userSecret;
         String scope = "openid";
 
-        TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        request.setUsername(username);
-        request.setPassword(password);
-        request.setScope(scope);
-        request.setAuthUsername(customAttrValue1);
-        request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        tokenRequest.setUsername(username);
+        tokenRequest.setPassword(password);
+        tokenRequest.setScope(scope);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(request);
-        TokenResponse response1 = tokenClient.exec();
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getEntity(), "The entity is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertNotNull(tokenResponse.getScope(), "The scope is null");
+        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 }
