@@ -42,10 +42,12 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for the Client Authentication Filter (embedded)
  *
  * @author Javier Rojas Blum
- * @version @version June 23, 2015
+ * @version March 4, 2016
  */
 public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
+    private String clientId;
+    private String authorizationCode1;
     private String customAttrValue1;
 
     @Parameters({"registerPath", "redirectUris"})
@@ -65,13 +67,11 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                             ResponseType.TOKEN,
                             ResponseType.ID_TOKEN);
 
+                    customAttrValue1 = UUID.randomUUID().toString();
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
-
                     registerRequest.setResponseTypes(responseTypes);
                     registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
-
-                    customAttrValue1 = UUID.randomUUID().toString();
                     registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
 
                     request.setContentType(MediaType.APPLICATION_JSON);
@@ -98,6 +98,8 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+
+                    clientId = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
@@ -108,9 +110,9 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
-    public void requestAccessTokenCustomClientAuth1(final String authorizePath,
-                                                    final String userId, final String userSecret,
-                                                    final String redirectUri) throws Exception {
+    public void requestAccessTokenCustomClientAuth1Step1(final String authorizePath,
+                                                         final String userId, final String userSecret,
+                                                         final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
         final String nonce = UUID.randomUUID().toString();
@@ -127,11 +129,11 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                 List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
                 AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, customAttrValue1, scopes, redirectUri, nonce);
+                        responseTypes, clientId, scopes, redirectUri, nonce);
                 authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
+                authorizationRequest.getPrompts().add(Prompt.NONE);
 
                 request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
                 request.addHeader("Accept", MediaType.TEXT_PLAIN);
@@ -141,7 +143,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
             @Override
             protected void onResponse(EnhancedMockHttpServletResponse response) {
                 super.onResponse(response);
-                showResponse("requestAccessTokenCustomClientAuth1", response);
+                showResponse("requestAccessTokenCustomClientAuth1Step1", response);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
                 assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
@@ -156,81 +158,71 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                     assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
                     assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
                     assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                    authorizationCode1 = params.get(AuthorizeResponseParam.CODE);
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                     fail("Response URI is not well formed");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
                 }
             }
         }.run();
     }
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
-    public void requestAccessTokenCustomClientAuth2(final String authorizePath,
-                                                    final String userId, final String userSecret,
-                                                    final String redirectUri) throws Exception {
-
-        final String state = UUID.randomUUID().toString();
-
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+    @Parameters({"tokenPath", "redirectUri"})
+    @Test(dependsOnMethods = {"requestAccessTokenCustomClientAuth1Step1"})
+    public void requestAccessTokenCustomClientAuth1Step2(final String tokenPath, final String redirectUri) throws Exception {
+        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(
-                        ResponseType.TOKEN,
-                        ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+                tokenRequest.setCode(authorizationCode1);
+                tokenRequest.setRedirectUri(redirectUri);
+                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+                tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, customAttrValue1, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                request.addParameters(tokenRequest.getParameters());
             }
 
             @Override
             protected void onResponse(EnhancedMockHttpServletResponse response) {
                 super.onResponse(response);
-                showResponse("requestAccessTokenCustomClientAuth2", response);
+                showResponse("requestAccessTokenCustomClientAuth1Step2", response);
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getFragment(), "Fragment is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access_token is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id_token is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires_in value is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
-                        assertNull(params.get("refresh_token"), "The refresh_token must be null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    }
+                assertEquals(response.getStatus(), 200, "Unexpected response code.");
+                assertTrue(response.getHeader("Cache-Control") != null
+                                && response.getHeader("Cache-Control").equals("no-store"),
+                        "Unexpected result: " + response.getHeader("Cache-Control"));
+                assertTrue(response.getHeader("Pragma") != null
+                                && response.getHeader("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeader("Pragma"));
+                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                try {
+                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+                    assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
+                    assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
                 }
             }
         }.run();
     }
 
     @Parameters({"tokenPath", "userId", "userSecret"})
-    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes", enabled = false)
-    public void requestAccessTokenCustomClientAuth3(final String tokenPath,
+    @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
+    public void requestAccessTokenCustomClientAuth2(final String tokenPath,
                                                     final String userId, final String userSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
@@ -242,8 +234,8 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                 tokenRequest.setUsername(userId);
                 tokenRequest.setPassword(userSecret);
                 tokenRequest.setScope("openid profile email");
-                tokenRequest.setAuthUsername(customAttrValue1);
                 tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+                tokenRequest.addCustomParameter("myCustomAttr1", customAttrValue1);
 
                 request.addParameters(tokenRequest.getParameters());
             }
@@ -251,7 +243,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
             @Override
             protected void onResponse(EnhancedMockHttpServletResponse response) {
                 super.onResponse(response);
-                showResponse("requestAccessTokenCustomClientAuth3", response);
+                showResponse("requestAccessTokenCustomClientAuth2", response);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null

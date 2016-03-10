@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.registration;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -192,7 +191,7 @@ public class RegisterParamsValidator {
     }
 
     public static void validateLogoutUri(String logoutUri, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
-        if (Strings.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
+        if (Util.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
             return;
         }
 
