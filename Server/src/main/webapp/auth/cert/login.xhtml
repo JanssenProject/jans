@@ -6,51 +6,8 @@
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
+
     <ui:define name="head">
-
-        <script src="./scripts/u2f-api.js"/>
-
-        <script>
-        var auth_request = ${fido_u2f_authentication_request};
-        var register_request = ${fido_u2f_registration_request};
-
-        function startRegistration() {
-            u2f.register(register_request.registerRequests, register_request.authenticateRequests,
-            function(data) {
-                if(data.errorCode) {
-                    alert("U2F failed with error: " + data.errorCode);
-                    return;
-                }
-
-                document.getElementById('tokenResponse').value = JSON.stringify(data);
-                document.getElementById('authMethod').value = 'enroll';
-
-                document.getElementById('u2f_form').submit();
-            });
-        }
-
-        function startAuthentication() {
-            u2f.sign(auth_request.authenticateRequests,
-            function(data) {
-                if(data.errorCode) {
-                    alert("U2F failed with error code: " + data.errorCode);
-                    return;
-                }
-
-                document.getElementById('tokenResponse').value = JSON.stringify(data);
-                document.getElementById('authMethod').value = 'authenticate';
-
-                document.getElementById('u2f_form').submit();
-            });
-        }
-
-        if (auth_request != null) {
-            setTimeout(startAuthentication(), 1000);
-        } else {
-            setTimeout(startRegistration(), 1000);
-        }
-        </script>
-
         <style type="text/css">
             .login-panel {
                 border-style: solid;
@@ -79,20 +36,27 @@
                 padding: 10px;
                 color: #000000;
                 font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
+                font-size: 13px;
+            }
+
+            .info-section, .info {
+                font-weight: bold;
+            }
+            
+            .body-section, .login-panel-body {
+                font-weight: bold;
+            }
+            .body-list, .login-panel-body {
+                font-weight: bold;
             }
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
+    <ui:define name="pageTitle">
+        <h:outputText value="#{messages['login.pageTitle']}"/>
+    </ui:define>
 
     <ui:define name="body">
-        <form method="post" action="#{request.contextPath}/postlogin" id="u2f_form" onsubmit="return false;">
-            <input type="hidden" name="username" value="${identity.username}"/>
-            <input type="hidden" name="authMethod" id="authMethod"/>
-            <input type="hidden" name="tokenResponse" id="tokenResponse"/>
-        </form>
-
         <table border="0" align="center">
             <tr>
                 <td>
@@ -111,8 +75,26 @@
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
                                         </s:div>
 
+                                        <p class="info-section">
+                                            <h:outputText value="Please folow next steps to login here"/>
+                                        </p>
+
                                         <div class="dialog">
-                                        	<p>Touch your U2F token.</p>
+                                            <h:panelGrid columns="2" border="0" rowClasses="prop" columnClasses="name, name">
+                                                <p class="body-list">1. Enter right answer:</p>
+                                                <h:panelGroup>
+			                                        <div id="captchaHolder">
+			                                            <h:outputText value="'recaptcha form'" escape="false" />
+			                                            <h:outputText value="#{recaptcha.html}" escape="false" />
+			                                        </div>
+		                                        </h:panelGroup>
+		
+                                                <p class="body-list">2. Click «Login» button.</p>
+                                                <p/>
+
+                                                <p class="body-list">3. If the certificates list appears then choose right certificate.</p>
+                                                <p/>
+                                            </h:panelGrid>
                                         </div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
@@ -132,11 +114,19 @@
                                                 </a>
                                             </p>
                                         </s:div>
+
+                                        <div class="actionButtons">
+                                            <h:commandButton id="loginButton"
+                                                             value="#{messages['login.login']}"
+                                                             action="#{authenticator.authenticate}" />
+
+	                                        <s:div id="registerId" style="display:none">
+	                                            <h:commandButton id="registerButton"
+	                                                             value="#{messages['login.register']}"
+	                                                             action="#{authenticator.authenticate}" />
+	                                        </s:div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="login-panel">
-                                	<s:fragment rendered="#{fido_u2f_authentication_request != 'null'}">
-                                	</s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>
@@ -144,6 +134,15 @@
                 </td>
             </tr>
         </table>
-    </ui:define>
+        <script type="text/javascript">
+            window.onload = function() {
+                document.getElementById("loginForm:username").focus();
 
+                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    document.getElementById("loginForm:registerId").style.display = 'inline';
+                }
+            };
+        </script>
+    </ui:define>
 </ui:composition>

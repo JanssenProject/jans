@@ -37,7 +37,8 @@ import com.google.common.io.ByteStreams;
 @AutoCreate
 public class RawAuthenticationService {
 
-	public static final String AUTHENTICATE_TYPE = "navigator.id.getAssertion";
+	public static final String AUTHENTICATE_GET_TYPE = "navigator.id.getAssertion";
+	public static final String AUTHENTICATE_CANCEL_TYPE = "navigator.id.cancelAssertion";
 
 	@Logger
 	private Log log;
