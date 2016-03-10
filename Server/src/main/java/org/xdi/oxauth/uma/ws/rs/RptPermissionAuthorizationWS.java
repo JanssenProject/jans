@@ -165,7 +165,7 @@ public class RptPermissionAuthorizationWS {
     private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
         try {
             resourceSetPermission.setTicket(UUID.randomUUID().toString()); // invalidate ticket and persist
-            ldapEntryManager.persist(resourceSetPermission);
+            ldapEntryManager.merge(resourceSetPermission);
         } catch (Exception e) {
             log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
         }
