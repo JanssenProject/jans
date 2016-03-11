@@ -9,11 +9,11 @@ Example: `/etc/certs/chain_cert.pem`
    Allowed values: true/false
    Example: true
 
-3) use_generic_validator, use_path_validator, use_ocsp_validator, use_clr_validator - Enable/Disable specific certificate validation.
+3) use_generic_validator, use_path_validator, use_ocsp_validator, use_crl_validator - Enable/Disable specific certificate validation.
    Allowed values: true/false
    Example: true
    
- 4) clr_max_response_size - Specify maximum allowed size of CRL response
+ 4) crl_max_response_size - Specify maximum allowed size of CRL response
    Allowed values: integer value greater that 0
    Example: 10485760
    Default value: 5242880
