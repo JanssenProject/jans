@@ -22,6 +22,7 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.List;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -54,13 +55,12 @@ import org.xdi.oxauth.model.util.SecurityProviderUtility;
  * @author Yuriy Movchan
  * @version March 10, 2016
  */
-public class CRLCertificateVerifier {
+public class CRLCertificateVerifier implements CertificateVerifier {
 
 	private static final Logger log = Logger.getLogger(CRLCertificateVerifier.class);
 
 	private int maxCrlSize;
 
-	@SuppressWarnings("unused")
 	private Cache crlCache;
 
 	public CRLCertificateVerifier(final int maxCrlResponseSize) {
@@ -68,47 +68,49 @@ public class CRLCertificateVerifier {
 	}
 
 	public CRLCertificateVerifier(final Cache crlCache, final int maxCrlSize) {
-		SecurityProviderUtility.installBCProvider();
+		SecurityProviderUtility.installBCProvider(true);
 
 		this.crlCache = crlCache;
 		this.maxCrlSize = maxCrlSize;
 	}
 
-	public ValidationStatus validate(X509Certificate certificate, X509Certificate issuer, Date validationDate) {
+	@Override
+	public ValidationStatus validate(X509Certificate certificate, List<X509Certificate> issuers, Date validationDate) {
+		X509Certificate issuer = issuers.get(0);
 		ValidationStatus status = new ValidationStatus(certificate, issuer, validationDate, ValidatorSourceType.CRL, CertificateValidity.UNKNOWN);
 
 		try {
-			Principal subjectDN = certificate.getSubjectDN();
+			Principal subjectX500Principal = certificate.getSubjectX500Principal();
 
 			String crlURL = getCrlUri(certificate);
 			if (crlURL == null) {
-				log.error("CRL's URL for '" + subjectDN + "' is empty");
+				log.error("CRL's URL for '" + subjectX500Principal + "' is empty");
 				return status;
 			}
 
-			log.debug("CRL's URL for '" + subjectDN + "' is '" + crlURL + "'");
+			log.debug("CRL's URL for '" + subjectX500Principal + "' is '" + crlURL + "'");
 
 			X509CRL x509crl = getCrl(crlURL);
 			if (!validateCRL(x509crl, certificate, issuer, validationDate)) {
 				log.error("The CRL is not valid!");
+				status.setValidity(CertificateValidity.INVALID);
 				return status;
 			}
 
 			X509CRLEntry crlEntry = x509crl.getRevokedCertificate(certificate.getSerialNumber());
 			if (crlEntry == null) {
-				log.debug("CRL status is valid for '" + subjectDN + "'");
+				log.debug("CRL status is valid for '" + subjectX500Principal + "'");
 				status.setValidity(CertificateValidity.VALID);
 			} else if (crlEntry.getRevocationDate().after(validationDate)) {
-				log.warn("CRL revocation time after the validation date, the certificate '" + subjectDN + "' was valid at " + validationDate);
+				log.warn("CRL revocation time after the validation date, the certificate '" + subjectX500Principal + "' was valid at " + validationDate);
 				status.setRevocationObjectIssuingTime(x509crl.getThisUpdate());
 				status.setValidity(CertificateValidity.VALID);
 			} else {
-				log.info("CRL for certificate '" + subjectDN + "' is revoked since " + crlEntry.getRevocationDate());
+				log.info("CRL for certificate '" + subjectX500Principal + "' is revoked since " + crlEntry.getRevocationDate());
 				status.setRevocationObjectIssuingTime(x509crl.getThisUpdate());
 				status.setRevocationDate(crlEntry.getRevocationDate());
 				status.setValidity(CertificateValidity.REVOKED);
 			}
-
 		} catch (Exception ex) {
 			log.error("CRL exception: ", ex);
 		}
@@ -117,10 +119,10 @@ public class CRLCertificateVerifier {
 	}
 
 	private boolean validateCRL(X509CRL x509crl, X509Certificate certificate, X509Certificate issuerCertificate, Date validationDate) {
-		Principal subjectDN = certificate.getSubjectDN();
+		Principal subjectX500Principal = certificate.getSubjectX500Principal();
 
 		if (x509crl == null) {
-			log.error("No CRL found for certificate '" + subjectDN + "'");
+			log.error("No CRL found for certificate '" + subjectX500Principal + "'");
 			return false;
 		}
 
@@ -133,7 +135,7 @@ public class CRLCertificateVerifier {
 		}
 
 		if (!x509crl.getIssuerX500Principal().equals(issuerCertificate.getSubjectX500Principal())) {
-			log.error("The CRL must be signed by the issuer '" + issuerCertificate.getSubjectDN() + "' but instead is signed by '"
+			log.error("The CRL must be signed by the issuer '" + subjectX500Principal + "' but instead is signed by '"
 					+ x509crl.getIssuerX500Principal() + "'");
 			return false;
 		}
@@ -155,12 +157,12 @@ public class CRLCertificateVerifier {
 		}
 
 		if (issuerCertificate.getKeyUsage() == null) {
-			log.error("There is no KeyUsage extension for certificate '" + subjectDN + "'");
+			log.error("There is no KeyUsage extension for certificate '" + subjectX500Principal + "'");
 			return false;
 		}
 
 		if (!issuerCertificate.getKeyUsage()[6]) {
-			log.error("cRLSign bit is not set for CRL certificate'" + subjectDN + "'");
+			log.error("cRLSign bit is not set for CRL certificate'" + subjectX500Principal + "'");
 			return false;
 		}
 
@@ -184,6 +186,22 @@ public class CRLCertificateVerifier {
 			}
 		}
 
+		// TODO: Implement more better solution to avoid parallel CRL file downloading 
+		X509CRL crl = requestCRL(url);
+		if (crl == null) {
+			return null;
+		}
+
+		if (crlCache != null) {
+			log.debug("Stroring CRL for url '" + url + "' into cache");
+			Element cacheElement = new Element(cacheKey, crl);
+			crlCache.put(cacheElement);
+		}
+
+		return crl;
+	}
+
+	public X509CRL requestCRL(String url) throws IOException, MalformedURLException, CertificateException, CRLException {
 		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 		try {
 			con.setUseCaches(false);
@@ -193,12 +211,6 @@ public class CRLCertificateVerifier {
 				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 				X509CRL crl = (X509CRL) certificateFactory.generateCRL(in);
 				log.debug("CRL size: " + crl.getEncoded().length + " bytes");
-
-				if (crlCache != null) {
-					log.debug("Stroring CRL for url '" + url + "' into cache");
-					Element cacheElement = new Element(cacheKey, crl);
-					crlCache.put(cacheElement);
-				}
 
 				return crl;
 			} finally {
@@ -211,7 +223,7 @@ public class CRLCertificateVerifier {
 				con.disconnect();
 			}
 		}
-
+		
 		return null;
 	}
 
@@ -268,6 +280,13 @@ public class CRLCertificateVerifier {
 		}
 
 		return null;
+	}
+	
+	@Override
+	public void destroy() {
+		if (crlCache != null) {
+			crlCache.removeAll();
+		}
 	}
 
 }

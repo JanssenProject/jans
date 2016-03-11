@@ -16,7 +16,9 @@ from org.xdi.oxauth.util import ServerUtil
 from java.util import HashMap, Arrays
 from java.security import MessageDigest
 from org.apache.commons.codec.binary import Hex
-from org.xdi.oxauth.model.util import FingerprintUtil
+from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
+from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from org.xdi.oxauth.cert.validation.model import ValidationStatus
 
 import sys
 import java
@@ -36,6 +38,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if not (configurationAttributes.containsKey("map_user_cert")):
             print "Cert. Initialization. Property map_user_cert is mandatory"
             return False
+        
+        self.validators = { 'generic' : [GenericCertificateVerifier(), True],
+                            'path' : [PathCertificateVerifier(False), True],
+                            'ocsp' : [OCSPCertificateVerifier(), True],
+                            'clr' : [CRLCertificateVerifier(10*1024*1024), True] }
+
+        for type in self.validators.keys():
+            print "Cert. Initialization. Validation method '%s' status: '%s'" % (type, self.validators[type][1])
 
         self.map_user_cert = StringHelper.toBoolean(configurationAttributes.get("map_user_cert").getValue2(), False)
         print "Cert. Initialization. map_user_cert: '%s'" % self.map_user_cert
@@ -253,18 +263,23 @@ class PersonAuthentication(PersonAuthenticationType):
         publicKey = x509Certificate.getPublicKey()
         
         # Use oxAuth implementation
-        fingerprint = FingerprintUtil.getPublicKeyFingerprint(publicKey)
+        fingerprint = FingerprintHelper.getPublicKeySshFingerprint(publicKey)
         
         return fingerprint      
 
     def validateCertificate(self, x509Certificate):
         print "Cert. Validating certificate with DN '%s'" % x509Certificate.getSubjectX500Principal()
         
-        # Validate certificate date
-#        valid = x509Certificate.checkValidity(java.util.Date())
-#        if not valid:
-#            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
-#            return False
+        validation_date = java.util.Date()
+
+        if self.validators['generic'][1]:
+            valid = self.validators['generic'][0].validate(x509Certificate, None, validation_date)
+            
+        
+        # Show result
+        if not valid:
+            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
+            return False
         
         # Check if certificate signed by specified CA
         # TODO: Implement validation

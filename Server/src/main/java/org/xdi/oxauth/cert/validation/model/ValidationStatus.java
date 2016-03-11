@@ -103,11 +103,11 @@ public class ValidationStatus {
 	}
 
 	public enum ValidatorSourceType {
-		OCSP, CRL, SELF_SIGNED
+		OCSP, CRL, APP, CHAIN, SELF_SIGNED
 	}
 
 	public enum CertificateValidity {
-		VALID, REVOKED, UNKNOWN
+		VALID, INVALID, REVOKED, UNKNOWN
 	}
 
 }
