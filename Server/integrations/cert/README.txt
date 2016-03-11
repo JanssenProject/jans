@@ -1,0 +1,14 @@
+This is a person authentication module for oxAuth that enables user Certificate Authentication.
+
+The module has a few properties:
+
+1) chain_cert_file_path - It's mandatory property. It's path to file with cert chains in pem format.
+Example: `/etc/certs/chain_cert.pem`
+
+2) map_user_cert - Specify if script should map new user to local account.
+   Allowed values: true/false
+   Example: true
+
+3) use_generic_validator, use_path_validator, use_ocsp_validator, use_clr_validator - Enable/Disable specific certificate validation.
+   Allowed values: true/false
+   Example: true
