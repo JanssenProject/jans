@@ -19,14 +19,9 @@ from org.apache.commons.codec.binary import Hex
 from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
 from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
 from org.xdi.oxauth.cert.validation.model import ValidationStatus
+from org.xdi.oxauth.util import CertUtil
 
-import sys
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -35,16 +30,32 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "Cert. Initialization"
 
+        if not (configurationAttributes.containsKey("chain_cert_file_path")):
+            print "Cert. Initialization. Property chain_cert_file_path is mandatory"
+            return False
+
         if not (configurationAttributes.containsKey("map_user_cert")):
             print "Cert. Initialization. Property map_user_cert is mandatory"
             return False
-        
-        self.validators = { 'generic' : [GenericCertificateVerifier(), True],
-                            'path' : [PathCertificateVerifier(False), True],
-                            'ocsp' : [OCSPCertificateVerifier(), True],
-                            'clr' : [CRLCertificateVerifier(10*1024*1024), True] }
 
-        for type in self.validators.keys():
+        chain_cert_file_path = configurationAttributes.get("chain_cert_file_path").getValue2()
+
+        self.chain_certs = CertUtil.loadPublicX509Certificate(chain_cert_file_path)
+        print "Cert. Initialization. Loaded '%d' chain certificates" % self.chain_certs.size()
+
+        # Define array to order methods correctly
+        self.validator_types = [ 'generic',  'path', 'ocsp', 'clr']
+        self.validators = { 'generic' : [GenericCertificateVerifier(), False],
+                            'path' : [PathCertificateVerifier(False), False],
+                            'ocsp' : [OCSPCertificateVerifier(), False],
+                            'clr' : [CRLCertificateVerifier(10*1024*1024), False] }
+
+        for type in self.validator_types:
+            validator_param_name = "use_%s_validator" % type
+            if configurationAttributes.containsKey(validator_param_name):
+                validator_status = StringHelper.toBoolean(configurationAttributes.get(validator_param_name).getValue2(), False)
+                self.validators[type][1] = validator_status
+
             print "Cert. Initialization. Validation method '%s' status: '%s'" % (type, self.validators[type][1])
 
         self.map_user_cert = StringHelper.toBoolean(configurationAttributes.get("map_user_cert").getValue2(), False)
@@ -56,6 +67,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def destroy(self, configurationAttributes):
         print "Cert. Destroy"
+
+        for type in self.validator_types:
+            self.validators[type][0].destroy()
+
         print "Cert. Destroyed successfully"
 
         return True
@@ -101,12 +116,13 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # Use only first certificate for validation 
             x509Certificate = x509Certificates[0]
-            print "Cert. Authenticate for step 2. User selected certificate with DN '%s'" % x509Certificate.getSubjectX500Principal()
+            subjectX500Principal = x509Certificate.getSubjectX500Principal()
+            print "Cert. Authenticate for step 2. User selected certificate with DN '%s'" % subjectX500Principal
             
             # Validate certificates which user selected
             valid = self.validateCertificate(x509Certificate)
             if not valid:
-                print "Cert. Authenticate for step 2. Certificate DN '%s' is not valid" % x509Certificate.getSubjectX500Principal()
+                print "Cert. Authenticate for step 2. Certificate DN '%s' is not valid" % subjectX500Principal
                 context.set("cert_valid", False)
                 
                 # Return True to inform user how to reset workflow
@@ -118,7 +134,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Calculate certificate fingerprint
             x509CertificateFingerprint = self.calculateCertificateFingerprint(x509Certificate)
             context.set("cert_x509_fingerprint", x509CertificateFingerprint)
-            print "Cert. Authenticate for step 2. Fingerprint is '%s' of certificate with DN '%s'" % (x509CertificateFingerprint, x509Certificate.getSubjectX500Principal())
+            print "Cert. Authenticate for step 2. Fingerprint is '%s' of certificate with DN '%s'" % (x509CertificateFingerprint, subjectX500Principal)
             
             # Attempt to find user by certificate fingerprint
             cert_user_external_uid = "cert: %s" % x509CertificateFingerprint
@@ -258,7 +274,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def calculateCertificateFingerprint(self, x509Certificate):
-        print "Cert. Calculating certificate DN '%s' fingerprint" % x509Certificate.getSubjectX500Principal()
+        print "Cert. Calculate fingerprint for certificate DN '%s'" % x509Certificate.getSubjectX500Principal()
         
         publicKey = x509Certificate.getPublicKey()
         
@@ -268,21 +284,19 @@ class PersonAuthentication(PersonAuthenticationType):
         return fingerprint      
 
     def validateCertificate(self, x509Certificate):
-        print "Cert. Validating certificate with DN '%s'" % x509Certificate.getSubjectX500Principal()
+        subjectX500Principal = x509Certificate.getSubjectX500Principal()
+
+        print "Cert. Validating certificate with DN '%s'" % subjectX500Principal
         
         validation_date = java.util.Date()
 
-        if self.validators['generic'][1]:
-            valid = self.validators['generic'][0].validate(x509Certificate, None, validation_date)
-            
-        
-        # Show result
-        if not valid:
-            print "Cert. Certificate with DN '%s' has expired" % x509Certificate.getSubjectX500Principal()
-            return False
-        
-        # Check if certificate signed by specified CA
-        # TODO: Implement validation
-        
+        for type in self.validator_types:
+            if self.validators[type][1]:
+                result = self.validators[type][0].validate(x509Certificate, self.chain_certs, validation_date)
+                print "Cert. Validate certificate: '%s'. Validation method '%s' result: '%s'" % (subjectX500Principal, type, result)
+                
+                if (result.getValidity() != ValidationStatus.CertificateValidity.VALID):
+                    print "Cert. Certificate: '%s' is invalid" % subjectX500Principal
+                    return False
         
         return True
