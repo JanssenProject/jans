@@ -2396,7 +2396,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Sample Dynamic Scope script
 displayName: dynamic_scope
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!0011!031C.5621
 oxLevel: 100
 oxRevision: 1
