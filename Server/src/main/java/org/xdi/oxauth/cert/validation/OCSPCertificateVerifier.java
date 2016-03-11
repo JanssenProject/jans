@@ -15,6 +15,7 @@ import java.net.URL;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -49,27 +50,29 @@ import org.xdi.oxauth.model.util.SecurityProviderUtility;
  * @author Yuriy Movchan
  * @version March 10, 2016
  */
-public class OCSPCertificateVerifier {
+public class OCSPCertificateVerifier implements CertificateVerifier {
 
 	private static final Logger log = Logger.getLogger(OCSPCertificateVerifier.class);
 
 	public OCSPCertificateVerifier() {
-		SecurityProviderUtility.installBCProvider();
+		SecurityProviderUtility.installBCProvider(true);
 	}
 
-	public ValidationStatus validate(X509Certificate certificate, X509Certificate issuer, Date validationDate) {
+	@Override
+	public ValidationStatus validate(X509Certificate certificate, List<X509Certificate> issuers, Date validationDate) {
+		X509Certificate issuer = issuers.get(0);
 		ValidationStatus status = new ValidationStatus(certificate, issuer, validationDate, ValidatorSourceType.OCSP, CertificateValidity.UNKNOWN);
 
 		try {
-			Principal subjectDN = certificate.getSubjectDN();
+			Principal subjectX500Principal = certificate.getSubjectX500Principal();
 
 			String ocspUrl = getOCSPUrl(certificate);
 			if (ocspUrl == null) {
-				log.error("OCSP URL for '" + subjectDN + "' is empty");
+				log.error("OCSP URL for '" + subjectX500Principal + "' is empty");
 				return status;
 			}
 
-			log.debug("OCSP URL for '" + subjectDN + "' is '" + ocspUrl + "'");
+			log.debug("OCSP URL for '" + subjectX500Principal + "' is '" + ocspUrl + "'");
 
 			// Generate OCSP request
 			OCSPReq ocspReq = generateOCSPRequest(certificate, issuer);
@@ -77,7 +80,8 @@ public class OCSPCertificateVerifier {
 			// Get OCSP response from server
 			OCSPResp ocspResp = requestOCSPResponse(ocspUrl, ocspReq);
 			if (ocspResp.getStatus() != OCSPRespGenerator.SUCCESSFUL) {
-				log.error("OCSP response is invalid");
+				log.error("OCSP response is invalid!");
+				status.setValidity(CertificateValidity.INVALID);
 				return status;
 			}
 
@@ -103,13 +107,13 @@ public class OCSPCertificateVerifier {
 					status.setValidity(CertificateValidity.VALID);
 				} else {
 					if (singleResp.getCertStatus() instanceof RevokedStatus) {
-						log.warn("OCSP status is revoked for: " + subjectDN);
+						log.warn("OCSP status is revoked for: " + subjectX500Principal);
 						if (validationDate.before(((RevokedStatus) singleResp.getCertStatus()).getRevocationTime())) {
-							log.warn("OCSP revocation time after the validation date, the certificate '" + subjectDN + "' was valid at " + validationDate);
+							log.warn("OCSP revocation time after the validation date, the certificate '" + subjectX500Principal + "' was valid at " + validationDate);
 							status.setValidity(CertificateValidity.VALID);
 						} else {
 							Date revocationDate = ((RevokedStatus) singleResp.getCertStatus()).getRevocationTime();
-							log.info("OCSP for certificate '" + subjectDN + "' is revoked since " + revocationDate);
+							log.info("OCSP for certificate '" + subjectX500Principal + "' is revoked since " + revocationDate);
 							status.setRevocationDate(revocationDate);
 							status.setRevocationObjectIssuingTime(singleResp.getThisUpdate());
 							status.setValidity(CertificateValidity.REVOKED);
@@ -203,6 +207,10 @@ public class OCSPCertificateVerifier {
 				con.disconnect();
 			}
 		}
+	}
+
+	@Override
+	public void destroy() {
 	}
 
 }
