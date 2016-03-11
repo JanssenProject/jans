@@ -33,8 +33,8 @@ public class RegisterSiteParams implements IParams {
     private String clientTokenEndpointAuthMethod;
     @JsonProperty(value = "client_request_uris")
     private List<String> clientRequestUris;
-    @JsonProperty(value = "client_logout_uri")
-    private String clientLogoutUri;
+    @JsonProperty(value = "client_logout_uris")
+    private List<String> clientLogoutUri;
 
 
     @JsonProperty(value = "scope")
@@ -53,11 +53,11 @@ public class RegisterSiteParams implements IParams {
     public RegisterSiteParams() {
     }
 
-    public String getClientLogoutUri() {
+    public List<String> getClientLogoutUri() {
         return clientLogoutUri;
     }
 
-    public void setClientLogoutUri(String clientLogoutUri) {
+    public void setClientLogoutUri(List<String> clientLogoutUri) {
         this.clientLogoutUri = clientLogoutUri;
     }
 

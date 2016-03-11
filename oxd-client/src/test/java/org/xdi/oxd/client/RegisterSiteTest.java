@@ -38,7 +38,7 @@ public class RegisterSiteTest {
             final RegisterSiteParams commandParams = new RegisterSiteParams();
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(logoutUrl);
+            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
             commandParams.setApplicationType("web");
             commandParams.setRedirectUris(Arrays.asList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
@@ -73,7 +73,7 @@ public class RegisterSiteTest {
             commandParams.setContacts(Arrays.asList("vlad.karapetyan.1988@gmail.com"));
 
 //            commandParams.setClientLogoutUri("https://mag.gluu/index.php/customer/account/logout/");
-            commandParams.setClientLogoutUri("https://gluu.loc/index.php/customer/account/logout/");
+            commandParams.setClientLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
             commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
 
@@ -99,7 +99,7 @@ public class RegisterSiteTest {
         final RegisterSiteParams commandParams = new RegisterSiteParams();
         commandParams.setAuthorizationRedirectUri(redirectUrl);
         commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        commandParams.setClientLogoutUri(logoutUri);
+        commandParams.setClientLogoutUri(Lists.newArrayList(logoutUri));
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(commandParams);
