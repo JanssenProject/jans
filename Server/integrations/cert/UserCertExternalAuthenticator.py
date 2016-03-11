@@ -43,17 +43,17 @@ class PersonAuthentication(PersonAuthenticationType):
         self.chain_certs = CertUtil.loadPublicX509Certificate(chain_cert_file_path)
         print "Cert. Initialization. Loaded '%d' chain certificates" % self.chain_certs.size()
         
-        clr_max_response_size = 5*1024*1024 # 10Mb
-        if configurationAttributes.containsKey("clr_max_response_size"):
-            clr_max_response_size = StringHelper.toInteger(configurationAttributes.get("clr_max_response_size").getValue2(), clr_max_response_size)
-            print "Cert. Initialization. CRL max response size is '%d'" % clr_max_response_size
+        crl_max_response_size = 5*1024*1024 # 10Mb
+        if configurationAttributes.containsKey("crl_max_response_size"):
+            crl_max_response_size = StringHelper.toInteger(configurationAttributes.get("crl_max_response_size").getValue2(), crl_max_response_size)
+            print "Cert. Initialization. CRL max response size is '%d'" % crl_max_response_size
 
         # Define array to order methods correctly
-        self.validator_types = [ 'generic',  'path', 'ocsp', 'clr']
+        self.validator_types = [ 'generic',  'path', 'ocsp', 'crl']
         self.validators = { 'generic' : [GenericCertificateVerifier(), False],
                             'path' : [PathCertificateVerifier(False), False],
                             'ocsp' : [OCSPCertificateVerifier(), False],
-                            'clr' : [CRLCertificateVerifier(clr_max_response_size), False] }
+                            'crl' : [CRLCertificateVerifier(crl_max_response_size), False] }
 
         for type in self.validator_types:
             validator_param_name = "use_%s_validator" % type
