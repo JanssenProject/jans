@@ -133,6 +133,13 @@
 	},
 
 	{
+		"attribute": "oxExternalUid",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "myCustomAttr1",
 		"type": "string",
 		"index": ["equality"],
