@@ -825,12 +825,6 @@ attributeTypes: ( oxAuthClientURI-oid NAME 'oxAuthClientURI'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAuthConfCustomAuthMethod-oid NAME 'oxAuthConfCustomAuthMethod'
-  DESC 'Custom authentication method'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthConfDynamic-oid NAME 'oxAuthConfDynamic'
   DESC 'oxAuth Dynamic Configuration'
   SUBSTR caseIgnoreSubstringsMatch
@@ -839,18 +833,6 @@ attributeTypes: ( oxAuthConfDynamic-oid NAME 'oxAuthConfDynamic'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAuthConfErrors-oid NAME 'oxAuthConfErrors'
   DESC 'oxAuth Errors Configuration'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAuthConfIdPythonScript-oid NAME 'oxAuthConfIdPythonScript'
-  DESC 'Custom id generation'
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( oxAuthConfLdapAuth-oid NAME 'oxAuthConfLdapAuth'
-  DESC 'LDAP authentication configuration'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2284,9 +2266,7 @@ objectclasses: ( oxAuthSessionId-oid NAME 'oxAuthSessionId' SUP top STRUCTURAL M
   $ oxAsJwt $ oxJwt $ oxInvolvedClients )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthConfiguration-oid NAME 'oxAuthConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
- ( ou $ oxAuthConfCustomAuthMethod $ oxAuthConfDynamic $ oxAuthConfErrors
-  $ oxAuthConfIdPythonScript $ oxAuthConfLdapAuth $ oxAuthConfStatic $ oxAuthConfWebKeys $ oxRevision
-  )
+ ( ou $ oxAuthConfDynamic $ oxAuthConfErrors $ oxAuthConfStatic $ oxAuthConfWebKeys $ oxRevision )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxTrustConfiguration-oid NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson) 
