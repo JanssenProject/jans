@@ -129,7 +129,7 @@ public class RegistrationService extends RequestService {
 		String appId = request.getAppId();
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawRegistrationService.REGISTER_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawRegistrationService.REGISTER_FINISH_TYPE, request.getChallenge(), facets);
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
 		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
@@ -322,7 +323,7 @@ public class ConfigurationFactory {
     private void initWebKeysFromJson(String p_webKeys) {
         try {
             initJwksFromString(p_webKeys);
-        } catch (JsonParseException ex) {
+        } catch (JsonProcessingException ex) {
             log.error("Failed to load JWKS. Attempting to generate new JWKS...", ex);
 
             String newWebKeys = null;
