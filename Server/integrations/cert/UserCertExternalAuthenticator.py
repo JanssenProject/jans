@@ -22,6 +22,7 @@ from org.xdi.oxauth.cert.validation.model import ValidationStatus
 from org.xdi.oxauth.util import CertUtil
 
 import java
+import base64
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -40,7 +41,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         chain_cert_file_path = configurationAttributes.get("chain_cert_file_path").getValue2()
 
-        self.chain_certs = CertUtil.loadPublicX509Certificate(chain_cert_file_path)
+        self.chain_certs = CertUtil.loadX509CertificateFromFile(chain_cert_file_path)
         print "Cert. Initialization. Loaded '%d' chain certificates" % self.chain_certs.size()
         
         crl_max_response_size = 5*1024*1024 # 10Mb
@@ -108,19 +109,25 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2"
 
             # Validate if user selected certificate
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
-            x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
-            if (x509Certificates == None) or (len(x509Certificates) == 0):
-                print "Cert. Authenticate for step 2. User not selected any certs"
-                context.set("cert_selected", False)
-                
-                # Return True to inform user how to reset workflow
-                return True
+            cert_pre_selected = self.getSessionAttribute("cert_pre_selected")
+            if cert_pre_selected != None:
+                x509Certificate = self.certFromString(cert_pre_selected)
+                context.set("cert_selected", True)
+            else:
+                request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+                x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
+                if (x509Certificates == None) or (len(x509Certificates) == 0):
+                    print "Cert. Authenticate for step 2. User not selected any certs"
+                    context.set("cert_selected", False)
+                    
+                    # Return True to inform user how to reset workflow
+                    return True
 
-            context.set("cert_selected", True)
+                context.set("cert_selected", True)
             
-            # Use only first certificate for validation 
-            x509Certificate = x509Certificates[0]
+                # Use only first certificate for validation 
+                x509Certificate = x509Certificates[0]
+
             subjectX500Principal = x509Certificate.getSubjectX500Principal()
             print "Cert. Authenticate for step 2. User selected certificate with DN '%s'" % subjectX500Principal
             
@@ -134,7 +141,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
 
             context.set("cert_valid", True)
-            context.set("cert_x509", x509Certificate)
+            # Uncomment if application should use it
+            #context.set("cert_x509", self.certToString(x509Certificate))
             
             # Calculate certificate fingerprint
             x509CertificateFingerprint = self.calculateCertificateFingerprint(x509Certificate)
@@ -208,13 +216,23 @@ class PersonAuthentication(PersonAuthenticationType):
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Cert. Prepare for step %d" % step
 
+        if (step == 2):
+            # Store certificate in session to cover case when Apache request certificate
+            context = Contexts.getEventContext()
+            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
+            if (x509Certificates != None) and (len(x509Certificates) > 0):
+                context.set("cert_pre_selected", self.certToString(x509Certificates))
+                print "Cert. Prepare for step 2. Storing proxy requested certificate"
+                print x509Certificates[0]
+
         if (step < 4):
             return True
         else:
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList("cert_selected", "cert_valid", "cert_x509", "cert_x509_fingerprint", "cert_count_login_steps", "cert_user_external_uid")
+        return Arrays.asList("cert_pre_selected", "cert_selected", "cert_valid", "cert_x509", "cert_x509_fingerprint", "cert_count_login_steps", "cert_user_external_uid")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         cert_count_login_steps = self.getSessionAttribute("cert_count_login_steps")
@@ -305,3 +323,11 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
         
         return True
+
+    def certToString(self, x509Certificates):
+        return base64.b64encode(x509Certificates[0].getEncoded())
+
+    def certFromString(self, x509CertificateEncoded):
+        x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
+
+        return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
