@@ -172,6 +172,10 @@ public class RegisterSiteOperation extends BaseOperation {
             request.setRequestUris(params.getClientRequestUris());
         }
 
+        if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
+            request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
+        }
+
         siteConfiguration.setResponseTypes(asString(responseTypes));
         siteConfiguration.setLogoutRedirectUri(params.getPostLogoutRedirectUri());
         siteConfiguration.setContacts(params.getContacts());
@@ -204,7 +208,7 @@ public class RegisterSiteOperation extends BaseOperation {
         return grantTypes;
     }
 
-    private List<String> asString(List<ResponseType> responseTypes) {
+    public static List<String> asString(List<ResponseType> responseTypes) {
         List<String> list = Lists.newArrayList();
         for (ResponseType r : responseTypes) {
             list.add(r.getValue());

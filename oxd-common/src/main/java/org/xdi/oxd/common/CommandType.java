@@ -35,7 +35,7 @@ public enum CommandType {
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
     REGISTER_SITE("register_site"),
-    UPDATE_SITE_REGISTRATION("update_site_registration");
+    UPDATE_SITE("update_site_registration");
 
     private final String value;
 
