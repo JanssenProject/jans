@@ -33,7 +33,7 @@ public class GetUserInfoTest {
             final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
 
             GetUserInfoParams params = new GetUserInfoParams();
-            params.setOxdId(site.getSiteId());
+            params.setOxdId(site.getOxdId());
             params.setAccessToken(tokens.getAccessToken());
 
             final GetUserInfoResponse resp = client.send(new Command(CommandType.GET_USER_INFO).setParamsObject(params)).dataAsResponse(GetUserInfoResponse.class);
@@ -47,8 +47,8 @@ public class GetUserInfoTest {
     private GetTokensByCodeResponse requestTokens(CommandClient client, RegisterSiteResponse site, String userId, String userSecret) {
 
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
-        commandParams.setOxdId(site.getSiteId());
-        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getSiteId(), userId, userSecret));
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret));
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
 

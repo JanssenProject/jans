@@ -39,8 +39,8 @@ public class GetTokensByCodeTest {
     public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret) {
 
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
-        commandParams.setOxdId(site.getSiteId());
-        commandParams.setCode(codeRequest(client, site.getSiteId(), userId, userSecret));
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setCode(codeRequest(client, site.getOxdId(), userId, userSecret));
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
 
