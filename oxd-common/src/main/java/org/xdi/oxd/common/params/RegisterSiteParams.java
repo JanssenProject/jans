@@ -35,7 +35,8 @@ public class RegisterSiteParams implements IParams {
     private List<String> clientRequestUris;
     @JsonProperty(value = "client_logout_uris")
     private List<String> clientLogoutUri;
-
+    @JsonProperty(value = "client_sector_identifier_uri")
+    private String clientSectorIdentifierUri;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -51,6 +52,14 @@ public class RegisterSiteParams implements IParams {
     private List<String> contacts;
 
     public RegisterSiteParams() {
+    }
+
+    public String getClientSectorIdentifierUri() {
+        return clientSectorIdentifierUri;
+    }
+
+    public void setClientSectorIdentifierUri(String clientSectorIdentifierUri) {
+        this.clientSectorIdentifierUri = clientSectorIdentifierUri;
     }
 
     public List<String> getClientLogoutUri() {
@@ -200,6 +209,7 @@ public class RegisterSiteParams implements IParams {
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
+        sb.append(", sectorIdentifierUri='").append(clientSectorIdentifierUri).append('\'');
         sb.append(", scope=").append(scope);
         sb.append(", uiLocales=").append(uiLocales);
         sb.append(", claimsLocales=").append(claimsLocales);
