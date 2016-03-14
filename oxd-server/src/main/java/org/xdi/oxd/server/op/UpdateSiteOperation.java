@@ -47,7 +47,9 @@ public class UpdateSiteOperation extends BaseOperation {
             LOG.info("Updating site configuration ...");
             persistSiteConfiguration(site, params);
 
-            return okResponse(new UpdateSiteResponse());
+            UpdateSiteResponse response = new UpdateSiteResponse();
+            response.setOxdId(site.getOxdId());
+            return okResponse(response);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
