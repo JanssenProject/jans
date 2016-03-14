@@ -31,7 +31,7 @@ public class GetAuthorizationUrlTest {
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl);
 
             final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
-            commandParams.setOxdId(site.getSiteId());
+            commandParams.setOxdId(site.getOxdId());
 
             final Command command = new Command(CommandType.GET_AUTHORIZATION_URL);
             command.setParamsObject(commandParams);

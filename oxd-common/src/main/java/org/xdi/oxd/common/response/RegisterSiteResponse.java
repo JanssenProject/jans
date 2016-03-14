@@ -10,24 +10,24 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class RegisterSiteResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
-    private String siteId;
+    private String oxdId;
 
     public RegisterSiteResponse() {
     }
 
-    public String getSiteId() {
-        return siteId;
+    public String getOxdId() {
+        return oxdId;
     }
 
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RegisterSiteResponse");
-        sb.append("{siteId='").append(siteId).append('\'');
+        sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append('}');
         return sb.toString();
     }
