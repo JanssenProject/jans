@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +33,7 @@ public class CertUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<X509Certificate> loadPublicX509Certificate(String filePath) {
+	public static List<X509Certificate> loadX509CertificateFromFile(String filePath) {
 		if (StringHelper.isEmpty(filePath)) {
 			log.error("X509Certificate file path is empty");
 			
@@ -58,6 +59,19 @@ public class CertUtil {
 		}
 
 		return certificates;
+	}
+
+	public static X509Certificate x509CertificateFromBytes(byte[] cert) {
+		try {
+			CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+			InputStream bais = new ByteArrayInputStream(cert);
+
+			return (X509Certificate) certFactory.generateCertificate(bais);
+		} catch (CertificateException ex) {
+			log.error("Failed to parse X.509 certificates from bytes", ex);
+		}
+		
+		return null;
 	}
 
 }
