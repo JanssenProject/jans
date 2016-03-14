@@ -62,7 +62,7 @@ public class RegisterSiteTest {
         }
     }
 
-    @Parameters({"host", "port", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "port"})
     @Test(dependsOnMethods = {"register"})
     public void update(String host, int port) throws IOException {
         notEmpty(oxdId);
