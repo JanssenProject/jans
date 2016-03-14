@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
@@ -79,7 +80,12 @@ public class SiteConfigurationService {
     }
 
     public SiteConfiguration getSite(String id) {
-        return sites.get(id + ".json");
+        Preconditions.checkNotNull(id);
+        Preconditions.checkState(!Strings.isNullOrEmpty(id));
+
+        SiteConfiguration site = sites.get(id + ".json");
+        Preconditions.checkNotNull(site, "Failed to fetch site configuration with id: " + id + ".json");
+        return site;
     }
 
     public Map<String, SiteConfiguration> getSites() {
@@ -106,6 +112,8 @@ public class SiteConfigurationService {
         File file = siteFiles.get(fileName);
         Preconditions.checkNotNull(file);
         CoreUtils.createJsonMapper().writerWithDefaultPrettyPrinter().writeValue(file, siteConfiguration);
+
+        sites.put(file.getName(), siteConfiguration);
     }
 
     public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
