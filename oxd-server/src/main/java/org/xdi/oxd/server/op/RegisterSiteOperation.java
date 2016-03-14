@@ -177,7 +177,7 @@ public class RegisterSiteOperation extends BaseOperation {
         }
 
         siteConfiguration.setResponseTypes(asString(responseTypes));
-        siteConfiguration.setLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        siteConfiguration.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         siteConfiguration.setContacts(params.getContacts());
         siteConfiguration.setRedirectUris(Lists.newArrayList(redirectUris));
         return request;

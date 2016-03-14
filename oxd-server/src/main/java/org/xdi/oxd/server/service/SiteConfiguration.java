@@ -26,7 +26,7 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
     @JsonProperty(value = "logout_redirect_uri")
-    private String logoutRedirectUri;
+    private String postLogoutRedirectUri;
 
     @JsonProperty(value = "application_type")
     private String applicationType;
@@ -49,6 +49,8 @@ public class SiteConfiguration implements Serializable {
     private Date clientSecretExpiresAt;
     @JsonProperty(value = "client_name")
     private String clientName;
+    @JsonProperty(value = "sector_identifier_uri")
+    private String sectorIdentifierUri;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -73,7 +75,7 @@ public class SiteConfiguration implements Serializable {
         this.accessToken = conf.accessToken;
 
         this.authorizationRedirectUri = conf.authorizationRedirectUri;
-        this.logoutRedirectUri = conf.logoutRedirectUri;
+        this.postLogoutRedirectUri = conf.postLogoutRedirectUri;
 
         this.applicationType = conf.applicationType;
         this.redirectUris = conf.redirectUris;
@@ -86,6 +88,7 @@ public class SiteConfiguration implements Serializable {
         this.clientIdIssuedAt = conf.clientIdIssuedAt;
         this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
         this.clientName = conf.clientName;
+        this.sectorIdentifierUri = conf.sectorIdentifierUri;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -93,6 +96,14 @@ public class SiteConfiguration implements Serializable {
         this.acrValues = conf.acrValues;
         this.grantType = conf.grantType;
         this.contacts = conf.contacts;
+    }
+
+    public String getSectorIdentifierUri() {
+        return sectorIdentifierUri;
+    }
+
+    public void setSectorIdentifierUri(String sectorIdentifierUri) {
+        this.sectorIdentifierUri = sectorIdentifierUri;
     }
 
     public String getAccessToken() {
@@ -111,12 +122,12 @@ public class SiteConfiguration implements Serializable {
         this.idToken = idToken;
     }
 
-    public String getLogoutRedirectUri() {
-        return logoutRedirectUri;
+    public String getPostLogoutRedirectUri() {
+        return postLogoutRedirectUri;
     }
 
-    public void setLogoutRedirectUri(String logoutRedirectUri) {
-        this.logoutRedirectUri = logoutRedirectUri;
+    public void setPostLogoutRedirectUri(String postLogoutRedirectUri) {
+        this.postLogoutRedirectUri = postLogoutRedirectUri;
     }
 
     public String getClientName() {
@@ -272,6 +283,7 @@ public class SiteConfiguration implements Serializable {
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", applicationType='").append(applicationType).append('\'');
+        sb.append(", sectorIdentifierUri='").append(sectorIdentifierUri).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
