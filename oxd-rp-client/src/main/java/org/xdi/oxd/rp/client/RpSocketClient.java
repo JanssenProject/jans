@@ -58,7 +58,7 @@ public class RpSocketClient implements RpClient {
 
     @Override
     public String getOxdId() {
-        return registrationDetails.getSiteId();
+        return registrationDetails.getOxdId();
     }
 
     @Override

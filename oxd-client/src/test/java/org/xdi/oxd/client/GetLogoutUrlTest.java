@@ -35,7 +35,7 @@ public class GetLogoutUrlTest {
 //            GetTokensByCodeTest.tokenByCode(client, site, redirectUrl, userId, userSecret);
 
             final GetLogoutUrlParams commandParams = new GetLogoutUrlParams();
-            commandParams.setOxdId(site.getSiteId());
+            commandParams.setOxdId(site.getOxdId());
             commandParams.setIdTokenHint("dummy_token");
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setState(UUID.randomUUID().toString());

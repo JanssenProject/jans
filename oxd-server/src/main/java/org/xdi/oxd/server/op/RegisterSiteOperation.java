@@ -59,7 +59,7 @@ public class RegisterSiteOperation extends BaseOperation {
             LOG.info("Site configuration created: " + siteConfiguration);
 
             RegisterSiteResponse opResponse = new RegisterSiteResponse();
-            opResponse.setSiteId(siteId);
+            opResponse.setOxdId(siteId);
             return okResponse(opResponse);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

@@ -6,7 +6,9 @@ import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.common.response.UpdateSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,9 +24,11 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class RegisterSiteTest {
 
+    private String oxdId = null;
+
     @Parameters({"host", "port", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, int port, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
+    public void register(String host, int port, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
@@ -32,7 +36,7 @@ public class RegisterSiteTest {
             RegisterSiteResponse resp = registerSite(client, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
 
-            notEmpty(resp.getSiteId());
+            notEmpty(resp.getOxdId());
 
             // more specific site registration
             final RegisterSiteParams commandParams = new RegisterSiteParams();
@@ -50,6 +54,32 @@ public class RegisterSiteTest {
             command.setParamsObject(commandParams);
 
             resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+            assertNotNull(resp);
+            assertNotNull(resp.getOxdId());
+            oxdId = resp.getOxdId();
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    @Parameters({"host", "port", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Test(dependsOnMethods = {"register"})
+    public void update(String host, int port) throws IOException {
+        notEmpty(oxdId);
+
+        CommandClient client = null;
+        try {
+            client = new CommandClient(host, port);
+
+            // more specific site registration
+            final UpdateSiteParams commandParams = new UpdateSiteParams();
+            commandParams.setOxdId(oxdId);
+            commandParams.setScope(Lists.newArrayList("profile"));
+
+            final Command command = new Command(CommandType.UPDATE_SITE);
+            command.setParamsObject(commandParams);
+
+            UpdateSiteResponse resp = client.send(command).dataAsResponse(UpdateSiteResponse.class);
             assertNotNull(resp);
         } finally {
             CommandClient.closeQuietly(client);
