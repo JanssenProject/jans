@@ -122,6 +122,10 @@ class Setup(object):
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
+        self.oxauthClient_2_pw = None
+        self.oxauthClient_2_encoded_pw = None
+        self.oxauthClient_3_pw = None
+        self.oxauthClient_3_encoded_pw = None
         self.encode_salt = None
         self.oxauth_jsf_salt = None
         self.oxTrustConfigGeneration = "true"
@@ -672,6 +676,14 @@ class Setup(object):
             self.oxauthClient_pw = self.getPW()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
             self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
+
+            self.oxauthClient_2_pw = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_2_pw)
+            self.oxauthClient_2_encoded_pw = os.popen(cmd, 'r').read().strip()
+
+            self.oxauthClient_3_pw = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_3_pw)
+            self.oxauthClient_3_encoded_pw = os.popen(cmd, 'r').read().strip()
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
