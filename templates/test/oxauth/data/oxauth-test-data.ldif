@@ -410,3 +410,11 @@ inum: %(inumOrg)s!0012!D426.60FD
 objectClass: top
 objectClass: oxSectorIdentifier
 oxAuthRedirectURI: https://example.com/bad_sector_identifier
+
+######################################
+# Scripts - Dynamic scope
+######################################
+dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: gluuStatus
+gluuStatus: true
