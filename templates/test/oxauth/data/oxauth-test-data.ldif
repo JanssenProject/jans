@@ -214,7 +214,7 @@ objectClass: oxAuthClient
 displayName: oxAuth Test Resource Server Client (don't remove)
 inum: %(inumOrg)s!0008!AB77!1A2B
 oxAuthAppType: web
-oxAuthClientSecret: PQzdFt4grVibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
+oxAuthClientSecret: %(oxauthClient_2_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
 oxAuthRedirectURI: https://client.example.com/cb
 oxAuthResponseType: code
@@ -228,7 +228,7 @@ objectClass: oxAuthClient
 displayName: oxAuth Test Requesting Party Client (don't remove)
 inum: %(inumOrg)s!0008!0068.3E20
 oxAuthAppType: web
-oxAuthClientSecret: t9eqhq8kyAibVTugJNH1t4TK+TaHlVyQK/pGsXU41Kk=
+oxAuthClientSecret: %(oxauthClient_3_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
 oxAuthRedirectURI: https://client.example.com/cb
 oxAuthResponseType: code
