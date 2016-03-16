@@ -7,7 +7,7 @@
     <action execute="#{authorizeAction.checkUiLocales}" />
     <action execute="#{authorizeAction.checkPermissionGranted}" on-postback="false"/>
 
-    <rewrite pattern="/authorize"/>    
+    <rewrite pattern="/authorize"/> 
      	<navigation from-action="#{authorizeAction.checkPermissionGranted}">
         <rule if-outcome="success">
             <render view-id="/authorize.xhtml" />

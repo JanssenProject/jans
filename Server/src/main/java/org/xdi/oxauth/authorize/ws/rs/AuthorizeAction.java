@@ -215,7 +215,7 @@ public class AuthorizeAction {
             if (client != null) {
             	
             	if(!client.getPersistClientAuthorizations() || client.getTrustedClient().equalsIgnoreCase("false")){
-            		return  Constants.RESULT_SUCCESS;
+            		return  Constants.RESULT_SUCCESS; 
             	}
             	
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
