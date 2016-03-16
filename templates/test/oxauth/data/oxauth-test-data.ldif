@@ -132,6 +132,17 @@ oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
 
 ######################################
+# Groups
+######################################
+dn: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: gluuGroup
+gluuGroupType: gluuTestGroup
+inum: %(inumOrg)s!0003!7890
+gluuStatus: active
+displayName: Gluu Test Group
+
+######################################
 # People
 ######################################
 dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
@@ -170,12 +181,12 @@ updatedAt: 1428004163
 userPassword: test_user_password
 website: http://www.gluu.org
 zoneinfo: America/Chicago
-memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+memberOf: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
 
 ######################################
 # Groups
 ######################################
-dn: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
+dn: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
 changetype: modify
 add: member
 member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
