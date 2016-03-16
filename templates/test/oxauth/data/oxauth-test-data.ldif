@@ -137,10 +137,18 @@ oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
 dn: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuGroup
-gluuGroupType: gluuTestGroup
+gluuGroupType: gluuTestGroup1
 inum: %(inumOrg)s!0003!7890
 gluuStatus: active
-displayName: Gluu Test Group
+displayName: Gluu Test Group 1
+
+dn: inum=%(inumOrg)s!0003!7891,ou=groups,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: gluuGroup
+gluuGroupType: gluuTestGroup2
+inum: %(inumOrg)s!0003!7891
+gluuStatus: active
+displayName: Gluu Test Group 2
 
 ######################################
 # People
@@ -187,6 +195,11 @@ memberOf: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
 # Groups
 ######################################
 dn: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
+changetype: modify
+add: member
+member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
+
+dn: inum=%(inumOrg)s!0003!7891,ou=groups,o=%(inumOrg)s,o=gluu
 changetype: modify
 add: member
 member: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
