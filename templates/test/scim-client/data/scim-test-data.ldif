@@ -24,10 +24,10 @@ dn: inum=%(inumOrg)s!0005!ADA6,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim First custom attribute
-displayName: Custom First
+displayName: Scim Custom First
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
-gluuAttributeName: customFirst
+gluuAttributeName: scimCustomFirst
 gluuAttributeOrigin: ox-%(inumOrgFN)s
 gluuAttributeType: string
 gluuSAML1URI: urn:gluu:dir:attribute-def:scimCustomFirst
@@ -41,7 +41,7 @@ dn: inum=%(inumOrg)s!0005!70F0,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim Second custom attribute
-displayName: Custom Second
+displayName: Scim Custom Second
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
 gluuAttributeName: scimCustomSecond
@@ -58,7 +58,7 @@ dn: inum=%(inumOrg)s!0005!653A,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuAttribute
 description: Scim Third custom attribute
-displayName: Custom Third
+displayName: Scim Custom Third
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
 gluuAttributeName: scimCustomThird
