@@ -190,6 +190,7 @@ userPassword: test_user_password
 website: http://www.gluu.org
 zoneinfo: America/Chicago
 memberOf: inum=%(inumOrg)s!0003!7890,ou=groups,o=%(inumOrg)s,o=gluu
+memberOf: inum=%(inumOrg)s!0003!7891,ou=groups,o=%(inumOrg)s,o=gluu
 
 ######################################
 # Groups
