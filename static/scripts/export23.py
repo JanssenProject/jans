@@ -267,15 +267,15 @@ def prepareProperties(setupFile):
         while line:
             if 'ldapPass=' in line:
                 ldap_password = line.split('=')[-1].strip()
-            line = sf.readline()
+            line = sf.readline
     ldap_creds = ['-h', 'localhost', '-p', '1389', '-D', '"cn=directory',
                   'manager"', '-w', ldap_password]
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print "Usage:\n\n./export23.py <location_of_setup.properties.last>"
-        print "\nExample: ./export23.py /install/community-edition-setup/" + \
-            "setup.properties.last"
+        print "\nExample: ./export23.py /install/community-edition-setup/setup"
+        + ".properties.last"
     else:
         prepareProperties(sys.argv[1])
         makeFolders()
