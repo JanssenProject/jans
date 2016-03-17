@@ -115,6 +115,9 @@
         </web-resource-collection>
         <auth-constraint/>
     </security-constraint>
+
+    <!-- Cert authentication for case when there is proxy like Apache -->
+    <!-- Don't remove. Use when there is standalone tomcat only.
     <security-constraint>
         <display-name>Request client cert for specific page</display-name>
         <web-resource-collection>
@@ -125,6 +128,7 @@
             <role-name>*</role-name>
             </auth-constraint>
     </security-constraint>
+    -->
 
     <session-config>
         <session-timeout>30</session-timeout>
