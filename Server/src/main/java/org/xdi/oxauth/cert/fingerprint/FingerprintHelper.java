@@ -1,4 +1,10 @@
-package org.xdi.oxauth.model.util;
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
+package org.xdi.oxauth.cert.fingerprint;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -13,27 +19,29 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
 
 /**
+ * Utility which help to calculate SSH RSA public key fingerprint
+ * 
  * @author Yuriy Movchan
  * @version March 03, 2016
  */
-public class FingerprintUtil {
+public class FingerprintHelper {
 
-	private static final Logger log = Logger.getLogger(FingerprintUtil.class);
+	private static final Logger log = Logger.getLogger(FingerprintHelper.class);
 
 	/*
 	 * Return SSH RSA public key fingerprint
 	 */
-	public static Object getPublicKeyFingerprint(PublicKey publicKey) throws NoSuchAlgorithmException, IOException {
+	public static String getPublicKeySshFingerprint(PublicKey publicKey) throws NoSuchAlgorithmException, IOException {
 		if (publicKey instanceof RSAPublicKey) {
-			return getPublicKeyFingerprint((RSAPublicKey) publicKey);
+			return getPublicKeySshFingerprint((RSAPublicKey) publicKey);
 		}
-		
+
 		throw new NoSuchAlgorithmException("Unsopported PublicKey type");
 	}
 
-	public static String getPublicKeyFingerprint(RSAPublicKey publicKey) throws NoSuchAlgorithmException, IOException {
+	public static String getPublicKeySshFingerprint(RSAPublicKey publicKey) throws NoSuchAlgorithmException, IOException {
 		MessageDigest digest = MessageDigest.getInstance("MD5");
-		
+
 		byte[] derEncoded = getDerEncoding(publicKey);
 		byte[] fingerprint = digest.digest(derEncoded);
 
@@ -43,16 +51,16 @@ public class FingerprintUtil {
 	private static byte[] getDerEncoding(RSAPublicKey key) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		DataOutputStream dataOutput = new DataOutputStream(buffer);
-		writeVariableLengthOpaque("ssh-rsa".getBytes(), dataOutput);
-		writeVariableLengthOpaque(key.getPublicExponent().toByteArray(), dataOutput);
-		writeVariableLengthOpaque(key.getModulus().toByteArray(), dataOutput);
+		writeDataWithLength("ssh-rsa".getBytes(), dataOutput);
+		writeDataWithLength(key.getPublicExponent().toByteArray(), dataOutput);
+		writeDataWithLength(key.getModulus().toByteArray(), dataOutput);
 
 		return buffer.toByteArray();
 	}
 
-	private static void writeVariableLengthOpaque(byte[] opaque, DataOutput byteBuffer) throws IOException {
-		byteBuffer.writeInt(opaque.length);
-		byteBuffer.write(opaque);
+	private static void writeDataWithLength(byte[] data, DataOutput byteBuffer) throws IOException {
+		byteBuffer.writeInt(data.length);
+		byteBuffer.write(data);
 	}
 
 }
