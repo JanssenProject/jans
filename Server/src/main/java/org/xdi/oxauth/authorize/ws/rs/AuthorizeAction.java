@@ -214,7 +214,8 @@ public class AuthorizeAction {
 
             if (client != null) {
             	
-            	if(!client.getPersistClientAuthorizations() || !client.getTrustedClient()){
+            	boolean trustedClient = (client.getTrustedClient() != null) && client.getTrustedClient();
+            	if(!client.getPersistClientAuthorizations() || !trustedClient){
             		return  Constants.RESULT_SUCCESS; 
             	}
             	
@@ -253,7 +254,7 @@ public class AuthorizeAction {
                                     org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
                         permissionGranted(session);
                     } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+                        if (trustedClient && !prompts.contains(Prompt.CONSENT)) {
                             permissionGranted(session);
                         }
                     } else {
