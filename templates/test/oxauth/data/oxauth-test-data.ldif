@@ -214,7 +214,7 @@ objectClass: oxAuthClient
 displayName: oxAuth Test Client (don't remove)
 inum: %(inumOrg)s!0008!FF81!2D39
 oxAuthAppType: web
-oxAuthClientSecret: KBvtRlZyEQ/ebFGy8/JGi0Nh3Qxasmn+dqU0LZPYmR4=
+oxAuthClientSecret: %(oxauthClient_4_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
 oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.seam
 oxAuthRedirectURI: https://client.example.com/cb
