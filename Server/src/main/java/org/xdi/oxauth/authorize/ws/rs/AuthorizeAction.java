@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
@@ -138,7 +139,7 @@ public class AuthorizeAction {
         }
     }
 
-    public void checkPermissionGranted() {
+    public String checkPermissionGranted() {
         SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
@@ -177,7 +178,7 @@ public class AuthorizeAction {
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
                     permissionDenied();
-                    return;
+                    return Constants.RESULT_FAILURE;
                 }
 
                 String acr = customScriptConfiguration.getName();
@@ -204,7 +205,7 @@ public class AuthorizeAction {
             sessionStateService.createSessionStateCookie(this.sessionState);
 
             FacesManager.instance().redirect(redirectTo, null, false);
-            return;
+            return Constants.RESULT_FAILURE;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
@@ -212,6 +213,11 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
+            	
+            	if(!client.getPersistClientAuthorizations() || client.getTrustedClient().equalsIgnoreCase("false")){
+            		return  Constants.RESULT_SUCCESS; 
+            	}
+            	
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
                     permissionDenied();
                 }
@@ -258,6 +264,7 @@ public class AuthorizeAction {
                 }
             }
         }
+		return Constants.RESULT_FAILURE;
     }
 
     /**
