@@ -166,7 +166,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
