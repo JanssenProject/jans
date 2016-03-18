@@ -153,7 +153,7 @@ public class Client {
     private String[] scopes;
 
     @LdapAttribute(name = "oxAuthTrustedClient")
-    private String trustedClient;
+    private Boolean trustedClient;
 
     @LdapAttribute(name = "oxAuthClientUserGroup")
     private String[] userGroups;
@@ -959,11 +959,11 @@ public class Client {
         this.scopes = scopes;
     }
 
-    public String getTrustedClient() {
+    public Boolean getTrustedClient() {
         return trustedClient;
     }
 
-    public void setTrustedClient(String trustedClient) {
+    public void setTrustedClient(Boolean trustedClient) {
         this.trustedClient = trustedClient;
     }
 
