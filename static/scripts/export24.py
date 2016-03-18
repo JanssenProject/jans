@@ -256,6 +256,7 @@ def main():
             while line:
                 if 'ldapPass=' in line:
                     ldap_pass = line.split('=')[-1].strip()
+                line = setupfile.readline()
 
         ldap_creds = ['-h', 'localhost', '-p', '1389', '-D',
                       '"cn=directory', 'manager"', '-w', ldap_pass]
