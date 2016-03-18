@@ -6,6 +6,7 @@ import sys
 import os
 import shutil
 import hashlib
+import getpass
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -194,7 +195,7 @@ def runCommand(args, return_list=False):
 
 def genProperties():
     props = {}
-    props['ldapPass'] = runCommand([cat, password_file])
+    props['ldapPass'] = ldap_pass
     props['hostname'] = runCommand([hostname])
     props['inumAppliance'] = runCommand(
         [grep, "^inum", "%s/ldif/appliance.ldif" % bu_folder]
@@ -248,9 +249,26 @@ def main():
     global ldap_pass
     global ldap_creds
 
-    ldap_pass = raw_input("Enter your LDAP password: ")
-    ldap_creds = ['-h', 'localhost', '-p', '1389', '-D',
-                  '"cn=directory', 'manager"', '-w', ldap_pass]
+    try:
+        with open('/install/community-edition-setup/setup.properties.last',
+                  'r') as setupfile:
+            line = setupfile.readline()
+            while line:
+                if 'ldapPass=' in line:
+                    ldap_pass = line.split('=')[-1].strip()
+
+        ldap_creds = ['-h', 'localhost', '-p', '1389', '-D',
+                      '"cn=directory', 'manager"', '-w', ldap_pass]
+
+        # perform a sample connection with the parsed password to validate it
+        getOrgInum()
+    except:
+        print "The LDAP password in your setup.properties.last seems outdated."
+        ldap_pass = getpass.getpass("Enter your current LDAP password: ")
+
+        ldap_creds = ['-h', 'localhost', '-p', '1389', '-D',
+                      '"cn=directory', 'manager"', '-w', ldap_pass]
+
     makeFolders()
     backupFiles()
     getLdif()
