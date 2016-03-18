@@ -671,7 +671,11 @@ public class JwtUtil {
                 }
             }
 
-            JSONObject jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
+            JSONObject jsonPublicKey = jsonKeyValue;
+            if (jsonKeyValue.has(PUBLIC_KEY)) {
+                // Use internal jwks.json format
+            	jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
+            }
 
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
 	            //String alg = jsonKeyValue.getString(ALGORITHM);
