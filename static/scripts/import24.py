@@ -23,6 +23,7 @@ import uuid
 log = "./import_24.log"
 logError = "./import_24.error"
 password_file = "/root/.pw"
+backup24_folder = None
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
@@ -335,25 +336,10 @@ changetype: modify
     f.write(modLdif)
     f.close()
 
-backup24_folder = None
-error = False
-try:
-    backup24_folder = sys.argv[1]
-    if (not os.path.exists("%s/ldif" % backup24_folder)):
-        error = True
-    if (not os.path.exists("%s/etc" % backup24_folder)):
-        error = True
-    if (not os.path.exists("%s/opt" % backup24_folder)):
-        error = True
-except:
-    error = True
-
-if error:
-    print "backup folders not found"
-    sys.exit(1)
-
 
 def main():
+    global backup24_folder
+
     backup24_folder = sys.argv[1]
     if not os.path.exists(backup24_folder):
         print "Backup folder %s does not exist." % backup24_folder
@@ -391,5 +377,5 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print "Usage: ./import24.py <path_to_backup_folder>"
         print "Example:\n ./import24.py /root/backup_24"
-
-    main()
+    else:
+        main()
