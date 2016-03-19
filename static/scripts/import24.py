@@ -28,6 +28,8 @@ service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
+stopds = "/opt/opendj/bin/stop-ds"
+startds = "/opt/opendj/bin/start-ds"
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -230,7 +232,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
 
 
 def startOpenDJ():
-    output = getOutput([service, 'opendj', 'start'])
+    output = getOutput([startds])
     if output.find("Directory Server has started successfully") > 0:
         logIt("Directory Server has started successfully")
     else:
@@ -240,7 +242,7 @@ def startOpenDJ():
 
 
 def stopOpenDJ():
-    output = getOutput([service, 'opendj', 'stop'])
+    output = getOutput([stopds])
     if output.find("Directory Server is now stopped") > 0:
         logIt("Directory Server is now stopped")
     else:
@@ -299,12 +301,12 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
             logIt("Error adding site.ldif", True)
 
 
-def walk_function(a, dir, files):
-    for file in files:
-        if file in ignore_files:
+def walk_function(a, directory, files):
+    for f in files:
+        if f in ignore_files:
             continue
-        fn = "%s/%s" % (dir, file)
-        targetFn = fn[1:]
+        fn = "%s/%s" % (directory, f)
+        targetFn = fn.replace(backup24_folder, '')
         if os.path.isdir(fn):
             if not os.path.exists(targetFn):
                 os.mkdir(targetFn)
@@ -348,24 +350,46 @@ except:
 
 if error:
     print "backup folders not found"
-    print "Usage: ./import.py <path_to_backup_folders>"
     sys.exit(1)
 
-ldif_folder = "%s/ldif" % backup24_folder
-outputFolder = "./output_ldif"
-outputLdifFolder = "%s/config" % outputFolder
 
-if not os.path.exists(outputFolder):
-    os.mkdir(outputFolder)
+def main():
+    backup24_folder = sys.argv[1]
+    if not os.path.exists(backup24_folder):
+        print "Backup folder %s does not exist." % backup24_folder
+        sys.exit(1)
 
-if not os.path.exists(outputLdifFolder):
-    os.mkdir(outputLdifFolder)
+    etc_folder = os.path.join(backup24_folder, 'etc')
+    opt_folder = os.path.join(backup24_folder, 'opt')
+    ldif_folder = os.path.join(backup24_folder, 'ldif')
 
-newLdif = "%s/current_config.ldif" % outputFolder
+    if not (os.path.exists(etc_folder) and os.path.exists(opt_folder) and
+            os.path.exists(ldif_folder)):
+        print "Backup folder doesn't have all the information. Try runnning " \
+              "the export script again."
+        sys.exit(1)
 
-stopOpenDJ()
-copyFiles(backup24_folder)
-startOpenDJ()
-getNewConfig(newLdif)
-restoreConfig(ldif_folder, newLdif, outputLdifFolder)
-uploadLDIF(ldif_folder, outputLdifFolder)
+    outputFolder = "./output_ldif"
+    outputLdifFolder = "%s/config" % outputFolder
+    newLdif = "%s/current_config.ldif" % outputFolder
+
+    if not os.path.exists(outputFolder):
+        os.mkdir(outputFolder)
+
+    if not os.path.exists(outputLdifFolder):
+        os.mkdir(outputLdifFolder)
+
+    stopOpenDJ()
+    copyFiles(backup24_folder)
+    startOpenDJ()
+    getNewConfig(newLdif)
+    restoreConfig(ldif_folder, newLdif, outputLdifFolder)
+    uploadLDIF(ldif_folder, outputLdifFolder)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print "Usage: ./import24.py <path_to_backup_folder>"
+        print "Example:\n ./import24.py /root/backup_24"
+
+    main()
