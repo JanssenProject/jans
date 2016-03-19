@@ -264,8 +264,7 @@ def main():
         # perform a sample connection with the parsed password to validate it
         getOrgInum()
     except:
-        print "The LDAP password in your setup.properties.last seems outdated."
-        ldap_pass = getpass.getpass("Enter your current LDAP password: ")
+        ldap_pass = getpass.getpass("Enter the LDAP password: ")
 
         ldap_creds = ['-h', 'localhost', '-p', '1389', '-D',
                       '"cn=directory', 'manager"', '-w', ldap_pass]
