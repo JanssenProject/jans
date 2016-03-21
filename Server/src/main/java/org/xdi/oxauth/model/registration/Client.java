@@ -45,7 +45,7 @@ public class Client {
     private String[] logoutUri;
 
     @LdapAttribute(name = "oxAuthLogoutSessionRequired")
-    private Boolean logoutSessionRequired;
+    private boolean logoutSessionRequired;
 
     @LdapAttribute(name = "oxAuthRegistrationAccessToken")
     private String registrationAccessToken;
@@ -135,7 +135,7 @@ public class Client {
     private Integer defaultMaxAge;
 
     @LdapAttribute(name = "oxAuthRequireAuthTime")
-    private Boolean requireAuthTime;
+    private boolean requireAuthTime;
 
     @LdapAttribute(name = "oxAuthDefaultAcrValues")
     private String[] defaultAcrValues;
@@ -153,7 +153,7 @@ public class Client {
     private String[] scopes;
 
     @LdapAttribute(name = "oxAuthTrustedClient")
-    private Boolean trustedClient;
+    private boolean trustedClient;
 
     @LdapAttribute(name = "oxAuthClientUserGroup")
     private String[] userGroups;
@@ -171,7 +171,7 @@ public class Client {
     private Date lastLogonTime;
 
     @LdapAttribute(name = "oxPersistClientAuthorizations")
-    private Boolean persistClientAuthorizations;
+    private boolean persistClientAuthorizations;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -196,7 +196,7 @@ public class Client {
      *
      * @return logout session required
      */
-    public Boolean getLogoutSessionRequired() {
+    public boolean getLogoutSessionRequired() {
         return logoutSessionRequired;
     }
 
@@ -205,7 +205,7 @@ public class Client {
      *
      * @param logoutSessionRequired logout session required
      */
-    public void setLogoutSessionRequired(Boolean logoutSessionRequired) {
+    public void setLogoutSessionRequired(boolean logoutSessionRequired) {
         this.logoutSessionRequired = logoutSessionRequired;
     }
 
@@ -854,22 +854,22 @@ public class Client {
     }
 
     /**
-     * Returns a Boolean value specifying whether the auth_time Claim in the ID Token is required.
+     * Returns a boolean value specifying whether the auth_time Claim in the ID Token is required.
      * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
      *
      * @return The required authentication time.
      */
-    public Boolean getRequireAuthTime() {
+    public boolean getRequireAuthTime() {
         return requireAuthTime;
     }
 
     /**
-     * Sets a Boolean value specifying whether the auth_time Claim in the ID Token is required.
+     * Sets a boolean value specifying whether the auth_time Claim in the ID Token is required.
      * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
      *
      * @param requireAuthTime The required authentication time.
      */
-    public void setRequireAuthTime(Boolean requireAuthTime) {
+    public void setRequireAuthTime(boolean requireAuthTime) {
         this.requireAuthTime = requireAuthTime;
     }
 
@@ -959,11 +959,11 @@ public class Client {
         this.scopes = scopes;
     }
 
-    public Boolean getTrustedClient() {
+    public boolean getTrustedClient() {
         return trustedClient;
     }
 
-    public void setTrustedClient(Boolean trustedClient) {
+    public void setTrustedClient(boolean trustedClient) {
         this.trustedClient = trustedClient;
     }
 
@@ -1027,11 +1027,11 @@ public class Client {
         this.lastLogonTime = lastLogonTime;
     }
 
-    public Boolean getPersistClientAuthorizations() {
+    public boolean getPersistClientAuthorizations() {
         return persistClientAuthorizations;
     }
 
-    public void setPersistClientAuthorizations(Boolean persistClientAuthorizations) {
+    public void setPersistClientAuthorizations(boolean persistClientAuthorizations) {
         this.persistClientAuthorizations = persistClientAuthorizations;
     }
 
