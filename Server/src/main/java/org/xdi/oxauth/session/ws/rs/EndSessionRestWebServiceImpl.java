@@ -185,7 +185,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     continue; // skip client if logout_uri is blank
                 }
 
-                if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
+                if (client.getLogoutSessionRequired()) {
                     if (logoutUri.contains("?")) {
                         logoutUri = logoutUri + "&sid=" + sessionState.getId();
                     } else {
