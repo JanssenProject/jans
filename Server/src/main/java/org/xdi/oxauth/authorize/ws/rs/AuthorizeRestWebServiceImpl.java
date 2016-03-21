@@ -386,8 +386,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
                                     sessionUser.addPermission(clientId, true);
                                 }
-                            	boolean trustedClient = (client.getTrustedClient() != null) && client.getTrustedClient();
-                                if (prompts.contains(Prompt.NONE) && trustedClient) {
+                                if (prompts.contains(Prompt.NONE) && client.getTrustedClient()) {
                                     sessionUser.addPermission(clientId, true);
                                 }
 

@@ -209,7 +209,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 				IOUtils.closeQuietly(in);
 			}
 		} catch (IOException ex) {
-			log.error("Faield to download CRL from '" + url + "'", ex);
+			log.error("Failed to download CRL from '" + url + "'", ex);
 		} finally {
 			if (con != null) {
 				con.disconnect();
