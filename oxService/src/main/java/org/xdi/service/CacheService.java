@@ -6,6 +6,7 @@
 
 import net.sf.ehcache.CacheManager;
 
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -54,5 +55,9 @@ public class CacheService {
 			((CacheManager) cacheProvider.getDelegate()).getCache(name).removeAll();
 		}
 	}
+
+	public static CacheService instance() {
+        return (CacheService) Component.getInstance(CacheService.class);
+    }
 
 }
