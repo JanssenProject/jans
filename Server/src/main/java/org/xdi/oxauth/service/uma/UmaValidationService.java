@@ -182,7 +182,7 @@ public class UmaValidationService {
    	}
 
     public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
-   		if (resourceSetPermission == null) {
+   		if (resourceSetPermission == null || "invalidated".equalsIgnoreCase(resourceSetPermission.getAmHost())) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
