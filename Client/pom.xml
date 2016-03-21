@@ -80,13 +80,6 @@
             <artifactId>oxauth-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.xdi</groupId>
-            <artifactId>oxauth-model</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxrs</artifactId>
         </dependency>
@@ -154,4 +147,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+		<profile>
+			<id>oxAuth test dependencies</id>
+			<activation>
+				<file>
+					<exists>../Model/target/oxauth-model-tests.jar</exists>
+				</file>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.xdi</groupId>
+					<artifactId>oxauth-model</artifactId>
+					<version>${project.version}</version>
+					<type>test-jar</type>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+    </profiles>
+
 </project>
