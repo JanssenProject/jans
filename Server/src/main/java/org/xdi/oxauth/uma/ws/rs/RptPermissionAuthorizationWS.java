@@ -42,7 +42,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -164,7 +163,7 @@ public class RptPermissionAuthorizationWS {
 
     private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
         try {
-            resourceSetPermission.setExpirationDate(new Date(0)); // invalidate ticket and persist
+            resourceSetPermission.setAmHost("invalidated"); // invalidate ticket and persist
             ldapEntryManager.merge(resourceSetPermission);
         } catch (Exception e) {
             log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
