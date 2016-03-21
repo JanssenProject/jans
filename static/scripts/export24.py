@@ -258,7 +258,7 @@ def main():
                     ldap_pass = line.split('=')[-1].strip()
                 line = setupfile.readline()
 
-        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', -'X', '-D',
+        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                       '"cn=directory manager"', '-w', ldap_pass]
 
         # perform a sample connection with the parsed password to validate it
@@ -266,7 +266,7 @@ def main():
     except:
         ldap_pass = getpass.getpass("Enter the LDAP password: ")
 
-        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', -'X', '-D',
+        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                       '"cn=directory manager"', '-w', ldap_pass]
 
     makeFolders()
