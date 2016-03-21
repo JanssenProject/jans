@@ -1,8 +1,10 @@
 package org.xdi.oxauth.model.authorize;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.xdi.oxauth.model.util.Preconditions;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 /**
@@ -13,8 +15,24 @@ import java.util.UUID;
 public class CodeVerifier {
 
     public enum TransformationType {
-        PLAIN,
-        S256
+        PLAIN("plain", ""),
+        S256("s256", "SHA-256");
+
+        private String pkceString;
+        private String messageDigestString;
+
+        private TransformationType(String pkceString, String messageDigestString) {
+            this.pkceString = pkceString;
+            this.messageDigestString = messageDigestString;
+        }
+
+        public String getMessageDigestString() {
+            return messageDigestString;
+        }
+
+        public String getPkceString() {
+            return pkceString;
+        }
     }
 
     private String codeVerifier;
@@ -49,9 +67,9 @@ public class CodeVerifier {
     }
 
     public static String generateCodeVerifier() {
-        return UUID.randomUUID().toString();
+        SecureRandom random = new SecureRandom();
+        return UUID.randomUUID().toString() + new BigInteger(130, random).toString(32);
     }
-
 
     public String getCodeChallenge() {
         return codeChallenge;
@@ -63,5 +81,16 @@ public class CodeVerifier {
 
     public TransformationType getTransformationType() {
         return transformationType;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("CodeVerifier");
+        sb.append("{codeVerifier='").append(codeVerifier).append('\'');
+        sb.append(", codeChallenge='").append(codeChallenge).append('\'');
+        sb.append(", transformationType=").append(transformationType);
+        sb.append('}');
+        return sb.toString();
     }
 }
