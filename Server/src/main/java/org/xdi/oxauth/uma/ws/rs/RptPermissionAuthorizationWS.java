@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.xdi.oxauth.model.util.Util;
 import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
@@ -25,6 +24,7 @@ import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -42,8 +42,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -164,7 +164,7 @@ public class RptPermissionAuthorizationWS {
 
     private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
         try {
-            resourceSetPermission.setTicket(UUID.randomUUID().toString()); // invalidate ticket and persist
+            resourceSetPermission.setExpirationDate(new Date(0)); // invalidate ticket and persist
             ldapEntryManager.merge(resourceSetPermission);
         } catch (Exception e) {
             log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
