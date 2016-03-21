@@ -11,9 +11,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxauth.model.util.Util;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * FIDO U2F authentication request message
