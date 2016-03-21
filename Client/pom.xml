@@ -153,7 +153,7 @@
 			<id>oxAuth test dependencies</id>
 			<activation>
 				<file>
-					<exists>../Model/target/test-classes</exists>
+					<exists>../Model/target/oxauth-model-tests.jar</exists>
 				</file>
 			</activation>
 			<dependencies>
