@@ -17,8 +17,8 @@ from org.xdi.util.security import StringEncrypter
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
 from java.util import HashMap, Arrays
-
-from com.devsu.push.sender.service.sync import SyncAndroidPushService, SyncApplePushService
+from com.notnoop.apns import APNS
+from com.google.android.gcm.server import Sender, Message 
 
 import sys
 import java
@@ -421,7 +421,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.pushAndroidService = None
         self.pushAppleService = None
         if android_creds["enabled"]:
-            self.pushAndroidService = SyncAndroidPushService(android_creds["api_key"])
+            self.pushAndroidService = Sender(android_creds["api_key"]) 
             print "oxPush2. Initialize notification services. Created Android notification service"
             
         if ios_creads["enabled"]:
@@ -435,7 +435,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Ignore exception. Password is not encrypted
                 print "oxPush2. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"
 
-            self.pushAppleService = SyncApplePushService(p12_file_path, p12_passowrd, ios_creads["production"])
+            apnsServiceBuilder =  APNS.newService().withCert(p12_file_path, p12_passowrd)
+            if ios_creads["production"]:
+                self.pushAppleService = apnsServiceBuilder.withProductionDestination().build()
+            else:
+                self.pushAppleService = apnsServiceBuilder.withSandboxDestination().build()
+
             print "oxPush2. Initialize notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -483,7 +488,11 @@ class PersonAuthentication(PersonAuthenticationType):
                         additional_fields = HashMap()
                         additional_fields.put("request", oxpush2_request)
 
-                        send_notification_result = self.pushAppleService.sendPush(title, message, additional_fields, push_token)
+                        msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
+                        msgBuilder.category('ACTIONABLE').badge(0)
+                        msgBuilder.customFields(additional_fields)
+
+                        send_notification_result = self.pushAppleService.push(push_token, msgBuilder.build())
                         if debug:
                             print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
@@ -493,7 +502,11 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "oxPush2. Send push notification. Android push notification service is not enabled"
                     else:
                         send_notification = True
-                        send_notification_result= self.pushAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
+
+                        title = "oxPush2"
+                        msgBuilder = Message.Builder().addData("message", oxpush2_request).addData("title", title).collapseKey("single");
+
+                        send_notification_result = self.pushAndroidService.send(msgBuilder.build(), push_token, 3)
                         if debug:
                             print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
