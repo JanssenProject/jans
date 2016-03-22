@@ -26,6 +26,7 @@ import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -119,17 +120,17 @@ public class RegistrationService extends RequestService {
 		return new RegisterRequest(Base64Util.base64urlencode(challenge), appId);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum) throws BadInputException {
+	public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum) throws BadInputException {
 		return finishRegistration(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum, Set<String> facets)
+	public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum, Set<String> facets)
 			throws BadInputException {
 		RegisterRequest request = requestMessage.getRegisterRequest();
 		String appId = request.getAppId();
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawRegistrationService.REGISTER_FINISH_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawRegistrationService.SUPPORTED_REGISTER_TYPES, request.getChallenge(), facets);
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
 		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
@@ -157,6 +158,12 @@ public class RegistrationService extends RequestService {
 			}
 		}
 
+		boolean approved = StringHelper.equals(RawRegistrationService.REGISTER_FINISH_TYPE, response.getClientData().getTyp());
+		if (!approved) {
+			log.debug("Registratio request with keyHandle '{0}' was canceled", rawRegisterResponse.getKeyHandle());
+			return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.CANCELED);
+		}
+
 		boolean twoStep = StringHelper.isNotEmpty(userInum);
 		if (twoStep) {
 			deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
@@ -166,14 +173,15 @@ public class RegistrationService extends RequestService {
 			if (foundDeviceRegistrations.size() != 0) {
 				throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
 			}
-			
+
 			deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
 		} else {
 			deviceRegistration.setDn(deviceRegistrationService.getDnForOneStepU2fDevice(deviceRegistrationId));
+			
 			deviceRegistrationService.addOneStepDeviceRegistration(deviceRegistration);
 		}
 
-		return deviceRegistration;
+		return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.APPROVED);
 	}
 
 	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userInum, String sessionState) {
