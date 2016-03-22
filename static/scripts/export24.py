@@ -171,12 +171,12 @@ def getLdif():
     f.close()
 
     # Backup o=site
-    args = [ldapsearch] + ldap_creds + ['-b', 'o=site', 'objectclass=*']
+    args = [ldapsearch] + ldap_creds + ['-b', 'ou=people,o=site',
+                                        '-s', 'one', 'objectclass=*']
     output = runCommand(args)
     f = open("%s/ldif/site.ldif" % bu_folder, 'w')
     f.write(output)
     f.close()
-
 
 def runCommand(args, return_list=False):
         try:
