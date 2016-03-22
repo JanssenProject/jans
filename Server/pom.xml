@@ -910,17 +910,18 @@
                 </plugins>
             </build>
             <dependencies>
-                <dependency>
-                    <groupId>com.devsu</groupId>
-                    <artifactId>push-sender</artifactId>
-                    <version>1.0.2</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>org.slf4j</groupId>
-            		<artifactId>slf4j-simple</artifactId>
-            	</exclusion>
-            </exclusions>
-                </dependency>
+				<dependency>
+					<groupId>com.notnoop.apns</groupId>
+					<artifactId>apns</artifactId>
+					<version>1.0.0.Beta6</version>
+					<scope>compile</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.ganyo</groupId>
+					<artifactId>gcm-server</artifactId>
+					<version>1.0.2</version>
+					<scope>compile</scope>
+				</dependency>
             </dependencies>
         </profile>
 
