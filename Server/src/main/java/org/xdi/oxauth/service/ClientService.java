@@ -132,12 +132,11 @@ public class ClientService {
     public Client getClient(String clientId, String registrationAccessToken) {
         String baseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
-        Client client = new Client();
-        client.setDn(baseDN);
-        client.setClientId(clientId);
-        client.setRegistrationAccessToken(registrationAccessToken);
+        Filter filterInum = Filter.createEqualityFilter("inum", clientId);
+        Filter registrationAccessTokenInum = Filter.createEqualityFilter("oxAuthRegistrationAccessToken", registrationAccessToken);
+        Filter filter = Filter.createANDFilter(filterInum, registrationAccessTokenInum);
 
-        List<Client> clients = ldapEntryManager.findEntries(client);
+        List<Client> clients = ldapEntryManager.findEntries(baseDN, Client.class, filter, null, 1, 1);
         if (clients != null && clients.size() > 0) {
             return clients.get(0);
         }
