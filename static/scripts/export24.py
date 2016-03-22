@@ -6,7 +6,6 @@ import sys
 import os
 import shutil
 import hashlib
-import getpass
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -37,8 +36,9 @@ folders_to_backup = ['/opt/tomcat/conf',
                      '/opt/idp/metadata']
 
 # LDAP Stuff
-ldap_pass = None
-ldap_creds = None
+password_file = "/root/.pw"
+ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
+              '"cn=directory manager"', '-j', password_file]
 base_dns = ['ou=people',
             'ou=groups',
             'ou=attributes',
@@ -195,7 +195,7 @@ def runCommand(args, return_list=False):
 
 def genProperties():
     props = {}
-    props['ldapPass'] = ldap_pass
+    props['ldapPass'] = runCommand([cat, password_file])
     props['hostname'] = runCommand([hostname])
     props['inumAppliance'] = runCommand(
         [grep, "^inum", "%s/ldif/appliance.ldif" % bu_folder]
@@ -246,28 +246,9 @@ def makeFolders():
 
 
 def main():
-    global ldap_pass
-    global ldap_creds
-
-    try:
-        with open('/install/community-edition-setup/setup.properties.last',
-                  'r') as setupfile:
-            line = setupfile.readline()
-            while line:
-                if 'ldapPass=' in line:
-                    ldap_pass = line.split('=')[-1].strip()
-                line = setupfile.readline()
-
-        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                      '"cn=directory manager"', '-w', ldap_pass]
-
-        # perform a sample connection with the parsed password to validate it
-        getOrgInum()
-    except:
-        ldap_pass = getpass.getpass("Enter the LDAP password: ")
-
-        ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                      '"cn=directory manager"', '-w', ldap_pass]
+    if not os.path.isfile(password_file):
+        print "Cannot find the ldap password_file in /root/.pw. Exiting."
+        sys.exit(1)
 
     makeFolders()
     backupFiles()
