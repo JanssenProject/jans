@@ -19,10 +19,11 @@ from jsonmerge import merge
 import base64
 import json
 import uuid
+import tempfile
 
 log = "./import_24.log"
 logError = "./import_24.error"
-password_file = "/root/.pw"
+password_file = tempfile.mkstemp()[1]
 backup24_folder = None
 
 service = "/usr/sbin/service"
@@ -364,12 +365,24 @@ def main():
     if not os.path.exists(outputLdifFolder):
         os.mkdir(outputLdifFolder)
 
+    # prepare password_file
+    with open('/install/community-edition-setup/setup.properties.last', 'r') \
+            as sfile:
+        for line in sfile:
+            if 'ldapPass=' in line:
+                with open(password_file, 'w') as pfile:
+                    pfile.write(line.split('=')[-1])
+                break
+
     stopOpenDJ()
     copyFiles(backup24_folder)
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+
+    # remove the password_file
+    os.remove(password_file)
 
 
 if __name__ == '__main__':
