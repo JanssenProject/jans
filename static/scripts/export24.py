@@ -259,9 +259,8 @@ def prepareLdapPW():
     with open(password_file, 'w') as pfile:
         pfile.write(ldap_pass)
     # perform sample search
-    try:
-        getOrgInum()
-    except:
+    sample = getOrgInum()
+    if not sample:
         # get the password from the user if it fails
         ldap_pass = getpass.getpass("Enter LDAP Passsword: ")
         with open(password_file, 'w') as pfile:
