@@ -6,6 +6,8 @@ import sys
 import os
 import shutil
 import hashlib
+import getpass
+import tempfile
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -36,7 +38,7 @@ folders_to_backup = ['/opt/tomcat/conf',
                      '/opt/idp/metadata']
 
 # LDAP Stuff
-password_file = "/root/.pw"
+password_file = tempfile.mkstemp()[1]
 ldap_creds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
               '"cn=directory manager"', '-j', password_file]
 base_dns = ['ou=people',
@@ -245,16 +247,37 @@ def makeFolders():
             sys.exit(3)
 
 
-def main():
-    if not os.path.isfile(password_file):
-        print "Cannot find the ldap password_file in /root/.pw. Exiting."
-        sys.exit(1)
+def prepareLdapPW():
+    ldap_pass = None
+    # read LDAP pass from setup.properties
+    with open('/install/community-edition-setup/setup.properties.last', 'r') \
+            as sfile:
+        for line in sfile:
+            if 'ldapPass=' in line:
+                ldap_pass = line.split('=')[-1]
+    # write it to the tmp file
+    with open(password_file, 'w') as pfile:
+        pfile.write(ldap_pass)
+    # perform sample search
+    try:
+        getOrgInum()
+    except:
+        # get the password from the user if it fails
+        ldap_pass = getpass.getpass("Enter LDAP Passsword: ")
+        with open(password_file, 'w') as pfile:
+            pfile.write(ldap_pass)
 
+
+def main():
+    prepareLdapPW()
     makeFolders()
     backupFiles()
     getLdif()
     genProperties()
     backupCustomizations()
+
+    # remove the tempfile with the ldap password
+    os.remove(password_file)
 
 if __name__ == "__main__":
     main()
