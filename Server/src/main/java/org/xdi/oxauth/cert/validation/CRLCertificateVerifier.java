@@ -23,9 +23,8 @@ import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
@@ -49,6 +48,11 @@ import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 /**
  * Certificate verifier based on CRL
  * 
@@ -61,17 +65,23 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 
 	private int maxCrlSize;
 
-	private Cache crlCache;
+	private LoadingCache<String, X509CRL> crlCache;
 
-	public CRLCertificateVerifier(final int maxCrlResponseSize) {
-		this(null, maxCrlResponseSize);
-	}
-
-	public CRLCertificateVerifier(final Cache crlCache, final int maxCrlSize) {
+	public CRLCertificateVerifier(final int maxCrlSize) {
 		SecurityProviderUtility.installBCProvider(true);
 
-		this.crlCache = crlCache;
 		this.maxCrlSize = maxCrlSize;
+		
+		CacheLoader<String, X509CRL> checkedLoader = new CacheLoader<String, X509CRL>() {
+			public X509CRL load(String crlURL) throws CertificateException, CRLException, NoSuchProviderException, NoSuchParserException, StreamParsingException, MalformedURLException, IOException, ExecutionException {
+				X509CRL result = requestCRL(crlURL);
+				Preconditions.checkNotNull(result);
+
+				return result;
+			}
+		};
+
+		this.crlCache = CacheBuilder.newBuilder().maximumSize(10).expireAfterWrite(60, TimeUnit.MINUTES).build(checkedLoader);
 	}
 
 	@Override
@@ -171,32 +181,14 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 	}
 
 	private X509CRL getCrl(String url) throws CertificateException, CRLException, NoSuchProviderException, NoSuchParserException, StreamParsingException,
-			MalformedURLException, IOException {
+			MalformedURLException, IOException, ExecutionException {
 		if (!(url.startsWith("http://") || url.startsWith("https://"))) {
 			log.error("It's possbiel to downloid CRL via HTTP and HTTPS only");
 			return null;
 		}
 		
 		String cacheKey = url.toLowerCase();
-		if (crlCache != null) {
-			Element cacheElement = crlCache.get(cacheKey); 
-			if (cacheElement != null) {
-				log.debug("Get CRL for url '" + url + "' from cache");
-				return (X509CRL) cacheElement.getValue();
-			}
-		}
-
-		// TODO: Implement more better solution to avoid parallel CRL file downloading 
-		X509CRL crl = requestCRL(url);
-		if (crl == null) {
-			return null;
-		}
-
-		if (crlCache != null) {
-			log.debug("Stroring CRL for url '" + url + "' into cache");
-			Element cacheElement = new Element(cacheKey, crl);
-			crlCache.put(cacheElement);
-		}
+		X509CRL crl = crlCache.get(cacheKey);
 
 		return crl;
 	}
@@ -217,7 +209,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 				IOUtils.closeQuietly(in);
 			}
 		} catch (IOException ex) {
-			log.error("Faield to download CRL from '" + url + "'", ex);
+			log.error("Failed to download CRL from '" + url + "'", ex);
 		} finally {
 			if (con != null) {
 				con.disconnect();
@@ -281,12 +273,10 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 
 		return null;
 	}
-	
+
 	@Override
 	public void destroy() {
-		if (crlCache != null) {
-			crlCache.removeAll();
-		}
+		crlCache.cleanUp();
 	}
 
 }
