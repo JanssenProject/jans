@@ -42,15 +42,10 @@ ignore_files = ['101-ox.ldif',
                 'oxtrust.config.reload'
                 ]
 
-ldap_creds = ['-h',
-              'localhost',
-              '-p',
-              '1389',
-              '-D',
-              '"cn=directory',
-              'manager"',
-              '-j',
-              password_file
+ldap_creds = ['-h', 'localhost',
+              '-p', '1636', '-Z', '-X',
+              '-D', '"cn=directory manager"',
+              '-j', password_file
               ]
 
 
@@ -207,8 +202,12 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             if attr in ignoreList:
                 continue
             if attr not in new_entry:
+                # Note: Prefixing with part length helps in inserting base
+                # before leaf entries in the LDAP
+                # Filename = DN_part_length + unique random string
+                new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
                 writeMod(dn, attr, old_entry[attr],
-                         '%s/%s.ldif' % (ldifModFolder, str(uuid.uuid4())),
+                         '%s/%s.ldif' % (ldifModFolder, new_fn),
                          True)
                 logIt("Adding attr %s to %s" % (attr, dn))
             else:
