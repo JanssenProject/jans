@@ -55,8 +55,8 @@ def backupCustomizations():
     for dir in dirs:
         if not os.path.exists(dir):
             os.mkdir(dir)
-    output = runCommand([unzip, oxauth_war, '-d', oxauth_original_dir])
-    output = runCommand([unzip, oxtrust_war, '-d', oxtrust_original_dir])
+    output = runCommand([unzip, '-q', oxauth_war, '-d', oxauth_original_dir])
+    output = runCommand([unzip, '-q', oxtrust_war, '-d', oxtrust_original_dir])
     logIt(output)
     dirs = [(oxauth_modified_dir, oxauth_original_dir),
             (oxtrust_modified_dir, oxtrust_original_dir)]
