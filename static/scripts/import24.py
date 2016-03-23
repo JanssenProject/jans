@@ -32,6 +32,8 @@ ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
 stopds = "/opt/opendj/bin/stop-ds"
 startds = "/opt/opendj/bin/start-ds"
+stoptomcat = "/opt/tomcat/bin/shutdown.sh"
+starttomcat = "/opt/tomcat/bin/startup.sh"
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -319,6 +321,18 @@ changetype: modify
     f.close()
 
 
+def startTomcat():
+    output = getOutput([starttomcat])
+    if output:
+        logIt(output)
+    else:
+        logIt("Tomcat start failed. Try /opt/tomcat/bin/startup.sh", True)
+
+
+def stopTomcat():
+    getOutput([stoptomcat])
+
+
 def main():
     global backup24_folder
 
@@ -356,12 +370,14 @@ def main():
                     pfile.write(line.split('=')[-1])
                 break
 
+    stopTomcat()
     stopOpenDJ()
     copyFiles(backup24_folder)
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+    startTomcat()
 
     # remove the password_file
     os.remove(password_file)
