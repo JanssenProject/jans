@@ -34,6 +34,8 @@ public interface AuthorizeRequestParam {
     public static final String REQUEST = "request";
     public static final String REQUEST_URI = "request_uri";
     public static final String ORIGIN_HEADERS = "origin_headers";
+    public static final String CODE_CHALLENGE = "code_challenge";
+    public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
 
     /**
      * String that represents the End-User's login state at the OP.
