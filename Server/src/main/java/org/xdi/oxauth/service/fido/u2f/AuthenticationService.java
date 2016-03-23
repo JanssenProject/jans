@@ -29,6 +29,7 @@ import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
@@ -119,12 +120,12 @@ public class AuthenticationService extends RequestService {
 		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getKeyHandle());
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum)
+	public DeviceRegistrationResult finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum)
 			throws BadInputException, DeviceCompromisedException {
 		return finishAuthentication(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum, Set<String> facets)
+	public DeviceRegistrationResult finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum, Set<String> facets)
 			throws BadInputException, DeviceCompromisedException {
 		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, requestMessage.getAppId());
 
@@ -147,7 +148,7 @@ public class AuthenticationService extends RequestService {
 		}
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawAuthenticationService.AUTHENTICATE_GET_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, request.getChallenge(), facets);
 
 		RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(response.getSignatureData());
 		rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
@@ -157,7 +158,15 @@ public class AuthenticationService extends RequestService {
 
 		deviceRegistrationService.updateDeviceRegistration(userInum, usedDeviceRegistration);
 
-		return usedDeviceRegistration;
+		DeviceRegistrationResult.Status status = DeviceRegistrationResult.Status.APPROVED; 
+
+		boolean approved = StringHelper.equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE, clientData.getTyp());
+		if (!approved) {
+			status = DeviceRegistrationResult.Status.CANCELED;
+			log.debug("Authentication request with keyHandle '{0}' was canceled", response.getKeyHandle());
+		}
+
+		return new DeviceRegistrationResult(usedDeviceRegistration, status);
 	}
 
 	public AuthenticateRequest getAuthenticateRequest(AuthenticateRequestMessage requestMessage, AuthenticateResponse response) throws BadInputException {
