@@ -165,6 +165,8 @@ class Setup(object):
         self.ldapPassFn = '/home/ldap/.pw'
         self.ldap_backend_type = 'local-db'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
+        self.ldapModifyCommand = '%s/bin/ldapmodify' % self.ldapBaseFolder
+        self.loadLdifCommand = self.importLdifCommand
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
         self.schemaFiles = ["%s/static/%s/96-eduperson.ldif" % (self.install_dir, self.ldap_type),
@@ -995,11 +997,7 @@ class Setup(object):
                                                  os.path.split(ldif_file_fn)[-1])
             self.run(['/bin/chown', 'ldap:ldap', ldif_file_fullpath])
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                                  self.importLdifCommand,
-                                  '--ldifFile',
-                                  ldif_file_fullpath,
-                                  '--backendID',
-                                  'userRoot',
+                                  self.loadLdifCommand,
                                   '--hostname',
                                   self.ldap_hostname,
                                   '--port',
@@ -1010,7 +1008,17 @@ class Setup(object):
                                   self.ldapPassFn,
                                   '--trustAll']
             if self.opendj_version == "2.6":
+                importParams.append('--backendID')
+                importParams.append('userRoot')
                 importParams.append('--append')
+                importParams.append('--ldifFile')
+                importParams.append(ldif_file_fullpath)
+            else:
+                importParams.append('--useSSL')
+                importParams.append('--defaultAdd')
+                importParams.append('--continueOnError')
+                importParams.append('--filename')
+                importParams.append(ldif_file_fullpath)
 
             importCmd = " ".join(importParams)
             self.run(['/bin/su',
@@ -1708,8 +1716,10 @@ class Setup(object):
 
     def configure_opendj_install(self):
         if self.opendj_version == "2.6":
+            self.loadLdifCommand = self.importLdifCommand
             self.ldap_backend_type = 'local-db'
         else:
+            self.loadLdifCommand = self.ldapModifyCommand
             self.ldap_backend_type = 'je'
 
         try:
