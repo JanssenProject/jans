@@ -39,6 +39,7 @@ public class RawAuthenticationService {
 
 	public static final String AUTHENTICATE_GET_TYPE = "navigator.id.getAssertion";
 	public static final String AUTHENTICATE_CANCEL_TYPE = "navigator.id.cancelAssertion";
+	public static final String[] SUPPORTED_AUTHENTICATE_TYPES = new String[] { AUTHENTICATE_GET_TYPE, AUTHENTICATE_CANCEL_TYPE };
 
 	@Logger
 	private Log log;
