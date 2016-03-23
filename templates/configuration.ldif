@@ -1,10 +1,5 @@
 version: 1
 
-dn: ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
-objectClass: top
-objectClass: organizationalUnit
-ou: configuration
-
 dn: ou=oxauth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: oxAuthConfiguration
 objectClass: top
