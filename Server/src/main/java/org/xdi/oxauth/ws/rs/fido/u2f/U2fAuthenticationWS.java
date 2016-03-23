@@ -26,6 +26,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
@@ -141,14 +142,15 @@ public class U2fAuthenticationWS {
 			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
 
 			String foundUserInum = authenticateRequestMessageLdap.getUserInum();
-			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserInum);
+			DeviceRegistrationResult deviceRegistrationResult = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserInum);
 
 			// If sessionState is not empty update session
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
 
 				boolean oneStep = StringHelper.isEmpty(userName);
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistration, false, oneStep);
+				
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistrationResult, false, oneStep);
 			}
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
