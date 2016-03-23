@@ -70,6 +70,7 @@ class Setup(object):
         self.os_type = None
         self.os_initdaemon = None
         self.apache_version = None
+        self.opendj_version = None
 
         self.distFolder = "/opt/dist"
         self.setup_properties_fn = "%s/setup.properties" % self.install_dir
@@ -474,13 +475,18 @@ class Setup(object):
             self.oxTrustConfigGeneration = "false"
 
     def configure_opendj(self):
+        if self.opendj_version == "2.6":
+            backend_type = 'local-db'
+        else:
+            backend_type = 'pdb'
+
         try:
             self.logIt("Making LDAP configuration changes")
             config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type local-db', '--set', 'enabled:true'],
+                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % backend_type, '--set', 'enabled:true'],
                               ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                               ['set-access-control-handler-prop', '--remove', 'global-aci:\'(targetattr!="userPassword||authPassword||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN||targetEntryUUID||changeInitiatorsName||changeLogCookie||includedAttributes")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''],
                               ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
@@ -652,6 +658,16 @@ class Setup(object):
             return self.determineApacheVersion("httpd")
         else:
             return self.determineApacheVersion("apache2")
+
+    def determineOpenDJVersion(self):
+        f = open('/opt/opendj/template/config/buildinfo', 'r')
+        encode_script = f.read().split()[0]
+        f.close()
+
+        if re.match(r'2\.6\.0\..*', encode_script):
+            return "2.6"
+
+        return "4.0"
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -982,7 +998,7 @@ class Setup(object):
             ldif_file_fullpath = "%s/ldif/%s" % (self.ldapBaseFolder,
                                                  os.path.split(ldif_file_fn)[-1])
             self.run(['/bin/chown', 'ldap:ldap', ldif_file_fullpath])
-            importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+            importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.importLdifCommand,
                                   '--ldifFile',
                                   ldif_file_fullpath,
@@ -996,8 +1012,11 @@ class Setup(object):
                                   '"%s"' % self.ldap_binddn,
                                   '-j',
                                   self.ldapPassFn,
-                                  '--append',
-                                  '--trustAll'])
+                                  '--trustAll']
+            if self.opendj_version == "2.6":
+                importParams.append('--append')
+
+            importCmd = " ".join(importParams)
             self.run(['/bin/su',
                       'ldap',
                       '-c',
@@ -1029,6 +1048,11 @@ class Setup(object):
                   '%s' % importCmd])
 
     def index_opendj(self, backend):
+        if self.opendj_version == "2.6":
+            index_command = 'create-local-db-index'
+        else:
+            index_command = 'create-backend-index'
+            
         try:
             self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
@@ -1045,7 +1069,7 @@ class Setup(object):
                                 self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
                                 indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
                                                      self.ldapDsconfigCommand,
-                                                     'create-local-db-index',
+                                                     index_command,
                                                      '--backend-name',
                                                      backend,
                                                      '--type',
@@ -1789,11 +1813,14 @@ if __name__ == '__main__':
     installObject.os_initdaemon = installObject.detect_initd()
     # Get apache version   
     installObject.apache_version = installObject.determineApacheVersionForOS()
+    # Get OpenDJ version   
+    installObject.opendj_version = installObject.determineOpenDJVersion()
 
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
     print "Detected init:  %s" % installObject.os_initdaemon
     print "Detected Apache:  %s" % installObject.apache_version
+    print "Detected OpenDJ:  %s" % installObject.opendj_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
