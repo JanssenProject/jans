@@ -476,18 +476,13 @@ class Setup(object):
             self.oxTrustConfigGeneration = "false"
 
     def configure_opendj(self):
-        if self.opendj_version == "2.6":
-            backend_type = 'local-db'
-        else:
-            backend_type = 'pdb'
-
         try:
             self.logIt("Making LDAP configuration changes")
             config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % backend_type, '--set', 'enabled:true'],
+                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
                               ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                               ['set-access-control-handler-prop', '--remove', 'global-aci:\'(targetattr!="userPassword||authPassword||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN||targetEntryUUID||changeInitiatorsName||changeLogCookie||includedAttributes")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''],
                               ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
@@ -1715,7 +1710,7 @@ class Setup(object):
         if self.opendj_version == "2.6":
             self.ldap_backend_type = 'local-db'
         else:
-            self.ldap_backend_type = 'pdb'
+            self.ldap_backend_type = 'je'
 
         try:
             f = open(self.ldapPassFn, 'w')
