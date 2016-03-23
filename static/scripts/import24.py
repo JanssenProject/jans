@@ -323,8 +323,8 @@ changetype: modify
 
 def startTomcat():
     output = getOutput([starttomcat])
-    if 'Tomcat Started' in output:
-        logIt("Tomcat started successfully")
+    if output:
+        logIt(output)
     else:
         logIt("Tomcat start failed. Try /opt/tomcat/bin/startup.sh", True)
 
