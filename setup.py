@@ -163,6 +163,7 @@ class Setup(object):
         self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
         self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
         self.ldapPassFn = '/home/ldap/.pw'
+        self.ldap_backend_type = 'local-db'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
@@ -1026,7 +1027,8 @@ class Setup(object):
         self.copyFile("%s/static/cache-refresh/o_site.ldif" % self.install_dir, ldifFolder)
         site_ldif_fn = "%s/o_site.ldif" % ldifFolder
         self.run(['/bin/chown', 'ldap:ldap', site_ldif_fn])
-        importCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+        
+        importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                               self.importLdifCommand,
                               '--ldifFile',
                               site_ldif_fn,
@@ -1040,8 +1042,11 @@ class Setup(object):
                               '"%s"' % self.ldap_binddn,
                               '-j',
                               self.ldapPassFn,
-                              '--append',
-                              '--trustAll'])
+                              '--trustAll']
+        if self.opendj_version == "2.6":
+            importParams.append('--append')
+
+        importCmd = " ".join(importParams)
         self.run(['/bin/su',
                   'ldap',
                   '-c',
@@ -1706,7 +1711,12 @@ class Setup(object):
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
 
-    def writeLdapPW(self):
+    def configure_opendj_install(self):
+        if self.opendj_version == "2.6":
+            self.ldap_backend_type = 'local-db'
+        else:
+            self.ldap_backend_type = 'pdb'
+
         try:
             f = open(self.ldapPassFn, 'w')
             f.write(self.ldapPass)
@@ -1861,7 +1871,7 @@ if __name__ == '__main__':
             installObject.make_salt()
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
-            installObject.writeLdapPW()
+            installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
