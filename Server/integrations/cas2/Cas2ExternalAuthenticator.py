@@ -67,7 +67,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             if (http_response.getStatusLine().getStatusCode() != 200):
-                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
+                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response.getStatusLine().getStatusCode())
                 httpService.consume(http_response)
                 return False
     

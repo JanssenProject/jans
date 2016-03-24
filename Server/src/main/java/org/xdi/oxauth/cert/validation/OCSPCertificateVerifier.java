@@ -87,6 +87,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 			CertificateID certificateId = new CertificateID(CertificateID.HASH_SHA1, issuer, certificate.getSerialNumber());
 
+			boolean foundResponse = false;
 			BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp.getResponseObject();
 			SingleResp[] singleResps = basicOCSPResp.getResponses();
 			for (SingleResp singleResp : singleResps) {
@@ -94,6 +95,8 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				if (!certificateId.equals(responseCertificateId)) {
 					continue;
 				}
+
+				foundResponse = true;
 
 				log.debug("OCSP validationDate: " + validationDate);
 				log.debug("OCSP thisUpdate: " + singleResp.getThisUpdate());
@@ -122,7 +125,9 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				}
 			}
 
-			log.error("There is no matching OCSP response entries");
+			if (!foundResponse) {
+				log.error("There is no matching OCSP response entries");
+			}
 		} catch (Exception ex) {
 			log.error("OCSP exception: ", ex);
 		}
