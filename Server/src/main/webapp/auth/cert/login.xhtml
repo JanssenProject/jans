@@ -50,6 +50,9 @@
                 font-weight: bold;
             }
         </style>
+        <s:fragment rendered="#{recaptcha_site_key != null}">
+	        <script src="https://www.google.com/recaptcha/api.js" async="async" defer="defer"></script>
+        </s:fragment>
     </ui:define>
 
     <ui:define name="pageTitle">
@@ -80,19 +83,16 @@
                                         </p>
 
                                         <div class="dialog">
-                                            <h:panelGrid columns="2" border="0" rowClasses="prop" columnClasses="name, name">
-                                                <p class="body-list">1. Enter right answer:</p>
-                                                <h:panelGroup>
-			                                        <div id="captchaHolder">
-			                                            <h:outputText value="'recaptcha form'" escape="false" />
-			                                            <h:outputText value="#{recaptcha.html}" escape="false" />
-			                                        </div>
-		                                        </h:panelGroup>
+                                            <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="name, name">
+                                                <s:fragment rendered="#{recaptcha_site_key != null}">
+                                                	<p class="body-list">1. Enter right answer:</p>
+                                                	<div class="g-recaptcha" data-sitekey="#{recaptcha_site_key}"></div>
+                                                </s:fragment>
 		
-                                                <p class="body-list">2. Click «Login» button.</p>
+                                                <p class="body-list">#{recaptcha_site_key == null ? '1' : '2'}. Click «Login» button.</p>
                                                 <p/>
 
-                                                <p class="body-list">3. If the certificates list appears then choose right certificate.</p>
+                                                <p class="body-list">#{recaptcha_site_key == null ? '2' : '3'}. If the certificates list appears then choose right certificate.</p>
                                                 <p/>
                                             </h:panelGrid>
                                         </div>
