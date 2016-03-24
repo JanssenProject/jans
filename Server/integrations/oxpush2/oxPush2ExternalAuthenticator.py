@@ -16,7 +16,7 @@ from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from java.util import HashMap, Arrays
+from java.util import Arrays
 from com.notnoop.apns import APNS
 from com.google.android.gcm.server import Sender, Message 
 
@@ -485,8 +485,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         title = "oxPush2"
                         message = "oxPush2 login request to: %s" % self.application_id
 
-                        additional_fields = HashMap()
-                        additional_fields.put("request", oxpush2_request)
+                        additional_fields = { "request" : oxpush2_request }
 
                         msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
                         msgBuilder.category('ACTIONABLE').badge(0)
