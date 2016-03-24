@@ -146,9 +146,14 @@ public class AuthorizeAction {
         try {
             session = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(session, redirectUri, acrValues);
         } catch (AcrChangedException e) {
-            log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
-            log.error("Please perform logout in order to be able login with new ACR value.");
-            permissionDenied();
+            log.debug("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
+            if (prompts.contains(Prompt.LOGIN)) {
+                session = handleAcrChange(session, prompts);
+            } else {
+                log.error("Please provide prompt=login to force login with new ACR or otherwise perform logout and re-authenticate.");
+                permissionDenied();
+                return Constants.RESULT_FAILURE;
+            }
         }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
@@ -265,6 +270,19 @@ public class AuthorizeAction {
             }
         }
 		return Constants.RESULT_FAILURE;
+    }
+
+    private SessionState handleAcrChange(SessionState session, List<Prompt> prompts) {
+        if (session != null && prompts.contains(Prompt.LOGIN)) { // change session state only if prompt=none
+            if (session.getState() == SessionIdState.AUTHENTICATED) {
+                session.getSessionAttributes().put("prompt", prompt);
+                session.setState(SessionIdState.UNAUTHENTICATED);
+
+                sessionStateService.updateSessionState(session);
+                sessionStateService.reinitLogin(session);
+            }
+        }
+        return session;
     }
 
     /**
