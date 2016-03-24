@@ -393,7 +393,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
         
         return session_device_status
-    
+
     def initPushNotificationService(self, configurationAttributes):
         print "oxPush2. Initialize notification services"
         if not configurationAttributes.containsKey("credentials_file"):
