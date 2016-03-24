@@ -13,6 +13,7 @@ from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
+from org.xdi.util.security import StringEncrypter 
 from java.util import HashMap, Arrays
 from java.security import MessageDigest
 from org.apache.commons.codec.binary import Hex
@@ -20,9 +21,18 @@ from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
 from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
 from org.xdi.oxauth.cert.validation.model import ValidationStatus
 from org.xdi.oxauth.util import CertUtil
+from org.xdi.oxauth.service.net import HttpService
+from org.apache.http.params import CoreConnectionPNames
 
 import java
+import sys
 import base64
+import urllib
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -44,13 +54,13 @@ class PersonAuthentication(PersonAuthenticationType):
         self.chain_certs = CertUtil.loadX509CertificateFromFile(chain_cert_file_path)
         print "Cert. Initialization. Loaded '%d' chain certificates" % self.chain_certs.size()
         
-        crl_max_response_size = 5*1024*1024 # 10Mb
+        crl_max_response_size = 5 * 1024 * 1024  # 10Mb
         if configurationAttributes.containsKey("crl_max_response_size"):
             crl_max_response_size = StringHelper.toInteger(configurationAttributes.get("crl_max_response_size").getValue2(), crl_max_response_size)
             print "Cert. Initialization. CRL max response size is '%d'" % crl_max_response_size
 
         # Define array to order methods correctly
-        self.validator_types = [ 'generic',  'path', 'ocsp', 'crl']
+        self.validator_types = [ 'generic', 'path', 'ocsp', 'crl']
         self.validators = { 'generic' : [GenericCertificateVerifier(), False],
                             'path' : [PathCertificateVerifier(False), False],
                             'ocsp' : [OCSPCertificateVerifier(), False],
@@ -66,6 +76,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.map_user_cert = StringHelper.toBoolean(configurationAttributes.get("map_user_cert").getValue2(), False)
         print "Cert. Initialization. map_user_cert: '%s'" % self.map_user_cert
+
+        self.enabled_recaptcha = self.initRecaptcha(configurationAttributes)
+        print "Cert. Initialization. enabled_recaptcha: '%s'" % self.enabled_recaptcha
 
         print "Cert. Initialized successfully"
 
@@ -97,15 +110,23 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         userService = UserService.instance()
 
-        if (step == 1):
+        if step == 1:
             print "Cert. Authenticate for step 1"
             login_button = ServerUtil.getFirstValue(requestParameters, "loginForm:loginButton")
             if StringHelper.isEmpty(login_button):
                 print "Cert. Authenticate for step 1. Form were submitted incorrectly"
                 return False
-            
+            if self.enabled_recaptcha:
+                print "Cert. Authenticate for step 1. Validating recaptcha response"
+                recaptcha_response = ServerUtil.getFirstValue(requestParameters, "g-recaptcha-response")
+
+                recaptcha_result = self.validateRecaptcha(recaptcha_response)
+                print "Cert. Authenticate for step 1. recaptcha_result: '%s'" % recaptcha_result
+                
+                return recaptcha_result
+
             return True
-        elif (step == 2):
+        elif step == 2:
             print "Cert. Authenticate for step 2"
 
             # Validate if user selected certificate
@@ -167,7 +188,7 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("cert_count_login_steps", 2)
 
             return logged_in
-        elif (step == 3):
+        elif step == 3:
             print "Cert. Authenticate for step 3"
 
             cert_user_external_uid = self.getSessionAttribute("cert_user_external_uid")
@@ -205,17 +226,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Cert. Prepare for step %d" % step
-
-        if (step == 2):
+        context = Contexts.getEventContext()
+        
+        if step == 1:
+            if self.enabled_recaptcha:
+                context.set("recaptcha_site_key", self.recaptcha_creds['site_key'])
+        elif step == 2:
             # Store certificate in session
-            context = Contexts.getEventContext()
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
                 context.set("cert_x509", self.certToString(x509Certificates))
                 print "Cert. Prepare for step 2. Storing user certificate"
 
-        if (step < 4):
+        if step < 4:
             return True
         else:
             return False
@@ -231,11 +255,11 @@ class PersonAuthentication(PersonAuthenticationType):
             return 3
 
     def getPageForStep(self, configurationAttributes, step):
-        if (step == 1):
+        if step == 1:
             return "/auth/cert/login.xhtml"
-        if (step == 2):
+        if step == 2:
             return "/cert-login.xhtml"
-        elif (step == 3):
+        elif step == 3:
             cert_selected = self.getSessionAttribute("cert_selected")
             if True != cert_selected:
                 return "/auth/cert/cert-not-selected.xhtml"
@@ -320,3 +344,103 @@ class PersonAuthentication(PersonAuthenticationType):
         x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
 
         return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
+
+    def initRecaptcha(self, configurationAttributes):
+        print "Cert. Initialize recaptcha"
+        if not configurationAttributes.containsKey("credentials_file"):
+            return False
+
+        cert_creds_file = configurationAttributes.get("credentials_file").getValue2()
+
+        # Load credentials from file
+        f = open(cert_creds_file, 'r')
+        try:
+            creds = json.loads(f.read())
+        except:
+            print "Cert. Initialize recaptcha. Failed to load credentials from file: %s" % cert_creds_file
+            return False
+        finally:
+            f.close()
+        
+        try:
+            recaptcha_creds = creds["recaptcha"]
+        except:
+            print "Cert. Initialize recaptcha. Invalid credentials file '%s' format:" % cert_creds_file
+            return False
+        
+        self.recaptcha_creds = None
+        if recaptcha_creds["enabled"]:
+            print "Cert. Initialize recaptcha. Recaptcha is enabled"
+
+            stringEncrypter = StringEncrypter.defaultInstance()
+
+            site_key = recaptcha_creds["site_key"]
+            secret_key = recaptcha_creds["secret_key"]
+
+            try:
+                site_key = stringEncrypter.decrypt(site_key)
+            except:
+                # Ignore exception. Value is not encrypted
+                print "Cert. Initialize recaptcha. Assuming that 'site_key' in not encrypted"
+
+            try:
+                secret_key = stringEncrypter.decrypt(secret_key)
+            except:
+                # Ignore exception. Value is not encrypted
+                print "Cert. Initialize recaptcha. Assuming that 'secret_key' in not encrypted"
+
+            
+            self.recaptcha_creds = { 'site_key' : site_key, "secret_key" : secret_key }
+            print "oxPush2. Initialize recaptcha. Recaptcha is configured correctly"
+
+            return True
+        else:
+            print "oxPush2. Initialize recaptcha. Recaptcha is disabled"
+
+        return False
+
+    def validateRecaptcha(self, recaptcha_response):
+        print "Cert. Validate recaptcha response"
+
+        request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+        remoteip = request.getHeader("X-FORWARDED-FOR")
+        if remoteip == None:
+            remoteip = request.getRemoteAddr()
+        print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
+
+        httpService = HttpService.instance();
+
+        http_client = httpService.getHttpsClient();
+        http_client_params = http_client.getParams();
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
+        
+        recaptcha_validation_url = "https://www.google.com/recaptcha/api/siteverify"
+        recaptcha_validation_request = urllib.urlencode({ "secret" : self.recaptcha_creds['secret_key'], "response" : recaptcha_response, "remoteip" : remoteip })
+        recaptcha_validation_headers = { "Content-type" : "application/x-www-form-urlencoded", "Accept" : "application/json" }
+
+        try:
+            http_service_response = httpService.executePost(http_client, recaptcha_validation_url, None, recaptcha_validation_headers, recaptcha_validation_request)
+            http_response = http_service_response.getHttpResponse()
+        except:
+            print "Cert. Validate recaptcha response. Exception: ", sys.exc_info()[1]
+            return False
+
+        try:
+            if not httpService.isResponseStastusCodeOk(http_response):
+                print "Cert. Validate recaptcha response. Get invalid response from validation server: ", str(http_response.getStatusLine().getStatusCode())
+                httpService.consume(http_response)
+                return False
+    
+            response_bytes = httpService.getResponseContent(http_response)
+            response_string = httpService.convertEntityToString(response_bytes)
+            httpService.consume(http_response)
+        finally:
+            http_service_response.closeConnection()
+
+        if response_string == None:
+            print "Cert. Validate recaptcha response. Get empty response from validation server"
+            return False
+        
+        response = json.loads(response_string)
+        
+        return response["success"]
