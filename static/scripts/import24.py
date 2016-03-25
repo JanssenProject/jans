@@ -12,7 +12,6 @@ import os
 import os.path
 import shutil
 import sys
-import time
 import traceback
 from ldif import LDIFParser
 from jsonmerge import merge
@@ -20,6 +19,7 @@ import base64
 import json
 import uuid
 import tempfile
+import logging
 
 log = "./import_24.log"
 logError = "./import_24.error"
@@ -48,6 +48,17 @@ ldap_creds = ['-h', 'localhost',
               '-D', '"cn=directory manager"',
               '-j', password_file
               ]
+
+# configure logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    filename='import_24.log',
+                    filemode='w')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 
 class MyLDIF(LDIFParser):
@@ -104,7 +115,7 @@ def getNewConfig(fn):
     f = open(fn, 'w')
     f.write(output)
     f.close()
-    logIt("Wrote new ldif to %s" % fn)
+    logging.info("Wrote new ldif to %s" % fn)
 
 
 def copyFiles(backup24_folder):
@@ -118,9 +129,9 @@ def deleteEntries(dn_list):
         cmd = [ldapdelete] + ldap_creds + [dn]
         output = getOutput(cmd)
         if output:
-            logIt(output)
+            logging.info(output)
         else:
-            logIt("Error deleting %s" % dn)
+            logging.error("Error deleting %s" % dn)
 
 
 def getAttributeValue(fn, targetAttr):
@@ -163,7 +174,9 @@ def getDns(fn):
 
 
 def getMod(attr, s):
+    logging.debug('Writing mod for %s', attr)
     val = str(s).strip()
+    logging.debug('String of Value: %s', val)
     if val.find('\n') > -1:
         val = base64.b64encode(val)
         return "%s\n" % tab_attr(attr, val, True)
@@ -175,23 +188,13 @@ def getMod(attr, s):
 
 def getOutput(args):
         try:
-            logIt("Running command : %s" % " ".join(args))
+            logging.info("Running command : %s" % " ".join(args))
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
-            logIt("Error running command : %s" % " ".join(args), True)
-            logIt(traceback.format_exc(), True)
+            logging.error("Error running command : %s" % " ".join(args), True)
+            logging.error(traceback.format_exc(), True)
             sys.exit(1)
-
-
-def logIt(msg, errorLog=False):
-    if errorLog:
-        f = open(logError, 'a')
-        f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-        f.close()
-    f = open(log, 'a')
-    f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-    f.close()
 
 
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
@@ -215,13 +218,13 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                 writeMod(dn, attr, old_entry[attr],
                          '%s/%s.ldif' % (ldifModFolder, new_fn),
                          True)
-                logIt("Adding attr %s to %s" % (attr, dn))
+                logging.info("Adding attr %s to %s", attr, dn)
             else:
                 mod_list = None
                 if old_entry[attr] != new_entry[attr]:
                     if len(old_entry[attr]) == 1:
                         try:
-                            logIt("Merging json value for %s " % attr)
+                            logging.info("Merging json value for %s", attr)
                             old_json = json.loads(old_entry[attr][0])
                             new_json = json.loads(new_entry[attr][0])
                             new_json = merge(new_json, old_json)
@@ -230,7 +233,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                             mod_list = old_entry[attr]
                     else:
                         mod_list = old_entry[attr]
-                        logIt("Keeping multiple old values for %s" % attr)
+                        logging.info("Keeping multiple old value for %s", attr)
                 else:
                     continue
                 writeMod(dn, attr, mod_list,
@@ -240,20 +243,20 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
 def startOpenDJ():
     output = getOutput([service, 'opendj', 'start'])
     if output.find("Directory Server has started successfully") > 0:
-        logIt("Directory Server has started successfully")
+        logging.info("Directory Server has started successfully")
     else:
-        logIt("OpenDJ did not start properly... exiting."
-              " Check /opt/opendj/logs/errors", True)
+        logging.critical("OpenDJ did not start properly... exiting."
+                         " Check /opt/opendj/logs/errors", True)
         sys.exit(2)
 
 
 def stopOpenDJ():
     output = getOutput([service, 'opendj', 'stop'])
     if output.find("Directory Server is now stopped") > 0:
-        logIt("Directory Server is now stopped")
+        logging.info("Directory Server is now stopped")
     else:
-        logIt("OpenDJ did not stop properly... exiting."
-              " Check /opt/opendj/logs/errors", True)
+        logging.critical("OpenDJ did not stop properly... exiting."
+                         " Check /opt/opendj/logs/errors", True)
         sys.exit(3)
 
 
@@ -279,9 +282,9 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
                                            "%s/%s" % (outputLdifFolder, fn)]
         output = getOutput(cmd)
         if output:
-            logIt(output)
+            logging.info(output)
         else:
-            logIt("Error adding file %s" % fn, True)
+            logging.error("Error adding file %s", fn)
 
 
 def walk_function(a, directory, files):
@@ -296,10 +299,10 @@ def walk_function(a, directory, files):
         else:
             # It's a file...
             try:
-                logIt("copying %s" % targetFn)
+                logging.info("copying %s", targetFn)
                 shutil.copyfile(fn, targetFn)
             except:
-                logIt("Error copying %s" % targetFn, True)
+                logging.error("Error copying %s", targetFn)
 
 
 def writeMod(dn, attr, value_list, fn, add=False):
@@ -319,24 +322,12 @@ changetype: modify
     f.close()
 
 
-def startTomcat():
-    output = getOutput([starttomcat])
-    if output:
-        logIt(output)
-    else:
-        logIt("Tomcat start failed. Try /opt/tomcat/bin/startup.sh", True)
-
-
-def stopTomcat():
-    getOutput([stoptomcat])
-
-
 def main():
     global backup24_folder
 
     backup24_folder = sys.argv[1]
     if not os.path.exists(backup24_folder):
-        print "Backup folder %s does not exist." % backup24_folder
+        logging.critical("Backup folder %s does not exist.", backup24_folder)
         sys.exit(1)
 
     etc_folder = os.path.join(backup24_folder, 'etc')
@@ -345,8 +336,8 @@ def main():
 
     if not (os.path.exists(etc_folder) and os.path.exists(opt_folder) and
             os.path.exists(ldif_folder)):
-        print "Backup folder doesn't have all the information. Try runnning " \
-              "the export script again."
+        logging.critical("Backup folder doesn't have all the information."
+                         " Rerun export.")
         sys.exit(1)
 
     outputFolder = "./output_ldif"
@@ -368,14 +359,12 @@ def main():
                     pfile.write(line.split('=')[-1])
                 break
 
-    stopTomcat()
     stopOpenDJ()
     copyFiles(backup24_folder)
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
-    startTomcat()
 
     # remove the password_file
     os.remove(password_file)
