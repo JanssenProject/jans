@@ -115,10 +115,11 @@ def getNewConfig(fn):
     f = open(fn, 'w')
     f.write(output)
     f.close()
-    logging.info("Wrote new ldif to %s" % fn)
+    logging.info("Created backup of new ldif to %s" % fn)
 
 
 def copyFiles(backup24_folder):
+    logging.info('Copying backup files from /etc, /opt and /usr')
     os.path.walk("%s/etc" % backup24_folder, walk_function, None)
     os.path.walk("%s/opt" % backup24_folder, walk_function, None)
     os.path.walk("%s/usr" % backup24_folder, walk_function, None)
@@ -188,7 +189,7 @@ def getMod(attr, s):
 
 def getOutput(args):
         try:
-            logging.info("Running command : %s" % " ".join(args))
+            logging.debug("Running command : %s" % " ".join(args))
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
@@ -198,6 +199,7 @@ def getOutput(args):
 
 
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
+    logging.info('Comparing old LDAP data and creating `modify` files.')
     ignoreList = ['objectClass', 'ou']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
@@ -276,6 +278,7 @@ def tab_attr(attr, value, encoded=False):
 
 
 def uploadLDIF(ldifFolder, outputLdifFolder):
+    logging.info('Uploading LDAP data.')
     files = os.listdir(outputLdifFolder)
     for fn in files:
         cmd = [ldapmodify] + ldap_creds + ['-a', '-f',
@@ -299,7 +302,7 @@ def walk_function(a, directory, files):
         else:
             # It's a file...
             try:
-                logging.info("copying %s", targetFn)
+                logging.debug("copying %s", targetFn)
                 shutil.copyfile(fn, targetFn)
             except:
                 logging.error("Error copying %s", targetFn)
