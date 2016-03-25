@@ -17,20 +17,21 @@ import static org.testng.Assert.assertEquals;
 public class CodeVerifierTest {
 
     @Test
-    public void test() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        assertVerification(CodeVerifier.TransformationType.PLAIN);
-        assertVerification(CodeVerifier.TransformationType.S256);
+    public void verifierAndChallengeMatch() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        assertMatch(CodeVerifier.TransformationType.PLAIN);
+        assertMatch(CodeVerifier.TransformationType.S256);
     }
 
-    private void assertVerification(CodeVerifier.TransformationType type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private void assertMatch(CodeVerifier.TransformationType type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         CodeVerifier verifier = new CodeVerifier(type);
+        System.out.println(verifier);
 
         if (type == CodeVerifier.TransformationType.PLAIN) {
             assertEquals(verifier.getCodeChallenge(), verifier.getCodeVerifier());
             return;
         }
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        MessageDigest md = MessageDigest.getInstance(type.getMessageDigestString());
         md.update(verifier.getCodeVerifier().getBytes("UTF-8")); // Change this to "UTF-16" if needed
         byte[] digest = md.digest();
 
