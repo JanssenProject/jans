@@ -2,17 +2,21 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.service;
+ */
+package org.xdi.service;
 
+import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.cache.CacheProvider;
+import org.jboss.seam.log.Log;
 
 /**
  * Provides operations with cache
@@ -27,6 +31,8 @@ public class CacheService {
 	@In(required = false)
 	private CacheProvider<?> cacheProvider;
 
+    @Logger
+    private Log log;
 
 	public Object get(String region, String key) {
 		if (cacheProvider == null) {
@@ -54,6 +60,19 @@ public class CacheService {
 		if (cacheProvider != null) {
 			((CacheManager) cacheProvider.getDelegate()).getCache(name).removeAll();
 		}
+	}
+
+	public Cache getCacheRegion(String regionName) {
+		Cache cache = null;
+		if (cacheProvider != null) {
+			CacheManager cacheManager = (CacheManager) cacheProvider.getDelegate();
+			cache = cacheManager.getCache(regionName);
+			if (cache == null) {
+				log.error("Could not find configuration for region [" + regionName + "]; using defaults.");
+			}
+		}
+
+		return cache;
 	}
 
 	public static CacheService instance() {

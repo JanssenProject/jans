@@ -23,6 +23,8 @@ public class WantCertJSSESupport implements SSLSupport {
 
 	private static final String TOMCAT_JSSE_SUPPORT = "org.apache.tomcat.util.net.jsse.JSSESupport";
 
+	private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
+
 	protected SSLSocket ssl;
 
 	private SSLSupport jseeSupport;
@@ -69,8 +71,17 @@ public class WantCertJSSESupport implements SSLSupport {
 			this.ssl.setWantClientAuth(true);
 		}
         
-        return this.jseeSupport.getPeerCertificateChain(force);
-
+		Object[] result = null;
+		try {
+			result =  this.jseeSupport.getPeerCertificateChain(force);
+		} catch (java.net.SocketException ex) {
+			if (log.isDebugEnabled()) {
+				// TODO: Review this part later
+				log.error("There is no certs. This issue not exist till OpenJDK 1.7.0_79 or Oracle JDK 1.6.0_37.", ex);
+			}
+		}
+		
+		return result;
 	}
 
 	@Override

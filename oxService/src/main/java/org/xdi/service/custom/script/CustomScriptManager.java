@@ -361,7 +361,7 @@ public class CustomScriptManager implements Serializable {
 		try {
 			initialized = externalType.init(configurationAttributes);
 		} catch (Exception ex) {
-            log.error("Failed to initialize custom script", ex);
+            log.error("Failed to initialize custom script: '{0}'", ex, customScript.getName());
 		}
 
 		if (initialized) {

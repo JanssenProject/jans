@@ -46,16 +46,20 @@ public class WantCertJSSEImplementation extends JSSEImplementation {
     public String getImplementationName() {
 		String suffix = "-WantCertJSSEImplementation";
 
-		if (delegateToApplicationJSSEImplementation == null) {
-	        return super.getImplementationName() + suffix;
-		} else {
+		if (delegateToApplicationJSSEImplementation != null) {
 	        return delegateToApplicationJSSEImplementation.getImplementationName() + suffix;
 		}
+
+		return super.getImplementationName() + suffix;
     }
 
     @Override
     public ServerSocketFactory getServerSocketFactory(AbstractEndpoint<?> endpoint)  {
-        return delegateToApplicationJSSEImplementation.getServerSocketFactory(endpoint);
+    	if (delegateToApplicationJSSEImplementation != null) {
+            return delegateToApplicationJSSEImplementation.getServerSocketFactory(endpoint);
+    	}
+
+    	return super.getServerSocketFactory(endpoint);
     }
 
     @Override
