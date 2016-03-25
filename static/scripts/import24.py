@@ -30,8 +30,6 @@ service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
-stopds = "/opt/opendj/bin/stop-ds"
-startds = "/opt/opendj/bin/start-ds"
 stoptomcat = "/opt/tomcat/bin/shutdown.sh"
 starttomcat = "/opt/tomcat/bin/startup.sh"
 
@@ -240,7 +238,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
 
 
 def startOpenDJ():
-    output = getOutput([startds])
+    output = getOutput([service, 'opendj', 'start'])
     if output.find("Directory Server has started successfully") > 0:
         logIt("Directory Server has started successfully")
     else:
@@ -250,7 +248,7 @@ def startOpenDJ():
 
 
 def stopOpenDJ():
-    output = getOutput([stopds])
+    output = getOutput([service, 'opendj', 'stop'])
     if output.find("Directory Server is now stopped") > 0:
         logIt("Directory Server is now stopped")
     else:
