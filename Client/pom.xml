@@ -76,6 +76,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxauth-model</artifactId>
         </dependency>
