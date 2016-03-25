@@ -262,6 +262,10 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.REQUEST_URI, getRequest().getRequestUri());
         addReqParam(AuthorizeRequestParam.ACCESS_TOKEN, getRequest().getAccessToken());
 
+        // PKCE
+        addReqParam(AuthorizeRequestParam.CODE_CHALLENGE, getRequest().getCodeChallenge());
+        addReqParam(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, getRequest().getCodeChallengeMethod());
+
         if (getRequest().isRequestSessionState()) {
             addReqParam(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(getRequest().isRequestSessionState()));
         }
