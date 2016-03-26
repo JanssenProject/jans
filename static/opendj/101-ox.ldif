@@ -2070,6 +2070,18 @@ attributeTypes: ( oxData-oid NAME 'oxData'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxCodeChallenge-oid NAME 'oxCodeChallenge'
+  DESC 'OX PKCE code challenge'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxCodeChallengeMethod-oid NAME 'oxCodeChallengeMethod'
+  DESC 'OX PKCE code challenge method'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxSectorIdentifierURI-oid NAME 'oxSectorIdentifierURI'
   DESC 'ox Sector Identifier URI'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2114,6 +2126,12 @@ attributeTypes: ( organizationId-oid NAME 'organizationId'
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxAsimbaEntry-oid NAME 'oxAsimbaEntry'
   DESC 'oxAsimba configuration JSON/XML serialization field'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( defaultCacheRefreshInumServer-oid NAME 'defaultCacheRefreshInumServer'
+  DESC 'oxTrust Cache Refresh inum Configuration Default '
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2173,7 +2191,7 @@ objectclasses: ( gluuAppliance-oid NAME 'gluuAppliance' SUP top STRUCTURAL MUST 
   $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode
   $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig
   $ oxSmtpConfiguration $ oxTrustStoreCert $ oxTrustStoreConf
-  $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress )
+  $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ defaultCacheRefreshInumServer )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuAttribute-oid NAME 'gluuAttribute' SUP top STRUCTURAL MUST objectclass MAY 
  ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin
@@ -2293,7 +2311,7 @@ objectclasses: ( oxAuthToken-oid NAME 'oxAuthToken' SUP top STRUCTURAL MUST obje
   ( createTimestamp $ oxAuthAuthenticationTime $ oxAuthAuthorizationCode
   $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
   $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId
-  $ oxAuthenticationMode $ uniqueIdentifier )
+  $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaRPT-oid NAME 'oxAuthUmaRPT' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration
