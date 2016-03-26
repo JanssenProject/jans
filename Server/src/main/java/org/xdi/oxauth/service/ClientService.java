@@ -213,6 +213,14 @@ public class ClientService {
         return result;
     }
 
+    public List<Client> getAllClients(String[] returnAttributes, int size) {
+        String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
+
+        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size, size);
+
+        return result;
+    }
+
     public List<Client> getClientsWithExpirationDate(String[] returnAttributes) {
         String baseDN = ConfigurationFactory.instance().getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
