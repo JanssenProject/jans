@@ -203,11 +203,12 @@ class Setup(object):
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
+        self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
         self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
-        self.oxidp_ldap_properties = '%s/conf/oxidp-ldap.properties' % self.tomcatHome
+        self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
@@ -249,6 +250,7 @@ class Setup(object):
         self.oxtrust_cache_refresh_base64 = None
         self.oxtrust_import_person_base64 = None
         self.oxidp_config_base64 = None
+        self.oxcas_config_base64 = None
 
 
         # oxTrust SCIM configuration
@@ -282,10 +284,11 @@ class Setup(object):
                      self.oxtrust_cache_refresh_json: False,
                      self.oxtrust_import_person_json: False,
                      self.oxidp_config_json: False,
+                     self.oxcas_config_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
                      self.oxasimba_ldap_properties: True,
-                     self.oxidp_ldap_properties: True,
+                     self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
                      self.oxTrust_log_rotation_configuration: True,
@@ -1549,6 +1552,7 @@ class Setup(object):
         self.oxtrust_import_person_base64 = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
 
         self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
+        self.oxcas_config_base64 = self.generate_base64_ldap_file(self.oxcas_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
