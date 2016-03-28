@@ -51,6 +51,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private IdToken idToken;
     private AuthorizationCode authorizationCode;
     private String nonce;
+    private String codeChallenge;
+    private String codeChallengeMethod;
 
     private String acrValues;
 
@@ -105,6 +107,22 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public void setNonce(String nonce) {
         this.nonce = nonce;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 
     /**
