@@ -324,10 +324,10 @@ changetype: modify
     logging.debug('Writing Mod for %s at %s', attr, fn)
 
 
-def main():
+def main(folder_name):
     global backup24_folder
 
-    backup24_folder = sys.argv[1]
+    backup24_folder = folder_name
     if not os.path.exists(backup24_folder):
         logging.critical("Backup folder %s does not exist.", backup24_folder)
         sys.exit(1)
@@ -377,4 +377,4 @@ if __name__ == '__main__':
         print "Usage: ./import24.py <path_to_backup_folder>"
         print "Example:\n ./import24.py /root/backup_24"
     else:
-        main()
+        main(sys.argv[1])
