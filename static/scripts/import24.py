@@ -212,7 +212,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             # before leaf entries in the LDAP
             # Filename = DN_part_length + unique random string
             new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
-            filename = '%s/%s.ldif' % (ldifFolder, new_fn)
+            filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
 
             if attr in ignoreList:
                 continue
