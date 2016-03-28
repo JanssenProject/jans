@@ -21,8 +21,6 @@ import uuid
 import tempfile
 import logging
 
-log = "./import_24.log"
-logError = "./import_24.error"
 password_file = tempfile.mkstemp()[1]
 backup24_folder = None
 
@@ -210,36 +208,34 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             continue
         new_entry = getEntry(newLdif, dn)
         for attr in old_entry.keys():
+            # Note: Prefixing with part length helps in inserting base
+            # before leaf entries in the LDAP
+            # Filename = DN_part_length + unique random string
+            new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
+            filename = '%s/%s.ldif' % (ldifFolder, new_fn)
+
             if attr in ignoreList:
                 continue
+
             if attr not in new_entry:
-                # Note: Prefixing with part length helps in inserting base
-                # before leaf entries in the LDAP
-                # Filename = DN_part_length + unique random string
-                new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
-                writeMod(dn, attr, old_entry[attr],
-                         '%s/%s.ldif' % (ldifModFolder, new_fn),
-                         True)
+                writeMod(dn, attr, old_entry[attr], filename, True)
                 logging.info("Adding attr %s to %s", attr, dn)
-            else:
+            elif old_entry[attr] != new_entry[attr]:
                 mod_list = None
-                if old_entry[attr] != new_entry[attr]:
-                    if len(old_entry[attr]) == 1:
-                        try:
-                            logging.info("Merging json value for %s", attr)
-                            old_json = json.loads(old_entry[attr][0])
-                            new_json = json.loads(new_entry[attr][0])
-                            new_json = merge(new_json, old_json)
-                            mod_list = [json.dumps(new_json)]
-                        except:
-                            mod_list = old_entry[attr]
-                    else:
+                if len(old_entry[attr]) == 1:
+                    try:
+                        logging.info("Merging json value for %s", attr)
+                        old_json = json.loads(old_entry[attr][0])
+                        new_json = json.loads(new_entry[attr][0])
+                        new_json = merge(new_json, old_json)
+                        mod_list = [json.dumps(new_json)]
+                    except:
                         mod_list = old_entry[attr]
                         logging.info("Keeping multiple old value for %s", attr)
                 else:
-                    continue
-                writeMod(dn, attr, mod_list,
-                         '%s/%s.ldif' % (ldifModFolder, str(uuid.uuid4())))
+                    mod_list = old_entry[attr]
+                    logging.info("Keeping multiple old value for %s", attr)
+                writeMod(dn, attr, mod_list, filename)
 
 
 def startOpenDJ():
@@ -285,7 +281,7 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
                                            "%s/%s" % (outputLdifFolder, fn)]
         output = getOutput(cmd)
         if output:
-            logging.info(output)
+            logging.debug(output)
         else:
             logging.error("Error adding file %s", fn)
 
