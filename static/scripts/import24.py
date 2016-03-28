@@ -173,10 +173,9 @@ def getDns(fn):
 
 
 def getMod(attr, s):
-    logging.debug('Writing mod for %s', attr)
     val = str(s).strip()
     logging.debug('String of Value: %s', val)
-    if val.find('\n') > -1:
+    if (val.find('\n') > -1) or ('{' in val):
         val = base64.b64encode(val)
         return "%s\n" % tab_attr(attr, val, True)
     elif len(val) > (78 - len(attr)):
@@ -219,7 +218,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
 
             if attr not in new_entry:
                 writeMod(dn, attr, old_entry[attr], filename, True)
-                logging.info("Adding attr %s to %s", attr, dn)
+                logging.debug("Adding attr %s to %s", attr, dn)
             elif old_entry[attr] != new_entry[attr]:
                 mod_list = None
                 if len(old_entry[attr]) == 1:
@@ -231,14 +230,15 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                         mod_list = [json.dumps(new_json)]
                     except:
                         mod_list = old_entry[attr]
-                        logging.info("Keeping multiple old value for %s", attr)
+                        logging.debug("Keeping multiple old vals for %s", attr)
                 else:
                     mod_list = old_entry[attr]
-                    logging.info("Keeping multiple old value for %s", attr)
+                    logging.debug("Keeping multiple old value for %s", attr)
                 writeMod(dn, attr, mod_list, filename)
 
 
 def startOpenDJ():
+    logging.info('Starting Directory Server ...')
     output = getOutput([service, 'opendj', 'start'])
     if output.find("Directory Server has started successfully") > 0:
         logging.info("Directory Server has started successfully")
@@ -249,6 +249,7 @@ def startOpenDJ():
 
 
 def stopOpenDJ():
+    logging.info('Stopping Directory Server ...')
     output = getOutput([service, 'opendj', 'stop'])
     if output.find("Directory Server is now stopped") > 0:
         logging.info("Directory Server is now stopped")
@@ -312,6 +313,7 @@ def writeMod(dn, attr, value_list, fn, add=False):
 changetype: modify
 %s: %s\n""" % (dn, operation, attr)
     if value_list is None:
+        logging.warning('Skipping emtry value %s', attr)
         return
     for val in value_list:
         modLdif = modLdif + getMod(attr, val)
@@ -319,6 +321,7 @@ changetype: modify
     f = open(fn, 'w')
     f.write(modLdif)
     f.close()
+    logging.debug('Writing Mod for %s at %s', attr, fn)
 
 
 def main():
