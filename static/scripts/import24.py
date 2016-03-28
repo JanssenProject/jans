@@ -223,7 +223,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                 mod_list = None
                 if len(old_entry[attr]) == 1:
                     try:
-                        logging.info("Merging json value for %s", attr)
+                        logging.debug("Merging json value for %s", attr)
                         old_json = json.loads(old_entry[attr][0])
                         new_json = json.loads(new_entry[attr][0])
                         new_json = merge(new_json, old_json)
