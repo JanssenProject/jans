@@ -287,6 +287,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier) {
+        log.trace("PKCE validation, code_verifier: {0}, code_challenge: {1}, method: {2}",
+                codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
+
         if (Strings.isNullOrEmpty(grant.getCodeChallenge()) && !Strings.isNullOrEmpty(codeVerifier)) {
             return; // if no code challenge then it's valid, no PKCE check
         }
