@@ -283,6 +283,12 @@
         </classes>
     </test>
 
+    <test name="PKCE test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.PkceHttpTest"/>
+        </classes>
+    </test>
+
     <!-- OIC Interop Tests -->
     <test name="OC5. FeatureTest-Accept Request Without redirect uri when One Registered" enabled="true">
         <classes>
