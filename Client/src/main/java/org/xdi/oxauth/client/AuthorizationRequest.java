@@ -87,7 +87,7 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     public CodeVerifier generateAndSetCodeChallengeWithMethod() {
-        CodeVerifier verifier = new CodeVerifier(CodeVerifier.TransformationType.S256);
+        CodeVerifier verifier = new CodeVerifier(CodeVerifier.CodeChallengeMethod.S256);
         codeChallenge = verifier.getCodeChallenge();
         codeChallengeMethod = verifier.getTransformationType().getPkceString();
         return verifier;
