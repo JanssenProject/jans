@@ -95,6 +95,9 @@ public interface TokenRestWebService {
             @FormParam("client_secret")
             @ApiParam(value = "The client secret.  The client MAY omit the parameter if the client secret is an empty string.", required = false)
             String clientSecret,
+            @FormParam("code_verifier")
+            @ApiParam(value = "The client's PKCE code verifier.", required = false)
+            String codeVerifier,
             @Context HttpServletRequest request,
             @Context SecurityContext sec);
 }
