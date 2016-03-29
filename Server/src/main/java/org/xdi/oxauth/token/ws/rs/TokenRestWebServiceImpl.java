@@ -266,6 +266,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
                 }
             }
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (SignatureException e) {
             builder = Response.status(500);
             log.error(e.getMessage(), e);
