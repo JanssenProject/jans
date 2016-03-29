@@ -74,10 +74,12 @@ public interface AuthorizeRestWebService {
      *                            is an array of case sensitive strings.
      * @param request             A JWT  encoded OpenID Request Object.
      * @param requestUri          An URL that points to an OpenID Request Object.
-     * @param requestSessionState
-     * @param sessionState
-     * @param accessToken
-     * @param httpRequest
+     * @param codeChallenge       PKCE code challenge
+     * @param codeChallengeMethod PKCE code challenge method
+     * @param requestSessionState request session state
+     * @param sessionState        session state
+     * @param accessToken         access token
+     * @param httpRequest         http request
      * @param securityContext     An injectable interface that provides access to security
      *                            related information.
      * @return <p>
@@ -219,6 +221,12 @@ public interface AuthorizeRestWebService {
             @QueryParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
             String originHeaders,
+            @QueryParam("code_challenge")
+            @ApiParam(value = "PKCE code challenge.", required = false)
+            String codeChallenge,
+            @QueryParam("code_challenge_method")
+            @ApiParam(value = "PKCE code challenge method.", required = false)
+            String codeChallengeMethod,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
@@ -316,6 +324,12 @@ public interface AuthorizeRestWebService {
             @FormParam("origin_headers")
             @ApiParam(value = "Origin headers. Used in custom workflows.", required = false)
             String originHeaders,
+            @QueryParam("code_challenge")
+            @ApiParam(value = "PKCE code challenge.", required = false)
+            String codeChallenge,
+            @QueryParam("code_challenge_method")
+            @ApiParam(value = "PKCE code challenge method.", required = false)
+            String codeChallengeMethod,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
