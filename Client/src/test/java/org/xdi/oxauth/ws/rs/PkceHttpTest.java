@@ -30,7 +30,7 @@ public class PkceHttpTest extends BaseTest {
     @Test
     public void tokenWithPkceCheck(final String redirectUris, final String userId, final String userSecret,
                                   final String redirectUri) throws Exception {
-        showTitle("validateTokenPost");
+        showTitle("tokenWithPkceCheck");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -101,7 +101,7 @@ public class PkceHttpTest extends BaseTest {
     @Test
     public void invalidCodeVerifier(final String redirectUris, final String userId, final String userSecret,
                                   final String redirectUri) throws Exception {
-        showTitle("validateTokenPost");
+        showTitle("invalidCodeVerifier");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
