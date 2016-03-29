@@ -20,6 +20,8 @@ public class CodeVerifierTest {
     public void verifierAndChallengeMatch() throws NoSuchAlgorithmException, UnsupportedEncodingException {
         assertMatch(CodeVerifier.CodeChallengeMethod.PLAIN);
         assertMatch(CodeVerifier.CodeChallengeMethod.S256);
+
+        assertFalse(CodeVerifier.matched(null, "", "invalid_code"));
     }
 
     @Test
