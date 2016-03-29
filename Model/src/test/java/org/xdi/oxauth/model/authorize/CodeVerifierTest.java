@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,15 +18,22 @@ public class CodeVerifierTest {
 
     @Test
     public void verifierAndChallengeMatch() throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        assertMatch(CodeVerifier.TransformationType.PLAIN);
-        assertMatch(CodeVerifier.TransformationType.S256);
+        assertMatch(CodeVerifier.CodeChallengeMethod.PLAIN);
+        assertMatch(CodeVerifier.CodeChallengeMethod.S256);
     }
 
-    private void assertMatch(CodeVerifier.TransformationType type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    @Test
+    public void codeVerificationGenerator() {
+        for (int i = 0; i < 10; i++) {
+            assertTrue(CodeVerifier.isCodeVerifierValid(CodeVerifier.generateCodeVerifier()));
+        }
+    }
+
+    private static void assertMatch(CodeVerifier.CodeChallengeMethod type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         CodeVerifier verifier = new CodeVerifier(type);
         System.out.println(verifier);
 
-        if (type == CodeVerifier.TransformationType.PLAIN) {
+        if (type == CodeVerifier.CodeChallengeMethod.PLAIN) {
             assertEquals(verifier.getCodeChallenge(), verifier.getCodeVerifier());
             return;
         }
