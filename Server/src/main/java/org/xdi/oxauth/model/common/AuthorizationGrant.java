@@ -102,6 +102,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
+                    LOGGER.trace("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
