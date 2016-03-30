@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.junit.Ignore;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -212,8 +211,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
     /**
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the schema HTTPS.
      */
-    @Test
-    @Ignore //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail1() throws Exception {
         showTitle("applicationTypeNativeFail1");
 
@@ -234,8 +232,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the host different than localhost.
      */
     @Parameters({"redirectUris"})
-    @Test
-    @Ignore //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail2(final String redirectUris) throws Exception {
         showTitle("applicationTypeNativeFail2");
 
