@@ -317,7 +317,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setExecutor(clientExecutor(true));
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterResponse response = registerClient.execRegister(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
                 redirectUriList);
 
         showClient(registerClient);
