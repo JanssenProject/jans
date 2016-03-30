@@ -62,6 +62,14 @@
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
     </context-param>
+    <context-param>
+        <param-name>facelets.RESOURCE_RESOLVER</param-name>
+        <param-value>org.gluu.oxauth.resource.custom.ExternalResourceHandler</param-value>
+    </context-param>
+  	<context-param>
+	    <param-name>facelets.REFRESH_PERIOD</param-name>
+	    <param-value>10</param-value>
+	</context-param>
 
     <!-- swagger servlet reader -->
     <!--<servlet>-->
