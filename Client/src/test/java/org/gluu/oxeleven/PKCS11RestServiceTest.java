@@ -3,6 +3,7 @@ package org.gluu.oxeleven;
 import org.apache.http.HttpStatus;
 import org.gluu.oxeleven.client.*;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -13,12 +14,6 @@ import static org.testng.Assert.*;
  */
 public class PKCS11RestServiceTest {
 
-    private final String GENERATE_KEY_ENDPOINT = "https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey";
-    private final String SIGN_ENDPOINT = "https://ce.gluu.info:8443/oxeleven/rest/oxeleven/sign";
-    private final String VERIFY_SIGNATURE_ENDPOINT = "https://ce.gluu.info:8443/oxeleven/rest/oxeleven/verifySignature";
-    private final String DELETE_KEY_ENDPOINT = "https://ce.gluu.info:8443/oxeleven/rest/oxeleven/deleteKey";
-
-    private final String SIGNING_INPUT = "Signing Input";
     private String rs256Alias;
     private String rs384Alias;
     private String rs512Alias;
@@ -32,13 +27,14 @@ public class PKCS11RestServiceTest {
     private String es384Signature;
     private String es512Signature;
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyRS256() {
+    public void testGenerateKeyRS256(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -51,13 +47,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyRS384() {
+    public void testGenerateKeyRS384(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS384);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -70,13 +67,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyRS512() {
+    public void testGenerateKeyRS512(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS512);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -89,13 +87,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyES256() {
+    public void testGenerateKeyES256(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -108,13 +107,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyES384() {
+    public void testGenerateKeyES384(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES384);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -127,13 +127,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyES512() {
+    public void testGenerateKeyES512(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES512);
 
-            GenerateKeyClient client = new GenerateKeyClient(GENERATE_KEY_ENDPOINT);
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
 
             GenerateKeyResponse response = client.exec();
@@ -145,15 +146,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyRS256")
-    public void testSignatureRS256() {
+    public void testSignatureRS256(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(rs256Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -165,15 +167,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyRS384")
-    public void testSignatureRS384() {
+    public void testSignatureRS384(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(rs384Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS384);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -185,15 +188,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyRS512")
-    public void testSignatureRS512() {
+    public void testSignatureRS512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(rs512Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS512);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -205,15 +209,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyES256")
-    public void testSignatureES256() {
+    public void testSignatureES256(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(es256Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -225,15 +230,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyES384")
-    public void testSignatureES384() {
+    public void testSignatureES384(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(es384Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES384);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -245,15 +251,16 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyES512")
-    public void testSignatureES512() {
+    public void testSignatureES512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setAlias(es512Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES512);
 
-            SignClient client = new SignClient(SIGN_ENDPOINT);
+            SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
@@ -265,16 +272,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureRS256")
-    public void testVerifySignatureRS256() {
+    public void testVerifySignatureRS256(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(rs256Signature);
             request.setAlias(rs256Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -285,16 +293,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureRS384")
-    public void testVerifySignatureRS384() {
+    public void testVerifySignatureRS384(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(rs384Signature);
             request.setAlias(rs384Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS384);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -305,16 +314,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureRS512")
-    public void testVerifySignatureRS512() {
+    public void testVerifySignatureRS512(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(rs512Signature);
             request.setAlias(rs512Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.RS512);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -325,16 +335,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureES256")
-    public void testVerifySignatureES256() {
+    public void testVerifySignatureES256(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(es256Signature);
             request.setAlias(es256Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -345,16 +356,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureES384")
-    public void testVerifySignatureES384() {
+    public void testVerifySignatureES384(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(es384Signature);
             request.setAlias(es384Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES384);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -365,16 +377,17 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testSignatureES512")
-    public void testVerifySignatureES512() {
+    public void testVerifySignatureES512(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
-            request.setSigningInput(SIGNING_INPUT);
+            request.setSigningInput(signingInput);
             request.setSignature(es512Signature);
             request.setAlias(es512Alias);
             request.setSignatureAlgorithm(SignatureAlgorithm.ES512);
 
-            VerifySignatureClient client = new VerifySignatureClient(VERIFY_SIGNATURE_ENDPOINT);
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
             client.setRequest(request);
 
             VerifySignatureResponse response = client.exec();
@@ -385,13 +398,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureRS256")
-    public void testDeleteKeyRS256() {
+    public void testDeleteKeyRS256(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(rs256Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();
@@ -402,13 +416,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureRS384")
-    public void testDeleteKeyRS384() {
+    public void testDeleteKeyRS384(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(rs384Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();
@@ -419,13 +434,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureRS512")
-    public void testDeleteKeyRS512() {
+    public void testDeleteKeyRS512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(rs512Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();
@@ -436,13 +452,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureES256")
-    public void testDeleteKeyES256() {
+    public void testDeleteKeyES256(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(es256Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();
@@ -453,13 +470,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureES384")
-    public void testDeleteKeyES384() {
+    public void testDeleteKeyES384(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(es384Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();
@@ -470,13 +488,14 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"deleteKeyEndpoint"})
     @Test(dependsOnMethods = "testVerifySignatureES512")
-    public void testDeleteKeyES512() {
+    public void testDeleteKeyES512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
             request.setAlias(es512Alias);
 
-            DeleteKeyClient client = new DeleteKeyClient(DELETE_KEY_ENDPOINT);
+            DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
             client.setRequest(request);
 
             DeleteKeyResponse response = client.exec();

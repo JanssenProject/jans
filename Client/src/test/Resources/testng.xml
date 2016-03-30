@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="oxElevenClient" parallel="false">
+    <test name="PKCS11 Rest Service Test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxeleven.PKCS11RestServiceTest"/>
+        </classes>
+    </test>
+</suite>
