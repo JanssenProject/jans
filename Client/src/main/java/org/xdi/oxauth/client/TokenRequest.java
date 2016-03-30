@@ -87,6 +87,7 @@ public class TokenRequest extends BaseRequest {
     private String refreshToken;
     private String oxAuthExchangeToken;
     private String audience;
+    private String codeVerifier;
 
     private SignatureAlgorithm algorithm;
     private String sharedKey;
@@ -151,6 +152,24 @@ public class TokenRequest extends BaseRequest {
      */
     public void setCode(String code) {
         this.code = code;
+    }
+
+    /**
+     * Gets PKCE code verifier.
+     *
+     * @return code verifier
+     */
+    public String getCodeVerifier() {
+        return codeVerifier;
+    }
+
+    /**
+     * Sets PKCE code verifier.
+     *
+     * @param codeVerifier code verifier
+     */
+    public void setCodeVerifier(String codeVerifier) {
+        this.codeVerifier = codeVerifier;
     }
 
     /**

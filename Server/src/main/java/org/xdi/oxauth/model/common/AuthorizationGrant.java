@@ -95,11 +95,14 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setScope(scopes);
                     t.setAuthMode(getAcrValues());
                     t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+                    t.setCodeChallenge(getCodeChallenge());
+                    t.setCodeChallengeMethod(getCodeChallengeMethod());
 
                     final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
+                    LOGGER.trace("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
