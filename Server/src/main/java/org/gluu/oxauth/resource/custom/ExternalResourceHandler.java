@@ -37,7 +37,7 @@ public class ExternalResourceHandler extends DefaultResourceResolver {
 
 	@Override
 	public URL resolveUrl(String path) {
-		if (useExternalResourceBase) {
+		if (!useExternalResourceBase) {
 			return super.resolveUrl(path);
 		}
 
