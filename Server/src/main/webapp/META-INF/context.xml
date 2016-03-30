@@ -6,4 +6,8 @@
 		<Realm className="org.xdi.tomcat7.WantSslRealm" validate="true" allRolesMode="authOnly"/>
     	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />
      -->
+
+    <Loader className="org.apache.catalina.loader.VirtualWebappLoader"
+            virtualClasspath="${gluu.external.resource.base}/libs/*.jar"/>
+
 </Context>
