@@ -11,7 +11,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.junit.Ignore;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -462,8 +461,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the schema HTTPS.
      */
     @Parameters({"registerPath"})
-    @Test
-    @Ignore //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false) //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail1(final String registerPath) throws Exception {
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
@@ -511,8 +509,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the host different than localhost.
      */
     @Parameters({"registerPath", "redirectUris"})
-    @Test
-    @Ignore //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false) //allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail2(final String registerPath, final String redirectUris) throws Exception {
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
