@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -22,6 +14,9 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
@@ -216,7 +211,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
     /**
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the schema HTTPS.
      */
-    @Test
+    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail1() throws Exception {
         showTitle("applicationTypeNativeFail1");
 
@@ -234,10 +229,10 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
     }
 
     /**
-     * Fail: Register a client with Application Type <code>web</code> and Redirect URI with the host different than localhost.
+     * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the host different than localhost.
      */
     @Parameters({"redirectUris"})
-    @Test
+    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail2(final String redirectUris) throws Exception {
         showTitle("applicationTypeNativeFail2");
 
