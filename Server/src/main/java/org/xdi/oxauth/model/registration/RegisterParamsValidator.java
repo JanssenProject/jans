@@ -145,11 +145,13 @@ public class RegisterParamsValidator {
                                 }
                                 break;
                             case NATIVE:
-                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
-                                    return false;
-                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
-                                    return false;
-                                }
+                                // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
+                                // we allow registration with custom schema for native apps.
+//                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
+//                                    return false;
+//                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
+//                                    return false;
+//                                }
                                 break;
                         }
                     }
