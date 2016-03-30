@@ -24,9 +24,9 @@ public class ExternalResourceHandler extends DefaultResourceResolver {
 
 		String externalResourceBase = System.getProperty("gluu.external.resource.base");
 		if (StringHelper.isNotEmpty(externalResourceBase)) {
-			externalResourceBase += "pages";
+			externalResourceBase += "/pages";
 			File folder = new File(externalResourceBase);
-			if (this.externalResourceBaseFolder.exists() && this.externalResourceBaseFolder.isDirectory()) {
+			if (folder.exists() && folder.isDirectory()) {
 				this.externalResourceBaseFolder = folder;
 				this.useExternalResourceBase = true;
 			} else {
