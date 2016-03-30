@@ -306,4 +306,25 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
     }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void registerWithCustomURI(final String redirectUris) throws Exception {
+        showTitle("requestClientAssociate1");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+        redirectUriList.add("myschema://client.example.com/cb"); // URI with custom schema
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+                redirectUriList);
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+    }
 }
