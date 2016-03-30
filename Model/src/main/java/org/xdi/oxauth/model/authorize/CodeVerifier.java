@@ -1,11 +1,9 @@
 package org.xdi.oxauth.model.authorize;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.xdi.oxauth.model.util.Preconditions;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.UUID;
+import org.apache.commons.lang.RandomStringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -14,14 +12,17 @@ import java.util.UUID;
 
 public class CodeVerifier {
 
-    public enum TransformationType {
+    private static final int MAX_CODE_VERIFIER_LENGTH = 128;
+    private static final int MIN_CODE_VERIFIER_LENGTH = 43;
+
+    public enum CodeChallengeMethod {
         PLAIN("plain", ""),
         S256("s256", "SHA-256");
 
         private String pkceString;
         private String messageDigestString;
 
-        private TransformationType(String pkceString, String messageDigestString) {
+        private CodeChallengeMethod(String pkceString, String messageDigestString) {
             this.pkceString = pkceString;
             this.messageDigestString = messageDigestString;
         }
@@ -33,33 +34,53 @@ public class CodeVerifier {
         public String getPkceString() {
             return pkceString;
         }
+
+        public static CodeChallengeMethod fromString(String value) {
+            for (CodeChallengeMethod type : values()) {
+                if (type.getPkceString().equalsIgnoreCase(value)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     private String codeVerifier;
     private String codeChallenge;
-    private TransformationType transformationType;
+    private CodeChallengeMethod transformationType;
 
     public CodeVerifier() {
-        this(TransformationType.S256);
+        this(CodeChallengeMethod.S256);
     }
 
-    public CodeVerifier(TransformationType transformationType) {
+    public CodeVerifier(CodeChallengeMethod transformationType) {
         this.codeVerifier = generateCodeVerifier();
         this.transformationType = transformationType;
         this.codeChallenge = generateCodeChallenge(transformationType, codeVerifier);
     }
 
-    public static String generateCodeChallenge(TransformationType transformationType, String codeVerifier) {
-        Preconditions.checkNotNull(transformationType);
+    public static String generateCodeChallenge(CodeChallengeMethod codeChallengeMethod, String codeVerifier) {
+        Preconditions.checkNotNull(codeChallengeMethod);
         Preconditions.checkNotNull(codeVerifier);
 
-        switch (transformationType) {
+        switch (codeChallengeMethod) {
             case PLAIN:
                 return codeVerifier;
             case S256:
                 return s256(codeVerifier);
         }
-        throw new RuntimeException("Unsupported transformation type: " + transformationType);
+        throw new RuntimeException("Unsupported code challenge method: " + codeChallengeMethod);
+    }
+
+    public static boolean matched(String codeChallenge, String codeChallengeMethod, String codeVerifier) {
+        return matched(codeChallenge, CodeChallengeMethod.fromString(codeChallengeMethod), codeVerifier);
+    }
+
+    public static boolean matched(String codeChallenge, CodeChallengeMethod codeChallengeMethod, String codeVerifier) {
+        if (Strings.isNullOrEmpty(codeChallenge) || codeChallengeMethod == null || Strings.isNullOrEmpty(codeVerifier)) {
+            return false;
+        }
+        return generateCodeChallenge(codeChallengeMethod, codeVerifier).equals(codeChallenge);
     }
 
     public static String s256(String codeVerifier) {
@@ -67,8 +88,23 @@ public class CodeVerifier {
     }
 
     public static String generateCodeVerifier() {
-        SecureRandom random = new SecureRandom();
-        return UUID.randomUUID().toString() + new BigInteger(130, random).toString(32);
+        String alphabetic = "abcdefghijklmnopqrstuvwxyz";
+        String chars = alphabetic + alphabetic.toUpperCase()
+                + "1234567890" + "-._~";
+        String code = RandomStringUtils.random(MAX_CODE_VERIFIER_LENGTH, chars);
+        Preconditions.checkState(isCodeVerifierValid(code));
+        return code;
+    }
+
+    public static boolean isCodeVerifierValid(String codeVerifier) {
+        if (codeVerifier == null) {
+            return false;
+        }
+        int length = codeVerifier.length();
+        if (length > MAX_CODE_VERIFIER_LENGTH || length < MIN_CODE_VERIFIER_LENGTH) {
+            return false;
+        }
+        return true;
     }
 
     public String getCodeChallenge() {
@@ -79,7 +115,7 @@ public class CodeVerifier {
         return codeVerifier;
     }
 
-    public TransformationType getTransformationType() {
+    public CodeChallengeMethod getTransformationType() {
         return transformationType;
     }
 
