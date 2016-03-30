@@ -33,7 +33,7 @@
     <!-- Make sure this URL pattern is the same as that used by the Faces Servlet -->
     <web:hot-deploy-filter url-pattern="*.htm"/>
 
-    <web:rewrite-filter view-mapping="*.seam" />
+    <web:rewrite-filter view-mapping="*.htm" />
 
     <!-- If you are still using JBoss 4, uncomment this to have your PU started -->
     <!--
@@ -60,7 +60,7 @@
 
     <security:identity authenticate-method="#{authenticator.authenticate}" remember-me="true"/>
 
-    <!--<web:redirect-filter url-pattern="*.seam"/>-->
+    <!--<web:redirect-filter url-pattern="*.htm"/>-->
 
     <!-- ATTENTION : Unfortunately this mechanism requires HTTP Session which is not acceptable for us.-->
     <!--<event type="org.jboss.seam.security.notLoggedIn">-->
