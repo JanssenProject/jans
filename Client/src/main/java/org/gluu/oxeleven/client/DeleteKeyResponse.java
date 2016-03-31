@@ -3,9 +3,11 @@ package org.gluu.oxeleven.client;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
 
+import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
+
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version March 31, 2016
  */
 public class DeleteKeyResponse extends BaseResponse {
 
@@ -17,7 +19,7 @@ public class DeleteKeyResponse extends BaseResponse {
 
         JSONObject jsonObject = getJSONEntity();
         if (jsonObject != null) {
-            deleted = jsonObject.optBoolean("deleted");
+            deleted = jsonObject.optBoolean(DELETED);
         }
     }
 

@@ -8,6 +8,7 @@ import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 
 import javax.ws.rs.core.CacheControl;
@@ -16,11 +17,12 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Map;
-
+import static org.gluu.oxeleven.model.SignResponseParam.*;
 /**
  * @author Javier Rojas Blum
  * @version March 30, 2016
  */
+@Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
 
     @Logger
@@ -51,7 +53,7 @@ public class SignRestServiceImpl implements SignRestService {
                 String signature = pkcs11.getSignature(signingInput.getBytes(), alias, signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("signature", signature);
+                jsonObject.put(SIGNATURE, signature);
 
                 builder.entity(jsonObject.toString());
             }

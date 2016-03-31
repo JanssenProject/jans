@@ -4,9 +4,11 @@ import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 
+import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
+
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version March 31, 2016
  */
 public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, VerifySignatureResponse> {
 
@@ -48,10 +50,10 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        addRequestParam("signingInput", getRequest().getSigningInput());
-        addRequestParam("signature", getRequest().getSignature());
-        addRequestParam("alias", getRequest().getAlias());
-        addRequestParam("signatureAlgorithm", getRequest().getSignatureAlgorithm().getName());
+        addRequestParam(SIGNING_INPUT, getRequest().getSigningInput());
+        addRequestParam(SIGNATURE, getRequest().getSignature());
+        addRequestParam(ALIAS, getRequest().getAlias());
+        addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
 
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {

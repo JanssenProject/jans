@@ -3,11 +3,12 @@ package org.gluu.oxeleven.rest;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
+import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 
 import javax.ws.rs.core.CacheControl;
@@ -17,10 +18,13 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
+@Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
     @Logger
@@ -46,10 +50,10 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                 String alias = pkcs11.generateKey(dnName, signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("alias", alias);
-                jsonObject.put("algorithm", signatureAlgorithm.getName());
+                jsonObject.put(ALIAS, alias);
+                jsonObject.put(ALGORITHM, signatureAlgorithm.getName());
                 if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-                    jsonObject.put("curve", signatureAlgorithm.getCurve());
+                    jsonObject.put(CURVE, signatureAlgorithm.getCurve());
                 }
 
                 builder.entity(jsonObject.toString());

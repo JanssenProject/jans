@@ -4,9 +4,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
 @Path("/oxeleven")
 public interface VerifySignatureRestService {
@@ -16,8 +18,8 @@ public interface VerifySignatureRestService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({MediaType.APPLICATION_JSON})
     Response verifySignature(
-            @FormParam("signingInput") String signingInput,
-            @FormParam("signature") String signature,
-            @FormParam("alias") String alias,
-            @FormParam("signatureAlgorithm") String signatureAlgorithm);
+            @FormParam(SIGNING_INPUT) String signingInput,
+            @FormParam(SIGNATURE) String signature,
+            @FormParam(ALIAS) String alias,
+            @FormParam(SIGNATURE_ALGORITHM) String signatureAlgorithm);
 }

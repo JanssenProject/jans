@@ -18,9 +18,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
+import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
 @Name("deleteKeyRestService")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
@@ -46,7 +48,7 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
                 pkcs11.deleteKey(alias);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("deleted", true);
+                jsonObject.put(DELETED, true);
 
                 builder.entity(jsonObject.toString());
             }

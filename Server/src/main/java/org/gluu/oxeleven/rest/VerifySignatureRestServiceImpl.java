@@ -4,10 +4,11 @@ import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 
 import javax.crypto.BadPaddingException;
@@ -20,10 +21,13 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
+import static org.gluu.oxeleven.model.VerifySignatureResponseParam.VERIFIED;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
+@Name("verifySignatureRestService")
 public class VerifySignatureRestServiceImpl implements VerifySignatureRestService {
 
     @Logger
@@ -57,7 +61,7 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
                 boolean verified = pkcs11.verifySignature(signingInput, signature, alias, signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("verified", verified);
+                jsonObject.put(VERIFIED, verified);
 
                 builder.entity(jsonObject.toString());
             }

@@ -4,9 +4,11 @@ import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 
+import static org.gluu.oxeleven.model.DeleteKeyRequestParam.ALIAS;
+
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version March 31, 2016
  */
 public class DeleteKeyClient extends BaseClient<DeleteKeyRequest, DeleteKeyResponse> {
 
@@ -48,7 +50,7 @@ public class DeleteKeyClient extends BaseClient<DeleteKeyRequest, DeleteKeyRespo
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        addRequestParam("alias", getRequest().getAlias());
+        addRequestParam(ALIAS, getRequest().getAlias());
 
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {

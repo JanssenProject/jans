@@ -3,9 +3,11 @@ package org.gluu.oxeleven.client;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
 
+import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
+
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version March 31, 2016
  */
 public class SignResponse extends BaseResponse {
 
@@ -16,7 +18,7 @@ public class SignResponse extends BaseResponse {
 
         JSONObject jsonObject = getJSONEntity();
         if (jsonObject != null) {
-            signature = jsonObject.optString("signature");
+            signature = jsonObject.optString(SIGNATURE);
         }
     }
 
