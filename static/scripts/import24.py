@@ -174,8 +174,7 @@ def getDns(fn):
 
 def getMod(attr, s):
     val = str(s).strip()
-    logging.debug('String of Value: %s', val)
-    if (val.find('\n') > -1) or ('{' in val):
+    if val.find('\n') > -1:
         val = base64.b64encode(val)
         return "%s\n" % tab_attr(attr, val, True)
     elif len(val) > (78 - len(attr)):
@@ -230,7 +229,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                         mod_list = [json.dumps(new_json)]
                     except:
                         mod_list = old_entry[attr]
-                        logging.debug("Keeping multiple old vals for %s", attr)
+                        logging.debug("Keeping old value for %s", attr)
                 else:
                     mod_list = old_entry[attr]
                     logging.debug("Keeping multiple old value for %s", attr)
