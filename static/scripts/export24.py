@@ -180,6 +180,7 @@ def getLdif():
     f.write(output)
     f.close()
 
+
 def runCommand(args, return_list=False):
         try:
             logIt("Running command : %s" % " ".join(args))
@@ -195,6 +196,14 @@ def runCommand(args, return_list=False):
             sys.exit(1)
 
 
+def getProp(prop):
+    with open('/install/community-edition-setup/setup.properties.last', 'r') \
+            as sf:
+        for line in sf:
+            if "{}=".format(prop) in line:
+                return line.split('=')[-1].strip()
+
+
 def genProperties():
     props = {}
     props['ldapPass'] = runCommand([cat, password_file])
@@ -208,6 +217,11 @@ def genProperties():
     props['baseInum'] = props['inumOrg'][:21]
     props['encode_salt'] = runCommand(
         [cat, "%s/opt/tomcat/conf/salt" % bu_folder]).split("=")[-1].strip()
+
+    props['oxauth_client_id'] = getProp('oxauth_client_id')
+    props['scim_rs_client_id'] = getProp('scim_rs_client_id')
+    props['scim_rp_client_id'] = getProp('scim_rp_client_id')
+
     f = open(propertiesFn, 'a')
     for key in props.keys():
         f.write("%s=%s\n" % (key, props[key]))
