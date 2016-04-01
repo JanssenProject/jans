@@ -28,8 +28,6 @@ service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
-stoptomcat = "/opt/tomcat/bin/shutdown.sh"
-starttomcat = "/opt/tomcat/bin/startup.sh"
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -323,6 +321,29 @@ changetype: modify
     logging.debug('Writing Mod for %s at %s', attr, fn)
 
 
+def stopTomcat():
+    logging.info('Stopping Tomcat ...')
+    output = getOutput([service, 'tomcat', 'stop'])
+    logging.debug(output)
+
+
+def startTomcat():
+    logging.info('Starting Tomcat ...')
+    output = getOutput([service, 'tomcat', 'start'])
+    logging.debug(output)
+
+
+def preparePasswordFile():
+    # prepare password_file
+    with open('/install/community-edition-setup/setup.properties.last', 'r') \
+            as sfile:
+        for line in sfile:
+            if 'ldapPass=' in line:
+                with open(password_file, 'w') as pfile:
+                    pfile.write(line.split('=')[-1])
+                break
+
+
 def main(folder_name):
     global backup24_folder
 
@@ -351,24 +372,19 @@ def main(folder_name):
     if not os.path.exists(outputLdifFolder):
         os.mkdir(outputLdifFolder)
 
-    # prepare password_file
-    with open('/install/community-edition-setup/setup.properties.last', 'r') \
-            as sfile:
-        for line in sfile:
-            if 'ldapPass=' in line:
-                with open(password_file, 'w') as pfile:
-                    pfile.write(line.split('=')[-1])
-                break
-
+    stopTomcat()
+    preparePasswordFile()
     stopOpenDJ()
     copyFiles(backup24_folder)
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+    startTomcat()
 
     # remove the password_file
     os.remove(password_file)
+    logging.info("Import finished.")
 
 
 if __name__ == '__main__':
