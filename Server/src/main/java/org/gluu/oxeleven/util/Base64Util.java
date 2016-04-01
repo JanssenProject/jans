@@ -2,13 +2,15 @@ package org.gluu.oxeleven.util;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.math.BigInteger;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
 public class Base64Util {
 
-    public static String base64urlencode(byte[] arg) {
+    public static String base64UrlEncode(byte[] arg) {
         String s = Base64.encodeBase64String(arg); // Standard base64 encoder
         s = s.split("=")[0]; // Remove any trailing '='s
         s = s.replace('+', '-'); // 62nd char of encoding
@@ -16,7 +18,7 @@ public class Base64Util {
         return s;
     }
 
-    public static byte[] base64urldecode(String arg) throws IllegalArgumentException {
+    public static byte[] base64UrlDecode(String arg) throws IllegalArgumentException {
         String s = removePadding(arg);
         return Base64.decodeBase64(s); // Standard base64 decoder
     }
@@ -39,5 +41,16 @@ public class Base64Util {
                 throw new IllegalArgumentException("Illegal base64url string.");
         }
         return s;
+    }
+
+    public static String base64UrlEncodeUnsignedBigInt(BigInteger bigInteger) {
+        byte[] array = bigInteger.toByteArray();
+        if (array[0] == 0) {
+            byte[] tmp = new byte[array.length - 1];
+            System.arraycopy(array, 1, tmp, 0, tmp.length);
+            array = tmp;
+        }
+
+        return base64UrlEncode(array);
     }
 }

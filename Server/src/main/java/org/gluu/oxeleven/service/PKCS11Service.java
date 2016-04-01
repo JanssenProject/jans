@@ -1,7 +1,6 @@
 package org.gluu.oxeleven.service;
 
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.gluu.oxeleven.model.ECEllipticCurve;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
@@ -26,7 +25,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version March 31, 2016
  */
 public class PKCS11Service {
 
@@ -111,7 +110,7 @@ public class PKCS11Service {
         signature.initSign(privateKey);
         signature.update(signingInput);
 
-        return Base64Util.base64urlencode(signature.sign());
+        return Base64Util.base64UrlEncode(signature.sign());
     }
 
     public boolean verifySignature(String signingInput, String encodedSignature, String alias, SignatureAlgorithm signatureAlgorithm)
@@ -119,7 +118,7 @@ public class PKCS11Service {
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, SignatureException {
         PublicKey publicKey = getPublicKey(alias);
 
-        byte[] signature = Base64Util.base64urldecode(encodedSignature);
+        byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
 
         Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
         verifier.initVerify(publicKey);
@@ -131,19 +130,19 @@ public class PKCS11Service {
         keyStore.deleteEntry(alias);
     }
 
+    public PublicKey getPublicKey(String alias)
+            throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
+        PublicKey publicKey = keyStore.getCertificate(alias).getPublicKey();
+
+        return publicKey;
+    }
+
     private PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         Key key = keyStore.getKey(alias, pin);
         PrivateKey privateKey = (PrivateKey) key;
 
         return privateKey;
-    }
-
-    private PublicKey getPublicKey(String alias)
-            throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
-        PublicKey publicKey = keyStore.getCertificate(alias).getPublicKey();
-
-        return publicKey;
     }
 
     private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm)

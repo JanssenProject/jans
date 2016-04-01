@@ -6,11 +6,13 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+
 import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 21, 2016
+ * @version March 31, 2016
  */
 public class PKCS11RestServiceTest {
 
@@ -398,8 +400,28 @@ public class PKCS11RestServiceTest {
         }
     }
 
+    @Parameters({"jwksEndpoint"})
+    @Test(dependsOnMethods = {"testGenerateKeyRS256", "testGenerateKeyRS384", "testGenerateKeyRS512",
+            "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
+    public void testJwks(final String jwksEndpoint) {
+        try {
+            JwksRequest request = new JwksRequest();
+            request.setAliasList(Arrays.asList(
+                    rs256Alias, rs384Alias, rs512Alias,
+                    es256Alias, es384Alias, es512Alias));
+
+            JwksClient client = new JwksClient(jwksEndpoint);
+            client.setRequest(request);
+
+            JwksResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureRS256")
+    @Test(dependsOnMethods = {"testVerifySignatureRS256", "testJwks"})
     public void testDeleteKeyRS256(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -417,7 +439,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureRS384")
+    @Test(dependsOnMethods = {"testVerifySignatureRS384", "testJwks"})
     public void testDeleteKeyRS384(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -435,7 +457,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureRS512")
+    @Test(dependsOnMethods = {"testVerifySignatureRS512", "testJwks"})
     public void testDeleteKeyRS512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -453,7 +475,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureES256")
+    @Test(dependsOnMethods = {"testVerifySignatureES256", "testJwks"})
     public void testDeleteKeyES256(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -471,7 +493,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureES384")
+    @Test(dependsOnMethods = {"testVerifySignatureES384", "testJwks"})
     public void testDeleteKeyES384(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -489,7 +511,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = "testVerifySignatureES512")
+    @Test(dependsOnMethods = {"testVerifySignatureES512", "testJwks"})
     public void testDeleteKeyES512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();

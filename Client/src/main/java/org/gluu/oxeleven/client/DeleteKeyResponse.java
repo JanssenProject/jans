@@ -13,7 +13,6 @@ public class DeleteKeyResponse extends BaseResponse {
 
     private boolean deleted;
 
-
     public DeleteKeyResponse(ClientResponse<String> clientResponse) {
         super(clientResponse);
 
