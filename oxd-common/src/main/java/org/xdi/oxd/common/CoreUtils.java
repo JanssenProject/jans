@@ -8,9 +8,9 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -21,11 +21,18 @@ import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Executors;
@@ -233,12 +240,38 @@ public class CoreUtils {
     }
 
     public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+//        System.setProperty("javax.net.debug", "SSL,handshake,trustmanager");
+
+//        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
+//            @Override
+//            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+//                return true;
+//            }
+//        }, new AllowAllHostnameVerifier());
+
         SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
+                   @Override
+                   public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                       return true;
+                   }
+               }, new X509HostnameVerifier() {
             @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public void verify(String host, SSLSocket ssl) throws IOException {
+            }
+
+            @Override
+            public void verify(String host, X509Certificate cert) throws SSLException {
+            }
+
+            @Override
+            public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException {
+            }
+
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
                 return true;
             }
-        }, new AllowAllHostnameVerifier());
+        });
 
         SchemeRegistry registry = new SchemeRegistry();
         registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
