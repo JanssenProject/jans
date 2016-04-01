@@ -93,7 +93,8 @@ public class TestUtils {
                 tokenClient1.setExecutor(clientExecutor);
                 tokenClient1.setRequest(tokenRequest);
                 final TokenResponse response2 = tokenClient1.exec();
-                ClientUtils.showClient(authorizeClient);
+
+                ClientUtils.showClient(tokenClient1);
                 if (response2.getStatus() == 200) {
                     return response2;
                 }
