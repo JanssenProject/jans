@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>oxd-rp-client</artifactId>
     <packaging>jar</packaging>
-    <version>2.4.3-SNAPSHOT</version>
+    <version>2.4.3.Final</version>
     <name>oxD RP Client</name>
     <url>http://ox.gluu.org</url>
 
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
-        <version>2.4.3-SNAPSHOT</version>
+        <version>2.4.3.Final</version>
     </parent>
 
     <build>
