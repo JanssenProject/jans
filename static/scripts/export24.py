@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import time
 import traceback
 import sys
 import os
@@ -8,6 +7,7 @@ import shutil
 import hashlib
 import getpass
 import tempfile
+import logging
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -51,15 +51,27 @@ base_dns = ['ou=people',
             'ou=hosts',
             'ou=u2f']
 
+# configure logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    filename='export_24.log',
+                    filemode='w')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
 
 def backupCustomizations():
+    logging.info('Creating backup of UI customizations')
     dirs = [oxauth_original_dir, oxtrust_original_dir]
     for dir in dirs:
         if not os.path.exists(dir):
             os.mkdir(dir)
     output = runCommand([unzip, '-q', oxauth_war, '-d', oxauth_original_dir])
     output = runCommand([unzip, '-q', oxtrust_war, '-d', oxtrust_original_dir])
-    logIt(output)
+    logging.debug(output)
     dirs = [(oxauth_modified_dir, oxauth_original_dir),
             (oxtrust_modified_dir, oxtrust_original_dir)]
     for dir_tup in dirs:
@@ -71,24 +83,25 @@ def backupCustomizations():
             original_file = modified_file.replace(modified_dir, original_dir)
             if not os.path.isdir(modified_file):
                 if not os.path.exists(original_file):
-                    logIt("Found new file: %s" % modified_file)
+                    logging.debug("Found new file: %s", modified_file)
                     copyFile(modified_file, bu_folder)
                 else:
                     modified_hash = hash_file(modified_file)
                     original_hash = hash_file(original_file)
                     if not modified_hash == original_hash:
-                        logIt("Found changed file: %s" % modified_file)
+                        logging.debug("Found changed file: %s", modified_file)
                         copyFile(modified_file, bu_folder)
     shutil.rmtree(oxauth_original_dir)
     shutil.rmtree(oxtrust_original_dir)
 
 
 def backupFiles():
+    logging.info('Creating backup of files')
     for folder in folders_to_backup:
         try:
             shutil.copytree(folder, bu_folder + folder)
         except:
-            logIt("Failed to backup %s" % folder)
+            logging.error("Failed to backup %s", folder)
 
 
 def clean(s):
@@ -112,6 +125,7 @@ def getOrgInum():
 
 
 def getLdif():
+    logging.info('Creating backup of LDAP data')
     orgInum = getOrgInum()
     # Backup the data
     for basedn in base_dns:
@@ -183,7 +197,7 @@ def getLdif():
 
 def runCommand(args, return_list=False):
         try:
-            logIt("Running command : %s" % " ".join(args))
+            logging.debug("Running command : %s", " ".join(args))
             output = None
             if return_list:
                 output = os.popen(" ".join(args)).readlines()
@@ -191,8 +205,8 @@ def runCommand(args, return_list=False):
                 output = os.popen(" ".join(args)).read().strip()
             return output
         except:
-            logIt("Error running command : %s" % " ".join(args), True)
-            logIt(traceback.format_exc(), True)
+            logging.error("Error running command : %s", " ".join(args))
+            logging.debug(traceback.format_exc())
             sys.exit(1)
 
 
@@ -205,6 +219,7 @@ def getProp(prop):
 
 
 def genProperties():
+    logging.info('Creating setup.properties backup file')
     props = {}
     props['ldapPass'] = runCommand([cat, password_file])
     props['hostname'] = runCommand([hostname])
@@ -239,16 +254,6 @@ def hash_file(filename):
     return h.hexdigest()
 
 
-def logIt(msg, errorLog=False):
-    if errorLog:
-        f = open(logError, 'a')
-        f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-        f.close()
-    f = open(log, 'a')
-    f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-    f.close()
-
-
 def makeFolders():
     folders = [bu_folder, "%s/ldif" % bu_folder]
     for folder in folders:
@@ -256,8 +261,8 @@ def makeFolders():
             if not os.path.exists(folder):
                 runCommand([mkdir, '-p', folder])
         except:
-            logIt("Error making folders", True)
-            logIt(traceback.format_exc(), True)
+            logging.error("Error making folder: %s", folder)
+            logging.debug(traceback.format_exc())
             sys.exit(3)
 
 
