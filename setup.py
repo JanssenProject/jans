@@ -287,7 +287,7 @@ class Setup(object):
                      self.oxcas_config_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
-                     self.oxasimba_ldap_properties: True,
+                     self.oxasimba_ldap_properties: False,
                      self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
