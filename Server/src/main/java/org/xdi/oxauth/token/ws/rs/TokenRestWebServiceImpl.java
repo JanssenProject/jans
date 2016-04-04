@@ -7,6 +7,7 @@
 package org.xdi.oxauth.token.ws.rs;
 
 import com.google.common.base.Strings;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+
 import java.security.SignatureException;
 
 /**
@@ -207,8 +209,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             idToken));
                 } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
     				if (client == null) {
+    					log.error("Invalid client", new RuntimeException("Client is empty"));
     					return response(error(401, TokenErrorResponseType.INVALID_CLIENT));
     				}
+    				
 
                     User user = null;
                     if (authenticationFilterService.isEnabled()) {
@@ -247,6 +251,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 scope,
                                 idToken));
                     } else {
+    					log.error("Invalid user", new RuntimeException("User is empty"));
                         builder = error(401, TokenErrorResponseType.INVALID_CLIENT);
                     }
                 } else if (gt == GrantType.EXTENSION) {
