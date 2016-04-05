@@ -211,6 +211,8 @@ public enum RegisterRequestParam {
 
     SCOPES("scopes"),
 
+    CLIENT_SECRET_EXPIRES_AT("client_secret_expires_at"),
+
     // Federation Params
     FEDERATION_METADATA_URL("federation_metadata_url"),
     FEDERATION_METADATA_ID("federation_metadata_id");
