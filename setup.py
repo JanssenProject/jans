@@ -207,7 +207,6 @@ class Setup(object):
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
-        self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
         self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
@@ -287,7 +286,6 @@ class Setup(object):
                      self.oxcas_config_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
-                     self.oxasimba_ldap_properties: False,
                      self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
