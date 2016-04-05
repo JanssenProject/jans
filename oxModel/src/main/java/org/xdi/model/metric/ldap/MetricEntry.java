@@ -7,9 +7,9 @@
 import java.util.Date;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.ldap.model.BaseEntry;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 
@@ -20,7 +20,10 @@ import org.xdi.model.metric.MetricType;
  */
 @LdapEntry(sortBy = "startDate")
 @LdapObjectClass(values = {"top", "oxMetric"})
-public class MetricEntry extends BaseEntry {
+public class MetricEntry {
+
+	@LdapDN
+	private String dn;
 
 	@LdapAttribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
 	private String id;
@@ -43,9 +46,17 @@ public class MetricEntry extends BaseEntry {
 	public MetricEntry() {}
 
 	public MetricEntry(String dn, String id, Date creationDate) {
-		super(dn);
+		this.dn = dn;
 		this.id = id;
 		this.creationDate = creationDate;
+	}
+
+	public String getDn() {
+		return dn;
+	}
+
+	public void setDn(String dn) {
+		this.dn = dn;
 	}
 
 	public String getId() {
@@ -99,9 +110,9 @@ public class MetricEntry extends BaseEntry {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("MetricEntry [id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
-				.append(", applicationType=").append(applicationType).append(", metricType=").append(metricType)
-				.append(", creationDate=").append(creationDate).append("]");
+		builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
+				.append(", applicationType=").append(applicationType).append(", metricType=").append(metricType).append(", creationDate=").append(creationDate)
+				.append("]");
 		return builder.toString();
 	}
 

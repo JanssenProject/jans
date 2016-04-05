@@ -25,11 +25,6 @@
         </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
-            <artifactId>oxLdap</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xdi</groupId>
             <artifactId>oxLdap-annotations</artifactId>
             <version>${project.version}</version>
         </dependency>
