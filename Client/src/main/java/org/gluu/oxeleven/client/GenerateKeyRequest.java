@@ -1,17 +1,15 @@
 package org.gluu.oxeleven.client;
 
-import org.gluu.oxeleven.model.SignatureAlgorithm;
-
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version April 5, 2016
  */
 public class GenerateKeyRequest extends BaseRequest {
 
-    private SignatureAlgorithm signatureAlgorithm;
+    private String signatureAlgorithm;
 
     public GenerateKeyRequest() {
         setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -19,11 +17,11 @@ public class GenerateKeyRequest extends BaseRequest {
         setHttpMethod(HttpMethod.POST);
     }
 
-    public SignatureAlgorithm getSignatureAlgorithm() {
+    public String getSignatureAlgorithm() {
         return signatureAlgorithm;
     }
 
-    public void setSignatureAlgorithm(SignatureAlgorithm signatureAlgorithm) {
+    public void setSignatureAlgorithm(String signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 }

@@ -9,7 +9,7 @@ import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 4, 2016
+ * @version April 5, 2016
  */
 public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, VerifySignatureResponse> {
 
@@ -60,8 +60,8 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
         if (!Strings.isNullOrEmpty(getRequest().getAlias())) {
             addRequestParam(ALIAS, getRequest().getAlias());
         }
-        if (getRequest().getSignatureAlgorithm() != null) {
-            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        if (!Strings.isNullOrEmpty(getRequest().getSignatureAlgorithm())) {
+            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm());
         }
 
         // Call REST Service and handle response

@@ -131,7 +131,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"generateKeyEndpoint"})
-    @Test
+    //@Test
     public void testGenerateKeyES512(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
@@ -272,7 +272,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"signEndpoint", "signingInput"})
-    @Test(dependsOnMethods = "testGenerateKeyES512")
+    //@Test(dependsOnMethods = "testGenerateKeyES512")
     public void testSignatureES512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
@@ -512,7 +512,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint", "signingInput"})
-    @Test(dependsOnMethods = "testSignatureES512")
+    //@Test(dependsOnMethods = "testSignatureES512")
     public void testVerifySignatureES512(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
@@ -865,7 +865,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
+    //@Test(dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
     public void testDeleteKeyES512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();

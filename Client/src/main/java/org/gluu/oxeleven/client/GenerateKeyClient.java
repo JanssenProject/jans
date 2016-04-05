@@ -1,5 +1,6 @@
 package org.gluu.oxeleven.client;
 
+import com.google.common.base.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
@@ -8,7 +9,7 @@ import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITH
 
 /**
  * @author Javier Rojas Blum
- * @version April 4, 2016
+ * @version April 5, 2016
  */
 public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKeyResponse> {
 
@@ -50,8 +51,8 @@ public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKe
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        if (getRequest().getSignatureAlgorithm() != null) {
-            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        if (!Strings.isNullOrEmpty(getRequest().getSignatureAlgorithm())) {
+            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm());
         }
 
         // Call REST Service and handle response
