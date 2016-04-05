@@ -199,6 +199,7 @@ class Setup(object):
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.tomcatHome
+        self.oxtrust_context_xml = '%s/conf/Catalina/localhost/identity.xml' % self.tomcatHome
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
@@ -278,6 +279,7 @@ class Setup(object):
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_json: False,
                      self.oxauth_context_xml: True,
+                     self.oxtrust_context_xml: True,
                      self.tomcat_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
