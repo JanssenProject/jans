@@ -90,6 +90,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
         self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
+        self.oxCustomizationFolder = "/var/gluu/webapps"
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
@@ -1299,6 +1300,12 @@ class Setup(object):
                 self.run([mkdir, '-p', self.oxPhotosFolder])
                 self.run([mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
+
+                # Customizations folders
+                self.run([mkdir, '-p', self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/{lib,pages,resources}" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/{lib,pages,resources}" % self.oxCustomizationFolder])
+                self.run([chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
 
             if self.installSaml:
                 self.run([mkdir, '-p', self.idpFolder])
