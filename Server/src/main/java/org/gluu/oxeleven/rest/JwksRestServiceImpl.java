@@ -28,7 +28,7 @@ import static org.gluu.oxeleven.model.JwksResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 @Name("jwksRestService")
 public class JwksRestServiceImpl implements JwksRestService {
@@ -90,19 +90,21 @@ public class JwksRestServiceImpl implements JwksRestService {
             jsonKeyValue.put(KEY_ID, alias);
             jsonKeyValue.put(KEY_USE, "sig");
             PublicKey publicKey = pkcs11.getPublicKey(alias);
-            publicKey.getAlgorithm();
-            if (publicKey instanceof RSAPublicKeyImpl) {
-                jsonKeyValue.put(KEY_TYPE, "RSA");
-                RSAPublicKeyImpl key = (RSAPublicKeyImpl) publicKey;
-                jsonKeyValue.put(MODULUS, Base64Util.base64UrlEncodeUnsignedBigInt(key.getModulus()));
-                jsonKeyValue.put(EXPONENT, Base64Util.base64UrlEncodeUnsignedBigInt(key.getPublicExponent()));
-            } else if (publicKey instanceof ECPublicKeyImpl) {
-                jsonKeyValue.put(KEY_TYPE, "EC");
-                ECPublicKeyImpl key = (ECPublicKeyImpl) publicKey;
-                jsonKeyValue.put(X, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineX()));
-                jsonKeyValue.put(Y, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineY()));
+            if (publicKey != null) {
+                publicKey.getAlgorithm();
+                if (publicKey instanceof RSAPublicKeyImpl) {
+                    jsonKeyValue.put(KEY_TYPE, "RSA");
+                    RSAPublicKeyImpl key = (RSAPublicKeyImpl) publicKey;
+                    jsonKeyValue.put(MODULUS, Base64Util.base64UrlEncodeUnsignedBigInt(key.getModulus()));
+                    jsonKeyValue.put(EXPONENT, Base64Util.base64UrlEncodeUnsignedBigInt(key.getPublicExponent()));
+                } else if (publicKey instanceof ECPublicKeyImpl) {
+                    jsonKeyValue.put(KEY_TYPE, "EC");
+                    ECPublicKeyImpl key = (ECPublicKeyImpl) publicKey;
+                    jsonKeyValue.put(X, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineX()));
+                    jsonKeyValue.put(Y, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineY()));
+                }
+                keys.put(jsonKeyValue);
             }
-            keys.put(jsonKeyValue);
         }
         jsonObj.put(JSON_WEB_KEY_SET, keys);
 

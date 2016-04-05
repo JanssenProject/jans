@@ -4,8 +4,8 @@ import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -17,10 +17,12 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Map;
-import static org.gluu.oxeleven.model.SignResponseParam.*;
+
+import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
+
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version April 4, 2016
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
@@ -57,6 +59,9 @@ public class SignRestServiceImpl implements SignRestService {
 
                 builder.entity(jsonObject.toString());
             }
+        } catch (InvalidKeyException e) {
+            builder = Response.status(Response.Status.BAD_REQUEST);
+            builder.entity("Invalid key, either the alias or signatureAlgorithm parameter is not valid.");
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);
@@ -70,9 +75,6 @@ public class SignRestServiceImpl implements SignRestService {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);
         } catch (UnrecoverableEntryException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (InvalidKeyException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);
         } catch (SignatureException e) {

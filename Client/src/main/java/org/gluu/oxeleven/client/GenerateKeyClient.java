@@ -8,7 +8,7 @@ import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITH
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKeyResponse> {
 
@@ -50,7 +50,9 @@ public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKe
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        if (getRequest().getSignatureAlgorithm() != null) {
+            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        }
 
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {

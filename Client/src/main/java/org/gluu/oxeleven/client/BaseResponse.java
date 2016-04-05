@@ -1,5 +1,6 @@
 package org.gluu.oxeleven.client;
 
+import org.apache.http.HttpStatus;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
@@ -8,7 +9,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * @author Javier Rojas Blum
- * @version March 29, 2016
+ * @version April 4, 2016
  */
 public abstract class BaseResponse {
 
@@ -45,7 +46,7 @@ public abstract class BaseResponse {
     }
 
     public JSONObject getJSONEntity() {
-        if (entity != null) {
+        if (status == HttpStatus.SC_OK && entity != null) {
             try {
                 JSONObject jsonObject = new JSONObject(entity);
                 return jsonObject;

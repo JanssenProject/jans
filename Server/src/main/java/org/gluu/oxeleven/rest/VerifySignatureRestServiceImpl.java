@@ -11,13 +11,11 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.security.*;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
@@ -25,7 +23,7 @@ import static org.gluu.oxeleven.model.VerifySignatureResponseParam.VERIFIED;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 @Name("verifySignatureRestService")
 public class VerifySignatureRestServiceImpl implements VerifySignatureRestService {
@@ -77,25 +75,10 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);
-        } catch (NoSuchPaddingException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (InvalidKeyException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (IllegalBlockSizeException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (BadPaddingException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (SignatureException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
-        } catch (UnrecoverableEntryException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
         } catch (JSONException e) {
+            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);
         }

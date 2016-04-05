@@ -1,13 +1,15 @@
 package org.gluu.oxeleven.client;
 
+import com.google.common.base.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 
 import static org.gluu.oxeleven.model.SignRequestParam.*;
+
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 public class SignClient extends BaseClient<SignRequest, SignResponse> {
 
@@ -49,9 +51,15 @@ public class SignClient extends BaseClient<SignRequest, SignResponse> {
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        addRequestParam(SIGNING_INPUT, getRequest().getSigningInput());
-        addRequestParam(ALIAS, getRequest().getAlias());
-        addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        if (!Strings.isNullOrEmpty(getRequest().getSigningInput())) {
+            addRequestParam(SIGNING_INPUT, getRequest().getSigningInput());
+        }
+        if (!Strings.isNullOrEmpty(getRequest().getAlias())) {
+            addRequestParam(ALIAS, getRequest().getAlias());
+        }
+        if (getRequest().getSignatureAlgorithm() != null) {
+            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm().getName());
+        }
 
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {

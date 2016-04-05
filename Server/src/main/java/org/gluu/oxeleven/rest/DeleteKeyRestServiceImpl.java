@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
@@ -22,7 +23,7 @@ import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 @Name("deleteKeyRestService")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
@@ -45,12 +46,20 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
 
-                pkcs11.deleteKey(alias);
+                PublicKey publicKey = pkcs11.getPublicKey(alias);
+                if (publicKey == null) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(DELETED, false);
 
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(DELETED, true);
+                    builder.entity(jsonObject.toString());
+                } else {
+                    pkcs11.deleteKey(alias);
 
-                builder.entity(jsonObject.toString());
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(DELETED, true);
+
+                    builder.entity(jsonObject.toString());
+                }
             }
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);

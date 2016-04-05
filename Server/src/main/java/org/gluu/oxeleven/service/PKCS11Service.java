@@ -1,20 +1,19 @@
 package org.gluu.oxeleven.service;
 
+import com.google.common.base.Strings;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
 import sun.security.pkcs11.SunPKCS11;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -25,7 +24,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 4, 2016
  */
 public class PKCS11Service {
 
@@ -113,33 +112,68 @@ public class PKCS11Service {
         return Base64Util.base64UrlEncode(signature.sign());
     }
 
-    public boolean verifySignature(String signingInput, String encodedSignature, String alias, SignatureAlgorithm signatureAlgorithm)
-            throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException, NoSuchPaddingException,
-            InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, SignatureException {
-        PublicKey publicKey = getPublicKey(alias);
+    public boolean verifySignature(String signingInput, String encodedSignature, String alias, SignatureAlgorithm signatureAlgorithm) {
+        boolean verified = false;
 
-        byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
+        try {
+            PublicKey publicKey = getPublicKey(alias);
+            if (publicKey == null) {
+                return false;
+            }
 
-        Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
-        verifier.initVerify(publicKey);
-        verifier.update(signingInput.getBytes());
-        return verifier.verify(signature);
+            byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
+
+            Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
+            verifier.initVerify(publicKey);
+            verifier.update(signingInput.getBytes());
+            verified = verifier.verify(signature);
+        } catch (NoSuchAlgorithmException e) {
+            verified = false;
+        } catch (SignatureException e) {
+            verified = false;
+        } catch (InvalidKeyException e) {
+            verified = false;
+        } catch (Exception e) {
+            verified = false;
+        }
+
+        return verified;
     }
 
     public void deleteKey(String alias) throws KeyStoreException {
         keyStore.deleteEntry(alias);
     }
 
-    public PublicKey getPublicKey(String alias)
-            throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
-        PublicKey publicKey = keyStore.getCertificate(alias).getPublicKey();
+    public PublicKey getPublicKey(String alias) {
+        PublicKey publicKey = null;
+
+        try {
+            if (Strings.isNullOrEmpty(alias)) {
+                return null;
+            }
+
+            Certificate certificate = keyStore.getCertificate(alias);
+            if (certificate == null) {
+                return null;
+            }
+            publicKey = certificate.getPublicKey();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
 
         return publicKey;
     }
 
     private PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+        if (Strings.isNullOrEmpty(alias)) {
+            return null;
+        }
+
         Key key = keyStore.getKey(alias, pin);
+        if (key == null) {
+            return null;
+        }
         PrivateKey privateKey = (PrivateKey) key;
 
         return privateKey;
