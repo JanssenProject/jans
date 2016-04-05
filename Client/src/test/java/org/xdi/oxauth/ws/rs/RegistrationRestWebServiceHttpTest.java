@@ -193,7 +193,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         assertTrue(responseContacts.contains(contact1NewValue) && responseContacts.contains(contact2NewValue));
         assertNotNull(responseLogoUri.equals(logoUriNewValue));
-        assertEquals(response.getClientSecretExpiresAt().getTime() / 1000, clientSecretExpiresAt.getTime() / 1000); // check after division on 1000 because of internal server conversion
+        assertEquals(response.getClientSecretExpiresAt().getTime() / 10000, clientSecretExpiresAt.getTime() / 10000); // check after division on 1000 because of internal server conversion
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
