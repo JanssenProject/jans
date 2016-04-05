@@ -152,7 +152,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertTrue(scopes.contains("email"));
         assertTrue(scopes.contains("profile"));
         assertTrue(scopes.contains("phone"));
-     //   assertTrue(scopes.contains("clientinfo"));
+        assertTrue(scopes.contains("clientinfo"));
 
         clientId1 = response.getClientId();
         registrationAccessToken1 = response.getRegistrationAccessToken();
