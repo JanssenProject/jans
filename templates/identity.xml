@@ -1,0 +1,6 @@
+<Context antiJARLocking="true" path="/identity" aliases="/ext/resources=${gluu.external.resource.base}/oxtrust/resources">
+
+    <Loader className="org.apache.catalina.loader.VirtualWebappLoader"
+            virtualClasspath="${gluu.external.resource.base}/oxtrust/libs/*.jar"/>
+
+</Context>
