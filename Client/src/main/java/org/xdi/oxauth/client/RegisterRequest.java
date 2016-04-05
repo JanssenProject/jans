@@ -953,7 +953,7 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
         }
         if (clientSecretExpiresAt != null) {
-            parameters.put(CLIENT_SECRET_EXPIRES_AT.toString(), Long.toString(clientSecretExpiresAt.getTime()));
+            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
         // Federation params
         if (!StringUtils.isBlank(federationUrl)) {
@@ -1087,9 +1087,9 @@ public class RegisterRequest extends BaseRequest {
         }
 
         Date clientSecretExpiresAt = null;
-        if (requestObject.has(CLIENT_SECRET_EXPIRES_AT.getName())) {
-            if (requestObject.optLong(CLIENT_SECRET_EXPIRES_AT.getName()) > 0) {
-                clientSecretExpiresAt = new Date(requestObject.optLong(CLIENT_SECRET_EXPIRES_AT.getName()));
+        if (requestObject.has(CLIENT_SECRET_EXPIRES_AT_.getName())) {
+            if (requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()) > 0) {
+                clientSecretExpiresAt = new Date(requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()));
             }
         }
 
@@ -1263,7 +1263,7 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(FEDERATION_METADATA_ID.toString(), federationId);
         }
         if (clientSecretExpiresAt != null) {
-            parameters.put(CLIENT_SECRET_EXPIRES_AT.toString(), clientSecretExpiresAt.getTime());
+            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());
         }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
