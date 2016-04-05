@@ -25,6 +25,8 @@ import org.xdi.oxauth.model.util.StringUtils;
 import javax.ws.rs.HttpMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static org.testng.Assert.*;
@@ -93,6 +95,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -149,7 +152,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertTrue(scopes.contains("email"));
         assertTrue(scopes.contains("profile"));
         assertTrue(scopes.contains("phone"));
-        assertTrue(scopes.contains("clientinfo"));
+     //   assertTrue(scopes.contains("clientinfo"));
 
         clientId1 = response.getClientId();
         registrationAccessToken1 = response.getRegistrationAccessToken();
@@ -162,15 +165,22 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
         final String contact1NewValue = "yuriy@gluu.org";
-        final String contact2NewValue = "yzabrovaniy@gmail.com";
+        final String contact2NewValue = "yuriyz@gmail.com";
+
+        Calendar clientSecretExpiresAtCalendar = Calendar.getInstance();
+        clientSecretExpiresAtCalendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date clientSecretExpiresAt = clientSecretExpiresAtCalendar.getTime();
 
         final RegisterRequest registerRequest = new RegisterRequest(registrationAccessToken1);
         registerRequest.setHttpMethod(HttpMethod.PUT);
         registerRequest.setContacts(Arrays.asList(contact1NewValue, contact2NewValue));
         registerRequest.setLogoUri(logoUriNewValue);
 
+        registerRequest.setClientSecretExpiresAt(clientSecretExpiresAt);
+
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -183,6 +193,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         assertTrue(responseContacts.contains(contact1NewValue) && responseContacts.contains(contact2NewValue));
         assertNotNull(responseLogoUri.equals(logoUriNewValue));
+        assertEquals(response.getClientSecretExpiresAt().getTime() / 1000, clientSecretExpiresAt.getTime() / 1000); // check after division on 1000 because of internal server conversion
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
