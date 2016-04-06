@@ -1304,12 +1304,12 @@ class Setup(object):
                 # Customizations folders
                 self.run([mkdir, '-p', self.oxCustomizationFolder])
                 self.run([mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxauth/lib" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
                 self.run([mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
                 self.run([mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
 
                 self.run([mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxtrust/lib" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
                 self.run([mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
                 self.run([mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
 
