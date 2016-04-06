@@ -194,7 +194,7 @@ def getOutput(args):
 
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     logging.info('Comparing old LDAP data and creating `modify` files.')
-    ignoreList = ['objectClass', 'ou']
+    ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
     for dn in oldDnMap.keys():
