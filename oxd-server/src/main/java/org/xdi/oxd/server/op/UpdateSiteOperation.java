@@ -103,6 +103,10 @@ public class UpdateSiteOperation extends BaseOperation {
             site.setApplicationType(applicationType.name());
         }
 
+        if (params.getClientSecretExpiresAt() != null) {
+            request.setClientSecretExpiresAt(params.getClientSecretExpiresAt());
+        }
+
         List<ResponseType> responseTypes = Lists.newArrayList();
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
             for (String type : params.getResponseTypes()) {

@@ -13,6 +13,7 @@ import org.xdi.oxd.common.response.UpdateSiteResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
@@ -71,9 +72,13 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+
             // more specific site registration
             final UpdateSiteParams commandParams = new UpdateSiteParams();
             commandParams.setOxdId(oxdId);
+            commandParams.setClientSecretExpiresAt(calendar.getTime());
             commandParams.setScope(Lists.newArrayList("profile"));
 
             final Command command = new Command(CommandType.UPDATE_SITE);
