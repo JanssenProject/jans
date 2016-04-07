@@ -139,6 +139,10 @@ public final class ApplicationConfiguration implements Serializable {
 	private String cssLocation;
 	private String jsLocation;
 	
+	private String recaptchaSiteKey;
+	private String recaptchUrl;
+	private String recaptchaSecretKey;
+	
 	public String getBaseDN() {
 		return baseDN;
 	}
@@ -769,6 +773,30 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setJsLocation(String jsLocation) {
 		this.jsLocation = jsLocation;
+	}
+	
+	public String getRecaptchaSiteKey() {
+		return recaptchaSiteKey;
+	}
+
+	public void setRecaptchaSiteKey(String recaptchaSiteKey) {
+		this.recaptchaSiteKey = recaptchaSiteKey;
+	}
+
+	public String getRecaptchUrl() {
+		return recaptchUrl;
+	}
+
+	public void setRecaptchUrl(String recaptchUrl) {
+		this.recaptchUrl = recaptchUrl;
+	}
+
+	public String getRecaptchaSecretKey() {
+		return recaptchaSecretKey;
+	}
+
+	public void setRecaptchaSecretKey(String recaptchaSecretKey) {
+		this.recaptchaSecretKey = recaptchaSecretKey;
 	}
 
 }
