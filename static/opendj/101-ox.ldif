@@ -2364,7 +2364,7 @@ objectclasses: ( oxSectorIdentifier-oid NAME 'oxSectorIdentifier' SUP top STRUCT
   ( inum $ oxAuthRedirectURI $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxConfApplication $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaSelector-oid NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectclass )
   MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)
