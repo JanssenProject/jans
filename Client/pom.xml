@@ -156,9 +156,10 @@
 		<profile>
 			<id>oxAuth test dependencies</id>
 			<activation>
-				<file>
-					<exists>../Model/target/oxauth-model-tests.jar</exists>
-				</file>
+                <property>
+                    <name>maven.test.skip</name>
+                    <value>false</value>
+                </property>
 			</activation>
 			<dependencies>
 				<dependency>
