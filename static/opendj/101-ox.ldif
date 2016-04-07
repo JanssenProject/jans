@@ -2349,7 +2349,7 @@ objectclasses: ( oxCustomScript-oid NAME 'oxCustomScript' SUP top STRUCTURAL MUS
   $ oxConfigurationProperty $ oxLevel $ oxRevision $ gluuStatus ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxDeviceRegistration-oid NAME 'oxDeviceRegistration' SUP top STRUCTURAL MUST objectclass MAY 
- ( oxId $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceData $ oxCounter $ oxStatus $ creationDate ) 
+ ( oxId $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxU2fRequest-oid NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ personInum $ creationDate )
