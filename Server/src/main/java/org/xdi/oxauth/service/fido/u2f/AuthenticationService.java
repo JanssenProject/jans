@@ -156,6 +156,8 @@ public class AuthenticationService extends RequestService {
 		rawAuthenticateResponse.checkUserPresence();
 		usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
+		usedDeviceRegistration.setLastAccessTime(new Date());
+
 		deviceRegistrationService.updateDeviceRegistration(userInum, usedDeviceRegistration);
 
 		DeviceRegistrationResult.Status status = DeviceRegistrationResult.Status.APPROVED; 
