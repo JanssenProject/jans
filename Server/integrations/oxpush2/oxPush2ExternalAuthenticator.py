@@ -37,15 +37,13 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "oxPush2. Initialization"
 
-        if not (configurationAttributes.containsKey("application_id") and
-                configurationAttributes.containsKey("authentication_mode")):
-            print "oxPush2. Initialization. Properties application_id and authentication_mode are mandatory"
+        if not configurationAttributes.containsKey("authentication_mode"):
+            print "oxPush2. Initialization. Property authentication_mode is mandatory"
             return False
 
-        self.application_id = configurationAttributes.get("application_id").getValue2()
-        if StringHelper.isEmpty(self.application_id):
-            print "oxPush2. Initialization. Failed to determine application_id. application_id configuration parameter is empty"
-            return False
+        self.registrationUri = None
+        if configurationAttributes.containsKey("registration_uri"):
+            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
 
         authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
         if StringHelper.isEmpty(authentication_mode):
@@ -84,13 +82,20 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
+        session_attributes = context.get("sessionAttributes")
+
+        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        if client_redirect_uri == None:
+            print "oxPush2. Authenticate. redirect_uri is not set"
+            return False
+
+        self.setRegistrationUri(context)
 
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
         if (step == 1):
             print "oxPush2. Authenticate for step 1"
             if self.oneStep:
-                session_attributes = context.get("sessionAttributes")
   
                 session_device_status = self.getSessionDeviceStatus(session_attributes);
                 if session_device_status == None:
@@ -98,7 +103,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 u2f_device_id = session_device_status['device_id']
 
-                validation_result = self.validateSessionDeviceStatus(session_device_status)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status)
                 if validation_result:
                     print "oxPush2. Authenticate for step 1. User successfully authenticated with u2f_device '%s'" % u2f_device_id
                 else:
@@ -141,10 +146,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 if (auth_method == 'authenticate'):
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId")
+                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId")
                     if (u2f_devices_list.size() == 0):
                         auth_method = 'enroll'
-                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, self.application_id, auth_method)
+                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
     
                 print "oxPush2. Authenticate for step 1. auth_method: '%s'" % auth_method
                 
@@ -181,7 +186,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "oxPush2. Authenticate for step 2. Failed to determine user name"
                     return False
 
-                validation_result = self.validateSessionDeviceStatus(session_device_status, user_name)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status, user_name)
                 if validation_result:
                     print "oxPush2. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 else:
@@ -200,6 +205,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
+        session_attributes = context.get("sessionAttributes")
+
+        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        if client_redirect_uri == None:
+            print "oxPush2. Prepare for step. redirect_uri is not set"
+            return False
+
+        self.setRegistrationUri(context)
 
         if step == 1:
             print "oxPush2. Prepare for step 1"
@@ -210,7 +223,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
                 issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-                oxpush2_request = json.dumps({'app': self.application_id,
+                oxpush2_request = json.dumps({'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_state,
                                    'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
@@ -232,7 +245,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Prepare for step 2. Failed to determine user name"
                 return False
 
-            session_attributes = context.get("sessionAttributes")
             if session_attributes.containsKey("oxpush2_request"):
                 print "oxPush2. Prepare for step 2. Request was generated already"
                 return True
@@ -251,7 +263,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
             oxpush2_request = json.dumps({'username': user.getUserId(),
-                               'app': self.application_id,
+                               'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
                                'state': session_state,
@@ -261,7 +273,7 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("oxpush2_request", oxpush2_request)
 
             if auth_method in ['authenticate']:
-                self.sendPushNotification(user, oxpush2_request)
+                self.sendPushNotification(client_redirect_uri, user, oxpush2_request)
 
             return True
         else:
@@ -320,7 +332,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return find_user_by_uid
 
-    def validateSessionDeviceStatus(self, session_device_status, user_name = None):
+    def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
 
@@ -344,7 +356,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Validate session device status. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
                 return False
 
-        if not StringHelper.equalsIgnoreCase(self.application_id, u2f_device.application):
+        if not StringHelper.equalsIgnoreCase(client_redirect_uri, u2f_device.application):
             print "oxPush2. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.application)
             return False
         
@@ -447,7 +459,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return enabled
 
-    def sendPushNotification(self, user, oxpush2_request):
+    def sendPushNotification(self, client_redirect_uri, user, oxpush2_request):
         if not self.enabledPushNotifications:
             return
 
@@ -462,7 +474,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_inum = userService.getUserInum(user_name)
 
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId", "oxDeviceData")
+        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
                 device_data = u2f_device.getDeviceData()
@@ -483,7 +495,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
                         
                         title = "oxPush2"
-                        message = "oxPush2 login request to: %s" % self.application_id
+                        message = "oxPush2 login request to: %s" % client_redirect_uri
 
                         additional_fields = { "request" : oxpush2_request }
 
@@ -511,4 +523,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
         print "oxPush2. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
-        
+
+    def getClientRedirecUri(self, session_attributes):
+        if not session_attributes.containsKey("redirect_uri"):
+            return None
+
+        return session_attributes.get("redirect_uri")
+
+    def setRegistrationUri(self, context):
+        if self.registrationUri != None:
+            context.set("external_registration_uri", self.registrationUri)
