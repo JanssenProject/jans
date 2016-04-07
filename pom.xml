@@ -763,6 +763,19 @@
         </profile>
 
         <profile>
+            <!-- Neded to resolve test dependencies -->
+            <id>set-skip-test-varible</id>
+            <activation>
+                <property>
+                    <name>!maven.test.skip</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.test.skip>false</maven.test.skip>
+            </properties>
+        </profile>
+
+        <profile>
             <id>run-benchmark-tests</id>
             <activation>
                 <property>
