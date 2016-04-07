@@ -12,14 +12,21 @@ import java.io.InputStreamReader;
 import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.Validator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 import org.xdi.util.io.HTTPFileDownloader;
+import org.xdi.xml.GluuErrorHandler;
 import org.xml.sax.SAXException;
 
 /**
