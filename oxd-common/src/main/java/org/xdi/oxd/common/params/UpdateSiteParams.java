@@ -2,6 +2,7 @@ package org.xdi.oxd.common.params;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,7 +40,8 @@ public class UpdateSiteParams  implements IParams {
     private List<String> clientRequestUris;
     @JsonProperty(value = "client_logout_uris")
     private List<String> clientLogoutUri;
-
+    @JsonProperty(value = "client_secret_expires_at")
+    private Date clientSecretExpiresAt;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -55,6 +57,14 @@ public class UpdateSiteParams  implements IParams {
     private List<String> contacts;
 
     public UpdateSiteParams() {
+    }
+
+    public Date getClientSecretExpiresAt() {
+        return clientSecretExpiresAt;
+    }
+
+    public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
+        this.clientSecretExpiresAt = clientSecretExpiresAt;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -227,7 +237,9 @@ public class UpdateSiteParams  implements IParams {
         sb.append(", claimsLocales=").append(claimsLocales);
         sb.append(", grantType=").append(grantType);
         sb.append(", contacts=").append(contacts);
+        sb.append(", clientSecretExpiresAt=").append(clientSecretExpiresAt);
         sb.append('}');
         return sb.toString();
     }
+
 }
