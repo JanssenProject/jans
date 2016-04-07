@@ -18,10 +18,10 @@ public enum AuthenticationMode {
 
 	BASIC("basic", "Basic"), OAUTH("oauth", "OAuth"), UMA("uma", "UMA");
 
-	private String value;
-	private String displayName;
+	private final String value;
+	private final String displayName;
 
-	private static Map<String, AuthenticationMode> mapByValues = new HashMap<String, AuthenticationMode>();
+	private final static Map<String, AuthenticationMode> mapByValues = new HashMap<String, AuthenticationMode>();
 
 	static {
 		for (AuthenticationMode enumType : values()) {
