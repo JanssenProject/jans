@@ -90,6 +90,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
         self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
+        self.oxCustomizationFolder = "/var/gluu/webapps"
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
@@ -199,6 +200,7 @@ class Setup(object):
         self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.tomcatHome
+        self.oxtrust_context_xml = '%s/conf/Catalina/localhost/identity.xml' % self.tomcatHome
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
@@ -207,7 +209,6 @@ class Setup(object):
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
         self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
-        self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
         self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
@@ -281,6 +282,7 @@ class Setup(object):
         self.ce_templates = {self.oxauth_ldap_properties: True,
                      self.oxauth_config_json: False,
                      self.oxauth_context_xml: True,
+                     self.oxtrust_context_xml: True,
                      self.tomcat_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
@@ -289,7 +291,6 @@ class Setup(object):
                      self.oxcas_config_json: False,
                      self.tomcat_server_xml: True,
                      self.oxtrust_ldap_properties: True,
-                     self.oxasimba_ldap_properties: False,
                      self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
@@ -1302,6 +1303,20 @@ class Setup(object):
                 self.run([mkdir, '-p', self.oxPhotosFolder])
                 self.run([mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
+
+                # Customizations folders
+                self.run([mkdir, '-p', self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
+
+                self.run([mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
+
+                self.run([chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
 
             if self.installSaml:
                 self.run([mkdir, '-p', self.idpFolder])
