@@ -230,8 +230,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Prepare for step 1. Prepared oxpush2_request:", oxpush2_request
     
                 context.set("oxpush2_request", oxpush2_request)
-            elif self.twoStep:
-                context.set("display_register_action", True)
+#            elif self.twoStep:
+#                context.set("display_register_action", True)
 
             return True
         elif step == 2:
