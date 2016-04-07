@@ -68,7 +68,7 @@
     </context-param>
   	<context-param>
 	    <param-name>facelets.REFRESH_PERIOD</param-name>
-	    <param-value>10</param-value>
+	    <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
 	</context-param>
 
     <!-- swagger servlet reader -->

@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxauth.resource.custom;
 
 import java.io.File;
@@ -12,6 +18,11 @@ import org.xdi.util.StringHelper;
 
 import com.sun.facelets.impl.DefaultResourceResolver;
 
+/**
+ * External resource handler to customize applicaton 
+ *
+ * @author Yuriy Movchan Date: 04/05/2016
+ */
 public class ExternalResourceHandler extends DefaultResourceResolver {
 
 	private static final LogProvider log = Logging.getLogProvider(ExternalResourceHandler.class);
@@ -20,11 +31,9 @@ public class ExternalResourceHandler extends DefaultResourceResolver {
 	private boolean useExternalResourceBase;
 
 	public ExternalResourceHandler() {
-		super();
-
 		String externalResourceBase = System.getProperty("gluu.external.resource.base");
 		if (StringHelper.isNotEmpty(externalResourceBase)) {
-			externalResourceBase += "/pages";
+			externalResourceBase += "/oxauth/pages";
 			File folder = new File(externalResourceBase);
 			if (folder.exists() && folder.isDirectory()) {
 				this.externalResourceBaseFolder = folder;

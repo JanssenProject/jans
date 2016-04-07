@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context antiJARLocking="true" path="">
+<Context antiJARLocking="true" path="/oxauth">
 
     <!-- Cert authentication for case when there is proxy like Apache -->
     <!-- Don't remove. Use when there is standalone tomcat only.
@@ -8,6 +8,6 @@
      -->
 
     <Loader className="org.apache.catalina.loader.VirtualWebappLoader"
-            virtualClasspath="${gluu.external.resource.base}/libs/*.jar"/>
+            virtualClasspath="${gluu.external.resource.base}/oxauth/libs/*.jar"/>
 
 </Context>
