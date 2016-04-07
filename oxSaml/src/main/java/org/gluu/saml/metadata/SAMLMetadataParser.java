@@ -5,12 +5,12 @@
  */
 package org.gluu.saml.metadata;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.StringBufferInputStream;
+import java.net.URL;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -19,8 +19,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xdi.util.StringHelper;
-import org.xdi.util.io.FileUploadWrapper;
 import org.xdi.util.io.HTTPFileDownloader;
 import org.xml.sax.SAXException;
 
@@ -101,31 +99,16 @@ public class SAMLMetadataParser {
         return handler;
     }
     
+    public static EntityIDHandler parseMetadata(URL metadataURL) {
+        String metadataFileContent = HTTPFileDownloader.getResource(metadataURL.toExternalForm(), "application/xml, text/xml", null, null);
+        return parseMetadata(metadataFileContent);
+    }
     
-
-//    public boolean saveMetadataFile(String spMetaDataURL, String metadataFileName) {
-//        if (StringHelper.isEmpty(spMetaDataURL)) {
-//            return false;
-//        }
-//
-//        String metadataFileContent = HTTPFileDownloader.getResource(spMetaDataURL, "application/xml, text/xml", null, null);
-//
-//        if (StringHelper.isEmpty(metadataFileContent)) {
-//            return false;
-//        }
-//
-//        // Save new file
-//        ByteArrayInputStream is;
-//        try {
-//            byte[] metadataFileContentBytes = metadataFileContent.getBytes("UTF-8");
-//            is = new ByteArrayInputStream(metadataFileContentBytes);
-//        } catch (UnsupportedEncodingException ex) {
-//            return false;
-//        }
-//
-//        FileUploadWrapper tmpfileWrapper = new FileUploadWrapper();
-//        tmpfileWrapper.setStream(is);
-//
-//        return saveMetadataFile(metadataFileName, tmpfileWrapper.getStream());
-//    }
+    public static EntityIDHandler parseMetadata(String metadata) {
+        if (metadata == null)
+            return null;
+        
+        InputStream is = new StringBufferInputStream(metadata);
+        return parseMetadata(is);
+    }
 }
