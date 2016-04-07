@@ -66,23 +66,33 @@ public class SAMLMetadataParser {
         }
 
         InputStream is = null;
+        try {
+            is = FileUtils.openInputStream(metadataFile);
+            
+            return parseMetadata(is);
+        } catch (IOException ex) {
+            log.error("Failed to read SAML metadata file: " + metadataFile.getAbsolutePath(), ex);
+            return null;
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+    }
+    
+    public static EntityIDHandler parseMetadata(InputStream is) {
         InputStreamReader isr = null;
         EntityIDHandler handler = null;
         try {
-            is = FileUtils.openInputStream(metadataFile);
             SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             SAXParser saxParser = saxParserFactory.newSAXParser();
 
             handler = new EntityIDHandler();
-            is = FileUtils.openInputStream(metadataFile);
             saxParser.parse(is, handler);
-
         } catch (IOException ex) {
-            log.error("Failed to read metadata file: " + metadataFile.getAbsolutePath(), ex);
+            log.error("Failed to read SAML metadata", ex);
         } catch (ParserConfigurationException e) {
-            log.error("Failed to confugure SAX parser for file: " + metadataFile.getAbsolutePath(), e);
+            log.error("Failed to confugure SAX parser", e);
         } catch (SAXException e) {
-            log.error("Failed to parse file: " + metadataFile.getAbsolutePath(), e);
+            log.error("Failed to parse SAML metadata", e);
         } finally {
             IOUtils.closeQuietly(isr);
             IOUtils.closeQuietly(is);
