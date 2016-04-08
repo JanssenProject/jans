@@ -187,8 +187,8 @@ def getOutput(args):
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
-            logging.error("Error running command : %s" % " ".join(args), True)
-            logging.error(traceback.format_exc(), True)
+            logging.error("Error running command : %s" % " ".join(args))
+            logging.error(traceback.format_exc())
             sys.exit(1)
 
 
@@ -241,7 +241,7 @@ def startOpenDJ():
         logging.info("Directory Server has started successfully")
     else:
         logging.critical("OpenDJ did not start properly... exiting."
-                         " Check /opt/opendj/logs/errors", True)
+                         " Check /opt/opendj/logs/errors")
         sys.exit(2)
 
 
@@ -252,7 +252,7 @@ def stopOpenDJ():
         logging.info("Directory Server is now stopped")
     else:
         logging.critical("OpenDJ did not stop properly... exiting."
-                         " Check /opt/opendj/logs/errors", True)
+                         " Check /opt/opendj/logs/errors")
         sys.exit(3)
 
 
