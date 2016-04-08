@@ -2289,7 +2289,7 @@ objectclasses: ( oxAuthConfiguration-oid NAME 'oxAuthConfiguration' SUP top STRU
 objectclasses: ( oxTrustConfiguration-oid NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson) 
   X-ORIGIN 'Gluu created objectclass' )
-objectclasses: ( oxApplicationConfiguration-oid NAME 'oxIdpConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclasses: ( oxApplicationConfiguration-oid NAME 'oxApplicationConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxConfApplication $ oxRevision ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaResourceSet-oid NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
