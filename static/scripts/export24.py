@@ -214,7 +214,7 @@ def getProp(prop):
     with open('/install/community-edition-setup/setup.properties.last', 'r') \
             as sf:
         for line in sf:
-            if "{}=".format(prop) in line:
+            if "{0}=".format(prop) in line:
                 return line.split('=')[-1].strip()
 
 
