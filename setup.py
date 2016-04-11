@@ -677,13 +677,13 @@ class Setup(object):
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/oxauth.war' % self.tomcatWebAppFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Downloading Shibboleth IDP war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
+            self.run(['/usr/bin/wget', self.idp_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/idp.war' % self.idpWarFolder])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '-O', '%s/oxcas.war' % self.distFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/oxcas.war' % self.distFolder])
 
             print "Finished downloading latest war files"
 
@@ -1153,7 +1153,7 @@ class Setup(object):
             # Asimba is not part of CE package. We need to download it if needed
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.asimba_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/oxasimba.war' % self.distFolder])
 
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
@@ -1227,7 +1227,7 @@ class Setup(object):
             # oxAuth RP is not part of CE package. We need to download it if needed
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '-O', '%s/oxauth-rp.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '-c --retry-connrefused --tries=10 -nv -O', '%s/oxauth-rp.war' % self.distFolder])
 
             self.logIt("Copying oxauth-rp.war into tomcat webapps folder...")
             self.copyFile('%s/oxauth-rp.war' % self.distFolder, self.tomcatWebAppFolder)
