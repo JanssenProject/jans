@@ -205,6 +205,7 @@ class Setup(object):
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
+        self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
         self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
@@ -251,6 +252,7 @@ class Setup(object):
         self.oxtrust_import_person_base64 = None
         self.oxidp_config_base64 = None
         self.oxcas_config_base64 = None
+        self.oxasimba_config_base64 = None
 
 
         # oxTrust SCIM configuration
@@ -286,6 +288,7 @@ class Setup(object):
                      self.oxtrust_import_person_json: False,
                      self.oxidp_config_json: False,
                      self.oxcas_config_json: False,
+                     self.oxasimba_config_json: False,
                      self.tomcat_server_xml: True,
                      self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
@@ -1567,6 +1570,7 @@ class Setup(object):
 
         self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
         self.oxcas_config_base64 = self.generate_base64_ldap_file(self.oxcas_config_json)
+        self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
