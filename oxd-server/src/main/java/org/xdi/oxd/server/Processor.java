@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
@@ -66,14 +65,9 @@ public class Processor {
 
     private void enforceLicenseRestrictions(Command command) {
         try {
-            if (licenseService.getThreadsCount() == 1) { // if thread count 1 then we assume it's is FREE license
-                final CommandType commandType = command.getCommandType();
-                switch (commandType) {
-                    case CHECK_ID_TOKEN:
-                    case RPT_STATUS:
-                        forceWait(500);
-                        break;
-                }
+            // if thread count 1 and no valid license then force 0.5 seconds delay
+            if (licenseService.getThreadsCount() == 1 && !licenseService.isLicenseValid()) {
+                forceWait(500);
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
