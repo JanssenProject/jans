@@ -124,7 +124,7 @@ public class RegisterSiteOperation extends BaseOperation {
         if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
             applicationType = ApplicationType.fromString(params.getApplicationType());
         }
-        if (applicationType == null) {
+        if (applicationType == null && fallback.getApplicationType() != null) {
             applicationType = ApplicationType.fromString(fallback.getApplicationType());
         }
 
@@ -134,7 +134,7 @@ public class RegisterSiteOperation extends BaseOperation {
                 responseTypes.add(ResponseType.fromString(type));
             }
         }
-        if (responseTypes.isEmpty()) {
+        if (responseTypes.isEmpty() && fallback.getResponseTypes() != null) {
             for (String type : fallback.getResponseTypes()) {
                 responseTypes.add(ResponseType.fromString(type));
             }
