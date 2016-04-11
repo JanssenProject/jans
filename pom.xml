@@ -5,18 +5,18 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>2.4.3.Final</version>
+    <version>2.4.4-SNAPSHOT</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>2.4.3.Final</oxCore.version>
+        <oxCore.version>2.4.3-SNAPSHOT</oxCore.version>
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.11</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>2.4.3.Final</oxauth.version>
+        <oxauth.version>2.4.3-SNAPSHOT</oxauth.version>
         <!--<resteasy.version>3.0.8.Final</resteasy.version>-->
         <resteasy.version>2.3.4.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
@@ -301,7 +301,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-client</artifactId>
-                <version>2.4.3.Final</version>
+                <version>2.4.3-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
