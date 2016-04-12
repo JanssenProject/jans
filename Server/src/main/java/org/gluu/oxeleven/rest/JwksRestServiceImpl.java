@@ -1,9 +1,15 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.rest;
 
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
+import org.gluu.oxeleven.model.Jwks;
+import org.gluu.oxeleven.model.Key;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.Base64Util;
@@ -21,14 +27,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
-
-import static org.gluu.oxeleven.model.JwksResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 4, 2016
+ * @version April 12, 2016
  */
 @Name("jwksRestService")
 public class JwksRestServiceImpl implements JwksRestService {
@@ -37,11 +41,11 @@ public class JwksRestServiceImpl implements JwksRestService {
     private Log log;
 
     @Override
-    public Response sign(List<String> aliasList) {
+    public Response sign(Jwks jwks) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            if (aliasList == null || aliasList.isEmpty()) {
+            if (jwks == null || jwks.getKeys() == null || jwks.getKeys().isEmpty()) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided aliasList parameter is mandatory.");
             } else {
@@ -50,7 +54,7 @@ public class JwksRestServiceImpl implements JwksRestService {
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                String response = getJSonResponse(pkcs11, aliasList);
+                Jwks response = getJSonResponse(pkcs11, jwks);
                 builder.entity(response);
             }
         } catch (CertificateException e) {
@@ -81,33 +85,28 @@ public class JwksRestServiceImpl implements JwksRestService {
         return builder.build();
     }
 
-    private String getJSonResponse(PKCS11Service pkcs11, List<String> aliasList)
+    private Jwks getJSonResponse(PKCS11Service pkcs11, Jwks jwks)
             throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException, JSONException {
-        JSONObject jsonObj = new JSONObject();
-        JSONArray keys = new JSONArray();
-        for (String alias : aliasList) {
-            JSONObject jsonKeyValue = new JSONObject();
-            jsonKeyValue.put(KEY_ID, alias);
-            jsonKeyValue.put(KEY_USE, "sig");
+        for (Iterator<Key> iterator = jwks.getKeys().iterator(); iterator.hasNext(); ) {
+            Key key = iterator.next();
+            String alias = key.getKid();
             PublicKey publicKey = pkcs11.getPublicKey(alias);
             if (publicKey != null) {
                 publicKey.getAlgorithm();
                 if (publicKey instanceof RSAPublicKeyImpl) {
-                    jsonKeyValue.put(KEY_TYPE, "RSA");
-                    RSAPublicKeyImpl key = (RSAPublicKeyImpl) publicKey;
-                    jsonKeyValue.put(MODULUS, Base64Util.base64UrlEncodeUnsignedBigInt(key.getModulus()));
-                    jsonKeyValue.put(EXPONENT, Base64Util.base64UrlEncodeUnsignedBigInt(key.getPublicExponent()));
+                    RSAPublicKeyImpl rsaPublicKey = (RSAPublicKeyImpl) publicKey;
+                    key.setN(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getModulus()));
+                    key.setE(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
                 } else if (publicKey instanceof ECPublicKeyImpl) {
-                    jsonKeyValue.put(KEY_TYPE, "EC");
-                    ECPublicKeyImpl key = (ECPublicKeyImpl) publicKey;
-                    jsonKeyValue.put(X, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineX()));
-                    jsonKeyValue.put(Y, Base64Util.base64UrlEncodeUnsignedBigInt(key.getW().getAffineY()));
+                    ECPublicKeyImpl ecPublicKey = (ECPublicKeyImpl) publicKey;
+                    key.setX(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
+                    key.setY(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
                 }
-                keys.put(jsonKeyValue);
+            } else {
+                iterator.remove();
             }
         }
-        jsonObj.put(JSON_WEB_KEY_SET, keys);
 
-        return jsonObj.toString();
+        return jwks;
     }
 }

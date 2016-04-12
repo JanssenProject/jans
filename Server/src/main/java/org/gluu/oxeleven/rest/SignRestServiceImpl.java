@@ -1,3 +1,9 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.rest;
 
 import com.google.common.base.Strings;
@@ -22,7 +28,7 @@ import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
 
 /**
  * @author Javier Rojas Blum
- * @version April 4, 2016
+ * @version April 12, 2016
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {

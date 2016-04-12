@@ -1,3 +1,9 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.util;
 
 import org.apache.commons.codec.binary.Base64;
@@ -6,7 +12,7 @@ import java.math.BigInteger;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 12, 2016
  */
 public class Base64Util {
 
@@ -15,6 +21,8 @@ public class Base64Util {
         s = s.split("=")[0]; // Remove any trailing '='s
         s = s.replace('+', '-'); // 62nd char of encoding
         s = s.replace('/', '_'); // 63rd char of encoding
+        s = s.replace("\r", "");
+        s = s.replace("\n", "");
         return s;
     }
 

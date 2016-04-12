@@ -1,3 +1,9 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.client;
 
 import com.google.common.base.Strings;
@@ -9,7 +15,7 @@ import static org.gluu.oxeleven.model.SignRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 5, 2016
+ * @version April 12, 2016
  */
 public class SignClient extends BaseClient<SignRequest, SignResponse> {
 

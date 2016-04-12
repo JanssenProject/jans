@@ -1,3 +1,9 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.rest;
 
 import org.codehaus.jettison.json.JSONException;
@@ -22,7 +28,7 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 31, 2016
+ * @version April 12, 2016
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {

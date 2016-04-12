@@ -40,5 +40,6 @@
     <modules>
         <module>Server</module>
         <module>Client</module>
+        <module>Model</module>
     </modules>
 </project>

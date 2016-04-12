@@ -6,12 +6,21 @@
 
 package org.gluu.oxeleven.model;
 
+import java.util.List;
+
 /**
  * @author Javier Rojas Blum
  * @version April 12, 2016
  */
-public interface SignatureAlgorithmFamily {
+public class Jwks {
 
-    public static final String RSA = "RSA";
-    public static final String EC = "EC";
+    private List<Key> keys;
+
+    public List<Key> getKeys() {
+        return keys;
+    }
+
+    public void setKeys(List<Key> keys) {
+        this.keys = keys;
+    }
 }

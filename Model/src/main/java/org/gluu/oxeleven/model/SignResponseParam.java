@@ -10,8 +10,7 @@ package org.gluu.oxeleven.model;
  * @author Javier Rojas Blum
  * @version April 12, 2016
  */
-public interface SignatureAlgorithmFamily {
+public interface SignResponseParam {
 
-    public static final String RSA = "RSA";
-    public static final String EC = "EC";
+    public static final String SIGNATURE = "signature";
 }

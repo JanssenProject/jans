@@ -1,3 +1,9 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +20,7 @@ import java.io.File;
 
 /**
  * @author Javier Rojas Blum
- * @version March 30, 2016
+ * @version April 12, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationService")
