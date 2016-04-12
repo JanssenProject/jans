@@ -5,18 +5,20 @@
   1. Install [SoftHSM version 2](https://github.com/opendnssec/SoftHSMv2)
   2. Copy the file Server/conf/oxeleven-config.json to tomcat/conf/oxeleven-config.json
   3. Edit the configuration file tomcat/conf/oxeleven-config.json
+
   ```javascript
   {
-      "pkcs11Config": {
-          "name": "SoftHSM",
-          "library": "/usr/local/lib/softhsm/libsofthsm2.so",
-          "slot": "0",
-          "showInfo": "true"
-      },
-      "pkcs11Pin": "1234",
-      "dnName": "CN=oxAuth CA Certificate"
+    "pkcs11Config": {
+      "name": "SoftHSM",
+      "library": "/usr/local/lib/softhsm/libsofthsm2.so",
+      "slot": "0",
+      "showInfo": "true"
+    },
+    "pkcs11Pin": "1234",
+    "dnName": "CN=oxAuth CA Certificate"
   }
   ```
+
   4. Deploy oxEleven.war in Tomcat
   
 ## Test
