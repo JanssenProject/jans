@@ -20,7 +20,7 @@ import org.xdi.ldap.model.Entry;
 @LdapObjectClass(values = {"top", "oxAsimbaConfiguration"})
 public class LdapOxAsimbaConfiguration extends Entry {
 
-    private static final long serialVersionUID = -12489347651302948L;
+    private static final long serialVersionUID = -12489397651302948L;
     
     @LdapJsonObject
     @LdapAttribute(name = "oxConfApplication")

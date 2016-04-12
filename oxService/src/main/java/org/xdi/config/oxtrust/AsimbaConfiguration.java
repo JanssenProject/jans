@@ -18,10 +18,9 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@XmlRootElement(name = "baseDN")
 public class AsimbaConfiguration implements Serializable {
     
-    private static final long serialVersionUID = -1207383590239619576L;
+    private static final long serialVersionUID = -1207383545739619576L;
     
     private String orgInum;
     
