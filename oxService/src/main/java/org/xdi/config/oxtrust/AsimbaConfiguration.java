@@ -24,10 +24,6 @@ public class AsimbaConfiguration implements Serializable {
     
     private String orgInum;
     
-    private String applianceInum;
-    
-    private String appliance;
-    
     private String oxasimba;
     
     private String idps;
@@ -50,34 +46,6 @@ public class AsimbaConfiguration implements Serializable {
      */
     public void setOrgInum(String orgInum) {
         this.orgInum = orgInum;
-    }
-
-    /**
-     * @return the applianceInum
-     */
-    public String getApplianceInum() {
-        return applianceInum;
-    }
-
-    /**
-     * @param applianceInum the applianceInum to set
-     */
-    public void setApplianceInum(String applianceInum) {
-        this.applianceInum = applianceInum;
-    }
-
-    /**
-     * @return the appliance
-     */
-    public String getAppliance() {
-        return appliance;
-    }
-
-    /**
-     * @param appliance the appliance to set
-     */
-    public void setAppliance(String appliance) {
-        this.appliance = appliance;
     }
 
     /**
