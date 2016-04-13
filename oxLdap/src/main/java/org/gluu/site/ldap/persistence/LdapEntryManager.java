@@ -8,16 +8,7 @@ package org.gluu.site.ldap.persistence;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
@@ -33,6 +24,7 @@ import org.gluu.site.ldap.persistence.property.Setter;
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.ldap.model.SortOrder;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
@@ -341,6 +333,51 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return entries;
 	}
 
+	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
+
+		if (StringHelper.isEmptyString(baseDN)) {
+			throw new MappingException("Base DN to find entries is null");
+		}
+
+		// Check entry class
+		checkEntryClass(entryClass, false);
+		String[] objectClasses = getTypeObjectClasses(entryClass);
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+		String[] currentLdapReturnAttributes = ldapReturnAttributes;
+		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
+			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+		}
+
+		// Find entries
+		Filter searchFilter;
+		if (objectClasses.length > 0) {
+			searchFilter = addObjectClassFilter(filter, objectClasses);
+		} else {
+			searchFilter = filter;
+		}
+
+		SearchResult searchResult = null;
+		try {
+
+			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, searchFilter, SearchScope.SUB, startIndex, count, sortBy, sortOrder, currentLdapReturnAttributes);
+
+			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+			}
+
+		} catch (Exception ex) {
+			throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+		}
+
+		if (searchResult.getEntryCount() == 0) {
+			return new ArrayList<T>(0);
+		}
+
+		List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
+
+		return entries;
+	}
+
 	public <T> boolean contains(String baseDN, Class<T> entryClass, Filter filter) {
 		// Check entry class
 		checkEntryClass(entryClass, false);
@@ -431,6 +468,43 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		
 		List<T> currentResult = createEntities(entryClass, propertiesAnnotations, entriesAttributes);  
+		result.addAll(currentResult);
+
+		return result;
+	}
+
+	private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, SearchResultEntry... searchResultEntries) {
+
+		List<T> result = new LinkedList<T>();
+		Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
+
+		int count = 0;
+		for (int i = 0; i < searchResultEntries.length; i++) {
+
+			count++;
+
+			SearchResultEntry entry = searchResultEntries[i];
+
+			LinkedList<AttributeData> attributeDataLinkedList = new LinkedList<AttributeData>();
+			attributeDataLinkedList.addAll(getAttributeDataList(entry));
+			entriesAttributes.put(entry.getDN(), attributeDataLinkedList);
+
+			// Remove reference to allow java clean up object
+			searchResultEntries[i] = null;
+
+			// Allow java to clean up temporary objects
+			if (count >= 100) {
+
+				List<T> currentResult = new LinkedList<T>();
+				currentResult.addAll(createEntities(entryClass, propertiesAnnotations, entriesAttributes, false));
+				result.addAll(currentResult);
+
+				entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
+				count = 0;
+			}
+		}
+
+		List<T> currentResult = createEntities(entryClass, propertiesAnnotations, entriesAttributes, false);
 		result.addAll(currentResult);
 
 		return result;

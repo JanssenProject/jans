@@ -8,16 +8,8 @@ package org.gluu.site.ldap.persistence;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -565,8 +557,11 @@ public abstract class AbstractEntryManager implements EntityManager {
 		return propertiesAnnotations.get(0).getPropertyName();
 	}
 
-	protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-			Map<String, List<AttributeData>> entriesAttributes) {
+	protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Map<String, List<AttributeData>> entriesAttributes) {
+		return createEntities(entryClass, propertiesAnnotations, entriesAttributes, true);
+	}
+
+	protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Map<String, List<AttributeData>> entriesAttributes, boolean doSort) {
 
 		// Check if entry has DN property
 		String dnProperty = getDNPropertyName(entryClass);
@@ -697,7 +692,9 @@ public abstract class AbstractEntryManager implements EntityManager {
 						}
 					}
 
-					sortLdapAttributesListIfNeeded((LdapAttributesList) ldapAttribute, entryItemType, propertyValue);
+					if (doSort) {
+						sortLdapAttributesListIfNeeded((LdapAttributesList) ldapAttribute, entryItemType, propertyValue);
+					}
 				}
 			}
 

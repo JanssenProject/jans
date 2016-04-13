@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
+import org.xdi.ldap.model.SortOrder;
 import org.xdi.util.ArrayHelper;
 
 import com.unboundid.asn1.ASN1OctetString;
@@ -35,8 +36,7 @@ import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.ldap.sdk.SearchScope;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
+import com.unboundid.ldap.sdk.controls.*;
 import com.unboundid.ldif.LDIFChangeRecord;
 
 /**
@@ -103,7 +103,7 @@ public class OperationsFacade {
 
 	/**
 	 *
-	 * @param userDn
+	 * @param userName
 	 * @param password
 	 * @return
 	 * @throws ConnectionException
@@ -254,6 +254,59 @@ public class OperationsFacade {
 			setControls(searchRequest, controls);
 			searchResult = getConnectionPool().search(searchRequest);
 		}
+		return searchResult;
+	}
+
+	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, String... attributes) throws Exception {
+
+		SearchRequest searchRequest;
+
+		if (attributes == null) {
+			searchRequest = new SearchRequest(dn, scope, filter);
+		} else {
+			searchRequest = new SearchRequest(dn, scope, filter, attributes);
+		}
+
+		count = (count < 1) ? 10 : count;
+		count = (count > 100) ? 100 : count;
+
+		int targetOffset = (startIndex < 1) ? 1 : startIndex;
+		int beforeCount = 0;
+		int afterCount = (count - 1);
+		int contentCount = 0;
+
+		boolean reverseOrder = false;
+		if (sortOrder != null) {
+			reverseOrder = sortOrder.equals(SortOrder.DESCENDING) ? true : false;
+		}
+
+		// Note that the VLV control always requires the server-side sort control.
+		searchRequest.setControls(
+			new ServerSideSortRequestControl(new SortKey(sortBy, reverseOrder)),
+			new VirtualListViewRequestControl(targetOffset, beforeCount, afterCount, contentCount, null)
+		);
+
+		SearchResult searchResult = getConnectionPool().search(searchRequest);
+
+		// int totalEntriesReturned = searchResult.getEntryCount();
+
+		// log.info("------");
+		// log.info("##### totalEntriesReturned = " + totalEntriesReturned);
+
+		/*
+		for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
+			log.info("##### searchResultEntry = " + searchResultEntry.toString());
+		}
+		*/
+
+		// LDAPTestUtils.assertHasControl(searchResult, VirtualListViewResponseControl.VIRTUAL_LIST_VIEW_RESPONSE_OID);
+
+		// VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
+		// contentCount = vlvResponseControl.getContentCount();
+
+		// log.info("##### contentCount = " + contentCount);
+		// log.info("------");
+
 		return searchResult;
 	}
 
