@@ -268,10 +268,8 @@ public class OperationsFacade {
 			searchRequest = new SearchRequest(dn, scope, filter, attributes);
 		}
 
-		count = (count < 1) ? 10 : count;
-		count = (count > 100) ? 100 : count;
-
-		int targetOffset = (startIndex < 1) ? 1 : startIndex;
+		// startIndex and count should be "cleansed" before arriving here
+		int targetOffset = startIndex;
 		int beforeCount = 0;
 		int afterCount = (count - 1);
 		int contentCount = 0;
