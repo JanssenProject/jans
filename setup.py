@@ -374,6 +374,26 @@ class Setup(object):
         self.run(['/bin/chmod', '-R', '400', realCertFolder])
         self.run(['/bin/chmod', 'u+X', realCertFolder])
 
+    def get_ip(self):
+        testIP = None
+        detectedIP = None
+        try:
+            testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
+                           testSocket.getsockname()[0],
+                           testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+        except:
+            self.logIt("No detected IP address", True)
+            self.logIt(traceback.format_exc(), True)
+        if detectedIP:
+            testIP = self.getPrompt("Enter IP Address", detectedIP)
+        else:
+            testIP = self.getPrompt("Enter IP Address")
+        if not self.isIP(testIP):
+            testIP = None
+            print 'ERROR: The IP Address is invalid. Try again\n'
+        return testIP
+
     def check_properties(self):
         self.logIt('Checking properties')
         while not self.hostname:
@@ -383,11 +403,7 @@ class Setup(object):
             else:
                 print 'The hostname has to be at least three domain components. Try again\n'
         while not self.ip:
-            testIP = raw_input('IP address : ').strip()
-            if self.isIP(testIP):
-                self.ip = testIP
-            else:
-                print 'ERROR: The IP Address is invalid. Try again\n'
+            self.ip = self.get_ip()
         while not self.orgName:
             self.orgName = raw_input('Organization Name: ').strip()
         while not self.countryCode:
@@ -1374,19 +1390,7 @@ class Setup(object):
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
         if self.installHttpd:
-            detectedIP = None
-            try:
-                testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
-                               testSocket.getsockname()[0],
-                               testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
-            except:
-                self.logIt("No detected IP address", True)
-                self.logIt(traceback.format_exc(), True)
-            if detectedIP:
-                self.ip = self.getPrompt("Enter IP Address", detectedIP)
-            else:
-                self.ip = self.getPrompt("Enter IP Address")
+            self.ip = self.get_ip()
 
         detectedHostname = None
         try:
