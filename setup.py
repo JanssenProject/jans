@@ -597,8 +597,9 @@ class Setup(object):
         if self.installSaml:
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
             self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/" % self.tomcatHome)
-            self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
-            self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
+
+            self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
+            
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
         if self.installOxAuth:
@@ -1117,6 +1118,7 @@ class Setup(object):
 
     def install_saml(self):
         if self.installSaml:
+            # Put latest Saml templates
             identityWar = 'identity.war'
             distIdentityPath = '%s/%s' % (self.tomcatWebAppFolder, identityWar)
 
@@ -1144,6 +1146,27 @@ class Setup(object):
             self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
 
             self.removeDirs(tmpIdentityDir)
+            
+            # Put files to /opt/idp
+            idpWar = "idp.war"
+            distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
+
+            tmpIdpDir = '%s/tmp_idp' % self.distFolder
+
+            self.logIt("Unpacking %s..." % idpWar)
+            self.removeDirs(tmpIdpDir)
+            self.createDirs(tmpIdpDir)
+
+            self.run([self.jarCommand,
+                      'xf',
+                      distIdpPath], tmpIdpDir)
+
+            self.logIt("Copying files to %s..." % self.idpLibFolder)
+            self.copyTree('%s/WEB_INF/lib' % tmpIdpDir, self.idpLibFolder)
+            self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
+            self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
+
+            self.removeDirs(tmpIdpDir)
 
     def install_asimba_war(self):
         if self.installAsimba:
