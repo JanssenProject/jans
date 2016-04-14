@@ -1162,7 +1162,7 @@ class Setup(object):
                       distIdpPath], tmpIdpDir)
 
             self.logIt("Copying files to %s..." % self.idpLibFolder)
-            self.copyTree('%s/WEB_INF/lib' % tmpIdpDir, self.idpLibFolder)
+            self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
 
