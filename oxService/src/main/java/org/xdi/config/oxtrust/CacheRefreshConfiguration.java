@@ -33,6 +33,8 @@ public class CacheRefreshConfiguration {
 
 	private String updateMethod;
 
+	private boolean defaultInumServer;
+
 	private boolean keepExternalPerson;
 
 	private boolean useSearchLimit;
@@ -120,6 +122,14 @@ public class CacheRefreshConfiguration {
 
 	public void setKeepExternalPerson(boolean keepExternalPerson) {
 		this.keepExternalPerson = keepExternalPerson;
+	}
+
+	public boolean isDefaultInumServer() {
+		return defaultInumServer;
+	}
+
+	public void setDefaultInumServer(boolean defaultInumServer) {
+		this.defaultInumServer = defaultInumServer;
 	}
 
 	public boolean isUseSearchLimit() {
