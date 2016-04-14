@@ -25,6 +25,7 @@ import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.SortOrder;
+import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
@@ -333,7 +334,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return entries;
 	}
 
-	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
+	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String[] ldapReturnAttributes) {
 
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
@@ -359,7 +360,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		SearchResult searchResult = null;
 		try {
 
-			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, searchFilter, SearchScope.SUB, startIndex, count, sortBy, sortOrder, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, searchFilter, SearchScope.SUB, startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));

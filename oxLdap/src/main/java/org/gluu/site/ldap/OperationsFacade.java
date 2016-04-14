@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.xdi.ldap.model.SortOrder;
+import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 
 import com.unboundid.asn1.ASN1OctetString;
@@ -257,7 +258,7 @@ public class OperationsFacade {
 		return searchResult;
 	}
 
-	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, String... attributes) throws Exception {
+	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
 
 		SearchRequest searchRequest;
 
@@ -288,11 +289,6 @@ public class OperationsFacade {
 
 		SearchResult searchResult = getConnectionPool().search(searchRequest);
 
-		// int totalEntriesReturned = searchResult.getEntryCount();
-
-		// log.info("------");
-		// log.info("##### totalEntriesReturned = " + totalEntriesReturned);
-
 		/*
 		for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
 			log.info("##### searchResultEntry = " + searchResultEntry.toString());
@@ -301,11 +297,12 @@ public class OperationsFacade {
 
 		// LDAPTestUtils.assertHasControl(searchResult, VirtualListViewResponseControl.VIRTUAL_LIST_VIEW_RESPONSE_OID);
 
-		// VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
-		// contentCount = vlvResponseControl.getContentCount();
+		VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
 
-		// log.info("##### contentCount = " + contentCount);
-		// log.info("------");
+		// Get results info
+		vlvResponse.setItemsPerPage(searchResult.getEntryCount());
+		vlvResponse.setTotalResults(vlvResponseControl.getContentCount());
+		vlvResponse.setStartIndex(vlvResponseControl.getTargetPosition());
 
 		return searchResult;
 	}
