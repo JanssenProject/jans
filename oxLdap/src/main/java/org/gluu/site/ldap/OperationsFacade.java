@@ -271,7 +271,7 @@ public class OperationsFacade {
 		// startIndex and count should be "cleansed" before arriving here
 		int targetOffset = startIndex;
 		int beforeCount = 0;
-		int afterCount = (count - 1);
+		int afterCount = (count > 0) ? (count - 1) : 0;
 		int contentCount = 0;
 
 		boolean reverseOrder = false;
