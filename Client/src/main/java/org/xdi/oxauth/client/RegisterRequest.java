@@ -1080,9 +1080,13 @@ public class RegisterRequest extends BaseRequest {
 
         final List<String> logoutUris = new ArrayList<String>();
         if (requestObject.has(LOGOUT_URI.toString())) {
-            JSONArray logoutUriJsonArray = requestObject.getJSONArray(LOGOUT_URI.toString());
-            for (int i = 0; i < logoutUriJsonArray.length(); i++) {
-                logoutUris.add(logoutUriJsonArray.getString(i));
+            try {
+                JSONArray logoutUriJsonArray = requestObject.getJSONArray(LOGOUT_URI.toString());
+                for (int i = 0; i < logoutUriJsonArray.length(); i++) {
+                    logoutUris.add(logoutUriJsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                logoutUris.add(requestObject.optString(LOGOUT_URI.toString()));
             }
         }
 
