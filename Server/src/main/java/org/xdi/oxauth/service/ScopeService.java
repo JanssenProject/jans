@@ -21,6 +21,7 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.util.LDAPConstants;
 
 import com.unboundid.ldap.sdk.Filter;
 
@@ -132,5 +133,27 @@ public class ScopeService {
         }
 
         return null;
+    }    
+    
+    /**
+     * Get scope by oxAuthClaims
+     *
+     * @param oxAuthClaim
+     * @return List of scope
+     */
+    public List<org.xdi.oxauth.model.common.Scope> getScopeByOxAuthClaims(String oxAuthClaims) {
+    	org.xdi.oxauth.model.common.Scope scope = new org.xdi.oxauth.model.common.Scope();
+    	
+    	String scopesBaseDN = ConfigurationFactory.instance().getBaseDn().getScopes();
+    	scope.setDn(scopesBaseDN);
+    	
+    	String attributesBaseDN = ConfigurationFactory.instance().getBaseDn().getAttributes();
+    	oxAuthClaims = LDAPConstants.inum+"="+oxAuthClaims+","+attributesBaseDN;
+        List<String> claimList = new  ArrayList<String>();
+        claimList.add(oxAuthClaims);
+        scope.setOxAuthClaims(claimList);
+        
+        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scope);  
+        return scopes;
     }
 }
