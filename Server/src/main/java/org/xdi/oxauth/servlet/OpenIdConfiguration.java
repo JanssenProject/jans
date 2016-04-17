@@ -14,8 +14,10 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -220,12 +222,25 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray claimsSupported = new JSONArray();
             List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                String claimName = gluuAttribute.getOxAuthClaimName();
-                if (StringUtils.isNotBlank(claimName)) {
-                    claimsSupported.put(claimName);
-                }
-            }
+			for (GluuAttribute gluuAttribute : gluuAttributes) {
+				if ((gluuAttribute.getStatus() != null) && (gluuAttribute.getStatus().getDisplayName().equalsIgnoreCase("Active"))) {
+					String claimName = gluuAttribute.getOxAuthClaimName();
+					if (claimName != null && (StringUtils.isNotBlank(claimName))) {
+						List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getScopeByOxAuthClaims(gluuAttribute.getInum());
+						if (scopes != null) {
+							for (org.xdi.oxauth.model.common.Scope scope : scopes) {
+								ScopeType scopeType = scope.getScopeType();
+								if (scopeType != null) {
+									if (scopeType.getDisplayName().equalsIgnoreCase(Constants.OX_AUTH_SCOPE_TYPE_OPENID)) {
+										claimsSupported.put(claimName);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+            
             if (claimsSupported.length() > 0) {
                 jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
             }
