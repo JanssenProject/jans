@@ -147,13 +147,23 @@ public class SchemaService {
 		if (newObjectClassDefinition == null) {
 			throw new InvalidSchemaUpdateException(String.format("Invalid objectClass definition format"));
 		}
-
+		
+		// Remove current OC definition
 		SchemaEntry schemaEntry = new SchemaEntry();
 		schemaEntry.setDn(getDnForSchema());
-		schemaEntry.addObjectClass(newObjectClassDefinition);
+		schemaEntry.addObjectClass(objectClassDefinition);
+		
+		log.debug("Removing objectClass: {0}", schemaEntry);
+		ldapEntryManager.remove(schemaEntry);
+		
 
-		log.debug("Adding attributeType to objectClass: {0}", schemaEntry);
-		ldapEntryManager.merge(schemaEntry);
+		// Add updated OC defintion
+		SchemaEntry newSchemaEntry = new SchemaEntry();
+		newSchemaEntry.setDn(getDnForSchema());
+		newSchemaEntry.addObjectClass(newObjectClassDefinition);
+
+		log.debug("Adding attributeType to objectClass: {0}", newSchemaEntry);
+		ldapEntryManager.merge(newSchemaEntry);
 	}
 
 	/**
