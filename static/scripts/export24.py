@@ -236,6 +236,7 @@ def genProperties():
     props['oxauth_client_id'] = getProp('oxauth_client_id')
     props['scim_rs_client_id'] = getProp('scim_rs_client_id')
     props['scim_rp_client_id'] = getProp('scim_rp_client_id')
+    props['version'] = getProp('githubBranchName').split('_')[-1]
 
     f = open(propertiesFn, 'a')
     for key in props.keys():
