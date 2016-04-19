@@ -23,6 +23,8 @@ import logging
 
 password_file = tempfile.mkstemp()[1]
 backup24_folder = None
+backup_version = None
+current_version = None
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
@@ -285,6 +287,11 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 
 
 def walk_function(a, directory, files):
+    # Skip copying the openDJ config from older versions to 2.4.3
+    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+        if 'opendj' in directory:
+            return
+
     for f in files:
         if f in ignore_files:
             continue
@@ -344,9 +351,24 @@ def preparePasswordFile():
                 break
 
 
-def main(folder_name):
-    global backup24_folder
+def getCurrentVersion():
+    with open('/opt/tomcat/webapps/oxauth/META-INF/MANIFEST.MF', 'r') as f:
+        for line in f:
+            if 'Implementation-Version' in line:
+                return line.split(':')[-1].strip()
 
+
+def getBackupVersion():
+    with open(os.path.join(backup24_folder, 'setup.properties'), 'r') as f:
+        for line in f:
+            if 'version=' in line:
+                return line.split('=')[-1].strip()
+
+
+def main(folder_name):
+    global backup24_folder, backup_version, current_version
+
+    # Verify that all required folders are present
     backup24_folder = folder_name
     if not os.path.exists(backup24_folder):
         logging.critical("Backup folder %s does not exist.", backup24_folder)
@@ -361,6 +383,10 @@ def main(folder_name):
         logging.critical("Backup folder doesn't have all the information."
                          " Rerun export.")
         sys.exit(1)
+
+    # Identify the version of the backup and installation
+    backup_version = getBackupVersion()
+    current_version = getCurrentVersion()
 
     outputFolder = "./output_ldif"
     outputLdifFolder = "%s/config" % outputFolder
