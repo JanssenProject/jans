@@ -97,13 +97,17 @@ public class SchemaService {
 
 		String objectClassDefinition = getObjectClassDefinition(schema, objectClass);
 		if (objectClassDefinition != null) {
-			SchemaEntry schemaEntry = new SchemaEntry();
-			schemaEntry.setDn(getDnForSchema());
-			schemaEntry.addObjectClass(objectClassDefinition);
-
-			log.debug("Removing objectClass: {0}", schemaEntry);
-			ldapEntryManager.remove(schemaEntry);
+			removeObjectClassWithDefinition(objectClassDefinition);
 		}
+	}
+
+	private void removeObjectClassWithDefinition(String objectClassDefinition) {
+		SchemaEntry schemaEntry = new SchemaEntry();
+		schemaEntry.setDn(getDnForSchema());
+		schemaEntry.addObjectClass(objectClassDefinition);
+
+		log.debug("Removing objectClass: {0}", schemaEntry);
+		ldapEntryManager.remove(schemaEntry);
 	}
 
 	/**
@@ -148,16 +152,10 @@ public class SchemaService {
 			throw new InvalidSchemaUpdateException(String.format("Invalid objectClass definition format"));
 		}
 		
-		// Remove current OC definition
-		SchemaEntry schemaEntry = new SchemaEntry();
-		schemaEntry.setDn(getDnForSchema());
-		schemaEntry.addObjectClass(objectClassDefinition);
-		
-		log.debug("Removing objectClass: {0}", schemaEntry);
-		ldapEntryManager.remove(schemaEntry);
-		
+		// Remove OC definition
+		removeObjectClassWithDefinition(objectClassDefinition);
 
-		// Add updated OC defintion
+		// Add updated OC definition
 		SchemaEntry newSchemaEntry = new SchemaEntry();
 		newSchemaEntry.setDn(getDnForSchema());
 		newSchemaEntry.addObjectClass(newObjectClassDefinition);
@@ -200,7 +198,11 @@ public class SchemaService {
 
 		String newObjectClassDefinition = objectClassDefinition.substring(0, index)
 				+ objectClassDefinition.substring(index + attributeTypePattern.length());
+		
+		// Remove OC definition
+		removeObjectClassWithDefinition(objectClassDefinition);
 
+		// Add updated OC definition
 		SchemaEntry schemaEntry = new SchemaEntry();
 		schemaEntry.setDn(getDnForSchema());
 		schemaEntry.addObjectClass(newObjectClassDefinition);
