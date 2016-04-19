@@ -8,8 +8,8 @@ package org.gluu.oxeleven.rest;
 
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.model.Jwks;
-import org.gluu.oxeleven.model.Key;
+import org.gluu.oxeleven.model.JwksRequestParam;
+import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.Base64Util;
@@ -32,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 @Name("jwksRestService")
 public class JwksRestServiceImpl implements JwksRestService {
@@ -41,11 +41,11 @@ public class JwksRestServiceImpl implements JwksRestService {
     private Log log;
 
     @Override
-    public Response sign(Jwks jwks) {
+    public Response jwks(JwksRequestParam jwksRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            if (jwks == null || jwks.getKeys() == null || jwks.getKeys().isEmpty()) {
+            if (jwksRequestParam == null || jwksRequestParam.getKeyRequestParams() == null || jwksRequestParam.getKeyRequestParams().isEmpty()) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided aliasList parameter is mandatory.");
             } else {
@@ -54,7 +54,7 @@ public class JwksRestServiceImpl implements JwksRestService {
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                Jwks response = getJSonResponse(pkcs11, jwks);
+                JwksRequestParam response = getJSonResponse(pkcs11, jwksRequestParam);
                 builder.entity(response);
             }
         } catch (CertificateException e) {
@@ -85,28 +85,28 @@ public class JwksRestServiceImpl implements JwksRestService {
         return builder.build();
     }
 
-    private Jwks getJSonResponse(PKCS11Service pkcs11, Jwks jwks)
+    private JwksRequestParam getJSonResponse(PKCS11Service pkcs11, JwksRequestParam jwksRequestParam)
             throws UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException, JSONException {
-        for (Iterator<Key> iterator = jwks.getKeys().iterator(); iterator.hasNext(); ) {
-            Key key = iterator.next();
-            String alias = key.getKid();
+        for (Iterator<KeyRequestParam> iterator = jwksRequestParam.getKeyRequestParams().iterator(); iterator.hasNext(); ) {
+            KeyRequestParam keyRequestParam = iterator.next();
+            String alias = keyRequestParam.getKid();
             PublicKey publicKey = pkcs11.getPublicKey(alias);
             if (publicKey != null) {
                 publicKey.getAlgorithm();
                 if (publicKey instanceof RSAPublicKeyImpl) {
                     RSAPublicKeyImpl rsaPublicKey = (RSAPublicKeyImpl) publicKey;
-                    key.setN(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getModulus()));
-                    key.setE(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
+                    keyRequestParam.setN(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getModulus()));
+                    keyRequestParam.setE(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
                 } else if (publicKey instanceof ECPublicKeyImpl) {
                     ECPublicKeyImpl ecPublicKey = (ECPublicKeyImpl) publicKey;
-                    key.setX(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
-                    key.setY(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
+                    keyRequestParam.setX(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
+                    keyRequestParam.setY(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
                 }
             } else {
                 iterator.remove();
             }
         }
 
-        return jwks;
+        return jwksRequestParam;
     }
 }

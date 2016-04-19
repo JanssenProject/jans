@@ -8,9 +8,9 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
-public class Key {
+public class KeyRequestParam {
 
     private String alg;
     private String kid;
@@ -22,14 +22,14 @@ public class Key {
     private String x;
     private String y;
 
-    public Key() {
+    public KeyRequestParam() {
     }
 
-    public Key(String kty, String use, String alg, String kid) {
+    public KeyRequestParam(String kty, String use, String alg, String kid) {
         this(kty, use, alg, null, kid);
     }
 
-    public Key(String kty, String use, String alg, String crv, String kid) {
+    public KeyRequestParam(String kty, String use, String alg, String crv, String kid) {
         this.kty = kty;
         this.use = use;
         this.alg = alg;

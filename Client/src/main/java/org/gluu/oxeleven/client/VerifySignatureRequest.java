@@ -6,55 +6,32 @@
 
 package org.gluu.oxeleven.client;
 
+import org.gluu.oxeleven.model.VerifySignatureRequestParam;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 public class VerifySignatureRequest extends BaseRequest {
 
-    private String signingInput;
-    private String signature;
-    private String alias;
-    private String signatureAlgorithm;
+    private VerifySignatureRequestParam verifySignatureRequestParam;
 
     public VerifySignatureRequest() {
-        setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        setMediaType(MediaType.APPLICATION_FORM_URLENCODED);
+        setContentType(MediaType.APPLICATION_JSON);
+        setMediaType(MediaType.APPLICATION_JSON);
         setHttpMethod(HttpMethod.POST);
+
+        verifySignatureRequestParam = new VerifySignatureRequestParam();
     }
 
-    public String getSigningInput() {
-        return signingInput;
+    public VerifySignatureRequestParam getVerifySignatureRequestParam() {
+        return verifySignatureRequestParam;
     }
 
-    public void setSigningInput(String signingInput) {
-        this.signingInput = signingInput;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getSignatureAlgorithm() {
-        return signatureAlgorithm;
-    }
-
-    public void setSignatureAlgorithm(String signatureAlgorithm) {
-        this.signatureAlgorithm = signatureAlgorithm;
+    public void setVerifySignatureRequestParam(VerifySignatureRequestParam verifySignatureRequestParam) {
+        this.verifySignatureRequestParam = verifySignatureRequestParam;
     }
 }

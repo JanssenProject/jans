@@ -12,7 +12,7 @@ import javax.ws.rs.HttpMethod;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 public class JwksClient extends BaseClient<JwksRequest, JwksResponse> {
 
@@ -54,8 +54,8 @@ public class JwksClient extends BaseClient<JwksRequest, JwksResponse> {
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        if (getRequest().getJwks() != null) {
-            clientRequest.body(getRequest().getMediaType(), getRequest().getJwks());
+        if (getRequest().getJwksRequestParam() != null) {
+            clientRequest.body(getRequest().getMediaType(), getRequest().getJwksRequestParam());
         }
 
         // Call REST Service and handle response

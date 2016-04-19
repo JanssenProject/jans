@@ -8,18 +8,18 @@ package org.gluu.oxeleven.client;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jettison.json.JSONObject;
-import org.gluu.oxeleven.model.Jwks;
+import org.gluu.oxeleven.model.JwksRequestParam;
 import org.jboss.resteasy.client.ClientResponse;
 
 import java.io.IOException;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 public class JwksResponse extends BaseResponse {
 
-    private Jwks jwks;
+    private JwksRequestParam jwksRequestParam;
 
     public JwksResponse(ClientResponse<String> clientResponse) throws IOException {
         super(clientResponse);
@@ -27,11 +27,11 @@ public class JwksResponse extends BaseResponse {
         JSONObject jsonObject = getJSONEntity();
         if (jsonObject != null) {
             ObjectMapper mapper = new ObjectMapper();
-            jwks = mapper.readValue(jsonObject.toString(), Jwks.class);
+            jwksRequestParam = mapper.readValue(jsonObject.toString(), JwksRequestParam.class);
         }
     }
 
-    public Jwks getJwks() {
-        return jwks;
+    public JwksRequestParam getJwksRequestParam() {
+        return jwksRequestParam;
     }
 }

@@ -15,7 +15,7 @@ import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, VerifySignatureResponse> {
 
@@ -57,17 +57,8 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
 
-        if (!Strings.isNullOrEmpty(getRequest().getSigningInput())) {
-            addRequestParam(SIGNING_INPUT, getRequest().getSigningInput());
-        }
-        if (!Strings.isNullOrEmpty(getRequest().getSignature())) {
-            addRequestParam(SIGNATURE, getRequest().getSignature());
-        }
-        if (!Strings.isNullOrEmpty(getRequest().getAlias())) {
-            addRequestParam(ALIAS, getRequest().getAlias());
-        }
-        if (!Strings.isNullOrEmpty(getRequest().getSignatureAlgorithm())) {
-            addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm());
+        if (getRequest().getVerifySignatureRequestParam() != null) {
+            clientRequest.body(getRequest().getMediaType(), getRequest().getVerifySignatureRequestParam());
         }
 
         // Call REST Service and handle response

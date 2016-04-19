@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.gluu.oxeleven.model.VerifySignatureRequestParam;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
@@ -29,7 +30,7 @@ import static org.gluu.oxeleven.model.VerifySignatureResponseParam.VERIFIED;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 @Name("verifySignatureRestService")
 public class VerifySignatureRestServiceImpl implements VerifySignatureRestService {
@@ -38,19 +39,19 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
     private Log log;
 
     @Override
-    public Response verifySignature(String signingInput, String signature, String alias, String sigAlg) {
+    public Response verifySignature(VerifySignatureRequestParam verifySignatureRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(sigAlg);
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(verifySignatureRequestParam.getSignatureAlgorithm());
 
-            if (Strings.isNullOrEmpty(signingInput)) {
+            if (Strings.isNullOrEmpty(verifySignatureRequestParam.getSigningInput())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided signingInput parameter is mandatory.");
-            } else if (Strings.isNullOrEmpty(signature)) {
+            } else if (Strings.isNullOrEmpty(verifySignatureRequestParam.getSignature())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided signature parameter is mandatory.");
-            } else if (Strings.isNullOrEmpty(alias)) {
+            } else if (Strings.isNullOrEmpty(verifySignatureRequestParam.getAlias())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
             } else if (signatureAlgorithm == null) {
@@ -62,7 +63,11 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                boolean verified = pkcs11.verifySignature(signingInput, signature, alias, signatureAlgorithm);
+                boolean verified = pkcs11.verifySignature(
+                        verifySignatureRequestParam.getSigningInput(), verifySignatureRequestParam.getSignature(),
+                        verifySignatureRequestParam.getAlias(),
+                        verifySignatureRequestParam.getJwksRequestParam(),
+                        signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(VERIFIED, verified);

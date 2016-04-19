@@ -6,7 +6,7 @@
 
 package org.gluu.oxeleven.rest;
 
-import org.gluu.oxeleven.model.Jwks;
+import org.gluu.oxeleven.model.JwksRequestParam;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 @Path("/oxeleven")
 public interface JwksRestService {
@@ -26,5 +26,5 @@ public interface JwksRestService {
     @Path("/jwks")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON})
-    Response sign(Jwks jwks);
+    Response jwks(JwksRequestParam jwksRequestParam);
 }

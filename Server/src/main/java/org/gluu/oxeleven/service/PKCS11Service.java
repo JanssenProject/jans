@@ -8,10 +8,13 @@ package org.gluu.oxeleven.service;
 
 import com.google.common.base.Strings;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.gluu.oxeleven.model.JwksRequestParam;
+import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
 import sun.security.pkcs11.SunPKCS11;
+import sun.security.rsa.RSAPublicKeyImpl;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
@@ -23,14 +26,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.ECGenParameterSpec;
+import java.security.spec.*;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
 public class PKCS11Service {
 
@@ -118,11 +121,17 @@ public class PKCS11Service {
         return Base64Util.base64UrlEncode(signature.sign());
     }
 
-    public boolean verifySignature(String signingInput, String encodedSignature, String alias, SignatureAlgorithm signatureAlgorithm) {
+    public boolean verifySignature(String signingInput, String encodedSignature, String alias,
+                                   JwksRequestParam jwksRequestParam, SignatureAlgorithm signatureAlgorithm) {
         boolean verified = false;
+        PublicKey publicKey = null;
 
         try {
-            PublicKey publicKey = getPublicKey(alias);
+            if (jwksRequestParam == null) {
+                publicKey = getPublicKey(alias);
+            } else {
+                publicKey = getPublicKey(alias, jwksRequestParam);
+            }
             if (publicKey == null) {
                 return false;
             }
@@ -148,6 +157,35 @@ public class PKCS11Service {
 
     public void deleteKey(String alias) throws KeyStoreException {
         keyStore.deleteEntry(alias);
+    }
+
+    public PublicKey getPublicKey(String alias, JwksRequestParam jwksRequestParam) throws InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, InvalidParameterSpecException, InvalidKeySpecException {
+        PublicKey publicKey = null;
+
+        for (KeyRequestParam key : jwksRequestParam.getKeyRequestParams()) {
+            if (alias.equals(key.getKid())) {
+                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(key.getAlg());
+                if (signatureAlgorithm != null) {
+                    if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
+                        publicKey = new RSAPublicKeyImpl(
+                                new BigInteger(1, Base64Util.base64UrlDecode(key.getN())),
+                                new BigInteger(1, Base64Util.base64UrlDecode(key.getE())));
+                    } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
+                        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", "SunEC");
+                        parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
+                        ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+
+                        publicKey = KeyFactory.getInstance("EC", "SunEC").generatePublic(new ECPublicKeySpec(
+                                new ECPoint(
+                                        new BigInteger(1, Base64Util.base64UrlDecode(key.getX())),
+                                        new BigInteger(1, Base64Util.base64UrlDecode(key.getY()))
+                                ), ecParameters));
+                    }
+                }
+            }
+        }
+
+        return publicKey;
     }
 
     public PublicKey getPublicKey(String alias) {

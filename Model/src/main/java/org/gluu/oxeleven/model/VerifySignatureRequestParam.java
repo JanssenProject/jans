@@ -8,12 +8,53 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 18, 2016
  */
-public interface VerifySignatureRequestParam {
+public class VerifySignatureRequestParam {
 
-    public static final String SIGNING_INPUT = "signingInput";
-    public static final String SIGNATURE = "signature";
-    public static final String ALIAS = "alias";
-    public static final String SIGNATURE_ALGORITHM = "signatureAlgorithm";
+    private String signingInput;
+    private String signature;
+    private String alias;
+    private JwksRequestParam jwksRequestParam;
+    private String signatureAlgorithm;
+
+    public String getSigningInput() {
+        return signingInput;
+    }
+
+    public void setSigningInput(String signingInput) {
+        this.signingInput = signingInput;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public JwksRequestParam getJwksRequestParam() {
+        return jwksRequestParam;
+    }
+
+    public void setJwksRequestParam(JwksRequestParam jwksRequestParam) {
+        this.jwksRequestParam = jwksRequestParam;
+    }
+
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+
+    public void setSignatureAlgorithm(String signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
+    }
 }
