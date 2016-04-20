@@ -487,7 +487,7 @@ class Setup(object):
         if self.os_type == 'centos' and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['redhat', 'fedora']:
+        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
@@ -656,6 +656,8 @@ class Setup(object):
 
         if 'CentOS' in distro_info:
             return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
         elif 'Ubuntu' in distro_info:
             return self.os_types[3]
 
