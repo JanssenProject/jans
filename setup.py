@@ -695,7 +695,7 @@ class Setup(object):
         if re.match(r'2\.6\.0\..*', encode_script):
             return "2.6"
 
-        return "4.0"
+        return "3.0"
 
     def downloadWarFiles(self):
         if self.downloadWars:
