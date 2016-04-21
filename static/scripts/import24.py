@@ -98,7 +98,9 @@ changetype: add
         for value in entry[attr]:
             newLdif = newLdif + getMod(attr, value)
     newLdif = newLdif + "\n"
-    f = open("%s/%s.ldif" % (ldifModFolder, str(uuid.uuid4())), 'w')
+    new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
+    filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
+    f = open(filename, 'w')
     f.write(newLdif)
     f.close()
 
