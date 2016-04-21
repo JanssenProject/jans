@@ -277,7 +277,7 @@ def tab_attr(attr, value, encoded=False):
 
 def uploadLDIF(ldifFolder, outputLdifFolder):
     logging.info('Uploading LDAP data.')
-    files = os.listdir(outputLdifFolder)
+    files = sorted(os.listdir(outputLdifFolder))
     for fn in files:
         cmd = [ldapmodify] + ldap_creds + ['-a', '-f',
                                            "%s/%s" % (outputLdifFolder, fn)]
