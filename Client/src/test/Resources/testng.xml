@@ -7,6 +7,7 @@
     <parameter name="deleteKeyEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/deleteKey"/>
     <parameter name="jwksEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/jwks"/>
     <parameter name="signingInput" value="Signing Input"/>
+    <parameter name="sharedSecret" value="Secret"/>
 
     <!--
     <parameter name="generateKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey"/>
@@ -15,6 +16,7 @@
     <parameter name="deleteKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/deleteKey"/>
     <parameter name="jwksEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/jwks"/>
     <parameter name="signingInput" value="Signing Input"/>
+    <parameter name="sharedSecret" value="Secret"/>
     -->
 
     <test name="PKCS11 Rest Service Test (HTTP)" enabled="true">

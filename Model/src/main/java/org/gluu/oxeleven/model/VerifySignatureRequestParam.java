@@ -8,7 +8,7 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version April 19, 2016
  */
 public class VerifySignatureRequestParam {
 
@@ -16,6 +16,7 @@ public class VerifySignatureRequestParam {
     private String signature;
     private String alias;
     private JwksRequestParam jwksRequestParam;
+    private String sharedSecret;
     private String signatureAlgorithm;
 
     public String getSigningInput() {
@@ -48,6 +49,14 @@ public class VerifySignatureRequestParam {
 
     public void setJwksRequestParam(JwksRequestParam jwksRequestParam) {
         this.jwksRequestParam = jwksRequestParam;
+    }
+
+    public String getSharedSecret() {
+        return sharedSecret;
+    }
+
+    public void setSharedSecret(String sharedSecret) {
+        this.sharedSecret = sharedSecret;
     }
 
     public String getSignatureAlgorithm() {

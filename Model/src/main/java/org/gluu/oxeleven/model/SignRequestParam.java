@@ -8,11 +8,44 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 19, 2016
  */
-public interface SignRequestParam {
+public class SignRequestParam {
 
-    public static final String SIGNING_INPUT = "signingInput";
-    public static final String ALIAS = "alias";
-    public static final String SIGNATURE_ALGORITHM = "signatureAlgorithm";
+    private String signingInput;
+    private String alias;
+    private String signatureAlgorithm;
+    private String sharedSecret;
+
+    public String getSigningInput() {
+        return signingInput;
+    }
+
+    public void setSigningInput(String signingInput) {
+        this.signingInput = signingInput;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+
+    public void setSignatureAlgorithm(String signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
+    }
+
+    public String getSharedSecret() {
+        return sharedSecret;
+    }
+
+    public void setSharedSecret(String sharedSecret) {
+        this.sharedSecret = sharedSecret;
+    }
 }

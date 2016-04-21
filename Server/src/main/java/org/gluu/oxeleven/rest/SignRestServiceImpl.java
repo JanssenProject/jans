@@ -10,7 +10,9 @@ import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
+import org.gluu.oxeleven.model.SignRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.jboss.seam.annotations.Logger;
@@ -28,7 +30,7 @@ import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 19, 2016
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
@@ -37,28 +39,36 @@ public class SignRestServiceImpl implements SignRestService {
     private Log log;
 
     @Override
-    public Response sign(String signingInput, String alias, String sigAlg) {
+    public Response sign(SignRequestParam signRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(sigAlg);
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(signRequestParam.getSignatureAlgorithm());
 
-            if (Strings.isNullOrEmpty(signingInput)) {
+            if (Strings.isNullOrEmpty(signRequestParam.getSigningInput())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the provided signingInput parameter is mandatory.");
-            } else if (Strings.isNullOrEmpty(alias)) {
-                builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
             } else if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
+            } else if (signatureAlgorithm != SignatureAlgorithm.NONE
+                    && SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())
+                    && Strings.isNullOrEmpty(signRequestParam.getSharedSecret())) {
+                builder = Response.status(Response.Status.BAD_REQUEST);
+                builder.entity("The request asked for an operation that cannot be supported because the provided shared secret parameter is mandatory.");
+            } else if (signatureAlgorithm != SignatureAlgorithm.NONE
+                    && !SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) // EC or RSA
+                    && Strings.isNullOrEmpty(signRequestParam.getAlias())) {
+                builder = Response.status(Response.Status.BAD_REQUEST);
+                builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                String signature = pkcs11.getSignature(signingInput.getBytes(), alias, signatureAlgorithm);
+                String signature = pkcs11.getSignature(signRequestParam.getSigningInput().getBytes(),
+                        signRequestParam.getAlias(), signRequestParam.getSharedSecret(), signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(SIGNATURE, signature);

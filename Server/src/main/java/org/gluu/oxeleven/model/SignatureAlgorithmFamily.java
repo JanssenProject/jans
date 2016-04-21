@@ -8,10 +8,11 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 19, 2016
  */
 public interface SignatureAlgorithmFamily {
 
+    public static final String HMAC = "HMAC";
     public static final String RSA = "RSA";
     public static final String EC = "EC";
 }

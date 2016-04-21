@@ -16,10 +16,14 @@ import org.gluu.oxeleven.util.Base64Util;
 import sun.security.pkcs11.SunPKCS11;
 import sun.security.rsa.RSAPublicKeyImpl;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -33,9 +37,11 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version April 20, 2016
  */
 public class PKCS11Service {
+
+    public static String UTF8_STRING_ENCODING = "UTF-8";
 
     private Provider provider;
     private KeyStore keyStore;
@@ -110,46 +116,64 @@ public class PKCS11Service {
         return alias;
     }
 
-    public String getSignature(byte[] signingInput, String alias, SignatureAlgorithm signatureAlgorithm) throws UnrecoverableEntryException,
-            NoSuchAlgorithmException, KeyStoreException, InvalidKeyException, SignatureException {
-        PrivateKey privateKey = getPrivateKey(alias);
+    public String getSignature(byte[] signingInput, String alias, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws UnrecoverableEntryException,
+            NoSuchAlgorithmException, KeyStoreException, InvalidKeyException, SignatureException, UnsupportedEncodingException {
+        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+            return null;
+        } else if (SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
+            SecretKey secretKey = new SecretKeySpec(sharedSecret.getBytes(UTF8_STRING_ENCODING), signatureAlgorithm.getAlgorithm());
+            Mac mac = Mac.getInstance(signatureAlgorithm.getAlgorithm());
+            mac.init(secretKey);
+            byte[] sig = mac.doFinal(signingInput);
+            return Base64Util.base64UrlEncode(sig);
+        } else { // EC or RSA
+            PrivateKey privateKey = getPrivateKey(alias);
 
-        Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
-        signature.initSign(privateKey);
-        signature.update(signingInput);
+            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
+            signature.initSign(privateKey);
+            signature.update(signingInput);
 
-        return Base64Util.base64UrlEncode(signature.sign());
+            return Base64Util.base64UrlEncode(signature.sign());
+        }
     }
 
-    public boolean verifySignature(String signingInput, String encodedSignature, String alias,
-                                   JwksRequestParam jwksRequestParam, SignatureAlgorithm signatureAlgorithm) {
+    public boolean verifySignature(String signingInput, String encodedSignature, String alias, String sharedSecret,
+                                   JwksRequestParam jwksRequestParam, SignatureAlgorithm signatureAlgorithm) throws InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, UnsupportedEncodingException, SignatureException, UnrecoverableEntryException {
         boolean verified = false;
-        PublicKey publicKey = null;
 
-        try {
-            if (jwksRequestParam == null) {
-                publicKey = getPublicKey(alias);
-            } else {
-                publicKey = getPublicKey(alias, jwksRequestParam);
+        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+            return Strings.isNullOrEmpty(encodedSignature);
+        } else if (SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
+            String expectedSignature = getSignature(signingInput.getBytes(), null, sharedSecret, signatureAlgorithm);
+            return expectedSignature.equals(encodedSignature);
+        } else { // EC or RSA
+            PublicKey publicKey = null;
+
+            try {
+                if (jwksRequestParam == null) {
+                    publicKey = getPublicKey(alias);
+                } else {
+                    publicKey = getPublicKey(alias, jwksRequestParam);
+                }
+                if (publicKey == null) {
+                    return false;
+                }
+
+                byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
+
+                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
+                verifier.initVerify(publicKey);
+                verifier.update(signingInput.getBytes());
+                verified = verifier.verify(signature);
+            } catch (NoSuchAlgorithmException e) {
+                verified = false;
+            } catch (SignatureException e) {
+                verified = false;
+            } catch (InvalidKeyException e) {
+                verified = false;
+            } catch (Exception e) {
+                verified = false;
             }
-            if (publicKey == null) {
-                return false;
-            }
-
-            byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
-
-            Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
-            verifier.initVerify(publicKey);
-            verifier.update(signingInput.getBytes());
-            verified = verifier.verify(signature);
-        } catch (NoSuchAlgorithmException e) {
-            verified = false;
-        } catch (SignatureException e) {
-            verified = false;
-        } catch (InvalidKeyException e) {
-            verified = false;
-        } catch (Exception e) {
-            verified = false;
         }
 
         return verified;

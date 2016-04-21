@@ -8,10 +8,14 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 20, 2016
  */
 public interface SignatureAlgorithm {
 
+    public static final String NONE = "none";
+    public static final String HS256 = "HS256";
+    public static final String HS384 = "HS384";
+    public static final String HS512 = "HS512";
     public static final String RS256 = "RS256";
     public static final String RS384 = "RS384";
     public static final String RS512 = "RS512";

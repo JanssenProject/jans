@@ -6,46 +6,32 @@
 
 package org.gluu.oxeleven.client;
 
+import org.gluu.oxeleven.model.SignRequestParam;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 19, 2016
  */
 public class SignRequest extends BaseRequest {
 
-    private String signingInput;
-    private String alias;
-    private String signatureAlgorithm;
+    private SignRequestParam signRequestParam;
 
     public SignRequest() {
-        setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        setMediaType(MediaType.APPLICATION_FORM_URLENCODED);
+        setContentType(MediaType.APPLICATION_JSON);
+        setMediaType(MediaType.APPLICATION_JSON);
         setHttpMethod(HttpMethod.POST);
+
+        signRequestParam = new SignRequestParam();
     }
 
-    public String getSigningInput() {
-        return signingInput;
+    public SignRequestParam getSignRequestParam() {
+        return signRequestParam;
     }
 
-    public void setSigningInput(String signingInput) {
-        this.signingInput = signingInput;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getSignatureAlgorithm() {
-        return signatureAlgorithm;
-    }
-
-    public void setSignatureAlgorithm(String signatureAlgorithm) {
-        this.signatureAlgorithm = signatureAlgorithm;
+    public void setSignRequestParam(SignRequestParam signRequestParam) {
+        this.signRequestParam = signRequestParam;
     }
 }

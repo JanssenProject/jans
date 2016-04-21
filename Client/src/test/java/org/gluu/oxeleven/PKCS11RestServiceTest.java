@@ -20,7 +20,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version April 19, 2016
  */
 public class PKCS11RestServiceTest {
 
@@ -30,6 +30,10 @@ public class PKCS11RestServiceTest {
     private String es256Alias;
     private String es384Alias;
     //private String es512Alias;
+    private String noneSignature;
+    private String hs256Signature;
+    private String hs384Signature;
+    private String hs512Signature;
     private String rs256Signature;
     private String rs384Signature;
     private String rs512Signature;
@@ -174,13 +178,96 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"signEndpoint", "signingInput"})
+    @Test
+    public void testSignatureNone(final String signEndpoint, final String signingInput) {
+        try {
+            SignRequest request = new SignRequest();
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.NONE);
+
+            SignClient client = new SignClient(signEndpoint);
+            client.setRequest(request);
+
+            SignResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertEquals("", response.getSignature());
+            noneSignature = response.getSignature();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"signEndpoint", "signingInput", "sharedSecret"})
+    @Test
+    public void testSignatureHS256(final String signEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            SignRequest request = new SignRequest();
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS256);
+            request.getSignRequestParam().setSharedSecret(sharedSecret);
+
+            SignClient client = new SignClient(signEndpoint);
+            client.setRequest(request);
+
+            SignResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertNotNull(response.getSignature());
+            hs256Signature = response.getSignature();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"signEndpoint", "signingInput", "sharedSecret"})
+    @Test
+    public void testSignatureHS384(final String signEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            SignRequest request = new SignRequest();
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS384);
+            request.getSignRequestParam().setSharedSecret(sharedSecret);
+
+            SignClient client = new SignClient(signEndpoint);
+            client.setRequest(request);
+
+            SignResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertNotNull(response.getSignature());
+            hs384Signature = response.getSignature();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"signEndpoint", "signingInput", "sharedSecret"})
+    @Test
+    public void testSignatureHS512(final String signEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            SignRequest request = new SignRequest();
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS512);
+            request.getSignRequestParam().setSharedSecret(sharedSecret);
+
+            SignClient client = new SignClient(signEndpoint);
+            client.setRequest(request);
+
+            SignResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertNotNull(response.getSignature());
+            hs512Signature = response.getSignature();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"signEndpoint", "signingInput"})
     @Test(dependsOnMethods = "testGenerateKeyRS256")
     public void testSignatureRS256(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(rs256Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(rs256Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -199,9 +286,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureRS384(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(rs384Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS384);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(rs384Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS384);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -220,9 +307,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureRS512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(rs512Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS512);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(rs512Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS512);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -241,9 +328,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureES256(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(es256Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(es256Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -262,9 +349,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureES384(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(es384Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.ES384);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(es384Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES384);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -283,9 +370,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureES512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(es512Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.ES512);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(es512Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES512);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -304,9 +391,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail1(final String signEndpoint) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(null);
-            request.setAlias(null);
-            request.setSignatureAlgorithm(null);
+            request.getSignRequestParam().setSigningInput(null);
+            request.getSignRequestParam().setAlias(null);
+            request.getSignRequestParam().setSignatureAlgorithm(null);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -323,9 +410,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail2(final String signEndpoint) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(null);
-            request.setAlias(rs256Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.getSignRequestParam().setSigningInput(null);
+            request.getSignRequestParam().setAlias(rs256Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -342,9 +429,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail3(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(null);
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(null);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -361,9 +448,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail4(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias("INVALID_ALIAS");
-            request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias("INVALID_ALIAS");
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -380,9 +467,9 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail5(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(rs256Alias);
-            request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(rs256Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
@@ -399,15 +486,98 @@ public class PKCS11RestServiceTest {
     public void testSignatureFail6(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
-            request.setSigningInput(signingInput);
-            request.setAlias(rs256Alias);
-            request.setSignatureAlgorithm(null);
+            request.getSignRequestParam().setSigningInput(signingInput);
+            request.getSignRequestParam().setAlias(rs256Alias);
+            request.getSignRequestParam().setSignatureAlgorithm(null);
 
             SignClient client = new SignClient(signEndpoint);
             client.setRequest(request);
 
             SignResponse response = client.exec();
             assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
+    @Test(dependsOnMethods = "testSignatureNone")
+    public void testVerifySignatureNone(final String verifySignatureEndpoint, final String signingInput) {
+        try {
+            VerifySignatureRequest request = new VerifySignatureRequest();
+            request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+            request.getVerifySignatureRequestParam().setSignature(noneSignature);
+            request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.NONE);
+
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+            client.setRequest(request);
+
+            VerifySignatureResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertTrue(response.isVerified());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"verifySignatureEndpoint", "signingInput", "sharedSecret"})
+    @Test(dependsOnMethods = "testSignatureHS256")
+    public void testVerifySignatureHS256(final String verifySignatureEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            VerifySignatureRequest request = new VerifySignatureRequest();
+            request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+            request.getVerifySignatureRequestParam().setSignature(hs256Signature);
+            request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
+            request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS256);
+
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+            client.setRequest(request);
+
+            VerifySignatureResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertTrue(response.isVerified());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"verifySignatureEndpoint", "signingInput", "sharedSecret"})
+    @Test(dependsOnMethods = "testSignatureHS384")
+    public void testVerifySignatureHS384(final String verifySignatureEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            VerifySignatureRequest request = new VerifySignatureRequest();
+            request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+            request.getVerifySignatureRequestParam().setSignature(hs384Signature);
+            request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
+            request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS384);
+
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+            client.setRequest(request);
+
+            VerifySignatureResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertTrue(response.isVerified());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"verifySignatureEndpoint", "signingInput", "sharedSecret"})
+    @Test(dependsOnMethods = "testSignatureHS512")
+    public void testVerifySignatureHS512(final String verifySignatureEndpoint, final String signingInput, final String sharedSecret) {
+        try {
+            VerifySignatureRequest request = new VerifySignatureRequest();
+            request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+            request.getVerifySignatureRequestParam().setSignature(hs512Signature);
+            request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
+            request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS512);
+
+            VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+            client.setRequest(request);
+
+            VerifySignatureResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertTrue(response.isVerified());
         } catch (Exception e) {
             fail(e.getMessage());
         }
