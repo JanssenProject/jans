@@ -366,7 +366,7 @@ def getBackupVersion():
 
 
 def main(folder_name):
-    global backup24_folder, backup_version, current_version
+    global backup24_folder, backup_version, current_version, service
 
     # Verify that all required folders are present
     backup24_folder = folder_name
@@ -397,6 +397,9 @@ def main(folder_name):
 
     if not os.path.exists(outputLdifFolder):
         os.mkdir(outputLdifFolder)
+
+    # rewrite service location as CentOS and Ubuntu have different values
+    service = getOutput(['whereis', 'service']).split(' ')[1].strip()
 
     stopTomcat()
     preparePasswordFile()
