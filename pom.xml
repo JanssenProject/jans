@@ -10,6 +10,21 @@
     <name>oxEleven</name>
     <url>http://ox.gluu.org</url>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <fork>true</fork>
+                    <compilerVersion>1.6</compilerVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <properties>
         <ox.version>2.4.3-SNAPSHOT</ox.version>
         <seam.version>2.2.2.Final</seam.version>
