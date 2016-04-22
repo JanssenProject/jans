@@ -171,6 +171,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
      *                    select_account, and none.
      * @return The authorization response.
      */
+    @Deprecated // it produces confusion since we have parameters and request object at the same time
     public AuthorizationResponse execImplicitGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
             String state, String req, String reqUri, Display display, List<Prompt> prompt) {
