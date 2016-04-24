@@ -292,8 +292,9 @@ def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
         ignore_folders = ['opendj', 'shibboleth2', 'template', 'endorsed']
-        if directory in ignore_folders:
-            return
+        for folder in ignore_foders:
+            if folder in directory:
+                return
 
     for f in files:
         if f in ignore_files:
