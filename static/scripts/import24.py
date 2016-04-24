@@ -38,7 +38,7 @@ ignore_files = ['101-ox.ldif',
                 'oxauth-errors.json',
                 'oxauth.config.reload',
                 'oxauth-static-conf.json',
-                'oxtrust.config.reload'
+                'oxtrust.config.reload',
                 ]
 
 ldap_creds = ['-h', 'localhost',
@@ -291,7 +291,7 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
-        if 'opendj' in directory or 'tomcat' in directory:
+        if 'opendj' in directory:
             return
 
     for f in files:
@@ -389,6 +389,17 @@ def main(folder_name):
     # Identify the version of the backup and installation
     backup_version = getBackupVersion()
     current_version = getCurrentVersion()
+
+    # some version specific adjustment
+    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+        skip_files = ['oxauth.xml',  # /opt/tomcat/conf/Catalina/localhost
+                      'oxasimba-ldap.properties',
+                      'oxauth-ldap.properties',
+                      'oxidp-ldap.properties',
+                      'oxtrust-ldap.properties',  # /opt/tomcat/conf
+                      ]
+        global ignore_files
+        ignore_files += skip_files
 
     outputFolder = "./output_ldif"
     outputLdifFolder = "%s/config" % outputFolder
