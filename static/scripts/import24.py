@@ -397,6 +397,7 @@ def main(folder_name):
                       'oxauth-ldap.properties',
                       'oxidp-ldap.properties',
                       'oxtrust-ldap.properties',  # /opt/tomcat/conf
+                      'gluuTomcatWrapper.conf'
                       ]
         global ignore_files
         ignore_files += skip_files
