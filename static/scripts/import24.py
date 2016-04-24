@@ -291,7 +291,7 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
-        if 'opendj' in directory:
+        if 'opendj' in directory or 'tomcat' in directory:
             return
 
     for f in files:
