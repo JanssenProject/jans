@@ -291,7 +291,8 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
-        if 'opendj' in directory:
+        ignore_folders = ['opendj', 'shibboleth2', 'template', 'endorsed']
+        if directory in ignore_folders:
             return
 
     for f in files:
@@ -397,7 +398,9 @@ def main(folder_name):
                       'oxauth-ldap.properties',
                       'oxidp-ldap.properties',
                       'oxtrust-ldap.properties',  # /opt/tomcat/conf
-                      'gluuTomcatWrapper.conf'
+                      'gluuTomcatWrapper.conf',
+                      'catalina.properties',
+                      'oxTrustLdap.properties',  # from 2.3.6
                       ]
         global ignore_files
         ignore_files += skip_files
