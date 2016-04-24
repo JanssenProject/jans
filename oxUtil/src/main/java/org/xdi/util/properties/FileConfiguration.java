@@ -252,4 +252,8 @@ public class FileConfiguration {
         return null;
     }
 
+	public PropertiesConfiguration getPropertiesConfiguration() {
+		return propertiesConfiguration;
+	}
+
 }
