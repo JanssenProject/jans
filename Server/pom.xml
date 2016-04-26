@@ -361,6 +361,14 @@
             <artifactId>oxauth-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxauth-model</artifactId>
             <version>${project.version}</version>
