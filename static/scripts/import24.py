@@ -152,6 +152,10 @@ def getOldEntryMap(folder):
     admin_dn = getDns('/opt/opendj/ldif/people.ldif')[0]
 
     for fn in files:
+        # oxIDPAuthentication in appliance.ldif file is incompatible with
+        # the new version of gluu-server. Hence skip the file
+        if 'appliance' in fn and '2.3' in backup_version:
+            continue
         dnList = getDns("%s/%s" % (folder, fn))
         for dn in dnList:
             # skip the entry of Admin DN and its leaves
