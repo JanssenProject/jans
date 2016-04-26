@@ -294,7 +294,8 @@ public class OpenIdConfiguration extends HttpServlet {
             for (Scope scope : scopeService.getAllScopesList()) {
                 final JSONArray claimsList = new JSONArray();
                 final JSONObject mapping = new JSONObject();
-                mapping.put(scope.getDisplayName(), claimsList);
+                mapping.put(SCOPE_KEY, scope.getDisplayName());
+                mapping.put(CLAIMS_KEY, claimsList);
 
                 result.put(mapping);
 
