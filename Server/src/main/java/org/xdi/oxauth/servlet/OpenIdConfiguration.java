@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
@@ -36,6 +37,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 /**
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
+ * @author Yuriy Movchan Date: 2016/04/26
  */
 public class OpenIdConfiguration extends HttpServlet {
 
@@ -222,19 +224,19 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray claimsSupported = new JSONArray();
             List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
+
+            // Preload all scopes to avoid sending request to LDAP per claim 
+            List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
+            
 			for (GluuAttribute gluuAttribute : gluuAttributes) {
-				if ((gluuAttribute.getStatus() != null) && (gluuAttribute.getStatus().getDisplayName().equalsIgnoreCase("Active"))) {
+				if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
 					String claimName = gluuAttribute.getOxAuthClaimName();
-					if (claimName != null && (StringUtils.isNotBlank(claimName))) {
-						List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getScopeByOxAuthClaims(gluuAttribute.getInum());
-						if (scopes != null) {
-							for (org.xdi.oxauth.model.common.Scope scope : scopes) {
-								ScopeType scopeType = scope.getScopeType();
-								if (scopeType != null) {
-									if (scopeType.getDisplayName().equalsIgnoreCase(Constants.OX_AUTH_SCOPE_TYPE_OPENID)) {
-										claimsSupported.put(claimName);
-									}
-								}
+					if (StringUtils.isNotBlank(claimName)) {
+						List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService.getScopesByClaim(scopes, gluuAttribute.getDn());
+						for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
+							if (ScopeType.OPENID.equals(scope.getScopeType())) {
+								claimsSupported.put(claimName);
+								break;
 							}
 						}
 					}
