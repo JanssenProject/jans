@@ -21,6 +21,11 @@
     "introspectionEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/introspection",
     "umaConfigurationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/uma-configuration",
     "sectorIdentifierEndpoint":"https://%(hostname)s/oxauth/sectoridentifier",
+    "oxElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
+    "oxElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
+    "oxElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
+    "oxElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
+    "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         "code",
@@ -220,5 +225,6 @@
     "metricReporterKeepDataDays":15,
     "pairwiseIdType":"persistent",
     "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
-    "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s"
+    "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
+    "webKeysStorage": "ldap"
 }
