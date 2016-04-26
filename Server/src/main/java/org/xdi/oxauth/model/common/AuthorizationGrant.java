@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -20,8 +19,6 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
@@ -57,8 +54,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public static IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+            throws Exception {
         JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
