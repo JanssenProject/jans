@@ -20,7 +20,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 19, 2016
+ * @version April 26, 2016
  */
 public class PKCS11RestServiceTest {
 
@@ -54,8 +54,8 @@ public class PKCS11RestServiceTest {
             GenerateKeyResponse response = client.exec();
 
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            rs256Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            rs256Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -74,8 +74,8 @@ public class PKCS11RestServiceTest {
             GenerateKeyResponse response = client.exec();
 
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            rs384Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            rs384Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -94,8 +94,8 @@ public class PKCS11RestServiceTest {
             GenerateKeyResponse response = client.exec();
 
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            rs512Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            rs512Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -114,8 +114,8 @@ public class PKCS11RestServiceTest {
             GenerateKeyResponse response = client.exec();
 
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            es256Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            es256Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -134,8 +134,8 @@ public class PKCS11RestServiceTest {
             GenerateKeyResponse response = client.exec();
 
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            es384Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            es384Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -153,8 +153,8 @@ public class PKCS11RestServiceTest {
 
             GenerateKeyResponse response = client.exec();
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
-            assertNotNull(response.getAlias());
-            es512Alias = response.getAlias();
+            assertNotNull(response.getKeyId());
+            es512Alias = response.getKeyId();
         } catch (Exception e) {
             fail(e.getMessage());
         }

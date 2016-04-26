@@ -10,11 +10,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.gluu.oxeleven.model.DeleteKeyRequestParam.ALIAS;
+import static org.gluu.oxeleven.model.DeleteKeyRequestParam.KEY_ID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 26, 2016
  */
 @Path("/oxeleven")
 public interface DeleteKeyRestService {
@@ -24,5 +24,5 @@ public interface DeleteKeyRestService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({MediaType.APPLICATION_JSON})
     Response sign(
-            @FormParam(ALIAS) String alias);
+            @FormParam(KEY_ID) String alias);
 }

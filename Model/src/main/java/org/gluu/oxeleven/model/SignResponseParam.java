@@ -8,9 +8,9 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 26, 2016
  */
 public interface SignResponseParam {
 
-    public static final String SIGNATURE = "signature";
+    public static final String SIGNATURE = "sig";
 }

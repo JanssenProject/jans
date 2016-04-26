@@ -8,11 +8,13 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 26, 2016
  */
 public interface GenerateKeyResponseParam {
 
-    public static final String ALIAS = "alias";
-    public static final String ALGORITHM = "algorithm";
-    public static final String CURVE = "curve";
+    public static final String KEY_TYPE = "kty";
+    public static final String KEY_ID = "kid";
+    public static final String KEY_USE = "sig";
+    public static final String ALGORITHM = "alg";
+    public static final String CURVE = "crv";
 }

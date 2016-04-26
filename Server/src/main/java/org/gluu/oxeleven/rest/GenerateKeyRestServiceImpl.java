@@ -28,7 +28,7 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 26, 2016
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
@@ -56,7 +56,9 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                 String alias = pkcs11.generateKey(dnName, signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(ALIAS, alias);
+                jsonObject.put(KEY_TYPE, signatureAlgorithm.getFamily());
+                jsonObject.put(KEY_ID, alias);
+                jsonObject.put(KEY_USE, "sig");
                 jsonObject.put(ALGORITHM, signatureAlgorithm.getName());
                 if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
                     jsonObject.put(CURVE, signatureAlgorithm.getCurve());
