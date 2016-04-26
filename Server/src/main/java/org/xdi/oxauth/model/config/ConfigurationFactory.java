@@ -6,10 +6,6 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
@@ -18,13 +14,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
@@ -33,12 +23,17 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.KeyGenerator;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.properties.FileConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
