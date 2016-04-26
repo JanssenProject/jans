@@ -196,7 +196,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         long diff = response.getClientSecretExpiresAt().getTime() / 10000 - clientSecretExpiresAt.getTime() / 10000; // check after division on 1000 because of internal server conversion
         System.out.println("Diff: " + diff + ", respTime: " + response.getClientSecretExpiresAt().getTime() + ", expAt: " + clientSecretExpiresAt.getTime());
-        assertTrue(Math.abs(diff) < 10);
+        assertTrue(Math.abs(diff) == 0);
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
