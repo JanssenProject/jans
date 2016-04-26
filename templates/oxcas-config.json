@@ -14,10 +14,6 @@
     "openIdDefaultAuthenticator":true,
     "openIdClaimMapping":[
         {
-            "claim":"sub",
-            "attribute":"username"
-        },
-        {
             "claim":"email",
             "attribute":"email"
         },

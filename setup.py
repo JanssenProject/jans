@@ -90,6 +90,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
         self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
+        self.oxCustomizationFolder = "/var/gluu/webapps"
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
@@ -196,18 +197,17 @@ class Setup(object):
 
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        self.oxauth_ldap_properties = '%s/conf/oxauth-ldap.properties' % self.tomcatHome
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.tomcatHome
+        self.oxtrust_context_xml = '%s/conf/Catalina/localhost/identity.xml' % self.tomcatHome
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
+        self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
-        self.oxtrust_ldap_properties = '%s/conf/oxtrust-ldap.properties' % self.tomcatHome
-        self.oxasimba_ldap_properties = '%s/conf/oxasimba-ldap.properties' % self.tomcatHome
         self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
@@ -230,6 +230,7 @@ class Setup(object):
         self.ldif_scripts = '%s/scripts.ldif' % self.outputFolder
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
+        self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -251,6 +252,7 @@ class Setup(object):
         self.oxtrust_import_person_base64 = None
         self.oxidp_config_base64 = None
         self.oxcas_config_base64 = None
+        self.oxasimba_config_base64 = None
 
 
         # oxTrust SCIM configuration
@@ -273,21 +275,21 @@ class Setup(object):
                            self.ldif_site,
                            self.ldif_scripts,
                            self.ldif_configuration,
-                           self.ldif_scim
+                           self.ldif_scim,
+                           self.ldif_asimba
                            ]
 
-        self.ce_templates = {self.oxauth_ldap_properties: True,
-                     self.oxauth_config_json: False,
+        self.ce_templates = {self.oxauth_config_json: False,
                      self.oxauth_context_xml: True,
+                     self.oxtrust_context_xml: True,
                      self.tomcat_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
                      self.oxtrust_import_person_json: False,
                      self.oxidp_config_json: False,
                      self.oxcas_config_json: False,
+                     self.oxasimba_config_json: False,
                      self.tomcat_server_xml: True,
-                     self.oxtrust_ldap_properties: True,
-                     self.oxasimba_ldap_properties: True,
                      self.ox_ldap_properties: True,
                      self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
@@ -309,6 +311,7 @@ class Setup(object):
                      self.ldif_groups: False,
                      self.ldif_scripts: False,
                      self.ldif_scim: False,
+                     self.ldif_asimba: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
@@ -371,6 +374,26 @@ class Setup(object):
         self.run(['/bin/chmod', '-R', '400', realCertFolder])
         self.run(['/bin/chmod', 'u+X', realCertFolder])
 
+    def get_ip(self):
+        testIP = None
+        detectedIP = None
+        try:
+            testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
+                           testSocket.getsockname()[0],
+                           testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+        except:
+            self.logIt("No detected IP address", True)
+            self.logIt(traceback.format_exc(), True)
+        if detectedIP:
+            testIP = self.getPrompt("Enter IP Address", detectedIP)
+        else:
+            testIP = self.getPrompt("Enter IP Address")
+        if not self.isIP(testIP):
+            testIP = None
+            print 'ERROR: The IP Address is invalid. Try again\n'
+        return testIP
+
     def check_properties(self):
         self.logIt('Checking properties')
         while not self.hostname:
@@ -380,11 +403,7 @@ class Setup(object):
             else:
                 print 'The hostname has to be at least three domain components. Try again\n'
         while not self.ip:
-            testIP = raw_input('IP address : ').strip()
-            if self.isIP(testIP):
-                self.ip = testIP
-            else:
-                print 'ERROR: The IP Address is invalid. Try again\n'
+            self.ip = self.get_ip()
         while not self.orgName:
             self.orgName = raw_input('Organization Name: ').strip()
         while not self.countryCode:
@@ -468,7 +487,7 @@ class Setup(object):
         if self.os_type == 'centos' and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['redhat', 'fedora']:
+        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
@@ -483,13 +502,17 @@ class Setup(object):
     def configure_opendj(self):
         try:
             self.logIt("Making LDAP configuration changes")
+            if self.opendj_version == "2.6":
+                opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN||targetEntryUUID||changeInitiatorsName||changeLogCookie||includedAttributes")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
+            else:
+                opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
             config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
                               ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
                               ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
                               ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
                               ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
-                              ['set-access-control-handler-prop', '--remove', 'global-aci:\'(targetattr!="userPassword||authPassword||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN||targetEntryUUID||changeInitiatorsName||changeLogCookie||includedAttributes")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''],
+                              ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                               ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
                               ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true']
@@ -594,8 +617,9 @@ class Setup(object):
         if self.installSaml:
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
             self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/" % self.tomcatHome)
-            self.copyFile("%s/static/idp/conf/attribute-filter.xml" % self.install_dir, "%s/" % self.idpConfFolder)
-            self.copyFile("%s/static/idp/conf/relying-party.xml" % self.install_dir, "%s/" % self.idpConfFolder)
+
+            self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
+            
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
         if self.installOxAuth:
@@ -632,6 +656,8 @@ class Setup(object):
 
         if 'CentOS' in distro_info:
             return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
         elif 'Ubuntu' in distro_info:
             return self.os_types[3]
 
@@ -669,7 +695,7 @@ class Setup(object):
         if re.match(r'2\.6\.0\..*', encode_script):
             return "2.6"
 
-        return "4.0"
+        return "3.0"
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1114,6 +1140,7 @@ class Setup(object):
 
     def install_saml(self):
         if self.installSaml:
+            # Put latest Saml templates
             identityWar = 'identity.war'
             distIdentityPath = '%s/%s' % (self.tomcatWebAppFolder, identityWar)
 
@@ -1141,6 +1168,27 @@ class Setup(object):
             self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
 
             self.removeDirs(tmpIdentityDir)
+            
+            # Put files to /opt/idp
+            idpWar = "idp.war"
+            distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
+
+            tmpIdpDir = '%s/tmp_idp' % self.distFolder
+
+            self.logIt("Unpacking %s..." % idpWar)
+            self.removeDirs(tmpIdpDir)
+            self.createDirs(tmpIdpDir)
+
+            self.run([self.jarCommand,
+                      'xf',
+                      distIdpPath], tmpIdpDir)
+
+            self.logIt("Copying files to %s..." % self.idpLibFolder)
+            self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
+            self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
+            self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
+
+            self.removeDirs(tmpIdpDir)
 
     def install_asimba_war(self):
         if self.installAsimba:
@@ -1300,6 +1348,20 @@ class Setup(object):
                 self.run([mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
 
+                # Customizations folders
+                self.run([mkdir, '-p', self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
+
+                self.run([mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
+                self.run([mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
+
+                self.run([chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
+
             if self.installSaml:
                 self.run([mkdir, '-p', self.idpFolder])
                 self.run([mkdir, '-p', self.idpMetadataFolder])
@@ -1334,19 +1396,7 @@ class Setup(object):
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
         if self.installHttpd:
-            detectedIP = None
-            try:
-                testSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                detectedIP = [(testSocket.connect(('8.8.8.8', 80)),
-                               testSocket.getsockname()[0],
-                               testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
-            except:
-                self.logIt("No detected IP address", True)
-                self.logIt(traceback.format_exc(), True)
-            if detectedIP:
-                self.ip = self.getPrompt("Enter IP Address", detectedIP)
-            else:
-                self.ip = self.getPrompt("Enter IP Address")
+            self.ip = self.get_ip()
 
         detectedHostname = None
         try:
@@ -1553,6 +1603,7 @@ class Setup(object):
 
         self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
         self.oxcas_config_base64 = self.generate_base64_ldap_file(self.oxcas_config_json)
+        self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None):
