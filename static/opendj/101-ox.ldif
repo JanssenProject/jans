@@ -2130,12 +2130,6 @@ attributeTypes: ( oxAsimbaEntry-oid NAME 'oxAsimbaEntry'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( defaultCacheRefreshInumServer-oid NAME 'defaultCacheRefreshInumServer'
-  DESC 'oxTrust Cache Refresh inum Configuration Default '
-  SUBSTR caseIgnoreSubstringsMatch
-  EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
    ( oxId $ oxSectorIdentifierURI )
     X-ORIGIN 'Gluu created objectclass' )
@@ -2191,7 +2185,7 @@ objectclasses: ( gluuAppliance-oid NAME 'gluuAppliance' SUP top STRUCTURAL MUST 
   $ gluuWhitePagesEnabled $ iname $ inum $ inumFN $ o $ oxAuthenticationMode
   $ oxTrustAuthenticationMode $ oxIDPAuthentication $ oxLogViewerConfig
   $ oxSmtpConfiguration $ oxTrustStoreCert $ oxTrustStoreConf
-  $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ defaultCacheRefreshInumServer )
+  $ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuAttribute-oid NAME 'gluuAttribute' SUP top STRUCTURAL MUST objectclass MAY 
  ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin
@@ -2289,7 +2283,7 @@ objectclasses: ( oxAuthConfiguration-oid NAME 'oxAuthConfiguration' SUP top STRU
 objectclasses: ( oxTrustConfiguration-oid NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson) 
   X-ORIGIN 'Gluu created objectclass' )
-objectclasses: ( oxApplicationConfiguration-oid NAME 'oxIdpConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclasses: ( oxApplicationConfiguration-oid NAME 'oxApplicationConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ oxConfApplication $ oxRevision ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthUmaResourceSet-oid NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
@@ -2349,7 +2343,7 @@ objectclasses: ( oxCustomScript-oid NAME 'oxCustomScript' SUP top STRUCTURAL MUS
   $ oxConfigurationProperty $ oxLevel $ oxRevision $ gluuStatus ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxDeviceRegistration-oid NAME 'oxDeviceRegistration' SUP top STRUCTURAL MUST objectclass MAY 
- ( oxId $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceData $ oxCounter $ oxStatus $ creationDate ) 
+ ( oxId $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxU2fRequest-oid NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
  ( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ personInum $ creationDate )
@@ -2364,7 +2358,7 @@ objectclasses: ( oxSectorIdentifier-oid NAME 'oxSectorIdentifier' SUP top STRUCT
   ( inum $ oxAuthRedirectURI $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaConfiguration-oid NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectclass )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxConfApplication $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( oxAsimbaSelector-oid NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectclass )
   MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)

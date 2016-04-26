@@ -23,13 +23,13 @@ import logging
 
 password_file = tempfile.mkstemp()[1]
 backup24_folder = None
+backup_version = None
+current_version = None
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
-stoptomcat = "/opt/tomcat/bin/shutdown.sh"
-starttomcat = "/opt/tomcat/bin/startup.sh"
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -38,7 +38,7 @@ ignore_files = ['101-ox.ldif',
                 'oxauth-errors.json',
                 'oxauth.config.reload',
                 'oxauth-static-conf.json',
-                'oxtrust.config.reload'
+                'oxtrust.config.reload',
                 ]
 
 ldap_creds = ['-h', 'localhost',
@@ -98,7 +98,9 @@ changetype: add
         for value in entry[attr]:
             newLdif = newLdif + getMod(attr, value)
     newLdif = newLdif + "\n"
-    f = open("%s/%s.ldif" % (ldifModFolder, str(uuid.uuid4())), 'w')
+    new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
+    filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
+    f = open(filename, 'w')
     f.write(newLdif)
     f.close()
 
@@ -174,8 +176,7 @@ def getDns(fn):
 
 def getMod(attr, s):
     val = str(s).strip()
-    logging.debug('String of Value: %s', val)
-    if (val.find('\n') > -1) or ('{' in val):
+    if val.find('\n') > -1:
         val = base64.b64encode(val)
         return "%s\n" % tab_attr(attr, val, True)
     elif len(val) > (78 - len(attr)):
@@ -190,14 +191,14 @@ def getOutput(args):
             output = os.popen(" ".join(args)).read().strip()
             return output
         except:
-            logging.error("Error running command : %s" % " ".join(args), True)
-            logging.error(traceback.format_exc(), True)
+            logging.error("Error running command : %s" % " ".join(args))
+            logging.error(traceback.format_exc())
             sys.exit(1)
 
 
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     logging.info('Comparing old LDAP data and creating `modify` files.')
-    ignoreList = ['objectClass', 'ou']
+    ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
     for dn in oldDnMap.keys():
@@ -230,7 +231,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
                         mod_list = [json.dumps(new_json)]
                     except:
                         mod_list = old_entry[attr]
-                        logging.debug("Keeping multiple old vals for %s", attr)
+                        logging.debug("Keeping old value for %s", attr)
                 else:
                     mod_list = old_entry[attr]
                     logging.debug("Keeping multiple old value for %s", attr)
@@ -244,7 +245,7 @@ def startOpenDJ():
         logging.info("Directory Server has started successfully")
     else:
         logging.critical("OpenDJ did not start properly... exiting."
-                         " Check /opt/opendj/logs/errors", True)
+                         " Check /opt/opendj/logs/errors")
         sys.exit(2)
 
 
@@ -255,7 +256,7 @@ def stopOpenDJ():
         logging.info("Directory Server is now stopped")
     else:
         logging.critical("OpenDJ did not stop properly... exiting."
-                         " Check /opt/opendj/logs/errors", True)
+                         " Check /opt/opendj/logs/errors")
         sys.exit(3)
 
 
@@ -276,7 +277,7 @@ def tab_attr(attr, value, encoded=False):
 
 def uploadLDIF(ldifFolder, outputLdifFolder):
     logging.info('Uploading LDAP data.')
-    files = os.listdir(outputLdifFolder)
+    files = sorted(os.listdir(outputLdifFolder))
     for fn in files:
         cmd = [ldapmodify] + ldap_creds + ['-a', '-f',
                                            "%s/%s" % (outputLdifFolder, fn)]
@@ -288,6 +289,13 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 
 
 def walk_function(a, directory, files):
+    # Skip copying the openDJ config from older versions to 2.4.3
+    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+        ignore_folders = ['opendj', 'shibboleth2', 'template', 'endorsed']
+        for folder in ignore_folders:
+            if folder in directory:
+                return
+
     for f in files:
         if f in ignore_files:
             continue
@@ -324,9 +332,47 @@ changetype: modify
     logging.debug('Writing Mod for %s at %s', attr, fn)
 
 
-def main(folder_name):
-    global backup24_folder
+def stopTomcat():
+    logging.info('Stopping Tomcat ...')
+    output = getOutput([service, 'tomcat', 'stop'])
+    logging.debug(output)
 
+
+def startTomcat():
+    logging.info('Starting Tomcat ...')
+    output = getOutput([service, 'tomcat', 'start'])
+    logging.debug(output)
+
+
+def preparePasswordFile():
+    # prepare password_file
+    with open('/install/community-edition-setup/setup.properties.last', 'r') \
+            as sfile:
+        for line in sfile:
+            if 'ldapPass=' in line:
+                with open(password_file, 'w') as pfile:
+                    pfile.write(line.split('=')[-1])
+                break
+
+
+def getCurrentVersion():
+    with open('/opt/tomcat/webapps/oxauth/META-INF/MANIFEST.MF', 'r') as f:
+        for line in f:
+            if 'Implementation-Version' in line:
+                return line.split(':')[-1].strip()
+
+
+def getBackupVersion():
+    with open(os.path.join(backup24_folder, 'setup.properties'), 'r') as f:
+        for line in f:
+            if 'version=' in line:
+                return line.split('=')[-1].strip()
+
+
+def main(folder_name):
+    global backup24_folder, backup_version, current_version, service
+
+    # Verify that all required folders are present
     backup24_folder = folder_name
     if not os.path.exists(backup24_folder):
         logging.critical("Backup folder %s does not exist.", backup24_folder)
@@ -342,6 +388,24 @@ def main(folder_name):
                          " Rerun export.")
         sys.exit(1)
 
+    # Identify the version of the backup and installation
+    backup_version = getBackupVersion()
+    current_version = getCurrentVersion()
+
+    # some version specific adjustment
+    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+        skip_files = ['oxauth.xml',  # /opt/tomcat/conf/Catalina/localhost
+                      'oxasimba-ldap.properties',
+                      'oxauth-ldap.properties',
+                      'oxidp-ldap.properties',
+                      'oxtrust-ldap.properties',  # /opt/tomcat/conf
+                      'gluuTomcatWrapper.conf',
+                      'catalina.properties',
+                      'oxTrustLdap.properties',  # from 2.3.6
+                      ]
+        global ignore_files
+        ignore_files += skip_files
+
     outputFolder = "./output_ldif"
     outputLdifFolder = "%s/config" % outputFolder
     newLdif = "%s/current_config.ldif" % outputFolder
@@ -352,24 +416,22 @@ def main(folder_name):
     if not os.path.exists(outputLdifFolder):
         os.mkdir(outputLdifFolder)
 
-    # prepare password_file
-    with open('/install/community-edition-setup/setup.properties.last', 'r') \
-            as sfile:
-        for line in sfile:
-            if 'ldapPass=' in line:
-                with open(password_file, 'w') as pfile:
-                    pfile.write(line.split('=')[-1])
-                break
+    # rewrite service location as CentOS and Ubuntu have different values
+    service = getOutput(['whereis', 'service']).split(' ')[1].strip()
 
+    stopTomcat()
+    preparePasswordFile()
     stopOpenDJ()
     copyFiles(backup24_folder)
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+    startTomcat()
 
     # remove the password_file
     os.remove(password_file)
+    logging.info("Import finished.")
 
 
 if __name__ == '__main__':
