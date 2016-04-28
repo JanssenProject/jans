@@ -204,7 +204,7 @@ public class AuthorizeAction {
             
             // Store Remote IP
             String remoteIp = networkService.getRemoteIp();
-           	session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
+            requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
 
             // Create unauthenticated session
             SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
