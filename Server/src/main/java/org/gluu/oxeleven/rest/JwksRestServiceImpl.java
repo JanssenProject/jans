@@ -16,8 +16,6 @@ import org.gluu.oxeleven.util.Base64Util;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import sun.security.ec.ECPublicKeyImpl;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -27,12 +25,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version April 28, 2016
  */
 @Name("jwksRestService")
 public class JwksRestServiceImpl implements JwksRestService {
@@ -91,14 +91,15 @@ public class JwksRestServiceImpl implements JwksRestService {
             KeyRequestParam keyRequestParam = iterator.next();
             String alias = keyRequestParam.getKid();
             PublicKey publicKey = pkcs11.getPublicKey(alias);
+
             if (publicKey != null) {
                 publicKey.getAlgorithm();
-                if (publicKey instanceof RSAPublicKeyImpl) {
-                    RSAPublicKeyImpl rsaPublicKey = (RSAPublicKeyImpl) publicKey;
+                if (publicKey instanceof RSAPublicKey) {
+                    RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
                     keyRequestParam.setN(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getModulus()));
                     keyRequestParam.setE(Base64Util.base64UrlEncodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
-                } else if (publicKey instanceof ECPublicKeyImpl) {
-                    ECPublicKeyImpl ecPublicKey = (ECPublicKeyImpl) publicKey;
+                } else if (publicKey instanceof ECPublicKey) {
+                    ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
                     keyRequestParam.setX(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
                     keyRequestParam.setY(Base64Util.base64UrlEncodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
                 }
