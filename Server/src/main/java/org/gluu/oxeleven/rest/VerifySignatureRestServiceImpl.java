@@ -31,7 +31,7 @@ import static org.gluu.oxeleven.model.VerifySignatureResponseParam.VERIFIED;
 
 /**
  * @author Javier Rojas Blum
- * @version April 19, 2016
+ * @version April 27, 2016
  */
 @Name("verifySignatureRestService")
 public class VerifySignatureRestServiceImpl implements VerifySignatureRestService {
@@ -48,10 +48,10 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
 
             if (Strings.isNullOrEmpty(verifySignatureRequestParam.getSigningInput())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided signingInput parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the signingInput parameter is mandatory.");
             } else if (verifySignatureRequestParam.getSignature() == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided signature parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the signature parameter is mandatory.");
             } else if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
@@ -59,12 +59,12 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
                     && SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())
                     && Strings.isNullOrEmpty(verifySignatureRequestParam.getSharedSecret())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided shared secret parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the shared secret parameter is mandatory.");
             } else if (signatureAlgorithm != SignatureAlgorithm.NONE
                     && !SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) // EC or RSA
                     && Strings.isNullOrEmpty(verifySignatureRequestParam.getAlias())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the alias parameter is mandatory.");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

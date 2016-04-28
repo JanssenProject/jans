@@ -13,7 +13,7 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2016
+ * @version April 27, 2016
  */
 public class GenerateKeyResponse extends BaseResponse {
 
@@ -22,6 +22,7 @@ public class GenerateKeyResponse extends BaseResponse {
     private String keyUse;
     private String algorithm;
     private String curve;
+    private Long expirationTime;
 
     public GenerateKeyResponse(ClientResponse<String> clientResponse) {
         super(clientResponse);
@@ -33,6 +34,7 @@ public class GenerateKeyResponse extends BaseResponse {
             keyUse = jsonObject.optString(KEY_USE);
             algorithm = jsonObject.optString(ALGORITHM);
             curve = jsonObject.optString(CURVE);
+            expirationTime = jsonObject.optLong(EXPIRATION_TIME);
         }
     }
 
@@ -54,5 +56,9 @@ public class GenerateKeyResponse extends BaseResponse {
 
     public String getCurve() {
         return curve;
+    }
+
+    public Long getExpirationTime() {
+        return expirationTime;
     }
 }

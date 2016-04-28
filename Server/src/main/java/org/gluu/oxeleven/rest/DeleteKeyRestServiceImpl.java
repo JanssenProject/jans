@@ -29,7 +29,7 @@ import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 27, 2016
  */
 @Name("deleteKeyRestService")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
@@ -44,7 +44,7 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
         try {
             if (Strings.isNullOrEmpty(alias)) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the alias parameter is mandatory.");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

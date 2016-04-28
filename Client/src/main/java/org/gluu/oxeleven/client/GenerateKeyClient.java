@@ -11,11 +11,12 @@ import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 
+import static org.gluu.oxeleven.model.GenerateKeyRequestParam.EXPIRATION_TIME;
 import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITHM;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 27, 2016
  */
 public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKeyResponse> {
 
@@ -59,6 +60,9 @@ public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKe
 
         if (!Strings.isNullOrEmpty(getRequest().getSignatureAlgorithm())) {
             addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm());
+        }
+        if (getRequest().getExpirationTime() != null) {
+            addRequestParam(EXPIRATION_TIME, getRequest().getExpirationTime());
         }
 
         // Call REST Service and handle response

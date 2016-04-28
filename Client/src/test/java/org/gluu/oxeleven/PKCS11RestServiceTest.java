@@ -11,19 +11,24 @@ import org.gluu.oxeleven.client.*;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2016
+ * @version April 27, 2016
  */
 public class PKCS11RestServiceTest {
 
+    private Long expirationTime;
     private String rs256Alias;
     private String rs384Alias;
     private String rs512Alias;
@@ -41,12 +46,20 @@ public class PKCS11RestServiceTest {
     private String es384Signature;
     //private String es512Signature;
 
+    @BeforeSuite
+    public void init() {
+        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.add(GregorianCalendar.MINUTE, 5);
+        expirationTime = calendar.getTimeInMillis();
+    }
+
     @Parameters({"generateKeyEndpoint"})
     @Test
     public void testGenerateKeyRS256(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -67,6 +80,7 @@ public class PKCS11RestServiceTest {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS384);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -87,6 +101,7 @@ public class PKCS11RestServiceTest {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.RS512);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -107,6 +122,7 @@ public class PKCS11RestServiceTest {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -127,6 +143,7 @@ public class PKCS11RestServiceTest {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES384);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -147,6 +164,7 @@ public class PKCS11RestServiceTest {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(SignatureAlgorithm.ES512);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -162,10 +180,119 @@ public class PKCS11RestServiceTest {
 
     @Parameters({"generateKeyEndpoint"})
     @Test
-    public void testGenerateKeyFail(final String generateKeyEndpoint) {
+    public void testGenerateKeyFail1(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
             request.setSignatureAlgorithm(null);
+            request.setExpirationTime(null);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail2(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(null);
+            request.setExpirationTime(expirationTime);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail3(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
+            request.setExpirationTime(null);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail4(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(SignatureAlgorithm.NONE);
+            request.setExpirationTime(expirationTime);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail5(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(SignatureAlgorithm.HS256);
+            request.setExpirationTime(expirationTime);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail6(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(SignatureAlgorithm.HS384);
+            request.setExpirationTime(expirationTime);
+
+            GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+            client.setRequest(request);
+
+            GenerateKeyResponse response = client.exec();
+            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Parameters({"generateKeyEndpoint"})
+    @Test
+    public void testGenerateKeyFail7(final String generateKeyEndpoint) {
+        try {
+            GenerateKeyRequest request = new GenerateKeyRequest();
+            request.setSignatureAlgorithm(SignatureAlgorithm.HS512);
+            request.setExpirationTime(expirationTime);
 
             GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
             client.setRequest(request);
@@ -1128,13 +1255,20 @@ public class PKCS11RestServiceTest {
             "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
     public void testJwks2(final String jwksEndpoint) {
         try {
+            JwksRequestParam jwksRequestParam = new JwksRequestParam();
+            jwksRequestParam.setKeyRequestParams(new ArrayList<KeyRequestParam>());
+
             JwksRequest request = new JwksRequest();
+            request.setJwksRequestParam(jwksRequestParam);
 
             JwksClient client = new JwksClient(jwksEndpoint);
             client.setRequest(request);
 
             JwksResponse response = client.exec();
-            assertEquals(response.getStatus(), HttpStatus.SC_BAD_REQUEST);
+            assertEquals(response.getStatus(), HttpStatus.SC_OK);
+            assertNotNull(response.getJwksRequestParam());
+            assertNotNull(response.getJwksRequestParam().getKeyRequestParams());
+            assertEquals(response.getJwksRequestParam().getKeyRequestParams().size(), 0);
         } catch (Exception e) {
             fail(e.getMessage());
         }

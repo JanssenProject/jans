@@ -10,11 +10,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.gluu.oxeleven.model.GenerateKeyRequestParam.EXPIRATION_TIME;
 import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITHM;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 27, 2016
  */
 @Path("/oxeleven")
 public interface GenerateKeyRestService {
@@ -24,5 +25,6 @@ public interface GenerateKeyRestService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces({MediaType.APPLICATION_JSON})
     Response generateKey(
-            @FormParam(SIGNATURE_ALGORITHM) String signatureAlgorithm);
+            @FormParam(SIGNATURE_ALGORITHM) String signatureAlgorithm,
+            @FormParam(EXPIRATION_TIME) Long expirationTime);
 }

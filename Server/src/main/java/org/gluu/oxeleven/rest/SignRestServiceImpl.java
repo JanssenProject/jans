@@ -30,7 +30,7 @@ import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
 
 /**
  * @author Javier Rojas Blum
- * @version April 19, 2016
+ * @version April 27, 2016
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
@@ -47,7 +47,7 @@ public class SignRestServiceImpl implements SignRestService {
 
             if (Strings.isNullOrEmpty(signRequestParam.getSigningInput())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided signingInput parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the signingInput parameter is mandatory.");
             } else if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
@@ -55,12 +55,12 @@ public class SignRestServiceImpl implements SignRestService {
                     && SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())
                     && Strings.isNullOrEmpty(signRequestParam.getSharedSecret())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided shared secret parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the shared secret parameter is mandatory.");
             } else if (signatureAlgorithm != SignatureAlgorithm.NONE
                     && !SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) // EC or RSA
                     && Strings.isNullOrEmpty(signRequestParam.getAlias())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided alias parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the alias parameter is mandatory.");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

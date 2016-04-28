@@ -37,7 +37,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 20, 2016
+ * @version April 27, 2016
  */
 public class PKCS11Service {
 
@@ -83,7 +83,7 @@ public class PKCS11Service {
         return new ByteArrayInputStream(cfg.getBytes());
     }
 
-    public String generateKey(String dnName, SignatureAlgorithm signatureAlgorithm)
+    public String generateKey(String dnName, SignatureAlgorithm signatureAlgorithm, Long expirationTime)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertificateException,
             NoSuchProviderException, InvalidKeyException, SignatureException, KeyStoreException, IOException {
         KeyPairGenerator keyGen = null;
@@ -106,7 +106,7 @@ public class PKCS11Service {
         PrivateKey pk = keyPair.getPrivate();
 
         // Java API requires a certificate chain
-        X509Certificate[] chain = generateV3Certificate(keyPair, dnName, signatureAlgorithm);
+        X509Certificate[] chain = generateV3Certificate(keyPair, dnName, signatureAlgorithm, expirationTime);
 
         String alias = UUID.randomUUID().toString();
 
@@ -247,7 +247,8 @@ public class PKCS11Service {
         return privateKey;
     }
 
-    private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm)
+    private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm,
+                                                    Long expirationTime)
             throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException,
             SignatureException {
         X500Principal principal = new X500Principal(dnName);
@@ -258,7 +259,7 @@ public class PKCS11Service {
         certGen.setSerialNumber(serialNumber);
         certGen.setIssuerDN(principal);
         certGen.setNotBefore(new Date(System.currentTimeMillis() - 10000));
-        certGen.setNotAfter(new Date(System.currentTimeMillis() + 10000));
+        certGen.setNotAfter(new Date(expirationTime));
         certGen.setSubjectDN(principal);
         certGen.setPublicKey(pair.getPublic());
         certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());

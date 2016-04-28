@@ -32,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version April 27, 2016
  */
 @Name("jwksRestService")
 public class JwksRestServiceImpl implements JwksRestService {
@@ -45,9 +45,9 @@ public class JwksRestServiceImpl implements JwksRestService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            if (jwksRequestParam == null || jwksRequestParam.getKeyRequestParams() == null || jwksRequestParam.getKeyRequestParams().isEmpty()) {
+            if (jwksRequestParam == null || jwksRequestParam.getKeyRequestParams() == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the provided aliasList parameter is mandatory.");
+                builder.entity("The request asked for an operation that cannot be supported because the aliasList parameter is mandatory.");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

@@ -28,7 +28,7 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2016
+ * @version April 27, 2016
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
@@ -37,7 +37,7 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
     private Log log;
 
     @Override
-    public Response generateKey(String sigAlg) {
+    public Response generateKey(String sigAlg, Long expirationTime) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
@@ -46,6 +46,12 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
             if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
                 builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
+            } else if (expirationTime == null) {
+                builder = Response.status(Response.Status.BAD_REQUEST);
+                builder.entity("The request asked for an operation that cannot be supported because the expiration time parameter is mandatory.");
+            } else if (signatureAlgorithm == SignatureAlgorithm.NONE || signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.HMAC)) {
+                builder = Response.status(Response.Status.BAD_REQUEST);
+                builder.entity("The provided signature algorithm parameter is not supported");
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
@@ -53,7 +59,7 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                 String dnName = configuration.getDnName();
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                String alias = pkcs11.generateKey(dnName, signatureAlgorithm);
+                String alias = pkcs11.generateKey(dnName, signatureAlgorithm, expirationTime);
 
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(KEY_TYPE, signatureAlgorithm.getFamily());
@@ -63,6 +69,7 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                 if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
                     jsonObject.put(CURVE, signatureAlgorithm.getCurve());
                 }
+                jsonObject.put(EXPIRATION_TIME, expirationTime);
 
                 builder.entity(jsonObject.toString());
             }

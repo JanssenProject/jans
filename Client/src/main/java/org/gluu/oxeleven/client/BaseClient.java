@@ -14,7 +14,7 @@ import javax.ws.rs.HttpMethod;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version April 27, 2016
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -30,6 +30,16 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
     protected void addRequestParam(String key, String value) {
         if (!Strings.isNullOrEmpty(key) && !Strings.isNullOrEmpty(value)) {
+            if (HttpMethod.POST.equals(request.getHttpMethod())) {
+                clientRequest.formParameter(key, value);
+            } else {
+                clientRequest.queryParameter(key, value);
+            }
+        }
+    }
+
+    protected void addRequestParam(String key, Long value) {
+        if (!Strings.isNullOrEmpty(key) && value != null) {
             if (HttpMethod.POST.equals(request.getHttpMethod())) {
                 clientRequest.formParameter(key, value);
             } else {
