@@ -204,7 +204,8 @@ public class CustomScript extends BaseEntry {
 	}
 
 	public void setLocationType(ScriptLocationType locationType) {
-		setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
+		if(locationType != null)
+			setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
 	}
 
 	public String getLocationPath() {
