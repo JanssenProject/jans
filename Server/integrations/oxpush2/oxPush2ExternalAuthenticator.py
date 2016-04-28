@@ -17,6 +17,8 @@ from org.xdi.util.security import StringEncrypter
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
 from java.util import Arrays
+from org.xdi.oxauth.service.net import HttpService
+from org.apache.http.params import CoreConnectionPNames
 from com.notnoop.apns import APNS
 from com.google.android.gcm.server import Sender, Message 
 
@@ -223,10 +225,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
                 issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-                oxpush2_request = json.dumps({'app': client_redirect_uri,
+                oxpush2_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_state,
-                                   'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
+                                   'created': datetime.datetime.now().isoformat()}
+
+                self.addGeolocationData(session_attributes, oxpush2_request_dictionary)
+
+                oxpush2_request = json.dumps(oxpush2_request_dictionary, separators=(',',':'))
                 print "oxPush2. Prepare for step 1. Prepared oxpush2_request:", oxpush2_request
     
                 context.set("oxpush2_request", oxpush2_request)
@@ -262,12 +268,16 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Prepare for step 2. auth_method: '%s'" % auth_method
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-            oxpush2_request = json.dumps({'username': user.getUserId(),
+            oxpush2_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
                                'state': session_state,
-                                'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
+                               'created': datetime.datetime.now().isoformat()}
+
+            self.addGeolocationData(session_attributes, oxpush2_request_dictionary)
+
+            oxpush2_request = json.dumps(oxpush2_request_dictionary, separators=(',',':'))
             print "oxPush2. Prepare for step 2. Prepared oxpush2_request:", oxpush2_request
 
             context.set("oxpush2_request", oxpush2_request)
@@ -533,3 +543,59 @@ class PersonAuthentication(PersonAuthenticationType):
     def setRegistrationUri(self, context):
         if self.registrationUri != None:
             context.set("external_registration_uri", self.registrationUri)
+
+    def addGeolocationData(self, session_attributes, oxpush2_request_dictionary):
+        if session_attributes.containsKey("remote_ip"):
+            remote_ip = session_attributes.get("remote_ip")
+            if StringHelper.isNotEmpty(remote_ip):
+                print "oxPush2. Prepare for step 2. Adding req_ip and req_loc to oxpush2_request"
+                oxpush2_request_dictionary['req_ip'] = remote_ip
+
+                remote_loc_dic = self.determineGeolocationData(remote_ip)
+                if remote_loc_dic == None:
+                    print "oxPush2. Prepare for step 2. Failed to determine remote location by remote IP '%s'" % remote_ip
+
+                remote_loc = "%s, %s, %s" % (remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'])
+                oxpush2_request_dictionary['req_loc'] = remote_loc
+
+    def determineGeolocationData(self, remote_ip):
+        print "oxPush2. Determine remote location. remote_ip: '%s'" % remote_ip
+        httpService = HttpService.instance();
+
+        http_client = httpService.getHttpsClient();
+        http_client_params = http_client.getParams();
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
+        
+        geolocation_service_url = "http://ip-api.com/json/%s?fields=49177" % remote_ip
+        geolocation_service_headers = { "Accept" : "application/json" }
+
+        try:
+            http_service_response = httpService.executeGet(http_client, geolocation_service_url,  geolocation_service_headers)
+            http_response = http_service_response.getHttpResponse()
+        except:
+            print "oxPush2. Determine remote location. Exception: ", sys.exc_info()[1]
+            return None
+
+        try:
+            if not httpService.isResponseStastusCodeOk(http_response):
+                print "oxPush2. Determine remote location. Get invalid response from validation server: ", str(http_response.getStatusLine().getStatusCode())
+                httpService.consume(http_response)
+                return None
+    
+            response_bytes = httpService.getResponseContent(http_response)
+            response_string = httpService.convertEntityToString(response_bytes)
+            httpService.consume(http_response)
+        finally:
+            http_service_response.closeConnection()
+
+        if response_string == None:
+            print "oxPush2. Determine remote location. Get empty response from location server"
+            return None
+        
+        response = json.loads(response_string)
+        
+        if not StringHelper.equalsIgnoreCase(response['status'], "success"):
+            print "oxPush2. Determine remote location. Get response with status: '%s'" % response['status']
+            return None
+
+        return response
