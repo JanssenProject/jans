@@ -10,7 +10,11 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.seam.Component;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.util.StringHelper;
 
@@ -19,6 +23,9 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 04/28/2016
  */
+@Scope(ScopeType.STATELESS)
+@Name("networkService")
+@AutoCreate
 public class NetworkService implements Serializable {
 
 	private static final long serialVersionUID = -1393318600428448743L;
@@ -27,15 +34,16 @@ public class NetworkService implements Serializable {
 	private Log log;
 
     public String getRemoteIp() {
+    	String remoteIp = "";
         try {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             if (facesContext == null) {
-                return null;
+                return remoteIp;
             }
 
             final HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
 
-            String remoteIp = request.getHeader("X-FORWARDED-FOR");
+            remoteIp = request.getHeader("X-FORWARDED-FOR");
             if (StringHelper.isEmpty(remoteIp)) {
             	remoteIp = request.getRemoteAddr();
             }
@@ -45,7 +53,7 @@ public class NetworkService implements Serializable {
             log.error("Failed to get remote IP", ex);
         }
         
-        return null;
+        return remoteIp;
     }
 
 	/**
