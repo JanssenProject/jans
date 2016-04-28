@@ -18,7 +18,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum GluuBoolean implements LdapEnum {
 
-	DISABLED(false, "disabled", "Disabled"), ENABLED(true, "enabled", "Enabled"), FALSE(false, "false", "False"), TRUE(true, "true", "True");
+	DISABLED(false, "disabled", "Disabled"), ENABLED(true, "enabled", "Enabled"), FALSE(false, "false", "False"), TRUE(true, "true", "True"),
+	ACTIVE(true, "active", "Active");
 
 	private boolean booleanValue;
 	private String value;
