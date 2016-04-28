@@ -1,6 +1,5 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
-<suite name="oxElevenClient" parallel="false">
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="oxElevenClient" parallel="false" verbose="1">
     <parameter name="generateKeyEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/generateKey"/>
     <parameter name="signEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/sign"/>
     <parameter name="verifySignatureEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/verifySignature"/>
