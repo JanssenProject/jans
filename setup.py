@@ -660,6 +660,8 @@ class Setup(object):
             return self.os_types[1]
         elif 'Ubuntu' in distro_info:
             return self.os_types[3]
+        elif 'Debian' in distro_info:
+            return self.os_types[4]
 
         else:
             return self.choose_from_list(self.os_types, "Operating System")
