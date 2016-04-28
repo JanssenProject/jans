@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="oxElevenClient" parallel="false" verbose="2">
+<suite name="oxElevenClient">
+
     <parameter name="generateKeyEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/generateKey"/>
     <parameter name="signEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/sign"/>
     <parameter name="verifySignatureEndpoint" value="https://localhost:8443/oxeleven/rest/oxeleven/verifySignature"/>
@@ -8,7 +10,7 @@
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
 
-    <!--
+<!--
     <parameter name="generateKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey"/>
     <parameter name="signEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/sign"/>
     <parameter name="verifySignatureEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/verifySignature"/>
@@ -16,8 +18,7 @@
     <parameter name="jwksEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/jwks"/>
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
-    -->
-
+-->
     <test name="PKCS11 Rest Service Test (HTTP)" enabled="true">
         <classes>
             <class name="org.gluu.oxeleven.PKCS11RestServiceTest"/>

@@ -20,17 +20,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
+                    <skipTests>false</skipTests>
+                    <failIfNoTests>false</failIfNoTests>
+                    <trimStackTrace>false</trimStackTrace>
+                    <argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true -Dseam.local.test=true</argLine>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        <suiteXmlFile>src/test/Resources/testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-testng</artifactId>
-                        <version>2.19.1</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -74,7 +71,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.10</version>
+            <version>6.9.9</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
