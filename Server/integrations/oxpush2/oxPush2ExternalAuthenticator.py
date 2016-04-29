@@ -26,6 +26,7 @@ import sys
 import java
 import datetime
 import base64
+import urllib
 
 try:
     import json
@@ -555,8 +556,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if remote_loc_dic == None:
                     print "oxPush2. Prepare for step 2. Failed to determine remote location by remote IP '%s'" % remote_ip
 
-                remote_loc = "%s, %s, %s" % (remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'])
-                oxpush2_request_dictionary['req_loc'] = remote_loc
+                remote_loc = "%s, %s, %s" % ( remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'] )
+                remote_loc_encoded = urllib.quote(remote_loc)
+                oxpush2_request_dictionary['req_loc'] = remote_loc_encoded
 
     def determineGeolocationData(self, remote_ip):
         print "oxPush2. Determine remote location. remote_ip: '%s'" % remote_ip
