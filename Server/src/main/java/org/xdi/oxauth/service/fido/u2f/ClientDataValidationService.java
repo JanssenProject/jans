@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.drools.util.ArrayUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
