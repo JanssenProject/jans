@@ -11,26 +11,29 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.faces.FacesException;
+import javax.faces.view.facelets.ResourceResolver;
 
 import org.jboss.seam.log.LogProvider;
 import org.jboss.seam.log.Logging;
 import org.xdi.util.StringHelper;
-
-import com.sun.facelets.impl.DefaultResourceResolver;
 
 /**
  * External resource handler to customize applicaton 
  *
  * @author Yuriy Movchan Date: 04/05/2016
  */
-public class ExternalResourceHandler extends DefaultResourceResolver {
+public class ExternalResourceHandler extends ResourceResolver {
 
 	private static final LogProvider log = Logging.getLogProvider(ExternalResourceHandler.class);
 
-	private File externalResourceBaseFolder;
+    private ResourceResolver parent;
+
+    private File externalResourceBaseFolder;
 	private boolean useExternalResourceBase;
 
-	public ExternalResourceHandler() {
+    public ExternalResourceHandler(ResourceResolver parent) {
+        this.parent = parent;
+
 		String externalResourceBase = System.getProperty("gluu.external.resource.base");
 		if (StringHelper.isNotEmpty(externalResourceBase)) {
 			externalResourceBase += "/oxauth/pages";
@@ -42,12 +45,12 @@ public class ExternalResourceHandler extends DefaultResourceResolver {
 				log.error("Specified path '" + externalResourceBase + "' in 'gluu.external.resource.base' not exists or not folder!");
 			}
 		}
-	}
+    }
 
 	@Override
 	public URL resolveUrl(String path) {
 		if (!useExternalResourceBase) {
-			return super.resolveUrl(path);
+			return this.parent.resolveUrl(path);
 		}
 
 		// First try external resource folder
@@ -64,7 +67,7 @@ public class ExternalResourceHandler extends DefaultResourceResolver {
 		}
 
 		// Return default resource
-		return super.resolveUrl(path);
+		return this.parent.resolveUrl(path);
 	}
 
 	public String toString() {

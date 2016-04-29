@@ -5,17 +5,17 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:a4j="http://richfaces.org/a4j"
-      xmlns:s="http://jboss.com/products/seam/taglib">
+      xmlns:s="http://jboss.org/schema/seam/taglib">
 <f:view>
-    <head>
+    <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>oxAuth</title>
         <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/theme.xcss" />
         <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/theme.css" />
         <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/site.css" />
         <ui:insert name="head"/>
-    </head>
-    <body>
+    </h:head>
+    <h:body>
     <div class="body">
         <a4j:status startText="Loading..."
                     startStyle="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px;"/>
@@ -29,6 +29,6 @@
             <p>Powered by <a href="http://www.gluu.org">Gluu</a>. Free and open source access management.</p>
         </div>
     </s:fragment>
-    </body>
+    </h:body>
 </f:view>
 </html>
