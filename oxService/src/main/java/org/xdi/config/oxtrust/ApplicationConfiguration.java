@@ -108,6 +108,7 @@ public final class ApplicationConfiguration implements Serializable {
 	private boolean persistSVN;
 
 	private String oxAuthAuthorizeUrl;
+	private String oxAuthRegisterUrl;
 	private String oxAuthTokenUrl;
 	private String oxAuthEndSessionUrl;
 	private String oxAuthLogoutUrl;
@@ -141,7 +142,10 @@ public final class ApplicationConfiguration implements Serializable {
 	
 	private String recaptchaSiteKey;
 	private String recaptchaSecretKey;
-	
+
+	private boolean scimTestMode;
+	private String scimTestModeAccessToken;
+
 	public String getBaseDN() {
 		return baseDN;
 	}
@@ -598,6 +602,14 @@ public final class ApplicationConfiguration implements Serializable {
 		this.oxAuthAuthorizeUrl = oxAuthAuthorizeUrl;
 	}
 
+	public String getOxAuthRegisterUrl() {
+		return oxAuthRegisterUrl;
+	}
+
+	public void setOxAuthRegisterUrl(String oxAuthRegisterUrl) {
+		this.oxAuthRegisterUrl = oxAuthRegisterUrl;
+	}
+
 	public String getOxAuthTokenUrl() {
 		return oxAuthTokenUrl;
 	}
@@ -790,4 +802,19 @@ public final class ApplicationConfiguration implements Serializable {
 		this.recaptchaSecretKey = recaptchaSecretKey;
 	}
 
+	public boolean isScimTestMode() {
+		return scimTestMode;
+	}
+
+	public void setScimTestMode(boolean scimTestMode) {
+		this.scimTestMode = scimTestMode;
+	}
+
+	public String getScimTestModeAccessToken() {
+		return scimTestModeAccessToken;
+	}
+
+	public void setScimTestModeAccessToken(String scimTestModeAccessToken) {
+		this.scimTestModeAccessToken = scimTestModeAccessToken;
+	}
 }
