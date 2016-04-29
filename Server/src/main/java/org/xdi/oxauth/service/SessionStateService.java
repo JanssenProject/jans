@@ -79,15 +79,15 @@ public class SessionStateService {
                 throw new AcrChangedException();
             }
 
-            reinitLogin(session);
+            reinitLogin(session, false);
         }
         return session;
     }
 
-    public void reinitLogin(SessionState session) {
+    public void reinitLogin(SessionState session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
-        if (!currentSessionAttributes.equals(sessionAttributes)) {
+        if (force || !currentSessionAttributes.equals(sessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
 
             // Reinit login
