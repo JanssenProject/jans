@@ -2,6 +2,7 @@ package org.xdi.oxauth.model.authorize;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -84,7 +85,13 @@ public class CodeVerifier {
     }
 
     public static String s256(String codeVerifier) {
-        return DigestUtils.sha256Hex(codeVerifier);
+        byte[] sha256 = DigestUtils.sha256(codeVerifier);
+        return base64UrlEncode(sha256);
+    }
+
+    public static String base64UrlEncode(byte[] input) {
+        Base64 base64 = new Base64(true);
+        return base64.encodeAsString(input);
     }
 
     public static String generateCodeVerifier() {
