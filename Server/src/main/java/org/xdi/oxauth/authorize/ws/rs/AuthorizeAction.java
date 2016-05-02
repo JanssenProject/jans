@@ -39,6 +39,7 @@ import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -93,6 +94,9 @@ public class AuthorizeAction {
 
     @In("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
+
+    @In
+    private NetworkService networkService;
 
     @In
     private Identity identity;
@@ -197,6 +201,10 @@ public class AuthorizeAction {
                     redirectTo = tmpRedirectTo;
                 }
             }
+            
+            // Store Remote IP
+            String remoteIp = networkService.getRemoteIp();
+            requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
 
             // Create unauthenticated session
             SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
@@ -278,8 +286,12 @@ public class AuthorizeAction {
                 session.getSessionAttributes().put("prompt", prompt);
                 session.setState(SessionIdState.UNAUTHENTICATED);
 
+                // Update Remote IP
+                String remoteIp = networkService.getRemoteIp();
+               	session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
+
                 sessionStateService.updateSessionState(session);
-                sessionStateService.reinitLogin(session);
+                sessionStateService.reinitLogin(session, false);
             }
         }
         return session;
