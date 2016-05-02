@@ -3,6 +3,7 @@ package org.xdi.oxauth.model.authorize;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.BaseNCodec;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -15,6 +16,7 @@ public class CodeVerifier {
 
     private static final int MAX_CODE_VERIFIER_LENGTH = 128;
     private static final int MIN_CODE_VERIFIER_LENGTH = 43;
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     public enum CodeChallengeMethod {
         PLAIN("plain", ""),
@@ -90,7 +92,7 @@ public class CodeVerifier {
     }
 
     public static String base64UrlEncode(byte[] input) {
-        Base64 base64 = new Base64(true);
+        Base64 base64 = new Base64(BaseNCodec.MIME_CHUNK_SIZE, EMPTY_BYTE_ARRAY, true);
         return base64.encodeAsString(input);
     }
 
