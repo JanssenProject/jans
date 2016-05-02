@@ -25,6 +25,13 @@ public class CodeVerifierTest {
     }
 
     @Test
+    public void verify() {
+        String codeChallenge = CodeVerifier.generateCodeChallenge(CodeVerifier.CodeChallengeMethod.S256, "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk");
+
+        assertEquals(codeChallenge, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\r\n");
+    }
+
+    @Test
     public void codeVerificationGenerator() {
         for (int i = 0; i < 10; i++) {
             assertTrue(CodeVerifier.isCodeVerifierValid(CodeVerifier.generateCodeVerifier()));
