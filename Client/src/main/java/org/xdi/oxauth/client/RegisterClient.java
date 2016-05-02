@@ -17,6 +17,8 @@ import org.xdi.oxauth.model.register.ApplicationType;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -219,6 +221,10 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getLogoutUris() != null && !getRequest().getLogoutUris().isEmpty()) {
                     requestBody.put(LOGOUT_URI.getName(), getRequest().getLogoutUris());
                 }
+                if (getRequest().getClientSecretExpiresAt() != null) {
+                    requestBody.put(CLIENT_SECRET_EXPIRES_AT_.toString(), getRequest().getClientSecretExpiresAt().getTime());
+                }
+                
                 if (getRequest().getLogoutSessionRequired() != null) {
                     requestBody.put(LOGOUT_SESSION_REQUIRED.getName(), getRequest().getLogoutSessionRequired());
                 }
