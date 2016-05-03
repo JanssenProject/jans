@@ -26,6 +26,8 @@ public interface PersonAuthenticationType extends BaseExternalType {
 
 	public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
 
+	public int getNextStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
+
 	public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
 	
 	public int getCountAuthenticationSteps(Map<String, SimpleCustomProperty> configurationAttributes);
