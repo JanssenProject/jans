@@ -227,7 +227,7 @@ public class AuthorizeAction {
 
             if (client != null) {
             	
-            	if(!client.getPersistClientAuthorizations() || !client.getTrustedClient()){
+            	if(!client.getTrustedClient()){
             		return  Constants.RESULT_SUCCESS; 
             	}
             	
@@ -628,6 +628,12 @@ public class AuthorizeAction {
             }
 
             final Client client = clientService.getClient(clientId);
+            
+            if(client.getPersistClientAuthorizations()){
+            	client.setTrustedClient(true);     
+            	clientService.merge(client);
+            }
+            
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
