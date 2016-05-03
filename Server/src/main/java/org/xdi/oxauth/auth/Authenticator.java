@@ -227,26 +227,58 @@ public class Authenticator implements Serializable {
 
             boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
             log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
-            if (!result) {
+
+            int overridenNextStep = -1;
+
+            int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
+            if (apiVersion > 1) {
+            	log.trace("According to API version script supports steps overriding");
+            	overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+            	log.debug("Get next step from script: '{0}'", apiVersion);
+            }
+
+            if (!result && (overridenNextStep == -1)) {
                 return false;
+            }
+
+            boolean overrideCurrentStep = false;
+            if (overridenNextStep > -1) {
+            	overrideCurrentStep = true;
+            	// Reload session state
+                sessionState = sessionStateService.getSessionState();
+                
+                // Reset to pecified step
+            	sessionStateService.resetToStep(sessionState, overridenNextStep);
+
+            	this.authStep = overridenNextStep;
+            	sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
+            	log.info("Authentication reset to step : '{0}'", this.authStep);
             }
 
             int countAuthenticationSteps = externalAuthenticationService.executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
             if (this.authStep < countAuthenticationSteps) {
-                final int nextStep = this.authStep + 1;
-                String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, nextStep);
+            	int nextStep;
+            	if (overrideCurrentStep) {
+            		nextStep = overridenNextStep;
+            	} else { 
+            		nextStep = this.authStep + 1;
+            	}
+
+            	String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, nextStep);
                 if (StringHelper.isEmpty(redirectTo)) {
-                    return false;
+                	redirectTo = "/login.xhtml";
                 }
 
                 // Store/Update extra parameters in session attributes map
                 updateExtraParameters(customScriptConfiguration, nextStep, sessionIdAttributes);
 
-                // Update auth_step
-                sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
-
-                // Mark step as passed
-                markAuthStepAsPassed(sessionIdAttributes, this.authStep);
+                if (!overrideCurrentStep) {
+	                // Update auth_step
+	                sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
+	
+	                // Mark step as passed
+	                markAuthStepAsPassed(sessionIdAttributes, this.authStep);
+                }
 
                 if (sessionState != null) {
                 	boolean updateResult = updateSession(sessionState, sessionIdAttributes);
@@ -397,7 +429,6 @@ public class Authenticator implements Serializable {
         if (customScriptConfiguration == null) {
             return Constants.RESULT_FAILURE;
         } else {
-
             String determinedauthAcr = customScriptConfiguration.getName();
             if (!StringHelper.equalsIgnoreCase(currentauthAcr, determinedauthAcr)) {
                 // Redirect user to alternative login workflow

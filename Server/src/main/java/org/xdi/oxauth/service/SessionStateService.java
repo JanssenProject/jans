@@ -110,6 +110,27 @@ public class SessionStateService {
         }
     }
 
+	public void resetToStep(SessionState session, int resetToStep) {
+        final Map<String, String> sessionAttributes = session.getSessionAttributes();
+        
+        int currentStep = 1;
+        if (sessionAttributes.containsKey("auth_step")) {
+        	currentStep = StringHelper.toInteger(sessionAttributes.get("auth_step"), currentStep);
+        }
+        
+        for (int i = resetToStep; i <= currentStep; i++) {
+            String key = String.format("auth_step_passed_%d", i);
+        	sessionAttributes.remove(key);
+        }
+
+        sessionAttributes.put("auth_step", String.valueOf(resetToStep));
+
+        boolean updateResult = updateSessionState(session, true, true);
+        if (!updateResult) {
+            log.debug("Failed to update session entry: '{0}'", session.getId());
+        }
+	}
+
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
         // Update from request
         FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -482,5 +503,6 @@ public class SessionStateService {
         String promptParam = sessionState.getSessionAttributes().get("prompt");
         return Prompt.fromString(promptParam, " ");
     }
+
 
 }
