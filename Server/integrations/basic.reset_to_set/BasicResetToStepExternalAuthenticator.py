@@ -33,7 +33,7 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         context.set("pass_authentication", False)
 
-        if step in range(1, 4):
+        if 1 <= step <= 3:
             print "Basic (demo reset step). Authenticate for step '%s'" % step
 
             credentials = Identity.instance().getCredentials()
@@ -69,7 +69,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Basic (demo reset step). Prepare for step '%s'" % step
-        if step in range(1, 4):
+        if 1 <= step <= 3:
             return True
         else:
             return False
