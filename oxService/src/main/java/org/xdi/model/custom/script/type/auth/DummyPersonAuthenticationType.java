@@ -45,6 +45,11 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	}
 
 	@Override
+	public int getNextStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
+		return -1;
+	}
+
+	@Override
 	public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
 		return false;
 	}
