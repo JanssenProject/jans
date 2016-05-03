@@ -4,9 +4,9 @@
 
   1. Install [SoftHSM version 2](https://github.com/opendnssec/SoftHSMv2)
 
-  2. Copy the file Server/conf/oxeleven-config.json to tomcat/conf/oxeleven-config.json
+  2. Copy the file Server/conf/oxeleven-config.json to $CATALINA_HOME/conf/oxeleven-config.json
 
-  3. Edit the configuration file tomcat/conf/oxeleven-config.json
+  3. Edit the configuration file $CATALINA_HOME/conf/oxeleven-config.json
 
   ```javascript
   {
