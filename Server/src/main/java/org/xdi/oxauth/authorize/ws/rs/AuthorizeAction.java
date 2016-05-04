@@ -253,11 +253,11 @@ public class AuthorizeAction {
                         permissionGranted(session);
                     }
                 }
-
-                if (AuthorizeParamsValidator.validatePrompt(prompts)) {
+                
+                if (!prompts.contains(Prompt.CONSENT) && AuthorizeParamsValidator.validatePrompt(prompts)) {
                 	boolean done = false;
                 	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+                        if (client.getTrustedClient()) {
                             permissionGranted(session);
                             done = true;
                         }
@@ -269,10 +269,6 @@ public class AuthorizeAction {
 	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
 	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
 	                        permissionGranted(session);
-	                    } else {
-	                    	if (prompts.contains(Prompt.CONSENT)) {
-	                    		consentRequired();
-	                    	}
 	                    }
                 	}
                 } else {
