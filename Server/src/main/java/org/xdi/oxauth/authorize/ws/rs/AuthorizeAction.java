@@ -143,7 +143,7 @@ public class AuthorizeAction {
         }
     }
 
-    public String checkPermissionGranted() {
+    public void checkPermissionGranted() {
         SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
@@ -156,7 +156,7 @@ public class AuthorizeAction {
             } else {
                 log.error("Please provide prompt=login to force login with new ACR or otherwise perform logout and re-authenticate.");
                 permissionDenied();
-                return Constants.RESULT_FAILURE;
+                return;
             }
         }
 
@@ -187,7 +187,7 @@ public class AuthorizeAction {
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
                     permissionDenied();
-                    return Constants.RESULT_FAILURE;
+                    return;
                 }
 
                 String acr = customScriptConfiguration.getName();
@@ -218,7 +218,7 @@ public class AuthorizeAction {
             sessionStateService.createSessionStateCookie(this.sessionState);
 
             FacesManager.instance().redirect(redirectTo, null, false);
-            return Constants.RESULT_FAILURE;
+            return;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
@@ -278,7 +278,8 @@ public class AuthorizeAction {
                 }
             }
         }
-		return Constants.RESULT_FAILURE;
+
+        return;
     }
 
     private SessionState handleAcrChange(SessionState session, List<Prompt> prompts) {
