@@ -255,18 +255,24 @@ public class AuthorizeAction {
                 }
 
                 if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                        permissionGranted(session);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                	boolean done = false;
+                	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                         if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                             permissionGranted(session);
+                            done = true;
                         }
-                    } else {
-                        consentRequired();
-                    }
+                	}
+
+                	if (!done) {
+	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+	                        permissionGranted(session);
+	                    } else {
+	                        consentRequired();
+	                    }
+                	}
                 } else {
                     invalidRequest();
                 }
