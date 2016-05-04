@@ -19,17 +19,17 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version May 4, 2016
  */
 public abstract class AbstractCryptoProvider {
 
-    public abstract String generateKey(SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception;
 
-    public abstract String sign(String signingInput, String alias, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
-    public abstract boolean verifySignature(String signingInput, String signature, String alias, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract boolean verifySignature(String signingInput, String signature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
-    public abstract boolean deleteKey(String alias) throws Exception;
+    public abstract boolean deleteKey(String keyId) throws Exception;
 
     public abstract JSONObject jwks(JSONWebKeySet jsonWebKeySet) throws Exception;
 
@@ -75,8 +75,8 @@ public abstract class AbstractCryptoProvider {
             KeyRequestParam key = new KeyRequestParam();
             key.setAlg(jsonWebKey.getAlg());
             key.setKid(jsonWebKey.getKid());
-            key.setUse(jsonWebKey.getUse().toString());
-            key.setKty(jsonWebKey.getKty().toString());
+            key.setUse(jsonWebKey.getUse().toValue());
+            key.setKty(jsonWebKey.getKty().toValue());
             key.setCrv(jsonWebKey.getCrv());
 
             jwks.getKeyRequestParams().add(key);
