@@ -226,11 +226,6 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
-            	
-            	if(!client.getTrustedClient()){
-            		return  Constants.RESULT_SUCCESS; 
-            	}
-            	
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
                     permissionDenied();
                 }
