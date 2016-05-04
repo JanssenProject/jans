@@ -29,6 +29,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestContext;
 import org.testng.Reporter;
@@ -290,6 +291,8 @@ public abstract class BaseTest {
         }
         driver.navigate().to(authorizationRequestUrl);
 
+        (new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
+
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
         WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
@@ -297,8 +300,6 @@ public abstract class BaseTest {
         usernameElement.sendKeys(userId);
         passwordElement.sendKeys(userSecret);
         loginButton.click();
-
-        //(new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
