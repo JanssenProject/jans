@@ -20,7 +20,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 13, 2016
+ * @version May 4, 2016
  */
 public class OxElevenCryptoProvider extends AbstractCryptoProvider {
 
@@ -39,26 +39,27 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String generateKey(SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(signatureAlgorithm.getName());
+        request.setExpirationTime(expirationTime);
 
         GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
         client.setRequest(request);
 
         GenerateKeyResponse response = client.exec();
-        if (response.getStatus() == HttpStatus.SC_OK && response.getAlias() != null) {
-            return response.getAlias();
+        if (response.getStatus() == HttpStatus.SC_OK && response.getKeyId() != null) {
+            return response.getJSONEntity();
         } else {
             throw new Exception(response.getEntity());
         }
     }
 
     @Override
-    public String sign(String signingInput, String alias, String shardSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public String sign(String signingInput, String keyId, String shardSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
         SignRequest request = new SignRequest();
         request.getSignRequestParam().setSigningInput(signingInput);
-        request.getSignRequestParam().setAlias(alias);
+        request.getSignRequestParam().setAlias(keyId);
         request.getSignRequestParam().setSharedSecret(shardSecret);
         request.getSignRequestParam().setSignatureAlgorithm(signatureAlgorithm.getName());
 
@@ -74,11 +75,11 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public boolean verifySignature(String signingInput, String signature, String alias, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public boolean verifySignature(String signingInput, String signature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
         VerifySignatureRequest request = new VerifySignatureRequest();
         request.getVerifySignatureRequestParam().setSigningInput(signingInput);
         request.getVerifySignatureRequestParam().setSignature(signature);
-        request.getVerifySignatureRequestParam().setAlias(alias);
+        request.getVerifySignatureRequestParam().setAlias(keyId);
         request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
         request.getVerifySignatureRequestParam().setSignatureAlgorithm(signatureAlgorithm.getName());
         if (jwks != null) {
@@ -97,9 +98,9 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public boolean deleteKey(String alias) throws Exception {
+    public boolean deleteKey(String keyId) throws Exception {
         DeleteKeyRequest request = new DeleteKeyRequest();
-        request.setAlias(alias);
+        request.setAlias(keyId);
 
         DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
         client.setRequest(request);
