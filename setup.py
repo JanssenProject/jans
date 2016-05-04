@@ -479,7 +479,7 @@ class Setup(object):
 
     def configure_httpd(self):
         # CentOS 7.* + systemd + apache 2.4
-        if self.os_type in ['centos', 'redhat'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
@@ -1333,6 +1333,10 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         return None
 
+    def configureOsPatches(self):
+        if self.os_type in ['debian']:
+            self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
+
     def makeFolders(self):
         try:
             # Create these folder on all instances
@@ -1759,7 +1763,7 @@ class Setup(object):
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
             
-        if self.os_initdaemon == 'systemd':
+        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'redhat', 'fedora']:
             self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
         else:
             if self.os_type in ['debian', 'ubuntu']:
@@ -1930,6 +1934,7 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
+            installObject.configureOsPatches()
             installObject.makeFolders()
             installObject.make_salt()
             installObject.make_oxauth_salt()
