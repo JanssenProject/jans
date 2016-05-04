@@ -11,15 +11,17 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.*;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.JwtUtil;
 
 import java.math.BigInteger;
+import java.util.UUID;
 
 import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version May 4, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -30,8 +32,55 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String generateKey(SignatureAlgorithm signatureAlgorithm) throws Exception {
-        return null;
+    public JSONObject generateKey(SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws Exception {
+        JSONObject key = null;
+
+        switch (signatureAlgorithm) {
+            case NONE:
+            case HS256:
+            case HS384:
+            case HS512:
+                throw new RuntimeException("The provided signature algorithm is not supported for key generation");
+            case RS256:
+            case RS384:
+            case RS512:
+                KeyFactory<RSAPrivateKey, RSAPublicKey> rsaKeyFactory = new RSAKeyFactory(
+                        signatureAlgorithm,
+                        "CN=Test CA Certificate");
+                Key<RSAPrivateKey, RSAPublicKey> rsaKey = rsaKeyFactory.getKey();
+
+                rsaKey.setKeyType(signatureAlgorithm.getFamily());
+                rsaKey.setUse(Use.SIGNATURE.toValue());
+                rsaKey.setAlgorithm(signatureAlgorithm.getName());
+                rsaKey.setKeyId(UUID.randomUUID().toString());
+                rsaKey.setExpirationTime(expirationTime);
+                rsaKey.setCurve(JSONObject.NULL);
+
+                key = rsaKey.toJSONObject();
+                break;
+            case ES256:
+            case ES384:
+            case ES512:
+                KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> ecKeyFactory = new ECDSAKeyFactory(
+                        signatureAlgorithm,
+                        "CN=Test CA Certificate");
+
+                Key<ECDSAPrivateKey, ECDSAPublicKey> ecKey = ecKeyFactory.getKey();
+
+                ecKey.setKeyType(signatureAlgorithm.getFamily());
+                ecKey.setUse(Use.SIGNATURE.toValue());
+                ecKey.setAlgorithm(signatureAlgorithm.getName());
+                ecKey.setKeyId(UUID.randomUUID().toString());
+                ecKey.setExpirationTime(expirationTime);
+                ecKey.setCurve(signatureAlgorithm.getCurve());
+
+                key = ecKey.toJSONObject();
+                break;
+            default:
+                throw new Exception("Invalid signature algorithm");
+        }
+
+        return key;
     }
 
     @Override
@@ -110,7 +159,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public boolean deleteKey(String alias) throws Exception {
-        return false;
+        return true;
     }
 
     @Override
@@ -126,12 +175,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             if (jsonWebKey.getKid() != null) {
                 jsonKeyValue.put(KEY_ID, jsonWebKey.getKid());
             }
-                /*if (ConfigurationFactory.instance().getConfiguration().getKeyRegenerationEnabled()
-                        && jsonWebKey.getExp() != null) {
-                    jsonKeyValue.put(EXPIRATION_TIME, jsonWebKey.getExp());
-                }*/
+            if (jsonWebKey.getExp() != null) {
+                jsonKeyValue.put(EXPIRATION_TIME, jsonWebKey.getExp());
+            }
             if (jsonWebKey.getUse() != null) {
-                jsonKeyValue.put(KEY_USE, jsonWebKey.getUse());
+                jsonKeyValue.put(KEY_USE, jsonWebKey.getUse().toValue());
             }
             if (jsonWebKey.getAlg() != null) {
                 jsonKeyValue.put(ALGORITHM, jsonWebKey.getAlg());
