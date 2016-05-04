@@ -299,7 +299,7 @@ public abstract class BaseTest {
         passwordElement.sendKeys(userSecret);
         loginButton.click();
 
-        (new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
+        //(new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
