@@ -140,11 +140,17 @@
         </table>
         <script type="text/javascript">
             window.onload = function() {
-                document.getElementById("loginForm:username").focus();
+                var userNameField = document.getElementById("loginForm:username");
+                if (userNameField != null {
+                	userNameField.focus();
+                }
 
                 var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
                 if (displayRegister) {
-                    document.getElementById("loginForm:registerId").style.display = 'inline';
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null {
+                        registerButton.style.display = 'inline';
+                    }
                 }
             };
         </script>
