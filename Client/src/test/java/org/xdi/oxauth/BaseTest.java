@@ -25,6 +25,7 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -276,7 +277,7 @@ public abstract class BaseTest {
      * and establishes whether the resource owner grants or denies the client's access request.
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
-            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies, boolean trustedClient) {
         String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
@@ -304,21 +305,35 @@ public abstract class BaseTest {
 
         if (authorizationRequest.getRedirectUri() == null ||
                 !authorizationResponseStr.startsWith(authorizationRequest.getRedirectUri())) {
+        	
+        	if (trustedClient) {
+        		try {
+                    driver.findElement(By.name(authorizeFormAllowButton));
+                    driver.findElement(By.name(authorizeFormDoNotAllowButton));
 
-            //WebElement allowButton = (new WebDriverWait(driver, 20)).until(ExpectedConditions.presenceOfElementLocated(By.name(authorizeFormAllowButton)));
-            WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
-
-            WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
-
-            final String previousURL = driver.getCurrentUrl();
-            allowButton.click();
-            WebDriverWait wait = new WebDriverWait(driver, 10);
-            wait.until(new ExpectedCondition<Boolean>() {
-                public Boolean apply(WebDriver d) {
-                    return (d.getCurrentUrl() != previousURL);
-                }
-            });
-
+                    // Return invalid response to notify if there is issue
+                    return new AuthorizationResponse("");
+        		} catch (NoSuchElementException ex) {
+        			// This is normal if client is Pre-Authorized
+        			System.out.println(driver.getPageSource());
+        			System.out.println(driver.getCurrentUrl()());
+        		}
+        	} else {
+	            //WebElement allowButton = (new WebDriverWait(driver, 20)).until(ExpectedConditions.presenceOfElementLocated(By.name(authorizeFormAllowButton)));
+	            WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+	
+	            WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
+	
+	            final String previousURL = driver.getCurrentUrl();
+	            allowButton.click();
+	            WebDriverWait wait = new WebDriverWait(driver, 10);
+	            wait.until(new ExpectedCondition<Boolean>() {
+	                public Boolean apply(WebDriver d) {
+	                    return (d.getCurrentUrl() != previousURL);
+	                }
+	            });
+        	}
+        	
             authorizationResponseStr = driver.getCurrentUrl();
         }
 
@@ -346,7 +361,16 @@ public abstract class BaseTest {
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true);
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true, false);
+    }
+
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * and establishes whether the resource owner grants or denies the client's access request.
+     */
+    public AuthorizationResponse authenticatePreAuthorizedResourceOwnerAndGrantAccess(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true, true);
     }
 
     /**
