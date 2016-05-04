@@ -270,7 +270,9 @@ public class AuthorizeAction {
 	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
 	                        permissionGranted(session);
 	                    } else {
-	                        consentRequired();
+	                    	if (prompts.contains(Prompt.CONSENT)) {
+	                    		consentRequired();
+	                    	}
 	                    }
                 	}
                 } else {
