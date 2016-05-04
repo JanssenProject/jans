@@ -124,7 +124,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         authorizationRequest2.setState(state2);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint2, authorizationRequest2, userId, userSecret, false, false);
+                authorizationEndpoint2, authorizationRequest2, userId, userSecret, false);
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
