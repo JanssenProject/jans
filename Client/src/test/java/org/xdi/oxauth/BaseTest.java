@@ -318,6 +318,14 @@ public abstract class BaseTest {
         			System.out.println(driver.getPageSource());
         			System.out.println(driver.getCurrentUrl());
         		}
+
+        		final String previousURL = driver.getCurrentUrl();
+	            WebDriverWait wait = new WebDriverWait(driver, 10);
+	            wait.until(new ExpectedCondition<Boolean>() {
+	                public Boolean apply(WebDriver d) {
+	                    return (d.getCurrentUrl() != previousURL);
+	                }
+	            });
         	} else {
 	            //WebElement allowButton = (new WebDriverWait(driver, 20)).until(ExpectedConditions.presenceOfElementLocated(By.name(authorizeFormAllowButton)));
 	            WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
