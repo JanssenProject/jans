@@ -8,17 +8,6 @@
     <action execute="#{authorizeAction.checkPermissionGranted}" on-postback="false"/>
 
     <rewrite pattern="/authorize"/> 
-     	<navigation from-action="#{authorizeAction.checkPermissionGranted}">
-        <rule if-outcome="success">
-            <render view-id="/authorize.xhtml" />
-        </rule>
-        
-        <rule if-outcome="failure">
-            <end-conversation />
-            <redirect view-id="/login.xhtml">                
-            </redirect>
-        </rule>
-    </navigation>
 
     <!-- OAuth 2.0 request parameters -->
     <param name="scope"
