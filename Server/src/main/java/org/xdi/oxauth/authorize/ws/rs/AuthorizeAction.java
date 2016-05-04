@@ -254,7 +254,9 @@ public class AuthorizeAction {
                     }
                 }
                 
-                if (!prompts.contains(Prompt.CONSENT) && AuthorizeParamsValidator.validatePrompt(prompts)) {
+                if (prompts.contains(Prompt.CONSENT)) {
+                	// The authorization server prompts the user for consent before returning information to the client. 
+                } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
                 	boolean done = false;
                 	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                         if (client.getTrustedClient()) {
