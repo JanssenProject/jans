@@ -36,6 +36,8 @@ public class LDAPConnectionProvider {
 
 	private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
 
+	private static final String[] SSL_PROTOCOLS = { "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3" };
+
 	private LDAPConnectionPool connectionPool;
 	private ResultCode creationResultCode;
 	
@@ -101,16 +103,29 @@ public class LDAPConnectionProvider {
 		connectionOptions.setAutoReconnect(true);
 
 		this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
+		SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
 
 		FailoverServerSet failoverSet;
 		if (this.useSSL) {
-			SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
-			failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(), connectionOptions);
+			failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);
 		} else {
 			failoverSet = new FailoverServerSet(this.addresses, this.ports, connectionOptions);
 		}
 
-		connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, Integer.parseInt(props.getProperty("maxconnections")));
+		int maxConnections = Integer.parseInt(props.getProperty("maxconnections"));
+		try {
+			connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, maxConnections);
+		} catch (LDAPException ex) {
+			if (!this.useSSL) {
+				throw ex;
+			}
+			
+			log.info("Attempting to use older SSL protocols", ex);
+			connectionPool = createSSLConnectionPoolWithPreviousProtocols(sslUtil, bindRequest, connectionOptions, maxConnections);
+			if (connectionPool == null) {
+				throw ex;
+			}
+		}
 		if (connectionPool != null) {
 			connectionPool.setCreateIfNecessary(true);
 			String connectionMaxWaitTime = props.getProperty("connection-max-wait-time");
@@ -129,6 +144,25 @@ public class LDAPConnectionProvider {
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.creationResultCode = ResultCode.SUCCESS;
+	}
+
+	private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest, LDAPConnectionOptions connectionOptions, int maxConnections) {
+		for (int i = 1; i < SSL_PROTOCOLS.length; i++) {
+			String protocol = SSL_PROTOCOLS[i];
+			try {
+				FailoverServerSet failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(protocol), connectionOptions);
+				LDAPConnectionPool connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, maxConnections);
+				
+				log.info("Server supports: '" + protocol + "'");
+				return connectionPool;
+			} catch (GeneralSecurityException ex) {
+				log.debug("Server not supports: '" + protocol + "'", ex);
+			} catch (LDAPException ex) {
+				log.debug("Server not supports: '" + protocol + "'", ex);
+			}
+		}
+
+		return null;
 	}
 
 	private int determineSupportedLdapVersion() {
