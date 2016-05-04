@@ -8,13 +8,13 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version May 4, 2016
  */
 public enum ECEllipticCurve {
 
     P_256("P-256", "secp256r1", "1.2.840.10045.3.1.7"),
-    P_384("P-384", "secp384r1", "1.3.132.0.34")/*,
-    P_521("P-521", "secp521r1", "1.3.132.0.35")*/;
+    P_384("P-384", "secp384r1", "1.3.132.0.34"),
+    P_521("P-521", "secp521r1", "1.3.132.0.35");
 
     private final String name;
     private final String alias;

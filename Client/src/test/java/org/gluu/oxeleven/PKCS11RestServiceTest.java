@@ -24,7 +24,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version May 4, 2016
  */
 public class PKCS11RestServiceTest {
 
@@ -34,7 +34,7 @@ public class PKCS11RestServiceTest {
     private String rs512Alias;
     private String es256Alias;
     private String es384Alias;
-    //private String es512Alias;
+    private String es512Alias;
     private String noneSignature;
     private String hs256Signature;
     private String hs384Signature;
@@ -44,7 +44,7 @@ public class PKCS11RestServiceTest {
     private String rs512Signature;
     private String es256Signature;
     private String es384Signature;
-    //private String es512Signature;
+    private String es512Signature;
 
     @BeforeSuite
     public void init() {
@@ -158,8 +158,8 @@ public class PKCS11RestServiceTest {
         }
     }
 
-    /*@Parameters({"generateKeyEndpoint"})
-    @Test
+    @Parameters({"generateKeyEndpoint"})
+    @Test(enabled = false)
     public void testGenerateKeyES512(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
@@ -176,7 +176,7 @@ public class PKCS11RestServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 
     @Parameters({"generateKeyEndpoint"})
     @Test
@@ -492,8 +492,8 @@ public class PKCS11RestServiceTest {
         }
     }
 
-    /*@Parameters({"signEndpoint", "signingInput"})
-    @Test(dependsOnMethods = "testGenerateKeyES512")
+    @Parameters({"signEndpoint", "signingInput"})
+    @Test(enabled = false, dependsOnMethods = "testGenerateKeyES512")
     public void testSignatureES512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
@@ -511,7 +511,7 @@ public class PKCS11RestServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 
     @Parameters({"signEndpoint"})
     @Test
@@ -894,7 +894,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint"})
-    @Test
+    @Test(enabled = false)
     public void testVerifySignatureES256Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkVTMjU2U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjQ0ZjU0NmU0LWRmMmMtNDE5Ny1iNTNjLTIzNzhmY2YwYmRiZSIsImV4cCI6MTQ2MTAzMjgzMiwiaWF0IjoxNDYxMDMyNTMyfQ";
         String signature = "MEQCIGmPSoCExpDu2jPkxttRZ0hjKId9SQM1pP3PLd4CXmt9AiB57tUzvBILyBvHqf3bHVMi0Fsy8M-v-ERib2KVdWJLtg";
@@ -949,7 +949,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint"})
-    @Test
+    @Test(enabled = false)
     public void testVerifySignatureES384Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzM4NCIsImtpZCI6IkVTMzg0U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCOUE2LkFBNUIiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCOUE2LkFBNUIiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjgyMmEzMjQwLTI0NjEtNGEwYS1hNDZlLTIwNTEwMDliZjI3NCIsImV4cCI6MTQ2MTAzMzQ2MiwiaWF0IjoxNDYxMDMzMTYyfQ";
         String signature = "MGUCMQCOELLrt3FSaEamp37D6S3XECWqHy-Iriry_tM5ZVLZ-z6aruZTVHJnNnFfyLXUKaYCMFMrKuXCbXjTZKqFv7v3UsJdY4F1S5IVGtIadoxxm-Ayw7rMzu7vTiaQYiRZZbSurw";
@@ -982,8 +982,8 @@ public class PKCS11RestServiceTest {
         }
     }
 
-    /*@Parameters({"verifySignatureEndpoint", "signingInput"})
-    @Test(dependsOnMethods = "testSignatureES512")
+    @Parameters({"verifySignatureEndpoint", "signingInput"})
+    @Test(enabled = false, dependsOnMethods = "testSignatureES512")
     public void testVerifySignatureES512(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
@@ -1001,10 +1001,10 @@ public class PKCS11RestServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 
-    /*@Parameters({"verifySignatureEndpoint"})
-    @Test
+    @Parameters({"verifySignatureEndpoint"})
+    @Test(enabled = false)
     public void testVerifySignatureES512Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiIsImtpZCI6IkVTNTEyU0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCQzRFLjBFQUUiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCQzRFLjBFQUUiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6ImI0ZjUzMmIyLWZmNzgtNGIxNS04Y2NkLWYwMGIxMWE1ODNlNyIsImV4cCI6MTQ2MTAzMzUyOCwiaWF0IjoxNDYxMDMzMjI4fQ";
         String signature = "MIGHAkFhmQZew3s2L23BpwhqTPxatHkEdqprogXBPCy1qQ5w6n288UrDm_t283nkFI9FklPqoHGr6ZT9hCOjET6mB732kwJCAOTBMwyDmZx9zuRXORH7ZG86Bj488CY75FkWcKfk8AuJyYFQbrJhPTDNmEpyx7f_AKjUlEk9eQcTQxMQX8VFwOi9";
@@ -1035,7 +1035,7 @@ public class PKCS11RestServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 
     @Parameters({"verifySignatureEndpoint"})
     @Test
@@ -1441,8 +1441,8 @@ public class PKCS11RestServiceTest {
         }
     }
 
-    /*@Parameters({"deleteKeyEndpoint"})
-    @Test(dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
+    @Parameters({"deleteKeyEndpoint"})
+    @Test(enabled = false, dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
     public void testDeleteKeyES512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();
@@ -1457,7 +1457,7 @@ public class PKCS11RestServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-    }*/
+    }
 
     @Parameters({"deleteKeyEndpoint"})
     @Test

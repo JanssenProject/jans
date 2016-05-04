@@ -8,7 +8,7 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 20, 2016
+ * @version May 4, 2016
  */
 public enum SignatureAlgorithm {
 
@@ -20,8 +20,8 @@ public enum SignatureAlgorithm {
     RS384("RS384", SignatureAlgorithmFamily.RSA, "SHA384WITHRSA"),
     RS512("RS512", SignatureAlgorithmFamily.RSA, "SHA512WITHRSA"),
     ES256("ES256", SignatureAlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256),
-    ES384("ES384", SignatureAlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384);
-    //ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521);
+    ES384("ES384", SignatureAlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384),
+    ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521);
 
     private final String name;
     private final String family;
