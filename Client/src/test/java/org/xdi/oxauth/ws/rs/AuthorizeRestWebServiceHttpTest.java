@@ -1923,7 +1923,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.CONSENT);
 
-        AuthorizationResponse authorizationResponse = authenticatePreAuthorizedResourceOwnerAndGrantAccess(
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
