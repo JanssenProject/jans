@@ -316,7 +316,7 @@ public abstract class BaseTest {
         		} catch (NoSuchElementException ex) {
         			// This is normal if client is Pre-Authorized
         			System.out.println(driver.getPageSource());
-        			System.out.println(driver.getCurrentUrl()());
+        			System.out.println(driver.getCurrentUrl());
         		}
         	} else {
 	            //WebElement allowButton = (new WebDriverWait(driver, 20)).until(ExpectedConditions.presenceOfElementLocated(By.name(authorizeFormAllowButton)));
