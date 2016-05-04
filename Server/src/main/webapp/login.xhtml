@@ -141,14 +141,14 @@
         <script type="text/javascript">
             window.onload = function() {
                 var userNameField = document.getElementById("loginForm:username");
-                if (userNameField != null {
+                if (userNameField != null) {
                 	userNameField.focus();
                 }
 
                 var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
                 if (displayRegister) {
                     var registerButton = document.getElementById("loginForm:registerId");
-                    if (registerButton != null {
+                    if (registerButton != null) {
                         registerButton.style.display = 'inline';
                     }
                 }
