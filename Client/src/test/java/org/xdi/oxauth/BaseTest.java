@@ -291,8 +291,6 @@ public abstract class BaseTest {
         }
         driver.navigate().to(authorizationRequestUrl);
 
-        (new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
-
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
         WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
@@ -300,6 +298,8 @@ public abstract class BaseTest {
         usernameElement.sendKeys(userId);
         passwordElement.sendKeys(userSecret);
         loginButton.click();
+
+        (new WebDriverWait(driver, 30)).until(ExpectedConditions.not(ExpectedConditions.titleIs("oxAuth - Login")));
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
