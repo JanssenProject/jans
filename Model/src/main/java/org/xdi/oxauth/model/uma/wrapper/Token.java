@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.model.uma.wrapper;
 
+import java.io.Serializable;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 15/03/2013
  */
 
-public class Token {
+public class Token implements Serializable {
 
     private String m_authorizationCode;
     private String m_scope;
