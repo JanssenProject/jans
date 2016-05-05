@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -16,12 +17,15 @@ import org.jboss.seam.mock.ResourceRequestEnvironment.ResourceRequest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.EndSessionRequest;
+import org.xdi.oxauth.client.QueryStringDecoder;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
@@ -45,6 +49,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
     private String clientId;
     private String idToken;
+    private String sessionState;
 
     @Parameters({"registerPath", "redirectUris", "postLogoutRedirectUri"})
     @Test
@@ -63,6 +68,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
                     registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
+                    registerRequest.setLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -152,6 +158,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                         assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
                         idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
+                        sessionState = params.get(AuthorizeResponseParam.SESSION_STATE);
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                         fail("Response URI is not well formed");
@@ -169,14 +176,15 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     public void requestEndSessionStep3(final String endSessionPath, final String postLogoutRedirectUri) throws Exception {
         new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, endSessionPath) {
 
-            String endSessionState = UUID.randomUUID().toString();
+            String state = UUID.randomUUID().toString();
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                 super.prepareRequest(request);
                 request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
+                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
+                endSessionRequest.setSessionState(sessionState);
 
                 request.setQueryString(endSessionRequest.getQueryString());
             }
@@ -186,27 +194,32 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 super.onResponse(response);
                 showResponse("requestEndSessionStep3", response);
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertEquals(response.getStatus(), 200, "Unexpected response code.");
+                assertNotNull(response.getContentAsString(), "Unexpected html.");
+                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
+                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
 
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "The query string is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-
-                        assertNotNull(params.get(EndSessionResponseParam.STATE), "The state is null");
-                        assertEquals(params.get(EndSessionResponseParam.STATE), endSessionState);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
             }
+
+//            private void validateNonHttpBasedLogout(EnhancedMockHttpServletResponse response) {
+//                if (response.getHeader("Location") != null) {
+//                    try {
+//                        URI uri = new URI(response.getHeader("Location").toString());
+//                        assertNotNull(uri.getQuery(), "The query string is null");
+//
+//                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+//
+//                        assertNotNull(params.get(EndSessionResponseParam.STATE), "The state is null");
+//                        assertEquals(params.get(EndSessionResponseParam.STATE), endSessionState);
+//                    } catch (URISyntaxException e) {
+//                        e.printStackTrace();
+//                        fail("Response URI is not well formed");
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        fail(e.getMessage());
+//                    }
+//                }
+//            }
         }.run();
     }
 

@@ -19,20 +19,20 @@ public enum TokenType {
     REFRESH_TOKEN("refresh_token"),
     AUTHORIZATION_CODE("authorization_code");
 
-    private final String m_value;
+    private final String value;
 
-    TokenType(String p_name) {
-        m_value = p_name;
+    TokenType(String name) {
+        value = name;
     }
 
     public String getValue() {
-        return m_value;
+        return value;
     }
 
-    public static TokenType fromValue(String p_value) {
-        if (StringUtils.isNotBlank(p_value)) {
+    public static TokenType fromValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
             for (TokenType t : values()) {
-                if (t.getValue().endsWith(p_value)) {
+                if (t.getValue().endsWith(value)) {
                     return t;
                 }
             }

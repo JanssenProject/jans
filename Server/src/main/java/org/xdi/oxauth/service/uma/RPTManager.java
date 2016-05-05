@@ -6,25 +6,30 @@
 
 package org.xdi.oxauth.service.uma;
 
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.common.AbstractToken;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * RPT manager component
@@ -34,88 +39,166 @@ import java.util.List;
 @AutoCreate
 @Scope(ScopeType.APPLICATION)
 @Name("rptManager")
-public class RPTManager implements IRPTManager {
+public class RPTManager extends AbstractRPTManager {
 
-    @Logger
-    private Log log;
+    private static final String ORGUNIT_OF_RPT = "uma_requester_permission_token";
+
+    private static final Log LOG = Logging.getLog(RPTManager.class);
+
+    private final LdapEntryManager ldapEntryManager;
+
     @In
-   	private TokenService tokenService;
+    private TokenService tokenService;
     @In
-   	private AuthorizationGrantList authorizationGrantList;
+    private AuthorizationGrantList authorizationGrantList;
 
-    private IRPTManager manager;
+    public RPTManager() {
+        ldapEntryManager = ServerUtil.getLdapManager();
+    }
 
-    @Create
-    public void init() {
-        switch (ConfigurationFactory.instance().getConfiguration().getModeEnum()) {
-            case IN_MEMORY:
-                manager = new RPTManagerInMemory();
-                log.info("Created IN-MEMORY UMA RPT manager");
-                break;
-            case LDAP:
-                manager = new RPTManagerLdap();
-                log.info("Created LDAP UMA RPT manager");
-                break;
-            default:
-                log.error("Unable to identify mode of the server. (Please check configuration.)");
-                throw new IllegalArgumentException("Unable to identify mode of the server. (Please check configuration.)");
+    @Override
+    public void addRPT(UmaRPT p_rpt, String p_clientDn) {
+        try {
+            addBranchIfNeeded(p_clientDn);
+            String id = UUID.randomUUID().toString();
+            p_rpt.setId(id);
+            p_rpt.setDn(getDn(p_clientDn, id));
+            ldapEntryManager.persist(p_rpt);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
     @Override
-    public UmaRPT createRPT(String authorization, String amHost) {
-        String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
-        AbstractToken accessToken = authorizationGrant.getAccessToken(aatToken);
+    public UmaRPT getRPTByCode(String p_code) {
+        try {
+            final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", p_code));
+            final String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
+            final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                return entries.get(0);
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
 
-        UmaRPT rpt = createRPT(accessToken, authorizationGrant.getUserId(), authorizationGrant.getClientId(), amHost);
+    @Override
+    public void deleteRPT(String rptCode) {
+        try {
+            final UmaRPT t = getRPTByCode(rptCode);
+            if (t != null) {
+                ldapEntryManager.remove(t);
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void cleanupRPTs(Date now) {
+        try {
+            final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+            final List<UmaRPT> entries = ldapEntryManager.findEntries(
+                    ConfigurationFactory.instance().getBaseDn().getClients(), UmaRPT.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                for (UmaRPT p : entries) {
+                    ldapEntryManager.remove(p);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void addPermissionToRPT(UmaRPT p_rpt, ResourceSetPermission p_permission) {
+        final List<String> permissions = new ArrayList<String>();
+        if (p_rpt.getPermissions() != null) {
+            permissions.addAll(p_rpt.getPermissions());
+        }
+        permissions.add(p_permission.getDn());
+        p_rpt.setPermissions(permissions);
+
+        try {
+            ldapEntryManager.merge(p_rpt);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt) {
+        final List<ResourceSetPermission> result = new ArrayList<ResourceSetPermission>();
+        try {
+            if (p_rpt != null && p_rpt.getPermissions() != null) {
+                final List<String> permissionDns = p_rpt.getPermissions();
+                for (String permissionDn : permissionDns) {
+                    final ResourceSetPermission permissionObject = ldapEntryManager.find(ResourceSetPermission.class, permissionDn);
+                    if (permissionObject != null) {
+                        result.add(permissionObject);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return result;
+    }
+
+    @Override
+    public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
+        String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+        IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
+
+        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken, isGat);
 
         addRPT(rpt, authorizationGrant.getClientDn());
         return rpt;
     }
 
-    public void addRPT(UmaRPT requesterPermissionToken, String clientDn) {
-        manager.addRPT(requesterPermissionToken, clientDn);
-    }
-
-    public UmaRPT getRPTByCode(String requesterPermissionTokenCode) {
-        return manager.getRPTByCode(requesterPermissionTokenCode);
-    }
-
-    public UmaRPT createRPT(AbstractToken authorizationApiToken, String userId, String clientId, String amHost) {
-        return manager.createRPT(authorizationApiToken, userId, clientId, amHost);
-    }
-
-    public void deleteRPT(String rptCode) {
-        manager.deleteRPT(rptCode);
-    }
-
-    public void cleanupRPTs(Date now) {
-        manager.cleanupRPTs(now);
-    }
-
-    @Override
-    public void addPermissionToRPT(UmaRPT p_rpt, ResourceSetPermission p_permission) {
-        manager.addPermissionToRPT(p_rpt, p_permission);
-    }
-
     @Override
     public ResourceSetPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId) {
-        return manager.getPermissionFromRPTByResourceSetId(p_rpt, p_resourceSetId);
+        try {
+            if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(p_resourceSetId)) {
+                final List<String> permissionDns = p_rpt.getPermissions();
+                for (String permissionDn : permissionDns) {
+                    final ResourceSetPermission permissionObject = ldapEntryManager.find(ResourceSetPermission.class, permissionDn);
+                    if (permissionObject != null && p_resourceSetId.equals(permissionObject.getResourceSetId())) {
+                        return permissionObject;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
     }
 
-    @Override
-    public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt) {
-        return manager.getRptPermissions(p_rpt);
+    public void addBranch(String clientDn) {
+        final SimpleBranch branch = new SimpleBranch();
+        branch.setOrganizationalUnitName(ORGUNIT_OF_RPT);
+        branch.setDn(branchDn(clientDn));
+        ldapEntryManager.persist(branch);
     }
 
-    /**
-     * Get RequesterPermissionTokenManager instance
-     *
-     * @return RequesterPermissionTokenManager instance
-     */
-    public static RPTManager instance() {
-        return ServerUtil.instance(RPTManager.class);
+    public void addBranchIfNeeded(String clientDn) {
+        if (!containsBranch(clientDn)) {
+            addBranch(clientDn);
+        }
+    }
+
+    public boolean containsBranch(String clientDn) {
+        return ldapEntryManager.contains(SimpleBranch.class, branchDn(clientDn));
+    }
+
+    public static String getDn(String clientDn, String uniqueIdentifier) {
+        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
+    }
+
+    public static String branchDn(String clientDn) {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
 }

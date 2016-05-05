@@ -227,7 +227,7 @@ public abstract class AbstractToken {
         String hash = null;
 
         try {
-            byte[] digest = null;
+            byte[] digest;
             if (signatureAlgorithm == SignatureAlgorithm.HS256 ||
                     signatureAlgorithm == SignatureAlgorithm.RS256 ||
                     signatureAlgorithm == SignatureAlgorithm.ES256) {

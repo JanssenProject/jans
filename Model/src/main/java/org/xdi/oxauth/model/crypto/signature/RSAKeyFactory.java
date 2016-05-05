@@ -6,23 +6,6 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Random;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
 import org.bouncycastle.jce.provider.JCERSAPublicKey;
@@ -31,10 +14,20 @@ import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.KeyFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 
+import javax.security.auth.x500.X500Principal;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Random;
+
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
@@ -92,11 +85,11 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
         }
 
         rsaPrivateKey = new RSAPrivateKey(
-                p_key.getPrivateKey().getModulus(),
-                p_key.getPrivateKey().getPrivateExponent());
+                p_key.getPrivateKey().getN(),
+                p_key.getPrivateKey().getE());
         rsaPublicKey = new RSAPublicKey(
-                p_key.getPublicKey().getModulus(),
-                p_key.getPublicKey().getExponent());
+                p_key.getPublicKey().getN(),
+                p_key.getPublicKey().getE());
         certificate = null;
     }
 

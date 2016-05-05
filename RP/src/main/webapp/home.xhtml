@@ -29,9 +29,9 @@
                     <h:outputLabel for="resource">Resource</h:outputLabel>
                     <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
                     <h:outputText>eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443</h:outputText>
-                    <h:outputLabel for="acceptUntrastedCertificate">Accept Untrasted Certificate</h:outputLabel>
-                    <h:selectBooleanCheckbox id="acceptUntrastedCertificate"
-                                             value="#{openIdConnectDiscoveryAction.acceptUntrastedCertificate}"/>
+                    <h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
+                    <h:selectBooleanCheckbox id="acceptUntrustedCertificate"
+                                             value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}"/>
                 </h:panelGrid>
             </div>
         </s:div>
@@ -195,16 +195,6 @@
              size="40"/>
 <h:outputText></h:outputText>
 
-<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
-<h:selectOneMenu id="tokenEndpointAuthMethod"
-                 value="#{registrationAction.tokenEndpointAuthMethod}">
-    <s:selectItems value="#{authenticationMethods}" var="authenticationMethod"
-                   label="#{authenticationMethod}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
 <h:outputLabel for="policyUri">Policy URI</h:outputLabel>
 <h:inputText id="policyUri"
              value="#{registrationAction.policyUri}"
@@ -239,11 +229,31 @@
 </h:selectOneMenu>
 <h:outputText></h:outputText>
 
-<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
-<h:selectOneMenu id="requestObjectSigningAlg"
-                 value="#{registrationAction.requestObjectSigningAlg}">
+<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
+<h:selectOneMenu id="idTokenSignedResponseAlg"
+                 value="#{registrationAction.idTokenSignedResponseAlg}">
     <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm}"
+                   label="#{signatureAlgorithm.name}"
+                   noSelectionLabel="- Please select one -"/>
+    <s:convertEnum/>
+</h:selectOneMenu>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
+<h:selectOneMenu id="idTokenEncryptedResponseAlg"
+                 value="#{registrationAction.idTokenEncryptedResponseAlg}">
+    <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
+                   label="#{keyEncryptionAlgorithm.name}"
+                   noSelectionLabel="- Please select one -"/>
+    <s:convertEnum/>
+</h:selectOneMenu>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
+<h:selectOneMenu id="idTokenEncryptedResponseEnc"
+                 value="#{registrationAction.idTokenEncryptedResponseEnc}">
+    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
+                   label="#{blockEncryptionAlgorithm.name}"
                    noSelectionLabel="- Please select one -"/>
     <s:convertEnum/>
 </h:selectOneMenu>
@@ -279,32 +289,49 @@
 </h:selectOneMenu>
 <h:outputText></h:outputText>
 
-
-<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
-<h:selectOneMenu id="idTokenSignedResponseAlg"
-                 value="#{registrationAction.idTokenSignedResponseAlg}">
+<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
+<h:selectOneMenu id="requestObjectSigningAlg"
+                 value="#{registrationAction.requestObjectSigningAlg}">
     <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm.name}"
+                   label="#{signatureAlgorithm}"
                    noSelectionLabel="- Please select one -"/>
     <s:convertEnum/>
 </h:selectOneMenu>
 <h:outputText></h:outputText>
 
-<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
-<h:selectOneMenu id="idTokenEncryptedResponseAlg"
-                 value="#{registrationAction.idTokenEncryptedResponseAlg}">
+<h:outputLabel for="requestObjectEncryptionAlg">Request Object Encryption Alg</h:outputLabel>
+<h:selectOneMenu id="requestObjectEncryptionAlg"
+                 value="#{registrationAction.requestObjectEncryptionAlg}">
     <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
                    label="#{keyEncryptionAlgorithm.name}"
                    noSelectionLabel="- Please select one -"/>
+</h:selectOneMenu>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="requestObjectEncryptionEnc">Request Object Encryption Enc</h:outputLabel>
+<h:selectOneMenu id="requestObjectEncryptionEnc"
+                 value="#{registrationAction.requestObjectEncryptionEnc}">
+    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
+                   label="#{blockEncryptionAlgorithm.name}"
+                   noSelectionLabel="- Please select one -"/>
+</h:selectOneMenu>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
+<h:selectOneMenu id="tokenEndpointAuthMethod"
+                 value="#{registrationAction.tokenEndpointAuthMethod}">
+    <s:selectItems value="#{authenticationMethods}" var="authenticationMethod"
+                   label="#{authenticationMethod}"
+                   noSelectionLabel="- Please select one -"/>
     <s:convertEnum/>
 </h:selectOneMenu>
 <h:outputText></h:outputText>
 
-<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
-<h:selectOneMenu id="idTokenEncryptedResponseEnc"
-                 value="#{registrationAction.idTokenEncryptedResponseEnc}">
-    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-                   label="#{blockEncryptionAlgorithm.name}"
+<h:outputLabel for="tokenEndpointAuthSigningAlg">Token Endpoint Auth Signing Alg</h:outputLabel>
+<h:selectOneMenu id="tokenEndpointAuthSigningAlg"
+                 value="#{registrationAction.tokenEndpointAuthSigningAlg}">
+    <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
+                   label="#{signatureAlgorithm}"
                    noSelectionLabel="- Please select one -"/>
     <s:convertEnum/>
 </h:selectOneMenu>
@@ -340,6 +367,17 @@
 <h:inputText id="requestUris"
              value="#{registrationAction.requestUris}"
              size="40"/>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="logoutUri">Logout URI</h:outputLabel>
+<h:inputText id="logoutUri"
+             value="#{registrationAction.logoutUri}"
+             size="40"/>
+<h:outputText></h:outputText>
+
+<h:outputLabel for="logoutSessionRequired">Logout Session Required</h:outputLabel>
+<h:selectBooleanCheckbox id="logoutSessionRequired"
+                         value="#{registrationAction.logoutSessionRequired}"/>
 <h:outputText></h:outputText>
 </h:panelGrid>
 </div>
@@ -617,9 +655,9 @@
             </h:selectOneMenu>
             <h:outputText rendered="#{authorizationAction.JWSSelected}"></h:outputText>
 
-            <h:outputLabel for="requestObjectEncryptionAlg"
+            <h:outputLabel for="authorizationRequestObjectEncryptionAlg"
                            rendered="#{authorizationAction.JWESelected}">Request Object Encryption Alg</h:outputLabel>
-            <h:selectOneMenu id="requestObjectEncryptionAlg"
+            <h:selectOneMenu id="authorizationRequestObjectEncryptionAlg"
                              value="#{authorizationAction.requestObjectEncryptionAlg}"
                              rendered="#{authorizationAction.JWESelected}">
                 <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
@@ -629,9 +667,9 @@
             </h:selectOneMenu>
             <h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
 
-            <h:outputLabel for="requestObjectEncryptionEnc"
+            <h:outputLabel for="authorizationRequestObjectEncryptionEnc"
                            rendered="#{authorizationAction.JWESelected}">Request Object Encryption Enc</h:outputLabel>
-            <h:selectOneMenu id="requestObjectEncryptionEnc"
+            <h:selectOneMenu id="authorizationRequestObjectEncryptionEnc"
                              value="#{authorizationAction.requestObjectEncryptionEnc}"
                              rendered="#{authorizationAction.JWESelected}">
                 <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
@@ -855,6 +893,24 @@
             <iframe id="op" style="visibility:hidden" height="0" width="0"
                     src="#{checkSessionAction.checkSessionEndpoint}"/>
             <iframe id="rp" style="visibility:hidden" height="0" width="0"/>
+
+            <s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="opIFrame">OP IFrame</h:outputLabel>
+                    <h:inputText id="opIFrame" value="#{checkSessionAction.checkSessionEndpoint}"
+                                 size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+
+                    <h:outputLabel for="rpIFrame">RP IFrame</h:outputLabel>
+                    <h:inputText id="rpIFrame" size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+
+                    <h:outputLabel for="checkSessionOpOrigin">OP Origin</h:outputLabel>
+                    <h:inputText id="checkSessionOpOrigin" value="https://#{openIdConnectDiscoveryAction.host}"
+                                 size="40" readonly="true"/>
+                    <h:outputText></h:outputText>
+                </h:panelGrid>
+            </s:div>
         </s:div>
     </rich:panel>
 </div>
@@ -975,32 +1031,6 @@
                                action="#{endSessionAction.exec}"
                                reRender="endSessionResults"/>
         </div>
-        <s:div id="endSessionResults">
-            <s:div rendered="#{endSessionAction.showResults}">
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">End Session Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="5"
-                                         value="#{endSessionAction.requestString}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">End Session Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="8"
-                                         value="#{endSessionAction.responseString}"/>
-                    </s:div>
-                </rich:panel>
-            </s:div>
-        </s:div>
     </rich:panel>
 </div>
 
@@ -1024,11 +1054,17 @@
                 document.getElementById("mainForm:endSessionIdTokenHint").value = param[1];
             } else if (param[0] == "scope") {
                 document.getElementById("mainForm:scope").value = param[1];
-            } else if (param[0] == "session_id") {
+            } else if (param[0] == "session_state") {
                 var rp = document.getElementById("rp");
                 var clientId = document.getElementById("mainForm:authorizationClientId").value;
-                rp.src = "./rpiframe.seam?session_state=" + param[1]
-                        + "&client_id=" + clientId;
+                var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin").value;
+
+                var rpIFrame = "./rpiframe.seam?session_state=" + param[1]
+                        + "&client_id=" + clientId + "&op_origin=" + opOrigin;
+
+                document.getElementById("mainForm:rpIFrame").value = rpIFrame;
+
+                rp.src = rpIFrame;
             }
         }
     }

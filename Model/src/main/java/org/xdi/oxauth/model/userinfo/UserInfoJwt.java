@@ -30,7 +30,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version December 17, 2015
  */
 public class UserInfoJwt {
 
@@ -125,7 +125,9 @@ public class UserInfoJwt {
                         && encodedSignature == null
                         && (type == null || type == JwtType.JWT)) {
                     validSignature = true;
-                } else if (type == JwtType.JWT || type == JwtType.JWS) {
+                } else if (algorithm.getFamily() == SignatureAlgorithmFamily.HMAC
+                        || algorithm.getFamily() == SignatureAlgorithmFamily.RSA
+                        || algorithm.getFamily() == SignatureAlgorithmFamily.EC) {
                     RSAPublicKey rsaPublicKey = null;
                     ECDSAPublicKey ecdsaPublicKey = null;
 
@@ -194,10 +196,12 @@ public class UserInfoJwt {
                             validSignature = false;
                             break;
                     }
-                } else if (type == JwtType.JWE) {
-                    throw new InvalidJwtException("JWE is not supported");
                 } else {
                     throw new InvalidJwtException("Cannot validate the JWT Cryptographic segment");
+                }
+
+                if (!validSignature) {
+                    throw new InvalidJwtException("The signature is not valid");
                 }
             }
         } catch (JSONException e) {

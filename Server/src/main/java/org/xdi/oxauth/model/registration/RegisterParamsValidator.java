@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.registration;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -146,11 +145,13 @@ public class RegisterParamsValidator {
                                 }
                                 break;
                             case NATIVE:
-                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
-                                    return false;
-                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
-                                    return false;
-                                }
+                                // to conform "OAuth 2.0 for Native Apps" https://tools.ietf.org/html/draft-wdenniss-oauth-native-apps-00
+                                // we allow registration with custom schema for native apps.
+//                                if (!HTTP.equalsIgnoreCase(uri.getScheme())) {
+//                                    return false;
+//                                } else if (!LOCALHOST.equalsIgnoreCase(uri.getHost())) {
+//                                    return false;
+//                                }
                                 break;
                         }
                     }
@@ -182,8 +183,17 @@ public class RegisterParamsValidator {
         return true;
     }
 
+    public static void validateLogoutUri(List<String> logoutUris, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
+        if (logoutUris == null || logoutUris.isEmpty()) { // logout uri is optional so null or empty list is valid
+            return;
+        }
+        for (String logoutUri : logoutUris) {
+            validateLogoutUri(logoutUri, redirectUris, errorResponseFactory);
+        }
+    }
+
     public static void validateLogoutUri(String logoutUri, List<String> redirectUris, ErrorResponseFactory errorResponseFactory) {
-        if (Strings.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
+        if (Util.isNullOrEmpty(logoutUri)) { // logout uri is optional so null or empty string is valid
             return;
         }
 

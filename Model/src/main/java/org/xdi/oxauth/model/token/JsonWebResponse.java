@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.io.Serializable;
-
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
+
+import java.io.Serializable;
 
 /**
  * JSON Web Token is a compact token format intended for space constrained
@@ -45,9 +45,8 @@ public class JsonWebResponse implements Serializable {
 	public void setClaims(JwtClaims claims) {
 		this.claims = claims;
 	}
-	
-	@Override
-	public String toString() {
+
+	public String asString() {
 		try {
 			return claims.toJsonString();
 		} catch (InvalidJwtException ex) {
@@ -57,4 +56,8 @@ public class JsonWebResponse implements Serializable {
 		return "";
 	}
 
+    @Override
+    public String toString() {
+        return asString();
+    }
 }

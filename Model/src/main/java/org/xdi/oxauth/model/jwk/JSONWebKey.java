@@ -10,31 +10,31 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version February 17, 2016
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
-    private KeyType keyType;
+    private KeyType kty;
     private Use use;
-    private String algorithm;
-    private String keyId;
-    private Long expirationTime;
-    private String curve;
+    private String alg;
+    private String kid;
+    private Long exp;
+    private String crv;
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private List<String> certificateChain;
+    private List<String> x5c;
 
     public JSONWebKey() {
         privateKey = new PrivateKey();
         publicKey = new PublicKey();
     }
 
-    public KeyType getKeyType() {
-        return keyType;
+    public KeyType getKty() {
+        return kty;
     }
 
-    public void setKeyType(KeyType keyType) {
-        this.keyType = keyType;
+    public void setKty(KeyType kty) {
+        this.kty = kty;
     }
 
     /**
@@ -55,12 +55,12 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         this.use = use;
     }
 
-    public String getAlgorithm() {
-        return algorithm;
+    public String getAlg() {
+        return alg;
     }
 
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
+    public void setAlg(String alg) {
+        this.alg = alg;
     }
 
     /**
@@ -69,25 +69,25 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @return The Key ID.
      */
-    public String getKeyId() {
-        return keyId;
+    public String getKid() {
+        return kid;
     }
 
     /**
      * Sets the Key ID.
      *
-     * @param keyId The Key ID.
+     * @param kid The Key ID.
      */
-    public void setKeyId(String keyId) {
-        this.keyId = keyId;
+    public void setKid(String kid) {
+        this.kid = kid;
     }
 
-    public Long getExpirationTime() {
-        return expirationTime;
+    public Long getExp() {
+        return exp;
     }
 
-    public void setExpirationTime(Long expirationTime) {
-        this.expirationTime = expirationTime;
+    public void setExp(Long exp) {
+        this.exp = exp;
     }
 
     /**
@@ -95,17 +95,17 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @return The curve member that identifies the cryptographic curve used with the key.
      */
-    public String getCurve() {
-        return curve;
+    public String getCrv() {
+        return crv;
     }
 
     /**
      * Sets the curve member that identifies the cryptographic curve used with the key.
      *
-     * @param curve The curve member that identifies the cryptographic curve used with the key.
+     * @param crv The curve member that identifies the cryptographic curve used with the key.
      */
-    public void setCurve(String curve) {
-        this.curve = curve;
+    public void setCrv(String crv) {
+        this.crv = crv;
     }
 
     public PrivateKey getPrivateKey() {
@@ -124,20 +124,20 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         this.publicKey = publicKey;
     }
 
-    public List<String> getCertificateChain() {
-        return certificateChain;
+    public List<String> getX5c() {
+        return x5c;
     }
 
-    public void setCertificateChain(List<String> certificateChain) {
-        this.certificateChain = certificateChain;
+    public void setX5c(List<String> x5c) {
+        this.x5c = x5c;
     }
 
     @Override
     public int compareTo(JSONWebKey o) {
-        if (this.getExpirationTime() == null || o.getExpirationTime() == null) {
+        if (this.getExp() == null || o.getExp() == null) {
             return 0;
         }
 
-        return getExpirationTime().compareTo(o.getExpirationTime());
+        return getExp().compareTo(o.getExp());
     }
 }

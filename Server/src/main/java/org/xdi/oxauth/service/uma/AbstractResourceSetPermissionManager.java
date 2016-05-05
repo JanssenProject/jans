@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.uma;
 
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.util.INumGenerator;
 
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public abstract class AbstractResourceSetPermissionManager implements IResourceSetPermissionManager {
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, RegisterPermissionRequest p_request, Date expirationDate) {
+    public ResourceSetPermission createResourceSetPermission(String amHost, UmaPermission p_request, Date expirationDate) {
         final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
         final ScopeService scopeService = ScopeService.instance();

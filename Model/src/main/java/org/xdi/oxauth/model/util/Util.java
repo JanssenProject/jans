@@ -132,4 +132,8 @@ public class Util {
         return null;
     }
 
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.length() == 0;
+    }
+
 }

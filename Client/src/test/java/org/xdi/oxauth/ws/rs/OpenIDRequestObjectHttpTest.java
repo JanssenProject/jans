@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -26,6 +27,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.StringHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1711,8 +1713,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     @Test // This tests requires a place to publish a request object via HTTPS
     public void requestFileMethod(final String userId, final String userSecret,
                                   final String redirectUris, final String redirectUri,
-                                  final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+                                  @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
         showTitle("requestFileMethod");
+        
+        if (StringHelper.isEmpty(requestFileBasePath)) {
+        	return;
+        }
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.TOKEN,
@@ -1908,8 +1914,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     @Test // This tests requires a place to publish a request object via HTTPS
     public void requestFileMethodFail3(final String userId, final String userSecret,
                                        final String redirectUris, final String redirectUri,
-                                       final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+                                       @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
         showTitle("requestFileMethodFail3");
+        
+        if (StringHelper.isEmpty(requestFileBasePath)) {
+        	return;
+        }
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.TOKEN,

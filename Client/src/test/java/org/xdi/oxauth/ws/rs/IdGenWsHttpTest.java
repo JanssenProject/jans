@@ -20,9 +20,10 @@ import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -79,9 +80,9 @@ public class IdGenWsHttpTest extends BaseTest {
         } catch (ClientResponseFailure e) {
             Assert.assertEquals(e.getResponse().getStatus(), 403); // forbidden : rpt is not authorized yet
 
-            final BaseClientResponse<ResourceSetPermissionTicket> r = (BaseClientResponse) e.getResponse();
-            r.setReturnType(ResourceSetPermissionTicket.class);
-            final ResourceSetPermissionTicket ticket = r.getEntity();
+            final BaseClientResponse<PermissionTicket> r = (BaseClientResponse) e.getResponse();
+            r.setReturnType(PermissionTicket.class);
+            final PermissionTicket ticket = r.getEntity();
             UmaTestUtil.assert_(ticket);
 
             authorizeRpt(ticket.getTicket());

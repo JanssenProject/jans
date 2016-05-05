@@ -16,7 +16,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.crypto.signature.BouncyCastleSignatureVerification;
+import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
@@ -37,13 +37,15 @@ import com.google.common.io.ByteStreams;
 @AutoCreate
 public class RawAuthenticationService {
 
-	public static final String AUTHENTICATE_TYPE = "navigator.id.getAssertion";
+	public static final String AUTHENTICATE_GET_TYPE = "navigator.id.getAssertion";
+	public static final String AUTHENTICATE_CANCEL_TYPE = "navigator.id.cancelAssertion";
+	public static final String[] SUPPORTED_AUTHENTICATE_TYPES = new String[] { AUTHENTICATE_GET_TYPE, AUTHENTICATE_CANCEL_TYPE };
 
 	@Logger
 	private Log log;
 
-	@In(value = "bouncyCastleSignatureVerification")
-	private BouncyCastleSignatureVerification signatureVerification;
+	@In(value = "sha256withECDSASignatureVerification")
+	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {
 		ByteDataInputStream bis = new ByteDataInputStream(Base64Util.base64urldecode(rawDataBase64));

@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.google.common.base.Strings;
 import com.wordnik.swagger.annotations.Api;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -19,11 +19,12 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -67,6 +68,8 @@ public class RptPermissionAuthorizationWS {
     private FederationDataService federationDataService;
     @In
     private ClientService clientService;
+    @In
+    private LdapEntryManager ldapEntryManager;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -77,7 +80,7 @@ public class RptPermissionAuthorizationWS {
             RptAuthorizationRequest rptAuthorizationRequest,
             @Context HttpServletRequest httpRequest) {
         try {
-            final AuthorizationGrant grant = umaValidationService.validateAuthorizationWithAuthScope(authorization);
+            final AuthorizationGrant grant = umaValidationService.assertHasAuthorizationScope(authorization);
 
             final String validatedAmHost = umaValidationService.validateAmHost(amHost);
             final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant, validatedAmHost);
@@ -96,13 +99,13 @@ public class RptPermissionAuthorizationWS {
     }
 
     private UmaRPT authorizeRptPermission(String authorization,
-                                                         RptAuthorizationRequest rptAuthorizationRequest,
-                                                         HttpServletRequest httpRequest,
-                                                         AuthorizationGrant grant,
-                                                         String amHost) {
+                                          RptAuthorizationRequest rptAuthorizationRequest,
+                                          HttpServletRequest httpRequest,
+                                          AuthorizationGrant grant,
+                                          String amHost) {
         UmaRPT rpt;
-        if (Strings.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-            rpt = rptManager.createRPT(authorization, amHost);
+        if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
+            rpt = rptManager.createRPT(authorization, amHost, false);
         } else {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
@@ -110,9 +113,9 @@ public class RptPermissionAuthorizationWS {
         // Validate RPT
         try {
             umaValidationService.validateRPT(rpt);
-        } catch(WebApplicationException e) {
+        } catch (WebApplicationException e) {
             // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
-            // it's up to impelementation whether to create new RPT for each request or pass back requests RPT.
+            // it's up to implementation whether to create new RPT for each request or pass back requests RPT.
             // Here we decided to pass back new RPT if request's RPT in invalid.
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
@@ -133,6 +136,7 @@ public class RptPermissionAuthorizationWS {
                         // grant access directly, client is in trust and skipAuthorization=true
                         log.trace("grant access directly, client is in trust and skipAuthorization=true");
                         rptManager.addPermissionToRPT(rpt, resourceSetPermission);
+                        invalidateTicket(resourceSetPermission);
                         return rpt;
                     }
                 }
@@ -146,13 +150,23 @@ public class RptPermissionAuthorizationWS {
         }
 
         // Add permission to RPT
-        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest)) {
+        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest.getClaims())) {
             rptManager.addPermissionToRPT(rpt, resourceSetPermission);
+            invalidateTicket(resourceSetPermission);
             return rpt;
         }
 
         // throw not authorized exception
         throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
+    }
+
+    private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
+        try {
+            resourceSetPermission.setAmHost("invalidated"); // invalidate ticket and persist
+            ldapEntryManager.merge(resourceSetPermission);
+        } catch (Exception e) {
+            log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
+        }
     }
 }

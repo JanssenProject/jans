@@ -99,7 +99,7 @@ public class AuthorizationAction {
             req.getPrompts().addAll(prompt);
 
             if (useOpenIdRequestObject) {
-                JwtAuthorizationRequest jwtAuthorizationRequest = null;
+                JwtAuthorizationRequest jwtAuthorizationRequest;
                 if (isJWSSelected()) {
                     if (isClientSecretRequired()) {
                         jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, clientSecret);

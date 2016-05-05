@@ -9,14 +9,14 @@ namespace org\xdi\oxauth\model\common;
 class Parameters implements HasParamName {
     
     /**
-     * Session ID
+     * Session State
      */
-    const SESSION_ID = "session_id";
+    const SESSION_STATE = "session_state";
     
     /**
-     * Request Session ID
+     * Request Session State
      */
-    const REQUEST_SESSION_ID = "request_session_id";
+    const REQUEST_SESSION_STATE = "request_session_state";
     
     /**
      * Parameter Name

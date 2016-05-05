@@ -25,10 +25,25 @@ public class RequestMessageLdap extends BaseEntry {
 	@LdapAttribute(name = "creationDate")
 	protected Date creationDate;
 
+	@LdapAttribute(name = "oxSessionStateId")
+	protected String sessionState;
+
+	@LdapAttribute(name = "personInum")
+	protected String userInum;
+
 	public RequestMessageLdap() {}
 
 	public RequestMessageLdap(String dn) {
 		super(dn);
+	}
+
+	public RequestMessageLdap(String dn, String id, String requestId, Date creationDate, String sessionState, String userInum) {
+		super(dn);
+		this.id = id;
+		this.requestId = requestId;
+		this.creationDate = creationDate;
+		this.sessionState = sessionState;
+		this.userInum = userInum;
 	}
 
 	public String getId() {
@@ -53,6 +68,22 @@ public class RequestMessageLdap extends BaseEntry {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getSessionState() {
+		return sessionState;
+	}
+
+	public void setSessionState(String sessionState) {
+		this.sessionState = sessionState;
+	}
+
+	public String getUserInum() {
+		return userInum;
+	}
+
+	public void setUserInum(String userInum) {
+		this.userInum = userInum;
 	}
 
 }
