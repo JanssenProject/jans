@@ -1,3 +1,9 @@
+# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+# Copyright (c) 2016, Gluu
+#
+# Author: Yuriy Movchan
+#
+
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
@@ -5,7 +11,7 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.oxauth.model.common import User, CustomAttribute
+from org.xdi.oxauth.model.common import User
 from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
 from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
@@ -402,8 +408,8 @@ class PersonAuthentication(PersonAuthenticationType):
             # Attempt to determine client_id from event context
             if (clientId == None):
                 eventContext = Contexts.getEventContext()
-                if (eventContext.isSet("stored_request_parameters")):
-                    clientId = eventContext.get("stored_request_parameters").get("client_id")
+                if (eventContext.isSet("sessionAttributes")):
+                    clientId = eventContext.get("sessionAttributes").get("client_id")
 
             if (clientId == None):
                 print "Google+ GetClientConfiguration. client_id is empty"

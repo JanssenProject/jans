@@ -15,9 +15,10 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.model.common.CustomAttribute;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
@@ -50,6 +51,7 @@ import java.util.*;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
@@ -58,7 +60,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 16, 2015
+ * @version February 5, 2016
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -122,7 +124,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
                         builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                     } else {
-                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUri(), r.getRedirectUris(), errorResponseFactory);
+                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
                         String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
@@ -247,9 +249,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringUtils.isNotBlank(requestObject.getClientUri())) {
             p_client.setClientUri(requestObject.getClientUri());
         }
-        if (requestObject.getTokenEndpointAuthMethod() != null) {
-            p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
-        }
         if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
             p_client.setPolicyUri(requestObject.getPolicyUri());
         }
@@ -265,8 +264,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getSubjectType() != null) {
             p_client.setSubjectType(requestObject.getSubjectType().toString());
         }
-        if (requestObject.getRequestObjectSigningAlg() != null) {
-            p_client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
+        if (requestObject.getIdTokenSignedResponseAlg() != null) {
+            p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
+        }
+        if (requestObject.getIdTokenEncryptedResponseAlg() != null) {
+            p_client.setIdTokenEncryptedResponseAlg(requestObject.getIdTokenEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getIdTokenEncryptedResponseEnc() != null) {
+            p_client.setIdTokenEncryptedResponseEnc(requestObject.getIdTokenEncryptedResponseEnc().toString());
         }
         if (requestObject.getUserInfoSignedResponseAlg() != null) {
             p_client.setUserInfoSignedResponseAlg(requestObject.getUserInfoSignedResponseAlg().toString());
@@ -277,14 +282,22 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
             p_client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
-        if (requestObject.getIdTokenSignedResponseAlg() != null) {
-            p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
+        if (requestObject.getRequestObjectSigningAlg() != null) {
+            p_client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
-        if (requestObject.getIdTokenEncryptedResponseAlg() != null) {
-            p_client.setIdTokenEncryptedResponseAlg(requestObject.getIdTokenEncryptedResponseAlg().toString());
+        if (requestObject.getRequestObjectEncryptionAlg() != null) {
+            p_client.setRequestObjectEncryptionAlg(requestObject.getRequestObjectEncryptionAlg().toString());
         }
-        if (requestObject.getIdTokenEncryptedResponseEnc() != null) {
-            p_client.setIdTokenEncryptedResponseEnc(requestObject.getIdTokenEncryptedResponseEnc().toString());
+        if (requestObject.getRequestObjectEncryptionEnc() != null) {
+            p_client.setRequestObjectEncryptionEnc(requestObject.getRequestObjectEncryptionEnc().toString());
+        }
+        if (requestObject.getTokenEndpointAuthMethod() != null) {
+            p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
+        } else { // If omitted, the default is client_secret_basic
+            p_client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+        }
+        if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
+            p_client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
         }
         if (requestObject.getDefaultMaxAge() != null) {
             p_client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
@@ -306,13 +319,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
-        p_client.setLogoutUri(requestObject.getLogoutUri());
+        if (requestObject.getLogoutUris() != null && !requestObject.getLogoutUris().isEmpty()) {
+            p_client.setLogoutUri(requestObject.getLogoutUris().toArray(new String[requestObject.getLogoutUris().size()]));
+        }
         p_client.setLogoutSessionRequired(requestObject.getLogoutSessionRequired());
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
             requestUris = new ArrayList<String>(new HashSet<String>(requestUris)); // Remove repeated elements
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
+        }
+
+        Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
+        if (clientSecretExpiresAt != null) {
+            p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
         // Federation params
@@ -440,20 +460,23 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientName());
         Util.addToJSONObjectIfNotNull(responseJsonObject, LOGO_URI.toString(), client.getLogoUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_URI.toString(), client.getClientUri());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_METHOD.toString(), client.getTokenEndpointAuthMethod());
         Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS_URI.toString(), client.getJwksUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS.toString(), client.getJwks());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SECTOR_IDENTIFIER_URI.toString(), client.getSectorIdentifierUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SUBJECT_TYPE.toString(), client.getSubjectType());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_SIGNED_RESPONSE_ALG.toString(), client.getUserInfoSignedResponseAlg());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), client.getUserInfoEncryptedResponseAlg());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), client.getUserInfoEncryptedResponseEnc());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), client.getIdTokenSignedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), client.getIdTokenEncryptedResponseAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), client.getIdTokenEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_SIGNED_RESPONSE_ALG.toString(), client.getUserInfoSignedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), client.getUserInfoEncryptedResponseAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), client.getUserInfoEncryptedResponseEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_SIGNING_ALG.toString(), client.getRequestObjectSigningAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ALG.toString(), client.getRequestObjectEncryptionAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REQUEST_OBJECT_ENCRYPTION_ENC.toString(), client.getRequestObjectEncryptionEnc());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_METHOD.toString(), client.getTokenEndpointAuthMethod());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), client.getTokenEndpointAuthSigningAlg());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_MAX_AGE.toString(), client.getDefaultMaxAge());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_AUTH_TIME.toString(), client.getRequireAuthTime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, DEFAULT_ACR_VALUES.toString(), client.getDefaultAcrValues());

@@ -26,6 +26,7 @@ import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -33,11 +34,13 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -79,27 +82,26 @@ public class RegistrationService extends RequestService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userName) {
+	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
-		}
-
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
 		}
 
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
 		List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
 
-		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
-		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
-			if (!deviceRegistration.isCompromised()) {
-				try {
-					AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
-					authenticateRequests.add(authenticateRequest);
-				} catch (DeviceCompromisedException ex) {
-					log.error("Faield to authenticate device", ex);
+		boolean twoStep = StringHelper.isNotEmpty(userInum);
+		if (twoStep) {
+			// In two steps we expects not empty userInum
+			List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
+			for (DeviceRegistration deviceRegistration : deviceRegistrations) {
+				if (!deviceRegistration.isCompromised()) {
+					try {
+						AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
+						authenticateRequests.add(authenticateRequest);
+					} catch (DeviceCompromisedException ex) {
+						log.error("Faield to authenticate device", ex);
+					}
 				}
 			}
 		}
@@ -108,7 +110,6 @@ public class RegistrationService extends RequestService {
 		registerRequests.add(request);
 
 		return new RegisterRequestMessage(authenticateRequests, registerRequests);
-
 	}
 
 	public RegisterRequest startRegistration(String appId) {
@@ -119,22 +120,17 @@ public class RegistrationService extends RequestService {
 		return new RegisterRequest(Base64Util.base64urlencode(challenge), appId);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName) throws BadInputException {
-		return finishRegistration(requestMessage, response, userName, null);
+	public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum) throws BadInputException {
+		return finishRegistration(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userName, Set<String> facets)
+	public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum, Set<String> facets)
 			throws BadInputException {
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
-		}
-
 		RegisterRequest request = requestMessage.getRegisterRequest();
 		String appId = request.getAppId();
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawRegistrationService.REGISTER_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawRegistrationService.SUPPORTED_REGISTER_TYPES, request.getChallenge(), facets);
 
 		RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(response.getRegistrationData());
 		rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
@@ -144,24 +140,56 @@ public class RegistrationService extends RequestService {
 		deviceRegistration.setStatus(DeviceRegistrationStatus.ACTIVE);
 		deviceRegistration.setApplication(appId);
 		deviceRegistration.setCreationDate(now);
+		
+		int keyHandleHashCode = deviceRegistrationService.getKeyHandleHashCode(rawRegisterResponse.getKeyHandle());
+		deviceRegistration.setKeyHandleHashCode(keyHandleHashCode);
 
 		final String deviceRegistrationId = String.valueOf(System.currentTimeMillis());
 		deviceRegistration.setId(deviceRegistrationId);
-		deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(deviceRegistrationId, userInum));
+		
+		String responseDeviceData = response.getDeviceData();
+		if (StringHelper.isNotEmpty(responseDeviceData)) {
+			try {
+				String responseDeviceDataDecoded = new String(Base64Util.base64urldecode(responseDeviceData));
+				DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceDataDecoded, DeviceData.class);
+				deviceRegistration.setDeviceData(deviceData);
+			} catch (Exception ex) {
+				throw new BadInputException(String.format("Device data is invalid: %s", responseDeviceData), ex);
+			}
+		}
 
-		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
+		boolean approved = StringHelper.equals(RawRegistrationService.REGISTER_FINISH_TYPE, response.getClientData().getTyp());
+		if (!approved) {
+			log.debug("Registratio request with keyHandle '{0}' was canceled", rawRegisterResponse.getKeyHandle());
+			return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.CANCELED);
+		}
 
-		return deviceRegistration;
+		boolean twoStep = StringHelper.isNotEmpty(userInum);
+		if (twoStep) {
+			deviceRegistration.setDn(deviceRegistrationService.getDnForU2fDevice(userInum, deviceRegistrationId));
+			
+			// Check if there is device registration with keyHandle in LDAP already
+			List<DeviceRegistration> foundDeviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, deviceRegistration.getKeyHandle(), "oxId");
+			if (foundDeviceRegistrations.size() != 0) {
+				throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
+			}
+
+			deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
+		} else {
+			deviceRegistration.setDn(deviceRegistrationService.getDnForOneStepU2fDevice(deviceRegistrationId));
+			
+			deviceRegistrationService.addOneStepDeviceRegistration(deviceRegistration);
+		}
+
+		return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.APPROVED);
 	}
 
-	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage) {
+	public void storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userInum, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String registerRequestMessageId = UUID.randomUUID().toString();
 
-		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(requestMessage);
-		registerRequestMessageLdap.setCreationDate(now);
-		registerRequestMessageLdap.setId(registerRequestMessageId);
-		registerRequestMessageLdap.setDn(getDnForRegisterRequestMessage(registerRequestMessageId));
+		RequestMessageLdap registerRequestMessageLdap = new RegisterRequestMessageLdap(getDnForRegisterRequestMessage(registerRequestMessageId),
+				registerRequestMessageId, now, sessionState, userInum, requestMessage);
 
 		ldapEntryManager.persist(registerRequestMessageLdap);
 	}

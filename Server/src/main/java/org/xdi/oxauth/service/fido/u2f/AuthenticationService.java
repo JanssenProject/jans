@@ -24,10 +24,12 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
@@ -74,14 +76,9 @@ public class AuthenticationService extends RequestService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userName) throws BadInputException, NoEligableDevicesException {
+	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
-		}
-
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
 		}
 
 		List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
@@ -120,28 +117,23 @@ public class AuthenticationService extends RequestService {
 			throw new DeviceCompromisedException(device, "Device has been marked as compromised, cannot authenticate");
 		}
 
-		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getDeviceRegistrationConfiguration().getKeyHandle());
+		return new AuthenticateRequest(Base64Util.base64urlencode(challenge), appId, device.getKeyHandle());
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName)
+	public DeviceRegistrationResult finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum)
 			throws BadInputException, DeviceCompromisedException {
-		return finishAuthentication(requestMessage, response, userName, null);
+		return finishAuthentication(requestMessage, response, userInum, null);
 	}
 
-	public DeviceRegistration finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userName, Set<String> facets)
+	public DeviceRegistrationResult finishAuthentication(AuthenticateRequestMessage requestMessage, AuthenticateResponse response, String userInum, Set<String> facets)
 			throws BadInputException, DeviceCompromisedException {
-		String userInum = userService.getUserInum(userName);
-		if (StringHelper.isEmpty(userInum)) {
-			throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
-		}
-
 		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, requestMessage.getAppId());
 
 		final AuthenticateRequest request = getAuthenticateRequest(requestMessage, response);
 
 		DeviceRegistration usedDeviceRegistration = null;
 		for (DeviceRegistration deviceRegistration : deviceRegistrations) {
-			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getDeviceRegistrationConfiguration().getKeyHandle())) {
+			if (StringHelper.equals(request.getKeyHandle(), deviceRegistration.getKeyHandle())) {
 				usedDeviceRegistration = deviceRegistration;
 				break;
 			}
@@ -156,7 +148,7 @@ public class AuthenticationService extends RequestService {
 		}
 
 		ClientData clientData = response.getClientData();
-		clientDataValidationService.checkContent(clientData, RawAuthenticationService.AUTHENTICATE_TYPE, request.getChallenge(), facets);
+		clientDataValidationService.checkContent(clientData, RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, request.getChallenge(), facets);
 
 		RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(response.getSignatureData());
 		rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
@@ -164,9 +156,19 @@ public class AuthenticationService extends RequestService {
 		rawAuthenticateResponse.checkUserPresence();
 		usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
+		usedDeviceRegistration.setLastAccessTime(new Date());
+
 		deviceRegistrationService.updateDeviceRegistration(userInum, usedDeviceRegistration);
 
-		return usedDeviceRegistration;
+		DeviceRegistrationResult.Status status = DeviceRegistrationResult.Status.APPROVED; 
+
+		boolean approved = StringHelper.equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE, clientData.getTyp());
+		if (!approved) {
+			status = DeviceRegistrationResult.Status.CANCELED;
+			log.debug("Authentication request with keyHandle '{0}' was canceled", response.getKeyHandle());
+		}
+
+		return new DeviceRegistrationResult(usedDeviceRegistration, status);
 	}
 
 	public AuthenticateRequest getAuthenticateRequest(AuthenticateRequestMessage requestMessage, AuthenticateResponse response) throws BadInputException {
@@ -183,14 +185,12 @@ public class AuthenticationService extends RequestService {
 		throw new BadInputException("Responses keyHandle does not match any contained request");
 	}
 
-	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage) {
+	public void storeAuthenticationRequestMessage(AuthenticateRequestMessage requestMessage, String userInum, String sessionState) {
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		final String authenticateRequestMessageId = UUID.randomUUID().toString();
 
-		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(requestMessage);
-		authenticateRequestMessageLdap.setCreationDate(now);
-		authenticateRequestMessageLdap.setId(authenticateRequestMessageId);
-		authenticateRequestMessageLdap.setDn(getDnForAuthenticateRequestMessage(authenticateRequestMessageId));
+		AuthenticateRequestMessageLdap authenticateRequestMessageLdap = new AuthenticateRequestMessageLdap(getDnForAuthenticateRequestMessage(authenticateRequestMessageId),
+				authenticateRequestMessageId, now, sessionState, userInum, requestMessage);
 
 		ldapEntryManager.persist(authenticateRequestMessageLdap);
 	}
@@ -221,6 +221,26 @@ public class AuthenticationService extends RequestService {
 
 	public void removeAuthenticationRequestMessage(AuthenticateRequestMessageLdap authenticateRequestMessageLdap) {
 		removeRequestMessage(authenticateRequestMessageLdap);
+	}
+
+
+	public String getUserInumByKeyHandle(String appId, String keyHandle) throws InvalidKeyHandleDeviceException {
+		if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+			return null;
+		}
+
+		List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findDeviceRegistrationsByKeyHandle(appId, keyHandle, "oxId");
+		if (deviceRegistrations.isEmpty()) {
+			throw new InvalidKeyHandleDeviceException(String.format("Failed to find device by keyHandle '%s' in LDAP", keyHandle));
+		}
+
+		if (deviceRegistrations.size() != 1) {
+			throw new BadInputException(String.format("There are '%d' devices with keyHandle '%s' in LDAP", deviceRegistrations.size(), keyHandle));
+		}
+		
+		DeviceRegistration deviceRegistration = deviceRegistrations.get(0);
+
+		return userService.getUserInumByDn(deviceRegistration.getDn());
 	}
 
 	/**

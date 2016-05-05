@@ -109,7 +109,13 @@
                                         <div class="actionButtons">
                                             <h:commandButton id="loginButton"
                                                              value="#{messages['login.login']}"
-                                                             action="#{authenticator.authenticate}"/>
+                                                             action="#{authenticator.authenticate}" />
+
+	                                        <s:div id="registerId" style="display:none">
+	                                            <h:commandButton id="registerButton"
+	                                                             value="#{messages['login.register']}"
+	                                                             action="#{authenticator.authenticate}" />
+	                                        </s:div>
                                         </div>
                                     </div>
                                 </div>
@@ -118,6 +124,11 @@
                                 		<a id="externalAuthButton"
 											href="#{external_auth_request_uri}">
                                             <input type="button" value="Use External Authentification" />
+										</a>
+                                	</s:fragment>
+                                	<s:fragment rendered="#{external_registration_uri != Null}">
+                                		<a id="externalRegistrationButton" href="#{external_registration_uri}">
+                                		    <input type="button" value="Register new user" />
 										</a>
                                 	</s:fragment>
                                 </div>
@@ -129,7 +140,18 @@
         </table>
         <script type="text/javascript">
             window.onload = function() {
-                document.getElementById("loginForm:username").focus();
+                var userNameField = document.getElementById("loginForm:username");
+                if (userNameField != null) {
+                	userNameField.focus();
+                }
+
+                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null) {
+                        registerButton.style.display = 'inline';
+                    }
+                }
             };
         </script>
     </ui:define>

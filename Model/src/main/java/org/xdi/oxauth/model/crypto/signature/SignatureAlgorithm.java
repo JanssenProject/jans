@@ -10,7 +10,7 @@ import org.xdi.oxauth.model.jwt.JwtType;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version December 17, 2015
  */
 public enum SignatureAlgorithm {
 
@@ -36,7 +36,7 @@ public enum SignatureAlgorithm {
         this.family = family;
         this.algorithm = algorithm;
         this.curve = curve;
-        this.jwtType = JwtType.JWS;
+        this.jwtType = JwtType.JWT;
     }
 
     private SignatureAlgorithm(String name, String family, String algorithm) {
@@ -44,7 +44,7 @@ public enum SignatureAlgorithm {
         this.family = family;
         this.algorithm = algorithm;
         this.curve = null;
-        this.jwtType = JwtType.JWS;
+        this.jwtType = JwtType.JWT;
     }
 
     private SignatureAlgorithm(String name) {

@@ -16,23 +16,15 @@ import org.xdi.oxauth.model.util.Base64Util;
 public class DeviceRegistrationConfiguration {
 
 	@JsonProperty
-	public final String keyHandle;
-
-	@JsonProperty
 	public final String publicKey;
 
 	@JsonProperty
 	public final String attestationCert;
 
-	public DeviceRegistrationConfiguration(@JsonProperty("keyHandle") String keyHandle, @JsonProperty("publicKey") String publicKey,
+	public DeviceRegistrationConfiguration(@JsonProperty("publicKey") String publicKey,
 			@JsonProperty("attestationCert") String attestationCert) {
-		this.keyHandle = keyHandle;
 		this.publicKey = publicKey;
 		this.attestationCert = attestationCert;
-	}
-
-	public String getKeyHandle() {
-		return keyHandle;
 	}
 
 	public String getPublicKey() {
@@ -54,8 +46,7 @@ public class DeviceRegistrationConfiguration {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceRegistrationConfiguration [keyHandle=").append(keyHandle).append(", publicKey=").append(publicKey).append(", attestationCert=")
-				.append(attestationCert).append("]");
+		builder.append("DeviceRegistrationConfiguration [publicKey=").append(publicKey).append(", attestationCert=").append(attestationCert).append("]");
 		return builder.toString();
 	}
 

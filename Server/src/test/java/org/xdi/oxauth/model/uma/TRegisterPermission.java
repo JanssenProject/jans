@@ -27,18 +27,18 @@ import static org.testng.Assert.*;
 
 class TRegisterPermission {
 
-    private final BaseTest m_baseTest;
+    private final BaseTest baseTest;
 
     public TRegisterPermission(BaseTest p_baseTest) {
         assertNotNull(p_baseTest); // must not be null
-        m_baseTest = p_baseTest;
+        baseTest = p_baseTest;
     }
 
-    public ResourceSetPermissionTicket registerPermission(final Token p_pat, final String p_umaAmHost, String p_umaHost,
-                                     final RegisterPermissionRequest p_request, String path) {
-        final Holder<ResourceSetPermissionTicket> ticketH = new Holder<ResourceSetPermissionTicket>();
+    public PermissionTicket registerPermission(final Token p_pat, final String p_umaAmHost, String p_umaHost,
+                                     final UmaPermission p_request, String path) {
+        final Holder<PermissionTicket> ticketH = new Holder<PermissionTicket>();
         try {
-            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(m_baseTest), ResourceRequestEnvironment.Method.POST, path) {
+            new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.POST, path) {
 
                 @Override
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -65,7 +65,7 @@ class TRegisterPermission {
 
                     assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
                     try {
-                        final ResourceSetPermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetPermissionTicket.class);
+                        final PermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), PermissionTicket.class);
                         UmaTestUtil.assert_(t);
 
                         ticketH.setT(t);

@@ -15,66 +15,66 @@ import java.io.Serializable;
 
 public class Token implements Serializable {
 
-    private String m_authorizationCode;
-    private String m_scope;
-    private String m_accessToken;
-    private String m_refreshToken;
-    private String m_idToken;
+    private String authorizationCode;
+    private String scope;
+    private String accessToken;
+    private String refreshToken;
+    private String idToken;
     private Integer expiresIn;
 
     public Token() {
     }
 
-    public Token(String p_authorizationCode, String p_refreshToken, String p_accessToken, String p_scope, Integer expiresIn) {
-        m_authorizationCode = p_authorizationCode;
-        m_refreshToken = p_refreshToken;
-        m_accessToken = p_accessToken;
-        m_scope = p_scope;
+    public Token(String authorizationCode, String refreshToken, String accessToken, String scope, Integer expiresIn) {
+        this.authorizationCode = authorizationCode;
+        this.refreshToken = refreshToken;
+        this.accessToken = accessToken;
+        this.scope = scope;
         this.expiresIn = expiresIn;
     }
 
     public String getAuthorizationCode() {
-        return m_authorizationCode;
+        return authorizationCode;
     }
 
     public Token setAuthorizationCode(String p_authorizationCode) {
-        m_authorizationCode = p_authorizationCode;
+        authorizationCode = p_authorizationCode;
         return this;
     }
 
     public String getRefreshToken() {
-        return m_refreshToken;
+        return refreshToken;
     }
 
     public Token setRefreshToken(String p_refreshToken) {
-        m_refreshToken = p_refreshToken;
+        refreshToken = p_refreshToken;
         return this;
     }
 
     public String getAccessToken() {
-        return m_accessToken;
+        return accessToken;
     }
 
     public Token setAccessToken(String p_accessToken) {
-        m_accessToken = p_accessToken;
+        accessToken = p_accessToken;
         return this;
     }
 
     public String getScope() {
-        return m_scope;
+        return scope;
     }
 
     public Token setScope(String p_scope) {
-        m_scope = p_scope;
+        scope = p_scope;
         return this;
     }
 
     public String getIdToken() {
-        return m_idToken;
+        return idToken;
     }
 
     public Token setIdToken(String p_idToken) {
-        m_idToken = p_idToken;
+        idToken = p_idToken;
         return this;
     }
 

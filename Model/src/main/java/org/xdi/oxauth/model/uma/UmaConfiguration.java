@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.uma;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -33,6 +34,7 @@ import java.util.Arrays;
         "pat_grant_types_supported",
         "aat_grant_types_supported",
         "claim_token_profiles_supported",
+        "uma_profiles_supported",
         "dynamic_client_endpoint",
         "token_endpoint",
         "authorization_endpoint",
@@ -42,10 +44,12 @@ import java.util.Arrays;
         "permission_registration_endpoint",
         "rpt_endpoint",
         "scope_endpoint",
-        "user_endpoint"
+        "user_endpoint",
+        "rpt_as_jwt"
 })
 @XmlRootElement
 @ApiModel(value = "UMA Configuration")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UmaConfiguration {
 
     @ApiModelProperty(value = "The version of the UMA core protocol to which this authorization server conforms. The value MUST be the string \"1.0\"."
@@ -77,8 +81,12 @@ public class UmaConfiguration {
     private String[] aatGrantTypesSupported;
 
     @ApiModelProperty(value = "Claim formats and associated sub-protocols for gathering claims from requesting parties, as supported by this authorization server. The property value is an array of string values, which each string value is either a reserved keyword defined in this specification or a URI identifying a claim profile defined elsewhere.",
-            required = true)
+            required = false)
     private String[] claimTokenProfilesSupported;
+
+    @ApiModelProperty(value = "UMA profiles supported by this authorization server. The property value is an array of string values, where each string value is a URI identifying an UMA profile. Examples of UMA profiles are the API extensibility profiles defined in Section 5.",
+            required = false)
+    private String[] umaProfilesSupported;
 
     @ApiModelProperty(value = "The endpoint to use for performing dynamic client registration. Usage of this endpoint is defined by [DynClientReg]. The presence of this property indicates authorization server support for the dynamic client registration feature and its absence indicates a lack of support.",
             required = true)
@@ -87,10 +95,6 @@ public class UmaConfiguration {
     @ApiModelProperty(value = "The endpoint URI at which the resource server or client asks the authorization server for a PAT or AAT, respectively. A requested scope of \"uma_protection\" results in a PAT. A requested scope of \"uma_authorization\" results in an AAT. Usage of this endpoint is defined by [OAuth2].",
             required = true)
     private String tokenEndpoint;
-
-    @ApiModelProperty(value = "The endpoint URI at which the resource server gathers the consent of the end-user resource owner or the client gathers the consent of the end-user requesting party, if the \"authorization_code\" grant type is used. Usage of this endpoint is defined by [OAuth2].",
-            required = true)
-    private String userEndpoint;
 
     @ApiModelProperty(value = "The endpoint URI at which the resource server introspects an RPT presented to it by a client. Usage of this endpoint is defined by [OAuth-introspection] and Section 3.3.1. A valid PAT MUST accompany requests to this protected endpoint.",
             required = true)
@@ -108,7 +112,11 @@ public class UmaConfiguration {
             required = true)
     private String rptEndpoint;
 
-    @ApiModelProperty( value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
+    @ApiModelProperty(value = "The endpoint URI at which the client asks the authorization server for an GAT. Usage of this endpoint is defined by Gluu documentation.",
+            required = true)
+    private String gatEndpoint;
+
+    @ApiModelProperty(value = "The endpoint URI at which the client asks to have authorization data associated with its RPT. Usage of this endpoint is defined in Section 3.4.2. A valid AAT MUST accompany requests to this protected endpoint.",
             required = true)
     private String authorizationEndpoint;
 
@@ -119,6 +127,58 @@ public class UmaConfiguration {
     @ApiModelProperty(value = "The endpoint URI at which the authorization server interacts with the end-user requesting party to gather claims. If this property is absent, the authorization server does not interact with the end-user requesting party for claims gathering.",
             required = false)
     private String requestingPartyClaimsEndpoint;
+
+    @ApiModelProperty(value = "RPT as JWT", required = false)
+    private Boolean rptAsJwt = false;
+
+    @ApiModelProperty(value = "RPT signing algorithm values supported", required = false)
+    private Boolean rptSigningAlgValuesSupported = true;
+
+    @ApiModelProperty(value = "RPT encryption algorithm values supported", required = false)
+    private Boolean rptEncryptionAlgValuesSupported = true;
+
+    @ApiModelProperty(value = "RPT encryption enc values supported", required = false)
+    private Boolean rptEncryptionEncValuesSupported = true;
+
+    @JsonProperty(value = "rpt_as_jwt")
+    @XmlElement(name = "rpt_as_jwt")
+    public Boolean getRptAsJwt() {
+        return rptAsJwt;
+    }
+
+    public void setRptAsJwt(Boolean rptAsJwt) {
+        this.rptAsJwt = rptAsJwt;
+    }
+
+    @JsonProperty(value = "rpt_signing_alg_values_supported")
+    @XmlElement(name = "rpt_signing_alg_values_supported")
+    public Boolean getRptSigningAlgValuesSupported() {
+        return rptSigningAlgValuesSupported;
+    }
+
+    public void setRptSigningAlgValuesSupported(Boolean rptSigningAlgValuesSupported) {
+        this.rptSigningAlgValuesSupported = rptSigningAlgValuesSupported;
+    }
+
+    @JsonProperty(value = "rpt_encryption_alg_values_supported")
+    @XmlElement(name = "rpt_encryption_alg_values_supported")
+    public Boolean getRptEncryptionAlgValuesSupported() {
+        return rptEncryptionAlgValuesSupported;
+    }
+
+    public void setRptEncryptionAlgValuesSupported(Boolean rptEncryptionAlgValuesSupported) {
+        this.rptEncryptionAlgValuesSupported = rptEncryptionAlgValuesSupported;
+    }
+
+    @JsonProperty(value = "rpt_encryption_enc_values_supported")
+    @XmlElement(name = "rpt_encryption_enc_values_supported")
+    public Boolean getRptEncryptionEncValuesSupported() {
+        return rptEncryptionEncValuesSupported;
+    }
+
+    public void setRptEncryptionEncValuesSupported(Boolean rptEncryptionEncValuesSupported) {
+        this.rptEncryptionEncValuesSupported = rptEncryptionEncValuesSupported;
+    }
 
     @JsonProperty(value = "requesting_party_claims_endpoint")
     @XmlElement(name = "requesting_party_claims_endpoint")
@@ -223,6 +283,16 @@ public class UmaConfiguration {
         this.claimTokenProfilesSupported = claimTokenProfilesSupported;
     }
 
+    @JsonProperty(value = "uma_profiles_supported")
+    @XmlElement(name = "uma_profiles_supported")
+    public String[] getUmaProfilesSupported() {
+        return umaProfilesSupported;
+    }
+
+    public void setUmaProfilesSupported(String[] umaProfilesSupported) {
+        this.umaProfilesSupported = umaProfilesSupported;
+    }
+
     @JsonProperty(value = "dynamic_client_endpoint")
     @XmlElement(name = "dynamic_client_endpoint")
     public String getDynamicClientEndpoint() {
@@ -241,16 +311,6 @@ public class UmaConfiguration {
 
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
-    }
-
-    @JsonProperty(value = "user_endpoint")
-    @XmlElement(name = "user_endpoint")
-    public String getUserEndpoint() {
-        return userEndpoint;
-    }
-
-    public void setUserEndpoint(String userEndpoint) {
-        this.userEndpoint = userEndpoint;
     }
 
     @JsonProperty(value = "resource_set_registration_endpoint")
@@ -293,6 +353,16 @@ public class UmaConfiguration {
         this.rptEndpoint = rptEndpoint;
     }
 
+    @JsonProperty(value = "gat_endpoint")
+    @XmlElement(name = "gat_endpoint")
+    public String getGatEndpoint() {
+        return gatEndpoint;
+    }
+
+    public void setGatEndpoint(String gatEndpoint) {
+        this.gatEndpoint = gatEndpoint;
+    }
+
     @JsonProperty(value = "authorization_endpoint")
     @XmlElement(name = "authorization_endpoint")
     public String getAuthorizationEndpoint() {
@@ -322,10 +392,10 @@ public class UmaConfiguration {
         builder.append(Arrays.toString(aatGrantTypesSupported));
         builder.append(", claimProfilesSupported=");
         builder.append(Arrays.toString(claimTokenProfilesSupported));
+        builder.append(", umaProfilesSupported=");
+        builder.append(Arrays.toString(umaProfilesSupported));
         builder.append(", tokenEndpoint=");
         builder.append(tokenEndpoint);
-        builder.append(", userEndpoint=");
-        builder.append(userEndpoint);
         builder.append(", introspection_endpoint=");
         builder.append(introspectionEndpoint);
         builder.append(", resourceSetRegistrationEndpoint=");
@@ -336,6 +406,8 @@ public class UmaConfiguration {
         builder.append(rptEndpoint);
         builder.append(", authorization_request_endpoint=");
         builder.append(authorizationEndpoint);
+        builder.append(", rpt_as_jwt=");
+        builder.append(rptAsJwt);
         builder.append("]");
         return builder.toString();
     }

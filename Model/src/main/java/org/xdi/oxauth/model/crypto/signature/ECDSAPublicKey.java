@@ -6,24 +6,21 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
-import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
-
-import java.math.BigInteger;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.math.BigInteger;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * The Public Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
  * @author Javier Rojas Blum
- * @version 0.9, 09/23/2014
+ * @version February 17, 2016
  */
 public class ECDSAPublicKey extends PublicKey {
 
@@ -74,10 +71,10 @@ public class ECDSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("modulus", JSONObject.NULL);
-        jsonObject.put("exponent", JSONObject.NULL);
-        jsonObject.put(X, JwtUtil.base64urlencode(x.toByteArray()));
-        jsonObject.put(Y, JwtUtil.base64urlencode(y.toByteArray()));
+        jsonObject.put(MODULUS, JSONObject.NULL);
+        jsonObject.put(EXPONENT, JSONObject.NULL);
+        jsonObject.put(X, JwtUtil.base64urlencodeUnsignedBigInt(x));
+        jsonObject.put(Y, JwtUtil.base64urlencodeUnsignedBigInt(y));
 
         return jsonObject;
     }

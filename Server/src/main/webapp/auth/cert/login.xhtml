@@ -1,0 +1,148 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:c="http://java.sun.com/jstl/core"
+                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                template="/WEB-INF/incl/layout/template.xhtml">
+
+    <ui:define name="head">
+        <style type="text/css">
+            .login-panel {
+                border-style: solid;
+                border-width: 1px;
+                padding: 1px;
+                background-color: #FFFFFF;
+                border-color: #C4C0B9;
+            }
+
+            .login-panel-header {
+                background-color: #D4CFC7;
+                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+                background-position: left top;
+                background-repeat: repeat-x;
+                border-style: solid;
+                border-width: 1px;
+                padding: 2px;
+                border-color: #D4CFC7;
+                color: #000000;
+                font-family: Arial, Verdana, sans-serif;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            .login-panel-body {
+                padding: 10px;
+                color: #000000;
+                font-family: Arial, Verdana, sans-serif;
+                font-size: 13px;
+            }
+
+            .info-section, .info {
+                font-weight: bold;
+            }
+            
+            .body-section, .login-panel-body {
+                font-weight: bold;
+            }
+            .body-list, .login-panel-body {
+                font-weight: bold;
+            }
+        </style>
+        <s:fragment rendered="#{recaptcha_site_key != null}">
+	        <script src="https://www.google.com/recaptcha/api.js" async="async" defer="defer"></script>
+        </s:fragment>
+    </ui:define>
+
+    <ui:define name="pageTitle">
+        <h:outputText value="#{messages['login.pageTitle']}"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <table border="0" align="center">
+            <tr>
+                <td>
+                    <div>
+                        <h:form id="loginForm">
+                            <s:token/>
+                            <h:panelGroup rendered="#{not identity.loggedIn}">
+                                <div class="login-panel">
+                                    <div class="login-panel-header">
+                                        <h:outputText value="#{messages['login.login']}"/>
+                                    </div>
+                                    <div class="login-panel-body">
+                                        <c:set var="client" value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+
+                                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                                        </s:div>
+
+                                        <p class="info-section">
+                                            <h:outputText value="Please folow next steps to login here"/>
+                                        </p>
+
+                                        <div class="dialog">
+                                            <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="name, name">
+                                                <s:fragment rendered="#{recaptcha_site_key != null}">
+                                                	<p class="body-list">1. Enter right answer:</p>
+                                                	<div class="g-recaptcha" data-sitekey="#{recaptcha_site_key}"></div>
+                                                </s:fragment>
+		
+                                                <p class="body-list">#{recaptcha_site_key == null ? '1' : '2'}. Click «Login» button.</p>
+                                                <p/>
+
+                                                <p class="body-list">#{recaptcha_site_key == null ? '2' : '3'}. If the certificates list appears then choose right certificate.</p>
+                                                <p/>
+                                            </h:panelGrid>
+                                        </div>
+
+                                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                            <p>
+                                                <h:outputText value="#{messages['common.agreePolicy']}"/>
+                                                <a target="_blank" href='#{client.getPolicyUri()}'>
+                                                    <h:outputText value="#{messages['common.privacyPolicy']}"/>
+                                                </a>
+                                            </p>
+                                        </s:div>
+
+                                        <s:div rendered='#{!empty client.getTosUri()}'>
+                                            <p>
+                                                <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+                                                <a target="_blank" href='#{client.getTosUri()}'>
+                                                    <h:outputText value="#{messages['common.termsOfService']}"/>
+                                                </a>
+                                            </p>
+                                        </s:div>
+
+                                        <div class="actionButtons">
+                                            <h:commandButton id="loginButton"
+                                                             value="#{messages['login.login']}"
+                                                             action="#{authenticator.authenticate}" />
+
+	                                        <s:div id="registerId" style="display:none">
+	                                            <h:commandButton id="registerButton"
+	                                                             value="#{messages['login.register']}"
+	                                                             action="#{authenticator.authenticate}" />
+	                                        </s:div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </h:panelGroup>
+                        </h:form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <script type="text/javascript">
+            window.onload = function() {
+                document.getElementById("loginForm:username").focus();
+
+                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    document.getElementById("loginForm:registerId").style.display = 'inline';
+                }
+            };
+        </script>
+    </ui:define>
+</ui:composition>

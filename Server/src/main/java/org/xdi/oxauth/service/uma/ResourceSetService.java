@@ -21,6 +21,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 
 import java.util.Collections;
@@ -40,6 +41,8 @@ public class ResourceSetService {
 
     @In
     private LdapEntryManager ldapEntryManager;
+    @In
+    private ErrorResponseFactory errorResponseFactory;
 
     @Logger
     private Log log;
@@ -65,6 +68,7 @@ public class ResourceSetService {
     public void validate(ResourceSet resourceSet) {
         Preconditions.checkArgument(StringUtils.isNotBlank(resourceSet.getName()), "Name is required for resource set.");
         Preconditions.checkArgument(resourceSet.getScopes() != null && !resourceSet.getScopes().isEmpty(), "Scope must be specified for resource set.");
+        prepareResourceSetsBranch();
     }
 
     /**
@@ -84,6 +88,15 @@ public class ResourceSetService {
      */
     public void remove(ResourceSet resourceSet) {
         ldapEntryManager.remove(resourceSet);
+    }
+
+    /**
+     * Remove resource set description entry by ID.
+     *
+     * @param rsid resourceSet ID
+     */
+    public void remove(String rsid) {
+        ldapEntryManager.remove(getResourceSetById(rsid));
     }
 
     public void remove(List<ResourceSet> resourceSet) {
@@ -108,6 +121,8 @@ public class ResourceSetService {
      */
     public List<ResourceSet> getResourceSetsByAssociatedClient(String p_associatedClientDn) {
         try {
+            prepareResourceSetsBranch();
+
             if (StringUtils.isNotBlank(p_associatedClientDn)) {
                 final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", p_associatedClientDn));
                 return ldapEntryManager.findEntries(getBaseDnForResourceSet(), ResourceSet.class, filter);
@@ -139,6 +154,32 @@ public class ResourceSetService {
      */
     public boolean containsResourceSet(ResourceSet resourceSet) {
         return ldapEntryManager.contains(resourceSet);
+    }
+
+    public ResourceSet getResourceSetById(String id) {
+
+        prepareResourceSetsBranch();
+
+        ResourceSet ldapResourceSet = new ResourceSet();
+        ldapResourceSet.setDn(getBaseDnForResourceSet());
+        ldapResourceSet.setId(id);
+
+        final List<ResourceSet> result = findResourceSets(ldapResourceSet);
+        if (result.size() == 0) {
+            log.error("Failed to find resource set with id: " + id);
+            errorResponseFactory.throwUmaNotFoundException();
+        } else if (result.size() > 1) {
+            log.error("Multiple resource sets found with given id: " + id);
+            errorResponseFactory.throwUmaInternalErrorException();
+        }
+        return result.get(0);
+    }
+
+    private void prepareResourceSetsBranch() {
+        // Create resource set description branch if needed
+        if (!containsBranch()) {
+            addBranch();
+        }
     }
 
     /**

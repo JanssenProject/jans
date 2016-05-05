@@ -17,8 +17,9 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.ClientService;
@@ -78,7 +79,7 @@ public class PermissionService {
             final String ticket = registerPermission(p_rpt, resource, p_scopes);
             //                    LOG.debug("Register permissions on AM, permission ticket: " + ticket);
 
-            final String entity = ServerUtil.asJsonSilently(new ResourceSetPermissionTicket(ticket));
+            final String entity = ServerUtil.asJsonSilently(new PermissionTicket(ticket));
 
             log.debug("Construct response: HTTP 403 (Forbidden), entity: " + entity);
             final Response response = Response.status(Response.Status.FORBIDDEN).
@@ -120,7 +121,7 @@ public class PermissionService {
     private String registerPermission(UmaRPT p_rpt, ResourceSet p_resource, List<RsScopeType> p_scopes) {
         final Date expirationDate = PermissionRegistrationWS.rptExpirationDate();
 
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
+        final UmaPermission r = new UmaPermission();
         r.setResourceSetId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 

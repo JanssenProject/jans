@@ -13,7 +13,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 23/01/2013
+ * @author Javier Rojas Blum
+ * @version January 15, 2016
  */
 
 @XmlRootElement(name = "base-dn")
@@ -49,12 +50,12 @@ public class BaseDnConfiguration {
     private String umaBase;
     @XmlElement(name = "umaPolicy")
     private String umaPolicy;
-
     @XmlElement(name = "u2fBase")
     private String u2fBase;
-
     @XmlElement(name = "metric")
     private String metric;
+    @XmlElement(name = "sectorIdentifiers")
+    private String sectorIdentifiers;
 
     public String getUmaBase() {
         return umaBase;
@@ -89,14 +90,14 @@ public class BaseDnConfiguration {
     }
 
     public String getScripts() {
-		return scripts;
-	}
+        return scripts;
+    }
 
-	public void setScripts(String scripts) {
-		this.scripts = scripts;
-	}
+    public void setScripts(String scripts) {
+        this.scripts = scripts;
+    }
 
-	public String getClients() {
+    public String getClients() {
         return clients;
     }
 
@@ -153,14 +154,14 @@ public class BaseDnConfiguration {
     }
 
     public String getGroups() {
-		return groups;
-	}
+        return groups;
+    }
 
-	public void setGroups(String groups) {
-		this.groups = groups;
-	}
+    public void setGroups(String groups) {
+        this.groups = groups;
+    }
 
-	public String getScopes() {
+    public String getScopes() {
         return scopes;
     }
 
@@ -176,20 +177,27 @@ public class BaseDnConfiguration {
         sessionId = p_sessionId;
     }
 
-	public String getU2fBase() {
-		return u2fBase;
-	}
+    public String getU2fBase() {
+        return u2fBase;
+    }
 
-	public void setU2fBase(String u2fBase) {
-		this.u2fBase = u2fBase;
-	}
+    public void setU2fBase(String u2fBase) {
+        this.u2fBase = u2fBase;
+    }
 
-	public String getMetric() {
-		return metric;
-	}
+    public String getMetric() {
+        return metric;
+    }
 
-	public void setMetric(String metric) {
-		this.metric = metric;
-	}
+    public void setMetric(String metric) {
+        this.metric = metric;
+    }
 
+    public String getSectorIdentifiers() {
+        return sectorIdentifiers;
+    }
+
+    public void setSectorIdentifiers(String sectorIdentifiers) {
+        this.sectorIdentifiers = sectorIdentifiers;
+    }
 }

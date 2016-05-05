@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.uma;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -25,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "name", "icon_uri" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement()
 @ApiModel(value = "A scope description is a JSON document")
 public class ScopeDescription {

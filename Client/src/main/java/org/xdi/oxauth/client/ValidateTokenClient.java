@@ -6,22 +6,25 @@
 
 package org.xdi.oxauth.client;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+
 /**
  * Encapsulates functionality to make validate token request calls to an authorization server via REST Services.
  *
- * @author Javier Rojas Blum Date: 10.27.2011
+ * @author Javier Rojas Blum
+ * @version January 27, 2016
  */
 public class ValidateTokenClient extends BaseClient<ValidateTokenRequest, ValidateTokenResponse> {
 
     private static final String mediaType = MediaType.APPLICATION_JSON;
+
+    private String httpMethod = HttpMethod.GET;
 
     /**
      * Constructs a validate token client by providing an URL where the REST service is located.
@@ -62,7 +65,13 @@ public class ValidateTokenClient extends BaseClient<ValidateTokenRequest, Valida
 
     @Override
     public String getHttpMethod() {
-        return HttpMethod.GET;
+        return httpMethod;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        if (HttpMethod.GET.equals(httpMethod) || HttpMethod.POST.equals(httpMethod)) {
+            this.httpMethod = httpMethod;
+        }
     }
 
     /**
@@ -95,7 +104,12 @@ public class ValidateTokenClient extends BaseClient<ValidateTokenRequest, Valida
 
         // Call REST Service and handle response
         try {
-            clientResponse = clientRequest.get(String.class);
+            if (HttpMethod.GET.equals(getHttpMethod())) {
+                clientResponse = clientRequest.get(String.class);
+            } else { // POST
+                clientResponse = clientRequest.post(String.class);
+            }
+
             int status = clientResponse.getStatus();
 
             setResponse(new ValidateTokenResponse(status));

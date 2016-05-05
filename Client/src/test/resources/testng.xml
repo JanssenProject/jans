@@ -30,8 +30,15 @@
         </classes>
     </test>
 
+    <!-- Authorize test -->
+    <test name="Authorize session state test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionStateRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+    
     <!-- Client Authentication Filter test -->
-    <test name="Client Authentication Filter test (HTTP)" enabled="false">
+    <test name="Client Authentication Filter test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterHttpTest"/>
         </classes>
@@ -48,6 +55,13 @@
     <test name="Client Info test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+
+    <!-- Client Secret Basic test -->
+    <test name="Client Secret Basic test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientSecretBasicTest"/>
         </classes>
     </test>
 
@@ -156,6 +170,13 @@
         </classes>
     </test>
 
+    <!-- Validate Token Endpoint test -->
+    <test name="Validate Token Endpoint test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ValidateTokenEndpointHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Federation tests -->
     <test name="Federation metadata test (HTTP)" enabled="true">
         <classes>
@@ -259,6 +280,12 @@
     <test name="Introspection test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWsHttpTest"/>
+        </classes>
+    </test>
+
+    <test name="PKCE test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.PkceHttpTest"/>
         </classes>
     </test>
 

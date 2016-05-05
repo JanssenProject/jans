@@ -38,12 +38,14 @@ public class ClientUtils {
         System.out.println(client.getUrl() + "?" + client.getRequest().getQueryString());
         System.out.println("");
 
-        System.out.println("-------------------------------------------------------");
-        System.out.println("RESPONSE:");
-        System.out.println("-------------------------------------------------------");
-        System.out.println("HTTP/1.1 302 Found");
-        System.out.println("Location: " + client.getResponse().getLocation());
-        System.out.println("");
+        if (client.getResponse() != null) {
+	        System.out.println("-------------------------------------------------------");
+	        System.out.println("RESPONSE:");
+	        System.out.println("-------------------------------------------------------");
+	        System.out.println("HTTP/1.1 302 Found");
+	        System.out.println("Location: " + client.getResponse().getLocation());
+	        System.out.println("");
+        }
     }
 
     public static void showClient(BaseClient client, CookieStore cookieStore) {

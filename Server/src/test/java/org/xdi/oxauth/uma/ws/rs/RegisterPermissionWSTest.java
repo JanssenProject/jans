@@ -13,9 +13,9 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
-import org.xdi.oxauth.model.uma.ResourceSetPermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -36,10 +36,10 @@ import static org.testng.Assert.*;
 
 public class RegisterPermissionWSTest extends BaseTest {
 
-    private Token m_pat;
-    private ResourceSetStatus m_resourceSet;
-    private String m_umaRegisterResourcePath;
-    private String m_umaPermissionPath;
+    private Token pat;
+    private ResourceSetResponse resourceSet;
+    private String umaRegisterResourcePath;
+    private String umaPermissionPath;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
@@ -48,34 +48,34 @@ public class RegisterPermissionWSTest extends BaseTest {
     public void init_(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                       String umaPatClientId, String umaPatClientSecret, String umaRedirectUri,
                       String umaRegisterResourcePath, String p_umaPermissionPath) {
-        m_umaRegisterResourcePath = umaRegisterResourcePath;
-        m_umaPermissionPath = p_umaPermissionPath;
+        this.umaRegisterResourcePath = umaRegisterResourcePath;
+        umaPermissionPath = p_umaPermissionPath;
 
-        m_pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        UmaTestUtil.assert_(m_pat);
+        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        UmaTestUtil.assert_(pat);
     }
 
     @Test(dependsOnMethods = {"init_"})
     public void init() {
-        m_resourceSet = TUma.registerResourceSet(this, m_pat, m_umaRegisterResourcePath, UmaTestUtil.createResourceSet());
-        UmaTestUtil.assert_(m_resourceSet);
+        resourceSet = TUma.registerResourceSet(this, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+        UmaTestUtil.assert_(resourceSet);
     }
 
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
-        final RegisterPermissionRequest r = new RegisterPermissionRequest();
-        r.setResourceSetId(m_resourceSet.getId());
+        final UmaPermission r = new UmaPermission();
+        r.setResourceSetId(resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        final ResourceSetPermissionTicket ticket = TUma.registerPermission(this, m_pat, umaAmHost, umaHost, r, m_umaPermissionPath);
+        final PermissionTicket ticket = TUma.registerPermission(this, pat, umaAmHost, umaHost, r, umaPermissionPath);
         UmaTestUtil.assert_(ticket);
     }
 
     @Test(dependsOnMethods = {"testRegisterPermission"})
     @Parameters({"umaAmHost", "umaHost"})
     public void testRegisterPermissionWithInvalidResourceSet(final String umaAmHost, String umaHost) {
-        final String path = m_umaPermissionPath;
+        final String path = umaPermissionPath;
         try {
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, path) {
 
@@ -84,12 +84,12 @@ public class RegisterPermissionWSTest extends BaseTest {
                     super.prepareRequest(request);
 
                     request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
-                    request.addHeader("Authorization", "Bearer " + m_pat.getAccessToken());
+                    request.addHeader("Authorization", "Bearer " + pat.getAccessToken());
                     request.addHeader("Host", umaAmHost);
 
                     try {
-                        final RegisterPermissionRequest r = new RegisterPermissionRequest();
-                        r.setResourceSetId(m_resourceSet.getId() + "x");
+                        final UmaPermission r = new UmaPermission();
+                        r.setResourceSetId(resourceSet.getId() + "x");
 
                         final String json = ServerUtil.createJsonMapper().writeValueAsString(r);
                         request.setContent(Util.getBytes(json));
@@ -107,7 +107,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 
                     assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response code.");
                     try {
-                        final ResourceSetPermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetPermissionTicket.class);
+                        final PermissionTicket t = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), PermissionTicket.class);
                         Assert.assertNull(t);
                     } catch (Exception e) {
                         // it's ok if it fails here, we expect ticket as null.
@@ -124,8 +124,8 @@ public class RegisterPermissionWSTest extends BaseTest {
     // behind TUma wrapper.
     @Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResourceSet"})
     public void cleanUp() {
-        if (m_resourceSet != null) {
-            TUma.deleteResourceSet(this, m_pat, m_umaRegisterResourcePath, m_resourceSet.getId());
+        if (resourceSet != null) {
+            TUma.deleteResourceSet(this, pat, umaRegisterResourcePath, resourceSet.getId());
         }
     }
 }

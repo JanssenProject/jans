@@ -6,12 +6,13 @@
 
 package org.xdi.oxauth.model.uma;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * UMA error response
@@ -23,6 +24,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "status", "error" })
 @XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UmaErrorResponse {
 
     private String status;

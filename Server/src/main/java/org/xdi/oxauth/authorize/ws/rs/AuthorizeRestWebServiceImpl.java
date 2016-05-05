@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -55,7 +56,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version October 16, 2015
+ * @version December 15, 2015
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -63,62 +64,45 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Logger
     private Log log;
-
     @In
     private ErrorResponseFactory errorResponseFactory;
-
     @In
     private RedirectionUriService redirectionUriService;
-
     @In
     private AuthorizationGrantList authorizationGrantList;
-
     @In
     private ClientService clientService;
-
     @In
     private UserService userService;
-
     @In
     private UserGroupService userGroupService;
-
     @In
     private FederationDataService federationDataService;
-
-    @In
-    private ScopeService scopeService;
-
-    @In
-    private AttributeService attributeService;
-
     @In
     private Identity identity;
-
     @In
     private AuthenticationFilterService authenticationFilterService;
-
     @In
-    private SessionIdService sessionIdService;
-
+    private SessionStateService sessionStateService;
     @In
     private ScopeChecker scopeChecker;
-
     @In
-    private SessionId sessionUser;
-
+    private SessionState sessionUser;
     @In
     private ClientAuthorizationsService clientAuthorizationsService;
+    @In
+    private AuthenticationService authenticationService;
 
     @Override
     public Response requestAuthorizationGet(
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
-            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String originHeaders,
+            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
+            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, HttpMethod.GET, originHeaders,
+                requestSessionState, sessionState, accessToken, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
                 httpRequest, httpResponse, securityContext);
     }
 
@@ -126,20 +110,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     public Response requestAuthorizationPost(
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
-            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String originHeaders,
+            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
+            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionId, sessionId, accessToken, HttpMethod.POST, originHeaders,
+                requestSessionState, sessionState, accessToken, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
                 httpRequest, httpResponse, securityContext);
     }
 
     public Response requestAuthorization(
             String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
-            String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
-            String sessionId, String accessToken, String method, String originHeaders,
+            String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionState,
+            String sessionState, String accessToken, String method, String originHeaders,
+            String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
@@ -147,12 +132,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request authorization: "
                         + "responseType = {0}, clientId = {1}, scope = {2}, redirectUri = {3}, nonce = {4}, "
-                        + "state = {5}, request = {6}, isSecure = {7}, requestSessionId = {8}, sessionId = {9}",
+                        + "state = {5}, request = {6}, isSecure = {7}, requestSessionState = {8}, sessionState = {9}",
                 responseType, clientId, scope, redirectUri, nonce,
-                state, request, securityContext.isSecure(), requestSessionId, sessionId);
+                state, request, securityContext.isSecure(), requestSessionState, sessionState);
 
         log.debug("Attempting to request authorization: "
-                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}", acrValuesStr, amrValuesStr, originHeaders);
+                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}, codeChallenge = {5}, codeChallengeMethod = {6}",
+                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
 
         ResponseBuilder builder = Response.ok();
 
@@ -168,11 +154,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
+//        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
+
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
         try {
-            sessionIdService.updateSessionIfNeeded(sessionUser, redirectUri, acrValuesStr);
+            sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, redirectUri, acrValuesStr);
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
@@ -224,7 +212,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     return builder.build();
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
-                                    sessionUser = sessionIdService.generateAuthenticatedSessionId(user.getDn(), prompt);
+                                    sessionUser = sessionStateService.generateAuthenticatedSessionState(user.getDn(), prompt);
                                 }
                             }
 
@@ -352,7 +340,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     identity.logout();
                                     if (prompts.contains(Prompt.NONE)) {
                                         if (authenticationFilterService.isEnabled()) {
-                                            Map<String, String> params = new HashMap<String, String>();
+                                            Map<String, String> params;
                                             if (method.equals(HttpMethod.GET)) {
                                                 params = QueryStringDecoder.decode(httpRequest.getQueryString());
                                             } else {
@@ -361,7 +349,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             String userDn = authenticationFilterService.processAuthenticationFilters(params);
                                             if (userDn != null) {
-                                                sessionUser = sessionIdService.generateAuthenticatedSessionId(userDn, prompt);
+                                                sessionUser = sessionStateService.generateAuthenticatedSessionState(userDn, prompt);
                                                 user = userService.getUserByDn(sessionUser.getUserDn());
 
                                                 Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
@@ -383,7 +371,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
                                     } else {
                                         if (prompts.contains(Prompt.LOGIN)) {
-                                            endSession(sessionId, httpRequest, httpResponse);
+                                            endSession(sessionState, httpRequest, httpResponse);
                                             prompts.remove(Prompt.LOGIN);
                                         }
 
@@ -400,12 +388,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
                                     sessionUser.addPermission(clientId, true);
                                 }
-                                if (prompts.contains(Prompt.NONE) && Boolean.parseBoolean(client.getTrustedClient())) {
+                                if (prompts.contains(Prompt.NONE) && client.getTrustedClient()) {
                                     sessionUser.addPermission(clientId, true);
                                 }
 
                                 if (prompts.contains(Prompt.LOGIN)) {
-                                    endSession(sessionId, httpRequest, httpResponse);
+                                    endSession(sessionState, httpRequest, httpResponse);
                                     prompts.remove(Prompt.LOGIN);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
@@ -446,7 +434,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     validAuthenticationMaxAge = userAuthenticationTime.after(now);
                                 }
                                 if (!validAuthenticationMaxAge) {
-                                    endSession(sessionId, httpRequest, httpResponse);
+                                    endSession(sessionState, httpRequest, httpResponse);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
@@ -464,6 +452,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
                                         authorizationGrant.setScopes(scopes);
+                                        authorizationGrant.setCodeChallenge(codeChallenge);
+                                        authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
@@ -489,9 +479,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
                                         newAccessToken = authorizationGrant.createAccessToken();
 
-                                        redirectUriResponse.addResponseParameter("access_token", newAccessToken.getCode());
-                                        redirectUriResponse.addResponseParameter("token_type", newAccessToken.getTokenType().toString());
-                                        redirectUriResponse.addResponseParameter("expires_in", newAccessToken.getExpiresIn() + "");
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
                                     }
 
                                     if (responseTypes.contains(ResponseType.ID_TOKEN)) {
@@ -510,26 +500,26 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         IdToken idToken = authorizationGrant.createIdToken(
                                                 nonce, authorizationCode, newAccessToken, authorizationGrant.getAcrValues());
 
-                                        redirectUriResponse.addResponseParameter("id_token", idToken.getCode());
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
                                     }
 
                                     if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
-                                        redirectUriResponse.addResponseParameter("acr_values", acrValuesStr);
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
                                     }
 
-                                    //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
+                                    //if (Boolean.valueOf(requestSessionState) && StringUtils.isBlank(sessionState) &&
                                     if (sessionUser.getId() == null) {
-                                        final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(sessionUser.getUserDn(), prompt);
-                                        String newSessionId = newSessionUser.getId();
-                                        sessionUser.setId(newSessionId);
-                                        log.trace("newSessionId = {0}", newSessionId);
+                                        final SessionState newSessionUser = sessionStateService.generateAuthenticatedSessionState(sessionUser.getUserDn(), prompt);
+                                        String newSessionState = newSessionUser.getId();
+                                        sessionUser.setId(newSessionState);
+                                        log.trace("newSessionState = {0}", newSessionState);
                                     }
-                                    redirectUriResponse.addResponseParameter(Parameters.SESSION_ID.getParamName(), sessionUser.getId());
-                                    redirectUriResponse.addResponseParameter("state", state);
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionUser.getId());
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
                                     if (scope != null && !scope.isEmpty()) {
                                         scope = authorizationGrant.checkScopesPolicy(scope);
 
-                                        redirectUriResponse.addResponseParameter("scope", scope);
+                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
                                     }
 
                                     clientService.updatAccessTime(client, false);
@@ -554,10 +544,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
                 }
             }
-        } catch (AcrChangedException e) {
-            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
-                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
-            log.error(e.getMessage(), e);
+//        } catch (AcrChangedException e) {
+//            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
+//                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
+//            log.error(e.getMessage(), e);
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
             log.error(e.getMessage(), e);
@@ -576,6 +566,33 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         return builder.build();
+    }
+
+    /**
+     * 1) https://ce-dev.gluu.org/oxauth/authorize -> session created with parameter list 1
+     * 2) https://ce-dev.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize -> with parameter list 2
+     *
+     * Second call will try to reuse session data from call 1 (parameter list1). Here we overriding them.
+     *
+     * @param httpRequest http request
+     * @param prompts prompts
+     */
+    private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
+        if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
+            Map<String, String> parameterMap = Maps.newHashMap(httpRequest.getParameterMap());
+            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+
+            sessionUser.setUserDn(null);
+            sessionUser.setSessionAttributes(requestParameterMap);
+            boolean persisted = sessionStateService.persistSessionState(sessionUser, !prompts.contains(Prompt.NONE));
+            if (persisted) {
+                if (log.isTraceEnabled()) {
+                    log.trace("Session '{0}' persisted to LDAP", sessionUser.getId());
+                }
+            } else {
+                log.error("Failed to persisted session: {0}", sessionUser.getId());
+            }
+        }
     }
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
@@ -676,83 +693,29 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return true;
     }
 
-    /*
-    public Map<String, String> getClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
-        Map<String, String> claims = new HashMap<String, String>();
-
-        for (String scopeName : scopes) {
-            Scope scope = scopeService.getScopeByDisplayName(scopeName);
-
-            if (scope != null && scope.getOxAuthClaims() != null) {
-                for (String claimDn : scope.getOxAuthClaims()) {
-                    GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
-
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    String ldapName = gluuAttribute.getGluuLdapAttributeName();
-                    Object attributeValue = null;
-
-                    if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                        if (ldapName.equals("uid")) {
-                            attributeValue = user.getUserId();
-                        } else {
-                            attributeValue = user.getAttribute(gluuAttribute.getName(), true);
-                        }
-
-                        if (attributeValue != null) {
-                            claims.put(claimName, attributeValue.toString());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (authorizationGrant.getAcrValues() != null) {
-            claims.put(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, authorizationGrant.getAcrValues());
-        }
-
-        if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
-                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
-
-                if (gluuAttribute != null) {
-                    String ldapClaimName = gluuAttribute.getGluuLdapAttributeName();
-
-                    Object attribute = user.getAttribute(ldapClaimName, optional);
-                    if (attribute != null) {
-                        claims.put(claim.getName(), attribute.toString());
-                    }
-                }
-            }
-        }
-
-        return claims;
-    }*/
-
-    private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private void endSession(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         identity.logout();
         sessionUser.setUserDn(null);
         sessionUser.setAuthenticationTime(null);
 
 
-        String id = sessionId;
+        String id = sessionState;
         if (StringHelper.isEmpty(id)) {
-            id = sessionIdService.getSessionIdFromCookie(httpRequest);
+            id = sessionStateService.getSessionStateFromCookie(httpRequest);
         }
 
         if (StringHelper.isNotEmpty(id)) {
-            SessionId ldapSessionId = sessionIdService.getSessionId(id);
-            if (ldapSessionId != null) {
-                boolean result = sessionIdService.remove(ldapSessionId);
+            SessionState ldapSessionState = sessionStateService.getSessionState(id);
+            if (ldapSessionState != null) {
+                boolean result = sessionStateService.remove(ldapSessionState);
                 if (!result) {
-                    log.error("Failed to remove session_id '{0}' from LDAP", id);
+                    log.error("Failed to remove session_state '{0}' from LDAP", id);
                 }
             } else {
-                log.error("Failed to load session from LDAP by session_id: '{0}'", id);
+                log.error("Failed to load session from LDAP by session_state: '{0}'", id);
             }
         }
 
-        sessionIdService.removeSessionIdCookie(httpResponse);
+        sessionStateService.removeSessionStateCookie(httpResponse);
     }
 }

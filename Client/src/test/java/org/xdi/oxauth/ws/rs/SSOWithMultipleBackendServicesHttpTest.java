@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -19,31 +14,23 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
-import org.xdi.oxauth.client.UserInfoClient;
-import org.xdi.oxauth.client.UserInfoResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.dev.HostnameVerifierType;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
- * @author Javier Rojas Blum Date: 09.25.2012
+ * @author Javier Rojas Blum
+ * @version December 15, 2015
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
@@ -89,7 +76,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         authorizationRequest1.setAuthPassword(userSecret);
         authorizationRequest1.getPrompts().add(Prompt.NONE);
         authorizationRequest1.setState("af0ifjsldkj");
-        authorizationRequest1.setRequestSessionId(true);
+        authorizationRequest1.setRequestSessionState(true);
 
         AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient1.setRequest(authorizationRequest1);
@@ -99,12 +86,12 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertEquals(authorizationResponse1.getStatus(), 302, "Unexpected response code: " + authorizationResponse1.getStatus());
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse1.getSessionId(), "The sessionId is null");
+        assertNotNull(authorizationResponse1.getSessionState(), "The session state is null");
         assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
 
         String code1 = authorizationResponse1.getCode();
-        String sessionId = authorizationResponse1.getSessionId();
+        String sessionState = authorizationResponse1.getSessionState();
 
         // TV sends the code to the Backend
         // We don't use httpClient and cookieStore during this call
@@ -153,7 +140,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
         authorizationRequest2.setState("af0ifjsldkj");
-        authorizationRequest2.setSessionId(sessionId);
+        authorizationRequest2.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
@@ -246,7 +233,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         authorizationRequest1.getPrompts().add(Prompt.NONE);
         authorizationRequest1.setState("af0ifjsldkj");
         authorizationRequest1.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
-        authorizationRequest1.setRequestSessionId(true);
+        authorizationRequest1.setRequestSessionState(true);
 
         AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient1.setRequest(authorizationRequest1);
@@ -256,12 +243,12 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertEquals(authorizationResponse1.getStatus(), 302, "Unexpected response code: " + authorizationResponse1.getStatus());
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
+        assertNotNull(authorizationResponse1.getSessionState(), "The session id is null");
         assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
 
         String authorizationCode1 = authorizationResponse1.getCode();
-        String sessionId = authorizationResponse1.getSessionId();
+        String sessionState = authorizationResponse1.getSessionState();
 
         TokenRequest tokenRequest1 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest1.setCode(authorizationCode1);
@@ -293,7 +280,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
         authorizationRequest2.setState("af0ifjsldkj");
-        authorizationRequest2.setSessionId(sessionId);
+        authorizationRequest2.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
@@ -338,7 +325,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest3.getPrompts().add(Prompt.NONE);
         authorizationRequest3.setState("af0ifjsldkj");
-        authorizationRequest3.setSessionId(sessionId);
+        authorizationRequest3.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient3 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient3.setRequest(authorizationRequest3);

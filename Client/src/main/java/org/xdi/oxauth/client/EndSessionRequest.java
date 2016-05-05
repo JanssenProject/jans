@@ -7,8 +7,8 @@
 package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.Parameters;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
+import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -17,13 +17,13 @@ import java.net.URLEncoder;
  * Represents an end session request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 28, 2015
+ * @version December 15, 2015
  */
 public class EndSessionRequest extends BaseRequest {
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
-    private String sessionId;
+    private String sessionState;
     private String state;
 
     /**
@@ -74,21 +74,21 @@ public class EndSessionRequest extends BaseRequest {
     }
 
     /**
-     * Gets session id.
+     * Gets session state.
      *
-     * @return session id
+     * @return session state.
      */
-    public String getSessionId() {
-        return sessionId;
+    public String getSessionState() {
+        return sessionState;
     }
 
     /**
-     * Sets session id.
+     * Sets session state.
      *
-     * @param p_sessionId session id
+     * @param p_sessionState session state
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionState(String p_sessionState) {
+        sessionState = p_sessionState;
     }
 
     /**
@@ -135,17 +135,20 @@ public class EndSessionRequest extends BaseRequest {
                 queryStringBuilder.append("&")
                         .append(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI)
                         .append("=")
-                        .append(URLEncoder.encode(postLogoutRedirectUri, "UTF-8"));
+                        .append(URLEncoder.encode(postLogoutRedirectUri, Util.UTF8_STRING_ENCODING));
             }
             if (StringUtils.isNotBlank(state)) {
                 queryStringBuilder.append("&")
                         .append(EndSessionRequestParam.STATE)
                         .append("=")
-                        .append(URLEncoder.encode(state, "UTF-8"));
+                        .append(URLEncoder.encode(state, Util.UTF8_STRING_ENCODING));
             }
 
-            if (StringUtils.isNotBlank(sessionId)) {
-                queryStringBuilder.append(Parameters.SESSION_ID.nameToAppend()).append(sessionId);
+            if (StringUtils.isNotBlank(sessionState)) {
+                queryStringBuilder.append("&")
+                        .append(EndSessionRequestParam.SESSION_STATE)
+                        .append("=")
+                        .append(URLEncoder.encode(sessionState, Util.UTF8_STRING_ENCODING));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

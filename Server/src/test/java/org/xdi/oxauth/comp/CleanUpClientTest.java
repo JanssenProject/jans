@@ -42,24 +42,35 @@ public class CleanUpClientTest extends BaseComponentTest {
 		output("Used clients: " + usedClientsList);
 
 		final ClientService clientService = (ClientService) Component.getInstance(ClientService.class);
-		List<Client> clients = clientService.getAllClients(new String[] { "inum" });
+		
+		int clientsResultSetSize = 50;
 
-		Assert.assertNotNull(clients);
-		output("Found clients: " + clients.size());
+		int countResults = 0;
+		int countRemoved = 0;
+		boolean existsMoreClients = true;
+		while (existsMoreClients && countResults < 10000) {
+			List<Client> clients = clientService.getAllClients(new String[] { "inum" }, clientsResultSetSize);
 
-		int count = 0;
-		for (Client client : clients) {
-			String clientId = client.getClientId();
-			if (!usedClientsList.contains(clientId)) {
-				try {
-					clientService.remove(client);
-				} catch (EntryPersistenceException ex) {
-					output("Failed to remove client: " + ex.getMessage());
+			existsMoreClients = clients.size() == clientsResultSetSize;
+			countResults += clients.size();
+	
+			Assert.assertNotNull(clients);
+			output("Found clients: " + clients.size());
+			output("Total clients: " + countResults);
+	
+			for (Client client : clients) {
+				String clientId = client.getClientId();
+				if (!usedClientsList.contains(clientId)) {
+					try {
+						clientService.remove(client);
+					} catch (EntryPersistenceException ex) {
+						output("Failed to remove client: " + ex.getMessage());
+					}
+					countRemoved++;
 				}
-				count++;
 			}
 		}
 
-		output("Removed clients: " + count);
+		output("Removed clients: " + countRemoved);
 	}
 }

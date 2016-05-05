@@ -1,0 +1,16 @@
+{
+    "android":{
+        "gcm":{
+            "enabled":false,
+            "api_key":""
+        }
+    },
+    "ios":{
+        "apns":{
+            "enabled":false,
+            "p12_file_path":"/etc/certs/oxPush-NotificationCertificat.p12",
+            "p12_password":"password",
+            "production":false
+        }
+    }
+}
