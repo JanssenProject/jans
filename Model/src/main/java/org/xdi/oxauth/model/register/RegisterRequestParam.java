@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version February 5, 2016
  */
 
 public enum RegisterRequestParam {
@@ -68,11 +68,6 @@ public enum RegisterRequestParam {
     CLIENT_URI("client_uri"),
 
     /**
-     * Requested authentication method for the Token Endpoint.
-     */
-    TOKEN_ENDPOINT_AUTH_METHOD("token_endpoint_auth_method"),
-
-    /**
      * URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
      */
     POLICY_URI("policy_uri"),
@@ -112,9 +107,19 @@ public enum RegisterRequestParam {
     SUBJECT_TYPE("subject_type"),
 
     /**
-     * JWS alg algorithm (JWA) that must be required by the Authorization Server.
+     * JWS alg algorithm (JWA)0 required for the issued ID Token.
      */
-    REQUEST_OBJECT_SIGNING_ALG("request_object_signing_alg"),
+    ID_TOKEN_SIGNED_RESPONSE_ALG("id_token_signed_response_alg"),
+
+    /**
+     * JWE alg algorithm (JWA) required for encrypting the ID Token.
+     */
+    ID_TOKEN_ENCRYPTED_RESPONSE_ALG("id_token_encrypted_response_alg"),
+
+    /**
+     * JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
+     */
+    ID_TOKEN_ENCRYPTED_RESPONSE_ENC("id_token_encrypted_response_enc"),
 
     /**
      * JWS alg algorithm (JWA) required for UserInfo Responses.
@@ -132,19 +137,30 @@ public enum RegisterRequestParam {
     USERINFO_ENCRYPTED_RESPONSE_ENC("userinfo_encrypted_response_enc"),
 
     /**
-     * JWS alg algorithm (JWA)0 required for the issued ID Token.
+     * JWS alg algorithm (JWA) that must be required by the Authorization Server.
      */
-    ID_TOKEN_SIGNED_RESPONSE_ALG("id_token_signed_response_alg"),
+    REQUEST_OBJECT_SIGNING_ALG("request_object_signing_alg"),
 
     /**
-     * JWE alg algorithm (JWA) required for encrypting the ID Token.
+     * JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
      */
-    ID_TOKEN_ENCRYPTED_RESPONSE_ALG("id_token_encrypted_response_alg"),
+    REQUEST_OBJECT_ENCRYPTION_ALG("request_object_encryption_alg"),
 
     /**
-     * JWE enc algorithm (JWA) required for symmetric encryption of the ID Token.
+     * JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
      */
-    ID_TOKEN_ENCRYPTED_RESPONSE_ENC("id_token_encrypted_response_enc"),
+    REQUEST_OBJECT_ENCRYPTION_ENC("request_object_encryption_enc"),
+
+    /**
+     * Requested authentication method for the Token Endpoint.
+     */
+    TOKEN_ENDPOINT_AUTH_METHOD("token_endpoint_auth_method"),
+
+    /**
+     * JWS alg algorithm (JWA) that MUST be used for signing the JWT used to authenticate the Client at the
+     * Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+     */
+    TOKEN_ENDPOINT_AUTH_SIGNING_ALG("token_endpoint_auth_signing_alg"),
 
     /**
      * Default Maximum Authentication Age. Specifies that the End-User must be actively authenticated if the End-User
@@ -183,8 +199,8 @@ public enum RegisterRequestParam {
     LOGOUT_URI("logout_uri"),
 
     /**
-     * 	Boolean value specifying whether the RP requires that a sid (session ID) query parameter be included
-     * 	to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.
+     * Boolean value specifying whether the RP requires that a sid (session ID) query parameter be included
+     * to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.
      */
     LOGOUT_SESSION_REQUIRED("logout_session_required"),
 
@@ -194,6 +210,8 @@ public enum RegisterRequestParam {
     REQUEST_URIS("request_uris"),
 
     SCOPES("scopes"),
+
+    CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at"),
 
     // Federation Params
     FEDERATION_METADATA_URL("federation_metadata_url"),

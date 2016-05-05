@@ -6,21 +6,24 @@
 
 package org.xdi.oxauth.service;
 
+import org.xdi.oxauth.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.QueryStringDecoder;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 
 import javax.ws.rs.HttpMethod;
-import java.net.ConnectException;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +38,10 @@ public class RedirectionUriService {
 
     @Logger
     private Log log;
-
     @In
     private ClientService clientService;
+    @In
+    private ErrorResponseFactory errorResponseFactory;
 
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
         try {
@@ -93,14 +97,6 @@ public class RedirectionUriService {
                     }
                 }
             }
-        } catch (URISyntaxException e) {
-            return null;
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (ConnectException e) {
-            return null;
-        } catch (JSONException e) {
-            return null;
         } catch (Exception e) {
             return null;
         }
@@ -109,12 +105,15 @@ public class RedirectionUriService {
     }
 
     public String validatePostLogoutRedirectUri(String clientId, String postLogoutRedirectUri) {
+
+        boolean isBlank = Util.isNullOrEmpty(postLogoutRedirectUri);
+
         Client client = clientService.getClient(clientId);
 
         if (client != null) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
 
-            if (postLogoutRedirectUris != null & StringUtils.isNotBlank(postLogoutRedirectUri)) {
+            if (postLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
                 log.debug("Validating post logout redirect URI: clientId = {0}, postLogoutRedirectUri = {1}",
                         clientId, postLogoutRedirectUri);
 
@@ -130,6 +129,10 @@ public class RedirectionUriService {
                     return postLogoutRedirectUris[0];
                 }
             }
+        }
+
+        if (!isBlank) {
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
         }
 
         return null;

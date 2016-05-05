@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
-import com.google.common.base.Preconditions;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -163,7 +162,9 @@ public class UmaClient {
     }
 
     public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
-        Preconditions.checkState(tokenRequest.getGrantType() == GrantType.CLIENT_CREDENTIALS);
+    	if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
+    		return null;
+    	}
 
         TokenClient tokenClient = new TokenClient(tokenUrl);
 

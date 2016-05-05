@@ -51,7 +51,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version February 17, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -105,8 +105,8 @@ public class JwtAuthorizationRequest {
                         JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
                         JSONWebKey jwk = jwks.getKey(keyId);
                         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                                jwk.getPrivateKey().getModulus(),
-                                jwk.getPrivateKey().getPrivateExponent());
+                                jwk.getPrivateKey().getN(),
+                                jwk.getPrivateKey().getE());
                         jweDecrypter = new JweDecrypterImpl(rsaPrivateKey);
                     } else {
                         jweDecrypter = new JweDecrypterImpl(client.getClientSecret().getBytes(Util.UTF8_STRING_ENCODING));

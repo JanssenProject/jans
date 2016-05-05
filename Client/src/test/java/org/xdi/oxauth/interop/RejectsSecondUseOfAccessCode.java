@@ -81,8 +81,8 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Request access token using the authorization code.
-        String accessToken = null;
-        String refreshToken = null;
+        String accessToken;
+        String refreshToken;
         {
             TokenClient tokenClient = new TokenClient(tokenEndpoint);
             TokenResponse tokenResponse = tokenClient.execAuthorizationCode(authorizationCode, redirectUri,

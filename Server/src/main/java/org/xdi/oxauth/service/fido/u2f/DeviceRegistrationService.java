@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -19,7 +21,10 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -62,7 +67,15 @@ public class DeviceRegistrationService {
 		}
 	}
 
-	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String... returnAttributes) {
+	public DeviceRegistration findUserDeviceRegistration(String userInum, String deviceId, String... returnAttributes) {
+		prepareBranch(userInum);
+		
+		String deviceDn = getDnForU2fDevice(userInum, deviceId);
+
+		return ldapEntryManager.find(DeviceRegistration.class, deviceDn);
+	}
+
+	public List<DeviceRegistration> findUserDeviceRegistrations(String userInum, String appId, String ... returnAttributes) {
 		prepareBranch(userInum);
 
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
@@ -71,9 +84,59 @@ public class DeviceRegistrationService {
 		return ldapEntryManager.findEntries(baseDnForU2fDevices, DeviceRegistration.class, returnAttributes, appIdFilter);
 	}
 
+	public List<DeviceRegistration> findDeviceRegistrationsByKeyHandle(String appId, String keyHandle, String ... returnAttributes) {
+		if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
+			return new ArrayList<DeviceRegistration>(0);
+		}
+
+		byte[] keyHandleDecoded = Base64Util.base64urldecode(keyHandle);
+
+		String baseDn = userService.getDnForUser(null);
+
+		Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "oxDeviceRegistration");
+		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", String.valueOf(getKeyHandleHashCode(keyHandleDecoded)));
+		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("oxDeviceKeyHandle", keyHandle);
+		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
+		
+		Filter filter = Filter.createANDFilter(deviceObjectClassFilter, deviceHashCodeFilter, appIdFilter, deviceKeyHandleFilter); 
+
+		return ldapEntryManager.findEntries(baseDn, DeviceRegistration.class, returnAttributes, filter);
+	}
+
+	public DeviceRegistration findOneStepUserDeviceRegistration(String deviceId, String... returnAttributes) {
+		String deviceDn = getDnForOneStepU2fDevice(deviceId);
+
+		return ldapEntryManager.find(DeviceRegistration.class, deviceDn);
+	}
+
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
 
+		ldapEntryManager.persist(deviceRegistration);
+	}
+
+	public boolean attachUserDeviceRegistration(String userInum, String oneStepDeviceId) {
+		String oneStepDeviceDn = getDnForOneStepU2fDevice(oneStepDeviceId);
+
+		// Load temporary stored device registration
+		DeviceRegistration deviceRegistration = ldapEntryManager.find(DeviceRegistration.class, oneStepDeviceDn);
+		if (deviceRegistration == null) {
+			return false;
+		}
+		
+		// Remove temporary stored device registration
+		removeUserDeviceRegistration(deviceRegistration);
+		
+		// Attach user device registration to user
+		String deviceDn = getDnForU2fDevice(userInum, deviceRegistration.getId());
+
+		deviceRegistration.setDn(deviceDn);
+		addUserDeviceRegistration(userInum, deviceRegistration);
+		
+		return true;
+	}
+
+	public void addOneStepDeviceRegistration(DeviceRegistration deviceRegistration) {
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
@@ -83,10 +146,29 @@ public class DeviceRegistrationService {
 		ldapEntryManager.merge(deviceRegistration);
 	}
 
+	public void disableUserDeviceRegistration(DeviceRegistration deviceRegistration) {
+		deviceRegistration.setStatus(DeviceRegistrationStatus.COMPROMISED);
+
+		ldapEntryManager.merge(deviceRegistration);
+	}
+
+	public void removeUserDeviceRegistration(DeviceRegistration deviceRegistration) {
+		ldapEntryManager.remove(deviceRegistration);
+	}
+
+	public List<DeviceRegistration> getExpiredDeviceRegistrations(Date expirationDate) {
+		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
+		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
+
+		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter);
+
+		return deviceRegistrations;
+	}
+
 	/**
 	 * Build DN string for U2F user device
 	 */
-	public String getDnForU2fDevice(String oxId, String userInum) {
+	public String getDnForU2fDevice(String userInum, String oxId) {
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
 		if (StringHelper.isEmpty(oxId)) {
 			return baseDnForU2fDevices;
@@ -98,6 +180,29 @@ public class DeviceRegistrationService {
 		final String userBaseDn = userService.getDnForUser(userInum); // "ou=u2f_devices,inum=1234,ou=people,o=@!1111,o=gluu"
 		return String.format("ou=u2f_devices,%s", userBaseDn);
 	}
+
+	public String getDnForOneStepU2fDevice(String deviceRegistrationId) {
+		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=@!1111,o=gluu
+		if (StringHelper.isEmpty(deviceRegistrationId)) {
+			return String.format("ou=registered_devices,%s", u2fBaseDn);
+		}
+
+		return String.format("oxid=%s,ou=registered_devices,%s", deviceRegistrationId, u2fBaseDn);
+	}
+
+    /*
+     * Generate non unique hash code to split keyHandle among small cluster with 10-20 elements
+     * 
+     * This hash code will be used to generate small LDAP indexes 
+     */
+    public int getKeyHandleHashCode(byte[] keyHandle) {
+		int hash = 0;
+		for (int j = 0; j < keyHandle.length; j++) {
+			hash += keyHandle[j]*j;
+		}
+		
+		return hash;
+    }
 
 	/**
 	 * Get DeviceRegistrationService instance

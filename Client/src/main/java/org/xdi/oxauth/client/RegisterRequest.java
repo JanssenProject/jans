@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -32,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version September 1, 2015
+ * @version February 5, 2016
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -45,22 +44,25 @@ public class RegisterRequest extends BaseRequest {
     private String clientName;
     private String logoUri;
     private String clientUri;
-    private AuthenticationMethod tokenEndpointAuthMethod;
     private String policyUri;
-    private String logoutUri;
+    private List<String> logoutUris;
     private Boolean logoutSessionRequired;
     private String tosUri;
     private String jwksUri;
     private String jwks;
     private String sectorIdentifierUri;
     private SubjectType subjectType;
-    private SignatureAlgorithm requestObjectSigningAlg;
-    private SignatureAlgorithm userInfoSignedResponseAlg;
-    private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
-    private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
     private SignatureAlgorithm idTokenSignedResponseAlg;
     private KeyEncryptionAlgorithm idTokenEncryptedResponseAlg;
     private BlockEncryptionAlgorithm idTokenEncryptedResponseEnc;
+    private SignatureAlgorithm userInfoSignedResponseAlg;
+    private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
+    private SignatureAlgorithm requestObjectSigningAlg;
+    private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
+    private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
+    private AuthenticationMethod tokenEndpointAuthMethod;
+    private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
     private Boolean requireAuthTime;
     private List<String> defaultAcrValues;
@@ -68,13 +70,14 @@ public class RegisterRequest extends BaseRequest {
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
     private List<String> scopes;
+    private Date clientSecretExpiresAt;
     private String federationId;
     private String federationUrl;
     private Map<String, String> customAttributes;
 
     // internal state
-    private JSONObject m_jsonObject;
-    private String m_httpMethod;
+    private JSONObject jsonObject;
+    private String httpMethod;
 
     /**
      * Private common constructor.
@@ -139,19 +142,38 @@ public class RegisterRequest extends BaseRequest {
 
     /**
      * Gets logout uri.
+     *
      * @return logout uri
      */
-    public String getLogoutUri() {
-        return logoutUri;
+    public List<String> getLogoutUris() {
+        return logoutUris;
     }
 
     /**
      * Sets logout uri
      *
-     * @param logoutUri logout uri
+     * @param logoutUris logout uri
      */
-    public void setLogoutUri(String logoutUri) {
-        this.logoutUri = logoutUri;
+    public void setLogoutUris(List<String> logoutUris) {
+        this.logoutUris = logoutUris;
+    }
+
+    /**
+     * Gets client_secret_expires_at
+     *
+     * @return client_secret_expires_at property
+     */
+    public Date getClientSecretExpiresAt() {
+        return clientSecretExpiresAt;
+    }
+
+    /**
+     * Sets client secret expiration date
+     *
+     * @param clientSecretExpiresAt client secret expiration date
+     */
+    public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
+        this.clientSecretExpiresAt = clientSecretExpiresAt;
     }
 
     /**
@@ -322,24 +344,6 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the requested authentication method for the Token Endpoint.
-     *
-     * @return The requested authentication method for the Token Endpoint.
-     */
-    public AuthenticationMethod getTokenEndpointAuthMethod() {
-        return tokenEndpointAuthMethod;
-    }
-
-    /**
-     * Sets the requested authentication method for the Token Endpoint.
-     *
-     * @param tokenEndpointAuthMethod The requested authentication method for the Token Endpoint.
-     */
-    public void setTokenEndpointAuthMethod(AuthenticationMethod tokenEndpointAuthMethod) {
-        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
-    }
-
-    /**
      * Returns an URL that the Relying Party Client provides to the End-User to read about the how the profile data
      * will be used.
      *
@@ -472,21 +476,57 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the JWS alg algorithm (JWA) that must be required by the Authorization Server.
+     * Returns th JWS alg algorithm (JWA) required for the ID Token issued to this client_id.
      *
      * @return The JWS algorithm (JWA).
      */
-    public SignatureAlgorithm getRequestObjectSigningAlg() {
-        return requestObjectSigningAlg;
+    public SignatureAlgorithm getIdTokenSignedResponseAlg() {
+        return idTokenSignedResponseAlg;
     }
 
     /**
-     * Sets the JWS alg algorithm (JWA) that must be required by the Authorization Server.
+     * Sets the JWS alg algorithm (JWA) required for the ID Token issued to this client_id.
      *
-     * @param requestObjectSigningAlg The JWS algorithm (JWA).
+     * @param idTokenSignedResponseAlg The JWS algorithm (JWA).
      */
-    public void setRequestObjectSigningAlg(SignatureAlgorithm requestObjectSigningAlg) {
-        this.requestObjectSigningAlg = requestObjectSigningAlg;
+    public void setIdTokenSignedResponseAlg(SignatureAlgorithm idTokenSignedResponseAlg) {
+        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public KeyEncryptionAlgorithm getIdTokenEncryptedResponseAlg() {
+        return idTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id.
+     *
+     * @param idTokenEncryptedResponseAlg The JWE algorithm (JWA).
+     */
+    public void setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm idTokenEncryptedResponseAlg) {
+        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public BlockEncryptionAlgorithm getIdTokenEncryptedResponseEnc() {
+        return idTokenEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id.
+     *
+     * @param idTokenEncryptedResponseEnc The JWE algorithm (JWA).
+     */
+    public void setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm idTokenEncryptedResponseEnc) {
+        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
     }
 
     /**
@@ -544,57 +584,97 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns th JWS alg algorithm (JWA) required for the ID Token issued to this client_id.
+     * Returns the JWS alg algorithm (JWA) that must be required by the Authorization Server.
      *
      * @return The JWS algorithm (JWA).
      */
-    public SignatureAlgorithm getIdTokenSignedResponseAlg() {
-        return idTokenSignedResponseAlg;
+    public SignatureAlgorithm getRequestObjectSigningAlg() {
+        return requestObjectSigningAlg;
     }
 
     /**
-     * Sets the JWS alg algorithm (JWA) required for the ID Token issued to this client_id.
+     * Sets the JWS alg algorithm (JWA) that must be required by the Authorization Server.
      *
-     * @param idTokenSignedResponseAlg The JWS algorithm (JWA).
+     * @param requestObjectSigningAlg The JWS algorithm (JWA).
      */
-    public void setIdTokenSignedResponseAlg(SignatureAlgorithm idTokenSignedResponseAlg) {
-        this.idTokenSignedResponseAlg = idTokenSignedResponseAlg;
+    public void setRequestObjectSigningAlg(SignatureAlgorithm requestObjectSigningAlg) {
+        this.requestObjectSigningAlg = requestObjectSigningAlg;
     }
 
     /**
-     * Returns the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id.
+     * Returns the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
+     * sent to the OP.
      *
-     * @return The JWE algorithm (JWA).
+     * @return The JWE alg algorithm (JWA).
      */
-    public KeyEncryptionAlgorithm getIdTokenEncryptedResponseAlg() {
-        return idTokenEncryptedResponseAlg;
+    public KeyEncryptionAlgorithm getRequestObjectEncryptionAlg() {
+        return requestObjectEncryptionAlg;
     }
 
     /**
-     * Sets the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id.
+     * Sets the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
+     * sent to the OP.
      *
-     * @param idTokenEncryptedResponseAlg The JWE algorithm (JWA).
+     * @param requestObjectEncryptionAlg The JWE alg algorithm (JWA).
      */
-    public void setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm idTokenEncryptedResponseAlg) {
-        this.idTokenEncryptedResponseAlg = idTokenEncryptedResponseAlg;
+    public void setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm requestObjectEncryptionAlg) {
+        this.requestObjectEncryptionAlg = requestObjectEncryptionAlg;
     }
 
     /**
-     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id.
+     * Returns the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
+     * sent to the OP.
      *
-     * @return The JWE algorithm (JWA).
+     * @return The JWE enc algorithm (JWA).
      */
-    public BlockEncryptionAlgorithm getIdTokenEncryptedResponseEnc() {
-        return idTokenEncryptedResponseEnc;
+    public BlockEncryptionAlgorithm getRequestObjectEncryptionEnc() {
+        return requestObjectEncryptionEnc;
     }
 
     /**
-     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id.
+     * Sets the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects
+     * sent to the OP.
      *
-     * @param idTokenEncryptedResponseEnc The JWE algorithm (JWA).
+     * @param requestObjectEncryptionEnc The JWE enc algorithm (JWA).
      */
-    public void setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm idTokenEncryptedResponseEnc) {
-        this.idTokenEncryptedResponseEnc = idTokenEncryptedResponseEnc;
+    public void setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm requestObjectEncryptionEnc) {
+        this.requestObjectEncryptionEnc = requestObjectEncryptionEnc;
+    }
+
+    /**
+     * Returns the requested authentication method for the Token Endpoint.
+     *
+     * @return The requested authentication method for the Token Endpoint.
+     */
+    public AuthenticationMethod getTokenEndpointAuthMethod() {
+        return tokenEndpointAuthMethod;
+    }
+
+    /**
+     * Sets the requested authentication method for the Token Endpoint.
+     *
+     * @param tokenEndpointAuthMethod The requested authentication method for the Token Endpoint.
+     */
+    public void setTokenEndpointAuthMethod(AuthenticationMethod tokenEndpointAuthMethod) {
+        this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
+    }
+
+    /**
+     * Returns the Requested Client Authentication method for the Token Endpoint.
+     *
+     * @return The Requested Client Authentication method for the Token Endpoint.
+     */
+    public SignatureAlgorithm getTokenEndpointAuthSigningAlg() {
+        return tokenEndpointAuthSigningAlg;
+    }
+
+    /**
+     * Sets the Requested Client Authentication method for the Token Endpoint.
+     *
+     * @param tokenEndpointAuthSigningAlg The Requested Client Authentication method for the Token Endpoint.
+     */
+    public void setTokenEndpointAuthSigningAlg(SignatureAlgorithm tokenEndpointAuthSigningAlg) {
+        this.tokenEndpointAuthSigningAlg = tokenEndpointAuthSigningAlg;
     }
 
     /**
@@ -737,11 +817,11 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public String getHttpMethod() {
-        return m_httpMethod;
+        return httpMethod;
     }
 
     public void setHttpMethod(String p_httpMethod) {
-        m_httpMethod = p_httpMethod;
+        httpMethod = p_httpMethod;
     }
 
     /**
@@ -794,9 +874,6 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(clientUri)) {
             parameters.put(CLIENT_URI.toString(), clientUri);
         }
-        if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
-        }
         if (StringUtils.isNotBlank(policyUri)) {
             parameters.put(POLICY_URI.toString(), policyUri);
         }
@@ -815,8 +892,14 @@ public class RegisterRequest extends BaseRequest {
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
         }
-        if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
+        if (idTokenSignedResponseAlg != null) {
+            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+        }
+        if (idTokenEncryptedResponseAlg != null) {
+            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+        }
+        if (idTokenEncryptedResponseEnc != null) {
+            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
         }
         if (userInfoSignedResponseAlg != null) {
             parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
@@ -827,14 +910,20 @@ public class RegisterRequest extends BaseRequest {
         if (userInfoEncryptedResponseEnc != null) {
             parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
-        if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+        if (requestObjectSigningAlg != null) {
+            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
-        if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+        if (requestObjectEncryptionAlg != null) {
+            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
         }
-        if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
+        if (requestObjectEncryptionEnc != null) {
+            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
+        }
+        if (tokenEndpointAuthMethod != null) {
+            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
+        }
+        if (tokenEndpointAuthSigningAlg != null) {
+            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
         if (defaultMaxAge != null) {
             parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
@@ -851,8 +940,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
         }
-        if (!Strings.isNullOrEmpty(logoutUri)) {
-            parameters.put(LOGOUT_URI.toString(), logoutUri);
+        if (logoutUris != null && !logoutUris.isEmpty()) {
+            parameters.put(LOGOUT_URI.toString(), toJSONArray(logoutUris).toString());
         }
         if (logoutSessionRequired != null) {
             parameters.put(LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());
@@ -862,6 +951,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
+        }
+        if (clientSecretExpiresAt != null) {
+            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
         // Federation params
         if (!StringUtils.isBlank(federationUrl)) {
@@ -986,8 +1078,28 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> logoutUris = new ArrayList<String>();
+        if (requestObject.has(LOGOUT_URI.toString())) {
+            try {
+                JSONArray logoutUriJsonArray = requestObject.getJSONArray(LOGOUT_URI.toString());
+                for (int i = 0; i < logoutUriJsonArray.length(); i++) {
+                    logoutUris.add(logoutUriJsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                logoutUris.add(requestObject.optString(LOGOUT_URI.toString()));
+            }
+        }
+
+        Date clientSecretExpiresAt = null;
+        if (requestObject.has(CLIENT_SECRET_EXPIRES_AT_.getName())) {
+            if (requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()) > 0) {
+                clientSecretExpiresAt = new Date(requestObject.optLong(CLIENT_SECRET_EXPIRES_AT_.getName()));
+            }
+        }
+
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
+        result.setClientSecretExpiresAt(clientSecretExpiresAt);
         result.setFederationUrl(requestObject.optString(FEDERATION_METADATA_URL.toString()));
         result.setFederationId(requestObject.optString(FEDERATION_METADATA_ID.toString()));
         result.setRequestUris(requestUris);
@@ -995,22 +1107,32 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
-        result.setLogoutUri(requestObject.optString(LOGOUT_URI.toString()));
+        result.setLogoutUris(logoutUris);
         result.setLogoutSessionRequired(requestObject.optBoolean(LOGOUT_SESSION_REQUIRED.toString()));
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
-        result.setIdTokenEncryptedResponseEnc(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
-        result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
                 SignatureAlgorithm.fromName(requestObject.getString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
-        result.setUserInfoEncryptedResponseEnc(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
-        result.setUserInfoEncryptedResponseAlg(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+        result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
+                KeyEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+        result.setIdTokenEncryptedResponseEnc(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()) ?
+                BlockEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setUserInfoSignedResponseAlg(requestObject.has(USERINFO_SIGNED_RESPONSE_ALG.toString()) ?
                 SignatureAlgorithm.fromName(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
+        result.setUserInfoEncryptedResponseAlg(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()) ?
+                KeyEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
+        result.setUserInfoEncryptedResponseEnc(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()) ?
+                BlockEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
+        result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
+                SignatureAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
+        result.setRequestObjectEncryptionAlg(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ALG.toString()) ?
+                KeyEncryptionAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())) : null);
+        result.setRequestObjectEncryptionEnc(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ENC.toString()) ?
+                BlockEncryptionAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())) : null);
+        result.setTokenEndpointAuthMethod(requestObject.has(TOKEN_ENDPOINT_AUTH_METHOD.toString()) ?
+                AuthenticationMethod.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : null);
+        result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
+                SignatureAlgorithm.fromName(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
         result.setScopes(scopes);
         result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
@@ -1021,8 +1143,6 @@ public class RegisterRequest extends BaseRequest {
         result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
         result.setLogoUri(requestObject.optString(LOGO_URI.toString()));
         result.setClientUri(requestObject.optString(CLIENT_URI.toString()));
-        result.setTokenEndpointAuthMethod(requestObject.has(TOKEN_ENDPOINT_AUTH_METHOD.toString()) ?
-                AuthenticationMethod.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : AuthenticationMethod.CLIENT_SECRET_BASIC);
         result.setPolicyUri(requestObject.optString(POLICY_URI.toString()));
         result.setTosUri(requestObject.optString(TOS_URI.toString()));
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
@@ -1030,8 +1150,6 @@ public class RegisterRequest extends BaseRequest {
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(requestObject.has(SUBJECT_TYPE.toString()) ?
                 SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : null);
-        result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
         return result;
     }
 
@@ -1063,9 +1181,6 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(clientUri)) {
             parameters.put(CLIENT_URI.toString(), clientUri);
         }
-        if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
-        }
         if (StringUtils.isNotBlank(policyUri)) {
             parameters.put(POLICY_URI.toString(), policyUri);
         }
@@ -1084,8 +1199,14 @@ public class RegisterRequest extends BaseRequest {
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
         }
-        if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
+        if (idTokenSignedResponseAlg != null) {
+            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+        }
+        if (idTokenEncryptedResponseAlg != null) {
+            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+        }
+        if (idTokenEncryptedResponseEnc != null) {
+            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
         }
         if (userInfoSignedResponseAlg != null) {
             parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
@@ -1096,14 +1217,20 @@ public class RegisterRequest extends BaseRequest {
         if (userInfoEncryptedResponseEnc != null) {
             parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
-        if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+        if (requestObjectSigningAlg != null) {
+            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
-        if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+        if (requestObjectEncryptionAlg != null) {
+            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
         }
-        if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
+        if (requestObjectEncryptionEnc != null) {
+            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
+        }
+        if (tokenEndpointAuthMethod != null) {
+            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
+        }
+        if (tokenEndpointAuthSigningAlg != null) {
+            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
         if (defaultMaxAge != null) {
             parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
@@ -1120,8 +1247,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
-        if (!Strings.isNullOrEmpty(logoutUri)) {
-            parameters.put(LOGOUT_URI.toString(), logoutUri);
+        if (logoutUris != null && !logoutUris.isEmpty()) {
+            parameters.put(LOGOUT_URI.toString(), toJSONArray(logoutUris));
         }
         if (logoutSessionRequired != null) {
             parameters.put(LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());
@@ -1139,6 +1266,9 @@ public class RegisterRequest extends BaseRequest {
         if (!StringUtils.isBlank(federationId)) {
             parameters.put(FEDERATION_METADATA_ID.toString(), federationId);
         }
+        if (clientSecretExpiresAt != null) {
+            parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());
+        }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -1153,11 +1283,11 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public JSONObject getJsonObject() {
-        return m_jsonObject;
+        return jsonObject;
     }
 
     public void setJsonObject(JSONObject p_jsonObject) {
-        m_jsonObject = p_jsonObject;
+        jsonObject = p_jsonObject;
     }
 
     @Override

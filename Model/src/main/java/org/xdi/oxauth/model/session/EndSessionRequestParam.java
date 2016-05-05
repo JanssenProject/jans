@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.session;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 October 28, 2014
+ * @version December 15, 2015
  */
 public interface EndSessionRequestParam {
 
@@ -30,4 +30,9 @@ public interface EndSessionRequestParam {
      * value back to the RP using the state query parameter when redirecting the User Agent back to the RP.
      */
     public static final String STATE = "state";
+
+    /**
+     * String that represents the End-User's login state at the OP.
+     */
+    public static final String SESSION_STATE = "session_state";
 }

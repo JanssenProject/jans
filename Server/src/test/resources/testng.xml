@@ -197,7 +197,7 @@
 
     <test name="Session ID service test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.comp.SessionIdServiceTest"/>
+            <class name="org.xdi.oxauth.comp.SessionStateServiceTest"/>
         </classes>
     </test>
 
@@ -303,8 +303,8 @@
     <parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2"/>
     <parameter name="postLogoutRedirectUri" value="https://client.example.com/pl"/>
     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
-    <parameter name="audience" value="https://localhost:8443/seam/resource/restv1/oxauth/token"/>
-    <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth-client/test/resources/sector_identifier.js"/>
+    <parameter name="audience" value="${test.server.url}/seam/resource/restv1/oxauth/token"/>
+    <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth/sectoridentifier/${config.oxauth.organization}!0012!D426.70FD"/>
     <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
     <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
     <parameter name="federationRpRedirectUri" value="https://client.example.com/cb"/>
@@ -323,6 +323,7 @@
     <parameter name="umaPermissionPath" value="/restv1/host/rsrc_pr"/>
     <parameter name="umaPermissionAuthorizationPath" value="/restv1/requester/perm"/>
     <parameter name="umaRptPath" value="/restv1/requester/rpt"/>
+    <parameter name="umaGatPath" value="/restv1/requester/gat"/>
     <parameter name="umaRptStatusPath" value="/restv1/rpt/status"/>
     <parameter name="umaAmHost" value="localhost"/>
     <parameter name="umaHost" value="photoz.example.com"/>

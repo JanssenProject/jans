@@ -11,9 +11,11 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.JSONable;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 8, 2014
+ * @version February 17, 2016
  */
 public class Key<E extends PrivateKey, F extends PublicKey> implements JSONable {
 
@@ -103,15 +105,15 @@ public class Key<E extends PrivateKey, F extends PublicKey> implements JSONable 
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("keyType", getKeyType());
-        jsonObject.put("use", getUse());
-        jsonObject.put("algorithm", getAlgorithm());
-        jsonObject.put("keyId", getKeyId());
-        jsonObject.put("expirationTime", getExpirationTime() == null ? JSONObject.NULL : getExpirationTime());
-        jsonObject.put("curve", getCurve());
-        jsonObject.put("privateKey", getPrivateKey().toJSONObject());
-        jsonObject.put("publicKey", getPublicKey().toJSONObject());
-        jsonObject.put("certificateChain", getCertificate().toJSONArray());
+        jsonObject.put(KEY_TYPE, getKeyType());
+        jsonObject.put(KEY_USE, getUse());
+        jsonObject.put(ALGORITHM, getAlgorithm());
+        jsonObject.put(KEY_ID, getKeyId());
+        jsonObject.put(EXPIRATION_TIME, getExpirationTime() == null ? JSONObject.NULL : getExpirationTime());
+        jsonObject.put(CURVE, getCurve());
+        jsonObject.put(PRIVATE_KEY, getPrivateKey().toJSONObject());
+        jsonObject.put(PUBLIC_KEY, getPublicKey().toJSONObject());
+        jsonObject.put(CERTIFICATE_CHAIN, getCertificate().toJSONArray());
 
         return jsonObject;
     }

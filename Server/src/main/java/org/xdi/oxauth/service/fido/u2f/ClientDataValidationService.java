@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.drools.util.ArrayUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
@@ -33,8 +34,8 @@ public class ClientDataValidationService {
 	@Logger
 	private Log log;
 
-	public void checkContent(ClientData clientData, String type, String challenge, Set<String> facets) throws BadInputException {
-		if (!type.equals(clientData.getTyp())) {
+	public void checkContent(ClientData clientData, String[] types, String challenge, Set<String> facets) throws BadInputException {
+		if (!ArrayUtils.contains(types, clientData.getTyp())) {
 			throw new BadInputException("Bad clientData: wrong typ " + clientData.getTyp());
 		}
 

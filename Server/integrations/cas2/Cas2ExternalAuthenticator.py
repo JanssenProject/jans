@@ -1,3 +1,9 @@
+# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+# Copyright (c) 2016, Gluu
+#
+# Author: Yuriy Movchan
+#
+
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.jboss.seam import Component
@@ -61,7 +67,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             if (http_response.getStatusLine().getStatusCode() != 200):
-                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response_ticket.getStatusLine().getStatusCode())
+                print "CAS2. Rest API authenticate isValidAuthenticationMethod. Get invalid response from CAS2 server: ", str(http_response.getStatusLine().getStatusCode())
                 httpService.consume(http_response)
                 return False
     

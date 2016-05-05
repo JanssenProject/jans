@@ -7,7 +7,7 @@
 package org.xdi.oxauth.client.uma;
 
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
@@ -24,13 +24,13 @@ public interface ResourceSetRegistrationService {
 	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE})
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public ResourceSetStatus addResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet);
+	public ResourceSetResponse addResourceSet(@HeaderParam("Authorization") String authorization, ResourceSet resourceSet);
 
 	@PUT
 	@Path("{rsid}")
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE})
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public ResourceSetStatus updateResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid, ResourceSet resourceSet);
+	public ResourceSetResponse updateResourceSet(@HeaderParam("Authorization") String authorization, @PathParam("rsid") String rsid, ResourceSet resourceSet);
 
 	@GET
 	@Path("{rsid}")

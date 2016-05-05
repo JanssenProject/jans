@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -26,13 +18,20 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetStatus;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
 
 /**
  * ATTENTION : This test is for debug purpose ONLY. Do not use asserts here!!!
@@ -45,9 +44,9 @@ public class DebugContentEncodingTest extends BaseTest {
 
     public static final ObjectMapper MAPPER = ServerUtil.createJsonMapper();
 
-    private Token m_pat;
+    private Token pat;
 
-    private String m_umaRegisterResourcePath;
+    private String umaRegisterResourcePath;
 
     @Override
     @BeforeSuite
@@ -91,8 +90,8 @@ public class DebugContentEncodingTest extends BaseTest {
             "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri", "umaRegisterResourcePath"})
     public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
-        m_pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        m_umaRegisterResourcePath = umaRegisterResourcePath;
+        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        this.umaRegisterResourcePath = umaRegisterResourcePath;
     }
 
     @Test(dependsOnMethods = {"init"})
@@ -111,7 +110,7 @@ public class DebugContentEncodingTest extends BaseTest {
     public void run(final String p_json) {
         try {
             final String rsid = String.valueOf(System.currentTimeMillis());
-            String path = m_umaRegisterResourcePath + "/" + rsid;
+            String path = umaRegisterResourcePath + "/" + rsid;
             System.out.println("Path: " + path);
             new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.PUT, path) {
 
@@ -119,9 +118,9 @@ public class DebugContentEncodingTest extends BaseTest {
                 protected void prepareRequest(EnhancedMockHttpServletRequest request) {
                     super.prepareRequest(request);
 
-                    System.out.println("PAT: " + m_pat.getAccessToken());
+                    System.out.println("PAT: " + pat.getAccessToken());
                     request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
-                    request.addHeader("Authorization", "Bearer " + m_pat.getAccessToken());
+                    request.addHeader("Authorization", "Bearer " + pat.getAccessToken());
 
                     try {
 //                        final String json = "{\"resourceSet\":{\"name\":\"Server Photo Album22\",\"iconUri\":\"http://www.example.com/icons/flower.png\",\"scopes\":[\"http://photoz.example.com/dev/scopes/view\",\"http://photoz.example.com/dev/scopes/all\"]}}";
@@ -145,7 +144,7 @@ public class DebugContentEncodingTest extends BaseTest {
                         System.out.println("ERROR: Unexpected response code.");
                     }
                     try {
-                        final ResourceSetStatus status = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetStatus.class);
+                        final ResourceSetResponse status = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), ResourceSetResponse.class);
                         System.out.println("Status: " + status);
                     } catch (IOException e) {
                         e.printStackTrace();

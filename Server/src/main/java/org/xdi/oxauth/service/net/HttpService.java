@@ -162,6 +162,11 @@ public class HttpService implements Serializable {
         
         return null;
 	}
+
+	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData) {
+		return executePost(httpClient, uri, authData, headers, postData, null);
+	}
+
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType);
 	}

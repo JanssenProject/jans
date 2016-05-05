@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.xdi.oxauth.model.util.Util;
+
+import com.unboundid.ldap.sdk.Filter;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
@@ -19,14 +19,19 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.GluuStatus;
-import org.xdi.oxauth.model.common.CustomAttribute;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import javax.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Provides operations with users.
@@ -89,9 +94,27 @@ public class UserService {
      *
      * @return User
      */
-    public User getUserByDn(String dn) {
-        return ldapEntryManager.find(User.class, dn);
+    @Nullable
+    public User getUserByDn(String dn, String... returnAttributes) {
+        if (Util.isNullOrEmpty(dn)) {
+            return null;
+        }
+        return ldapEntryManager.find(User.class, dn, returnAttributes);
     }
+
+	public User getUserByInum(String inum, String... returnAttributes) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, returnAttributes);
+		if (user == null) {
+			return null;
+		}
+
+		return user;
+	}
 
 	public User getUser(String userId, String... returnAttributes) {
 		log.debug("Getting user information from LDAP: userId = {0}", userId);
@@ -112,9 +135,7 @@ public class UserService {
 		}
 	}
 
-	public String getUserInum(String userId) {
-		User user = getUser(userId, "inum");
-		
+	public String getUserInum(User user) {
 		if (user == null) {
 			return null;
 		}
@@ -122,6 +143,26 @@ public class UserService {
 		String inum = user.getAttribute("inum");
 
 		return inum;
+	}
+
+	public String getUserInum(String userId) {
+		User user = getUser(userId, "inum");
+
+		return getUserInum(user);
+	}
+
+	public String getUserNameByInum(String inum) {
+		if (StringHelper.isEmpty(inum)) {
+			return null;
+		}
+		
+		String userDn = getDnForUser(inum);
+		User user = getUserByDn(userDn, "uid");
+		if (user == null) {
+			return null;
+		}
+
+		return user.getUserId();
 	}
 
     public User updateUser(User user) {
@@ -300,6 +341,39 @@ public class UserService {
 		}
 
 		return String.format("inum=%s,%s", inum, peopleDn);
+	}
+
+	public String getUserInumByDn(String dn) {
+		if (StringHelper.isEmpty(dn)) {
+			return null;
+		}
+
+		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
+		if (!dn.toLowerCase().endsWith(peopleDn.toLowerCase())) {
+			return null;
+		}
+		String firstDnPart = dn.substring(0, dn.length() - peopleDn.length());
+		
+		String[] dnParts = firstDnPart.split(",");
+		if (dnParts.length == 0) {
+			return null;
+		}
+		
+		String userInumPart = dnParts[dnParts.length - 1];
+		String[] userInumParts = userInumPart.split("=");
+		if ((userInumParts.length == 2) && StringHelper.equalsIgnoreCase(userInumParts[0], "inum")) {
+			return userInumParts[1];
+		}
+
+		return null;
+	}
+
+	public String encodeGeneralizedTime(Date date) {
+		return ldapEntryManager.encodeGeneralizedTime(date);
+	}
+
+	public Date decodeGeneralizedTime(String date) {
+		return ldapEntryManager.decodeGeneralizedTime(date);
 	}
 
     public static UserService instance() {

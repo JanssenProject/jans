@@ -40,9 +40,9 @@ public class RequestService {
 
 	public List<RequestMessageLdap> getExpiredRequestMessages(Date expirationDate) {
 		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
-		Filter expiratioFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
+		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expiratioFilter);
+		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter);
 
 		return requestMessageLdap;
 	}

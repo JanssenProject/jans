@@ -40,7 +40,7 @@ import java.util.Set;
  * Provides implementation of Federation Metadata REST web services interface.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 11/09/2012
+ * @version December 17, 2015
  */
 @Name("federationMetadataWS")
 public class FederationMetadataWSImpl implements FederationMetadataWS {
@@ -95,7 +95,7 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
             final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
             final JSONObject jsonHeader = JwtHeader.instance().
-                    setType(JwtType.JWS).setAlgorithm(algorithm).setKeyId(keyId).
+                    setType(JwtType.JWT).setAlgorithm(algorithm).setKeyId(keyId).
                     toJsonObject();
             final JSONObject jsonPayload = asJSON(p_metadata);
             return JwtUtil.encodeJwt(jsonHeader, jsonPayload, algorithm, factory.getPrivateKey());

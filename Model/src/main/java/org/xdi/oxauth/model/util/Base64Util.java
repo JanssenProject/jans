@@ -22,7 +22,12 @@ public class Base64Util {
     }
 
     public static byte[] base64urldecode(String arg) throws IllegalArgumentException {
-        String s = arg;
+        String s = removePadding(arg);
+        return Base64.decodeBase64(s); // Standard base64 decoder
+    }
+
+    public static String removePadding(String base64UrlEncoded) {
+		String s = base64UrlEncoded;
         s = s.replace('-', '+'); // 62nd char of encoding
         s = s.replace('_', '/'); // 63rd char of encoding
         switch (s.length() % 4) // Pad with trailing '='s
@@ -38,7 +43,7 @@ public class Base64Util {
             default:
                 throw new IllegalArgumentException("Illegal base64url string.");
         }
-        return Base64.decodeBase64(s); // Standard base64 decoder
-    }
+		return s;
+	}
 
 }

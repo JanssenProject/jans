@@ -21,7 +21,11 @@ import org.jboss.seam.security.NotLoggedInException;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -30,8 +34,9 @@ import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.util.StringHelper;
 
 import javax.servlet.FilterChain;
@@ -43,10 +48,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version November 16, 2015
+ * @version March 4, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("org.jboss.seam.web.authenticationFilter")
@@ -94,21 +100,28 @@ public class AuthenticationFilter extends AbstractFilter {
                             httpResponse.sendError(401, "Not authorized");
                         }
                     } else {
-                        SessionIdService sessionIdService = SessionIdService.instance();
-                        String sessionId = httpRequest.getParameter("session_id");
-                        if (StringUtils.isBlank(sessionId)) {
-                            // OXAUTH-297 : check whether session_id is present in cookie
-                            sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
+                        SessionStateService sessionStateService = SessionStateService.instance();
+                        String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+                        List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
+
+                        if (StringUtils.isBlank(sessionState)) {
+                            // OXAUTH-297 : check whether session_state is present in cookie
+                            sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
                         }
-                        if (StringUtils.isNotBlank(sessionId)) {
-                            processSessionAuth(sessionId, sessionIdService, httpRequest, httpResponse, filterChain);
+
+                        SessionState sessionStateObject = null;
+                        if (StringUtils.isNotBlank(sessionState)) {
+                            sessionStateObject = sessionStateService.getSessionState(sessionState);
+                        }
+                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState() && !prompts.contains(Prompt.LOGIN)) {
+                            processSessionAuth(sessionState, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);
                         }
                     }
                 } catch (IOException ex) {
                     log.error(ex.getMessage(), ex);
-                } catch (ServletException ex) {
+                } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
             }
@@ -120,16 +133,17 @@ public class AuthenticationFilter extends AbstractFilter {
                 requestUrl.equals("http://localhost:80/seam/resource/restv1/oxauth/token");
     }
 
-    private void processSessionAuth(String p_sessionId, SessionIdService sessionIdService, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
+    private void processSessionAuth(String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
         boolean requireAuth;
 
-        requireAuth = !getAuthenticator().authenticateBySessionId(p_sessionId);
-        log.trace("Process Session Auth, sessionId = {0}, requireAuth = {1}", p_sessionId, requireAuth);
+        requireAuth = !getAuthenticator().authenticateBySessionState(p_sessionState);
+        log.trace("Process Session Auth, sessionState = {0}, requireAuth = {1}", p_sessionState, requireAuth);
 
         if (!requireAuth) {
             try {
                 p_filterChain.doFilter(p_httpRequest, p_httpResponse);
-            } catch (Exception e) {
+            } catch (Exception ex) {
+                log.error("Failed to process session authentication", ex);
                 requireAuth = true;
             }
         }
@@ -253,8 +267,20 @@ public class AuthenticationFilter extends AbstractFilter {
 
                             requireAuth = !getAuthenticator().authenticateWebService();
                         } else {
-                        	getAuthenticator().configureSessionClient(client);
+                            getAuthenticator().configureSessionClient(client);
                         }
+                    }
+                } else if (Boolean.TRUE.equals(ConfigurationFactory.instance().getConfiguration().getClientAuthenticationFiltersEnabled())) {
+                    String clientDn = ClientFilterService.instance().processAuthenticationFilters(servletRequest.getParameterMap());
+                    if (clientDn != null) {
+                        Client client = getClientService().getClientByDn(clientDn);
+
+                        identity.logout();
+
+                        identity.getCredentials().setUsername(client.getClientId());
+                        identity.getCredentials().setPassword(null);
+
+                        requireAuth = !getAuthenticator().authenticateWebService(true);
                     }
                 }
             }
