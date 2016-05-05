@@ -20,7 +20,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version October 16, 2015
+ * @version December 15, 2015
  */
 public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
@@ -52,7 +52,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionId = null;
+        String sessionState = null;
         {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile");
@@ -71,7 +71,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             assertNotNull(authorizationResponse.getState());
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionId = authorizationResponse.getSessionId();
+            sessionState = authorizationResponse.getSessionState();
 
             // 3. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -143,7 +143,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
             authorizationRequest.getPrompts().add(Prompt.NONE);
-            authorizationRequest.setSessionId(sessionId);
+            authorizationRequest.setSessionState(sessionState);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);

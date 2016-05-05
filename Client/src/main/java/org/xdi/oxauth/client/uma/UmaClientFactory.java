@@ -11,9 +11,10 @@ import org.jboss.resteasy.client.ProxyFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 
 /**
- * Helper class which creates proxy UMA resource set description service
+ * Helper class which creates proxied UMA services
  *
- * @author Yuriy Movchan Date: 10/04/2012
+ * @author Yuriy Movchan
+ * @author Yuriy Zabrovarnyy
  */
 public class UmaClientFactory {
 
@@ -40,6 +41,14 @@ public class UmaClientFactory {
 
     public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
+    }
+
+    public CreateGatService createGatService(UmaConfiguration metadataConfiguration) {
+        return ProxyFactory.create(CreateGatService.class, metadataConfiguration.getGatEndpoint());
+    }
+
+    public CreateGatService createGatService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(CreateGatService.class, metadataConfiguration.getGatEndpoint(), clientExecutor);
     }
 
     public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration) {

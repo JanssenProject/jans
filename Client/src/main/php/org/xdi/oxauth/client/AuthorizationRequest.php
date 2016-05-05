@@ -23,8 +23,8 @@ class AuthorizationRequest extends BaseRequest {
     private $requestUri;
     private $display;
     private $prompts;
-    private $requestSessionId;
-    private $sessionId;
+    private $requestSessionState;
+    private $sessionState;
 
     private $accessToken;
     private $useNoRedirectHeader;
@@ -105,39 +105,39 @@ class AuthorizationRequest extends BaseRequest {
     }
     
     /**
-     * Returns whether session id is requested.
+     * Returns whether session state is requested.
      *
-     * @return whether session id is requested
+     * @return whether session state is requested.
      */
-    public function isRequestSessionId() {
-        return $this->requestSessionId;
+    public function isRequestSessionState() {
+        return $this->requestSessionState;
     }
     
     /**
-     * Sets whether session id should be requested.
+     * Sets whether session state should be requested.
      *
-     * @param p_requestSessionId session id
+     * @param p_requestSessionState session state.
      */
-    public function setRequestSessionId($p_requestSessionId) {
-        $this->requestSessionId = $p_requestSessionId;
+    public function setRequestSessionState($p_requestSessionState) {
+        $this->requestSessionState = $p_requestSessionState;
     }
     
     /**
-     * Gets session id.
+     * Gets session state.
      *
-     * @return session id
+     * @return session state.
      */
-    public function getSessionId() {
-        return $this->sessionId;
+    public function getSessionState() {
+        return $this->sessionState;
     }    
     
     /**
-     * Sets session id.
+     * Sets session state.
      *
-     * @param p_sessionId session id
+     * @param p_sessionState session state.
      */
-    public function setSessionId($p_sessionId) {
-        $this->sessionId = $p_sessionId;
+    public function setSessionState($p_sessionState) {
+        $this->sessionState = $p_sessionState;
     }
     
     /**

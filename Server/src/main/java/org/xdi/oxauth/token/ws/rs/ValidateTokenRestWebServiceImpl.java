@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.annotations.In;
@@ -24,10 +19,16 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.token.ValidateTokenParamsValidator;
 
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 /**
  * Provides interface for validate token REST web services
  *
- * @author Javier Rojas Blum Date: 10.27.2011
+ * @author Javier Rojas Blum
+ * @version January 27, 2016
  */
 @Name("requestValidateTokenRestWebService")
 public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebService {
@@ -42,7 +43,16 @@ public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebServ
     private AuthorizationGrantList authorizationGrantList;
 
     @Override
-    public Response validateAccessToken(String accessToken, SecurityContext sec) {
+    public Response validateAccessTokenGet(String accessToken, SecurityContext sec) {
+        return validateAccessToken(accessToken, sec);
+    }
+
+    @Override
+    public Response validateAccessTokenPost(String accessToken, SecurityContext sec) {
+        return validateAccessToken(accessToken, sec);
+    }
+
+    private Response validateAccessToken(String accessToken, SecurityContext sec) {
         log.debug("Attempting to validate access token: {0}, Is Secure = {1}",
                 accessToken, sec.isSecure());
         ResponseBuilder builder = Response.ok();

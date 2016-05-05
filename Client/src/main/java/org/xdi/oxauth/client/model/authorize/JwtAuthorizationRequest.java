@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.client.model.authorize;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.SecureRandom;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -34,8 +29,14 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.SecureRandom;
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 03.07.2012
+ * @author Javier Rojas Blum
+ * @version December 17, 2015
  */
 public class JwtAuthorizationRequest {
 
@@ -116,7 +117,7 @@ public class JwtAuthorizationRequest {
     public JwtAuthorizationRequest(
             AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
             BlockEncryptionAlgorithm blockEncryptionAlgorithm, RSAPublicKey rsaPublicKey) {
-        this.type = JwtType.JWE;
+        this.type = JwtType.JWT;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
 
@@ -131,7 +132,7 @@ public class JwtAuthorizationRequest {
     public JwtAuthorizationRequest(
             AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
             BlockEncryptionAlgorithm blockEncryptionAlgorithm, byte[] sharedSymmetricKey) {
-        this.type = JwtType.JWE;
+        this.type = JwtType.JWT;
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
         this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
 
@@ -145,7 +146,7 @@ public class JwtAuthorizationRequest {
 
     private JwtAuthorizationRequest(SignatureAlgorithm signatureAlgorithm, String sharedKey,
                                     RSAPrivateKey rsaPrivateKey, ECDSAPrivateKey ecPrivateKey) {
-        this.type = JwtType.JWS;
+        this.type = JwtType.JWT;
         this.sharedKey = sharedKey;
         this.rsaPrivateKey = rsaPrivateKey;
         this.ecPrivateKey = ecPrivateKey;
@@ -178,7 +179,7 @@ public class JwtAuthorizationRequest {
             this.loginHint = authorizationRequest.getLoginHint();
             this.acrValues = authorizationRequest.getAcrValues();
             this.registration = authorizationRequest.getRegistration();
-            this.requestUniqueId = authorizationRequest.isRequestSessionId();
+            this.requestUniqueId = authorizationRequest.isRequestSessionState();
         }
     }
 
@@ -387,7 +388,7 @@ public class JwtAuthorizationRequest {
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
                 encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadToJSONObject(), signatureAlgorithm, ecPrivateKey);
             } else if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-                JweEncrypterImpl jweEncrypter = null;
+                JweEncrypterImpl jweEncrypter;
                 if (rsaPublicKey != null) {
                     jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
                 } else {
@@ -452,7 +453,7 @@ public class JwtAuthorizationRequest {
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
                 encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm, ecPrivateKey);
             } else if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-                JweEncrypterImpl jweEncrypter = null;
+                JweEncrypterImpl jweEncrypter;
                 if (rsaPublicKey != null) {
                     jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
                 } else {
@@ -518,7 +519,7 @@ public class JwtAuthorizationRequest {
         JwtHeader jwtHeader = new JwtHeader();
 
         jwtHeader.setType(type);
-        if (type == JwtType.JWE) {
+        if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             jwtHeader.setAlgorithm(keyEncryptionAlgorithm);
             jwtHeader.setEncryptionMethod(blockEncryptionAlgorithm);
         } else {

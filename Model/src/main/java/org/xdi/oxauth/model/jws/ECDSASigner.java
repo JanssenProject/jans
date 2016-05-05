@@ -106,8 +106,8 @@ public class ECDSASigner extends AbstractJwsSigner {
             throw new SignatureException("The signing input is null");
         }
 
-        String algorithm = null;
-        String curve = null;
+        String algorithm;
+        String curve;
         switch (getSignatureAlgorithm()) {
             case ES256:
                 algorithm = "SHA256WITHECDSA";

@@ -18,10 +18,8 @@ import java.util.concurrent.ThreadFactory;
 import javax.ws.rs.core.CacheControl;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
@@ -30,9 +28,8 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
-import org.xdi.oxauth.model.common.CustomAttribute;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
@@ -156,9 +153,9 @@ public class ServerUtil {
         });
     }
 
-    public static RegisterPermissionRequest convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
+    public static UmaPermission convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
         if (p_permission != null) {
-            final RegisterPermissionRequest result = new RegisterPermissionRequest();
+            final UmaPermission result = new UmaPermission();
             result.setResourceSetId(p_permission.getResourceSetId());
             result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
             result.setExpiresAt(p_permission.getExpirationDate());

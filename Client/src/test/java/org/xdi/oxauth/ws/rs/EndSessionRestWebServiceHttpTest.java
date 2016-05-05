@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -20,8 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for End Session Web Services (HTTP)
@@ -31,10 +31,10 @@ import static org.testng.Assert.assertNotNull;
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri"})
     @Test
     public void requestEndSession(final String userId, final String userSecret, final String redirectUri,
-                                  final String redirectUris, final String postLogoutRedirectUri) throws Exception {
+                                  final String redirectUris, final String postLogoutRedirectUri, final String logoutUri) throws Exception {
         showTitle("requestEndSession");
 
         // 1. OpenID Connect Dynamic Registration
@@ -42,6 +42,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
+        registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -86,12 +87,14 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getTokenType(), "The token type is null");
         assertNotNull(response1.getExpiresIn(), "The expires in value is null");
         assertNotNull(response1.getScope(), "The scope must be null");
+        assertNotNull(response1.getSessionState(), "The session_state is null");
 
         String idToken = response1.getIdToken();
 
         // 3. End session
         String endSessionState = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
+        endSessionRequest.setSessionState(response1.getSessionState());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest);
@@ -99,9 +102,14 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse endSessionResponse = endSessionClient.exec();
 
         showClient(endSessionClient);
-        assertEquals(endSessionResponse.getStatus(), 302, "Unexpected response code: " + endSessionResponse.getStatus());
-        assertNotNull(endSessionResponse.getLocation(), "The location is null");
-        assertEquals(endSessionResponse.getState(), endSessionState);
+        assertEquals(endSessionResponse.getStatus(), 200, "Unexpected response code: " + endSessionResponse.getStatus());
+        assertNotNull(endSessionResponse.getHtmlPage(), "The HTML page is null");
+
+        // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
+        assertTrue(endSessionResponse.getHtmlPage().contains("<html>"), "The HTML page is null");
+        assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
+        assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
+        // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
     }
 
     @Test

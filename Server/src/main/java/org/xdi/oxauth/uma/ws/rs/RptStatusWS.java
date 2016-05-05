@@ -17,11 +17,13 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.RegisterPermissionRequest;
+import org.xdi.oxauth.model.uma.GatIntrospectionResponse;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.service.uma.AbstractRPTManager;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
@@ -29,6 +31,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,15 +101,21 @@ public class RptStatusWS {
                                              "      Token Revocation [RFC7009].", required = false)
                                      String tokenTypeHint) {
         try {
-            umaValidationService.validateAuthorizationWithProtectScope(authorization);
+            umaValidationService.assertHasProtectionScope(authorization);
 
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
+            if (rpt != null && AbstractRPTManager.isGat(rpt.getCode())) {
+                return gatResponse(rpt);
+            }
             if (!isValid(rpt)) {
-                return Response.status(Response.Status.OK).entity(new RptIntrospectionResponse(false)).cacheControl(ServerUtil.cacheControl(true)).build();
+                return Response.status(Response.Status.OK).
+                        entity(new RptIntrospectionResponse(false)).
+                        cacheControl(ServerUtil.cacheControl(true)).
+                        build();
             }
 
-            final List<RegisterPermissionRequest> permissions = buildStatusResponsePermissions(rpt);
+            final List<UmaPermission> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
@@ -130,6 +139,30 @@ public class RptStatusWS {
         }
     }
 
+    private Response gatResponse(UmaRPT rpt) throws IOException {
+        if (!isValid(rpt)) {
+            return Response.status(Response.Status.OK).
+                    entity(new GatIntrospectionResponse(false)).
+                    cacheControl(ServerUtil.cacheControl(true)).
+                    build();
+        }
+
+        final GatIntrospectionResponse statusResponse = new GatIntrospectionResponse();
+        statusResponse.setActive(true);
+        statusResponse.setExpiresAt(rpt.getExpirationDate());
+        statusResponse.setIssuedAt(rpt.getCreationDate());
+        statusResponse.setScopes(rpt.getPermissions());
+
+        // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
+        final String entity = ServerUtil.asJson(statusResponse);
+
+        return Response.status(Response.Status.OK).
+                entity(entity).
+                cacheControl(ServerUtil.cacheControl(true)).
+                build();
+
+    }
+
     private boolean isValid(UmaRPT p_rpt) {
         if (p_rpt != null) {
             p_rpt.checkExpired();
@@ -146,14 +179,14 @@ public class RptStatusWS {
         return false;
     }
 
-    private List<RegisterPermissionRequest> buildStatusResponsePermissions(UmaRPT p_rpt) {
-        final List<RegisterPermissionRequest> result = new ArrayList<RegisterPermissionRequest>();
+    private List<UmaPermission> buildStatusResponsePermissions(UmaRPT p_rpt) {
+        final List<UmaPermission> result = new ArrayList<UmaPermission>();
         if (p_rpt != null) {
             final List<ResourceSetPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (ResourceSetPermission permission : rptPermissions) {
                     if (isValid(permission)) {
-                        final RegisterPermissionRequest toAdd = ServerUtil.convert(permission, umaScopeService);
+                        final UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                         if (toAdd != null) {
                             result.add(toAdd);
                         }

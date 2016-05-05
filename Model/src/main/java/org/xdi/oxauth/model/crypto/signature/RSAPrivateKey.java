@@ -6,18 +6,21 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
-import java.math.BigInteger;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PrivateKey;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.math.BigInteger;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * The Private Key for the RSA Algorithm
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version February 17, 2016
  */
 public class RSAPrivateKey extends PrivateKey {
 
@@ -30,8 +33,8 @@ public class RSAPrivateKey extends PrivateKey {
     }
 
     public RSAPrivateKey(String modulus, String privateExponent) {
-        this.modulus = new BigInteger(JwtUtil.base64urldecode(modulus));
-        this.privateExponent = new BigInteger(JwtUtil.base64urldecode(privateExponent));
+        this.modulus = new BigInteger(1, JwtUtil.base64urldecode(modulus));
+        this.privateExponent = new BigInteger(1, JwtUtil.base64urldecode(privateExponent));
     }
 
     public BigInteger getModulus() {
@@ -54,9 +57,9 @@ public class RSAPrivateKey extends PrivateKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put("modulus", JwtUtil.base64urlencode(modulus.toByteArray()));
-        jsonObject.put("privateExponent", JwtUtil.base64urlencode(privateExponent.toByteArray()));
-        jsonObject.put("d", JSONObject.NULL);
+        jsonObject.put(MODULUS, JwtUtil.base64urlencodeUnsignedBigInt(modulus));
+        jsonObject.put(EXPONENT, JwtUtil.base64urlencodeUnsignedBigInt(privateExponent));
+        jsonObject.put(D, JSONObject.NULL);
 
         return jsonObject;
     }

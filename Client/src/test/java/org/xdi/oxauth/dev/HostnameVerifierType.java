@@ -17,16 +17,16 @@ public enum HostnameVerifierType {
     DEFAULT("default"),
     ALLOW_ALL("allow_all");
 
-    private final String m_value;
+    private final String value;
 
-    HostnameVerifierType(String p_value) {
-        m_value = p_value;
+    HostnameVerifierType(String value) {
+        this.value = value;
     }
 
-    public static HostnameVerifierType fromString(String p_value) {
-        if (StringUtils.isNotBlank(p_value)) {
+    public static HostnameVerifierType fromString(String value) {
+        if (StringUtils.isNotBlank(value)) {
             for (HostnameVerifierType v : values()) {
-                if (v.m_value.equals(p_value)) {
+                if (v.value.equals(value)) {
                     return v;
                 }
             }

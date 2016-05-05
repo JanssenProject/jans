@@ -17,6 +17,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 import org.xdi.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.util.Base64Util;
 
 /**
@@ -45,24 +46,41 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	@LdapAttribute(name = "oxApplication")
 	private String application;
-	
+
+	@LdapAttribute(name = "oxDeviceKeyHandle")
+	private String keyHandle;
+
+	@LdapAttribute(name = "oxDeviceHashCode")
+	private Integer keyHandleHashCode;
+
+    @LdapJsonObject
+	@LdapAttribute(name = "oxDeviceData")
+	private DeviceData deviceData;
+
 	@LdapAttribute(name = "creationDate")
 	private Date creationDate;
+
+    @LdapAttribute(name = "oxLastAccessTime")
+    private Date lastAccessTime;
 	
 	public DeviceRegistration() {}
 
-	public DeviceRegistration(String keyHandle, String publicKey, String attestationCert, long counter, DeviceRegistrationStatus status, String application, Date creationDate) {
-		this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(keyHandle, publicKey, attestationCert);
+	public DeviceRegistration(String keyHandle, String publicKey, String attestationCert, long counter, DeviceRegistrationStatus status,
+			String application, Integer keyHandleHashCode, Date creationDate) {
+		this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(publicKey, attestationCert);
 		this.counter = counter;
 		this.status = status;
 		this.application = application;
+		this.keyHandle = keyHandle;
+		this.keyHandleHashCode = keyHandleHashCode;
 		this.creationDate = creationDate;
 	}
 
 	public DeviceRegistration(String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
+		this.keyHandle = keyHandle;
 		try {
 			String attestationCertDecoded = Base64Util.base64urlencode(attestationCert.getEncoded());
-			this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(keyHandle, publicKey, attestationCertDecoded);
+			this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(publicKey, attestationCertDecoded);
 		} catch (CertificateEncodingException e) {
 			throw new BadInputException("Malformed attestation certificate", e);
 		}
@@ -110,12 +128,44 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.application = application;
 	}
 
+	public String getKeyHandle() {
+		return keyHandle;
+	}
+
+	public void setKeyHandle(String keyHandle) {
+		this.keyHandle = keyHandle;
+	}
+
+	public Integer getKeyHandleHashCode() {
+		return keyHandleHashCode;
+	}
+
+	public void setKeyHandleHashCode(Integer keyHandleHashCode) {
+		this.keyHandleHashCode = keyHandleHashCode;
+	}
+
 	public Date getCreationDate() {
 		return creationDate;
 	}
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public DeviceData getDeviceData() {
+		return deviceData;
+	}
+
+	public void setDeviceData(DeviceData deviceData) {
+		this.deviceData = deviceData;
+	}
+
+	public Date getLastAccessTime() {
+		return lastAccessTime;
+	}
+
+	public void setLastAccessTime(Date lastAccessTime) {
+		this.lastAccessTime = lastAccessTime;
 	}
 
 	public boolean isCompromised() {
@@ -138,8 +188,9 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DeviceRegistration [id=").append(id).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
-				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application).append(", creationDate=")
-				.append(creationDate).append("]");
+				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application).append(", keyHandle=")
+				.append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", deviceData=").append(deviceData)
+				.append(", creationDate=").append(creationDate).append(", lastAccessTime=").append(lastAccessTime).append("]");
 		return builder.toString();
 	}
 

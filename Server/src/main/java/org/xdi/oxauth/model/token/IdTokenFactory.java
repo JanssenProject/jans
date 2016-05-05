@@ -26,8 +26,6 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
@@ -36,13 +34,12 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.jws.ECDSASigner;
-import org.xdi.oxauth.model.jws.HMACSigner;
-import org.xdi.oxauth.model.jws.RSASigner;
-import org.xdi.oxauth.model.jwt.*;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
+import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
@@ -52,6 +49,8 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.*;
 
@@ -65,7 +64,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 21, 2015
+ * @version February 15, 2015
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -90,30 +89,10 @@ public class IdTokenFactory {
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
                                      Set<String> scopes) throws SignatureException, InvalidJwtException,
-            StringEncrypter.EncryptionException, InvalidClaimException {
-        Jwt jwt = new Jwt();
-        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
+            StringEncrypter.EncryptionException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
 
-        // Header
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm());
-        if (authorizationGrant.getClient() != null
-                && authorizationGrant.getClient().getIdTokenSignedResponseAlg() != null) {
-            signatureAlgorithm = SignatureAlgorithm.fromName(authorizationGrant.getClient().getIdTokenSignedResponseAlg());
-        }
-        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
-            jwt.getHeader().setType(JwtType.JWT);
-        } else {
-            jwt.getHeader().setType(JwtType.JWS);
-        }
-        jwt.getHeader().setAlgorithm(signatureAlgorithm);
-        List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
-        if (jsonWebKeys.size() > 0) {
-            jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKeyId());
-        }
-
-        // Claims
-        jwt.getClaims().setIssuer(ConfigurationFactory.instance().getConfiguration().getIssuer());
-        jwt.getClaims().setAudience(authorizationGrant.getClient().getClientId());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
+        Jwt jwt = jwtSigner.newJwt();
 
         int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
@@ -134,11 +113,11 @@ public class IdTokenFactory {
             jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
         }
         if (authorizationCode != null) {
-            String codeHash = authorizationCode.getHash(signatureAlgorithm);
+            String codeHash = authorizationCode.getHash(jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
         }
         if (accessToken != null) {
-            String accessTokenHash = accessToken.getHash(signatureAlgorithm);
+            String accessTokenHash = accessToken.getHash(jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
         jwt.getClaims().setClaim("oxValidationURI", ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
@@ -162,7 +141,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -182,7 +161,7 @@ public class IdTokenFactory {
 
                         String claimName = gluuAttribute.getOxAuthClaimName();
                         String ldapName = gluuAttribute.getName();
-                        String attributeValue = null;
+                        String attributeValue;
 
                         if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                             if (ldapName.equals("uid")) {
@@ -257,51 +236,18 @@ public class IdTokenFactory {
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
         }
 
-        // Signature
-        JSONWebKey jwk = null;
-        switch (signatureAlgorithm) {
-            case HS256:
-            case HS384:
-            case HS512:
-                HMACSigner hmacSigner = new HMACSigner(signatureAlgorithm, authorizationGrant.getClient().getClientSecret());
-                jwt = hmacSigner.sign(jwt);
-                break;
-            case RS256:
-            case RS384:
-            case RS512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getModulus(),
-                        jwk.getPrivateKey().getPrivateExponent());
-                RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
-                jwt = rsaSigner.sign(jwt);
-                break;
-            case ES256:
-            case ES384:
-            case ES512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(jwk.getPrivateKey().getD());
-                ECDSASigner ecdsaSigner = new ECDSASigner(signatureAlgorithm, ecdsaPrivateKey);
-                jwt = ecdsaSigner.sign(jwt);
-                break;
-            case NONE:
-                break;
-            default:
-                break;
-        }
-
-        return jwt;
+        return jwtSigner.sign();
     }
 
     public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                         AuthorizationCode authorizationCode, AccessToken accessToken,
-                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException {
+                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
         Jwe jwe = new Jwe();
 
         // Header
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseAlg());
         BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseEnc());
-        jwe.getHeader().setType(JwtType.JWE);
+        jwe.getHeader().setType(JwtType.JWT);
         jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
@@ -352,7 +298,7 @@ public class IdTokenFactory {
 
                     String claimName = gluuAttribute.getOxAuthClaimName();
                     String ldapName = gluuAttribute.getName();
-                    String attributeValue = null;
+                    String attributeValue;
 
                     if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                         if (ldapName.equals("uid")) {
@@ -399,7 +345,7 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifier;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
                 sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
@@ -467,6 +413,22 @@ public class IdTokenFactory {
         }
 
         return (IdTokenFactory) Component.getInstance(IdTokenFactory.class);
+    }
+
+    public static JsonWebResponse createJwr(
+            IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
+            Set<String> scopes)
+            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
+            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException {
+        IdTokenFactory idTokenFactory = IdTokenFactory.instance();
+
+        final Client grantClient = grant.getClient();
+        if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
+                && grantClient.getIdTokenEncryptedResponseEnc() != null) {
+            return idTokenFactory.generateEncryptedIdToken(grant, nonce, authorizationCode, accessToken, scopes);
+        } else {
+            return idTokenFactory.generateSignedIdToken(grant, nonce, authorizationCode, accessToken, scopes);
+        }
     }
 
 }

@@ -12,10 +12,13 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -34,6 +37,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 /**
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
+ * @author Yuriy Movchan Date: 2016/04/26
  */
 public class OpenIdConfiguration extends HttpServlet {
 
@@ -66,7 +70,6 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(CLIENT_INFO_ENDPOINT, configuration.getClientInfoEndpoint());
             jsonObj.put(CHECK_SESSION_IFRAME, configuration.getCheckSessionIFrame());
             jsonObj.put(END_SESSION_ENDPOINT, configuration.getEndSessionEndpoint());
-            jsonObj.put(END_SESSION_PAGE, configuration.getEndSessionPage());
             jsonObj.put(JWKS_URI, configuration.getJwksUri());
             jsonObj.put(REGISTRATION_ENDPOINT, configuration.getRegistrationEndpoint());
             jsonObj.put(VALIDATE_TOKEN_ENDPOINT, configuration.getValidateTokenEndpoint());
@@ -221,12 +224,25 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray claimsSupported = new JSONArray();
             List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                String claimName = gluuAttribute.getOxAuthClaimName();
-                if (StringUtils.isNotBlank(claimName)) {
-                    claimsSupported.put(claimName);
-                }
-            }
+
+            // Preload all scopes to avoid sending request to LDAP per claim 
+            List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
+            
+			for (GluuAttribute gluuAttribute : gluuAttributes) {
+				if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
+					String claimName = gluuAttribute.getOxAuthClaimName();
+					if (StringUtils.isNotBlank(claimName)) {
+						List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService.getScopesByClaim(scopes, gluuAttribute.getDn());
+						for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
+							if (ScopeType.OPENID.equals(scope.getScopeType())) {
+								claimsSupported.put(claimName);
+								break;
+							}
+						}
+					}
+				}
+			}
+            
             if (claimsSupported.length() > 0) {
                 jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
             }
@@ -278,8 +294,7 @@ public class OpenIdConfiguration extends HttpServlet {
             for (Scope scope : scopeService.getAllScopesList()) {
                 final JSONArray claimsList = new JSONArray();
                 final JSONObject mapping = new JSONObject();
-                mapping.put(SCOPE_KEY, scope.getDisplayName());
-                mapping.put(CLAIMS_KEY, claimsList);
+                mapping.put(scope.getDisplayName(), claimsList);
 
                 result.put(mapping);
 
