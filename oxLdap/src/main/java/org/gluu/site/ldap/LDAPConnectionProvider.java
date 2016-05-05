@@ -119,6 +119,11 @@ public class LDAPConnectionProvider {
 			if (!this.useSSL) {
 				throw ex;
 			}
+
+			// Error when LDAP server not supports specified encryption
+			if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
+				throw ex;
+			}
 			
 			log.info("Attempting to use older SSL protocols", ex);
 			connectionPool = createSSLConnectionPoolWithPreviousProtocols(sslUtil, bindRequest, connectionOptions, maxConnections);
@@ -146,7 +151,7 @@ public class LDAPConnectionProvider {
 		this.creationResultCode = ResultCode.SUCCESS;
 	}
 
-	private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest, LDAPConnectionOptions connectionOptions, int maxConnections) {
+	private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest, LDAPConnectionOptions connectionOptions, int maxConnections) throws LDAPException {
 		for (int i = 1; i < SSL_PROTOCOLS.length; i++) {
 			String protocol = SSL_PROTOCOLS[i];
 			try {
@@ -158,6 +163,10 @@ public class LDAPConnectionProvider {
 			} catch (GeneralSecurityException ex) {
 				log.debug("Server not supports: '" + protocol + "'", ex);
 			} catch (LDAPException ex) {
+				// Error when LDAP server not supports specified encryption
+				if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
+					throw ex;
+				}
 				log.debug("Server not supports: '" + protocol + "'", ex);
 			}
 		}
