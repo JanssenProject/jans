@@ -4,29 +4,26 @@
 # Author: Yuriy Movchan
 #
 
+import sys
+import datetime
+import urllib
+
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam.contexts import Context, Contexts
+from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import SessionStateService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util.security import StringEncrypter 
-from org.xdi.oxauth.model.config import Constants
+from org.xdi.util.security import StringEncrypter
 from org.xdi.oxauth.model.config import ConfigurationFactory
 from java.util import Arrays
 from org.xdi.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 from com.notnoop.apns import APNS
-from com.google.android.gcm.server import Sender, Message 
+from com.google.android.gcm.server import Sender, Message
 
-import sys
-import java
-import datetime
-import base64
-import urllib
 
 try:
     import json
