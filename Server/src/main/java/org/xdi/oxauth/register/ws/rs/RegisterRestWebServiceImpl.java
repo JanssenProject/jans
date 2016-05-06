@@ -51,6 +51,7 @@ import java.util.*;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
@@ -327,6 +328,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestUris != null && !requestUris.isEmpty()) {
             requestUris = new ArrayList<String>(new HashSet<String>(requestUris)); // Remove repeated elements
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
+        }
+
+        Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
+        if (clientSecretExpiresAt != null) {
+            p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
         // Federation params

@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
@@ -38,6 +39,7 @@ import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -94,6 +96,9 @@ public class AuthorizeAction {
     private LocaleSelector localeSelector;
 
     @In
+    private NetworkService networkService;
+
+    @In
     private Identity identity;
 
     // OAuth 2.0 request parameters
@@ -145,9 +150,14 @@ public class AuthorizeAction {
         try {
             session = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(session, redirectUri, acrValues);
         } catch (AcrChangedException e) {
-            log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
-            log.error("Please perform logout in order to be able login with new ACR value.");
-            permissionDenied();
+            log.debug("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
+            if (prompts.contains(Prompt.LOGIN)) {
+                session = handleAcrChange(session, prompts);
+            } else {
+                log.error("Please provide prompt=login to force login with new ACR or otherwise perform logout and re-authenticate.");
+                permissionDenied();
+                return;
+            }
         }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
@@ -191,6 +201,10 @@ public class AuthorizeAction {
                     redirectTo = tmpRedirectTo;
                 }
             }
+            
+            // Store Remote IP
+            String remoteIp = networkService.getRemoteIp();
+            requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
 
             // Create unauthenticated session
             SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
@@ -239,25 +253,50 @@ public class AuthorizeAction {
                         permissionGranted(session);
                     }
                 }
-
-                if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                        permissionGranted(session);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (Boolean.parseBoolean(client.getTrustedClient()) && !prompts.contains(Prompt.CONSENT)) {
+                
+                if (prompts.contains(Prompt.CONSENT)) {
+                	// The authorization server prompts the user for consent before returning information to the client. 
+                } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
+                	boolean done = false;
+                	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                        if (client.getTrustedClient()) {
                             permissionGranted(session);
+                            done = true;
                         }
-                    } else {
-                        consentRequired();
-                    }
+                	}
+
+                	if (!done) {
+	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+	                        permissionGranted(session);
+	                    }
+                	}
                 } else {
                     invalidRequest();
                 }
             }
         }
+
+        return;
+    }
+
+    private SessionState handleAcrChange(SessionState session, List<Prompt> prompts) {
+        if (session != null && prompts.contains(Prompt.LOGIN)) { // change session state only if prompt=none
+            if (session.getState() == SessionIdState.AUTHENTICATED) {
+                session.getSessionAttributes().put("prompt", prompt);
+                session.setState(SessionIdState.UNAUTHENTICATED);
+
+                // Update Remote IP
+                String remoteIp = networkService.getRemoteIp();
+               	session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
+
+                sessionStateService.updateSessionState(session);
+                sessionStateService.reinitLogin(session, false);
+            }
+        }
+        return session;
     }
 
     /**
@@ -591,6 +630,12 @@ public class AuthorizeAction {
             }
 
             final Client client = clientService.getClient(clientId);
+            
+            if(client.getPersistClientAuthorizations()){
+            	client.setTrustedClient(true);     
+            	clientService.merge(client);
+            }
+            
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 

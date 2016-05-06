@@ -23,6 +23,7 @@ import org.jboss.seam.util.Base64;
 import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -47,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -100,6 +102,7 @@ public class AuthenticationFilter extends AbstractFilter {
                     } else {
                         SessionStateService sessionStateService = SessionStateService.instance();
                         String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+                        List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
                         if (StringUtils.isBlank(sessionState)) {
                             // OXAUTH-297 : check whether session_state is present in cookie
@@ -110,7 +113,7 @@ public class AuthenticationFilter extends AbstractFilter {
                         if (StringUtils.isNotBlank(sessionState)) {
                             sessionStateObject = sessionStateService.getSessionState(sessionState);
                         }
-                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState()) {
+                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState() && !prompts.contains(Prompt.LOGIN)) {
                             processSessionAuth(sessionState, httpRequest, httpResponse, filterChain);
                         } else {
                             filterChain.doFilter(httpRequest, httpResponse);

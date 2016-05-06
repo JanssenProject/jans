@@ -66,7 +66,7 @@ public class SessionStateService {
 
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
-    // 2) acr change -> send error
+    // 2) acr change -> throw acr change exception
     // 3) client_id change -> do nothing
     // https://github.com/GluuFederation/oxAuth/issues/34
     public SessionState assertAuthenticatedSessionCorrespondsToNewRequest(SessionState session, String redirectUri, String acrValuesStr) throws AcrChangedException {
@@ -79,31 +79,57 @@ public class SessionStateService {
                 throw new AcrChangedException();
             }
 
-            final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
-            if (!currentSessionAttributes.equals(sessionAttributes)) {
-                sessionAttributes.putAll(currentSessionAttributes);
-
-                // Reinit login
-                sessionAttributes.put("auth_step", "1");
-
-                for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext(); ) {
-                    Entry<String, String> currentSessionAttributesEntry = it.next();
-                    String name = currentSessionAttributesEntry.getKey();
-                    if (name.startsWith("auth_step_passed_")) {
-                        it.remove();
-                    }
-                }
-
-                session.setSessionAttributes(currentSessionAttributes);
-
-                boolean updateResult = updateSessionState(session, true, true);
-                if (!updateResult) {
-                    log.debug("Failed to update session entry: '{0}'", session.getId());
-                }
-            }
+            reinitLogin(session, false);
         }
         return session;
     }
+
+    public void reinitLogin(SessionState session, boolean force) {
+        final Map<String, String> sessionAttributes = session.getSessionAttributes();
+        final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
+        if (force || !currentSessionAttributes.equals(sessionAttributes)) {
+            sessionAttributes.putAll(currentSessionAttributes);
+
+            // Reinit login
+            sessionAttributes.put("auth_step", "1");
+
+            for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext(); ) {
+                Entry<String, String> currentSessionAttributesEntry = it.next();
+                String name = currentSessionAttributesEntry.getKey();
+                if (name.startsWith("auth_step_passed_")) {
+                    it.remove();
+                }
+            }
+
+            session.setSessionAttributes(currentSessionAttributes);
+
+            boolean updateResult = updateSessionState(session, true, true);
+            if (!updateResult) {
+                log.debug("Failed to update session entry: '{0}'", session.getId());
+            }
+        }
+    }
+
+	public void resetToStep(SessionState session, int resetToStep) {
+        final Map<String, String> sessionAttributes = session.getSessionAttributes();
+        
+        int currentStep = 1;
+        if (sessionAttributes.containsKey("auth_step")) {
+        	currentStep = StringHelper.toInteger(sessionAttributes.get("auth_step"), currentStep);
+        }
+        
+        for (int i = resetToStep; i <= currentStep; i++) {
+            String key = String.format("auth_step_passed_%d", i);
+        	sessionAttributes.remove(key);
+        }
+
+        sessionAttributes.put("auth_step", String.valueOf(resetToStep));
+
+        boolean updateResult = updateSessionState(session, true, true);
+        if (!updateResult) {
+            log.debug("Failed to update session entry: '{0}'", session.getId());
+        }
+	}
 
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
         // Update from request
@@ -477,5 +503,6 @@ public class SessionStateService {
         String promptParam = sessionState.getSessionAttributes().get("prompt");
         return Prompt.fromString(promptParam, " ");
     }
+
 
 }
