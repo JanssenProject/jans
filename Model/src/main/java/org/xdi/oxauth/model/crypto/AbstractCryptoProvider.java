@@ -5,21 +5,25 @@
  */
 package org.xdi.oxauth.model.crypto;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 4, 2016
+ * @version May 5, 2016
  */
 public abstract class AbstractCryptoProvider {
 
@@ -83,5 +87,51 @@ public abstract class AbstractCryptoProvider {
         }
 
         return jwks;
+    }
+
+    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, Configuration configuration,
+                                          JSONWebKeySet jwks) throws Exception {
+        JSONArray keys = new JSONArray();
+
+        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
+        expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
+
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration, jwks);
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS384, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS512, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES256, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES384, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        try {
+            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES512, expirationTime.getTimeInMillis()));
+        } catch (Exception ex) {
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(JSON_WEB_KEY_SET, keys);
+
+        return jsonObject;
     }
 }
