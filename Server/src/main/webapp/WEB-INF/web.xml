@@ -62,6 +62,14 @@
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
     </context-param>
+    <context-param>
+        <param-name>facelets.RESOURCE_RESOLVER</param-name>
+        <param-value>org.gluu.oxauth.resource.custom.ExternalResourceHandler</param-value>
+    </context-param>
+  	<context-param>
+	    <param-name>facelets.REFRESH_PERIOD</param-name>
+	    <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
+	</context-param>
 
     <!-- swagger servlet reader -->
     <!--<servlet>-->
@@ -105,7 +113,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.seam</url-pattern>
+        <url-pattern>*.htm</url-pattern>
     </servlet-mapping>
     <security-constraint>
         <display-name>Restrict raw XHTML Documents</display-name>
@@ -115,6 +123,9 @@
         </web-resource-collection>
         <auth-constraint/>
     </security-constraint>
+
+    <!-- Cert authentication for case when there is proxy like Apache -->
+    <!-- Don't remove. Use when there is standalone tomcat only.
     <security-constraint>
         <display-name>Request client cert for specific page</display-name>
         <web-resource-collection>
@@ -125,6 +136,7 @@
             <role-name>*</role-name>
             </auth-constraint>
     </security-constraint>
+    -->
 
     <session-config>
         <session-timeout>30</session-timeout>

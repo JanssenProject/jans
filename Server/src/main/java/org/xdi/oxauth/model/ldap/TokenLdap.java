@@ -53,6 +53,10 @@ public class TokenLdap {
     private String authorizationCode;
     @LdapAttribute(name = "oxAuthNonce")
     private String nonce;
+    @LdapAttribute(name = "oxCodeChallenge")
+    private String codeChallenge;
+    @LdapAttribute(name = "oxCodeChallengeMethod")
+    private String codeChallengeMethod;
 
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
@@ -196,6 +200,22 @@ public class TokenLdap {
 
     public void setAuthMode(String authMode) {
         this.authMode = authMode;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 
     @Override
