@@ -41,7 +41,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
 import java.util.Set;
 
 import static org.xdi.oxauth.model.jwk.JWKParameter.*;
@@ -49,7 +48,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version February 17, 2016
+ * @version May 5, 2016
  */
 public class JwtUtil {
 
@@ -183,30 +182,6 @@ public class JwtUtil {
         return builder.toString();
     }
 
-    public static boolean verifySignatureHS256(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature;
-
-        validSignature = Arrays.equals(sigBytes, getSignatureHS256(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
-
-        return validSignature;
-    }
-
-    public static boolean verifySignatureHS384(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature;
-
-        validSignature = Arrays.equals(sigBytes, getSignatureHS384(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
-
-        return validSignature;
-    }
-
-    public static boolean verifySignatureHS512(byte[] signingInput, byte[] sigBytes, String hsKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        boolean validSignature;
-
-        validSignature = Arrays.equals(sigBytes, getSignatureHS512(signingInput, hsKey.getBytes(Util.UTF8_STRING_ENCODING)));
-
-        return validSignature;
-    }
-
     public static String base64urlencode(byte[] arg) {
         return Base64Util.base64urlencode(arg);
     }
@@ -333,27 +308,6 @@ public class JwtUtil {
         }
     }
 
-    public static boolean verifySignatureRS256(byte[] signingInput, byte[] sigBytes, X509Certificate cert) throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
-        PublicKey publicKey = cert.getPublicKey();
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-256", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
-    }
-
     public static byte[] getSignatureRS384(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -396,27 +350,6 @@ public class JwtUtil {
         }
     }
 
-    public static boolean verifySignatureRS384(byte[] signingInput, byte[] sigBytes, X509Certificate cert) throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
-        PublicKey publicKey = cert.getPublicKey();
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-384", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
-    }
-
     public static byte[] getSignatureRS512(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -440,27 +373,6 @@ public class JwtUtil {
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
         PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-512", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
-    }
-
-    public static boolean verifySignatureRS512(byte[] signingInput, byte[] sigBytes, X509Certificate cert) throws NoSuchProviderException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
-        PublicKey publicKey = cert.getPublicKey();
 
         Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
@@ -577,16 +489,6 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
-    public static boolean verifySignatureES256(byte[] signingInput, byte[] sigBytes, X509Certificate cert)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        PublicKey publicKey = cert.getPublicKey();
-
-        Signature signature = Signature.getInstance("SHA256WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
     public static boolean verifySignatureES384(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
@@ -606,16 +508,6 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
-    public static boolean verifySignatureES384(byte[] signingInput, byte[] sigBytes, X509Certificate cert)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        PublicKey publicKey = cert.getPublicKey();
-
-        Signature signature = Signature.getInstance("SHA384WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
     public static boolean verifySignatureES512(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
@@ -628,16 +520,6 @@ public class JwtUtil {
 
         KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
         PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-        Signature signature = Signature.getInstance("SHA512WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
-    public static boolean verifySignatureES512(byte[] signingInput, byte[] sigBytes, X509Certificate cert)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        PublicKey publicKey = cert.getPublicKey();
 
         Signature signature = Signature.getInstance("SHA512WITHECDSA", "BC");
         signature.initVerify(publicKey);
@@ -773,51 +655,4 @@ public class JwtUtil {
 
         return jsonKey;
     }
-
-    public static org.xdi.oxauth.model.crypto.PrivateKey getPrivateKey(String jwksUri, String jwks, String keyId) {
-        log.debug("Retrieving JWK Private Key...");
-
-        JSONObject jsonKeyValue = getJsonKey(jwksUri, jwks, keyId);
-        if (jsonKeyValue == null) {
-            return null;
-        }
-
-        org.xdi.oxauth.model.crypto.PrivateKey privateKey = null;
-
-        try {
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(jsonKeyValue.getString(ALGORITHM));
-            String resultKeyId = jsonKeyValue.getString(KEY_ID);
-            if (signatureAlgorithm == null) {
-                log.error(String.format("Failed to determine key '%s' signature algorithm", resultKeyId));
-                return null;
-            }
-
-            JSONObject jsonPrivateKey = jsonKeyValue.getJSONObject(PRIVATE_KEY);
-            if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                String exp = jsonPrivateKey.getString(EXPONENT);
-                String mod = jsonPrivateKey.getString(MODULUS);
-
-                BigInteger privateExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
-                BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
-
-                privateKey = new RSAPrivateKey(modulus, privateExponent);
-            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                String dd = jsonPrivateKey.getString(D);
-
-                BigInteger d = new BigInteger(1, JwtUtil.base64urldecode(dd));
-
-                privateKey = new ECDSAPrivateKey(d);
-            }
-
-            if (privateKey != null) {
-                privateKey.setSignatureAlgorithm(signatureAlgorithm);
-                privateKey.setKeyId(resultKeyId);
-            }
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
-
-        return privateKey;
-    }
-
 }
