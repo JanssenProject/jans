@@ -1,8 +1,8 @@
 {
     "mode":"ldap",
     "issuer":"${config.oxauth.issuer}",
-    "loginPage":"${config.oxauth.contextPath}/login.seam",
-    "authorizationPage":"${config.oxauth.contextPath}/authorize.seam",
+    "loginPage":"${config.oxauth.contextPath}/login",
+    "authorizationPage":"${config.oxauth.contextPath}/authorize",
     "baseEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1",
     "authorizationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/authorize",
     "tokenEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/token",

@@ -16,14 +16,17 @@ from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util.security import StringEncrypter 
 from org.xdi.oxauth.model.config import Constants
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from java.util import HashMap, Arrays
-
-from com.devsu.push.sender.service.sync import SyncAndroidPushService, SyncApplePushService
+from java.util import Arrays
+from org.xdi.oxauth.service.net import HttpService
+from org.apache.http.params import CoreConnectionPNames
+from com.notnoop.apns import APNS
+from com.google.android.gcm.server import Sender, Message 
 
 import sys
 import java
 import datetime
 import base64
+import urllib
 
 try:
     import json
@@ -37,15 +40,13 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "oxPush2. Initialization"
 
-        if not (configurationAttributes.containsKey("application_id") and
-                configurationAttributes.containsKey("authentication_mode")):
-            print "oxPush2. Initialization. Properties application_id and authentication_mode are mandatory"
+        if not configurationAttributes.containsKey("authentication_mode"):
+            print "oxPush2. Initialization. Property authentication_mode is mandatory"
             return False
 
-        self.application_id = configurationAttributes.get("application_id").getValue2()
-        if StringHelper.isEmpty(self.application_id):
-            print "oxPush2. Initialization. Failed to determine application_id. application_id configuration parameter is empty"
-            return False
+        self.registrationUri = None
+        if configurationAttributes.containsKey("registration_uri"):
+            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
 
         authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
         if StringHelper.isEmpty(authentication_mode):
@@ -84,13 +85,20 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
+        session_attributes = context.get("sessionAttributes")
+
+        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        if client_redirect_uri == None:
+            print "oxPush2. Authenticate. redirect_uri is not set"
+            return False
+
+        self.setRegistrationUri(context)
 
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
         if (step == 1):
             print "oxPush2. Authenticate for step 1"
             if self.oneStep:
-                session_attributes = context.get("sessionAttributes")
   
                 session_device_status = self.getSessionDeviceStatus(session_attributes);
                 if session_device_status == None:
@@ -98,7 +106,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 u2f_device_id = session_device_status['device_id']
 
-                validation_result = self.validateSessionDeviceStatus(session_device_status)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status)
                 if validation_result:
                     print "oxPush2. Authenticate for step 1. User successfully authenticated with u2f_device '%s'" % u2f_device_id
                 else:
@@ -141,10 +149,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 if (auth_method == 'authenticate'):
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId")
+                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId")
                     if (u2f_devices_list.size() == 0):
                         auth_method = 'enroll'
-                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, self.application_id, auth_method)
+                        print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
     
                 print "oxPush2. Authenticate for step 1. auth_method: '%s'" % auth_method
                 
@@ -181,7 +189,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "oxPush2. Authenticate for step 2. Failed to determine user name"
                     return False
 
-                validation_result = self.validateSessionDeviceStatus(session_device_status, user_name)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status, user_name)
                 if validation_result:
                     print "oxPush2. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 else:
@@ -200,6 +208,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
+        session_attributes = context.get("sessionAttributes")
+
+        client_redirect_uri = self.getClientRedirecUri(session_attributes)
+        if client_redirect_uri == None:
+            print "oxPush2. Prepare for step. redirect_uri is not set"
+            return False
+
+        self.setRegistrationUri(context)
 
         if step == 1:
             print "oxPush2. Prepare for step 1"
@@ -210,15 +226,19 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
                 issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-                oxpush2_request = json.dumps({'app': self.application_id,
+                oxpush2_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_state,
-                                   'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
+                                   'created': datetime.datetime.now().isoformat()}
+
+                self.addGeolocationData(session_attributes, oxpush2_request_dictionary)
+
+                oxpush2_request = json.dumps(oxpush2_request_dictionary, separators=(',',':'))
                 print "oxPush2. Prepare for step 1. Prepared oxpush2_request:", oxpush2_request
     
                 context.set("oxpush2_request", oxpush2_request)
-            elif self.twoStep:
-                context.set("display_register_action", True)
+#            elif self.twoStep:
+#                context.set("display_register_action", True)
 
             return True
         elif step == 2:
@@ -232,7 +252,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Prepare for step 2. Failed to determine user name"
                 return False
 
-            session_attributes = context.get("sessionAttributes")
             if session_attributes.containsKey("oxpush2_request"):
                 print "oxPush2. Prepare for step 2. Request was generated already"
                 return True
@@ -250,18 +269,22 @@ class PersonAuthentication(PersonAuthenticationType):
             print "oxPush2. Prepare for step 2. auth_method: '%s'" % auth_method
             
             issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
-            oxpush2_request = json.dumps({'username': user.getUserId(),
-                               'app': self.application_id,
+            oxpush2_request_dictionary = {'username': user.getUserId(),
+                               'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
                                'state': session_state,
-                                'created': datetime.datetime.now().isoformat()}, separators=(',',':'))
+                               'created': datetime.datetime.now().isoformat()}
+
+            self.addGeolocationData(session_attributes, oxpush2_request_dictionary)
+
+            oxpush2_request = json.dumps(oxpush2_request_dictionary, separators=(',',':'))
             print "oxPush2. Prepare for step 2. Prepared oxpush2_request:", oxpush2_request
 
             context.set("oxpush2_request", oxpush2_request)
 
             if auth_method in ['authenticate']:
-                self.sendPushNotification(user, oxpush2_request)
+                self.sendPushNotification(client_redirect_uri, user, oxpush2_request)
 
             return True
         else:
@@ -320,7 +343,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return find_user_by_uid
 
-    def validateSessionDeviceStatus(self, session_device_status, user_name = None):
+    def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
 
@@ -344,7 +367,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "oxPush2. Validate session device status. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
                 return False
 
-        if not StringHelper.equalsIgnoreCase(self.application_id, u2f_device.application):
+        if not StringHelper.equalsIgnoreCase(client_redirect_uri, u2f_device.application):
             print "oxPush2. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.application)
             return False
         
@@ -393,7 +416,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "oxPush2. Get session device status. session_device_status: '%s'" % (session_device_status)
         
         return session_device_status
-    
+
     def initPushNotificationService(self, configurationAttributes):
         print "oxPush2. Initialize notification services"
         if not configurationAttributes.containsKey("credentials_file"):
@@ -421,7 +444,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.pushAndroidService = None
         self.pushAppleService = None
         if android_creds["enabled"]:
-            self.pushAndroidService = SyncAndroidPushService(android_creds["api_key"])
+            self.pushAndroidService = Sender(android_creds["api_key"]) 
             print "oxPush2. Initialize notification services. Created Android notification service"
             
         if ios_creads["enabled"]:
@@ -435,14 +458,19 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Ignore exception. Password is not encrypted
                 print "oxPush2. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"
 
-            self.pushAppleService = SyncApplePushService(p12_file_path, p12_passowrd, ios_creads["production"])
+            apnsServiceBuilder =  APNS.newService().withCert(p12_file_path, p12_passowrd)
+            if ios_creads["production"]:
+                self.pushAppleService = apnsServiceBuilder.withProductionDestination().build()
+            else:
+                self.pushAppleService = apnsServiceBuilder.withSandboxDestination().build()
+
             print "oxPush2. Initialize notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
 
         return enabled
 
-    def sendPushNotification(self, user, oxpush2_request):
+    def sendPushNotification(self, client_redirect_uri, user, oxpush2_request):
         if not self.enabledPushNotifications:
             return
 
@@ -457,7 +485,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_inum = userService.getUserInum(user_name)
 
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, self.application_id, "oxId", "oxDeviceData")
+        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
                 device_data = u2f_device.getDeviceData()
@@ -478,12 +506,15 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
                         
                         title = "oxPush2"
-                        message = "oxPush2 login request to: %s" % self.application_id
+                        message = "oxPush2 login request to: %s" % client_redirect_uri
 
-                        additional_fields = HashMap()
-                        additional_fields.put("request", oxpush2_request)
+                        additional_fields = { "request" : oxpush2_request }
 
-                        send_notification_result = self.pushAppleService.sendPush(title, message, additional_fields, push_token)
+                        msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
+                        msgBuilder.category('ACTIONABLE').badge(0)
+                        msgBuilder.customFields(additional_fields)
+
+                        send_notification_result = self.pushAppleService.push(push_token, msgBuilder.build())
                         if debug:
                             print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
@@ -493,10 +524,80 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "oxPush2. Send push notification. Android push notification service is not enabled"
                     else:
                         send_notification = True
-                        send_notification_result= self.pushAndroidService.sendPush("oxPush2", oxpush2_request, push_token)
+
+                        title = "oxPush2"
+                        msgBuilder = Message.Builder().addData("message", oxpush2_request).addData("title", title).collapseKey("single");
+
+                        send_notification_result = self.pushAndroidService.send(msgBuilder.build(), push_token, 3)
                         if debug:
                             print "oxPush2. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
 
 
         print "oxPush2. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
+
+    def getClientRedirecUri(self, session_attributes):
+        if not session_attributes.containsKey("redirect_uri"):
+            return None
+
+        return session_attributes.get("redirect_uri")
+
+    def setRegistrationUri(self, context):
+        if self.registrationUri != None:
+            context.set("external_registration_uri", self.registrationUri)
+
+    def addGeolocationData(self, session_attributes, oxpush2_request_dictionary):
+        if session_attributes.containsKey("remote_ip"):
+            remote_ip = session_attributes.get("remote_ip")
+            if StringHelper.isNotEmpty(remote_ip):
+                print "oxPush2. Prepare for step 2. Adding req_ip and req_loc to oxpush2_request"
+                oxpush2_request_dictionary['req_ip'] = remote_ip
+
+                remote_loc_dic = self.determineGeolocationData(remote_ip)
+                if remote_loc_dic == None:
+                    print "oxPush2. Prepare for step 2. Failed to determine remote location by remote IP '%s'" % remote_ip
+
+                remote_loc = "%s, %s, %s" % ( remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'] )
+                remote_loc_encoded = urllib.quote(remote_loc)
+                oxpush2_request_dictionary['req_loc'] = remote_loc_encoded
+
+    def determineGeolocationData(self, remote_ip):
+        print "oxPush2. Determine remote location. remote_ip: '%s'" % remote_ip
+        httpService = HttpService.instance();
+
+        http_client = httpService.getHttpsClient();
+        http_client_params = http_client.getParams();
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
         
+        geolocation_service_url = "http://ip-api.com/json/%s?fields=49177" % remote_ip
+        geolocation_service_headers = { "Accept" : "application/json" }
+
+        try:
+            http_service_response = httpService.executeGet(http_client, geolocation_service_url,  geolocation_service_headers)
+            http_response = http_service_response.getHttpResponse()
+        except:
+            print "oxPush2. Determine remote location. Exception: ", sys.exc_info()[1]
+            return None
+
+        try:
+            if not httpService.isResponseStastusCodeOk(http_response):
+                print "oxPush2. Determine remote location. Get invalid response from validation server: ", str(http_response.getStatusLine().getStatusCode())
+                httpService.consume(http_response)
+                return None
+    
+            response_bytes = httpService.getResponseContent(http_response)
+            response_string = httpService.convertEntityToString(response_bytes)
+            httpService.consume(http_response)
+        finally:
+            http_service_response.closeConnection()
+
+        if response_string == None:
+            print "oxPush2. Determine remote location. Get empty response from location server"
+            return None
+        
+        response = json.loads(response_string)
+        
+        if not StringHelper.equalsIgnoreCase(response['status'], "success"):
+            print "oxPush2. Determine remote location. Get response with status: '%s'" % response['status']
+            return None
+
+        return response

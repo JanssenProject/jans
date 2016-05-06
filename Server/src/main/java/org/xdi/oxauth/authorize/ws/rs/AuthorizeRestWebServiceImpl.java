@@ -98,11 +98,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
-            String sessionState, String accessToken, String originHeaders,
+            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionState, sessionState, accessToken, HttpMethod.GET, originHeaders,
+                requestSessionState, sessionState, accessToken, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
                 httpRequest, httpResponse, securityContext);
     }
 
@@ -111,11 +111,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
-            String sessionState, String accessToken, String originHeaders,
+            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionState, sessionState, accessToken, HttpMethod.POST, originHeaders,
+                requestSessionState, sessionState, accessToken, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
                 httpRequest, httpResponse, securityContext);
     }
 
@@ -124,6 +124,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionState,
             String sessionState, String accessToken, String method, String originHeaders,
+            String codeChallenge, String codeChallengeMethod,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
@@ -136,7 +137,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 state, request, securityContext.isSecure(), requestSessionState, sessionState);
 
         log.debug("Attempting to request authorization: "
-                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}", acrValuesStr, amrValuesStr, originHeaders);
+                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}, codeChallenge = {5}, codeChallengeMethod = {6}",
+                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
 
         ResponseBuilder builder = Response.ok();
 
@@ -386,7 +388,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
                                     sessionUser.addPermission(clientId, true);
                                 }
-                                if (prompts.contains(Prompt.NONE) && Boolean.parseBoolean(client.getTrustedClient())) {
+                                if (prompts.contains(Prompt.NONE) && client.getTrustedClient()) {
                                     sessionUser.addPermission(clientId, true);
                                 }
 
@@ -450,6 +452,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
                                         authorizationGrant.setScopes(scopes);
+                                        authorizationGrant.setCodeChallenge(codeChallenge);
+                                        authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);

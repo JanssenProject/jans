@@ -7,8 +7,8 @@
     },
     "ios":{
         "apns":{
-            "enabled":true,
- 	    "p12_file_path":"/etc/certs/oxPush-NotificationCertificat.p12",
+            "enabled":false,
+            "p12_file_path":"/etc/certs/oxPush-NotificationCertificat.p12",
             "p12_password":"password",
             "production":false
         }

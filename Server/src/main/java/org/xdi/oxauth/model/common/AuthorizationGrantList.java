@@ -197,6 +197,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 }
                 result.setScopes(Util.splittedStringAsList(tokenLdap.getScope(), " "));
 
+                result.setCodeChallenge(tokenLdap.getCodeChallenge());
+                result.setCodeChallengeMethod(tokenLdap.getCodeChallengeMethod());
+
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {
                         result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(jwtRequest, client));

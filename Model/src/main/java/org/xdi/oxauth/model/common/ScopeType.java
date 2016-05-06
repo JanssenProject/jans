@@ -19,7 +19,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 public enum ScopeType implements LdapEnum {
 
     LDAP("ldap", "Ldap"),
-	DYNAMIC("dynamic", "Dynamic");
+	DYNAMIC("dynamic", "Dynamic"),
+    OPENID("openid", "Openid");
 
     private final String value;
 	private final String displayName;

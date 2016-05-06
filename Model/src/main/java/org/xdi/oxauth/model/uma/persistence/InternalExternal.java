@@ -18,7 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum InternalExternal implements LdapEnum {
 
-	INTERNAL("internal", "Internal"), EXTERNAL("external", "External"), EXTERNAL_AUTO("external_auto", "External auto");
+	INTERNAL("internal", "Internal"), EXTERNAL("external", "External"), EXTERNAL_AUTO("external_auto", "External auto"), UMA("uma", "Uma");
 
 	private String value;
 	private String displayName;

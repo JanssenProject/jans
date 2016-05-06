@@ -26,6 +26,7 @@ import com.unboundid.ldap.sdk.Filter;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
+ * @author Yuriy Movchan Date: 2016/04/26
  */
 @Scope(ScopeType.STATELESS)
 @Name("scopeService")
@@ -132,5 +133,32 @@ public class ScopeService {
         }
 
         return null;
+    }    
+    
+    /**
+     * Get scope by oxAuthClaims
+     *
+     * @param oxAuthClaim
+     * @return List of scope
+     */
+    public List<org.xdi.oxauth.model.common.Scope> getScopeByClaim(String claimDn) {
+        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
+        
+    	String scopesBaseDN = ConfigurationFactory.instance().getBaseDn().getScopes();
+        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
+
+        return scopes;
     }
+
+	public List<org.xdi.oxauth.model.common.Scope> getScopesByClaim(List<org.xdi.oxauth.model.common.Scope> scopes, String claimDn) {
+		List<org.xdi.oxauth.model.common.Scope> result = new ArrayList<org.xdi.oxauth.model.common.Scope>();
+		for (org.xdi.oxauth.model.common.Scope scope : scopes) {
+			List<String> claims = scope.getOxAuthClaims();
+			if ((claims != null) && claims.contains(claimDn)) {
+				result.add(scope);
+			}
+		}
+
+		return result;
+	}
 }

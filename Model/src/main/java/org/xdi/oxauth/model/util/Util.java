@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -134,7 +132,7 @@ public class Util {
         return null;
     }
 
-    public static boolean isNullOrEmpty(@Nullable String string) {
+    public static boolean isNullOrEmpty(String string) {
         return string == null || string.length() == 0;
     }
 
