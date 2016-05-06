@@ -1140,6 +1140,34 @@ class Setup(object):
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
 
+    def install_ox_base(self):
+        if self.installOxAuth or self.installOxTrust:
+            # Unpack oxauth.war to get bcprov-jdk16.jar
+            oxauthWar = 'oxauth.war'
+            distOxAuthPath = '%s/%s' % (self.tomcatWebAppFolder, oxauthWar)
+
+            tmpOxAuthDir = '%s/tmp_oxauth' % self.distFolder
+
+            self.logIt("Unpacking %s..." % oxauthWar)
+            self.removeDirs(tmpOxAuthDir)
+            self.createDirs(tmpOxAuthDir)
+
+            self.run([self.jarCommand,
+                      'xf',
+                      distOxAuthPath], tmpOxAuthDir)
+
+            # Prepare endorsed folder
+            endorsedFolder = "%s/endorsed" % self.tomcatHome             
+            self.createDirs(endorsedFolder)
+            
+            # Copy  files into endorsed
+            bcFilePath = '%s/WEB-INF/lib/bcprov-jdk16-1.46.jar' % tmpOxAuthDir
+
+            self.logIt("Copying files to %s..." % endorsedFolder)
+            self.copyFile(bcFilePath, endorsedFolder)
+
+            self.removeDirs(tmpOxAuthDir)
+
     def install_saml(self):
         if self.installSaml:
             # Put latest Saml templates
@@ -1959,6 +1987,7 @@ if __name__ == '__main__':
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.export_opendj_public_cert()
+            installObject.install_ox_base()
             installObject.install_saml()
             installObject.copy_output()
             installObject.setup_init_scripts()
