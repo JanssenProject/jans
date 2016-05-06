@@ -16,9 +16,7 @@ import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
-import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
@@ -36,8 +34,8 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
  * @author Yuriy Movchan Date: 2016/04/26
+ * @version 0.9 March 27, 2015
  */
 public class OpenIdConfiguration extends HttpServlet {
 
@@ -59,7 +57,7 @@ public class OpenIdConfiguration extends HttpServlet {
         PrintWriter out = response.getWriter();
         try {
             JSONObject jsonObj = new JSONObject();
-            
+
             ConfigurationFactory configurationFactory = ConfigurationFactory.instance();
             Configuration configuration = configurationFactory.getConfiguration();
 
@@ -227,22 +225,22 @@ public class OpenIdConfiguration extends HttpServlet {
 
             // Preload all scopes to avoid sending request to LDAP per claim 
             List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
-            
-			for (GluuAttribute gluuAttribute : gluuAttributes) {
-				if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
-					String claimName = gluuAttribute.getOxAuthClaimName();
-					if (StringUtils.isNotBlank(claimName)) {
-						List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService.getScopesByClaim(scopes, gluuAttribute.getDn());
-						for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
-							if (ScopeType.OPENID.equals(scope.getScopeType())) {
-								claimsSupported.put(claimName);
-								break;
-							}
-						}
-					}
-				}
-			}
-            
+
+            for (GluuAttribute gluuAttribute : gluuAttributes) {
+                if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
+                    String claimName = gluuAttribute.getOxAuthClaimName();
+                    if (StringUtils.isNotBlank(claimName)) {
+                        List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService.getScopesByClaim(scopes, gluuAttribute.getDn());
+                        for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
+                            if (ScopeType.OPENID.equals(scope.getScopeType())) {
+                                claimsSupported.put(claimName);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             if (claimsSupported.length() > 0) {
                 jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
             }
