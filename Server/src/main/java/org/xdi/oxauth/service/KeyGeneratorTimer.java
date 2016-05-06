@@ -21,7 +21,6 @@ import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -31,7 +30,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 4, 2016
+ * @version May 5, 2016
  */
 @Name("keyGeneratorTimer")
 @AutoCreate
@@ -105,7 +104,11 @@ public class KeyGeneratorTimer {
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
-        JSONObject jsonObject = generateJwks();
+        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
+                configurationFactory.getConfiguration().getKeyRegenerationInterval(),
+                configurationFactory.getConfiguration().getIdTokenLifetime(),
+                ConfigurationFactory.instance().getConfiguration(),
+                ConfigurationFactory.instance().getWebKeys());
 
         JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
         for (int i = 0; i < keys.length(); i++) {
@@ -137,53 +140,6 @@ public class KeyGeneratorTimer {
                 jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
             }
         }
-
-        return jsonObject;
-    }
-
-    private JSONObject generateJwks() throws Exception {
-        JSONArray keys = new JSONArray();
-
-        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        expirationTime.add(GregorianCalendar.HOUR, configurationFactory.getConfiguration().getKeyRegenerationInterval());
-        expirationTime.add(GregorianCalendar.SECOND, configurationFactory.getConfiguration().getIdTokenLifetime());
-
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                ConfigurationFactory.instance().getConfiguration(),
-                ConfigurationFactory.instance().getWebKeys());
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS384, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS512, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES256, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES384, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        try {
-            keys.put(cryptoProvider.generateKey(SignatureAlgorithm.ES512, expirationTime.getTimeInMillis()));
-        } catch (Exception ex) {
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JSON_WEB_KEY_SET, keys);
 
         return jsonObject;
     }
