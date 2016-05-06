@@ -6,14 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.Map;
-
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -21,6 +15,8 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
 import org.xdi.util.StringHelper;
+
+import java.util.Map;
 
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication

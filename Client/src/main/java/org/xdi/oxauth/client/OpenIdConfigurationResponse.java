@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.configuration.ConfigurationResponseClaim;
 
 import java.util.ArrayList;
 import java.util.HashMap;
