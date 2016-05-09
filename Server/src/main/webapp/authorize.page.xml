@@ -57,6 +57,10 @@
            value="#{authorizeAction.request}"/>
     <param name="request_uri"
            value="#{authorizeAction.requestUri}"/>
+    <param name="code_challenge"
+           value="#{authorizeAction.codeChallenge}"/>
+    <param name="code_challenge_method"
+           value="#{authorizeAction.codeChallengeMethod}"/>
 
     <!-- custom oxAuth parameters -->
     <param name="session_state"

@@ -60,7 +60,7 @@ public class AuthenticationService {
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             "scope", "response_type", "client_id", "redirect_uri", "state", "response_mode", "nonce", "display", "prompt", "max_age",
             "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_state", "request", "request_uri",
-            AuthorizeRequestParam.ORIGIN_HEADERS));
+            AuthorizeRequestParam.ORIGIN_HEADERS, AuthorizeRequestParam.CODE_CHALLENGE, AuthorizeRequestParam.CODE_CHALLENGE_METHOD));
 
     @Logger
     private Log log;
