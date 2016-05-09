@@ -14,9 +14,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.Configuration;

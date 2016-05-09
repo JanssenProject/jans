@@ -307,46 +307,6 @@
                     <doUpdate>false</doUpdate>
                 </configuration>
             </plugin>
-
-            <!--<plugin>-->
-                <!--<groupId>com.github.kongchen</groupId>-->
-                <!--<artifactId>swagger-maven-plugin</artifactId>-->
-                <!--<version>2.0</version>-->
-                <!--<configuration>-->
-                    <!--<apiSources>-->
-                        <!--<apiSource>-->
-                            <!--<locations>org.xdi.oxauth.token.ws.rs;org.xdi.oxauth.uma.ws.rs;-->
-                            <!--</locations>-->
-                            <!--<apiVersion>v1</apiVersion>-->
-                            <!--<basePath>http://gluu.org</basePath>-->
-                            <!--<outputTemplate>${basedir}/src/main/docs/mustache/markdown.mustache</outputTemplate>-->
-                            <!--<outputPath>${basedir}/generated/swagger.markdown</outputPath>-->
-                            <!--<swaggerDirectory>${basedir}/generated/apidocs</swaggerDirectory>-->
-                            <!--&lt;!&ndash;swaggerUIDocBasePath>http://www.example.com/restapi/doc</swaggerUIDocBasePath&ndash;&gt;-->
-                            <!--&lt;!&ndash;useOutputFlatStructure>false</useOutputFlatStructure&ndash;&gt;-->
-                            <!--<mustacheFileRoot>${basedir}/src/main/docs/mustache</mustacheFileRoot>-->
-                            <!--&lt;!&ndash;overridingModels>/swagger-overriding-models.json</overridingModels&ndash;&gt;-->
-                        <!--</apiSource>-->
-                    <!--</apiSources>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>compile</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<dependencies>-->
-                    <!--<dependency>-->
-                        <!--<groupId>javax.servlet</groupId>-->
-                        <!--<artifactId>servlet-api</artifactId>-->
-                        <!--<version>2.3</version>-->
-                        <!--<scope>runtime</scope>-->
-                    <!--</dependency>-->
-                <!--</dependencies>-->
-            <!--</plugin>-->
-
         </plugins>
     </build>
 
@@ -570,10 +530,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.jboss.resteasy</groupId>-->
-        <!--<artifactId>resteasy-jettison-provider</artifactId>-->
-        <!--</dependency>-->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
@@ -633,37 +589,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>el-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>jboss-embedded-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>hibernate-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>thirdparty-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>jboss-embedded</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -684,6 +609,18 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <profiles>
@@ -778,112 +715,6 @@
                     </plugins>
                 </pluginManagement>
             </build>
-        </profile>
-
-        <profile>
-            <id>phonefactor</id>
-            <activation>
-                <property>
-                    <name>phonefactor-enabled</name>
-                </property>
-            </activation>
-            <properties>
-            </properties>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-            <repositories>
-                <repository>
-                    <id>phonefactor-local</id>
-                    <url>file://${project.basedir}/integrations/phonefactor/repository</url>
-                </repository>
-            </repositories>
-            <dependencies>
-                <dependency>
-                    <groupId>com.phonefactor</groupId>
-                    <artifactId>PhoneFactorSDK</artifactId>
-                    <version>2.13</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>toopher</id>
-            <activation>
-                <property>
-                    <name>toopher-enabled</name>
-                </property>
-            </activation>
-            <properties>
-            </properties>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-            <repositories>
-                <repository>
-                    <id>toopher-local</id>
-                    <url>file://${project.basedir}/integrations/toopher/repository</url>
-                </repository>
-            </repositories>
-            <dependencies>
-                <dependency>
-                    <groupId>com.toopher</groupId>
-                    <artifactId>ToopherSDK</artifactId>
-                    <version>1.0.0</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>oauth.signpost</groupId>
-                    <artifactId>signpost-commonshttp4</artifactId>
-                    <version>1.2.1.2</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>twilio</id>
-            <activation>
-                <property>
-                    <name>!twilio-disabled</name>
-                </property>
-            </activation>
-            <properties>
-            </properties>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>com.twilio.sdk</groupId>
-                    <artifactId>twilio-java-sdk</artifactId>
-                    <version>3.4.5</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <profile>
-            <id>oxpush</id>
-            <activation>
-                <property>
-                    <name>oxpush-enabled</name>
-                </property>
-            </activation>
-            <properties>
-            </properties>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.xdi</groupId>
-                    <artifactId>oxpush-java-sdk</artifactId>
-                    <version>0.0.1</version>
-                </dependency>
-            </dependencies>
         </profile>
 
         <profile>

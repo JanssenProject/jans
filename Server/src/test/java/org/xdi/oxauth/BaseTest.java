@@ -8,7 +8,7 @@ package org.xdi.oxauth;
 
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.SeamTest;
-import org.testng.Assert;
+import org.junit.Assert;
 
 /**
  * @author Javier Rojas Date: 10.10.2011
@@ -38,7 +38,7 @@ public abstract class BaseTest extends SeamTest {
     }
 
     public static void fails(Throwable e) {
-        Assert.fail(e.getMessage(), e);
+        Assert.assertNull(e.getMessage(), e);
     }
 
     public static void output(String p_msg) {

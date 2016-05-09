@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;

@@ -352,28 +352,8 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.el</groupId>
             <artifactId>el-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>jboss-embedded-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>hibernate-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>thirdparty-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.embedded</groupId>
-            <artifactId>jboss-embedded</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

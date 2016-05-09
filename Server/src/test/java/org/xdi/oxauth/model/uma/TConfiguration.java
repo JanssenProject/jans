@@ -14,7 +14,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import java.io.IOException;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
