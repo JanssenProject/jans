@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.testng.annotations.Test;
+import org.junit.Test;
 import org.xdi.oxauth.model.config.CustomProperty;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 

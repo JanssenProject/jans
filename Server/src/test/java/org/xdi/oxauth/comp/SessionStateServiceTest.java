@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.comp;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -15,7 +15,7 @@ import org.xdi.oxauth.service.SessionStateService;
 
 import java.util.*;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

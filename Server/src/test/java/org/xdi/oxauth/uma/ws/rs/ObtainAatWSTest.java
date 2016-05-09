@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;

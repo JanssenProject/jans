@@ -7,8 +7,8 @@
 package org.xdi.oxauth.comp;
 
 import org.apache.commons.lang.StringUtils;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.idgen.ws.rs.InumGenerator;
 import org.xdi.oxauth.model.common.IdType;

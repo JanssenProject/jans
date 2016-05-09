@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 import javax.ws.rs.core.MediaType;
@@ -20,8 +20,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.Test;
 import org.xdi.oxauth.BaseTest;
 /**
  * Functional tests for JWK Web Services (embedded)

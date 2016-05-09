@@ -9,8 +9,8 @@ package org.xdi.oxauth.ws.rs;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.common.Id;
@@ -26,7 +26,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import java.io.IOException;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
