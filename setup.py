@@ -330,14 +330,14 @@ class Setup(object):
                 + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
                 + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
                 + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-                + 'Install oxAuth'.ljust(30) + `self.installOxAuth`.rjust(35) + "\n" \
-                + 'Install oxTrust'.ljust(30) + `self.installOxAuth`.rjust(35) + "\n" \
-                + 'Install LDAP'.ljust(30) + `self.installLdap`.rjust(35) + "\n" \
-                + 'Install Apache 2 web server'.ljust(30) + `self.installHttpd`.rjust(35) + "\n" \
-                + 'Install Shibboleth 2 SAML IDP'.ljust(30) + `self.installSaml`.rjust(35) + "\n" \
-                + 'Install Asimba SAML Proxy'.ljust(30) + `self.installAsimba`.rjust(35) + "\n" \
-                + 'Install CAS'.ljust(30) + `self.installCas`.rjust(35) + "\n" \
-                + 'Install oxAuth RP'.ljust(30) + `self.installOxAuthRP`.rjust(35) + "\n"
+                + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
+                + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
+                + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
+                + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
+                + 'Install Shibboleth 2 SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
+                + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
+                + 'Install CAS'.ljust(30) + repr(self.installCas).rjust(35) + "\n" \
+                + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -582,12 +582,10 @@ class Setup(object):
                 output_fn = os.path.join(self.outputFolder, fn)
                 try:
                     self.logIt("Copying %s to %s" % (output_fn, dest_fn))
-
                     dest_dir = os.path.dirname(dest_fn)
                     if not os.path.exists(dest_dir):
                         self.logIt("Created destination folder %s" % dest_dir)
-                        os.makedirs(dest_dir);
-
+                        os.makedirs(dest_dir)
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
@@ -619,7 +617,6 @@ class Setup(object):
             self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/" % self.tomcatHome)
 
             self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
-            
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
         if self.installOxAuth:
@@ -651,7 +648,7 @@ class Setup(object):
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         try:
             distro_info = self.file_get_contents('/etc/redhat-release')
-        except IOError as e:
+        except IOError:
             distro_info = self.file_get_contents('/etc/os-release')
 
         if 'CentOS' in distro_info:
@@ -1342,6 +1339,10 @@ class Setup(object):
             for prop in properties_list:
                 try:
                     self.__dict__[prop] = p[prop]
+                    if p[prop] == 'True':
+                        self.__dict__[prop] = True
+                    elif p[prop] == 'False':
+                        self.__dict__[prop] = False
                 except:
                     self.logIt("Error loading property %s" % prop)
                     self.logIt(traceback.format_exc(), True)
@@ -1655,11 +1656,14 @@ class Setup(object):
 
     def save_properties(self):
         self.logIt('Saving properties to %s' % self.savedProperties)
-        def getString(object):
-            if type(object) == type(""):
+
+        def getString(value):
+            if isinstance(value, ""):
                 return object.strip()
-            else:
-                return ''
+            try:
+                return str(value)
+            except:
+                return ""
         try:
             p = Properties.Properties()
             keys = self.__dict__.keys()
@@ -1842,7 +1846,7 @@ def print_help():
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:fhNn:suw")
+        opts, args = getopt.getopt(argv, "acd:f:hNnsuwr")
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -1874,6 +1878,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installHTTPD'] = False
         elif opt == "-s":
             setupOptions['installSaml'] = True
+        elif opt == "-u":
+            pass  # TODO implement this option or remove it from help
         elif opt == "-w":
             setupOptions['downloadWars'] = True
         elif opt == '-r':
