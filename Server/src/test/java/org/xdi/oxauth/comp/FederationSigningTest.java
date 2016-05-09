@@ -8,7 +8,7 @@ package org.xdi.oxauth.comp;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.testng.annotations.Test;
+import org.junit.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
@@ -29,7 +29,7 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 /**
  * https://localhost:8443/oxauth/seam/resource/restv1/oxauth/jwk

@@ -7,9 +7,9 @@
 package org.xdi.oxauth.comp;
 
 import org.jboss.seam.contexts.Contexts;
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.runners.Parameterized;
+import org.junit.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
@@ -34,7 +34,7 @@ public class FederationIntervalCheckerTest extends BaseComponentTest {
     private FederationTrust m_invalidFederationUrlTrust;
     private FederationTrust m_invalidRedirectUrlTrust;
 
-    @Parameters({"redirectUri", "serverUri"})
+    @Parameterized({"redirectUri", "serverUri"})
     public FederationIntervalCheckerTest(String p_redirectUri, String serverUri) {
         m_redirectUri = p_redirectUri;
         this.serverUri = serverUri;

@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.dev;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.error.ErrorMessage;

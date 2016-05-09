@@ -12,7 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.testng.Assert;
+import org.junit.Assert;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
