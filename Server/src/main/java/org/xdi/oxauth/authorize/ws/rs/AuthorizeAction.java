@@ -121,6 +121,8 @@ public class AuthorizeAction {
     private String amrValues;
     private String request;
     private String requestUri;
+    private String codeChallenge;
+    private String codeChallengeMethod;
 
     // custom oxAuth parameters
     private String sessionState;
@@ -692,5 +694,21 @@ public class AuthorizeAction {
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
 
         FacesManager.instance().redirectToExternalURL(sb.toString());
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 }
