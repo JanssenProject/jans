@@ -11,8 +11,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -22,7 +22,7 @@ import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
