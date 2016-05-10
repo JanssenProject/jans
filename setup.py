@@ -1658,8 +1658,8 @@ class Setup(object):
         self.logIt('Saving properties to %s' % self.savedProperties)
 
         def getString(value):
-            if isinstance(value, ""):
-                return object.strip()
+            if isinstance(value, str):
+                return value.strip()
             try:
                 return str(value)
             except:
