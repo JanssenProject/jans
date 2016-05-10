@@ -13,7 +13,7 @@ Java web application providing REST API's for a PKCS #11 interface.
     - signatureAlgorithm [string]
     - expirationTime [long]
 
-#### Sample Code
+#### Sample Code - RS256
 
 ```java
 GenerateKeyRequest request = new GenerateKeyRequest();
@@ -27,10 +27,10 @@ GenerateKeyResponse response = client.exec();
 
 assertEquals(response.getStatus(), HttpStatus.SC_OK);
 assertNotNull(response.getKeyId());
-String alias = response.getKeyId();
+String rs256Alias = response.getKeyId();
 ```
 
-#### Sample Request
+#### Sample Request - RS256
 
 ```
 POST /oxeleven/rest/oxeleven/generateKey HTTP/1.1
@@ -41,7 +41,7 @@ Content-Type: application/x-www-form-urlencoded
 signatureAlgorithm=RS256&expirationTime=1462916947752
 ```
 
-#### Sample Response
+#### Sample Response - RS256
 
 ```
 {
@@ -49,6 +49,47 @@ signatureAlgorithm=RS256&expirationTime=1462916947752
     "kid": "57a6c4fd-f65e-4baa-8a5d-f34812265383",
     "use": "sig",
     "alg": "RS256",
+    "exp": 1462916947752
+}
+```
+
+#### Sample Code - ES256
+
+```java
+GenerateKeyRequest request = new GenerateKeyRequest();
+request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
+request.setExpirationTime(expirationTime);
+
+GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
+client.setRequest(request);
+
+GenerateKeyResponse response = client.exec();
+
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertNotNull(response.getKeyId());
+String es256Alias = response.getKeyId();
+```
+
+#### Sample Request - ES256
+
+```
+POST /oxeleven/rest/oxeleven/generateKey HTTP/1.1
+Host: ce.gluu.info:8443
+Cache-Control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+signatureAlgorithm=ES256&expirationTime=1462916947752
+```
+
+#### Sample Response - ES256
+
+```
+{
+    "kty": "EC",
+    "kid": "f6ade591-4230-4114-8147-316dde969395",
+    "use": "sig",
+    "alg": "ES256",
+    "crv": "P-256",
     "exp": 1462916947752
 }
 ```
@@ -68,19 +109,124 @@ signatureAlgorithm=RS256&expirationTime=1462916947752
 }
 ```
 
-#### Sample Code
+#### Sample Code - HS256
 
 ```java
+SignRequest request = new SignRequest();
+request.getSignRequestParam().setSigningInput(signingInput);
+request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS256);
+request.getSignRequestParam().setSharedSecret(sharedSecret);
+
+SignClient client = new SignClient(signEndpoint);
+client.setRequest(request);
+
+SignResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertNotNull(response.getSignature());
+String hs256Signature = response.getSignature();
 ```
 
-#### Sample Request
+#### Sample Request - HS256
 
 ```
+POST /oxeleven/rest/oxeleven/sign HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "signingInput": "Signing Input",
+    "signatureAlgorithm": "HS256",
+    "sharedSecret": "secret"
+}
 ```
 
-#### Sample Response
+#### Sample Response - HS256
 
 ```
+{
+    "sig": "CZag3MkkRmJXCnDbE43k6gRit_7ZIPzzpBMHXiNNHBg"
+}
+```
+
+#### Sample Code - RS256
+
+```java
+SignRequest request = new SignRequest();
+request.getSignRequestParam().setSigningInput(signingInput);
+request.getSignRequestParam().setAlias(rs256Alias);
+request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
+
+SignClient client = new SignClient(signEndpoint);
+client.setRequest(request);
+
+SignResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertNotNull(response.getSignature());
+String rs256Signature = response.getSignature();
+```
+
+#### Sample Request - RS256
+
+```
+POST /oxeleven/rest/oxeleven/sign HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "signingInput": "Signing Input",
+    "signatureAlgorithm": "RS256",
+    "alias": "57a6c4fd-f65e-4baa-8a5d-f34812265383"
+}
+```
+
+#### Sample Response - RS256
+
+```
+{
+    "sig": "TharYC_SVPb_PDWyLM2d1_XsAAiePEMom0Wja8R9aWZpP2mRrzMJKuLUcOG7QE7JxnVgQmGGnEV8QPKguGDca5S2EU9NiodFBzg6N4JEFC5FvrpDyZPRhtQP3OKshGWyLKa37KddUWGVRTwfluUhirMRgFmTMYjv6Wuhj_Dx7DoBvMY5KbEkIcBm1tqvqT2U02RNo8ts0PSW3z3hkdygCAcwqmzb0ICBxZ6aCePmVtSXaicEX0Z8FuZY0t4b-PjkuCIUIPLdb5043HFdGX1dwErEi3Y1j-osALnamS8LCqvogjMxbx_MJt6QaUkW952JT0Tk1Xvc_J81ZekzvMpptw"
+}
+```
+
+#### Sample Code - ES256
+
+```java
+SignRequest request = new SignRequest();
+request.getSignRequestParam().setSigningInput(signingInput);
+request.getSignRequestParam().setAlias(es256Alias);
+request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
+
+SignClient client = new SignClient(signEndpoint);
+client.setRequest(request);
+
+SignResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertNotNull(response.getSignature());
+String es256Signature = response.getSignature();
+```
+
+#### Sample Request - ES256
+
+```
+POST /oxeleven/rest/oxeleven/sign HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "signingInput": "Signing Input",
+    "signatureAlgorithm": "ES256",
+    "alias": "f6ade591-4230-4114-8147-316dde969395"
+}
+```
+
+#### Sample Response - ES256
+
+```
+{
+    "sig": "MEUCIQCe-t-b4ba7OaIBuNKHCCW2GIKPzjTZKCdBAP4EEmVJAQIgXHIW3c9_Ax2DvUHu_tJJzV9LUeYH5uw40m-h2qy-jgM"
+}
 ```
 
 ### /verifySignature
