@@ -1,5 +1,15 @@
 # oxEleven
 
+Java web application providing REST API's for a PKCS #11 interface.
+
+## Operations
+
+...
+
+## Supported Algorithms
+
+...
+
 ## Installation
 
   1. Install [SoftHSM version 2](https://github.com/opendnssec/SoftHSMv2)
