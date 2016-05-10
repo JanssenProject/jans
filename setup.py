@@ -1660,9 +1660,9 @@ class Setup(object):
         def getString(value):
             if isinstance(value, str):
                 return value.strip()
-            try:
+            elif isinstance(value, bool):
                 return str(value)
-            except:
+            else:
                 return ""
         try:
             p = Properties.Properties()
