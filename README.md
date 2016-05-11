@@ -548,19 +548,70 @@ Cache-Control: no-cache
 - **Data Params**
     - kid [string]
 
-#### Sample Code
+#### Sample Code - RS256
 
 ```java
+DeleteKeyRequest request = new DeleteKeyRequest();
+request.setAlias(rs256Alias);
+
+DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
+client.setRequest(request);
+
+DeleteKeyResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertTrue(response.isDeleted());
 ```
 
-#### Sample Request
+#### Sample Request - RS256
 
 ```
+POST /oxeleven/rest/oxeleven/deleteKey HTTP/1.1
+Host: ce.gluu.info:8443
+Cache-Control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+kid=57a6c4fd-f65e-4baa-8a5d-f34812265383
 ```
 
-#### Sample Response
+#### Sample Response - RS256
 
 ```
+{
+    "deleted": true
+}
+```
+
+#### Sample Code - ES256
+
+```java
+DeleteKeyRequest request = new DeleteKeyRequest();
+request.setAlias(es256Alias);
+
+DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
+client.setRequest(request);
+
+DeleteKeyResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertTrue(response.isDeleted());
+```
+
+#### Sample Request - ES256
+
+```
+POST /oxeleven/rest/oxeleven/deleteKey HTTP/1.1
+Host: ce.gluu.info:8443
+Cache-Control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+kid=f6ade591-4230-4114-8147-316dde969395
+```
+
+#### Sample Response - ES256
+
+```
+{
+    "deleted": true
+}
 ```
 
 ###/jwks
@@ -590,30 +641,149 @@ Cache-Control: no-cache
 #### Sample Code
 
 ```java
+KeyRequestParam k1 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS256, rs256Alias);
+KeyRequestParam k2 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS384, rs384Alias);
+KeyRequestParam k3 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS512, rs512Alias);
+KeyRequestParam k4 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES256, "P-256", es256Alias);
+KeyRequestParam k5 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES384, "P-384", es384Alias);
+
+JwksRequestParam jwksRequestParam = new JwksRequestParam();
+jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5));
+
+JwksRequest request = new JwksRequest();
+request.setJwksRequestParam(jwksRequestParam);
+
+JwksClient client = new JwksClient(jwksEndpoint);
+client.setRequest(request);
+
+JwksResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertNotNull(response.getJwksRequestParam());
+assertNotNull(response.getJwksRequestParam().getKeyRequestParams());
 ```
 
 #### Sample Request
 
 ```
+POST /oxeleven/rest/oxeleven/jwks HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "keyRequestParams": [
+        {
+            "alg": "RS256",
+            "kid": "425b3e3e-8514-45b9-a45d-426170e7d1f7",
+            "use": "sig",
+            "kty": "RSA"
+        },
+        {
+            "alg": "RS384",
+            "kid": "95a93e98-e39e-4f5e-929b-4cfd6c6ea04b",
+            "use": "sig",
+            "kty": "RSA"
+        },
+        {
+            "alg": "RS512",
+            "kid": "0825283d-973a-44c0-adc5-01e62ea89d0c",
+            "use": "sig",
+            "kty": "RSA"
+        },
+        {
+            "alg": "ES256",
+            "kid": "ddf87471-9171-4465-85d8-e91530906a5d",
+            "use": "sig",
+            "kty": "EC",
+            "crv": "P-256"
+        },
+        {
+            "alg": "ES384",
+            "kid": "1b4b1179-f04e-4750-a06d-13ea265d4b65",
+            "use": "sig",
+            "kty": "EC",
+            "crv": "P-384"
+        }
+    ]
+}
 ```
 
 #### Sample Response
 
 ```
+{
+    "keyRequestParams": [
+        {
+            "alg": "RS256",
+            "kid": "425b3e3e-8514-45b9-a45d-426170e7d1f7",
+            "use": "sig",
+            "kty": "RSA",
+            "n": "yr7Nc2VhSCd55lEpBWy-DVER8fhshoa17qLf4CuQYvNzOv05yVuLKVN9tcOE7nrBaY9QEgzaNvtyTUJD8y_tOfPGLH5raU3L-kKMfySEPs2hDt2iIYV2JQAhrEuWvHVJDlLMhoL-9fj5t-ur0mrygo6VbLY8f89spaW1HC73nU8B8mFdDTM_aR8OtZgDZ7mEuNy10TTu74Vm4nOCa1f17VRDOVuexgEADrmuKWmegxSoVNlTFIj7v2jZgvhW4GxHYJ5KdS_O1-lNXOMXjJ--_domZfoNqpX6QcQdAow9lgnr9g5vdYuZxf8fYe6qukapchNysschXBVDpuHVnGZo_Q",
+            "e": "AQAB",
+            "crv": null,
+            "x": null,
+            "y": null
+        },
+        {
+            "alg": "RS384",
+            "kid": "95a93e98-e39e-4f5e-929b-4cfd6c6ea04b",
+            "use": "sig",
+            "kty": "RSA",
+            "n": "8eE0A3ouRZa4nr7T1XXCrdKWkgK8U5SnS1r7TG6lwP7JJm0juNQp6FQqZ1cP6np2T3rj4jr4K_d42pRQWa5EE4EnH1LOQ5_PrOFGs05XdW_aZwRz8scefso7Is0R_TjlSf09flr6C7UoW_uUZgEPoLaYn8mJJLg2rjleAipt-LsgOh0SOZ2Qv6K6RvU0YiukZdpiKKp7oxLmxMNuLDYwGTbvFIiy2o_bDYlf1iIWGDLBl_0Osrqx7w8Z6PTx_zp8GBsqaz25O1tyCqTnKLLxeyS0lDzPxqKjReKv_MsZAzmMfqLYc6EgfcKKgOdPTBfDSbsd_I6E4qd_Bb6mAlwKVQ",
+            "e": "AQAB",
+            "crv": null,
+            "x": null,
+            "y": null
+        },
+        {
+            "alg": "RS512",
+            "kid": "0825283d-973a-44c0-adc5-01e62ea89d0c",
+            "use": "sig",
+            "kty": "RSA",
+            "n": "qSvqlMAFCHbmHG1cPZsW3gIosKtk7U0zy_PJPdgfPEQFQ-hrIWIMsA7ECKUIUSPg_dbcEMlxOUD-WplG9jmafjU_eiWoObZmThQRYAODQXhXyVNAoE-o7sLPKxJIc4TXzemL4ygVA3NcCAYeXqbhwblcogfql9AGNYnKitA1U8qyla9SBESxqduwUsTy7nFU6X31FKkpcMMAIdkacH-Va3JiTl99K8A52ZwXYeUzzAPzsnlVVb9xKhhYcVIOFnu0jnmVAfMDlI8RdMeriuHKGVUZUxy3iwBfuHYZJURljLPgp4SwLSsr3jwsH6qHgWo5FPcR8AWHh8xrulBFZ8OKQQ",
+            "e": "AQAB",
+            "crv": null,
+            "x": null,
+            "y": null
+        },
+        {
+            "alg": "ES256",
+            "kid": "ddf87471-9171-4465-85d8-e91530906a5d",
+            "use": "sig",
+            "kty": "EC",
+            "n": null,
+            "e": null,
+            "crv": "P-256",
+            "x": "BWYJuJvjR_xXlh2P6EccCK9vOx-xqcCWaZhTGAFRW5Q",
+            "y": "4X7p94uxJqOCi8GgQNuSAE91bWslTOsmMTJNHQsu5j4"
+        },
+        {
+            "alg": "ES384",
+            "kid": "1b4b1179-f04e-4750-a06d-13ea265d4b65",
+            "use": "sig",
+            "kty": "EC",
+            "n": null,
+            "e": null,
+            "crv": "P-384",
+            "x": "vaQ77h84F8Qj18xFt9p9Dzur2yL-3NsEgoyzredAm3A9jq3aP5xljYrzwd5Im3Ca",
+            "y": "FTFRTXi0Am56ma9G1JAVjwHbCdtUvNesFGZ44c73T-HiKuz3Ww41LRg3--8Aoc2w"
+        }
+    ]
+}
 ```
 
 ## Supported Algorithms
 
-none
-HS256
-HS384
-HS512
-RS256
-RS384
-RS512
-ES256
-ES384
-ES512
+- none
+- HS256
+- HS384
+- HS512
+- RS256
+- RS384
+- RS512
+- ES256
+- ES384
+- ES512 (Currently not supported by SoftHSMv2)
 
 ## Installation
 
