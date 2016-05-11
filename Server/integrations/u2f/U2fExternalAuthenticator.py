@@ -8,6 +8,7 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import SessionStateService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
@@ -136,6 +137,11 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "U2F. Prepare for step 2"
 
+            session_state = SessionStateService.instance().getSessionStateFromCookie()
+            if StringHelper.isEmpty(session_state):
+                print "U2F. Prepare for step 2. Failed to determine session_state"
+                return False
+
             credentials = Identity.instance().getCredentials()
             user = credentials.getUser()
 
@@ -158,7 +164,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
-                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), u2f_application_id)
+                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_state)
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
@@ -166,7 +172,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "U2F. Prepare for step 2. Call FIDO U2F in order to start registration workflow"
             registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
-            registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id)
+            registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_state)
 
             context.set("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
             context.set("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
