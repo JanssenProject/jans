@@ -37,6 +37,7 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.fido.u2f.AuthenticationService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
+import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -70,9 +71,13 @@ public class U2fAuthenticationWS {
 	@In
 	private UserSessionStateService userSessionStateService;
 
+	@In
+	private ValidationService u2fValidationService;
+
 	@GET
 	@Produces({ "application/json" })
 	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
 			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
 
@@ -82,15 +87,20 @@ public class U2fAuthenticationWS {
 
 			String foundUserInum = null;
 
-			boolean oneStep = StringHelper.isEmpty(userName);
-			if (oneStep) {
+			boolean twoStep = StringHelper.isNotEmpty(userName);
+			if (twoStep) {
+				boolean valid = u2fValidationService.isValidSessionState(userName, sessionState);
+				if (!valid) {
+					throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
+				}
+
+				foundUserInum = userService.getUserInum(userName);
+			} else {
 				// Convert to non padding URL base64 string
 				String keyHandleWithoutPading = Base64Util.base64urlencode(Base64Util.base64urldecode(keyHandle));
 
 				// In one step we expects empty username and not empty keyhandle
 				foundUserInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
-			} else {
-				foundUserInum = userService.getUserInum(userName);
 			}
 
 			if (StringHelper.isEmpty(foundUserInum)) {
@@ -123,7 +133,7 @@ public class U2fAuthenticationWS {
 
 	@POST
 	@Produces({ "application/json" })
-	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("keyhandle") String keyHandle, @FormParam("tokenResponse") String authenticateResponseString) {
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
 			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
@@ -149,7 +159,6 @@ public class U2fAuthenticationWS {
 				log.debug("There is session state. Setting session state attributes");
 
 				boolean oneStep = StringHelper.isEmpty(userName);
-				
 				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistrationResult, false, oneStep);
 			}
 
