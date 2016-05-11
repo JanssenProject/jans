@@ -1363,7 +1363,7 @@ class Setup(object):
         return None
 
     def configureOsPatches(self):
-        if self.os_type in ['debian']:
+        if self.os_type in ['debian', 'ubuntu']:
             self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
 
     def makeFolders(self):
