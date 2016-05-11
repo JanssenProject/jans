@@ -238,6 +238,14 @@ def genProperties():
     props['scim_rp_client_id'] = getProp('scim_rp_client_id')
     props['version'] = getProp('githubBranchName').split('_')[-1]
 
+    # installed optional components
+    # props['installSaml'] =
+    props['installAsimba'] = os.path.isfile('/opt/tomcat/webapps/asmiba.war')
+    props['installCas'] = os.path.isfile('/opt/tomcat/webapps/cas.war')
+    props['installOxAuthRP'] = os.path.isfile(
+        '/opt/tomcat/webapps/oxauth-rp.war'
+    )
+
     f = open(propertiesFn, 'a')
     for key in props.keys():
         f.write("%s=%s\n" % (key, props[key]))
