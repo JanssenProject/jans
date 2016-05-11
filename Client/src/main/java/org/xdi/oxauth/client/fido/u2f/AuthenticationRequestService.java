@@ -24,7 +24,7 @@ public interface AuthenticationRequestService {
 
 	@GET
 	@Produces({ "application/json" })
-	public AuthenticateRequestMessage startAuthentication(@QueryParam("username") String userName, @QueryParam("application") String appId);
+	public AuthenticateRequestMessage startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState);
 
 	@POST
 	@Produces({ "application/json" })
