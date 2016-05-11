@@ -19,6 +19,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -28,10 +29,12 @@ import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
+import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
+import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
@@ -63,11 +66,18 @@ public class U2fRegistrationWS {
 	private DeviceRegistrationService deviceRegistrationService;
 
 	@In
+	private SessionStateService sessionStateService;
+
+	@In
 	private UserSessionStateService userSessionStateService;
+
+	@In
+	private ValidationService u2fValidationService;
 
 	@GET
 	@Produces({ "application/json" })
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
 			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
 
@@ -75,6 +85,11 @@ public class U2fRegistrationWS {
 
 			boolean twoStep = StringHelper.isNotEmpty(userName);
 			if (twoStep) {
+				boolean valid = u2fValidationService.isValidSessionState(userName, sessionState);
+				if (!valid) {
+					throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
+				}
+
 				userInum = userService.getUserInum(userName);
 				if (StringHelper.isEmpty(userInum)) {
 					throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
@@ -84,8 +99,7 @@ public class U2fRegistrationWS {
 			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userInum);
 			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, userInum, sessionState);
 
-			// convert manually to avoid possible conflict between resteasy
-			// providers, e.g. jettison, jackson
+			// Convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
 			final String entity = ServerUtil.asJson(registerRequestMessage);
 
 			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
@@ -118,22 +132,22 @@ public class U2fRegistrationWS {
 			u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
 			String foundUserInum = registerRequestMessageLdap.getUserInum();
-			boolean oneStep = StringHelper.isEmpty(foundUserInum);
 
 			RegisterRequestMessage registerRequestMessage = registerRequestMessageLdap.getRegisterRequestMessage();
 			DeviceRegistrationResult deviceRegistrationResult = u2fRegistrationService.finishRegistration(registerRequestMessage, registerResponse, foundUserInum);
-			
+
 			// If sessionState is not empty update session
 			sessionState = registerRequestMessageLdap.getSessionState();
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
+
+				boolean oneStep = StringHelper.isEmpty(foundUserInum);
 				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistrationResult, true, oneStep);
 			}
 
 			RegisterStatus registerStatus = new RegisterStatus(Constants.RESULT_SUCCESS, requestId);
 
-			// convert manually to avoid possible conflict between resteasy
-			// providers, e.g. jettison, jackson
+			// Convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
 			final String entity = ServerUtil.asJson(registerStatus);
 
 			return Response.status(Response.Status.OK).entity(entity).cacheControl(ServerUtil.cacheControl(true)).build();
