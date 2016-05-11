@@ -240,8 +240,8 @@ Cache-Control: no-cache
     "signingInput": [string],
     "signature": [string],
     "alias": [string],
-    "jwksRequestParam": [
-        {
+    "jwksRequestParam": { 
+        "keyRequestParams": [{
             "alg": [string],
             "kid": [string],
             "use": [string],
@@ -251,8 +251,8 @@ Cache-Control: no-cache
             "crv": [string],
             "x": [string],
             "y": [string]
-        }
-    ],
+        }],
+    },
     "sharedSecret": [string],
     "signatureAlgorithm": [string]
 }
@@ -341,6 +341,13 @@ Cache-Control: no-cache
 #### Sample Code - RS256 JWKs
 
 ```java
+String alias = "RS256SIG";
+JwksRequestParam jwksRequestParam = new JwksRequestParam();
+KeyRequestParam keyRequestParam = new KeyRequestParam("RSA", "sig", "RS256", alias);
+keyRequestParam.setN("AJpGcIVu7fmQJLHXeAClhXaJD7SvuABjYiPcT9IbKFWGWj51GgD-CxtyrQGXT0ctGEEsXOzMZM40q-V7GR-5qkJ_OalVTTc_EeKAHao45bZPsPHLxvusNfrfpyhc6JjF2TQhoOqxbgMgQ9L6W9q9fSjgzx-tPlD0d3X0GZOEQ_NYGstZWRRBwHgsxA2IRYtwSH-v76yPpxF9poLIWdnBKtKfSr6UY7p1BrLmMm0DdMhjQLn6j4S_eB-p2WyBwObvsLqO6FdClpZFtGr82Km2uinpHvZ6KJ_MUEW1sijPPI3rIGbaUbLtQJwX5GVynAP5qU2qRVkcsrKt-GeNoz6QNLM");
+keyRequestParam.setE("AQAB");
+jwksRequestParam.setKeyRequestParams(Arrays.asList(keyRequestParam));
+        
 VerifySignatureRequest request = new VerifySignatureRequest();
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(signature);
@@ -431,34 +438,106 @@ Cache-Control: no-cache
 }
 ```
 
-#### Sample Code - ES256
-
-```java
-```
-
-#### Sample Request - ES256
-
-```
-```
-
-#### Sample Response - ES256
-
-```
-```
-
 #### Sample Code - ES256 JWKs
 
 ```java
+String alias = "ES256SIG";
+JwksRequestParam jwksRequestParam = new JwksRequestParam();
+KeyRequestParam keyRequestParam = new KeyRequestParam("EC", "sig", "ES256", alias);
+keyRequestParam.setCrv("P-256");
+keyRequestParam.setX("QDpwgxzGm0XdD-3Rgk62wiUnayJDS5iV7nLBwNEX4SI");
+keyRequestParam.setY("AJ3IvktOcoICgdFPAvBM44glxcqoHzqyEmj60eATGf5e");
+jwksRequestParam.setKeyRequestParams(Arrays.asList(keyRequestParam));
+
+VerifySignatureRequest request = new VerifySignatureRequest();
+request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+request.getVerifySignatureRequestParam().setSignature(signature);
+request.getVerifySignatureRequestParam().setAlias(alias);
+request.getVerifySignatureRequestParam().setJwksRequestParam(jwksRequestParam);
+request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
+
+VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+client.setRequest(request);
+
+VerifySignatureResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertTrue(response.isVerified());
 ```
 
 #### Sample Request - ES256 JWKs
 
 ```
+POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "signingInput": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkVTMjU2U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjQ0ZjU0NmU0LWRmMmMtNDE5Ny1iNTNjLTIzNzhmY2YwYmRiZSIsImV4cCI6MTQ2MTAzMjgzMiwiaWF0IjoxNDYxMDMyNTMyfQ",
+    "signature": "MEQCIGmPSoCExpDu2jPkxttRZ0hjKId9SQM1pP3PLd4CXmt9AiB57tUzvBILyBvHqf3bHVMi0Fsy8M-v-ERib2KVdWJLtg",
+    "signatureAlgorithm": "ES256",
+    "alias": "ES256SIG",
+    "jwksRequestParam": {
+        "keyRequestParams": [{
+            "alg": "ES256",
+            "kid": "ES256SIG",
+            "use": "sig",
+            "kty": "EC",
+            "crv": "P-256",
+            "x": "QDpwgxzGm0XdD-3Rgk62wiUnayJDS5iV7nLBwNEX4SI",
+            "y": "AJ3IvktOcoICgdFPAvBM44glxcqoHzqyEmj60eATGf5e"
+        }]
+    }
+}
 ```
 
 #### Sample Response - ES256 JWKs
 
 ```
+{
+    "verified": true
+}
+```
+
+#### Sample Code - ES256
+
+```java
+VerifySignatureRequest request = new VerifySignatureRequest();
+request.getVerifySignatureRequestParam().setSigningInput(signingInput);
+request.getVerifySignatureRequestParam().setSignature(es256Signature);
+request.getVerifySignatureRequestParam().setAlias(es256Alias);
+request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
+
+VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
+client.setRequest(request);
+
+VerifySignatureResponse response = client.exec();
+assertEquals(response.getStatus(), HttpStatus.SC_OK);
+assertTrue(response.isVerified());
+```
+
+#### Sample Request - ES256
+
+```
+POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
+Host: ce.gluu.info:8443
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+    "signingInput": "Signing Input",
+    "signature": "MEUCIQCe-t-b4ba7OaIBuNKHCCW2GIKPzjTZKCdBAP4EEmVJAQIgXHIW3c9_Ax2DvUHu_tJJzV9LUeYH5uw40m-h2qy-jgM",
+    "signatureAlgorithm": "ES256",
+    "alias": "f6ade591-4230-4114-8147-316dde969395"
+}
+```
+
+#### Sample Response - ES256
+
+```
+{
+    "verified": true
+}
 ```
 
 ### /deleteKey
