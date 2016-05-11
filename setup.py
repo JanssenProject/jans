@@ -1156,6 +1156,7 @@ class Setup(object):
             # Prepare endorsed folder
             endorsedFolder = "%s/endorsed" % self.tomcatHome             
             self.createDirs(endorsedFolder)
+            self.run(['/bin/chmod', '-R', '755', endorsedFolder])
             
             # Copy  files into endorsed
             bcFilePath = '%s/WEB-INF/lib/bcprov-jdk16-1.46.jar' % tmpOxAuthDir
