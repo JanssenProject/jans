@@ -805,6 +805,15 @@ Cache-Control: no-cache
     "dnName": "CN=oxAuth CA Certificate"
   }
   ```
+  
+  Attribute    | Value                                 | Description
+  ------------ | -------------                         | -------------
+  name         | name suffix of this provider instance | This string is concatenated with the prefix SunPKCS11- to produce this provider instance's name (that is, the string returned by its Provider.getName() method). For example, if the name attribute is "SoftHSM", then the provider instance's name will be "SunPKCS11-SoftHSM".
+  library      | pathname of PKCS#11 implementation    | This is the full pathname (including extension) of the PKCS#11 implementation; the format of the pathname is platform dependent. For example, /opt/foo/lib/libpkcs11.so might be the pathname of a PKCS#11 implementation on Solaris and Linux while C:\foo\mypkcs11.dll might be one on Windows.
+  slot         | slot id                               | This is the id of the slot that this provider instance is to be associated with. For example, you would use 1 for the slot with the id 1 under PKCS#11. At most one of slot or slotListIndex may be specified. If neither is specified, the default is a slotListIndex of 0.
+  showinfo     | boolean                               | Whether to print debug info during startup
+  pkcs11Pin    | Personal Identification Number        | Certain PKCS#11 operations, such as accessing private keys, require a login using a Personal Identification Number, or PIN, before the operations can proceed. The most common type of operations that require login are those that deal with keys on the token.
+  dnName       | DN of certificate issuer              | DN of certificate issuer.
 
   4. Deploy oxEleven.war in Tomcat
   
