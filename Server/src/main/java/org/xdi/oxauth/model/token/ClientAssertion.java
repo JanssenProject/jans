@@ -7,17 +7,20 @@
 package org.xdi.oxauth.model.token;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jws.JwsValidator;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.security.StringEncrypter;
 
@@ -26,7 +29,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version December 17, 2015
+ * @version April 25, 2016
  */
 public class ClientAssertion {
 
@@ -41,6 +44,8 @@ public class ClientAssertion {
             }
         } catch (StringEncrypter.EncryptionException e) {
             throw new InvalidJwtException(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new InvalidJwtException("Cannot verify the JWT");
         }
     }
 
@@ -53,7 +58,7 @@ public class ClientAssertion {
     }
 
     private boolean load(String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
-            throws InvalidJwtException, StringEncrypter.EncryptionException {
+            throws Exception {
         boolean result;
 
         if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
@@ -99,8 +104,16 @@ public class ClientAssertion {
                                     clientSecret = client.getClientSecret();
 
                                     // Validate the crypto segment
-                                    JwsValidator jwtValidator = new JwsValidator(jwt, clientSecret, client.getJwksUri(), client.getJwks());
-                                    if (jwtValidator.validateSignature()) {
+                                    String keyId = jwt.getHeader().getKeyId();
+                                    JSONObject jwks = JwtUtil.getJsonKey(client.getJwksUri(), client.getJwks(), keyId);
+                                    String sharedSecret = client.getClientSecret();
+                                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
+                                            ConfigurationFactory.instance().getConfiguration(),
+                                            ConfigurationFactory.instance().getWebKeys());
+                                    boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
+                                            keyId, jwks, sharedSecret, signatureAlgorithm);
+
+                                    if (validSignature) {
                                         result = true;
                                     } else {
                                         throw new InvalidJwtException("Invalid cryptographic segment");

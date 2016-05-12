@@ -6,11 +6,7 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;

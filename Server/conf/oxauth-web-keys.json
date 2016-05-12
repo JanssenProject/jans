@@ -1,7 +1,7 @@
 {"keys": [
     {
         "kty": "RSA",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "RS256",
         "kid": "6898cff9-4f92-4b58-b37c-2a2b6779b0b3",
         "exp": null,
@@ -21,7 +21,7 @@
     },
     {
         "kty": "RSA",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "RS384",
         "kid": "da6d4b6d-7076-426c-a516-fc962fe9ad89",
         "exp": null,
@@ -41,7 +41,7 @@
     },
     {
         "kty": "RSA",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "RS512",
         "kid": "511f368a-1933-4e67-8905-cc2469089cef",
         "exp": null,
@@ -61,7 +61,7 @@
     },
     {
         "kty": "EC",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "ES256",
         "kid": "a7f67c6c-c965-4798-9058-1ef49cb6735a",
         "exp": null,
@@ -81,7 +81,7 @@
     },
     {
         "kty": "EC",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "ES384",
         "kid": "46663699-1f33-49e4-9158-f49eeb511a7c",
         "exp": null,
@@ -101,7 +101,7 @@
     },
     {
         "kty": "EC",
-        "use": "SIGNATURE",
+        "use": "sig",
         "alg": "ES512",
         "kid": "90f51699-2df5-47bc-9dfa-2419b46cb23d",
         "exp": null,

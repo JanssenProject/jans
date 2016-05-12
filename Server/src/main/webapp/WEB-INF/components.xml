@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <components xmlns="http://jboss.com/products/seam/components"
             xmlns:core="http://jboss.com/products/seam/core"
-            xmlns:persistence="http://jboss.com/products/seam/persistence"
-            xmlns:drools="http://jboss.com/products/seam/drools"
-            xmlns:bpm="http://jboss.com/products/seam/bpm"
             xmlns:security="http://jboss.com/products/seam/security"
             xmlns:mail="http://jboss.com/products/seam/mail"
             xmlns:web="http://jboss.com/products/seam/web"
@@ -12,9 +9,9 @@
             xmlns:transaction="http://jboss.com/products/seam/transaction"
             xmlns:cache="http://jboss.com/products/seam/cache"
             xsi:schemaLocation="http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.2.xsd
-                http://jboss.com/products/seam/persistence http://jboss.com/products/seam/persistence-2.2.xsd
-                http://jboss.com/products/seam/drools http://jboss.com/products/seam/drools-2.2.xsd
-                http://jboss.com/products/seam/bpm http://jboss.com/products/seam/bpm-2.2.xsd
+
+
+
                 http://jboss.com/products/seam/security http://jboss.com/products/seam/security-2.2.xsd
                 http://jboss.com/products/seam/mail http://jboss.com/products/seam/mail-2.2.xsd
                 http://jboss.com/products/seam/web http://jboss.com/products/seam/web-2.2.xsd
