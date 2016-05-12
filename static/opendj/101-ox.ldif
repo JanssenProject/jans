@@ -2150,7 +2150,8 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuGroup-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
-  $ iname $ inum $ member $ o $ owner $ seeAlso ) 
+  $ iname $ inum $ member $ o $ owner $ seeAlso
+  $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuOrganization-oid NAME 'gluuOrganization' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ county $ deployedAppliances $ description $ displayName $ gluuAddPersonCapability

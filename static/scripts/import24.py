@@ -152,6 +152,10 @@ def getOldEntryMap(folder):
     admin_dn = getDns('/opt/opendj/ldif/people.ldif')[0]
 
     for fn in files:
+        # oxIDPAuthentication in appliance.ldif file is incompatible with
+        # the new version of gluu-server. Hence skip the file
+        if 'appliance' in fn and '2.3' in backup_version:
+            continue
         dnList = getDns("%s/%s" % (folder, fn))
         for dn in dnList:
             # skip the entry of Admin DN and its leaves
@@ -291,7 +295,7 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
-        ignore_folders = ['opendj', 'shibboleth2', 'template', 'endorsed']
+        ignore_folders = ['opendj', 'template', 'endorsed']
         for folder in ignore_folders:
             if folder in directory:
                 return
@@ -369,6 +373,21 @@ def getBackupVersion():
                 return line.split('=')[-1].strip()
 
 
+def setPermissions():
+    logging.info("Changing ownership")
+    realCertFolder = os.path.realpath('/etc/certs')
+    realTomcatFolder = os.path.realpath('/opt/tomcat')
+    realLdapBaseFolder = os.path.realpath('/opt/opendj')
+    realIdpFolder = os.path.realpath('/opt/idp')
+    realOxBaseFolder = os.path.realpath('/var/ox')
+
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
+    self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realOxBaseFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
+
+
 def main(folder_name):
     global backup24_folder, backup_version, current_version, service
 
@@ -427,6 +446,7 @@ def main(folder_name):
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+    setPermissions()
     startTomcat()
 
     # remove the password_file

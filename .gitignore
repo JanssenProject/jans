@@ -6,3 +6,4 @@ setup.properties.last
 /.pydevproject
 /.idea
 /output/
+env/
