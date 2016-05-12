@@ -20,9 +20,6 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.JwtSigner;
@@ -35,17 +32,11 @@ import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.security.StringEncrypter;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +102,7 @@ public class CreateRptWS {
         }
     }
 
-    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException, InvalidClaimException {
+    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
         final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(grant.getClient());

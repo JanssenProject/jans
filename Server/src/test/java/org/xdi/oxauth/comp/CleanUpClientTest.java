@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.comp;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.testng.Assert;
@@ -18,6 +15,9 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.StringHelper;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan
