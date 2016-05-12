@@ -239,7 +239,8 @@ def genProperties():
     props['version'] = getProp('githubBranchName').split('_')[-1]
 
     # installed optional components
-    # props['installSaml'] =
+    installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (Y/N):")
+    props['installSaml'] = 'y' in installSaml.lower()
     props['installAsimba'] = os.path.isfile('/opt/tomcat/webapps/asmiba.war')
     props['installCas'] = os.path.isfile('/opt/tomcat/webapps/cas.war')
     props['installOxAuthRP'] = os.path.isfile(
