@@ -8,10 +8,11 @@ package org.xdi.oxauth.model.crypto.signature;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version April 22, 2016
  */
-    public interface SignatureAlgorithmFamily {
-    public static final String HMAC = "HMAC";
-    public static final String RSA = "RSA";
-    public static final String EC = "EC";
+public interface Signer {
+
+    public String sign(String signingInput) throws Exception;
+
+    public boolean verifySignature(String signingInput, String signature) throws Exception;
 }

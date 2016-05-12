@@ -105,6 +105,16 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxeleven-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxeleven-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxService</artifactId>
                 <version>${oxCore.version}</version>

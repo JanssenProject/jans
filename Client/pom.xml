@@ -157,24 +157,24 @@
     </dependencies>
 
     <profiles>
-		<profile>
-			<id>oxAuth test dependencies</id>
-			<activation>
+        <profile>
+            <id>oxAuth test dependencies</id>
+            <activation>
                 <property>
                     <name>maven.test.skip</name>
                     <value>false</value>
                 </property>
-			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.xdi</groupId>
-					<artifactId>oxauth-model</artifactId>
-					<version>${project.version}</version>
-					<type>test-jar</type>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.xdi</groupId>
+                    <artifactId>oxauth-model</artifactId>
+                    <version>${project.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 
 </project>

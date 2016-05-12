@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.model.config;
+package org.xdi.oxauth.model.configuration;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 15, 2015
+ * @version April 13, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -52,6 +52,13 @@ public class Configuration {
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
+
+    //oxEleven
+    private String oxElevenGenerateKeyEndpoint;
+    private String oxElevenSignEndpoint;
+    private String oxElevenVerifySignatureEndpoint;
+    private String oxElevenDeleteKeyEndpoint;
+    private String oxElevenJwksEndpoint;
 
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
@@ -124,9 +131,10 @@ public class Configuration {
     private String imgLocation;
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private String pairwiseIdType;
+    private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
+    private String webKeysStorage; // ldap, pkcs11
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -462,6 +470,51 @@ public class Configuration {
 
     public void setUmaConfigurationEndpoint(String p_umaConfigurationEndpoint) {
         umaConfigurationEndpoint = p_umaConfigurationEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-generate-key-endpoint")
+    public String getOxElevenGenerateKeyEndpoint() {
+        return oxElevenGenerateKeyEndpoint;
+    }
+
+    public void setOxElevenGenerateKeyEndpoint(String oxElevenGenerateKeyEndpoint) {
+        this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-sign-endpoint")
+    public String getOxElevenSignEndpoint() {
+        return oxElevenSignEndpoint;
+    }
+
+    public void setOxElevenSignEndpoint(String oxElevenSignEndpoint) {
+        this.oxElevenSignEndpoint = oxElevenSignEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-verify-signature-endpoint")
+    public String getOxElevenVerifySignatureEndpoint() {
+        return oxElevenVerifySignatureEndpoint;
+    }
+
+    public void setOxElevenVerifySignatureEndpoint(String oxElevenVerifySignatureEndpoint) {
+        this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-delete-key-endpoint")
+    public String getOxElevenDeleteKeyEndpoint() {
+        return oxElevenDeleteKeyEndpoint;
+    }
+
+    public void setOxElevenDeleteKeyEndpoint(String oxElevenDeleteKeyEndpoint) {
+        this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-jwks-endpoint")
+    public String getOxElevenJwksEndpoint() {
+        return oxElevenJwksEndpoint;
+    }
+
+    public void setOxElevenJwksEndpoint(String oxElevenJwksEndpoint) {
+        this.oxElevenJwksEndpoint = oxElevenJwksEndpoint;
     }
 
     @XmlElement(name = "openid-sub-attribute")
@@ -1140,5 +1193,14 @@ public class Configuration {
 
     public void setPairwiseCalculationSalt(String pairwiseCalculationSalt) {
         this.pairwiseCalculationSalt = pairwiseCalculationSalt;
+    }
+
+    @XmlElement(name = "web-keys-storage")
+    public String getWebKeysStorage() {
+        return webKeysStorage;
+    }
+
+    public void setWebKeysStorage(String webKeysStorage) {
+        this.webKeysStorage = webKeysStorage;
     }
 }

@@ -15,7 +15,8 @@ import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
