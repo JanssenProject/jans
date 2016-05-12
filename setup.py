@@ -218,7 +218,7 @@ class Setup(object):
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
         self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
         self.apache2_24_conf = '%s/httpd_2.4.conf' % self.outputFolder
-        self.apache2_ssl_24_conf = '%s/https_gluu_2.4.conf' % self.outputFolder
+        self.apache2_ssl_24_conf = '%s/https_gluu.conf' % self.outputFolder
         self.ldif_base = '%s/base.ldif' % self.outputFolder
         self.ldif_appliance = '%s/appliance.ldif' % self.outputFolder
         self.ldif_attributes = '%s/attributes.ldif' % self.outputFolder
