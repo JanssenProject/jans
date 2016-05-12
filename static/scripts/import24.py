@@ -373,6 +373,21 @@ def getBackupVersion():
                 return line.split('=')[-1].strip()
 
 
+def setPermissions():
+    logging.info("Changing ownership")
+    realCertFolder = os.path.realpath('/etc/certs')
+    realTomcatFolder = os.path.realpath('/opt/tomcat')
+    realLdapBaseFolder = os.path.realpath('/opt/opendj')
+    realIdpFolder = os.path.realpath('/opt/idp')
+    realOxBaseFolder = os.path.realpath('/var/ox')
+
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
+    self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realOxBaseFolder])
+    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
+
+
 def main(folder_name):
     global backup24_folder, backup_version, current_version, service
 
@@ -431,6 +446,7 @@ def main(folder_name):
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
     uploadLDIF(ldif_folder, outputLdifFolder)
+    setPermissions()
     startTomcat()
 
     # remove the password_file
