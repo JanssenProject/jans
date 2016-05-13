@@ -25,6 +25,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version May 4, 2016
  */
 public class KeyGenerator {
