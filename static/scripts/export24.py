@@ -239,21 +239,19 @@ def genProperties():
     props['version'] = getProp('githubBranchName').split('_')[-1]
 
     # Preferences for installation of optional components
-    # NOTE: old version of setup.py will interpret any string as True
-    #       Hence, store only the True values, the defaults are False
     installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (Y/N):")
-    if 'y' in installSaml.lower():
-        props['installSaml'] = True
-    if os.path.isfile('/opt/tomcat/webapps/asmiba.war'):
-        props['installAsimba'] = True
-    if os.path.isfile('/opt/tomcat/webapps/cas.war'):
-        props['installCas'] = True
-    if os.path.isfile('/opt/tomcat/webapps/oxauth-rp.war'):
-        props['installOxAuthRP'] = True
+    props['installSaml'] = 'y' in installSaml.lower()
+    props['installAsimba'] = os.path.isfile('/opt/tomcat/webapps/asimba.war')
+    props['installCas'] = os.path.isfile('/opt/tomcat/webapps/cas.war')
+    props['installOxAuthRP'] = os.path.isfile(
+        '/opt/tomcat/webapps/oxauth-rp.war')
 
     f = open(propertiesFn, 'a')
     for key in props.keys():
-        f.write("%s=%s\n" % (key, props[key]))
+        # NOTE: old version of setup.py will interpret any string as True
+        #       Hence, store only the True values, the defaults are False
+        if props[key]:
+            f.write("%s=%s\n" % (key, props[key]))
     f.close()
 
 
