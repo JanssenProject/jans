@@ -238,14 +238,18 @@ def genProperties():
     props['scim_rp_client_id'] = getProp('scim_rp_client_id')
     props['version'] = getProp('githubBranchName').split('_')[-1]
 
-    # installed optional components
+    # Preferences for installation of optional components
+    # NOTE: old version of setup.py will interpret any string as True
+    #       Hence, store only the True values, the defaults are False
     installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (Y/N):")
-    props['installSaml'] = 'y' in installSaml.lower()
-    props['installAsimba'] = os.path.isfile('/opt/tomcat/webapps/asmiba.war')
-    props['installCas'] = os.path.isfile('/opt/tomcat/webapps/cas.war')
-    props['installOxAuthRP'] = os.path.isfile(
-        '/opt/tomcat/webapps/oxauth-rp.war'
-    )
+    if 'y' in installSaml.lower():
+        props['installSaml'] = True
+    if os.path.isfile('/opt/tomcat/webapps/asmiba.war'):
+        props['installAsimba'] = True
+    if os.path.isfile('/opt/tomcat/webapps/cas.war'):
+        props['installCas'] = True
+    if os.path.isfile('/opt/tomcat/webapps/oxauth-rp.war'):
+        props['installOxAuthRP'] = True
 
     f = open(propertiesFn, 'a')
     for key in props.keys():
