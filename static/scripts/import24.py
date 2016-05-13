@@ -381,11 +381,11 @@ def setPermissions():
     realIdpFolder = os.path.realpath('/opt/idp')
     realOxBaseFolder = os.path.realpath('/var/ox')
 
-    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
-    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
-    self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
-    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realOxBaseFolder])
-    self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
+    getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
+    getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
+    getOutput(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
+    getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realOxBaseFolder])
+    getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
 
 
 def main(folder_name):
