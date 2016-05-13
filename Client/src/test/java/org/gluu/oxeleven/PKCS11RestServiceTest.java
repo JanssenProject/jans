@@ -159,7 +159,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"generateKeyEndpoint"})
-    @Test(enabled = false)
+    @Test
     public void testGenerateKeyES512(final String generateKeyEndpoint) {
         try {
             GenerateKeyRequest request = new GenerateKeyRequest();
@@ -493,7 +493,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"signEndpoint", "signingInput"})
-    @Test(enabled = false, dependsOnMethods = "testGenerateKeyES512")
+    @Test(dependsOnMethods = "testGenerateKeyES512")
     public void testSignatureES512(final String signEndpoint, final String signingInput) {
         try {
             SignRequest request = new SignRequest();
@@ -894,7 +894,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint"})
-    @Test(enabled = false)
+    @Test
     public void testVerifySignatureES256Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkVTMjU2U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjQ0ZjU0NmU0LWRmMmMtNDE5Ny1iNTNjLTIzNzhmY2YwYmRiZSIsImV4cCI6MTQ2MTAzMjgzMiwiaWF0IjoxNDYxMDMyNTMyfQ";
         String signature = "MEQCIGmPSoCExpDu2jPkxttRZ0hjKId9SQM1pP3PLd4CXmt9AiB57tUzvBILyBvHqf3bHVMi0Fsy8M-v-ERib2KVdWJLtg";
@@ -949,7 +949,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint"})
-    @Test(enabled = false)
+    @Test
     public void testVerifySignatureES384Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzM4NCIsImtpZCI6IkVTMzg0U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCOUE2LkFBNUIiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCOUE2LkFBNUIiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjgyMmEzMjQwLTI0NjEtNGEwYS1hNDZlLTIwNTEwMDliZjI3NCIsImV4cCI6MTQ2MTAzMzQ2MiwiaWF0IjoxNDYxMDMzMTYyfQ";
         String signature = "MGUCMQCOELLrt3FSaEamp37D6S3XECWqHy-Iriry_tM5ZVLZ-z6aruZTVHJnNnFfyLXUKaYCMFMrKuXCbXjTZKqFv7v3UsJdY4F1S5IVGtIadoxxm-Ayw7rMzu7vTiaQYiRZZbSurw";
@@ -983,7 +983,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint", "signingInput"})
-    @Test(enabled = false, dependsOnMethods = "testSignatureES512")
+    @Test(dependsOnMethods = "testSignatureES512")
     public void testVerifySignatureES512(final String verifySignatureEndpoint, final String signingInput) {
         try {
             VerifySignatureRequest request = new VerifySignatureRequest();
@@ -1004,7 +1004,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"verifySignatureEndpoint"})
-    @Test(enabled = false)
+    @Test
     public void testVerifySignatureES512Jwks(final String verifySignatureEndpoint) {
         String signingInput = "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiIsImtpZCI6IkVTNTEyU0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCQzRFLjBFQUUiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCFCQzRFLjBFQUUiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6ImI0ZjUzMmIyLWZmNzgtNGIxNS04Y2NkLWYwMGIxMWE1ODNlNyIsImV4cCI6MTQ2MTAzMzUyOCwiaWF0IjoxNDYxMDMzMjI4fQ";
         String signature = "MIGHAkFhmQZew3s2L23BpwhqTPxatHkEdqprogXBPCy1qQ5w6n288UrDm_t283nkFI9FklPqoHGr6ZT9hCOjET6mB732kwJCAOTBMwyDmZx9zuRXORH7ZG86Bj488CY75FkWcKfk8AuJyYFQbrJhPTDNmEpyx7f_AKjUlEk9eQcTQxMQX8VFwOi9";
@@ -1205,7 +1205,7 @@ public class PKCS11RestServiceTest {
 
     @Parameters({"jwksEndpoint"})
     @Test(dependsOnMethods = {"testGenerateKeyRS256", "testGenerateKeyRS384", "testGenerateKeyRS512",
-            "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
+            "testGenerateKeyES256", "testGenerateKeyES384", "testGenerateKeyES512"})
     public void testJwks1(final String jwksEndpoint) {
         try {
             KeyRequestParam k1 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS256, rs256Alias);
@@ -1213,10 +1213,10 @@ public class PKCS11RestServiceTest {
             KeyRequestParam k3 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS512, rs512Alias);
             KeyRequestParam k4 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES256, "P-256", es256Alias);
             KeyRequestParam k5 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES384, "P-384", es384Alias);
-            //Key k6 = new Key("EC", "sig", SignatureAlgorithm.ES512, "P-521", es512Alias);
+            KeyRequestParam k6 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES512, "P-521", es512Alias);
 
             JwksRequestParam jwksRequestParam = new JwksRequestParam();
-            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5/*, k6*/));
+            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5, k6));
 
             JwksRequest request = new JwksRequest();
             request.setJwksRequestParam(jwksRequestParam);
@@ -1228,7 +1228,7 @@ public class PKCS11RestServiceTest {
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
             assertNotNull(response.getJwksRequestParam());
             assertNotNull(response.getJwksRequestParam().getKeyRequestParams());
-            assertEquals(response.getJwksRequestParam().getKeyRequestParams().size(), 5);
+            assertEquals(response.getJwksRequestParam().getKeyRequestParams().size(), 6);
             for (KeyRequestParam keyRequestParam : response.getJwksRequestParam().getKeyRequestParams()) {
                 assertNotNull(keyRequestParam.getAlg());
                 assertNotNull(keyRequestParam.getKid());
@@ -1252,7 +1252,7 @@ public class PKCS11RestServiceTest {
 
     @Parameters({"jwksEndpoint"})
     @Test(dependsOnMethods = {"testGenerateKeyRS256", "testGenerateKeyRS384", "testGenerateKeyRS512",
-            "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
+            "testGenerateKeyES256", "testGenerateKeyES384", "testGenerateKeyES512"})
     public void testJwks2(final String jwksEndpoint) {
         try {
             JwksRequestParam jwksRequestParam = new JwksRequestParam();
@@ -1276,7 +1276,7 @@ public class PKCS11RestServiceTest {
 
     @Parameters({"jwksEndpoint"})
     @Test(dependsOnMethods = {"testGenerateKeyRS256", "testGenerateKeyRS384", "testGenerateKeyRS512",
-            "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
+            "testGenerateKeyES256", "testGenerateKeyES384", "testGenerateKeyES512"})
     public void testJwks3(final String jwksEndpoint) {
         try {
             KeyRequestParam k1 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS256, "INVALID_ALIAS_1");
@@ -1284,10 +1284,10 @@ public class PKCS11RestServiceTest {
             KeyRequestParam k3 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS512, "INVALID_ALIAS_3");
             KeyRequestParam k4 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES256, "P-256", "INVALID_ALIAS_4");
             KeyRequestParam k5 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES384, "P-384", "INVALID_ALIAS_5");
-            //Key k6 = new Key("EC", "sig", SignatureAlgorithm.ES512, "P-521", "INVALID_ALIAS_6");
+            KeyRequestParam k6 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES512, "P-521", "INVALID_ALIAS_6");
 
             JwksRequestParam jwksRequestParam = new JwksRequestParam();
-            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5/*, k6*/));
+            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5, k6));
 
             JwksRequest request = new JwksRequest();
             request.setJwksRequestParam(jwksRequestParam);
@@ -1304,7 +1304,7 @@ public class PKCS11RestServiceTest {
 
     @Parameters({"jwksEndpoint"})
     @Test(dependsOnMethods = {"testGenerateKeyRS256", "testGenerateKeyRS384", "testGenerateKeyRS512",
-            "testGenerateKeyES256", "testGenerateKeyES384"/*, "testGenerateKeyES512"*/})
+            "testGenerateKeyES256", "testGenerateKeyES384", "testGenerateKeyES512"})
     public void testJwks4(final String jwksEndpoint) {
         try {
             KeyRequestParam k1 = new KeyRequestParam("RSA", "sig", SignatureAlgorithm.RS256, "INVALID_ALIAS_1");
@@ -1314,10 +1314,10 @@ public class PKCS11RestServiceTest {
             KeyRequestParam k5 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES256, "P-256", "INVALID_ALIAS_2");
             KeyRequestParam k6 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES256, "P-256", es256Alias);
             KeyRequestParam k7 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES384, "P-384", es384Alias);
-            //Key k8 = new Key("EC", "sig", SignatureAlgorithm.ES512, "P-521", es512Alias);
+            KeyRequestParam k8 = new KeyRequestParam("EC", "sig", SignatureAlgorithm.ES512, "P-521", es512Alias);
 
             JwksRequestParam jwksRequestParam = new JwksRequestParam();
-            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5, k6, k7/*, k8*/));
+            jwksRequestParam.setKeyRequestParams(Arrays.asList(k1, k2, k3, k4, k5, k6, k7, k8));
 
             JwksRequest request = new JwksRequest();
             request.setJwksRequestParam(jwksRequestParam);
@@ -1329,7 +1329,7 @@ public class PKCS11RestServiceTest {
             assertEquals(response.getStatus(), HttpStatus.SC_OK);
             assertNotNull(response.getJwksRequestParam());
             assertNotNull(response.getJwksRequestParam().getKeyRequestParams());
-            assertEquals(response.getJwksRequestParam().getKeyRequestParams().size(), 5);
+            assertEquals(response.getJwksRequestParam().getKeyRequestParams().size(), 6);
             for (KeyRequestParam keyRequestParam : response.getJwksRequestParam().getKeyRequestParams()) {
                 assertNotNull(keyRequestParam.getAlg());
                 assertNotNull(keyRequestParam.getKid());
@@ -1442,7 +1442,7 @@ public class PKCS11RestServiceTest {
     }
 
     @Parameters({"deleteKeyEndpoint"})
-    @Test(enabled = false, dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
+    @Test(dependsOnMethods = {"testVerifySignatureES512", "testJwks1", "testJwks2", "testJwks3", "testJwks4"})
     public void testDeleteKeyES512(final String deleteKeyEndpoint) {
         try {
             DeleteKeyRequest request = new DeleteKeyRequest();

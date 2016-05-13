@@ -7,6 +7,7 @@
 package org.gluu.oxeleven.service;
 
 import com.google.common.base.Strings;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
@@ -66,6 +67,11 @@ public class PKCS11Service {
 
         keyStore = KeyStore.getInstance("PKCS11", provider);
         keyStore.load(null, this.pin);
+
+        installedProvider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+        if (installedProvider == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
 
     private static InputStream getTokenCfg(Map<String, String> pkcs11Config) {
@@ -95,7 +101,7 @@ public class PKCS11Service {
             keyGen.initialize(2048, new SecureRandom());
         } else if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
             ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance("EC", provider);
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily());
             keyGen.initialize(eccgen, new SecureRandom());
         } else {
             throw new RuntimeException("The provided signature algorithm parameter is not supported");
@@ -161,7 +167,7 @@ public class PKCS11Service {
 
                 byte[] signature = Base64Util.base64UrlDecode(encodedSignature);
 
-                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), provider);
+                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm());
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
