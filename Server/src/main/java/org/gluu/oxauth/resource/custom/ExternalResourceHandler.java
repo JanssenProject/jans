@@ -6,17 +6,15 @@
 
 package org.gluu.oxauth.resource.custom;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.faces.FacesException;
-
+import com.sun.facelets.impl.DefaultResourceResolver;
 import org.jboss.seam.log.LogProvider;
 import org.jboss.seam.log.Logging;
 import org.xdi.util.StringHelper;
 
-import com.sun.facelets.impl.DefaultResourceResolver;
+import javax.faces.FacesException;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * External resource handler to customize applicaton 

@@ -6,44 +6,24 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
+import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
-import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
-import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.*;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
-import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
-import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
+import org.xdi.oxauth.model.fido.u2f.protocol.*;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.*;
 
 /**
  * Provides operations with U2F registration requests

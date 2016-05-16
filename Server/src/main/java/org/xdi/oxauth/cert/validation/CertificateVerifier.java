@@ -1,10 +1,10 @@
 package org.xdi.oxauth.cert.validation;
 
+import org.xdi.oxauth.cert.validation.model.ValidationStatus;
+
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
-
-import org.xdi.oxauth.cert.validation.model.ValidationStatus;
 
 /**
  * Base interface for all certificate verifiers
