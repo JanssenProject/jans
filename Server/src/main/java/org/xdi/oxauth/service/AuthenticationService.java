@@ -122,6 +122,13 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
+        SessionState sessionState = sessionStateService.getSessionState();
+        if (sessionState != null) {
+        	Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+        	sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+        	sessionStateService.updateSessionState(sessionState);
+        }
+
         MetricType metricType;
         if (authenticated) {
             metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;

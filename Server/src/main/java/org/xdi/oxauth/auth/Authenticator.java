@@ -251,9 +251,12 @@ public class Authenticator implements Serializable {
             	sessionStateService.resetToStep(sessionState, overridenNextStep);
 
             	this.authStep = overridenNextStep;
-            	sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
             	log.info("Authentication reset to step : '{0}'", this.authStep);
             }
+
+            // Reload from LDAP to make sure that we are updating latest session attributes
+            sessionState = sessionStateService.getSessionState();
+            sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
 
             int countAuthenticationSteps = externalAuthenticationService.executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
             if (this.authStep < countAuthenticationSteps) {

@@ -7,7 +7,6 @@
 package org.xdi.oxauth.token.ws.rs;
 
 import com.google.common.base.Strings;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.annotations.common.util.StringHelper;
@@ -26,11 +25,7 @@ import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
-import org.xdi.oxauth.service.AuthenticationFilterService;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.GrantService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
@@ -40,7 +35,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
-
 import java.security.SignatureException;
 
 /**
