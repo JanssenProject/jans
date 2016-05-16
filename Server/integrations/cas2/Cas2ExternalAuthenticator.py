@@ -4,12 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
+import sys
+
+from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
 from javax.faces.context import FacesContext
-from org.jboss.seam import Component
-from org.apache.http.entity import ContentType 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service import AuthenticationService
@@ -20,8 +19,6 @@ from org.apache.http.params import CoreConnectionPNames
 from java.util import Arrays
 from java.util import HashMap
 
-import java
-import sys
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

@@ -6,15 +6,11 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.io.IOException;
-
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
@@ -24,8 +20,7 @@ import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.util.io.ByteDataInputStream;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
+import java.io.IOException;
 
 /**
  * Provides operations with U2F RAW authentication response

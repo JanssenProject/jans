@@ -51,7 +51,6 @@ import java.util.*;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
 import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**

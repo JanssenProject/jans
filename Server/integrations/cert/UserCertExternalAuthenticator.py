@@ -5,29 +5,27 @@
 # Author: Yuriy Movchan
 #
 
+import sys
+import base64
+import urllib
+
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam.contexts import Context, Contexts
+from org.jboss.seam.contexts import Contexts
 from javax.faces.context import FacesContext
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util.security import StringEncrypter 
-from java.util import HashMap, Arrays
-from java.security import MessageDigest
-from org.apache.commons.codec.binary import Hex
+from org.xdi.util.security import StringEncrypter
+from java.util import Arrays
 from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
 from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
 from org.xdi.oxauth.cert.validation.model import ValidationStatus
 from org.xdi.oxauth.util import CertUtil
 from org.xdi.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
-
 import java
-import sys
-import base64
-import urllib
+
 
 try:
     import json
