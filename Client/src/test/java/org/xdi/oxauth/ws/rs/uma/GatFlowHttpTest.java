@@ -98,8 +98,8 @@ public class GatFlowHttpTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testRequesterObtainAat"})
     @Parameters({"umaAmHost"})
-    public void testRequesterObtainsRpt(final String umaAmHost) throws Exception {
-        showTitle("testRequesterObtainsRpt");
+    public void testRequesterObtainsGat(final String umaAmHost) throws Exception {
+        showTitle("testRequesterObtainsGat");
 
         CreateGatService gatService = UmaClientFactory.instance().createGatService(this.metadataConfiguration, clientExecutor(true));
 
@@ -111,7 +111,7 @@ public class GatFlowHttpTest extends BaseTest {
     /**
      * Host determines GAT status
      */
-    @Test(dependsOnMethods = {"testRequesterObtainsRpt"})
+    @Test(dependsOnMethods = {"testRequesterObtainsGat"})
     public void testHostDetermineRptStatus1() throws Exception {
         showTitle("testHostDetermineRptStatus1");
 
