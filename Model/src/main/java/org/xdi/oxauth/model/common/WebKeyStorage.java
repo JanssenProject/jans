@@ -30,6 +30,6 @@ public enum WebKeyStorage {
                 return v;
             }
         }
-        return null;
+        return LDAP;
     }
 }
