@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://jboss.org/schema/seam/components"
+            xmlns:core="http://jboss.org/schema/seam/core"
+            xmlns:persistence="http://jboss.org/schema/seam/persistence"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:security="http://jboss.org/schema/seam/security"
+            xsi:schemaLocation=
+                    "http://jboss.org/schema/seam/core http://jboss.org/schema/seam/core-2.3.xsd
+                 http://jboss.org/schema/seam/persistence http://jboss.org/schema/seam/persistence-2.3.xsd
+                 http://jboss.org/schema/seam/components http://jboss.org/schema/seam/components-2.3.xsd
+                 http://jboss.org/schema/seam/security http://jboss.org/schema/seam/security-2.3.xsd">
+
+
+    <core:init debug="@debug@" jndi-pattern="@jndiPattern@" transaction-management-enabled="false"/>
+
+    <transaction:no-transaction/>	
+
+    <security:identity authenticate-method="#{authenticator.authenticate}" remember-me="true"/>
+
+</components>
