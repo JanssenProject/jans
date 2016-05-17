@@ -166,7 +166,7 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
      */
     private static boolean isRequestValid(HttpServletRequest request) {
         if (request != null) {
-            final Map<String, String> map = request.getParameterMap();
+            final Map<String, String[]> map = request.getParameterMap();
             if (map != null) {
                 final Set<String> keys = map.keySet();
                 if (keys != null) {

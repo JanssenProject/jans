@@ -4,15 +4,15 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:s="http://jboss.com/products/seam/taglib">
+      xmlns:s="http://jboss.org/schema/seam/taglib">
 <f:view>
-    <head>
+    <h:head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title><ui:insert name="pageTitle"/></title>
         <link type="text/css" rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/theme.css" />
         <ui:insert name="head"/>
-    </head>
-    <body>
+    </h:head>
+    <h:body>
     <div class="body">
         <h:messages id="messages" globalOnly="true" styleClass="message"
                     errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
@@ -28,6 +28,6 @@
             </p>
         </div>
     </s:fragment>
-    </body>
+    </h:body>
 </f:view>
 </html>
