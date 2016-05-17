@@ -158,7 +158,7 @@
 
     <profiles>
 		<profile>
-			<id>oxAuth test dependencies</id>
+			<id>test-dependencies</id>
 			<activation>
                 <property>
                     <name>maven.test.skip</name>

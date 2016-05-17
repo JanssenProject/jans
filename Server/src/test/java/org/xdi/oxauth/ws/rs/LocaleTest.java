@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.util.LocaleUtil;
 

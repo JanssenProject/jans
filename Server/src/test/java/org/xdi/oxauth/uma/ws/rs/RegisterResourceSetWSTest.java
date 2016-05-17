@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetResponse;
@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
