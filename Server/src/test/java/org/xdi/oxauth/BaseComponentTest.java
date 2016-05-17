@@ -10,10 +10,10 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.web.Session;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.xdi.oxauth.service.AppInitializer;
 
 /**
@@ -22,14 +22,14 @@ import org.xdi.oxauth.service.AppInitializer;
  */
 
 public abstract class BaseComponentTest extends BaseTest {
-    @BeforeMethod
+    @Before
     @Override
     public void begin() {
         Lifecycle.beginCall();
         super.begin();
     }
 
-    @AfterMethod
+    @After
     @Override
     public void end() {
         Session.instance().invalidate();
