@@ -12,7 +12,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.LdapDummyEntry;
-import org.xdi.oxauth.model.config.BaseFilter;
+import org.xdi.oxauth.model.configuration.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
