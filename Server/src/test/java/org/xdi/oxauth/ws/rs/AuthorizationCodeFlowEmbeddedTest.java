@@ -14,8 +14,8 @@ import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
 import org.jboss.seam.mock.ResourceRequestEnvironment.ResourceRequest;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  * Test cases for the authorization code flow (embedded)

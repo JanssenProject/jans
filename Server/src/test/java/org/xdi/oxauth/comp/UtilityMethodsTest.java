@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.comp;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 
 /**

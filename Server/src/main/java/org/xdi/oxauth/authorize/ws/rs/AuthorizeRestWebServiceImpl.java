@@ -49,6 +49,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.SignatureException;
 import java.util.*;
+import java.util.Map.Entry;
 
 import static org.xdi.oxauth.model.util.StringUtils.implode;
 
@@ -344,7 +345,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             if (method.equals(HttpMethod.GET)) {
                                                 params = QueryStringDecoder.decode(httpRequest.getQueryString());
                                             } else {
-                                                params = httpRequest.getParameterMap();
+                                                params = getGenericRequestMap(httpRequest);
                                             }
 
                                             String userDn = authenticationFilterService.processAuthenticationFilters(params);
@@ -579,7 +580,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      */
     private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
         if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
-            Map<String, String> parameterMap = Maps.newHashMap(httpRequest.getParameterMap());
+        	Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
+        	
+            Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
             sessionUser.setUserDn(null);
@@ -594,6 +597,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         }
     }
+
+	private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
+		Map<String, String> result = new HashMap<String, String>();
+		for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
+			result.put(entry.getKey(), entry.getValue()[0]);
+		}
+		
+		return result;
+	}
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
         return Response.status(p_status.getStatusCode()).entity(errorResponseFactory.getErrorAsJson(p_type, p_state));

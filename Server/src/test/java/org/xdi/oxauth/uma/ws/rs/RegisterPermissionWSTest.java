@@ -9,9 +9,9 @@ package org.xdi.oxauth.uma.ws.rs;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.junit.Assert;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
