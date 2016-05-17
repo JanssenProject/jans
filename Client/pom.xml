@@ -30,6 +30,33 @@
             </testResource>
         </testResources>
 
+		<pluginManagement>
+			<plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.17</version>
+                    <configuration>
+						<!-- Needed as we have both junit and testng -->
+						<failIfNoTests>false</failIfNoTests>
+						<trimStackTrace>false</trimStackTrace>
+						<skip>false</skip>
+
+						<!-- exclude selenium tests -->
+						<excludes>
+							<exclude>**/selenium/*</exclude>
+							<exclude>**/webdriver/*</exclude>
+							<exclude>**/xml/*</exclude>
+						</excludes>
+
+                        <suiteXmlFiles>
+                            <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                    </configuration>
+                </plugin>
+			</plugins>
+		</pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
