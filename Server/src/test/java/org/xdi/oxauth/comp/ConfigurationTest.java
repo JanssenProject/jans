@@ -11,7 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.Conf;
-import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.util.ServerUtil;
 

@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.model.config;
+package org.xdi.oxauth.model.configuration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -12,7 +12,8 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/08/2012
+ * @author Javier Rojas Blum
+ * @version April 13, 2016
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "client-auth-filter")

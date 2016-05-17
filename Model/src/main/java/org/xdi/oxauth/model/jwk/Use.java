@@ -6,8 +6,12 @@
 
 package org.xdi.oxauth.model.jwk;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+
 /**
- * @author Javier Rojas Date: 11.15.2011
+ * @author Javier Rojas Blum
+ * @version May 4, 2016
  */
 public enum Use {
 
@@ -32,6 +36,7 @@ public enum Use {
      * @param param The use parameter.
      * @return The corresponding use if found, otherwise <code>null</code>.
      */
+    @JsonCreator
     public static Use fromString(String param) {
         if (param != null) {
             for (Use rt : Use.values()) {
@@ -48,8 +53,8 @@ public enum Use {
      *
      * @return The string representation of the object.
      */
-    @Override
-    public String toString() {
+    @JsonValue
+    public String toValue() {
         return paramName;
     }
 }

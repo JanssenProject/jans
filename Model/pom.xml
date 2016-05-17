@@ -78,6 +78,14 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxb-provider</artifactId>
         </dependency>

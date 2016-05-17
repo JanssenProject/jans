@@ -24,7 +24,7 @@ public interface RegistrationRequestService {
 
 	@GET
 	@Produces({ "application/json" })
-	public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId);
+	public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState);
 
 	@POST
 	@Produces({ "application/json" })

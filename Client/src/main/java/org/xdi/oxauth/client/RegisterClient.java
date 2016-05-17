@@ -17,8 +17,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 

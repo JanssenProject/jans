@@ -6,25 +6,15 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
@@ -33,19 +23,24 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
+import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.util.KeyGenerator;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version 0.9 February 12, 2015
+ * @version May 5, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
@@ -330,14 +325,19 @@ public class ConfigurationFactory {
     private void initWebKeysFromJson(String p_webKeys) {
         try {
             initJwksFromString(p_webKeys);
-        } catch (JsonProcessingException ex) {
+        } catch (Exception ex) {
             log.error("Failed to load JWKS. Attempting to generate new JWKS...", ex);
 
             String newWebKeys = null;
         	try {
-        		// Generate new JWKS
-				newWebKeys = KeyGenerator.generateJWKS().toString();
-				
+                // Generate new JWKS
+                JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
+                        getConfiguration().getKeyRegenerationInterval(),
+                        getConfiguration().getIdTokenLifetime(),
+                        getConfiguration(),
+                        getWebKeys());
+                newWebKeys = jsonObject.toString();
+
 				// Attempt to load new JWKS
 				initJwksFromString(newWebKeys);
 
@@ -355,8 +355,6 @@ public class ConfigurationFactory {
 			} catch (Exception ex2) {
 	            log.error("Failed to re-generate JWKS keys", ex2);
 			}
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
         }
     }
 

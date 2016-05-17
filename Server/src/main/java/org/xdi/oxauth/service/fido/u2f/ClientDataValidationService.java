@@ -21,6 +21,11 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Client data validation service
  *
