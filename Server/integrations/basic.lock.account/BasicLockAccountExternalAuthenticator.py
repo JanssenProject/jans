@@ -129,7 +129,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = UserService.instance()
 
-        find_user_by_uid = userService.getUser(user_name, "gluuStatus")
+        find_user_by_uid = userService.getUser(user_name)
         if (find_user_by_uid == None):
             return None
 
