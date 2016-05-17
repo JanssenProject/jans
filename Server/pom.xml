@@ -597,6 +597,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
@@ -630,7 +631,8 @@
 			<id>enable-seam-debug</id>
 			<activation>
 				<property>
-					<name>!disable-seam-debug</name>
+                    <name>development-build</name>
+                    <value>true</value>
 				</property>
 			</activation>
 			<dependencies>
