@@ -290,6 +290,14 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxLdap</artifactId>
 		</dependency>
+          <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxeleven-model</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxAuthStatic</artifactId>
