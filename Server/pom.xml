@@ -726,9 +726,9 @@
 		<profile>
 			<id>arq-tomcat-7-embedded</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
 				<property>
-					<name>!disable-arq-tomcat-7-embedded</name>
+					<name>maven.test.skip</name>
+					<value>false</value>
 				</property>
 			</activation>
 
