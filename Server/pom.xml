@@ -51,6 +51,37 @@
 
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.17</version>
+                    <configuration>
+                        <skipTests>false</skipTests>
+                        <failIfNoTests>false</failIfNoTests>
+                        <trimStackTrace>false</trimStackTrace>
+
+						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
+							-Dgluu.conf.folder=${project.build.directory}
+							-Dseam.local.test=true
+						</argLine>
+
+						<!-- Needed as we have both junit and testng -->
+						<failIfNoTests>false</failIfNoTests>
+						<trimStackTrace>false</trimStackTrace>
+						<skip>false</skip>
+
+						<!-- exclude selenium tests -->
+						<excludes>
+							<exclude>**/selenium/*</exclude>
+							<exclude>**/webdriver/*</exclude>
+							<exclude>**/xml/*</exclude>
+						</excludes>
+
+                        <suiteXmlFiles>
+                            <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
@@ -616,49 +647,6 @@
 		</profile>
 
 		<profile>
-			<id>generate-configuration</id>
-			<activation>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-surefire-plugin</artifactId>
-							<configuration>
-								<skipTests>true</skipTests>
-							</configuration>
-						</plugin>
-						<plugin>
-							<artifactId>maven-resources-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>generate-config-files</id>
-									<phase>validate</phase>
-									<goals>
-										<goal>copy-resources</goal>
-									</goals>
-									<configuration>
-										<outputDirectory>${project.build.directory}/conf</outputDirectory>
-										<resources>
-											<resource>
-												<directory>${basedir}/conf</directory>
-												<filtering>true</filtering>
-											</resource>
-										</resources>
-										<filters>
-											<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
-										</filters>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
-		</profile>
-
-		<profile>
 			<id>saml</id>
 			<activation>
 				<property>
@@ -757,37 +745,25 @@
 				<pluginManagement>
 					<plugins>
 						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-surefire-plugin</artifactId>
-							<configuration>
-								<skip>false</skip>
-							</configuration>
+							<artifactId>maven-resources-plugin</artifactId>
 							<executions>
 								<execution>
-									<id>integration-test</id>
-									<phase>integration-test</phase>
+									<id>generate-config-files</id>
+									<phase>validate</phase>
 									<goals>
-										<goal>test</goal>
+										<goal>copy-resources</goal>
 									</goals>
 									<configuration>
-										<skipTests>false</skipTests>
-
-										<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
-											-Dgluu.conf.folder=${project.build.directory}
-											-Dseam.local.test=true
-										</argLine>
-
-										<!-- Needed as we have both junit and testng -->
-										<testNGArtifactName>none:none</testNGArtifactName>
-										<failIfNoTests>false</failIfNoTests>
-										<trimStackTrace>false</trimStackTrace>
-										<skip>false</skip>
-										<!-- exclude selenium tests -->
-										<excludes>
-											<exclude>**/selenium/*</exclude>
-											<exclude>**/webdriver/*</exclude>
-											<exclude>**/xml/*</exclude>
-										</excludes>
+										<outputDirectory>${project.build.directory}/conf</outputDirectory>
+										<resources>
+											<resource>
+												<directory>${basedir}/conf</directory>
+												<filtering>true</filtering>
+											</resource>
+										</resources>
+										<filters>
+											<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
+										</filters>
 									</configuration>
 								</execution>
 							</executions>
