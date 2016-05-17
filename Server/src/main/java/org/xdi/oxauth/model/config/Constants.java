@@ -31,5 +31,6 @@ public final class Constants extends LDAPConstants {
 	public static final String OX_AUTH_SCOPE_TYPE_OPENID = "openid";
 
 	public static final String REMOTE_IP = "remote_ip";
+	public static final String AUTHENTICATED_USER = "auth_user";
 
 }

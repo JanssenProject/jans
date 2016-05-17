@@ -121,6 +121,8 @@ public class AuthorizeAction {
     private String amrValues;
     private String request;
     private String requestUri;
+    private String codeChallenge;
+    private String codeChallengeMethod;
 
     // custom oxAuth parameters
     private String sessionState;
@@ -143,7 +145,7 @@ public class AuthorizeAction {
         }
     }
 
-    public String checkPermissionGranted() {
+    public void checkPermissionGranted() {
         SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
@@ -156,7 +158,7 @@ public class AuthorizeAction {
             } else {
                 log.error("Please provide prompt=login to force login with new ACR or otherwise perform logout and re-authenticate.");
                 permissionDenied();
-                return Constants.RESULT_FAILURE;
+                return;
             }
         }
 
@@ -187,7 +189,7 @@ public class AuthorizeAction {
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
                     permissionDenied();
-                    return Constants.RESULT_FAILURE;
+                    return;
                 }
 
                 String acr = customScriptConfiguration.getName();
@@ -218,7 +220,7 @@ public class AuthorizeAction {
             sessionStateService.createSessionStateCookie(this.sessionState);
 
             FacesManager.instance().redirect(redirectTo, null, false);
-            return Constants.RESULT_FAILURE;
+            return;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
@@ -226,11 +228,6 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
-            	
-            	if(!client.getPersistClientAuthorizations() || !client.getTrustedClient()){
-            		return  Constants.RESULT_SUCCESS; 
-            	}
-            	
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
                     permissionDenied();
                 }
@@ -258,26 +255,33 @@ public class AuthorizeAction {
                         permissionGranted(session);
                     }
                 }
-
-                if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                        permissionGranted(session);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+                
+                if (prompts.contains(Prompt.CONSENT)) {
+                	// The authorization server prompts the user for consent before returning information to the client. 
+                } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
+                	boolean done = false;
+                	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                        if (client.getTrustedClient()) {
                             permissionGranted(session);
+                            done = true;
                         }
-                    } else {
-                        consentRequired();
-                    }
+                	}
+
+                	if (!done) {
+	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+	                        permissionGranted(session);
+	                    }
+                	}
                 } else {
                     invalidRequest();
                 }
             }
         }
-		return Constants.RESULT_FAILURE;
+
+        return;
     }
 
     private SessionState handleAcrChange(SessionState session, List<Prompt> prompts) {
@@ -628,6 +632,12 @@ public class AuthorizeAction {
             }
 
             final Client client = clientService.getClient(clientId);
+            
+            if(client.getPersistClientAuthorizations()){
+            	client.setTrustedClient(true);     
+            	clientService.merge(client);
+            }
+            
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
@@ -692,5 +702,21 @@ public class AuthorizeAction {
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
 
         FacesManager.instance().redirectToExternalURL(sb.toString());
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 }

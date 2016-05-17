@@ -23,11 +23,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.HttpMethod;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
