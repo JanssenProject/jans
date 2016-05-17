@@ -6,7 +6,12 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.drools.util.ArrayUtils;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
