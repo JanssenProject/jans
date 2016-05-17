@@ -7,7 +7,7 @@
 package org.xdi.oxauth;
 
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.junit.Assert;
+import org.testng.Assert;
 
 /**
  * @author Javier Rojas Date: 10.10.2011
@@ -37,7 +37,7 @@ public abstract class BaseTest extends ConfigurableTest {
     }
 
     public static void fails(Throwable e) {
-        Assert.assertNull(e.getMessage(), e);
+        Assert.fail(e.getMessage(), e);
     }
 
     public static void output(String p_msg) {
