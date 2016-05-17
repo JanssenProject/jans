@@ -11,9 +11,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
-import org.junit.Assert;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;

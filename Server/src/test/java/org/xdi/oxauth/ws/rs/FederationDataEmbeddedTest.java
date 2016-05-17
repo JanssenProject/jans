@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import javax.ws.rs.core.MediaType;
 
@@ -16,8 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.FederationDataRequest;
 import org.xdi.oxauth.client.FederationDataResponse;

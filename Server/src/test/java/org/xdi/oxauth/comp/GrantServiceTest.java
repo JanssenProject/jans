@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.comp;
 
-import org.junit.Assert;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;

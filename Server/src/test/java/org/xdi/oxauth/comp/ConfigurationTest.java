@@ -6,23 +6,20 @@
 
 package org.xdi.oxauth.comp;
 
-import java.io.File;
-import java.io.FileInputStream;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.Configuration;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * @author Yuriy Zabrovarnyy

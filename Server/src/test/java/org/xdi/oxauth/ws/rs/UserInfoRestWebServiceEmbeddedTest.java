@@ -13,8 +13,8 @@ import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
 import org.jboss.seam.mock.ResourceRequestEnvironment;
 import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.model.authorize.Claim;
@@ -35,7 +35,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**

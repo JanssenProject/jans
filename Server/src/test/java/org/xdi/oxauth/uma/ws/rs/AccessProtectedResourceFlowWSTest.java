@@ -6,16 +6,16 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.junit.Assert;
-import org.junit.runners.Parameterized.Parameters;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
