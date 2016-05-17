@@ -6,18 +6,14 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.google.common.collect.Lists;
+import com.wordnik.swagger.annotations.*;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.GatIntrospectionResponse;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -33,6 +29,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -142,16 +139,21 @@ public class RptStatusWS {
     private Response gatResponse(UmaRPT rpt) throws IOException {
         if (!isValid(rpt)) {
             return Response.status(Response.Status.OK).
-                    entity(new GatIntrospectionResponse(false)).
+                    entity(new RptIntrospectionResponse(false)).
                     cacheControl(ServerUtil.cacheControl(true)).
                     build();
         }
 
-        final GatIntrospectionResponse statusResponse = new GatIntrospectionResponse();
+        UmaPermission permission = new UmaPermission();
+        permission.setScopes(rpt.getPermissions());
+        permission.setExpiresAt(rpt.getExpirationDate());
+        permission.setIssuedAt(new Date());
+
+        final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
         statusResponse.setActive(true);
         statusResponse.setExpiresAt(rpt.getExpirationDate());
         statusResponse.setIssuedAt(rpt.getCreationDate());
-        statusResponse.setScopes(rpt.getPermissions());
+        statusResponse.setPermissions(Lists.newArrayList(permission));
 
         // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
         final String entity = ServerUtil.asJson(statusResponse);
@@ -160,7 +162,6 @@ public class RptStatusWS {
                 entity(entity).
                 cacheControl(ServerUtil.cacheControl(true)).
                 build();
-
     }
 
     private boolean isValid(UmaRPT p_rpt) {

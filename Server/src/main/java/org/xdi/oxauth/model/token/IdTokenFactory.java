@@ -30,7 +30,6 @@ import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
@@ -51,7 +50,6 @@ import org.xdi.util.security.StringEncrypter;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.util.*;
 
 /**
@@ -88,8 +86,7 @@ public class IdTokenFactory {
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
-                                     Set<String> scopes) throws SignatureException, InvalidJwtException,
-            StringEncrypter.EncryptionException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+                                     Set<String> scopes) throws Exception {
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
@@ -418,8 +415,7 @@ public class IdTokenFactory {
     public static JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException {
+            throws Exception {
         IdTokenFactory idTokenFactory = IdTokenFactory.instance();
 
         final Client grantClient = grant.getClient();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/oxauth">
 
-    <!-- Cert authentication for case when there is proxy like Apache -->
+    <!-- Cert authentication for case when there is no proxy like Apache -->
     <!-- Don't remove. Use when there is standalone tomcat only.
 		<Realm className="org.xdi.tomcat7.WantSslRealm" validate="true" allRolesMode="authOnly"/>
     	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />

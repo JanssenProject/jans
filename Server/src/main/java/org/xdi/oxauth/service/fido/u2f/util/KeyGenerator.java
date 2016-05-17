@@ -1,7 +1,10 @@
-package org.xdi.oxauth.service.fido.u2f.util;
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
 
-import java.util.Date;
-import java.util.UUID;
+package org.xdi.oxauth.service.fido.u2f.util;
 
 import org.codehaus.jettison.json.JSONObject;
 import org.python.icu.util.Calendar;
@@ -11,8 +14,17 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAKeyFactory;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
+import java.util.Date;
+import java.util.UUID;
+
+/**
+ * @author Yuriy Movchan
+ * @author Javier Rojas Blum
+ * @version May 4, 2016
+ */
 public class KeyGenerator {
 	public static void main(String[] args) throws Exception {
     	SecurityProviderUtility.installBCProvider(true);
@@ -36,12 +48,12 @@ public class KeyGenerator {
         Certificate certificate = keyFactory.generateV3Certificate(startDate, expirationDate, dnName);
         key.setCertificate(certificate);
 
-        key.setKeyType("EC");
-        key.setUse("SIGNATURE");
+        key.setKeyType(SignatureAlgorithm.ES256.getFamily());
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.ES256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationDate.getTime());
-        key.setCurve("P-256");
+        key.setCurve(SignatureAlgorithm.ES256.getCurve());
 
         JSONObject jsonKey = key.toJSONObject();
         System.out.println(jsonKey);
