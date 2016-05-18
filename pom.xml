@@ -114,12 +114,6 @@
                 <groupId>org.xdi</groupId>
                 <artifactId>oxUtil</artifactId>
                 <version>${oxCore.version}</version>
-	            <exclusions>
-	            	<exclusion>
-	            		<artifactId>servlet-api</artifactId>
-	            		<groupId>javax.servlet</groupId>
-	            	</exclusion>
-	            </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
@@ -135,16 +129,6 @@
                 <groupId>org.xdi</groupId>
                 <artifactId>oxTomcat</artifactId>
                 <version>${oxCore.version}</version>
-	            <exclusions>
-	            	<exclusion>
-	            		<artifactId>tomcat-catalina</artifactId>
-	            		<groupId>org.apache.tomcat</groupId>
-	            	</exclusion>
-	            	<exclusion>
-	            		<artifactId>tomcat-coyote</artifactId>
-	            		<groupId>org.apache.tomcat</groupId>
-	            	</exclusion>
-	            </exclusions>
             </dependency>
 
 			<!-- Seam -->
@@ -159,23 +143,11 @@
 				<groupId>org.jboss.seam</groupId>
 				<artifactId>jboss-seam</artifactId>
 				<version>${seam.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>testng</artifactId>
-						<groupId>org.testng</groupId>
-					</exclusion>
-				</exclusions>
 			</dependency>
             <dependency>
                 <groupId>dom4j</groupId>
                 <artifactId>dom4j</artifactId>
                 <version>1.6.1</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>xml-apis</artifactId>
-                        <groupId>xml-apis</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javassist</groupId>
@@ -242,12 +214,6 @@
                 <groupId>commons-configuration</groupId>
                 <artifactId>commons-configuration</artifactId>
                 <version>1.6</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>commons-beanutils-core</artifactId>
-                        <groupId>commons-beanutils</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>commons-digester</groupId>
@@ -299,12 +265,6 @@
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
                 <version>1.4.7</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>activation</artifactId>
-                        <groupId>javax.activation</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
 			<!-- LDAP -->
@@ -314,32 +274,114 @@
                 <version>3.1.1</version>
             </dependency>
 
-			<!-- Other. Review -->
+            <!-- Metrics -->
+			<dependency>
+				<groupId>io.dropwizard.metrics</groupId>
+				<artifactId>metrics-core</artifactId>
+				<version>3.1.2</version>
+			</dependency>
+			
+			<!--  Google -->
             <dependency>
-                <groupId>org.apache.lucene</groupId>
-                <artifactId>lucene-core</artifactId>
-                <version>2.4.1</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>19.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>1.3.9</version>
+            </dependency>
+
+            <!-- Hibernate -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>4.3.0.Final</version>
+			</dependency>
+
+			<!-- JBoss -->
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-common-core</artifactId>
+				<version>2.2.0.GA</version>
+			</dependency>
+			
+			<!-- Debug -->
+            <dependency>
+                <groupId>org.jboss.seam</groupId>
+                <artifactId>jboss-seam-debug</artifactId>
+                <version>${seam.version}</version>
+            </dependency>
+			
+			<!-- Jython -->
+			<dependency>
+				<groupId>org.python</groupId>
+				<artifactId>jython</artifactId>
+				<version>2.7.0</version>
+			</dependency>
+
+			<!-- RestEasy -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxb-provider</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jettison-provider</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jackson-provider</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>jaxrs-api</artifactId>
+                <version>${resteasy.version}</version>
+            </dependency>
+
+			<!-- Jackson -->
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-core-asl</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-mapper-asl</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-jaxrs</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+
+			<!-- Jettison -->
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>${jettison.version}</version>
+            </dependency>
+
+			<!-- Other -->
             <dependency>
                 <groupId>org.mvel</groupId>
                 <artifactId>mvel2</artifactId>
                 <version>2.1.3.Final</version>
             </dependency>
             <dependency>
-                <groupId>antlr</groupId>
-                <artifactId>antlr</artifactId>
-                <version>2.7.7</version>
-            </dependency>
-            <dependency>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr-runtime</artifactId>
                 <version>3.1.1</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>stringtemplate</artifactId>
-                        <groupId>org.antlr</groupId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -368,225 +410,6 @@
 				<artifactId>ejb-api</artifactId>
 				<version>3.0</version>
 				<scope>provided</scope>
-			</dependency>
-            
-            <!-- Drools -->
-			<dependency>
-				<groupId>org.drools</groupId>
-				<artifactId>drools-core</artifactId>
-				<version>${drools.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.drools</groupId>
-				<artifactId>drools-compiler</artifactId>
-				<version>${drools.version}</version>
-			</dependency>
-
-
-			<!-- JBoss -->
-			<dependency>
-				<groupId>jboss</groupId>
-				<artifactId>jboss-common-core</artifactId>
-				<version>2.2.0.GA</version>
-				<exclusions>
-					<exclusion>
-						<groupId>apache-slide</groupId>
-						<artifactId>webdavlib</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>apache-httpclient</groupId>
-						<artifactId>commons-httpclient</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>apache-xerces</groupId>
-						<artifactId>xml-apis</artifactId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jboss-common-logging-spi</artifactId>
-						<groupId>jboss</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			
-			<!-- Debug -->
-            <dependency>
-                <groupId>org.jboss.seam</groupId>
-                <artifactId>jboss-seam-debug</artifactId>
-                <version>${seam.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.el</groupId>
-                        <artifactId>el-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>xpp3</groupId>
-                        <artifactId>xpp3_min</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.thoughtworks.xstream</groupId>
-                        <artifactId>xstream</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-			<!-- RestEasy -->
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxb-provider</artifactId>
-				<version>${resteasy.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>activation</artifactId>
-						<groupId>javax.activation</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jaxb-api</artifactId>
-						<groupId>javax.xml.bind</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jaxb-impl</artifactId>
-						<groupId>com.sun.xml.bind</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>sjsxp</artifactId>
-						<groupId>com.sun.xml.stream</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxrs</artifactId>
-				<version>${resteasy.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>activation</artifactId>
-						<groupId>javax.activation</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jcip-annotations</artifactId>
-						<groupId>net.jcip</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jcl-over-slf4j</artifactId>
-						<groupId>org.slf4j</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>jsr250-api</artifactId>
-						<groupId>javax.annotation</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>scannotation</artifactId>
-						<groupId>org.scannotation</groupId>
-					</exclusion>
-					<exclusion>
-						<artifactId>slf4j-simple</artifactId>
-						<groupId>org.slf4j</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jettison-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jackson-provider</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>jaxrs-api</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-			
-			<!-- Jython -->
-			<dependency>
-				<groupId>org.python</groupId>
-				<artifactId>jython</artifactId>
-				<version>2.7.0</version>
-			</dependency>
-
-			<!-- Jackson -->
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-core-asl</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-mapper-asl</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.jackson</groupId>
-				<artifactId>jackson-jaxrs</artifactId>
-				<version>${jackson.version}</version>
-			</dependency>
-
-			<!-- Jettison -->
-            <dependency>
-                <groupId>org.codehaus.jettison</groupId>
-                <artifactId>jettison</artifactId>
-                <version>${jettison.version}</version>
-            </dependency>
-
-            <!-- Metrics -->
-			<dependency>
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-core</artifactId>
-				<version>3.1.2</version>
-			</dependency>
-			
-			<!--  Google -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>19.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>1.3.9</version>
-            </dependency>
-
-            <!-- Hibernate -->
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>${hibernate.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>javassist</artifactId>
-						<groupId>org.javassist</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>${hibernate.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>javassist</artifactId>
-						<groupId>org.javassist</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.javax.persistence</groupId>
-				<artifactId>hibernate-jpa-2.0-api</artifactId>
-				<version>1.0.1.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-validator</artifactId>
-				<version>4.3.0.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.java-persistence</groupId>
-				<artifactId>jpa-api</artifactId>
-				<version>2.0-cr-1</version>
 			</dependency>
 
             <!-- Test -->
@@ -626,16 +449,6 @@
                 <groupId>com.wordnik</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.wordnik</groupId>
-                <artifactId>swagger-jaxrs_2.10</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.wordnik</groupId>
-                <artifactId>swagger-servlet_2.9.1</artifactId>
-                <version>1.3.1</version>
             </dependency>
         </dependencies>
 	</dependencyManagement>
