@@ -2,7 +2,6 @@ package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -12,6 +11,7 @@ import org.xdi.oxauth.model.common.PairwiseIdType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
+import org.xdi.util.StringHelper;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
