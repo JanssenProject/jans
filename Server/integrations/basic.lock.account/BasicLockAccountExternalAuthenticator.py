@@ -18,7 +18,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, configurationAttributes):
         print "Basic (lock account). Initialization"
-        print "Basic (lock account). Initialized successfully"
+
+        self.invalidLoginCountAttribute = "oxCountInvalidLogin"
+        if configurationAttributes.containsKey("invalid_login_count_attribute"):
+            self.invalidLoginCountAttribute = configurationAttributes.get("invalid_login_count_attribute").getValue2()
+        else:
+            print "Basic (lock account). Initialization. Using default attribute"
+
+        self.maximumInvalidLoginAttemps = 3
+        if configurationAttributes.containsKey("maximum_invalid_login_attemps"):
+            self.maximumInvalidLoginAttemps = StringHelper.toInteger(configurationAttributes.get("maximum_invalid_login_attemps").getValue2())
+        else:
+            print "Basic (lock account). Initialization. Using default number attempts"
+
+        print "Basic (lock account). Initialized successfully. invalid_login_count_attribute: '%s', maximum_invalid_login_attemps: '%s'" % (self.invalidLoginCountAttribute, self.maximumInvalidLoginAttemps)
+
         return True   
 
     def destroy(self, configurationAttributes):
@@ -52,16 +66,19 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 
             if (not logged_in):
-                countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, "oxCountInvalidLogin")
+                countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
-                if countInvalidLogin < 3:
-                    self.setUserAttributeValue(user_name, "oxCountInvalidLogin", StringHelper.toString(countInvalidLogin + 1))
-                else:
+
+                if countInvalidLogin < self.maximumInvalidLoginAttemps:
+                    countInvalidLogin = countInvalidLogin + 1
+                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(countInvalidLogin))
+
+                if countInvalidLogin >= self.maximumInvalidLoginAttemps:
                     self.lockUser(user_name)
                     
                 return False
 
-            self.setUserAttributeValue(user_name, "oxCountInvalidLogin", StringHelper.toString(0))
+            self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
 
             return True
         else:
