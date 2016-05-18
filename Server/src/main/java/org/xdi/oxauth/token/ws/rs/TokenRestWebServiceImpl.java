@@ -9,7 +9,7 @@ package org.xdi.oxauth.token.ws.rs;
 import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.hibernate.annotations.common.util.StringHelper;
+import org.xdi.util.StringHelper;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
