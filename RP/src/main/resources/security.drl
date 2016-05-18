@@ -1,6 +1,0 @@
-package Permissions;
-
-import java.security.Principal;
-
-import org.jboss.seam.security.permission.PermissionCheck;
-import org.jboss.seam.security.Role;
