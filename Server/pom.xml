@@ -51,11 +51,11 @@
 
 		<pluginManagement>
 			<plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.17</version>
-                    <configuration>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.17</version>
+					<configuration>
 						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
 							-Dcatalina.base=${project.build.directory}
 							-Dgluu.conf.folder=${project.build.directory}
@@ -74,11 +74,11 @@
 							<exclude>**/xml/*</exclude>
 						</excludes>
 
-                        <suiteXmlFiles>
-                            <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
-                        </suiteXmlFiles>
-                    </configuration>
-                </plugin>
+						<suiteXmlFiles>
+							<suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+						</suiteXmlFiles>
+					</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
@@ -288,14 +288,14 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxLdap</artifactId>
 		</dependency>
-          <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxeleven-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxeleven-model</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-model</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxAuthStatic</artifactId>
@@ -330,16 +330,16 @@
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxTomcat</artifactId>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>tomcat-catalina</artifactId>
-            		<groupId>org.apache.tomcat</groupId>
-            	</exclusion>
-            	<exclusion>
-            		<artifactId>tomcat-coyote</artifactId>
-            		<groupId>org.apache.tomcat</groupId>
-            	</exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>tomcat-catalina</artifactId>
+					<groupId>org.apache.tomcat</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>tomcat-coyote</artifactId>
+					<groupId>org.apache.tomcat</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Seam -->
@@ -350,12 +350,12 @@
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>xml-apis</artifactId>
-                    <groupId>xml-apis</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>javassist</groupId>
@@ -365,12 +365,12 @@
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+		</dependency>
 
-        <!-- Commons libs -->
+		<!-- Commons libs -->
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
@@ -396,12 +396,12 @@
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-beanutils-core</artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-beanutils-core</artifactId>
+					<groupId>commons-beanutils</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-digester</groupId>
@@ -429,7 +429,7 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
-        <dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
@@ -456,26 +456,26 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>activation</artifactId>
-                    <groupId>javax.activation</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>activation</artifactId>
+					<groupId>javax.activation</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		
+
 		<!-- LDAP -->
 		<dependency>
 			<groupId>com.unboundid</groupId>
 			<artifactId>unboundid-ldapsdk</artifactId>
 		</dependency>
 
-        <!-- Metrics -->
+		<!-- Metrics -->
 		<dependency>
 			<groupId>io.dropwizard.metrics</groupId>
 			<artifactId>metrics-core</artifactId>
 		</dependency>
-		
+
 		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -602,7 +602,7 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 
-        <!-- Documentation -->
+		<!-- Documentation -->
 		<dependency>
 			<groupId>com.wordnik</groupId>
 			<artifactId>swagger-annotations</artifactId>
@@ -707,8 +707,8 @@
 			<id>enable-seam-debug</id>
 			<activation>
 				<property>
-                    <name>development-build</name>
-                    <value>true</value>
+					<name>development-build</name>
+					<value>true</value>
 				</property>
 			</activation>
 			<dependencies>
@@ -720,19 +720,19 @@
 							<artifactId>jsf-facelets</artifactId>
 							<groupId>com.sun.facelets</groupId>
 						</exclusion>
-	                    <exclusion>
-	                        <groupId>javax.el</groupId>
-	                        <artifactId>el-api</artifactId>
-	                    </exclusion>
-	                    <exclusion>
-	                        <groupId>xpp3</groupId>
-	                        <artifactId>xpp3_min</artifactId>
-	                    </exclusion>
-	                    <exclusion>
-	                        <groupId>com.thoughtworks.xstream</groupId>
-	                        <artifactId>xstream</artifactId>
-	                    </exclusion>
-                	</exclusions>
+						<exclusion>
+							<groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>xpp3</groupId>
+							<artifactId>xpp3_min</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>com.thoughtworks.xstream</groupId>
+							<artifactId>xstream</artifactId>
+						</exclusion>
+					</exclusions>
 				</dependency>
 			</dependencies>
 		</profile>
