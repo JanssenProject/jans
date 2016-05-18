@@ -194,7 +194,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
+			<artifactId>ehcache-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -297,6 +297,10 @@
 				<exclusion>
 					<artifactId>commons-httpclient</artifactId>
 					<groupId>apache-httpclient</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>webdavlib</artifactId>
+					<groupId>apache-slide</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
