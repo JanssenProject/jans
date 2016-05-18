@@ -321,6 +321,10 @@
 					<artifactId>jsf-facelets</artifactId>
 					<groupId>com.sun.facelets</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
