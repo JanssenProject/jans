@@ -77,6 +77,28 @@
       <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
    </context-param>
 
+    <!-- Cors -->
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value>*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/.well-known/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/seam/resource/restv1/oxauth/clientinfo</url-pattern>
+    </filter-mapping>
+
     <!-- swagger servlet reader -->
     <!--<servlet>-->
         <!--<servlet-name>DefaultServletReaderConfig</servlet-name>-->
