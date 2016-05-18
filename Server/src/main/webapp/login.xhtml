@@ -56,7 +56,7 @@
                                         <h:outputText value="#{messages['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-					                	<ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+					<ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
                                         <s:div rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
