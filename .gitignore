@@ -3,6 +3,8 @@
 .project
 .classpath
 .pydevproject
+.tern-project
+.faces-config.xml.jsfdia
 
 # IntelliJ IDEA project files
 .idea
