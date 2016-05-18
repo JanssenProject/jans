@@ -11,36 +11,39 @@
 
 <ui:define name="body">
 
-<a4j:form id="mainForm">
+<h:form id="mainForm">
 <h1>Welcome to oxAuth RP!</h1>
 
 <div>
     <rich:panel>
         <f:facet name="header">OpenID Connect Discovery (Webfinger)</f:facet>
-        <s:div>
-            <div>
-                <strong>
-                    Please enter an identifier of the target End-User that is the subject
-                    of the discovery request.
-                </strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="resource">Resource</h:outputLabel>
-                    <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
-                    <h:outputText>eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443</h:outputText>
-                    <h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
-                    <h:selectBooleanCheckbox id="acceptUntrustedCertificate"
-                                             value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}"/>
-                </h:panelGrid>
-            </div>
-        </s:div>
+        <a4j:region>
+	        <s:div>
+	            <div>
+	                <strong>
+	                    Please enter an identifier of the target End-User that is the subject
+	                    of the discovery request.
+	                </strong>
+	            </div>
+	            <div>
+	                <h:panelGrid columns="3">
+	                    <h:outputLabel for="resource">Resource</h:outputLabel>
+	                    <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
+	                    <h:outputText value="eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443" />
+	                    <h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
+	                    <h:selectBooleanCheckbox id="acceptUntrustedCertificate"
+	                                             value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}"/>
+	                </h:panelGrid>
+	            </div>
+	        </s:div>
+	
+	        <div class="actionButtons">
+	            <a4j:commandButton value="Submit"
+	                               action="#{openIdConnectDiscoveryAction.exec}"
+	                               execute="@region" render="discoveryResults, registrationForm, authorizationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm"/>
+	        </div>
 
-        <div class="actionButtons">
-            <a4j:commandButton value="Submit"
-                               action="#{openIdConnectDiscoveryAction.exec}"
-                               reRender="discoveryResults, registrationForm, authorizationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm"/>
-        </div>
+        </a4j:region>
 
         <s:div id="discoveryResults">
             <s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
@@ -116,6 +119,7 @@
 <div>
 <rich:panel>
 <f:facet name="header">Dynamic Client Registration</f:facet>
+<a4j:region>
 <s:div id="registrationForm">
 <div>
     <strong>
@@ -386,8 +390,9 @@
 <div class="actionButtons">
     <a4j:commandButton value="Submit"
                        action="#{registrationAction.exec}"
-                       reRender="registrationResults, clientReadForm, authorizationForm, tokenForm"/>
+                       execute="@region" render="registrationResults, clientReadForm, authorizationForm, tokenForm"/>
 </div>
+</a4j:region>
 <s:div id="registrationResults">
     <s:div rendered="#{registrationAction.showResults}">
         <br/>
@@ -415,6 +420,7 @@
     </s:div>
 </s:div>
 
+<a4j:region>
 <s:div id="clientReadForm">
     <div>
         <br/>
@@ -445,8 +451,9 @@
 <div class="actionButtons">
     <a4j:commandButton value="Submit"
                        action="#{registrationAction.execClientRead}"
-                       reRender="clientReadResults"/>
+                       execute="@region" render="clientReadResults"/>
 </div>
+</a4j:region>
 <s:div id="clientReadResults">
     <s:div rendered="#{registrationAction.showClientReadResults}">
         <br/>
@@ -603,7 +610,7 @@
                          value="#{authorizationAction.claims}"
                          rows="10" cols="45">
             <f:validator validatorId="jsonValidator"/>
-            <rich:ajaxValidator event="onblur"/>
+            <rich:validator event="blur"/>
         </h:inputTextarea>
         <rich:message for="claims" style="color: red"/>
 
@@ -628,7 +635,7 @@
         <h:outputLabel for="useOpenIdRequestObject">Use OpenID Request Object</h:outputLabel>
         <h:selectBooleanCheckbox id="useOpenIdRequestObject"
                                  value="#{authorizationAction.useOpenIdRequestObject}">
-            <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
+            <a4j:ajax event="change" execute="@this" render="authorizationEndpointDiv"/>
         </h:selectBooleanCheckbox>
     </h:panelGrid>
     <s:div rendered="#{authorizationAction.useOpenIdRequestObject}">
@@ -638,7 +645,7 @@
                               value="#{authorizationAction.signOrEncryptRequestObject}">
                 <f:selectItem itemValue="JWS" itemLabel="JWS"/>
                 <f:selectItem itemValue="JWE" itemLabel="JWE"/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
+                <a4j:ajax event="change" render="authorizationEndpointDiv" execute="@this"/>
             </h:selectOneRadio>
             <h:outputText></h:outputText>
         </h:panelGrid>
@@ -651,7 +658,7 @@
                 <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
                                label="#{signatureAlgorithm}"/>
                 <s:convertEnum/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
+                <a4j:ajax event="change" render="authorizationEndpointDiv" execute="@this"/>
             </h:selectOneMenu>
             <h:outputText rendered="#{authorizationAction.JWSSelected}"></h:outputText>
 
@@ -663,7 +670,7 @@
                 <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
                                label="#{keyEncryptionAlgorithm.name}"/>
                 <s:convertEnum/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
+                <a4j:ajax event="change" render="authorizationEndpointDiv" execute="@this"/>
             </h:selectOneMenu>
             <h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
 
@@ -731,7 +738,7 @@
                              value="#{authorizationAction.openIdRequestObject}"
                              rows="20" cols="45">
                 <f:validator validatorId="jsonValidator"/>
-                <rich:ajaxValidator event="onblur"/>
+                <rich:validator event="blur"/>
             </h:inputTextarea>
             <rich:message for="openIdRequestObject" style="color: red"/>
         </h:panelGrid>
@@ -751,6 +758,7 @@
 <div>
     <rich:panel>
         <f:facet name="header">Token Endpoint</f:facet>
+        <a4j:region>
         <s:div id="tokenForm">
             <div>
                 <strong>Required parameters</strong>
@@ -853,8 +861,9 @@
         <div class="actionButtons">
             <a4j:commandButton value="Submit"
                                action="#{tokenAction.exec}"
-                               reRender="tokenResults, userInfoForm"/>
+                               execute="@region" render="tokenResults, userInfoForm"/>
         </div>
+        </a4j:region>
         <s:div id="tokenResults">
             <s:div rendered="#{tokenAction.showResults}">
                 <br/>
@@ -920,6 +929,7 @@
 <div>
     <rich:panel>
         <f:facet name="header">User Info Endpoint</f:facet>
+<a4j:region>
         <s:div id="userInfoForm">
             <div>
                 <strong>Required Parameters</strong>
@@ -957,8 +967,9 @@
         <div class="actionButtons">
             <a4j:commandButton value="Submit"
                                action="#{userInfoAction.exec}"
-                               reRender="userInfoResults"/>
+                               execute="@region" render="userInfoResults"/>
         </div>
+</a4j:region>
         <s:div id="userInfoResults">
             <s:div rendered="#{userInfoAction.showResults}">
                 <br/>
@@ -993,6 +1004,7 @@
 <div>
     <rich:panel>
         <f:facet name="header">End Session Endpoint</f:facet>
+<a4j:region>
         <s:div id="endSessionForm">
             <div>
                 <strong></strong>
@@ -1029,12 +1041,13 @@
         <div class="actionButtons">
             <a4j:commandButton value="Submit"
                                action="#{endSessionAction.exec}"
-                               reRender="endSessionResults"/>
+                               execute="@region" render="endSessionResults"/>
         </div>
+</a4j:region>
     </rich:panel>
 </div>
 
-</a4j:form>
+</h:form>
 
 <script type="text/javascript">
     //<![CDATA[
