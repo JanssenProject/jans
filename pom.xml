@@ -451,6 +451,23 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.version}</version>
 			</dependency>
+			
+			<!-- JSF -->
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>2.1.28</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>2.1.28-jbossorg-1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec.javax.faces</groupId>
+				<artifactId>jboss-jsf-api_2.1_spec</artifactId>
+				<version>2.1.28.Final</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
