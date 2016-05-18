@@ -45,6 +45,10 @@
         <param-name>org.richfaces.CONTROL_SKINNING_CLASSES</param-name>
         <param-value>disable</param-value>
     </context-param>
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Production</param-value>
+    </context-param>
 
     <!-- JSF -->
     <context-param>
