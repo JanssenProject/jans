@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:c="http://java.sun.com/jstl/core"
                 xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
@@ -59,7 +58,7 @@
                 <div class="login-panel">
                     <div class="login-panel-header">Login</div>
                     <div class="login-panel-body">
-                        <c:set var="client" value='#{clientService.getClient(redirect.parameters["client_id"])}'/>
+                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
                         <s:div rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -104,7 +103,7 @@
                     <div class="login-panel">
                         <div class="login-panel-header">Login</div>
                         <div class="login-panel-body">
-                            <c:set var="client" value='#{clientService.getClient(redirect.parameters["client_id"])}'/>
+                            <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
     
                             <s:div rendered='#{!empty client.getLogoUri()}'>
                                 <h:graphicImage url='#{client.getLogoUri()}'/>
