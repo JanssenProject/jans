@@ -1,1 +1,1 @@
-<% response.sendRedirect("home.seam"); %>
+<% response.sendRedirect("home.htm"); %>
