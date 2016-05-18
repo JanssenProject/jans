@@ -25,11 +25,14 @@ password_file = tempfile.mkstemp()[1]
 backup24_folder = None
 backup_version = None
 current_version = None
+hostname = None
 
 service = "/usr/sbin/service"
 ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
+keytool = '/usr/bin/keytool'
+defaultKeystore = '/etc/ssl/certs/java/cacerts'
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -366,10 +369,10 @@ def getCurrentVersion():
                 return line.split(':')[-1].strip()
 
 
-def getBackupVersion():
+def getBackupProperty(prop):
     with open(os.path.join(backup24_folder, 'setup.properties'), 'r') as f:
         for line in f:
-            if 'version=' in line:
+            if '{0}='.format(prop) in line:
                 return line.split('=')[-1].strip()
 
 
@@ -388,8 +391,23 @@ def setPermissions():
     getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
 
 
+def updateCertKeystore():
+    logging.info('Updating the SSL Keystore')
+    keys = ['httpd', 'asmiba', 'shibidp', 'opendj']
+    for key in keys:
+        alias = "{0}_{1}".format(hostname, key)
+        filename = "/etc/certs/{0}.crt".format(key)
+        # delete the old key from the keystore
+        getOutput([keytool, '-delete', '-alias', alias, '-keystore',
+                   defaultKeystore, '-storepass', 'changeit', '-noprompt'])
+        # import the new key into the keystore
+        getOutput([keytool, '-import', '-trustcacerts', '-file', filename,
+                   '-alias', alias, '-keystore', defaultKeystore, '-storepass',
+                   'changeit', '-noprompt'])
+
+
 def main(folder_name):
-    global backup24_folder, backup_version, current_version, service
+    global backup24_folder, backup_version, current_version, service, hostname
 
     # Verify that all required folders are present
     backup24_folder = folder_name
@@ -408,8 +426,10 @@ def main(folder_name):
         sys.exit(1)
 
     # Identify the version of the backup and installation
-    backup_version = getBackupVersion()
+    backup_version = getBackupProperty('version')
     current_version = getCurrentVersion()
+
+    hostname = getBackupProperty('hostname')
 
     # some version specific adjustment
     if '2.4.3' in current_version and '2.4.3' not in backup_version:
@@ -442,6 +462,7 @@ def main(folder_name):
     preparePasswordFile()
     stopOpenDJ()
     copyFiles(backup24_folder)
+    updateCertKeystore()
     startOpenDJ()
     getNewConfig(newLdif)
     restoreConfig(ldif_folder, newLdif, outputLdifFolder)
