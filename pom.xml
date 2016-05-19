@@ -528,13 +528,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.17</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>test</goal>
-							</goals>
-						</execution>
-					</executions>
 					<configuration>
 						<!-- Needed as we have both junit and testng -->
 						<failIfNoTests>false</failIfNoTests>
