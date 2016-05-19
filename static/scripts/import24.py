@@ -393,17 +393,29 @@ def setPermissions():
 
 def updateCertKeystore():
     logging.info('Updating the SSL Keystore')
-    keys = ['httpd', 'asmiba', 'shibidp', 'opendj']
+    keys = ['httpd', 'asimba', 'shibIDP', 'opendj']
     for key in keys:
         alias = "{0}_{1}".format(hostname, key)
         filename = "/etc/certs/{0}.crt".format(key)
         # delete the old key from the keystore
-        getOutput([keytool, '-delete', '-alias', alias, '-keystore',
-                   defaultKeystore, '-storepass', 'changeit', '-noprompt'])
+        logging.debug('Deleting new %s', alias)
+        result = getOutput([keytool, '-delete', '-alias', alias, '-keystore',
+                            defaultKeystore, '-storepass', 'changeit',
+                            '-noprompt'])
+        if 'error' in result:
+            logging.error(result)
+        else:
+            logging.debug('Delete operation success.')
         # import the new key into the keystore
-        getOutput([keytool, '-import', '-trustcacerts', '-file', filename,
-                   '-alias', alias, '-keystore', defaultKeystore, '-storepass',
-                   'changeit', '-noprompt'])
+        logging.debug('Importing old %s', alias)
+        result = getOutput([keytool, '-import', '-trustcacerts', '-file',
+                            filename, '-alias', alias, '-keystore',
+                            defaultKeystore, '-storepass', 'changeit',
+                            '-noprompt'])
+        if 'error' in result:
+            logging.error(result)
+        else:
+            logging.debug('Delete operation success.')
 
 
 def main(folder_name):
