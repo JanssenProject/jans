@@ -237,6 +237,11 @@ def genProperties():
     props['scim_rs_client_id'] = getProp('scim_rs_client_id')
     props['scim_rp_client_id'] = getProp('scim_rp_client_id')
     props['version'] = getProp('githubBranchName').split('_')[-1]
+    # As the certificates are copied over to the new installation, their pass
+    # are required for accessing them and validating them
+    props['httpdKeyPass'] = getProp('httpdKeyPass')
+    props['shibJksPass'] = getProp('shibJksPass')
+    props['asimbaJksPass'] = getProp('asimbaJksPass')
 
     # Preferences for installation of optional components
     installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (Y/N):")
