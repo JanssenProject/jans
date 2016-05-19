@@ -415,7 +415,7 @@ def updateCertKeystore():
         if 'error' in result:
             logging.error(result)
         else:
-            logging.debug('Delete operation success.')
+            logging.debug('Certificate import success.')
 
 
 def main(folder_name):
