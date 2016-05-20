@@ -394,6 +394,31 @@ def setPermissions():
 def updateCertKeystore():
     logging.info('Updating the SSL Keystore')
     keys = ['httpd', 'asimba', 'shibIDP', 'opendj']
+
+    # The old opendj.crt file is useless. export the file from the
+    # new opendj truststore and import that into the java truststore
+    openDjPinFn = '/opt/opendj/config/keystore.pin'
+    openDjTruststore = '/opt/opendj/config/truststore'
+    openDjPin = None
+    try:
+        f = open(openDjPinFn)
+        openDjPin = f.read().splitlines()[0]
+        f.close()
+    except Exception as e:
+        logging.error("Reading OpenDJ truststore failed. Without OpenDJ cert"
+                      " the import is useless")
+        logging.debug(e)
+        sys.exit(1)
+
+    # Export public OpenDJ certificate
+    logging.debug("Exporting OpenDJ certificate")
+    result = getOutput([keytool, '-exportcert', '-keystore', openDjTruststore,
+                        '-storepass', openDjPin,
+                        '-file', '/etc/certs/opendj.crt',
+                        '-alias', 'server-cert', '-rfc'])
+    logging.debug(result)
+
+    # import all the keys into the keystore
     for key in keys:
         alias = "{0}_{1}".format(hostname, key)
         filename = "/etc/certs/{0}.crt".format(key)
