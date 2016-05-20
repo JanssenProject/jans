@@ -1,1042 +1,992 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:rich="http://richfaces.org/rich"
-                xmlns:a4j="http://richfaces.org/a4j"
-                template="/WEB-INF/incl/layout/template.xhtml">
-
-<ui:define name="body">
-
-<a4j:form id="mainForm">
-<h1>Welcome to oxAuth RP!</h1>
-
-<div>
-    <rich:panel>
-        <f:facet name="header">OpenID Connect Discovery (Webfinger)</f:facet>
-        <s:div>
-            <div>
-                <strong>
-                    Please enter an identifier of the target End-User that is the subject
-                    of the discovery request.
-                </strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="resource">Resource</h:outputLabel>
-                    <h:inputText id="resource" value="#{openIdConnectDiscoveryAction.resource}" size="40"/>
-                    <h:outputText>eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443</h:outputText>
-                    <h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
-                    <h:selectBooleanCheckbox id="acceptUntrustedCertificate"
-                                             value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}"/>
-                </h:panelGrid>
-            </div>
-        </s:div>
-
-        <div class="actionButtons">
-            <a4j:commandButton value="Submit"
-                               action="#{openIdConnectDiscoveryAction.exec}"
-                               reRender="discoveryResults, registrationForm, authorizationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm"/>
-        </div>
-
-        <s:div id="discoveryResults">
-            <s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Identifier Normalization</f:facet>
-                    <s:div>
-                        <div>
-                            <h:panelGrid columns="2">
-                                <h:outputLabel>Resource</h:outputLabel>
-                                <h:outputText value="#{openIdConnectDiscoveryAction.resource}"/>
-
-                                <h:outputLabel>Host</h:outputLabel>
-                                <h:outputText value="#{openIdConnectDiscoveryAction.host}"/>
-
-                                <h:outputLabel>Rel</h:outputLabel>
-                                <h:outputText value="#{openIdConnectDiscoveryAction.rel}"/>
-                            </h:panelGrid>
-                        </div>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Webfinger Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="4"
-                                         value="#{openIdConnectDiscoveryAction.requestString1}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Webfinger Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="10"
-                                         value="#{openIdConnectDiscoveryAction.responseString1}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Configuration Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="4"
-                                         value="#{openIdConnectDiscoveryAction.requestString2}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Configuration Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="15"
-                                         value="#{openIdConnectDiscoveryAction.responseString2}"/>
-                    </s:div>
-                </rich:panel>
-            </s:div>
-        </s:div>
-    </rich:panel>
-</div>
-
-<br/>
-
-<div>
-<rich:panel>
-<f:facet name="header">Dynamic Client Registration</f:facet>
-<s:div id="registrationForm">
-<div>
-    <strong>
-        Please fill the form to register with an OpenID Provider to acquire
-        a Client ID and shared secret.
-    </strong>
-</div>
-<div>
-<h:panelGrid columns="3">
-<h:outputLabel for="registrationEndpoint">Registration Endpoint</h:outputLabel>
-<h:inputText id="registrationEndpoint"
-             value="#{registrationAction.registrationEndpoint}"
-             size="40"/>
-<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/register</h:outputText>
-
-<h:outputLabel for="redirectUris">Redirect URIs (space-separated)</h:outputLabel>
-<h:inputText id="redirectUris"
-             value="#{registrationAction.redirectUris}"
-             size="40"/>
-<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
-
-<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
-<h:inputText id="postLogoutRedirectUris"
-             value="#{registrationAction.postLogoutRedirectUris}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
-<h:selectManyListbox id="registrationResponseType"
-                     value="#{registrationAction.responseTypes}">
-    <s:selectItems value="#{responseTypes}" var="responseType"
-                   label="#{responseType}"/>
-    <s:convertEnum/>
-</h:selectManyListbox>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="registrationGrantType">Grant Types</h:outputLabel>
-<h:selectManyListbox id="registrationGrantType"
-                     value="#{registrationAction.grantTypes}">
-    <s:selectItems value="#{grantTypes}" var="grantType"
-                   label="#{grantType}"/>
-    <s:convertEnum/>
-</h:selectManyListbox>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="applicationType">Application Type</h:outputLabel>
-<h:selectOneMenu id="applicationType"
-                 value="#{registrationAction.applicationType}">
-    <s:selectItems value="#{applicationTypes}" var="applicationType"
-                   label="#{applicationType}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="contacts">Contacts (space-separated)</h:outputLabel>
-<h:inputText id="contacts"
-             value="#{registrationAction.contacts}"
-             size="40"/>
-<h:outputText>eg: javier@gluu.org</h:outputText>
-
-<h:outputLabel for="clientName">Client Name</h:outputLabel>
-<h:inputText id="clientName"
-             value="#{registrationAction.clientName}"
-             size="40"/>
-<h:outputText>eg: Test app</h:outputText>
-
-<h:outputLabel for="logoUri">Logo URI</h:outputLabel>
-<h:inputText id="logoUri"
-             value="#{registrationAction.logoUri}"
-             size="40"/>
-<h:outputText>eg: http://www.gluu.org/wp-content/uploads/2013/08/logo.png</h:outputText>
-
-<h:outputLabel for="clientUri">Client URI</h:outputLabel>
-<h:inputText id="clientUri"
-             value="#{registrationAction.clientUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="policyUri">Policy URI</h:outputLabel>
-<h:inputText id="policyUri"
-             value="#{registrationAction.policyUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="tosUri">Terms of Service URI</h:outputLabel>
-<h:inputText id="tosUri"
-             value="#{registrationAction.tosUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="jwksUri">JSON Web Key Set URI</h:outputLabel>
-<h:inputText id="jwksUri"
-             value="#{registrationAction.jwksUri}"
-             size="40"/>
-<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/jwks.json</h:outputText>
-
-<h:outputLabel for="sectorIdentifierUri">Sector Identifier URI</h:outputLabel>
-<h:inputText id="sectorIdentifierUri"
-             value="#{registrationAction.sectorIdentifierUri}"
-             size="40"/>
-<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/sector_identifier.js</h:outputText>
-
-<h:outputLabel for="subjectType">Subject Type</h:outputLabel>
-<h:selectOneMenu id="subjectType"
-                 value="#{registrationAction.subjectType}">
-    <s:selectItems value="#{subjectTypes}" var="subjectType"
-                   label="#{subjectType}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
-<h:selectOneMenu id="idTokenSignedResponseAlg"
-                 value="#{registrationAction.idTokenSignedResponseAlg}">
-    <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
-<h:selectOneMenu id="idTokenEncryptedResponseAlg"
-                 value="#{registrationAction.idTokenEncryptedResponseAlg}">
-    <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-                   label="#{keyEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
-<h:selectOneMenu id="idTokenEncryptedResponseEnc"
-                 value="#{registrationAction.idTokenEncryptedResponseEnc}">
-    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-                   label="#{blockEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="userInfoSignedResponseAlg">User Info Signed Response Alg</h:outputLabel>
-<h:selectOneMenu id="userInfoSignedResponseAlg"
-                 value="#{registrationAction.userInfoSignedResponseAlg}">
-    <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="userInfoEncryptedResponseAlg">User Info Encrypted Response Alg</h:outputLabel>
-<h:selectOneMenu id="userInfoEncryptedResponseAlg"
-                 value="#{registrationAction.userInfoEncryptedResponseAlg}">
-    <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-                   label="#{keyEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="userInfoEncryptedResponseEnc">User Info Encrypted Response Enc</h:outputLabel>
-<h:selectOneMenu id="userInfoEncryptedResponseEnc"
-                 value="#{registrationAction.userInfoEncryptedResponseEnc}">
-    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-                   label="#{blockEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
-<h:selectOneMenu id="requestObjectSigningAlg"
-                 value="#{registrationAction.requestObjectSigningAlg}">
-    <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="requestObjectEncryptionAlg">Request Object Encryption Alg</h:outputLabel>
-<h:selectOneMenu id="requestObjectEncryptionAlg"
-                 value="#{registrationAction.requestObjectEncryptionAlg}">
-    <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-                   label="#{keyEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="requestObjectEncryptionEnc">Request Object Encryption Enc</h:outputLabel>
-<h:selectOneMenu id="requestObjectEncryptionEnc"
-                 value="#{registrationAction.requestObjectEncryptionEnc}">
-    <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-                   label="#{blockEncryptionAlgorithm.name}"
-                   noSelectionLabel="- Please select one -"/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
-<h:selectOneMenu id="tokenEndpointAuthMethod"
-                 value="#{registrationAction.tokenEndpointAuthMethod}">
-    <s:selectItems value="#{authenticationMethods}" var="authenticationMethod"
-                   label="#{authenticationMethod}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="tokenEndpointAuthSigningAlg">Token Endpoint Auth Signing Alg</h:outputLabel>
-<h:selectOneMenu id="tokenEndpointAuthSigningAlg"
-                 value="#{registrationAction.tokenEndpointAuthSigningAlg}">
-    <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                   label="#{signatureAlgorithm}"
-                   noSelectionLabel="- Please select one -"/>
-    <s:convertEnum/>
-</h:selectOneMenu>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="defaultMaxAge">Default Maximum Authentication Age</h:outputLabel>
-<h:inputText id="defaultMaxAge"
-             value="#{registrationAction.defaultMaxAge}"
-             size="40"/>
-<h:outputText>Number of seconds</h:outputText>
-
-<h:outputLabel for="defaultMaxAge">Require Auth Time</h:outputLabel>
-<h:selectOneRadio id="requireAuthTime"
-                  value="#{registrationAction.requireAuthTime}">
-    <f:selectItem itemValue="#{true}" itemLabel="yes"/>
-    <f:selectItem itemValue="#{false}" itemLabel="no"/>
-</h:selectOneRadio>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="defaultAcrValues">Default ACR Values (space-separated)</h:outputLabel>
-<h:inputText id="defaultAcrValues"
-             value="#{registrationAction.defaultAcrValues}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="initiateLoginUri">Initiate Login URI</h:outputLabel>
-<h:inputText id="initiateLoginUri"
-             value="#{registrationAction.initiateLoginUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="requestUris">Request URIs (space-separated)</h:outputLabel>
-<h:inputText id="requestUris"
-             value="#{registrationAction.requestUris}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="logoutUri">Logout URI</h:outputLabel>
-<h:inputText id="logoutUri"
-             value="#{registrationAction.logoutUri}"
-             size="40"/>
-<h:outputText></h:outputText>
-
-<h:outputLabel for="logoutSessionRequired">Logout Session Required</h:outputLabel>
-<h:selectBooleanCheckbox id="logoutSessionRequired"
-                         value="#{registrationAction.logoutSessionRequired}"/>
-<h:outputText></h:outputText>
-</h:panelGrid>
-</div>
-</s:div>
-
-<div class="actionButtons">
-    <a4j:commandButton value="Submit"
-                       action="#{registrationAction.exec}"
-                       reRender="registrationResults, clientReadForm, authorizationForm, tokenForm"/>
-</div>
-<s:div id="registrationResults">
-    <s:div rendered="#{registrationAction.showResults}">
-        <br/>
-        <hr/>
-        <br/>
-        <rich:panel>
-            <f:facet name="header">Registration Request</f:facet>
-            <s:div>
-                <h:inputTextarea readonly="true"
-                                 styleClass="width100"
-                                 rows="10"
-                                 value="#{registrationAction.requestString}"/>
-            </s:div>
-        </rich:panel>
-        <br/>
-        <rich:panel>
-            <f:facet name="header">Registration Response</f:facet>
-            <s:div>
-                <h:inputTextarea readonly="true"
-                                 styleClass="width100"
-                                 rows="30"
-                                 value="#{registrationAction.responseString}"/>
-            </s:div>
-        </rich:panel>
-    </s:div>
-</s:div>
-
-<s:div id="clientReadForm">
-    <div>
-        <br/>
-        <hr/>
-        <br/>
-        <strong>
-            Please fill the form to read the current configuration of the Client
-            on the Authorization Server.
-        </strong>
-    </div>
-    <div>
-        <h:panelGrid columns="3">
-            <h:outputLabel for="registrationClientUri">Registration Client URI</h:outputLabel>
-            <h:inputText id="registrationClientUri"
-                         value="#{registrationAction.registrationClientUri}"
-                         size="40"/>
-            <h:outputText></h:outputText>
-
-            <h:outputLabel for="registrationAccessToken">Registration Access Token</h:outputLabel>
-            <h:inputText id="registrationAccessToken"
-                         value="#{registrationAction.registrationAccessToken}"
-                         size="40"/>
-            <h:outputText></h:outputText>
-        </h:panelGrid>
-    </div>
-</s:div>
-
-<div class="actionButtons">
-    <a4j:commandButton value="Submit"
-                       action="#{registrationAction.execClientRead}"
-                       reRender="clientReadResults"/>
-</div>
-<s:div id="clientReadResults">
-    <s:div rendered="#{registrationAction.showClientReadResults}">
-        <br/>
-        <hr/>
-        <br/>
-        <rich:panel>
-            <f:facet name="header">Client Read Request</f:facet>
-            <s:div>
-                <h:inputTextarea readonly="true"
-                                 styleClass="width100"
-                                 rows="4"
-                                 value="#{registrationAction.clientReadRequestString}"/>
-            </s:div>
-        </rich:panel>
-        <br/>
-        <rich:panel>
-            <f:facet name="header">Client Read Response</f:facet>
-            <s:div>
-                <h:inputTextarea readonly="true"
-                                 styleClass="width100"
-                                 rows="30"
-                                 value="#{registrationAction.clientReadResponseString}"/>
-            </s:div>
-        </rich:panel>
-    </s:div>
-</s:div>
-</rich:panel>
-</div>
-
-<br/>
-
-<s:div id="authorizationEndpointDiv">
-<rich:panel>
-<f:facet name="header">Authorization Endpoint</f:facet>
-<s:div id="authorizationForm">
-<div>
-    <strong>OAuth 2.0 request parameters</strong>
-</div>
-<div>
-    <h:panelGrid columns="3">
-        <h:outputLabel for="authorizationEndpoint">Authorization Endpoint</h:outputLabel>
-        <h:inputText id="authorizationEndpoint"
-                     value="#{authorizationAction.authorizationEndpoint}"
-                     size="40"/>
-        <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize</h:outputText>
-
-        <h:outputLabel for="responseType">Response Type</h:outputLabel>
-        <h:selectManyListbox id="responseType"
-                             value="#{authorizationAction.responseTypes}">
-            <s:selectItems value="#{responseTypes}" var="responseType"
-                           label="#{responseType}"/>
-            <s:convertEnum/>
-        </h:selectManyListbox>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="authorizationClientId">Client ID</h:outputLabel>
-        <h:inputText id="authorizationClientId"
-                     value="#{authorizationAction.clientId}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="scopes">Scopes</h:outputLabel>
-        <h:selectManyListbox id="scopes"
-                             value="#{authorizationAction.scopes}">
-            <f:selectItem itemLabel="openid" itemValue="openid"/>
-            <f:selectItem itemLabel="profile" itemValue="profile"/>
-            <f:selectItem itemLabel="address" itemValue="address"/>
-            <f:selectItem itemLabel="email" itemValue="email"/>
-            <f:selectItem itemLabel="phone" itemValue="phone"/>
-        </h:selectManyListbox>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="authorizationRedirectUri">Redirect URI</h:outputLabel>
-        <h:inputText id="authorizationRedirectUri"
-                     value="#{authorizationAction.redirectUri}"
-                     size="40"/>
-        <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
-
-        <h:outputLabel for="authorizationState">State</h:outputLabel>
-        <h:inputText id="authorizationState"
-                     value="#{authorizationAction.state}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-    </h:panelGrid>
-</div>
-<div>
-    <strong>OpenID Connect request parameters</strong>
-</div>
-<div>
-    <h:panelGrid columns="3">
-        <h:outputLabel for="nonce">Nonce</h:outputLabel>
-        <h:inputText id="nonce"
-                     value="#{authorizationAction.nonce}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="display">Display</h:outputLabel>
-        <h:selectOneMenu id="display"
-                         value="#{authorizationAction.display}">
-            <s:selectItems value="#{displays}" var="display"
-                           label="#{display}"
-                           noSelectionLabel="- Please select one -"/>
-            <s:convertEnum/>
-        </h:selectOneMenu>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="prompt">Prompt</h:outputLabel>
-        <h:selectManyListbox id="prompt"
-                             value="#{authorizationAction.prompt}">
-            <s:selectItems value="#{prompts}" var="prompt"
-                           label="#{prompt}"/>
-            <s:convertEnum/>
-        </h:selectManyListbox>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="maxAge">Maximum Authentication Age</h:outputLabel>
-        <h:inputText id="maxAge"
-                     value="#{authorizationAction.maxAge}"
-                     size="40"/>
-        <h:outputText>Number of seconds</h:outputText>
-
-        <h:outputLabel for="uiLocales">UI Locales (space-separated)</h:outputLabel>
-        <h:inputText id="uiLocales"
-                     value="#{authorizationAction.uiLocales}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="claimsLocales">Claims Locales (space-separated)</h:outputLabel>
-        <h:inputText id="claimsLocales"
-                     value="#{authorizationAction.claimsLocales}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="idTokenHint">ID Token Hint</h:outputLabel>
-        <h:inputText id="idTokenHint"
-                     value="#{authorizationAction.idTokenHint}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="loginHint">Login Hint</h:outputLabel>
-        <h:inputText id="loginHint"
-                     value="#{authorizationAction.loginHint}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="acrValues">ACR Values (space-separated)</h:outputLabel>
-        <h:inputText id="acrValues"
-                     value="#{authorizationAction.acrValues}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="claims">Claims (JSON Object)</h:outputLabel>
-        <h:inputTextarea id="claims"
-                         value="#{authorizationAction.claims}"
-                         rows="10" cols="45">
-            <f:validator validatorId="jsonValidator"/>
-            <rich:ajaxValidator event="onblur"/>
-        </h:inputTextarea>
-        <rich:message for="claims" style="color: red"/>
-
-        <h:outputLabel for="registration">Registration</h:outputLabel>
-        <h:inputText id="registration"
-                     value="#{authorizationAction.registration}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-
-        <h:outputLabel for="requestUri">Request URI</h:outputLabel>
-        <h:inputText id="requestUri"
-                     value="#{authorizationAction.requestUri}"
-                     size="40"/>
-        <h:outputText></h:outputText>
-    </h:panelGrid>
-</div>
-<div>
-    <strong>OpenID Request Object</strong>
-</div>
-<div>
-    <h:panelGrid columns="2">
-        <h:outputLabel for="useOpenIdRequestObject">Use OpenID Request Object</h:outputLabel>
-        <h:selectBooleanCheckbox id="useOpenIdRequestObject"
-                                 value="#{authorizationAction.useOpenIdRequestObject}">
-            <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
-        </h:selectBooleanCheckbox>
-    </h:panelGrid>
-    <s:div rendered="#{authorizationAction.useOpenIdRequestObject}">
-        <h:panelGrid columns="2">
-            <h:outputLabel for="signOrEncryptRequestObject">Sign/Encrypted the JWT Request Object</h:outputLabel>
-            <h:selectOneRadio id="signOrEncryptRequestObject"
-                              value="#{authorizationAction.signOrEncryptRequestObject}">
-                <f:selectItem itemValue="JWS" itemLabel="JWS"/>
-                <f:selectItem itemValue="JWE" itemLabel="JWE"/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
-            </h:selectOneRadio>
-            <h:outputText></h:outputText>
-        </h:panelGrid>
-        <h:panelGrid columns="3">
-            <h:outputLabel for="authorizationRequestObjectSigningAlg"
-                           rendered="#{authorizationAction.JWSSelected}">Request Object Signing Alg</h:outputLabel>
-            <h:selectOneMenu id="authorizationRequestObjectSigningAlg"
-                             value="#{authorizationAction.requestObjectSigningAlg}"
-                             rendered="#{authorizationAction.JWSSelected}">
-                <s:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-                               label="#{signatureAlgorithm}"/>
-                <s:convertEnum/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
-            </h:selectOneMenu>
-            <h:outputText rendered="#{authorizationAction.JWSSelected}"></h:outputText>
-
-            <h:outputLabel for="authorizationRequestObjectEncryptionAlg"
-                           rendered="#{authorizationAction.JWESelected}">Request Object Encryption Alg</h:outputLabel>
-            <h:selectOneMenu id="authorizationRequestObjectEncryptionAlg"
-                             value="#{authorizationAction.requestObjectEncryptionAlg}"
-                             rendered="#{authorizationAction.JWESelected}">
-                <s:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-                               label="#{keyEncryptionAlgorithm.name}"/>
-                <s:convertEnum/>
-                <a4j:support event="onchange" reRender="authorizationEndpointDiv"/>
-            </h:selectOneMenu>
-            <h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
-
-            <h:outputLabel for="authorizationRequestObjectEncryptionEnc"
-                           rendered="#{authorizationAction.JWESelected}">Request Object Encryption Enc</h:outputLabel>
-            <h:selectOneMenu id="authorizationRequestObjectEncryptionEnc"
-                             value="#{authorizationAction.requestObjectEncryptionEnc}"
-                             rendered="#{authorizationAction.JWESelected}">
-                <s:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-                               label="#{blockEncryptionAlgorithm.name}"/>
-                <s:convertEnum/>
-            </h:selectOneMenu>
-            <h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
-
-            <h:outputLabel for="authorizationKeyId"
-                           rendered="#{authorizationAction.keyIdRequired}">Key ID</h:outputLabel>
-            <h:inputText id="authorizationKeyId"
-                         value="#{authorizationAction.keyId}"
-                         rendered="#{authorizationAction.keyIdRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.keyIdRequired}"/>
-
-            <h:outputLabel for="authorizationClientSecret"
-                           rendered="#{authorizationAction.clientSecretRequired}">Client Secret</h:outputLabel>
-            <h:inputText id="authorizationClientSecret"
-                         value="#{authorizationAction.clientSecret}"
-                         rendered="#{authorizationAction.clientSecretRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.clientSecretRequired}"/>
-
-            <h:outputLabel for="modulus"
-                           rendered="#{authorizationAction.modulusRequired}">Modulus</h:outputLabel>
-            <h:inputText id="modulus"
-                         value="#{authorizationAction.modulus}"
-                         rendered="#{authorizationAction.modulusRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.modulusRequired}"/>
-
-            <h:outputLabel for="privateExponent"
-                           rendered="#{authorizationAction.privateExponentRequired}">Private Exponent</h:outputLabel>
-            <h:inputText id="privateExponent"
-                         value="#{authorizationAction.privateExponent}"
-                         rendered="#{authorizationAction.privateExponentRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.privateExponentRequired}"/>
-
-            <h:outputLabel for="publicExponent"
-                           rendered="#{authorizationAction.publicExponentRequired}">Public Exponent</h:outputLabel>
-            <h:inputText id="publicExponent"
-                         value="#{authorizationAction.publicExponent}"
-                         rendered="#{authorizationAction.publicExponentRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.publicExponentRequired}"/>
-
-            <h:outputLabel for="d"
-                           rendered="#{authorizationAction.DRequired}">D</h:outputLabel>
-            <h:inputText id="d"
-                         value="#{authorizationAction.d}"
-                         rendered="#{authorizationAction.DRequired}"
-                         size="40"/>
-            <h:outputText rendered="#{authorizationAction.DRequired}"/>
-
-            <h:outputLabel for="openIdRequestObject">OpenID Request Object</h:outputLabel>
-            <h:inputTextarea id="openIdRequestObject"
-                             value="#{authorizationAction.openIdRequestObject}"
-                             rows="20" cols="45">
-                <f:validator validatorId="jsonValidator"/>
-                <rich:ajaxValidator event="onblur"/>
-            </h:inputTextarea>
-            <rich:message for="openIdRequestObject" style="color: red"/>
-        </h:panelGrid>
-    </s:div>
-</div>
-</s:div>
-
-<div class="actionButtons">
-    <h:commandButton value="Submit"
-                     action="#{authorizationAction.exec}"/>
-</div>
-</rich:panel>
-</s:div>
-
-<br/>
-
-<div>
-    <rich:panel>
-        <f:facet name="header">Token Endpoint</f:facet>
-        <s:div id="tokenForm">
-            <div>
-                <strong>Required parameters</strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="tokenEndpoint">Token Endpoint</h:outputLabel>
-                    <h:inputText id="tokenEndpoint"
-                                 value="#{tokenAction.tokenEndpoint}"
-                                 size="40"/>
-                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/token</h:outputText>
-
-                    <h:outputLabel for="grantType">Grant Type</h:outputLabel>
-                    <h:selectOneMenu id="grantType"
-                                     value="#{tokenAction.grantType}">
-                        <s:selectItems value="#{grantTypes}" var="grantType"
-                                       label="#{grantType}"
-                                       noSelectionLabel="- Please select one -"/>
-                        <s:convertEnum/>
-                    </h:selectOneMenu>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="tokenClientId">Client ID</h:outputLabel>
-                    <h:inputText id="tokenClientId"
-                                 value="#{tokenAction.clientId}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="clientSecret">Client Secret</h:outputLabel>
-                    <h:inputText id="clientSecret"
-                                 value="#{tokenAction.clientSecret}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-                </h:panelGrid>
-            </div>
-            <div>
-                <strong>Optional parameters</strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="code">Code</h:outputLabel>
-                    <h:inputText id="code"
-                                 value="#{tokenAction.code}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="tokenRedirectUri">Redirect URI</h:outputLabel>
-                    <h:inputText id="tokenRedirectUri"
-                                 value="#{tokenAction.redirectUri}"
-                                 size="40"/>
-                    <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
-
-                    <h:outputLabel for="username">Username</h:outputLabel>
-                    <h:inputText id="username"
-                                 value="#{tokenAction.username}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="password">Password</h:outputLabel>
-                    <h:inputSecret id="password"
-                                   value="#{tokenAction.password}"
-                                   size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="scope">Scope</h:outputLabel>
-                    <h:inputText id="scope"
-                                 value="#{tokenAction.scope}"
-                                 size="40"/>
-                    <h:outputText>eg: openid profile address email phone</h:outputText>
-
-                    <h:outputLabel for="assertion">Assertion</h:outputLabel>
-                    <h:inputText id="assertion"
-                                 value="#{tokenAction.assertion}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="refreshToken">Refresh Token</h:outputLabel>
-                    <h:inputText id="refreshToken"
-                                 value="#{tokenAction.refreshToken}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-                </h:panelGrid>
-            </div>
-            <div>
-                <strong>Authentication Method</strong>
-            </div>
-            <div>
-                <h:panelGrid columns="2">
-                    <h:selectOneMenu id="tokenAuthenticationMethod"
-                                     value="#{tokenAction.authenticationMethod}">
-                        <s:selectItems value="#{authenticationMethods}" var="authenticationMethod"
-                                       label="#{authenticationMethod}"
-                                       hideNoSelectionLabel="true"/>
-                        <s:convertEnum/>
-                    </h:selectOneMenu>
-                </h:panelGrid>
-            </div>
-        </s:div>
-
-        <div class="actionButtons">
-            <a4j:commandButton value="Submit"
-                               action="#{tokenAction.exec}"
-                               reRender="tokenResults, userInfoForm"/>
-        </div>
-        <s:div id="tokenResults">
-            <s:div rendered="#{tokenAction.showResults}">
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Token Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="5"
-                                         value="#{tokenAction.requestString}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">Token Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="5"
-                                         value="#{tokenAction.responseString}"/>
-                    </s:div>
-                </rich:panel>
-            </s:div>
-        </s:div>
-    </rich:panel>
-</div>
-
-<br/>
-
-<div>
-    <rich:panel>
-        <f:facet name="header">Check Session Endpoint</f:facet>
-        <s:div id="checkSessionForm">
-            <iframe id="op" style="visibility:hidden" height="0" width="0"
-                    src="#{checkSessionAction.checkSessionEndpoint}"/>
-            <iframe id="rp" style="visibility:hidden" height="0" width="0"/>
-
-            <s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="opIFrame">OP IFrame</h:outputLabel>
-                    <h:inputText id="opIFrame" value="#{checkSessionAction.checkSessionEndpoint}"
-                                 size="40" readonly="true"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="rpIFrame">RP IFrame</h:outputLabel>
-                    <h:inputText id="rpIFrame" size="40" readonly="true"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="checkSessionOpOrigin">OP Origin</h:outputLabel>
-                    <h:inputText id="checkSessionOpOrigin" value="https://#{openIdConnectDiscoveryAction.host}"
-                                 size="40" readonly="true"/>
-                    <h:outputText></h:outputText>
-                </h:panelGrid>
-            </s:div>
-        </s:div>
-    </rich:panel>
-</div>
-
-<br/>
-
-<div>
-    <rich:panel>
-        <f:facet name="header">User Info Endpoint</f:facet>
-        <s:div id="userInfoForm">
-            <div>
-                <strong>Required Parameters</strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="userInfoEndpoint">User Info Endpoint</h:outputLabel>
-                    <h:inputText id="userInfoEndpoint"
-                                 value="#{userInfoAction.userInfoEndpoint}"
-                                 size="40"/>
-                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/userinfo</h:outputText>
-
-                    <h:outputLabel for="userInfoAccessToken">Access Token</h:outputLabel>
-                    <h:inputText id="userInfoAccessToken"
-                                 value="#{userInfoAction.accessToken}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-                </h:panelGrid>
-            </div>
-            <div>
-                <strong>Authentication Method</strong>
-            </div>
-            <div>
-                <h:panelGrid columns="2">
-                    <h:selectOneMenu id="userInfoAuthorizationMethod"
-                                     value="#{userInfoAction.authorizationMethod}">
-                        <s:selectItems value="#{authorizationMethods}" var="authorizationMethod"
-                                       label="#{authorizationMethod}" hideNoSelectionLabel="true"/>
-                        <s:convertEnum/>
-                    </h:selectOneMenu>
-                </h:panelGrid>
-            </div>
-        </s:div>
-
-        <div class="actionButtons">
-            <a4j:commandButton value="Submit"
-                               action="#{userInfoAction.exec}"
-                               reRender="userInfoResults"/>
-        </div>
-        <s:div id="userInfoResults">
-            <s:div rendered="#{userInfoAction.showResults}">
-                <br/>
-                <hr/>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">User Info Request</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="5"
-                                         value="#{userInfoAction.requestString}"/>
-                    </s:div>
-                </rich:panel>
-                <br/>
-                <rich:panel>
-                    <f:facet name="header">User Info Response</f:facet>
-                    <s:div>
-                        <h:inputTextarea readonly="true"
-                                         styleClass="width100"
-                                         rows="10"
-                                         value="#{userInfoAction.responseString}"/>
-                    </s:div>
-                </rich:panel>
-            </s:div>
-        </s:div>
-    </rich:panel>
-</div>
-
-<br/>
-
-<div>
-    <rich:panel>
-        <f:facet name="header">End Session Endpoint</f:facet>
-        <s:div id="endSessionForm">
-            <div>
-                <strong></strong>
-            </div>
-            <div>
-                <h:panelGrid columns="3">
-                    <h:outputLabel for="endSessionEndpoint">End Session Endpoint</h:outputLabel>
-                    <h:inputText id="endSessionEndpoint"
-                                 value="#{endSessionAction.endSessionEndpoint}"
-                                 size="40"/>
-                    <h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/end_session</h:outputText>
-
-                    <h:outputLabel for="endSessionIdTokenHint">ID Token Hint</h:outputLabel>
-                    <h:inputText id="endSessionIdTokenHint"
-                                 value="#{endSessionAction.idTokenHint}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-
-                    <h:outputLabel for="endSessionPostLogoutRedirectUri">Post Logout Redirect URI</h:outputLabel>
-                    <h:inputText id="endSessionPostLogoutRedirectUri"
-                                 value="#{endSessionAction.postLogoutRedirectUri}"
-                                 size="40"/>
-                    <h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
-
-                    <h:outputLabel for="endSessionState">State</h:outputLabel>
-                    <h:inputText id="endSessionState"
-                                 value="#{endSessionAction.state}"
-                                 size="40"/>
-                    <h:outputText></h:outputText>
-                </h:panelGrid>
-            </div>
-        </s:div>
-
-        <div class="actionButtons">
-            <a4j:commandButton value="Submit"
-                               action="#{endSessionAction.exec}"
-                               reRender="endSessionResults"/>
-        </div>
-    </rich:panel>
-</div>
-
-</a4j:form>
-
-<script type="text/javascript">
+	xmlns:s="http://jboss.org/schema/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:a4j="http://richfaces.org/a4j"
+	template="/WEB-INF/incl/layout/template.xhtml">
+
+	<ui:define name="body">
+
+		<h:form id="mainForm">
+			<h1>Welcome to oxAuth RP!</h1>
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">OpenID Connect Discovery (Webfinger)</f:facet>
+					<a4j:region>
+						<s:div>
+							<div>
+								<strong> Please enter an identifier of the target
+									End-User that is the subject of the discovery request. </strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="resource">Resource</h:outputLabel>
+									<h:inputText id="resource"
+										value="#{openIdConnectDiscoveryAction.resource}" size="40" />
+									<h:outputText
+										value="eg: acct:mike@seed.gluu.org https://seed.gluu.org https://localhost:8443" />
+									<h:outputLabel for="acceptUntrustedCertificate">Accept Untrusted Certificate</h:outputLabel>
+									<h:selectBooleanCheckbox id="acceptUntrustedCertificate"
+										value="#{openIdConnectDiscoveryAction.acceptUntrustedCertificate}" />
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit"
+								action="#{openIdConnectDiscoveryAction.exec}" execute="@region"
+								render="discoveryResults, registrationForm, authorizationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm" />
+						</div>
+
+					</a4j:region>
+
+					<s:div id="discoveryResults">
+						<s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Identifier Normalization</f:facet>
+								<s:div>
+									<div>
+										<h:panelGrid columns="2">
+											<h:outputLabel>Resource</h:outputLabel>
+											<h:outputText
+												value="#{openIdConnectDiscoveryAction.resource}" />
+
+											<h:outputLabel>Host</h:outputLabel>
+											<h:outputText value="#{openIdConnectDiscoveryAction.host}" />
+
+											<h:outputLabel>Rel</h:outputLabel>
+											<h:outputText value="#{openIdConnectDiscoveryAction.rel}" />
+										</h:panelGrid>
+									</div>
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Webfinger Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
+										value="#{openIdConnectDiscoveryAction.requestString1}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Webfinger Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="10"
+										value="#{openIdConnectDiscoveryAction.responseString1}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Configuration Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
+										value="#{openIdConnectDiscoveryAction.requestString2}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Configuration Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="15"
+										value="#{openIdConnectDiscoveryAction.responseString2}" />
+								</s:div>
+							</rich:panel>
+						</s:div>
+					</s:div>
+				</rich:panel>
+			</div>
+
+			<br />
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">Dynamic Client Registration</f:facet>
+					<a4j:region>
+						<s:div id="registrationForm">
+							<div>
+								<strong> Please fill the form to register with an
+									OpenID Provider to acquire a Client ID and shared secret. </strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="registrationEndpoint">Registration Endpoint</h:outputLabel>
+									<h:inputText id="registrationEndpoint"
+										value="#{registrationAction.registrationEndpoint}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/register</h:outputText>
+
+									<h:outputLabel for="redirectUris">Redirect URIs (space-separated)</h:outputLabel>
+									<h:inputText id="redirectUris"
+										value="#{registrationAction.redirectUris}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+
+									<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
+									<h:inputText id="postLogoutRedirectUris"
+										value="#{registrationAction.postLogoutRedirectUris}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
+									<h:selectManyListbox id="registrationResponseType"
+										value="#{registrationAction.responseTypes}">
+										<s:selectItems value="#{responseTypes}" var="responseType"
+											label="#{responseType}" />
+										<s:convertEnum />
+									</h:selectManyListbox>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="registrationGrantType">Grant Types</h:outputLabel>
+									<h:selectManyListbox id="registrationGrantType"
+										value="#{registrationAction.grantTypes}">
+										<s:selectItems value="#{grantTypes}" var="grantType"
+											label="#{grantType}" />
+										<s:convertEnum />
+									</h:selectManyListbox>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="applicationType">Application Type</h:outputLabel>
+									<h:selectOneMenu id="applicationType"
+										value="#{registrationAction.applicationType}">
+										<s:selectItems value="#{applicationTypes}"
+											var="applicationType" label="#{applicationType}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="contacts">Contacts (space-separated)</h:outputLabel>
+									<h:inputText id="contacts"
+										value="#{registrationAction.contacts}" size="40" />
+									<h:outputText>eg: javier@gluu.org</h:outputText>
+
+									<h:outputLabel for="clientName">Client Name</h:outputLabel>
+									<h:inputText id="clientName"
+										value="#{registrationAction.clientName}" size="40" />
+									<h:outputText>eg: Test app</h:outputText>
+
+									<h:outputLabel for="logoUri">Logo URI</h:outputLabel>
+									<h:inputText id="logoUri" value="#{registrationAction.logoUri}"
+										size="40" />
+									<h:outputText>eg: http://www.gluu.org/wp-content/uploads/2013/08/logo.png</h:outputText>
+
+									<h:outputLabel for="clientUri">Client URI</h:outputLabel>
+									<h:inputText id="clientUri"
+										value="#{registrationAction.clientUri}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="policyUri">Policy URI</h:outputLabel>
+									<h:inputText id="policyUri"
+										value="#{registrationAction.policyUri}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="tosUri">Terms of Service URI</h:outputLabel>
+									<h:inputText id="tosUri" value="#{registrationAction.tosUri}"
+										size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="jwksUri">JSON Web Key Set URI</h:outputLabel>
+									<h:inputText id="jwksUri" value="#{registrationAction.jwksUri}"
+										size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/jwks.json</h:outputText>
+
+									<h:outputLabel for="sectorIdentifierUri">Sector Identifier URI</h:outputLabel>
+									<h:inputText id="sectorIdentifierUri"
+										value="#{registrationAction.sectorIdentifierUri}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-client/test/resources/sector_identifier.js</h:outputText>
+
+									<h:outputLabel for="subjectType">Subject Type</h:outputLabel>
+									<h:selectOneMenu id="subjectType"
+										value="#{registrationAction.subjectType}">
+										<s:selectItems value="#{subjectTypes}" var="subjectType"
+											label="#{subjectType}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
+									<h:selectOneMenu id="idTokenSignedResponseAlg"
+										value="#{registrationAction.idTokenSignedResponseAlg}">
+										<s:selectItems value="#{signatureAlgorithms}"
+											var="signatureAlgorithm" label="#{signatureAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
+									<h:selectOneMenu id="idTokenEncryptedResponseAlg"
+										value="#{registrationAction.idTokenEncryptedResponseAlg}">
+										<s:selectItems value="#{keyEncryptionAlgorithms}"
+											var="keyEncryptionAlgorithm"
+											label="#{keyEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
+									<h:selectOneMenu id="idTokenEncryptedResponseEnc"
+										value="#{registrationAction.idTokenEncryptedResponseEnc}">
+										<s:selectItems value="#{blockEncryptionAlgorithms}"
+											var="blockEncryptionAlgorithm"
+											label="#{blockEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="userInfoSignedResponseAlg">User Info Signed Response Alg</h:outputLabel>
+									<h:selectOneMenu id="userInfoSignedResponseAlg"
+										value="#{registrationAction.userInfoSignedResponseAlg}">
+										<s:selectItems value="#{signatureAlgorithms}"
+											var="signatureAlgorithm" label="#{signatureAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="userInfoEncryptedResponseAlg">User Info Encrypted Response Alg</h:outputLabel>
+									<h:selectOneMenu id="userInfoEncryptedResponseAlg"
+										value="#{registrationAction.userInfoEncryptedResponseAlg}">
+										<s:selectItems value="#{keyEncryptionAlgorithms}"
+											var="keyEncryptionAlgorithm"
+											label="#{keyEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="userInfoEncryptedResponseEnc">User Info Encrypted Response Enc</h:outputLabel>
+									<h:selectOneMenu id="userInfoEncryptedResponseEnc"
+										value="#{registrationAction.userInfoEncryptedResponseEnc}">
+										<s:selectItems value="#{blockEncryptionAlgorithms}"
+											var="blockEncryptionAlgorithm"
+											label="#{blockEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
+									<h:selectOneMenu id="requestObjectSigningAlg"
+										value="#{registrationAction.requestObjectSigningAlg}">
+										<s:selectItems value="#{signatureAlgorithms}"
+											var="signatureAlgorithm" label="#{signatureAlgorithm}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="requestObjectEncryptionAlg">Request Object Encryption Alg</h:outputLabel>
+									<h:selectOneMenu id="requestObjectEncryptionAlg"
+										value="#{registrationAction.requestObjectEncryptionAlg}">
+										<s:selectItems value="#{keyEncryptionAlgorithms}"
+											var="keyEncryptionAlgorithm"
+											label="#{keyEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="requestObjectEncryptionEnc">Request Object Encryption Enc</h:outputLabel>
+									<h:selectOneMenu id="requestObjectEncryptionEnc"
+										value="#{registrationAction.requestObjectEncryptionEnc}">
+										<s:selectItems value="#{blockEncryptionAlgorithms}"
+											var="blockEncryptionAlgorithm"
+											label="#{blockEncryptionAlgorithm.name}"
+											noSelectionLabel="- Please select one -" />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
+									<h:selectOneMenu id="tokenEndpointAuthMethod"
+										value="#{registrationAction.tokenEndpointAuthMethod}">
+										<s:selectItems value="#{authenticationMethods}"
+											var="authenticationMethod" label="#{authenticationMethod}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="tokenEndpointAuthSigningAlg">Token Endpoint Auth Signing Alg</h:outputLabel>
+									<h:selectOneMenu id="tokenEndpointAuthSigningAlg"
+										value="#{registrationAction.tokenEndpointAuthSigningAlg}">
+										<s:selectItems value="#{signatureAlgorithms}"
+											var="signatureAlgorithm" label="#{signatureAlgorithm}"
+											noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="defaultMaxAge">Default Maximum Authentication Age</h:outputLabel>
+									<h:inputText id="defaultMaxAge"
+										value="#{registrationAction.defaultMaxAge}" size="40" />
+									<h:outputText>Number of seconds</h:outputText>
+
+									<h:outputLabel for="defaultMaxAge">Require Auth Time</h:outputLabel>
+									<h:selectOneRadio id="requireAuthTime"
+										value="#{registrationAction.requireAuthTime}">
+										<f:selectItem itemValue="#{true}" itemLabel="yes" />
+										<f:selectItem itemValue="#{false}" itemLabel="no" />
+									</h:selectOneRadio>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="defaultAcrValues">Default ACR Values (space-separated)</h:outputLabel>
+									<h:inputText id="defaultAcrValues"
+										value="#{registrationAction.defaultAcrValues}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="initiateLoginUri">Initiate Login URI</h:outputLabel>
+									<h:inputText id="initiateLoginUri"
+										value="#{registrationAction.initiateLoginUri}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="requestUris">Request URIs (space-separated)</h:outputLabel>
+									<h:inputText id="requestUris"
+										value="#{registrationAction.requestUris}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="logoutUri">Logout URI</h:outputLabel>
+									<h:inputText id="logoutUri"
+										value="#{registrationAction.logoutUri}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="logoutSessionRequired">Logout Session Required</h:outputLabel>
+									<h:selectBooleanCheckbox id="logoutSessionRequired"
+										value="#{registrationAction.logoutSessionRequired}" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit"
+								action="#{registrationAction.exec}" execute="@region"
+								render="registrationResults, clientReadForm, authorizationForm, tokenForm" />
+						</div>
+					</a4j:region>
+					<s:div id="registrationResults">
+						<s:div rendered="#{registrationAction.showResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Registration Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="10" value="#{registrationAction.requestString}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Registration Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="30" value="#{registrationAction.responseString}" />
+								</s:div>
+							</rich:panel>
+						</s:div>
+					</s:div>
+
+					<a4j:region>
+						<s:div id="clientReadForm">
+							<div>
+								<br />
+								<hr />
+								<br /> <strong> Please fill the form to read the
+									current configuration of the Client on the Authorization
+									Server. </strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="registrationClientUri">Registration Client URI</h:outputLabel>
+									<h:inputText id="registrationClientUri"
+										value="#{registrationAction.registrationClientUri}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="registrationAccessToken">Registration Access Token</h:outputLabel>
+									<h:inputText id="registrationAccessToken"
+										value="#{registrationAction.registrationAccessToken}"
+										size="40" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit"
+								action="#{registrationAction.execClientRead}" execute="@region"
+								render="clientReadResults" />
+						</div>
+					</a4j:region>
+					<s:div id="clientReadResults">
+						<s:div rendered="#{registrationAction.showClientReadResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Client Read Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="4"
+										value="#{registrationAction.clientReadRequestString}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Client Read Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="30"
+										value="#{registrationAction.clientReadResponseString}" />
+								</s:div>
+							</rich:panel>
+						</s:div>
+					</s:div>
+				</rich:panel>
+			</div>
+
+			<br />
+
+			<s:div id="authorizationEndpointDiv">
+				<rich:panel>
+					<f:facet name="header">Authorization Endpoint</f:facet>
+					<s:div id="authorizationForm">
+						<div>
+							<strong>OAuth 2.0 request parameters</strong>
+						</div>
+						<div>
+							<h:panelGrid columns="3">
+								<h:outputLabel for="authorizationEndpoint">Authorization Endpoint</h:outputLabel>
+								<h:inputText id="authorizationEndpoint"
+									value="#{authorizationAction.authorizationEndpoint}" size="40" />
+								<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize</h:outputText>
+
+								<h:outputLabel for="responseType">Response Type</h:outputLabel>
+								<h:selectManyListbox id="responseType"
+									value="#{authorizationAction.responseTypes}">
+									<s:selectItems value="#{responseTypes}" var="responseType"
+										label="#{responseType}" />
+									<s:convertEnum />
+								</h:selectManyListbox>
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="authorizationClientId">Client ID</h:outputLabel>
+								<h:inputText id="authorizationClientId"
+									value="#{authorizationAction.clientId}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="scopes">Scopes</h:outputLabel>
+								<h:selectManyListbox id="scopes"
+									value="#{authorizationAction.scopes}">
+									<f:selectItem itemLabel="openid" itemValue="openid" />
+									<f:selectItem itemLabel="profile" itemValue="profile" />
+									<f:selectItem itemLabel="address" itemValue="address" />
+									<f:selectItem itemLabel="email" itemValue="email" />
+									<f:selectItem itemLabel="phone" itemValue="phone" />
+								</h:selectManyListbox>
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="authorizationRedirectUri">Redirect URI</h:outputLabel>
+								<h:inputText id="authorizationRedirectUri"
+									value="#{authorizationAction.redirectUri}" size="40" />
+								<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+
+								<h:outputLabel for="authorizationState">State</h:outputLabel>
+								<h:inputText id="authorizationState"
+									value="#{authorizationAction.state}" size="40" />
+								<h:outputText></h:outputText>
+							</h:panelGrid>
+						</div>
+						<div>
+							<strong>OpenID Connect request parameters</strong>
+						</div>
+						<div>
+							<h:panelGrid columns="3">
+								<h:outputLabel for="nonce">Nonce</h:outputLabel>
+								<h:inputText id="nonce" value="#{authorizationAction.nonce}"
+									size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="display">Display</h:outputLabel>
+								<h:selectOneMenu id="display"
+									value="#{authorizationAction.display}">
+									<s:selectItems value="#{displays}" var="display"
+										label="#{display}" noSelectionLabel="- Please select one -" />
+									<s:convertEnum />
+								</h:selectOneMenu>
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="prompt">Prompt</h:outputLabel>
+								<h:selectManyListbox id="prompt"
+									value="#{authorizationAction.prompt}">
+									<s:selectItems value="#{prompts}" var="prompt"
+										label="#{prompt}" />
+									<s:convertEnum />
+								</h:selectManyListbox>
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="maxAge">Maximum Authentication Age</h:outputLabel>
+								<h:inputText id="maxAge" value="#{authorizationAction.maxAge}"
+									size="40" />
+								<h:outputText>Number of seconds</h:outputText>
+
+								<h:outputLabel for="uiLocales">UI Locales (space-separated)</h:outputLabel>
+								<h:inputText id="uiLocales"
+									value="#{authorizationAction.uiLocales}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="claimsLocales">Claims Locales (space-separated)</h:outputLabel>
+								<h:inputText id="claimsLocales"
+									value="#{authorizationAction.claimsLocales}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="idTokenHint">ID Token Hint</h:outputLabel>
+								<h:inputText id="idTokenHint"
+									value="#{authorizationAction.idTokenHint}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="loginHint">Login Hint</h:outputLabel>
+								<h:inputText id="loginHint"
+									value="#{authorizationAction.loginHint}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="acrValues">ACR Values (space-separated)</h:outputLabel>
+								<h:inputText id="acrValues"
+									value="#{authorizationAction.acrValues}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="claims">Claims (JSON Object)</h:outputLabel>
+								<h:inputTextarea id="claims"
+									value="#{authorizationAction.claims}" rows="10" cols="45">
+									<f:validator validatorId="jsonValidator" />
+									<rich:validator event="blur" />
+								</h:inputTextarea>
+								<rich:message for="claims" style="color: red" />
+
+								<h:outputLabel for="registration">Registration</h:outputLabel>
+								<h:inputText id="registration"
+									value="#{authorizationAction.registration}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="requestUri">Request URI</h:outputLabel>
+								<h:inputText id="requestUri"
+									value="#{authorizationAction.requestUri}" size="40" />
+								<h:outputText></h:outputText>
+							</h:panelGrid>
+						</div>
+						<div>
+							<strong>OpenID Request Object</strong>
+						</div>
+						<div>
+							<h:panelGrid columns="2">
+								<h:outputLabel for="useOpenIdRequestObject">Use OpenID Request Object</h:outputLabel>
+								<h:selectBooleanCheckbox id="useOpenIdRequestObject"
+									value="#{authorizationAction.useOpenIdRequestObject}">
+									<a4j:ajax event="change" execute="@this"
+										render="authorizationEndpointDiv" />
+								</h:selectBooleanCheckbox>
+							</h:panelGrid>
+							<s:div rendered="#{authorizationAction.useOpenIdRequestObject}">
+								<h:panelGrid columns="2">
+									<h:outputLabel for="signOrEncryptRequestObject">Sign/Encrypted the JWT Request Object</h:outputLabel>
+									<h:selectOneRadio id="signOrEncryptRequestObject"
+										value="#{authorizationAction.signOrEncryptRequestObject}">
+										<f:selectItem itemValue="JWS" itemLabel="JWS" />
+										<f:selectItem itemValue="JWE" itemLabel="JWE" />
+										<a4j:ajax event="change" render="authorizationEndpointDiv"
+											execute="@this" />
+									</h:selectOneRadio>
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="authorizationRequestObjectSigningAlg"
+										rendered="#{authorizationAction.JWSSelected}">Request Object Signing Alg</h:outputLabel>
+									<h:selectOneMenu id="authorizationRequestObjectSigningAlg"
+										value="#{authorizationAction.requestObjectSigningAlg}"
+										rendered="#{authorizationAction.JWSSelected}">
+										<s:selectItems value="#{signatureAlgorithms}"
+											var="signatureAlgorithm" label="#{signatureAlgorithm}" />
+										<s:convertEnum />
+										<a4j:ajax event="change" render="authorizationEndpointDiv"
+											execute="@this" />
+									</h:selectOneMenu>
+									<h:outputText rendered="#{authorizationAction.JWSSelected}"></h:outputText>
+
+									<h:outputLabel for="authorizationRequestObjectEncryptionAlg"
+										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Alg</h:outputLabel>
+									<h:selectOneMenu id="authorizationRequestObjectEncryptionAlg"
+										value="#{authorizationAction.requestObjectEncryptionAlg}"
+										rendered="#{authorizationAction.JWESelected}">
+										<s:selectItems value="#{keyEncryptionAlgorithms}"
+											var="keyEncryptionAlgorithm"
+											label="#{keyEncryptionAlgorithm.name}" />
+										<s:convertEnum />
+										<a4j:ajax event="change" render="authorizationEndpointDiv"
+											execute="@this" />
+									</h:selectOneMenu>
+									<h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
+
+									<h:outputLabel for="authorizationRequestObjectEncryptionEnc"
+										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Enc</h:outputLabel>
+									<h:selectOneMenu id="authorizationRequestObjectEncryptionEnc"
+										value="#{authorizationAction.requestObjectEncryptionEnc}"
+										rendered="#{authorizationAction.JWESelected}">
+										<s:selectItems value="#{blockEncryptionAlgorithms}"
+											var="blockEncryptionAlgorithm"
+											label="#{blockEncryptionAlgorithm.name}" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
+
+									<h:outputLabel for="authorizationKeyId"
+										rendered="#{authorizationAction.keyIdRequired}">Key ID</h:outputLabel>
+									<h:inputText id="authorizationKeyId"
+										value="#{authorizationAction.keyId}"
+										rendered="#{authorizationAction.keyIdRequired}" size="40" />
+									<h:outputText rendered="#{authorizationAction.keyIdRequired}" />
+
+									<h:outputLabel for="authorizationClientSecret"
+										rendered="#{authorizationAction.clientSecretRequired}">Client Secret</h:outputLabel>
+									<h:inputText id="authorizationClientSecret"
+										value="#{authorizationAction.clientSecret}"
+										rendered="#{authorizationAction.clientSecretRequired}"
+										size="40" />
+									<h:outputText
+										rendered="#{authorizationAction.clientSecretRequired}" />
+
+									<h:outputLabel for="modulus"
+										rendered="#{authorizationAction.modulusRequired}">Modulus</h:outputLabel>
+									<h:inputText id="modulus"
+										value="#{authorizationAction.modulus}"
+										rendered="#{authorizationAction.modulusRequired}" size="40" />
+									<h:outputText rendered="#{authorizationAction.modulusRequired}" />
+
+									<h:outputLabel for="privateExponent"
+										rendered="#{authorizationAction.privateExponentRequired}">Private Exponent</h:outputLabel>
+									<h:inputText id="privateExponent"
+										value="#{authorizationAction.privateExponent}"
+										rendered="#{authorizationAction.privateExponentRequired}"
+										size="40" />
+									<h:outputText
+										rendered="#{authorizationAction.privateExponentRequired}" />
+
+									<h:outputLabel for="publicExponent"
+										rendered="#{authorizationAction.publicExponentRequired}">Public Exponent</h:outputLabel>
+									<h:inputText id="publicExponent"
+										value="#{authorizationAction.publicExponent}"
+										rendered="#{authorizationAction.publicExponentRequired}"
+										size="40" />
+									<h:outputText
+										rendered="#{authorizationAction.publicExponentRequired}" />
+
+									<h:outputLabel for="d"
+										rendered="#{authorizationAction.DRequired}">D</h:outputLabel>
+									<h:inputText id="d" value="#{authorizationAction.d}"
+										rendered="#{authorizationAction.DRequired}" size="40" />
+									<h:outputText rendered="#{authorizationAction.DRequired}" />
+
+									<h:outputLabel for="openIdRequestObject">OpenID Request Object</h:outputLabel>
+									<h:inputTextarea id="openIdRequestObject"
+										value="#{authorizationAction.openIdRequestObject}" rows="20"
+										cols="45">
+										<f:validator validatorId="jsonValidator" />
+										<rich:validator event="blur" />
+									</h:inputTextarea>
+									<rich:message for="openIdRequestObject" style="color: red" />
+								</h:panelGrid>
+							</s:div>
+						</div>
+					</s:div>
+
+					<div class="actionButtons">
+						<h:commandButton value="Submit"
+							action="#{authorizationAction.exec}" />
+					</div>
+				</rich:panel>
+			</s:div>
+
+			<br />
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">Token Endpoint</f:facet>
+					<a4j:region>
+						<s:div id="tokenForm">
+							<div>
+								<strong>Required parameters</strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="tokenEndpoint">Token Endpoint</h:outputLabel>
+									<h:inputText id="tokenEndpoint"
+										value="#{tokenAction.tokenEndpoint}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/token</h:outputText>
+
+									<h:outputLabel for="grantType">Grant Type</h:outputLabel>
+									<h:selectOneMenu id="grantType"
+										value="#{tokenAction.grantType}">
+										<s:selectItems value="#{grantTypes}" var="grantType"
+											label="#{grantType}" noSelectionLabel="- Please select one -" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="tokenClientId">Client ID</h:outputLabel>
+									<h:inputText id="tokenClientId" value="#{tokenAction.clientId}"
+										size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="clientSecret">Client Secret</h:outputLabel>
+									<h:inputText id="clientSecret"
+										value="#{tokenAction.clientSecret}" size="40" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+							<div>
+								<strong>Optional parameters</strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="code">Code</h:outputLabel>
+									<h:inputText id="code" value="#{tokenAction.code}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="tokenRedirectUri">Redirect URI</h:outputLabel>
+									<h:inputText id="tokenRedirectUri"
+										value="#{tokenAction.redirectUri}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+
+									<h:outputLabel for="username">Username</h:outputLabel>
+									<h:inputText id="username" value="#{tokenAction.username}"
+										size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="password">Password</h:outputLabel>
+									<h:inputSecret id="password" value="#{tokenAction.password}"
+										size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="scope">Scope</h:outputLabel>
+									<h:inputText id="scope" value="#{tokenAction.scope}" size="40" />
+									<h:outputText>eg: openid profile address email phone</h:outputText>
+
+									<h:outputLabel for="assertion">Assertion</h:outputLabel>
+									<h:inputText id="assertion" value="#{tokenAction.assertion}"
+										size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="refreshToken">Refresh Token</h:outputLabel>
+									<h:inputText id="refreshToken"
+										value="#{tokenAction.refreshToken}" size="40" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+							<div>
+								<strong>Authentication Method</strong>
+							</div>
+							<div>
+								<h:panelGrid columns="2">
+									<h:selectOneMenu id="tokenAuthenticationMethod"
+										value="#{tokenAction.authenticationMethod}">
+										<s:selectItems value="#{authenticationMethods}"
+											var="authenticationMethod" label="#{authenticationMethod}"
+											hideNoSelectionLabel="true" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit" action="#{tokenAction.exec}"
+								execute="@region" render="tokenResults, userInfoForm" />
+						</div>
+					</a4j:region>
+					<s:div id="tokenResults">
+						<s:div rendered="#{tokenAction.showResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">Token Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
+										value="#{tokenAction.requestString}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">Token Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
+										value="#{tokenAction.responseString}" />
+								</s:div>
+							</rich:panel>
+						</s:div>
+					</s:div>
+				</rich:panel>
+			</div>
+
+			<br />
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">Check Session Endpoint</f:facet>
+					<s:div id="checkSessionForm">
+						<iframe id="op" style="visibility: hidden" height="0" width="0"
+							src="#{checkSessionAction.checkSessionEndpoint}" />
+						<iframe id="rp" style="visibility: hidden" height="0" width="0" />
+
+						<s:div rendered="#{openIdConnectDiscoveryAction.showResults}">
+							<h:panelGrid columns="3">
+								<h:outputLabel for="opIFrame">OP IFrame</h:outputLabel>
+								<h:inputText id="opIFrame"
+									value="#{checkSessionAction.checkSessionEndpoint}" size="40"
+									readonly="true" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="rpIFrame">RP IFrame</h:outputLabel>
+								<h:inputText id="rpIFrame" size="40" readonly="true" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="checkSessionOpOrigin">OP Origin</h:outputLabel>
+								<h:inputText id="checkSessionOpOrigin"
+									value="https://#{openIdConnectDiscoveryAction.host}" size="40"
+									readonly="true" />
+								<h:outputText></h:outputText>
+							</h:panelGrid>
+						</s:div>
+					</s:div>
+				</rich:panel>
+			</div>
+
+			<br />
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">User Info Endpoint</f:facet>
+					<a4j:region>
+						<s:div id="userInfoForm">
+							<div>
+								<strong>Required Parameters</strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="userInfoEndpoint">User Info Endpoint</h:outputLabel>
+									<h:inputText id="userInfoEndpoint"
+										value="#{userInfoAction.userInfoEndpoint}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/userinfo</h:outputText>
+
+									<h:outputLabel for="userInfoAccessToken">Access Token</h:outputLabel>
+									<h:inputText id="userInfoAccessToken"
+										value="#{userInfoAction.accessToken}" size="40" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+							<div>
+								<strong>Authentication Method</strong>
+							</div>
+							<div>
+								<h:panelGrid columns="2">
+									<h:selectOneMenu id="userInfoAuthorizationMethod"
+										value="#{userInfoAction.authorizationMethod}">
+										<s:selectItems value="#{authorizationMethods}"
+											var="authorizationMethod" label="#{authorizationMethod}"
+											hideNoSelectionLabel="true" />
+										<s:convertEnum />
+									</h:selectOneMenu>
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit" action="#{userInfoAction.exec}"
+								execute="@region" render="userInfoResults" />
+						</div>
+					</a4j:region>
+					<s:div id="userInfoResults">
+						<s:div rendered="#{userInfoAction.showResults}">
+							<br />
+							<hr />
+							<br />
+							<rich:panel>
+								<f:facet name="header">User Info Request</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
+										value="#{userInfoAction.requestString}" />
+								</s:div>
+							</rich:panel>
+							<br />
+							<rich:panel>
+								<f:facet name="header">User Info Response</f:facet>
+								<s:div>
+									<h:inputTextarea readonly="true" styleClass="width100"
+										rows="10" value="#{userInfoAction.responseString}" />
+								</s:div>
+							</rich:panel>
+						</s:div>
+					</s:div>
+				</rich:panel>
+			</div>
+
+			<br />
+
+			<div>
+				<rich:panel>
+					<f:facet name="header">End Session Endpoint</f:facet>
+					<a4j:region>
+						<s:div id="endSessionForm">
+							<div>
+								<strong></strong>
+							</div>
+							<div>
+								<h:panelGrid columns="3">
+									<h:outputLabel for="endSessionEndpoint">End Session Endpoint</h:outputLabel>
+									<h:inputText id="endSessionEndpoint"
+										value="#{endSessionAction.endSessionEndpoint}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/end_session</h:outputText>
+
+									<h:outputLabel for="endSessionIdTokenHint">ID Token Hint</h:outputLabel>
+									<h:inputText id="endSessionIdTokenHint"
+										value="#{endSessionAction.idTokenHint}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="endSessionPostLogoutRedirectUri">Post Logout Redirect URI</h:outputLabel>
+									<h:inputText id="endSessionPostLogoutRedirectUri"
+										value="#{endSessionAction.postLogoutRedirectUri}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+
+									<h:outputLabel for="endSessionState">State</h:outputLabel>
+									<h:inputText id="endSessionState"
+										value="#{endSessionAction.state}" size="40" />
+									<h:outputText></h:outputText>
+								</h:panelGrid>
+							</div>
+						</s:div>
+
+						<div class="actionButtons">
+							<a4j:commandButton value="Submit"
+								action="#{endSessionAction.exec}" execute="@region"
+								render="endSessionResults" />
+						</div>
+					</a4j:region>
+				</rich:panel>
+			</div>
+
+		</h:form>
+
+		<script type="text/javascript">
     //<![CDATA[
     if (self.document.location.hash) {
         var hash = self.document.location.hash.substring(1);
@@ -1071,5 +1021,5 @@
     //]]>
 </script>
 
-</ui:define>
+	</ui:define>
 </ui:composition>

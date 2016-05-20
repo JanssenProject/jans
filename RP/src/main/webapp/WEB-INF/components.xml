@@ -31,42 +31,6 @@
                   conversation-timeout="120000"
                   conversation-id-parameter="cid"
                   parent-conversation-id-parameter="pid"/>
+    <transaction:no-transaction/>	
 
-    <!-- Make sure this URL pattern is the same as that used by the Faces Servlet -->
-    <web:hot-deploy-filter url-pattern="*.htm"/>
-
-    <!-- If you are still using JBoss 4, uncomment this to have your PU started -->
-    <!--
-    <persistence:entity-manager-factory name="entityManagerFactory" persistence-unit-name="oxauth"
-        installed="@seamBootstrapsPu@"/>
-    -->
-    <!--
-    <persistence:managed-persistence-context name="entityManager" auto-create="true"
-        entity-manager-factory="@seamEmfRef@"
-        persistence-unit-jndi-name="@puJndiName@"/>
-    -->
-
-    <security:rule-based-permission-resolver security-rules="#{securityRules}"/>
-
-    <security:identity authenticate-method="#{authenticator.authenticate}" remember-me="true"/>
-
-    <event type="org.jboss.seam.security.notLoggedIn">
-        <action execute="#{redirect.captureCurrentView}"/>
-    </event>
-    <event type="org.jboss.seam.security.loginSuccessful">
-        <action execute="#{redirect.returnToCapturedView}"/>
-    </event>
-
-    <mail:mail-session host="localhost" port="25"/>
-
-    <!-- For use with jBPM pageflow or process management -->
-    <!--
-    <bpm:jbpm>
-       <bpm:process-definitions></bpm:process-definitions>
-       <bpm:pageflow-definitions></bpm:pageflow-definitions>
-    </bpm:jbpm>
-    -->
-
-    <!-- Rest SD Web service configuration -->
-    <resteasy:application resource-path-prefix="/restv1"/>
 </components>
