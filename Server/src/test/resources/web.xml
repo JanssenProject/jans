@@ -9,7 +9,7 @@
 
     <!-- Seam -->
     <listener>
-        <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
+        <listener-class>org.jboss.seam.mock.MockSeamListener</listener-class>
     </listener>
 
     <filter>
