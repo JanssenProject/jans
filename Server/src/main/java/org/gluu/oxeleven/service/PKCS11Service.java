@@ -14,6 +14,8 @@ import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 import sun.security.pkcs11.SunPKCS11;
 import sun.security.rsa.RSAPublicKeyImpl;
 
@@ -38,10 +40,11 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version May 21, 2016
  */
 public class PKCS11Service {
 
+    private static final Log LOG = Logging.getLog(PKCS11Service.class);
     public static String UTF8_STRING_ENCODING = "UTF-8";
 
     private Provider provider;
@@ -172,12 +175,16 @@ public class PKCS11Service {
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
             } catch (NoSuchAlgorithmException e) {
+                LOG.error(e.getMessage(), e);
                 verified = false;
             } catch (SignatureException e) {
+                LOG.error(e.getMessage(), e);
                 verified = false;
             } catch (InvalidKeyException e) {
+                LOG.error(e.getMessage(), e);
                 verified = false;
             } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
                 verified = false;
             }
         }
