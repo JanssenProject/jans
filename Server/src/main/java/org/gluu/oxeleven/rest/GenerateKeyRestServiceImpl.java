@@ -13,9 +13,9 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -28,13 +28,12 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version May 20, 2016
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
-    @Logger
-    private Log log;
+    private static final Log LOG = Logging.getLog(GenerateKeyRestServiceImpl.class);
 
     @Override
     public Response generateKey(String sigAlg, Long expirationTime) {
@@ -75,31 +74,34 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
             }
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (InvalidKeyException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (InvalidAlgorithmParameterException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (NoSuchProviderException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (SignatureException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+            LOG.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();

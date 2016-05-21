@@ -20,7 +20,7 @@ import java.io.File;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version May 20, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationService")
@@ -28,22 +28,10 @@ import java.io.File;
 @Startup
 public class ConfigurationService {
 
-    @Logger
-    private Log log;
-
     private static final Log LOG = Logging.getLog(ConfigurationService.class);
 
     static {
-        /*if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
-            BASE_DIR = System.getProperty("catalina.base");
-        } else*/
-        if (System.getProperty("catalina.home") != null) {
-            BASE_DIR = System.getProperty("catalina.home");
-        } else if (System.getProperty("jboss.home.dir") != null) {
-            BASE_DIR = System.getProperty("jboss.home.dir");
-        } else {
-            BASE_DIR = null;
-        }
+        BASE_DIR = System.getProperty("catalina.home");
     }
 
     private static final String BASE_DIR;

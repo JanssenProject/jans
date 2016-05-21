@@ -13,7 +13,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ox.version>2.4.3-SNAPSHOT</ox.version>
-        <seam.version>2.2.2.Final</seam.version>
+        <slf4j.version>1.6.5</slf4j.version>
+        <seam.version>2.3.1.Final</seam.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <jettison.version>1.3</jettison.version>
         <bouncycastle.version>1.46</bouncycastle.version>

@@ -12,9 +12,9 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -29,13 +29,12 @@ import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version May 20, 2016
  */
 @Name("deleteKeyRestService")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 
-    @Logger
-    private Log log;
+    private static final Log LOG = Logging.getLog(DeleteKeyRestServiceImpl.class);
 
     @Override
     public Response sign(String alias) {
@@ -69,19 +68,22 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
             }
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+            LOG.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();

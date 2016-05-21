@@ -15,9 +15,9 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
-import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -30,13 +30,12 @@ import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version May 20, 2016
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
 
-    @Logger
-    private Log log;
+    private static final Log LOG = Logging.getLog(SignRestServiceImpl.class);
 
     @Override
     public Response sign(SignRequestParam signRequestParam) {
@@ -80,25 +79,28 @@ public class SignRestServiceImpl implements SignRestService {
             builder.entity("Invalid key, either the alias or signatureAlgorithm parameter is not valid.");
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (UnrecoverableEntryException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (SignatureException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+            LOG.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();
