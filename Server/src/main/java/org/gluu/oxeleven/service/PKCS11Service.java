@@ -208,11 +208,11 @@ public class PKCS11Service {
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getN())),
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getE())));
                     } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
-                        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", "SunEC");
+                        AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
                         parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
                         ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
 
-                        publicKey = KeyFactory.getInstance("EC", "SunEC").generatePublic(new ECPublicKeySpec(
+                        publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC).generatePublic(new ECPublicKeySpec(
                                 new ECPoint(
                                         new BigInteger(1, Base64Util.base64UrlDecode(key.getX())),
                                         new BigInteger(1, Base64Util.base64UrlDecode(key.getY()))
