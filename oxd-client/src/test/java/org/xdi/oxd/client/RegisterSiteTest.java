@@ -27,9 +27,9 @@ public class RegisterSiteTest {
 
     private String oxdId = null;
 
-    @Parameters({"host", "port", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
+    @Parameters({"host", "port", "opHost", "redirectUrl", "logoutUrl", "postLogoutRedirectUrl"})
     @Test
-    public void register(String host, int port, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
+    public void register(String host, int port, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
@@ -41,6 +41,7 @@ public class RegisterSiteTest {
 
             // more specific site registration
             final RegisterSiteParams commandParams = new RegisterSiteParams();
+            commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));

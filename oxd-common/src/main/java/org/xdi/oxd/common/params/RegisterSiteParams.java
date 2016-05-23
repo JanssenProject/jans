@@ -11,6 +11,8 @@ import java.util.List;
 
 public class RegisterSiteParams implements IParams {
 
+    @JsonProperty(value = "op_host")
+    private String opHost;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
     @JsonProperty(value = "post_logout_redirect_uri")
@@ -52,6 +54,14 @@ public class RegisterSiteParams implements IParams {
     private List<String> contacts;
 
     public RegisterSiteParams() {
+    }
+
+    public String getOpHost() {
+        return opHost;
+    }
+
+    public void setOpHost(String opHost) {
+        this.opHost = opHost;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -203,6 +213,7 @@ public class RegisterSiteParams implements IParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("RegisterSiteParams");
         sb.append("{acrValues=").append(acrValues);
+        sb.append(", opHost='").append(opHost).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", applicationType='").append(applicationType).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
