@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<components xmlns="http://jboss.com/products/seam/components"
-            xmlns:core="http://jboss.com/products/seam/core"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:transaction="http://jboss.org/schema/seam/transaction"
-            xmlns:resteasy="http://jboss.com/products/seam/resteasy"
-            xsi:schemaLocation="
-        http://jboss.com/products/seam/core
-        http://jboss.com/products/seam/core-2.2.xsd
-        http://jboss.com/products/seam/components
-        http://jboss.com/products/seam/components-2.2.xsd
-        http://jboss.org/schema/seam/transaction http://jboss.org/schema/seam/transaction-2.3.xsd
-        http://jboss.com/products/seam/resteasy http://jboss.com/products/seam/resteasy-2.2.xsd">
+      <components xmlns="http://jboss.org/schema/seam/components"
+                  xmlns:core="http://jboss.org/schema/seam/core"
+                  xmlns:transaction="http://jboss.org/schema/seam/transaction"
+                  xmlns:resteasy="http://jboss.org/schema/seam/resteasy"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation=
+                      "http://jboss.org/schema/seam/core http://jboss.org/schema/seam/core-2.3.xsd
+                       http://jboss.org/schema/seam/transaction http://jboss.org/schema/seam/transaction-2.3.xsd
+                       http://jboss.org/schema/seam/resteasy http://jboss.org/schema/seam/resteasy-2.3.xsd
+                       http://jboss.org/schema/seam/components http://jboss.org/schema/seam/components-2.3.xsd">
+
     <core:init debug="@debug@" jndi-pattern="@jndiPattern@" transaction-management-enabled="false"/>
 
     <core:manager concurrent-request-timeout="500"
