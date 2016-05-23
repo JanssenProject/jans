@@ -53,7 +53,7 @@ public class GetTokensByCodeOperation extends BaseOperation {
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
             tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
 
-            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse().getTokenEndpoint());
+            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
             tokenClient.setExecutor(getHttpService().getClientExecutor());
             tokenClient.setRequest(tokenRequest);
             final TokenResponse response = tokenClient.exec();
@@ -68,7 +68,7 @@ public class GetTokensByCodeOperation extends BaseOperation {
                     opResponse.setExpiresIn(response.getExpiresIn());
 
                     final Jwt jwt = Jwt.parse(response.getIdToken());
-                    if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse())) {
+                    if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()))) {
                         final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
                         opResponse.setIdTokenClaims(claims);
 
