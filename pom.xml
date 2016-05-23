@@ -36,7 +36,6 @@
         <module>oxd-client</module>
         <module>oxd-server</module>
         <module>oxd-ping</module>
-        <module>oxd-rs-protect</module>
         <module>oxd-rp-client</module>
         <!--<module>oxd-rp-client-demo</module>-->
     </modules>
