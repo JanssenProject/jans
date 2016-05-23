@@ -10,6 +10,8 @@ import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
+import java.net.URLEncoder;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/11/2015
@@ -37,7 +39,7 @@ public class GetLogoutUrlOperation extends BaseOperation {
             String uri = getDiscoveryService().getConnectDiscoveryResponse().getEndSessionEndpoint() +
                     "?id_token_hint=" + getIdToken(params, site);
             if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-                uri += "&post_logout_redirect_uri=" + params.getPostLogoutRedirectUri();
+                uri += "&post_logout_redirect_uri=" + URLEncoder.encode(params.getPostLogoutRedirectUri(), "UTF-8");
             }
             if (!Strings.isNullOrEmpty(params.getState())) {
                 uri += "&state=" + params.getState();
