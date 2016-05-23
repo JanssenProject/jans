@@ -10,12 +10,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 13/08/2013
  */
 
-public class ObtainPatParams implements IParams {
+public class ObtainPatParams implements IParams, HasOxdId {
 
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
-    @JsonProperty(value = "uma_discovery_url")
-    private String umaDiscoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
     @JsonProperty(value = "redirect_url")
     private String redirectUrl;
     @JsonProperty(value = "client_id")
@@ -28,6 +26,14 @@ public class ObtainPatParams implements IParams {
     private String userSecret;
 
     public ObtainPatParams() {
+    }
+
+    public String getOxdId() {
+        return oxdId;
+    }
+
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     public String getRedirectUrl() {
@@ -95,8 +101,7 @@ public class ObtainPatParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("ObtainPatParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
-        sb.append(", umaDiscoveryUrl='").append(umaDiscoveryUrl).append('\'');
+        sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');

@@ -82,12 +82,17 @@ public class Processor {
         }
     }
 
-    public CommandResponse process(Command p_command) {
-        if (p_command != null) {
+    public CommandResponse process(Command command) {
+        if (command != null) {
             try {
-                final IOperation iOperation = OperationFactory.create(p_command, ServerLauncher.getInjector());
-                if (iOperation != null) {
-                    return iOperation.execute();
+                final IOperation operation = OperationFactory.create(command, ServerLauncher.getInjector());
+                if (operation != null) {
+                    CommandResponse operationResponse = operation.execute();
+                    if (operationResponse != null) {
+                        return operationResponse;
+                    } else {
+                        LOG.error("No response from operation. Command: " + command);
+                    }
                 } else {
                     return CommandResponse.OPERATION_IS_NOT_SUPPORTED;
                 }

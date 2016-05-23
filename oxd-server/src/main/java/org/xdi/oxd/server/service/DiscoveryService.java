@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.server.service;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
-import org.xdi.oxd.server.Configuration;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,89 +36,92 @@ public class DiscoveryService {
     private final ConcurrentMap<String, UmaConfiguration> m_umaMap = new ConcurrentHashMap<String, UmaConfiguration>();
 
     private final HttpService httpService;
-    private final Configuration configuration;
+    private final SiteConfigurationService siteService;
 
     @Inject
-    public DiscoveryService(HttpService httpService, Configuration configuration) {
+    public DiscoveryService(HttpService httpService, SiteConfigurationService siteService) {
         this.httpService = httpService;
-        this.configuration = configuration;
+        this.siteService = siteService;
     }
 
-    public OpenIdConfigurationResponse getConnectDiscoveryResponse() {
-        return getConnectDiscoveryResponse(getConnectDiscoveryUrl());
-    }
-
-    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String p_discoveryUrl) {
-        try {
-            if (StringUtils.isNotBlank(p_discoveryUrl)) {
-                final OpenIdConfigurationResponse r = m_map.get(p_discoveryUrl);
-                if (r != null) {
-                    return r;
-                }
-                final OpenIdConfigurationClient client = new OpenIdConfigurationClient(p_discoveryUrl);
-                client.setExecutor(httpService.getClientExecutor());
-                final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
-                LOG.trace("Discovery response: {} ", response.getEntity());
-                if (StringUtils.isNotBlank(response.getEntity())) {
-                    m_map.put(p_discoveryUrl, response);
-                } else {
-                    LOG.error("No response from discovery!");
-                }
-                return response;
-            } else {
-                LOG.error("Discovery URL is null or blank.");
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+    public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
+        SiteConfiguration site = siteService.getSite(oxdId);
+        if (site != null) {
+            return getConnectDiscoveryResponse(site.getOpHost());
         }
-        LOG.error("Unable to fetch discovery information for url: {}", p_discoveryUrl);
+        LOG.error("Failed to find site configuration for oxd_id: " + oxdId);
         return null;
     }
 
-    public UmaConfiguration getUmaDiscovery() {
-        return getUmaDiscovery(getUmaDiscoveryUrl());
-    }
+    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost) {
+        if (Strings.isNullOrEmpty(opHost)) {
+            LOG.error("Failed to fetch connect discovery response. op_host is null or blank.");
+            return null;
+        }
 
-    public UmaConfiguration getUmaDiscovery(String umaDiscoveryUrl) {
         try {
-            if (StringUtils.isNotBlank(umaDiscoveryUrl)) {
-                final UmaConfiguration r = m_umaMap.get(umaDiscoveryUrl);
-                if (r != null) {
-                    return r;
-                }
-                final UmaConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
-                        umaDiscoveryUrl, httpService.getClientExecutor()).getMetadataConfiguration();
-                LOG.trace("Uma discovery response: {} ", response);
-                m_umaMap.put(umaDiscoveryUrl, response);
-                return response;
-            } else {
-                LOG.error("Uma discovery URL is null or blank.");
+            final OpenIdConfigurationResponse r = m_map.get(opHost);
+            if (r != null) {
+                return r;
             }
+            final OpenIdConfigurationClient client = new OpenIdConfigurationClient(getConnectDiscoveryUrl(opHost));
+            client.setExecutor(httpService.getClientExecutor());
+            final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
+            LOG.trace("Discovery response: {} ", response.getEntity());
+            if (StringUtils.isNotBlank(response.getEntity())) {
+                m_map.put(opHost, response);
+            } else {
+                LOG.error("No response from discovery!");
+            }
+            return response;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        LOG.error("Unable to fetch UMA discovery information for url: {}", umaDiscoveryUrl);
+        LOG.error("Unable to fetch discovery information for op_host: {}", opHost);
         return null;
     }
 
-    public String getConnectDiscoveryUrl() {
-        return baseOpUrl() + WELL_KNOWN_CONNECT_PATH;
+    public UmaConfiguration getUmaDiscovery(String opHost) {
+
+        if (Strings.isNullOrEmpty(opHost)) {
+            LOG.error("Failed to fetch UMA discovery response. op_host is null or blank.");
+            return null;
+        }
+
+        try {
+            final UmaConfiguration r = m_umaMap.get(opHost);
+            if (r != null) {
+                return r;
+            }
+            final UmaConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
+                    getUmaDiscoveryUrl(opHost), httpService.getClientExecutor()).getMetadataConfiguration();
+            LOG.trace("Uma discovery response: {} ", response);
+            m_umaMap.put(opHost, response);
+            return response;
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        LOG.error("Unable to fetch UMA discovery information for op_host: {}", opHost);
+        return null;
     }
 
-    public String getUmaDiscoveryUrl() {
-        return baseOpUrl() + WELL_KNOWN_UMA_PATH;
+    public String getConnectDiscoveryUrl(String opHost) {
+        return baseOpUrl(opHost) + WELL_KNOWN_CONNECT_PATH;
     }
 
-    private String baseOpUrl() {
-        String baseUrl = configuration.getOpHost();
+    public String getUmaDiscoveryUrl(String opHost) {
+        return baseOpUrl(opHost) + WELL_KNOWN_UMA_PATH;
+    }
 
-        if (!baseUrl.startsWith("http")) {
-            baseUrl = "https://" + baseUrl;
+    private String baseOpUrl(String opHost) {
+        if (!opHost.startsWith("http")) {
+            opHost = "https://" + opHost;
         }
-        if (baseUrl.endsWith("/")) {
-            baseUrl = StringUtils.removeEnd(baseUrl, "/");
+        if (opHost.endsWith("/")) {
+            opHost = StringUtils.removeEnd(opHost, "/");
         }
-        return baseUrl;
+        return opHost;
     }
 
 }
