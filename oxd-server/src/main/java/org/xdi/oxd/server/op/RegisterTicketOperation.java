@@ -31,31 +31,28 @@ public class RegisterTicketOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final RegisterPermissionTicketParams params = asParams(RegisterPermissionTicketParams.class);
-            if (params != null) {
-                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                final PermissionRegistrationService registrationService = UmaClientFactory.instance().
-                        createResourceSetPermissionRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
 
-                final UmaPermission request = new UmaPermission();
-                request.setResourceSetId(params.getResourceSetId());
-                request.setScopes(params.getScopes());
+        final RegisterPermissionTicketParams params = asParams(RegisterPermissionTicketParams.class);
 
-                final PermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
-                        "Bearer " + params.getPatToken(), params.getAmHost(), request);
+        final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
+        final PermissionRegistrationService registrationService = UmaClientFactory.instance().
+                createResourceSetPermissionRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
 
-                if (ticketResponse != null) {
-                    final RegisterPermissionTicketOpResponse opResponse = new RegisterPermissionTicketOpResponse();
-                    opResponse.setTicket(ticketResponse.getTicket());
-                    return okResponse(opResponse);
-                } else {
-                    LOG.error("No response on requestRptStatus call from OP.");
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        final UmaPermission request = new UmaPermission();
+        request.setResourceSetId(params.getResourceSetId());
+        request.setScopes(params.getScopes());
+
+        final PermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
+                "Bearer " + params.getPatToken(), params.getAmHost(), request);
+
+        if (ticketResponse != null) {
+            final RegisterPermissionTicketOpResponse opResponse = new RegisterPermissionTicketOpResponse();
+            opResponse.setTicket(ticketResponse.getTicket());
+            return okResponse(opResponse);
+        } else {
+            LOG.error("No response on requestRptStatus call from OP.");
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        return null;
     }
 }

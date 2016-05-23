@@ -3,7 +3,6 @@
  */
 package org.xdi.oxd.server.service;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -12,6 +11,8 @@ import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,27 +38,24 @@ public class DiscoveryService {
 
     private final HttpService httpService;
     private final SiteConfigurationService siteService;
+    private final ValidationService validationService;
 
     @Inject
-    public DiscoveryService(HttpService httpService, SiteConfigurationService siteService) {
+    public DiscoveryService(HttpService httpService, SiteConfigurationService siteService, ValidationService validationService) {
         this.httpService = httpService;
         this.siteService = siteService;
+        this.validationService = validationService;
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
+        validationService.notBlankOxdId(oxdId);
+
         SiteConfiguration site = siteService.getSite(oxdId);
-        if (site != null) {
-            return getConnectDiscoveryResponse(site.getOpHost());
-        }
-        LOG.error("Failed to find site configuration for oxd_id: " + oxdId);
-        return null;
+        return getConnectDiscoveryResponse(site.getOpHost());
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost) {
-        if (Strings.isNullOrEmpty(opHost)) {
-            LOG.error("Failed to fetch connect discovery response. op_host is null or blank.");
-            return null;
-        }
+        validationService.notBlankOpHost(opHost);
 
         try {
             final OpenIdConfigurationResponse r = m_map.get(opHost);
@@ -70,23 +68,26 @@ public class DiscoveryService {
             LOG.trace("Discovery response: {} ", response.getEntity());
             if (StringUtils.isNotBlank(response.getEntity())) {
                 m_map.put(opHost, response);
+                return response;
             } else {
                 LOG.error("No response from discovery!");
             }
-            return response;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
         LOG.error("Unable to fetch discovery information for op_host: {}", opHost);
-        return null;
+        throw new ErrorResponseException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
+    }
+
+    public UmaConfiguration getUmaDiscoveryByOxdId(String oxdId) {
+        validationService.notBlankOxdId(oxdId);
+
+        SiteConfiguration site = siteService.getSite(oxdId);
+        return getUmaDiscovery(site.getOpHost());
     }
 
     public UmaConfiguration getUmaDiscovery(String opHost) {
-
-        if (Strings.isNullOrEmpty(opHost)) {
-            LOG.error("Failed to fetch UMA discovery response. op_host is null or blank.");
-            return null;
-        }
+        validationService.notBlankOpHost(opHost);
 
         try {
             final UmaConfiguration r = m_umaMap.get(opHost);
@@ -103,7 +104,7 @@ public class DiscoveryService {
             LOG.error(e.getMessage(), e);
         }
         LOG.error("Unable to fetch UMA discovery information for op_host: {}", opHost);
-        return null;
+        throw new ErrorResponseException(ErrorResponseCode.NO_UMA_DISCOVERY_RESPONSE);
     }
 
     public String getConnectDiscoveryUrl(String opHost) {

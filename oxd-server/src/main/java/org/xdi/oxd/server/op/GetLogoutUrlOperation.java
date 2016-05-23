@@ -31,12 +31,12 @@ public class GetLogoutUrlOperation extends BaseOperation {
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
+    public CommandResponse execute() throws Exception {
+
             final GetLogoutUrlParams params = asParams(GetLogoutUrlParams.class);
             final SiteConfiguration site = getSite(params.getOxdId());
 
-            String uri = getDiscoveryService().getConnectDiscoveryResponse().getEndSessionEndpoint() +
+            String uri = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint() +
                     "?id_token_hint=" + getIdToken(params, site);
             if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
                 uri += "&post_logout_redirect_uri=" + URLEncoder.encode(params.getPostLogoutRedirectUri(), "UTF-8");
@@ -49,10 +49,6 @@ public class GetLogoutUrlOperation extends BaseOperation {
             }
 
             return okResponse(new LogoutResponse(uri));
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
     private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {

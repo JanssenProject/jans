@@ -30,28 +30,24 @@ public class RptStatusOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final RptStatusParams params = asParams(RptStatusParams.class);
-            if (params != null) {
-                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, getHttpService().getClientExecutor());
 
-                final RptIntrospectionResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), params.getRpt(), "");
+        final RptStatusParams params = asParams(RptStatusParams.class);
 
-                if (statusResponse != null) {
-                    final RptStatusOpResponse opResponse = new RptStatusOpResponse();
-                    opResponse.setActive(statusResponse.getActive());
-                    opResponse.setExpiresAt(statusResponse.getExpiresAt());
-                    opResponse.setIssuedAt(statusResponse.getIssuedAt());
-                    opResponse.setPermissions(statusResponse.getPermissions());
-                    return okResponse(opResponse);
-                } else {
-                    LOG.error("No response on requestRptStatus call from OP.");
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
+        final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, getHttpService().getClientExecutor());
+
+        final RptIntrospectionResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), params.getRpt(), "");
+
+        if (statusResponse != null) {
+            final RptStatusOpResponse opResponse = new RptStatusOpResponse();
+            opResponse.setActive(statusResponse.getActive());
+            opResponse.setExpiresAt(statusResponse.getExpiresAt());
+            opResponse.setIssuedAt(statusResponse.getIssuedAt());
+            opResponse.setPermissions(statusResponse.getPermissions());
+            return okResponse(opResponse);
+        } else {
+            LOG.error("No response on requestRptStatus call from OP.");
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        return null;
     }
 }

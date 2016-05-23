@@ -39,63 +39,54 @@ public class RegisterClientOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final RegisterClientParams params = asParams(RegisterClientParams.class);
-            LOG.trace("Start process, params: {}", params);
-            if (params != null) {
-                final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                if (discoveryResponse != null) {
 
-                    final String applicationTypeString = StringUtils.isNotBlank(params.getApplicationType()) ?
-                            params.getApplicationType() : getConfiguration().getRegisterClientAppType();
+        final RegisterClientParams params = asParams(RegisterClientParams.class);
+        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
 
-                    final String responseTypeString = StringUtils.isNotBlank(params.getResponseTypes()) ?
-                            params.getResponseTypes() : getConfiguration().getRegisterClientResponesType();
+        final String applicationTypeString = StringUtils.isNotBlank(params.getApplicationType()) ?
+                params.getApplicationType() : getConfiguration().getRegisterClientAppType();
 
-                    final ApplicationType applicationType = ApplicationType.fromString(applicationTypeString);
-                    final List<ResponseType> responseTypes = ResponseType.fromString(responseTypeString, " ");
-                    final RegisterRequest request = new RegisterRequest(applicationType, params.getClientName(), params.getRedirectUrl());
-                    request.setResponseTypes(responseTypes);
-                    request.setJwksUri(params.getJwksUri());
-                    request.setPostLogoutRedirectUris(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getLogoutRedirectUrl()));
+        final String responseTypeString = StringUtils.isNotBlank(params.getResponseTypes()) ?
+                params.getResponseTypes() : getConfiguration().getRegisterClientResponesType();
 
-                    if (StringUtils.isNotBlank(params.getContacts())) {
-                        request.setContacts(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getContacts()));
-                    }
+        final ApplicationType applicationType = ApplicationType.fromString(applicationTypeString);
+        final List<ResponseType> responseTypes = ResponseType.fromString(responseTypeString, " ");
+        final RegisterRequest request = new RegisterRequest(applicationType, params.getClientName(), params.getRedirectUrl());
+        request.setResponseTypes(responseTypes);
+        request.setJwksUri(params.getJwksUri());
+        request.setPostLogoutRedirectUris(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getLogoutRedirectUrl()));
 
-                    if (StringUtils.isNotBlank(params.getGrantTypes())) {
-                        request.setGrantTypes(grantTypes(params.getGrantTypes()));
-                    }
-
-                    if (StringUtils.isNotBlank(params.getTokenEndpointAuthMethod())) {
-                        final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getTokenEndpointAuthMethod());
-                        if (authenticationMethod != null) {
-                            request.setTokenEndpointAuthMethod(authenticationMethod);
-                        }
-                    }
-
-                    if (params.getRequestUris() != null && !params.getRequestUris().isEmpty()) {
-                        request.setRequestUris(params.getRequestUris());
-                    }
-
-
-                    final RegisterClient registerClient = new RegisterClient(discoveryResponse.getRegistrationEndpoint());
-                    registerClient.setRequest(request);
-                    registerClient.setExecutor(getHttpService().getClientExecutor());
-                    final RegisterResponse response = registerClient.exec();
-                    if (response != null) {
-                        LOG.trace("RegisterResponse: {}, client_id: {}", response, response.getClientId());
-                        final RegisterClientOpResponse r = Convertor.asRegisterClientOpResponse(response);
-                        return okResponse(r);
-                    } else {
-                        LOG.error("There is no response for registerClient.");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        if (StringUtils.isNotBlank(params.getContacts())) {
+            request.setContacts(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(params.getContacts()));
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        if (StringUtils.isNotBlank(params.getGrantTypes())) {
+            request.setGrantTypes(grantTypes(params.getGrantTypes()));
+        }
+
+        if (StringUtils.isNotBlank(params.getTokenEndpointAuthMethod())) {
+            final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getTokenEndpointAuthMethod());
+            if (authenticationMethod != null) {
+                request.setTokenEndpointAuthMethod(authenticationMethod);
+            }
+        }
+
+        if (params.getRequestUris() != null && !params.getRequestUris().isEmpty()) {
+            request.setRequestUris(params.getRequestUris());
+        }
+
+        final RegisterClient registerClient = new RegisterClient(discoveryResponse.getRegistrationEndpoint());
+        registerClient.setRequest(request);
+        registerClient.setExecutor(getHttpService().getClientExecutor());
+        final RegisterResponse response = registerClient.exec();
+        if (response != null) {
+            LOG.trace("RegisterResponse: {}, client_id: {}", response, response.getClientId());
+            final RegisterClientOpResponse r = Convertor.asRegisterClientOpResponse(response);
+            return okResponse(r);
+        } else {
+            LOG.error("There is no response for registerClient.");
+        }
+        return null;
     }
 
     private List<GrantType> grantTypes(String grantTypesString) {

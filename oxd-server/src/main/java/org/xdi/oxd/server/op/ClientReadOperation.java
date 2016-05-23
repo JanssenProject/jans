@@ -14,7 +14,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ClientReadParams;
 import org.xdi.oxd.common.response.RegisterClientOpResponse;
 import org.xdi.oxd.server.Convertor;
-import org.xdi.oxd.server.service.HttpService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,27 +30,23 @@ public class ClientReadOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final ClientReadParams params = asParams(ClientReadParams.class);
-            LOG.trace("Start process, params: {}", params);
-            if (params != null) {
-                RegisterRequest registerRequest = new RegisterRequest(params.getRegistrationAccessToken());
-                RegisterClient registerClient = new RegisterClient(params.getRegistrationClientUri());
-                registerClient.setExecutor(getHttpService().getClientExecutor());
-                registerClient.setRequest(registerRequest);
-                RegisterResponse response = registerClient.exec();
 
-                LOG.trace("RegisterResponse: {}", response);
-                if (response != null) {
-                    final RegisterClientOpResponse r = Convertor.asRegisterClientOpResponse(response);
-                    return okResponse(r);
-                } else {
-                    LOG.error("There is no response for registerClient.");
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        final ClientReadParams params = asParams(ClientReadParams.class);
+
+        RegisterRequest registerRequest = new RegisterRequest(params.getRegistrationAccessToken());
+        RegisterClient registerClient = new RegisterClient(params.getRegistrationClientUri());
+        registerClient.setExecutor(getHttpService().getClientExecutor());
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        LOG.trace("RegisterResponse: {}", response);
+        if (response != null) {
+            final RegisterClientOpResponse r = Convertor.asRegisterClientOpResponse(response);
+            return okResponse(r);
+        } else {
+            LOG.error("There is no response for registerClient.");
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        return null;
     }
 }

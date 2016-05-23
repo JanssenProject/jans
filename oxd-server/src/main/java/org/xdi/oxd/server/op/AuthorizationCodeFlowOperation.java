@@ -39,17 +39,14 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
+        final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
 
-            final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-            if (discovery != null) {
-                return okResponse(requestToken(discovery, params));
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        if (discovery != null) {
+            return okResponse(requestToken(discovery, params));
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        return null;
     }
 
     private AuthorizationCodeFlowResponse requestToken(OpenIdConfigurationResponse discovery, AuthorizationCodeFlowParams params) {

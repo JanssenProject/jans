@@ -13,16 +13,23 @@ import org.codehaus.jackson.annotate.JsonValue;
  */
 
 public enum ErrorResponseCode {
-    INTERNAL_ERROR("internal_error", "Internal server error occurs."),
+
+    INTERNAL_ERROR_UNKNOWN("internal_error", "Unknown internal server error occurs."),
+    INTERNAL_ERROR_NO_PARAMS("internal_error", "Command parameters are not specified or otherwise malformed."),
+    BAD_REQUEST_NO_OXD_ID("bad_request", "oxd_id is empty or not specified."),
+    INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),
-    UNSUPPORTED_OPERATION("unsupported_operation", "Operation is not supported by server error.");
+    UNSUPPORTED_OPERATION("unsupported_operation", "Operation is not supported by server error."),
+    INVALID_OP_HOST("invalid_op_host", "Invalid op_host (empty or blank)."),
+    NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
+    NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma-configuration");
 
-    private final String value;
+    private final String code;
     private final String description;
 
     private ErrorResponseCode(String p_value, String p_description) {
-        value = p_value;
+        code = p_value;
         description = p_description;
     }
 
@@ -31,19 +38,29 @@ public enum ErrorResponseCode {
     }
 
     @JsonValue
-    public String getValue() {
-        return value;
+    public String getCode() {
+        return code;
     }
 
     @JsonCreator
     public static ErrorResponseCode fromValue(String v) {
         if (StringUtils.isNotBlank(v)) {
             for (ErrorResponseCode t : values()) {
-                if (t.getValue().equalsIgnoreCase(v)) {
+                if (t.getCode().equalsIgnoreCase(v)) {
                     return t;
                 }
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("ErrorResponseCode");
+        sb.append("{value='").append(code).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

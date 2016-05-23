@@ -40,6 +40,8 @@ public class SiteConfigurationService {
 
     @Inject
     ConfigurationService configurationService;
+    @Inject
+    ValidationService validationService;
 
     public void load() {
 
@@ -84,8 +86,7 @@ public class SiteConfigurationService {
         Preconditions.checkState(!Strings.isNullOrEmpty(id));
 
         SiteConfiguration site = sites.get(id + ".json");
-        Preconditions.checkNotNull(site, "Failed to fetch site configuration with id: " + id + ".json");
-        return site;
+        return validationService.validate(site);
     }
 
     public Map<String, SiteConfiguration> getSites() {
