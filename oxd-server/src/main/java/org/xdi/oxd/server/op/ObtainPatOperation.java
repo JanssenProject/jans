@@ -11,7 +11,6 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
@@ -42,31 +41,24 @@ public class ObtainPatOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final ObtainPatParams params = asParams(ObtainPatParams.class);
-            if (params != null) {
-                final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                if (discovery != null && umaDiscovery != null) {
-                    final ObtainPatOpResponse r;
-                    if (useClientAuthentication()) {
-                        LOG.trace("Try to obtain PAT with client authentication...");
-                        r = obtainPatWithClientCredentials(discovery, params);
-                    } else {
-                        LOG.trace("Try to obtain PAT with user credentials...");
-                        r = obtainPatWithUserCredentials(discovery, params);
-                    }
-                    if (r != null) {
-                        return okResponse(r);
-                    }
-                } else {
-                    LOG.error("No discovery response!");
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        final ObtainPatParams params = asParams(ObtainPatParams.class);
+        getValidationService().validate(params);
+
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+
+        final ObtainPatOpResponse r;
+        if (useClientAuthentication()) {
+            LOG.trace("Try to obtain PAT with client authentication...");
+            r = obtainPatWithClientCredentials(discovery, params);
+        } else {
+            LOG.trace("Try to obtain PAT with user credentials...");
+            r = obtainPatWithUserCredentials(discovery, params);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        if (r != null) {
+            return okResponse(r);
+        }
+
+        return null;
     }
 
     public boolean useClientAuthentication() {

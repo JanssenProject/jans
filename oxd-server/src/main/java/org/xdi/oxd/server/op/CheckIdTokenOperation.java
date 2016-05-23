@@ -3,8 +3,6 @@
  */
 package org.xdi.oxd.server.op;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
@@ -40,43 +38,30 @@ public class CheckIdTokenOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckIdTokenOperation.class);
 
-    protected CheckIdTokenOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected CheckIdTokenOperation(Command command, final Injector injector) {
+        super(command, injector);
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
-            final CheckIdTokenParams params = asParams(CheckIdTokenParams.class);
-            if (params != null) {
-                OpenIdConfigurationResponse discoveryResponse = null;
+    public CommandResponse execute() throws Exception {
 
-                if (!Strings.isNullOrEmpty(params.getDiscoveryUrl())) {
-                    discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                }
+        final CheckIdTokenParams params = asParams(CheckIdTokenParams.class);
+        getValidationService().validate(params);
 
-                if (!Strings.isNullOrEmpty(params.getOxdId())) {
-                    discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse();
-                }
-                Preconditions.checkNotNull(discoveryResponse, "Failed to identify discovery response, params: " + params);
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
-                final String idToken = params.getIdToken();
-                final Jwt jwt = Jwt.parse(idToken);
+        final String idToken = params.getIdToken();
+        final Jwt jwt = Jwt.parse(idToken);
 
-                final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
-                final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+        final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
+        final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
 
-                final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-                opResponse.setActive(isValid(jwt, discoveryResponse));
-                opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
-                opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
-                opResponse.setClaims(jwt.getClaims().toMap());
-                return okResponse(opResponse);
-            }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
+        opResponse.setActive(isValid(jwt, discoveryResponse));
+        opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
+        opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
+        opResponse.setClaims(jwt.getClaims().toMap());
+        return okResponse(opResponse);
     }
 
     public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {

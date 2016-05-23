@@ -38,42 +38,40 @@ public class AuthorizeRptOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final AuthorizeRptParams params = asParams(AuthorizeRptParams.class);
-            if (params != null && CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {
 
-                final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
-                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(umaDiscoveryUrl);
-                if (umaDiscovery != null) {
-                    ClaimTokenList tokenList = new ClaimTokenList();
-                    for (Map.Entry<String, List<String>> claim : params.getClaims().entrySet()) {
-                        tokenList.add(new ClaimToken(claim.getKey(), claim.getValue() != null && !claim.getValue().isEmpty() ? claim.getValue().get(0) : ""));
-                    }
+        final AuthorizeRptParams params = asParams(AuthorizeRptParams.class);
+        if (CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {
 
-                    final RptAuthorizationRequest authorizationRequest = new RptAuthorizationRequest(params.getRptToken(), params.getTicket());
-                    authorizationRequest.setClaims(tokenList);
+            final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
+            final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(umaDiscoveryUrl);
+            if (umaDiscovery != null) {
+                ClaimTokenList tokenList = new ClaimTokenList();
+                for (Map.Entry<String, List<String>> claim : params.getClaims().entrySet()) {
+                    tokenList.add(new ClaimToken(claim.getKey(), claim.getValue() != null && !claim.getValue().isEmpty() ? claim.getValue().get(0) : ""));
+                }
 
-                    LOG.debug("Try to authorize RPT with ticket: {}...", params.getTicket());
-                    final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, getHttpService().getClientExecutor());
-                    final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
-                            "Bearer " + params.getAatToken(), params.getAmHost(), authorizationRequest);
-                    if (authorizationResponse != null) {
-                        LOG.trace("RPT is authorized. RPT: {} ", params.getRptToken());
-                        // authorized
-                        return CommandResponse.ok();
-                    } else {
-                        LOG.trace("Failed to authorize RPT: {}", params.getRptToken());
-                        return CommandResponse.createErrorResponse(ErrorResponseCode.RPT_NOT_AUTHORIZED);
-                    }
+                final RptAuthorizationRequest authorizationRequest = new RptAuthorizationRequest(params.getRptToken(), params.getTicket());
+                authorizationRequest.setClaims(tokenList);
+
+                LOG.debug("Try to authorize RPT with ticket: {}...", params.getTicket());
+                final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(umaDiscovery, getHttpService().getClientExecutor());
+                final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
+                        "Bearer " + params.getAatToken(), params.getAmHost(), authorizationRequest);
+                if (authorizationResponse != null) {
+                    LOG.trace("RPT is authorized. RPT: {} ", params.getRptToken());
+                    // authorized
+                    return CommandResponse.ok();
                 } else {
-                    LOG.error("Unable to fetch uma discovery for amHost: {}", params.getAmHost());
+                    LOG.trace("Failed to authorize RPT: {}", params.getRptToken());
+                    return CommandResponse.createErrorResponse(ErrorResponseCode.RPT_NOT_AUTHORIZED);
                 }
             } else {
-                return CommandResponse.createErrorResponse(ErrorResponseCode.INVALID_REQUEST);
+                LOG.error("Unable to fetch uma discovery for amHost: {}", params.getAmHost());
             }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
+        } else {
+            return CommandResponse.createErrorResponse(ErrorResponseCode.INVALID_REQUEST);
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        return null;
     }
 }

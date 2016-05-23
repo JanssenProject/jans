@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
@@ -96,7 +97,10 @@ public class Processor {
                 } else {
                     return CommandResponse.OPERATION_IS_NOT_SUPPORTED;
                 }
-            } catch (Exception e) {
+            } catch (ErrorResponseException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                return CommandResponse.createErrorResponse(e.getErrorResponseCode());
+            } catch (Throwable e) {
                 LOG.error(e.getMessage(), e);
             }
         }

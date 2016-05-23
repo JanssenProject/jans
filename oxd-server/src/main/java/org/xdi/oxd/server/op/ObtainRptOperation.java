@@ -15,7 +15,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.ObtainRptParams;
 import org.xdi.oxd.common.response.ObtainRptOpResponse;
-import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.Utils;
 
 /**
@@ -33,12 +32,12 @@ public class ObtainRptOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
+
             final ObtainRptParams params = asParams(ObtainRptParams.class);
-            if (params != null) {
+
                 final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
                 final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(umaDiscoveryUrl);
-                if (umaDiscovery != null) {
+
                     final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(umaDiscovery, getHttpService().getClientExecutor());
                     final RPTResponse rptResponse = rptService.createRPT("Bearer " + params.getAat(), params.getAmHost());
                     if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
@@ -48,11 +47,8 @@ public class ObtainRptOperation extends BaseOperation {
                         r.setRptToken(rpt);
                         return okResponse(r);
                     }
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+
+
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 }

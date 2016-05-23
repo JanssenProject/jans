@@ -35,29 +35,24 @@ public class CheckAccessTokenOperation extends BaseOperation {
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
-            final CheckAccessTokenParams params = asParams(CheckAccessTokenParams.class);
-            if (params != null) {
-                final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                final String idToken = params.getIdToken();
-                final String accessToken = params.getAccessToken();
+    public CommandResponse execute() throws Exception {
 
-                final Jwt jwt = Jwt.parse(idToken);
+        final CheckAccessTokenParams params = asParams(CheckAccessTokenParams.class);
 
-                final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
-                final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        final String idToken = params.getIdToken();
+        final String accessToken = params.getAccessToken();
 
-                final CheckAccessTokenResponse opResponse = new CheckAccessTokenResponse();
-                opResponse.setActive(isAccessTokenValid(accessToken, jwt, discoveryResponse));
-                opResponse.setIssuedAt(issuedAt);
-                opResponse.setExpiresAt(expiresAt);
-                return okResponse(opResponse);
-            }
-        } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        final Jwt jwt = Jwt.parse(idToken);
+
+        final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
+        final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+
+        final CheckAccessTokenResponse opResponse = new CheckAccessTokenResponse();
+        opResponse.setActive(isAccessTokenValid(accessToken, jwt, discoveryResponse));
+        opResponse.setIssuedAt(issuedAt);
+        opResponse.setExpiresAt(expiresAt);
+        return okResponse(opResponse);
     }
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {

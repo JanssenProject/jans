@@ -12,21 +12,21 @@ import java.io.Serializable;
  * @version 0.9, 09/08/2013
  */
 
-public class ResponseError implements Serializable {
+public class ErrorResponse implements Serializable {
 
     @JsonProperty(value = "error")
     private ErrorResponseCode error;
     @JsonProperty(value = "error_description")
     private String errorDescription;
 
-    public ResponseError() {
+    public ErrorResponse() {
     }
 
-    public ResponseError(ErrorResponseCode p_error) {
+    public ErrorResponse(ErrorResponseCode p_error) {
         error = p_error;
     }
 
-    public ResponseError(ErrorResponseCode p_error, String p_errorDescription) {
+    public ErrorResponse(ErrorResponseCode p_error, String p_errorDescription) {
         error = p_error;
         errorDescription = p_errorDescription;
     }

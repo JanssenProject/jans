@@ -20,7 +20,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.SiteConfigurationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +35,6 @@ public class RegisterSiteOperation extends BaseOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
-    private SiteConfigurationService siteService;
     private SiteConfiguration siteConfiguration;
 
     /**
@@ -46,7 +44,6 @@ public class RegisterSiteOperation extends BaseOperation {
      */
     protected RegisterSiteOperation(Command p_command, final Injector injector) {
         super(p_command, injector);
-        siteService = getInjector().getInstance(SiteConfigurationService.class);
     }
 
     @Override
@@ -75,7 +72,7 @@ public class RegisterSiteOperation extends BaseOperation {
             siteConfiguration = createSiteConfiguration(siteId, params);
 
             if (!hasClient()) {
-                final RegisterResponse registerResponse = registerClient();
+                final RegisterResponse registerResponse = registerClient(params.getOpHost());
                 siteConfiguration.setClientId(registerResponse.getClientId());
                 siteConfiguration.setClientSecret(registerResponse.getClientSecret());
                 siteConfiguration.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
@@ -84,9 +81,10 @@ public class RegisterSiteOperation extends BaseOperation {
                 siteConfiguration.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
 
-            siteService.createNewFile(siteConfiguration);
+            getSiteService().createNewFile(siteConfiguration);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to persist site configuration, params: " + params, e);
+            LOG.error("Failed to persist site configuration, params: " + params, e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -95,8 +93,8 @@ public class RegisterSiteOperation extends BaseOperation {
         return !Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret());
     }
 
-    private RegisterResponse registerClient() {
-        final RegisterClient registerClient = new RegisterClient(getDiscoveryService().getConnectDiscoveryResponse().getRegistrationEndpoint());
+    private RegisterResponse registerClient(String opHost) {
+        final RegisterClient registerClient = new RegisterClient(getDiscoveryService().getConnectDiscoveryResponse(opHost).getRegistrationEndpoint());
         registerClient.setRequest(createRegisterClientRequest());
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
@@ -119,7 +117,7 @@ public class RegisterSiteOperation extends BaseOperation {
 
     private RegisterRequest createRegisterClientRequest() {
         final RegisterSiteParams params = asParams(RegisterSiteParams.class);
-        final SiteConfiguration fallback = siteService.defaultSiteConfiguration();
+        final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
 
         ApplicationType applicationType = null;
         if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
@@ -194,7 +192,7 @@ public class RegisterSiteOperation extends BaseOperation {
             }
         }
 
-        final SiteConfiguration fallback = siteService.defaultSiteConfiguration();
+        final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
         if (fallback != null && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
             for (String grantType : fallback.getGrantType()) {
                 grantTypes.add(GrantType.fromString(grantType));
@@ -221,7 +219,7 @@ public class RegisterSiteOperation extends BaseOperation {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final SiteConfiguration siteConf = new SiteConfiguration(siteService.defaultSiteConfiguration());
+        final SiteConfiguration siteConf = new SiteConfiguration(getSiteService().defaultSiteConfiguration());
         siteConf.setOxdId(siteId);
         siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());

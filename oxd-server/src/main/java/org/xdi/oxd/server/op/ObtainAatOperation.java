@@ -44,27 +44,23 @@ public class ObtainAatOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final ObtainAatParams params = asParams(ObtainAatParams.class);
-            if (params != null) {
-                final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-                if (discovery != null && umaDiscovery != null) {
-                    final ObtainAatOpResponse r;
-                    if (useClientAuthentication()) {
-                        r = obtainAatWithClientCredentials(discovery, params);
-                    } else {
-                        r = obtainAatWithUserCredentials(discovery, params);
-                    }
-                    if (r != null) {
-                        return okResponse(r);
-                    }
-                }
+
+        final ObtainAatParams params = asParams(ObtainAatParams.class);
+
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
+        if (discovery != null && umaDiscovery != null) {
+            final ObtainAatOpResponse r;
+            if (useClientAuthentication()) {
+                r = obtainAatWithClientCredentials(discovery, params);
+            } else {
+                r = obtainAatWithUserCredentials(discovery, params);
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            if (r != null) {
+                return okResponse(r);
+            }
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        return null;
     }
 
     public boolean useClientAuthentication() {

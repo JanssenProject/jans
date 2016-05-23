@@ -1,8 +1,6 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoRequest;
 import org.xdi.oxd.common.Command;
@@ -17,7 +15,7 @@ import org.xdi.oxd.common.response.GetUserInfoResponse;
 
 public class GetUserInfoOperation extends BaseOperation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
 
     /**
      * Base constructor
@@ -30,18 +28,14 @@ public class GetUserInfoOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final GetUserInfoParams params = asParams(GetUserInfoParams.class);
+        final GetUserInfoParams params = asParams(GetUserInfoParams.class);
+        getValidationService().validate(params);
 
-            UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponse().getUserInfoEndpoint());
-            client.setExecutor(getHttpService().getClientExecutor());
-            client.setRequest(new UserInfoRequest(params.getAccessToken()));
+        UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId()).getUserInfoEndpoint());
+        client.setExecutor(getHttpService().getClientExecutor());
+        client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
-            GetUserInfoResponse opResponse = new GetUserInfoResponse(client.exec().getClaims());
-            return okResponse(opResponse);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        GetUserInfoResponse opResponse = new GetUserInfoResponse(client.exec().getClaims());
+        return okResponse(opResponse);
     }
 }
