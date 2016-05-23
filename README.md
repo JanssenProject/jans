@@ -783,7 +783,7 @@ Cache-Control: no-cache
 - RS512
 - ES256
 - ES384
-- ES512 (Currently not supported by SoftHSMv2)
+- ES512
 
 ## Installation
 
