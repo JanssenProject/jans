@@ -22,15 +22,16 @@ import java.util.Map;
 
 public class CheckIdTokenTest {
 
-    @Parameters({"host", "port", "discoveryUrl", "redirectUrl",
+    @Parameters({"host", "port", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String discoveryUrl, String redirectUrl,
+    public void test(String host, int port, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
+            RegisterSiteTest.registerSite()
             final Command command = new Command(CommandType.DISCOVERY);
             command.setParamsObject(new DiscoveryParams(discoveryUrl));
             final CommandResponse response = client.send(command);

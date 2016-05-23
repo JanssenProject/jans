@@ -12,10 +12,10 @@ import java.util.List;
  * @version 0.9, 13/08/2013
  */
 
-public class RegisterClientParams implements IParams {
+public class RegisterClientParams implements HasOxdIdParams {
 
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
     @JsonProperty(value = "redirect_uris")
     private List<String> redirectUrl;
     @JsonProperty(value = "logout_redirect_url")
@@ -40,12 +40,6 @@ public class RegisterClientParams implements IParams {
     private List<String> requestUris;
 
     public RegisterClientParams() {
-    }
-
-    public RegisterClientParams(String discoveryUrl, List<String> redirectUrl, String clientName) {
-        this.discoveryUrl = discoveryUrl;
-        this.redirectUrl = redirectUrl;
-        this.clientName = clientName;
     }
 
     public List<String> getRequestUris() {
@@ -112,12 +106,12 @@ public class RegisterClientParams implements IParams {
         this.responseTypes = responseTypes;
     }
 
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
+    public String getOxdId() {
+        return oxdId;
     }
 
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     public List<String> getRedirectUrl() {
@@ -153,7 +147,7 @@ public class RegisterClientParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RegisterClientParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
+        sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", logoutRedirectUrl='").append(logoutRedirectUrl).append('\'');
         sb.append(", clientName='").append(clientName).append('\'');

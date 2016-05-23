@@ -37,9 +37,9 @@ public class CompleteFlowTest {
         CommandClient.closeQuietly(g_client);
     }
 
-    @Parameters({"discoveryUrl", "umaDiscoveryUrl", "redirectUrl", "clientName"})
+    @Parameters({"umaDiscoveryUrl", "redirectUrl", "clientName"})
     @Test
-    public void test(String discoveryUrl, String umaDiscoveryUrl, String redirectUrl, String clientName) throws IOException {
+    public void test(String umaDiscoveryUrl, String redirectUrl, String clientName) throws IOException {
         // 1. register client
         final RegisterClientOpResponse r = registerClient(discoveryUrl, redirectUrl, clientName);
         Assert.assertNotNull(r);

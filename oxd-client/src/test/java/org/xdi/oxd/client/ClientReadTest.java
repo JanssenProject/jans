@@ -19,9 +19,9 @@ import java.io.IOException;
  */
 
 public class ClientReadTest {
-    @Parameters({"host", "port", "discoveryUrl", "redirectUrl", "clientName"})
+    @Parameters({"host", "port", "redirectUrl", "clientName"})
     @Test
-    public void clientRead(String host, int port, String discoveryUrl, String redirectUrl, String clientName) throws IOException {
+    public void clientRead(String host, int port, String redirectUrl, String clientName) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);

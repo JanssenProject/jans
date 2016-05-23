@@ -10,10 +10,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 23/06/2015
  */
 
-public class ImplicitFlowParams implements IParams {
+public class ImplicitFlowParams implements HasOxdIdParams {
 
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
     @JsonProperty(value = "redirect_url")
     private String redirectUrl;
     @JsonProperty(value = "client_id")
@@ -88,12 +88,12 @@ public class ImplicitFlowParams implements IParams {
         userSecret = p_userSecret;
     }
 
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
+    public String getOxdId() {
+        return oxdId;
     }
 
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     /**
@@ -105,7 +105,7 @@ public class ImplicitFlowParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("ImplicitFlowParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
+        sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", userId='").append(userId).append('\'');
