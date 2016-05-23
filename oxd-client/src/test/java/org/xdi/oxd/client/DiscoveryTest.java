@@ -18,15 +18,15 @@ import java.io.IOException;
 
 public class DiscoveryTest {
 
-    @Parameters({"host", "port", "discoveryUrl"})
+    @Parameters({"host", "port", "opHost"})
     @Test
-    public void test(String host, int port, String discoveryUrl) throws IOException {
+    public void test(String host, int port, String opHost) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
             final Command command = new Command(CommandType.DISCOVERY);
-            command.setParamsObject(new DiscoveryParams(discoveryUrl));
+            command.setParamsObject(new DiscoveryParams(opHost + "/.well-known/openid-configuration"));
             final CommandResponse response = client.send(command);
             Assert.assertNotNull(response);
             Assert.assertTrue(response.getStatus() == ResponseStatus.OK);

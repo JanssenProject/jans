@@ -11,10 +11,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 19/06/2015
  */
 
-public class AuthorizationCodeFlowParams implements IParams {
+public class AuthorizationCodeFlowParams implements HasOxdIdParams {
 
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
     @JsonProperty(value = "redirect_url")
     private String redirectUrl;
     @JsonProperty(value = "client_id")
@@ -33,6 +33,14 @@ public class AuthorizationCodeFlowParams implements IParams {
     private String acr;
 
     public AuthorizationCodeFlowParams() {
+    }
+
+    public String getOxdId() {
+        return oxdId;
+    }
+
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     public String getAcr() {
@@ -99,14 +107,6 @@ public class AuthorizationCodeFlowParams implements IParams {
         userSecret = p_userSecret;
     }
 
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
-    }
-
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
-    }
-
     /**
      * Returns string representation of object
      *
@@ -116,7 +116,7 @@ public class AuthorizationCodeFlowParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("AuthorizationCodeFlowParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
+        sb.append("{oxd_id='").append(oxdId).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", userId='").append(userId).append('\'');

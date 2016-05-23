@@ -20,10 +20,10 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class AuthorizationCodeFlowTest {
 
-    @Parameters({"host", "port", "discoveryUrl", "umaDiscoveryUrl", "redirectUrl",
+    @Parameters({"host", "port", "umaDiscoveryUrl", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String discoveryUrl, String umaDiscoveryUrl, String redirectUrl,
+    public void test(String host, int port, String umaDiscoveryUrl, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {

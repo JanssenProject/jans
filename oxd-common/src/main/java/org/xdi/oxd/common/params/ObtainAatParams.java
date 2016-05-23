@@ -11,8 +11,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class ObtainAatParams implements IParams {
 
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
     @JsonProperty(value = "uma_discovery_url")
     private String umaDiscoveryUrl;
     @JsonProperty(value = "redirect_url")
@@ -77,12 +77,12 @@ public class ObtainAatParams implements IParams {
         umaDiscoveryUrl = p_umaDiscoveryUrl;
     }
 
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
+    public String getOxdId() {
+        return oxdId;
     }
 
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     /**
@@ -94,7 +94,7 @@ public class ObtainAatParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("ObtainAatParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
+        sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", umaDiscoveryUrl='").append(umaDiscoveryUrl).append('\'');
         sb.append(", redirectUrl='").append(redirectUrl).append('\'');
         sb.append(", clientId='").append(clientId).append('\'');
