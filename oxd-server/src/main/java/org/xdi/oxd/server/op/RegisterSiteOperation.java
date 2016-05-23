@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -218,8 +219,11 @@ public class RegisterSiteOperation extends BaseOperation {
 
     private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {
 
+        Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
+
         final SiteConfiguration siteConf = new SiteConfiguration(siteService.defaultSiteConfiguration());
         siteConf.setOxdId(siteId);
+        siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         siteConf.setRedirectUris(params.getRedirectUris());
 
