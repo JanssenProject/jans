@@ -26,10 +26,10 @@ public class RegisterTicketTest {
     private static String g_patToken;
     private static RegisterResourceOpResponse g_resource;
 
-    @Parameters({"host", "port", "discoveryUrl", "umaDiscoveryUrl", "redirectUrl",
+    @Parameters({"host", "port", "umaDiscoveryUrl", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @BeforeClass
-    public static void setUp(String host, int port, String discoveryUrl, String umaDiscoveryUrl, String redirectUrl,
+    public static void setUp(String host, int port, String umaDiscoveryUrl, String redirectUrl,
                              String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         g_client = new CommandClient(host, port);
 

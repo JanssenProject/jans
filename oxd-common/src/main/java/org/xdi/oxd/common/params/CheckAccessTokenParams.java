@@ -12,13 +12,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 23/10/2013
  */
 
-public class CheckAccessTokenParams implements IParams {
+public class CheckAccessTokenParams implements HasOxdIdParams {
 
     /**
-     * Discovery url
+     * oxd ID
      */
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl;
+    @JsonProperty(value = "oxd_id")
+    private String oxdId;
 
     /**
      * Id token
@@ -38,22 +38,12 @@ public class CheckAccessTokenParams implements IParams {
     public CheckAccessTokenParams() {
     }
 
-    /**
-     * Returns discovery url
-     *
-     * @return discovery url
-     */
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
+    public String getOxdId() {
+        return oxdId;
     }
 
-    /**
-     * Sets discovery url
-     *
-     * @param p_discoveryUrl discovery url
-     */
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
+    public void setOxdId(String oxdId) {
+        this.oxdId = oxdId;
     }
 
     /**
@@ -101,7 +91,7 @@ public class CheckAccessTokenParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CheckAccessTokenParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
+        sb.append("{oxd_id='").append(oxdId).append('\'');
         sb.append(", idToken='").append(idToken).append('\'');
         sb.append(", accessToken='").append(accessToken).append('\'');
         sb.append('}');
