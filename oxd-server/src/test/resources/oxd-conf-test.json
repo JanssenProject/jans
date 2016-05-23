@@ -10,6 +10,5 @@
     "license_check_period_in_hours": 24,
     "public_key":"dc3/INiUZCuZGbE7O8caFO4PZljtTrxYN6DNkCfXYyRUJj2hKX2BuMAX/sXJdh+EgRLbNZeiY83bUSicuuoUo/nFDRR0nPZRy26uEMdhCHVymMfg9Rcz5v51ITbymCGx7m6w97Vqx2OFJ+z+GvukJJWSiOh2WoMZ/H21CgvnUSEqvSatcWIdDq8sZc1EpNOPrNZs7KBXYdAFosU85hrjIGxjkyviom3n4Nws95o3LlwRC2ZJrZOmivqdiNh2nIR9hyPTNawTA2qs7O7SQ/fr1ed3mynDXI4Rh5YubR74u0eg9d27ifc3kI64ldOWLOuHH6k+g89IKT/Jb7l7oynDCh25fx5s/fMog7b4oGGv0zHfpkq9UTh/GsBOiy4qdfHwgJGGjH7lcmWz7erI3mN6cQ==",
     "public_password":"7JCncAbkTG1zXq77MDM3",
-    "license_password":"NdSMDbPRty1tR7BIARja",
-    "op_host":"https://ce-dev.gluu.org"
+    "license_password":"NdSMDbPRty1tR7BIARja"
 }

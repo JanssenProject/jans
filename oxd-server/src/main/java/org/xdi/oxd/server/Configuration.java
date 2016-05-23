@@ -45,16 +45,6 @@ public class Configuration {
     private String licensePassword;
     @JsonProperty(value = "license_check_period_in_hours")
     private Integer licenseCheckPeriodInHours = 24;
-    @JsonProperty(value = "op_host")
-    private String opHost;
-
-    public String getOpHost() {
-        return opHost;
-    }
-
-    public void setOpHost(String opHost) {
-        this.opHost = opHost;
-    }
 
     public int getJettyPort() {
         return jettyPort;
@@ -195,7 +185,6 @@ public class Configuration {
         sb.append("Configuration");
         sb.append("{port=").append(port);
         sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
-        sb.append(", opHost=").append(opHost);
         sb.append(", localhostOnly=").append(localhostOnly);
         sb.append(", licenseServerEndpoint=").append(licenseServerEndpoint);
         sb.append(", licenseId=").append(licenseId);
