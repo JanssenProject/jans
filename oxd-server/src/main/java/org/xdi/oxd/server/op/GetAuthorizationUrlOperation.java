@@ -1,8 +1,6 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
@@ -19,7 +17,7 @@ import java.util.List;
 
 public class GetAuthorizationUrlOperation extends BaseOperation {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
 
     /**
      * Base constructor
@@ -31,28 +29,23 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
-            final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
-            final SiteConfiguration site = getSite(params.getOxdId());
+    public CommandResponse execute() throws Exception {
+        final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
+        final SiteConfiguration site = getSite(params.getOxdId());
 
-            String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse().getIssuer() + "/oxauth/authorize";
+        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getIssuer() + "/oxauth/authorize";
 
-            authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
-            authorizationEndpoint += "&client_id=" + site.getClientId();
-            authorizationEndpoint += "&client_secret=" + site.getClientSecret();
-            authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
-            authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
-            authorizationEndpoint += "&state=" + state();
-            authorizationEndpoint += "&nonce=" + nonce();
-            authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site));
+        authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
+        authorizationEndpoint += "&client_id=" + site.getClientId();
+        authorizationEndpoint += "&client_secret=" + site.getClientSecret();
+        authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
+        authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
+        authorizationEndpoint += "&state=" + state();
+        authorizationEndpoint += "&nonce=" + nonce();
+        authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site));
 
 
-            return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
     }
 
     private List<String> acrValues(SiteConfiguration site) {
@@ -61,11 +54,11 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
     }
 
     private String nonce() {
-        return "n-0S6_WzA2Mj"; // fixme
+        return "n-0S6_WzA2Mj"; // fixme todo
     }
 
     private String state() {
-        return "af0ifjsldkj"; // fixme
+        return "af0ifjsldkj"; // fixme todo
     }
 
 

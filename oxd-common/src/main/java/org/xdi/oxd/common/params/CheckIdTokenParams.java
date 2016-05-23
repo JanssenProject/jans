@@ -10,12 +10,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 21/10/2013
  */
 
-public class CheckIdTokenParams implements IParams {
+public class CheckIdTokenParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
-    @JsonProperty(value = "discovery_url")
-    private String discoveryUrl; // ignore if oxd_id is specified
     @JsonProperty(value = "id_token")
     private String idToken;
 
@@ -28,14 +26,6 @@ public class CheckIdTokenParams implements IParams {
 
     public void setOxdId(String oxdId) {
         this.oxdId = oxdId;
-    }
-
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
-    }
-
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
     }
 
     public String getIdToken() {
@@ -55,8 +45,7 @@ public class CheckIdTokenParams implements IParams {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("CheckIdTokenParams");
-        sb.append("{discoveryUrl='").append(discoveryUrl).append('\'');
-        sb.append(", idToken='").append(idToken).append('\'');
+        sb.append("{idToken='").append(idToken).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append('}');
         return sb.toString();

@@ -10,7 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 13/08/2013
  */
 
-public class ObtainPatParams implements IParams, HasOxdId {
+public class ObtainPatParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -74,22 +74,6 @@ public class ObtainPatParams implements IParams, HasOxdId {
 
     public void setUserSecret(String p_userSecret) {
         userSecret = p_userSecret;
-    }
-
-    public String getUmaDiscoveryUrl() {
-        return umaDiscoveryUrl;
-    }
-
-    public void setUmaDiscoveryUrl(String p_umaDiscoveryUrl) {
-        umaDiscoveryUrl = p_umaDiscoveryUrl;
-    }
-
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
-    }
-
-    public void setDiscoveryUrl(String p_discoveryUrl) {
-        discoveryUrl = p_discoveryUrl;
     }
 
     /**

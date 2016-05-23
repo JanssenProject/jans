@@ -40,55 +40,52 @@ public class GetTokensByCodeOperation extends BaseOperation {
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
-            final GetTokensByCodeParams params = asParams(GetTokensByCodeParams.class);
-            final SiteConfiguration site = getSite(params.getOxdId());
+    public CommandResponse execute() throws Exception {
 
-            final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-            tokenRequest.setCode(params.getCode());
-            tokenRequest.setRedirectUri(site.getAuthorizationRedirectUri());
-            tokenRequest.setAuthUsername(site.getClientId());
-            tokenRequest.setAuthPassword(site.getClientSecret());
-            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-            tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
+        final GetTokensByCodeParams params = asParams(GetTokensByCodeParams.class);
+        final SiteConfiguration site = getSite(params.getOxdId());
 
-            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
-            tokenClient.setExecutor(getHttpService().getClientExecutor());
-            tokenClient.setRequest(tokenRequest);
-            final TokenResponse response = tokenClient.exec();
-            ClientUtils.showClient(tokenClient);
+        final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(params.getCode());
+        tokenRequest.setRedirectUri(site.getAuthorizationRedirectUri());
+        tokenRequest.setAuthUsername(site.getClientId());
+        tokenRequest.setAuthPassword(site.getClientSecret());
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
 
-            if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
-                if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
-                    final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
-                    opResponse.setAccessToken(response.getAccessToken());
-                    opResponse.setIdToken(response.getIdToken());
-                    opResponse.setRefreshToken(response.getRefreshToken());
-                    opResponse.setExpiresIn(response.getExpiresIn());
+        final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
+        tokenClient.setExecutor(getHttpService().getClientExecutor());
+        tokenClient.setRequest(tokenRequest);
+        final TokenResponse response = tokenClient.exec();
+        ClientUtils.showClient(tokenClient);
 
-                    final Jwt jwt = Jwt.parse(response.getIdToken());
-                    if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()))) {
-                        final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
-                        opResponse.setIdTokenClaims(claims);
+        if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
+            if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
+                final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
+                opResponse.setAccessToken(response.getAccessToken());
+                opResponse.setIdToken(response.getIdToken());
+                opResponse.setRefreshToken(response.getRefreshToken());
+                opResponse.setExpiresIn(response.getExpiresIn());
 
-                        // persist tokens
-                        site.setIdToken(response.getIdToken());
-                        site.setAccessToken(response.getAccessToken());
-                        getSiteService().update(site);
+                final Jwt jwt = Jwt.parse(response.getIdToken());
+                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()))) {
+                    final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
+                    opResponse.setIdTokenClaims(claims);
 
-                        return okResponse(opResponse);
-                    } else {
-                        LOG.error("ID Token is not valid, token: " + response.getIdToken());
-                    }
+                    // persist tokens
+                    site.setIdToken(response.getIdToken());
+                    site.setAccessToken(response.getAccessToken());
+                    getSiteService().update(site);
+
+                    return okResponse(opResponse);
+                } else {
+                    LOG.error("ID Token is not valid, token: " + response.getIdToken());
                 }
-            } else {
-                LOG.error("Failed to get tokens because response code is: " + response.getScope());
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        } else {
+            LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        return null;
     }
 
     private static String asCommaSeparatedString(List<String> scope) {

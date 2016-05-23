@@ -28,24 +28,19 @@ public class DiscoveryOperation extends BaseOperation {
     }
 
     @Override
-    public CommandResponse execute() {
-        try {
-            final DiscoveryParams params = asParams(DiscoveryParams.class);
-            if (params != null) {
-                final OpenIdConfigurationResponse response = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
-                if (StringUtils.isNotBlank(response.getEntity())) {
-                    final JsonNode node = CoreUtils.createJsonMapper().readTree(response.getEntity());
-                    if (node != null) {
-                        return CommandResponse.ok().setData(node);
-                    } else {
-                        LOG.error("Unable to parse discovery response.");
-                    }
-                } else {
-                    LOG.error("Unable to parse discovery response.");
-                }
+    public CommandResponse execute() throws Exception {
+        final DiscoveryParams params = asParams(DiscoveryParams.class);
+
+        final OpenIdConfigurationResponse response = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        if (StringUtils.isNotBlank(response.getEntity())) {
+            final JsonNode node = CoreUtils.createJsonMapper().readTree(response.getEntity());
+            if (node != null) {
+                return CommandResponse.ok().setData(node);
+            } else {
+                LOG.error("Unable to parse discovery response.");
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        } else {
+            LOG.error("Unable to parse discovery response.");
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }

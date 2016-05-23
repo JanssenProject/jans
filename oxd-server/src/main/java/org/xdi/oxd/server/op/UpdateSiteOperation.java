@@ -40,20 +40,15 @@ public class UpdateSiteOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final UpdateSiteParams params = asParams(UpdateSiteParams.class);
-            final SiteConfiguration site = getSite(params.getOxdId());
+        final UpdateSiteParams params = asParams(UpdateSiteParams.class);
+        final SiteConfiguration site = getSite(params.getOxdId());
 
-            LOG.info("Updating site configuration ...");
-            persistSiteConfiguration(site, params);
+        LOG.info("Updating site configuration ...");
+        persistSiteConfiguration(site, params);
 
-            UpdateSiteResponse response = new UpdateSiteResponse();
-            response.setOxdId(site.getOxdId());
-            return okResponse(response);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+        UpdateSiteResponse response = new UpdateSiteResponse();
+        response.setOxdId(site.getOxdId());
+        return okResponse(response);
     }
 
     private void persistSiteConfiguration(SiteConfiguration site, UpdateSiteParams params) {

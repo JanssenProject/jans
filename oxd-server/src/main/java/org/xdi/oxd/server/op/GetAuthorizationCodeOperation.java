@@ -39,35 +39,32 @@ public class GetAuthorizationCodeOperation extends BaseOperation {
 
     @Override
     public CommandResponse execute() {
-        try {
-            final GetAuthorizationCodeParams params = asParams(GetAuthorizationCodeParams.class);
-            final SiteConfiguration site = getSite(params.getOxdId());
 
-            final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
-                    site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), UUID.randomUUID().toString());
-            request.setState("af0ifjsldkj");
-            request.setAuthUsername(params.getUsername());
-            request.setAuthPassword(params.getPassword());
-            request.getPrompts().add(Prompt.NONE);
-            request.setNonce(UUID.randomUUID().toString());
-            request.setAcrValues(acrValues(params, site));
+        final GetAuthorizationCodeParams params = asParams(GetAuthorizationCodeParams.class);
+        final SiteConfiguration site = getSite(params.getOxdId());
 
-            final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse().getAuthorizationEndpoint());
-            authorizeClient.setRequest(request);
-            authorizeClient.setExecutor(getHttpService().getClientExecutor());
-            final AuthorizationResponse response = authorizeClient.exec();
+        final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
+                site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), UUID.randomUUID().toString());
+        request.setState("af0ifjsldkj");
+        request.setAuthUsername(params.getUsername());
+        request.setAuthPassword(params.getPassword());
+        request.getPrompts().add(Prompt.NONE);
+        request.setNonce(UUID.randomUUID().toString());
+        request.setAcrValues(acrValues(params, site));
 
-            ClientUtils.showClient(authorizeClient);
-            if (response != null) {
-                return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
-            } else {
-                LOG.error("Failed to get response from oxauth client.");
-            }
+        final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint());
+        authorizeClient.setRequest(request);
+        authorizeClient.setExecutor(getHttpService().getClientExecutor());
+        final AuthorizationResponse response = authorizeClient.exec();
 
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+        ClientUtils.showClient(authorizeClient);
+        if (response != null) {
+            return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
+        } else {
+            LOG.error("Failed to get response from oxauth client.");
         }
-        return CommandResponse.INTERNAL_ERROR_RESPONSE;
+
+        return null;
     }
 
     private List<String> acrValues(GetAuthorizationCodeParams params, SiteConfiguration site) {

@@ -94,18 +94,18 @@ public class CommandResponse implements Serializable {
         return new CommandResponse(ResponseStatus.ERROR);
     }
 
-    public static CommandResponse createErrorResponse(ResponseError p_error) {
+    public static CommandResponse createErrorResponse(ErrorResponse p_error) {
         return CommandResponse.error().setData(new POJONode(p_error));
     }
 
     public static CommandResponse createErrorResponse(ErrorResponseCode p_errorCode) {
-        final ResponseError error = new ResponseError(p_errorCode);
+        final ErrorResponse error = new ErrorResponse(p_errorCode);
         error.setErrorDescription(p_errorCode.getDescription());
         return CommandResponse.error().setData(new POJONode(error));
     }
 
     public static CommandResponse createInternalError() {
-        return createErrorResponse(ErrorResponseCode.INTERNAL_ERROR);
+        return createErrorResponse(ErrorResponseCode.INTERNAL_ERROR_UNKNOWN);
     }
 
     public static CommandResponse createUnsupportedOperationError() {

@@ -19,5 +19,5 @@ public interface IOperation {
      *
      * @return command response
      */
-    public CommandResponse execute();
+    public CommandResponse execute() throws Exception;
 }
