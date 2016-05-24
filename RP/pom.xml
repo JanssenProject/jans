@@ -16,17 +16,6 @@
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
 	</prerequisites>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.richfaces</groupId>
-				<artifactId>richfaces-bom</artifactId>
-				<version>${richfaces.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<finalName>oxauth-rp</finalName>
