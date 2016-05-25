@@ -62,7 +62,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version May 24, 2016
  */
 public abstract class BaseTest {
 
@@ -102,10 +102,9 @@ public abstract class BaseTest {
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
             //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
+            //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
-        // Load test paramters
-        //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         FileInputStream conf = new FileInputStream(propertiesFile);
         Properties prop = new Properties();
         prop.load(conf);
@@ -286,7 +285,7 @@ public abstract class BaseTest {
         startSelenium();
         if (cleanupCookies) {
             System.out.println("authenticateResourceOwnerAndGrantAccess: Cleaning cookies");
-        	deleteAllCookies();
+            deleteAllCookies();
         }
         driver.navigate().to(authorizationRequestUrl);
 
@@ -294,7 +293,9 @@ public abstract class BaseTest {
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
         WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
 
-        usernameElement.sendKeys(userId);
+        if (userId != null) {
+            usernameElement.sendKeys(userId);
+        }
         passwordElement.sendKeys(userSecret);
         loginButton.click();
 
@@ -325,7 +326,7 @@ public abstract class BaseTest {
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
-        	sessionState = sessionStateCookie.getValue();
+            sessionState = sessionStateCookie.getValue();
         }
         System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionState);
 
@@ -340,13 +341,14 @@ public abstract class BaseTest {
 
         return authorizationResponse;
     }
+
     /**
      * The authorization server authenticates the resource owner (via the user-agent)
      * and establishes whether the resource owner grants or denies the client's access request.
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
-    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true);
+        return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, true);
     }
 
     /**
@@ -363,22 +365,22 @@ public abstract class BaseTest {
         startSelenium();
         if (cleanupCookies) {
             System.out.println("waitForResourceOwnerAndGrantLoginForm: Cleaning cookies");
-        	deleteAllCookies();
+            deleteAllCookies();
         }
         driver.navigate().to(authorizationRequestUrl);
 
         WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
         WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
         WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
-        
+
         if ((usernameElement == null) || (passwordElement == null) || (loginButton == null)) {
-        	return null;
+            return null;
         }
 
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
-        	sessionState = sessionStateCookie.getValue();
+            sessionState = sessionStateCookie.getValue();
         }
         System.out.println("waitForResourceOwnerAndGrantLoginForm: sessionState:" + sessionState);
 
@@ -394,7 +396,7 @@ public abstract class BaseTest {
      */
     public String waitForResourceOwnerAndGrantLoginForm(
             String authorizeUrl, AuthorizationRequest authorizationRequest) {
-    	return waitForResourceOwnerAndGrantLoginForm(authorizeUrl, authorizationRequest, true);
+        return waitForResourceOwnerAndGrantLoginForm(authorizeUrl, authorizationRequest, true);
     }
 
     private void deleteAllCookies() {
@@ -494,9 +496,9 @@ public abstract class BaseTest {
         authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
     }
 
-	private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
-		return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
-	}
+    private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
+        return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+    }
 
     public void showTitle(String title) {
         title = "TEST: " + title;
