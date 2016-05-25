@@ -462,6 +462,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
+                                        authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification!!!
 
                                         authorizationCode = authorizationGrant.getAuthorizationCode();
@@ -480,6 +481,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             // Store acr_values
                                             authorizationGrant.setAcrValues(acrValuesStr);
+                                            authorizationGrant.setSessionDn(sessionUser.getDn());
                                             authorizationGrant.save(); // call save after object modification!!!
                                         }
                                         newAccessToken = authorizationGrant.createAccessToken();
@@ -499,11 +501,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                             // Store authentication acr values
                                             authorizationGrant.setAcrValues(acrValuesStr);
+                                            authorizationGrant.setSessionDn(sessionUser.getDn());
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
                                         //Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken, authorizationGrant.getAcrValues());
+                                                nonce, authorizationCode, newAccessToken, authorizationGrant);
 
                                         redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
                                     }
