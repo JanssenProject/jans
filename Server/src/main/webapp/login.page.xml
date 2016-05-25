@@ -8,6 +8,9 @@
 
     <rewrite pattern="/login" />
 
+    <param name="login_hint"
+           value="#{loginAction.loginHint}"/>
+
     <navigation from-action="#{authenticator.prepareAuthenticationForStep}">
         <rule if-outcome="success">
             <render view-id="/login.xhtml" />
