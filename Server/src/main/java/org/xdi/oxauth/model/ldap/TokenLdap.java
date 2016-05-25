@@ -61,6 +61,9 @@ public class TokenLdap {
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
 
+    @LdapAttribute(name = "oxAuthSessionDn")
+    private String sessionDn;
+
     public TokenLdap() {
     }
 
@@ -218,7 +221,15 @@ public class TokenLdap {
         this.codeChallengeMethod = codeChallengeMethod;
     }
 
-    @Override
+    public String getSessionDn() {
+		return sessionDn;
+	}
+
+	public void setSessionDn(String sessionDn) {
+		this.sessionDn = sessionDn;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

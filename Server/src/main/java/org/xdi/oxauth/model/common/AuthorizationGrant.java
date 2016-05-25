@@ -90,6 +90,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setNonce(nonce);
                     t.setScope(scopes);
                     t.setAuthMode(getAcrValues());
+                    t.setSessionDn(getSessionDn());
                     t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
                     t.setCodeChallenge(getCodeChallenge());
                     t.setCodeChallengeMethod(getCodeChallengeMethod());
@@ -149,19 +150,23 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 String authMode)
+    		AuthorizationGrant authorizationGrant)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = createIdToken(this, nonce, authorizationCode,
                     accessToken, getScopes());
+            final String acrValues = authorizationGrant.getAcrValues();
+            final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
-                tokenLdap.setAuthMode(authMode);
+                tokenLdap.setAuthMode(acrValues);
+                tokenLdap.setSessionDn(sessionDn);
                 persist(tokenLdap);
             }
 
             // is it really neccessary to propagate to all tokens?
-            setAcrValues(authMode);
+            setAcrValues(acrValues);
+            setSessionDn(sessionDn);
             save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
@@ -226,6 +231,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
         result.setScope(getScopesAsString());
         result.setAuthMode(p_token.getAuthMode());
+        result.setSessionDn(p_token.getSessionDn());
         result.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();

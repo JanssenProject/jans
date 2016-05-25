@@ -189,6 +189,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 final String grantId = tokenLdap.getGrantId();
                 final String jwtRequest = tokenLdap.getJwtRequest();
                 final String authMode = tokenLdap.getAuthMode();
+                final String sessionDn = tokenLdap.getSessionDn();
 
                 result.setNonce(nonce);
                 result.setTokenLdap(tokenLdap);
@@ -209,6 +210,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 }
 
                 result.setAcrValues(authMode);
+                result.setSessionDn(sessionDn);
 
                 if (tokenLdap.getTokenTypeEnum() != null) {
                     switch (tokenLdap.getTokenTypeEnum()) {
