@@ -752,12 +752,6 @@
 					<name>!disable-push-messages</name>
 				</property>
 			</activation>
-			<properties>
-			</properties>
-			<build>
-				<plugins>
-				</plugins>
-			</build>
 			<dependencies>
 				<dependency>
 					<groupId>com.notnoop.apns</groupId>
@@ -818,11 +812,6 @@
 						<directory>src/test/resources-tomcat-7-embedded</directory>
 					</testResource>
 				</testResources>
-
-				<pluginManagement>
-					<plugins>
-					</plugins>
-				</pluginManagement>
 			</build>
 
 			<dependencies>

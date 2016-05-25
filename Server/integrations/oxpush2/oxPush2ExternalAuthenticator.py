@@ -93,11 +93,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
-        if (step == 1):
+        if step == 1:
             print "oxPush2. Authenticate for step 1"
             if self.oneStep:
   
-                session_device_status = self.getSessionDeviceStatus(session_attributes);
+                session_device_status = self.getSessionDeviceStatus(session_attributes, user_name);
                 if session_device_status == None:
                     return
 
@@ -127,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 logged_in = userService.authenticate(user_name)
-                if (not logged_in):
+                if not logged_in:
                     print "oxPush2. Authenticate for step 1. Failed to authenticate user '%s'" % user_name
                     return False
 
@@ -144,10 +144,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 if StringHelper.isNotEmpty(enrollment_mode):
                     auth_method = 'enroll'
                 
-                if (auth_method == 'authenticate'):
+                if auth_method == 'authenticate':
                     user_inum = userService.getUserInum(authenticated_user)
                     u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId")
-                    if (u2f_devices_list.size() == 0):
+                    if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
                         print "oxPush2. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
     
@@ -158,11 +158,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
 
             return False
-        elif (step == 2):
+        elif step == 2:
             print "oxPush2. Authenticate for step 2"
             session_attributes = context.get("sessionAttributes")
 
-            session_device_status = self.getSessionDeviceStatus(session_attributes);
+            session_device_status = self.getSessionDeviceStatus(session_attributes, user_name);
             if session_device_status == None:
                 return False
 
@@ -182,7 +182,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return attach_result
             elif self.twoStep:
-                if (user_name == None):
+                if user_name == None:
                     print "oxPush2. Authenticate for step 2. Failed to determine user name"
                     return False
 
@@ -288,28 +288,28 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        if (step == 1):
+        if step == 1:
             if self.oneStep:        
                 return Arrays.asList("oxpush2_request")
             elif self.twoStep:
                 return Arrays.asList("display_register_action")
-        elif (step == 2):
+        elif step == 2:
             return Arrays.asList("oxpush2_auth_method", "oxpush2_request")
         
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         context = Contexts.getEventContext()
-        if (context.isSet("oxpush2_count_login_steps")):
+        if context.isSet("oxpush2_count_login_steps"):
             return context.get("oxpush2_count_login_steps")
         else:
             return 2
 
     def getPageForStep(self, configurationAttributes, step):
-        if (step == 1):
+        if step == 1:
             if self.oneStep:        
                 return "/auth/oxpush2/login.xhtml"
-        elif (step == 2):
+        elif step == 2:
             if self.oneStep:
                 return "/login.xhtml"
             else:
@@ -327,14 +327,14 @@ class PersonAuthentication(PersonAuthenticationType):
         user_password = credentials.getPassword()
 
         logged_in = False
-        if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+        if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
             logged_in = userService.authenticate(user_name, user_password)
 
-        if (not logged_in):
+        if not logged_in:
             return None
 
         find_user_by_uid = userService.getUser(user_name)
-        if (find_user_by_uid == None):
+        if find_user_by_uid == None:
             print "oxPush. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
@@ -349,7 +349,7 @@ class PersonAuthentication(PersonAuthenticationType):
         u2f_device = None
         if session_device_status['enroll'] and session_device_status['one_step']:
             u2f_device = deviceRegistrationService.findOneStepUserDeviceRegistration(u2f_device_id)
-            if (u2f_device == None):
+            if u2f_device == None:
                 print "oxPush2. Validate session device status. There is no one step u2f_device '%s'" % u2f_device_id
                 return False
         else:
@@ -370,7 +370,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return True
 
-    def getSessionDeviceStatus(self, session_attributes):
+    def getSessionDeviceStatus(self, session_attributes, user_name):
         print "oxPush2. Get session device status"
 
         if not session_attributes.containsKey("oxpush2_request"):
@@ -384,7 +384,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_custom_state = session_attributes.get("session_custom_state")
         if not StringHelper.equalsIgnoreCase("approved", session_custom_state):
-            print "oxPush2. Get session device status. User '%s' not approve or pass U2F authentication. session_custom_state: '%s'" % (user_name, session_custom_state)
+            print "oxPush2. Get session device status. User '%s' not approve or not pass U2F authentication. session_custom_state: '%s'" % (user_name, session_custom_state)
             return None
 
         # Try to find device_id in session attribute
@@ -497,7 +497,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
-                    if (self.pushAppleService == None):
+                    if self.pushAppleService == None:
                         print "oxPush2. Send push notification. Apple push notification service is not enabled"
                     else:
                         send_notification = True
@@ -517,7 +517,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
-                    if (self.pushAndroidService == None):
+                    if self.pushAndroidService == None:
                         print "oxPush2. Send push notification. Android push notification service is not enabled"
                     else:
                         send_notification = True
