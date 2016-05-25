@@ -18,7 +18,7 @@
 		<resteasy.version>2.3.7.Final</resteasy.version>
 		<httpcore.version>4.3.3</httpcore.version>
 		<httpclient.version>4.3.6</httpclient.version>
-		<slf4j.version>1.6.5</slf4j.version>
+		<slf4j.version>1.7.2</slf4j.version>
 		<seam.version>2.3.1.Final</seam.version>
 		<jboss-embedded.version>beta3</jboss-embedded.version>
 		<drools.version>5.3.3.Final</drools.version>
@@ -179,12 +179,32 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.richfaces.core</groupId>
+				<artifactId>richfaces-core-api</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces.core</groupId>
+				<artifactId>richfaces-core-impl</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces.ui</groupId>
+				<artifactId>richfaces-components-ui</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces.ui</groupId>
+				<artifactId>richfaces-components-api</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
 
 			<!-- Commons libs -->
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.5</version>
+				<version>1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-lang</groupId>
@@ -194,12 +214,12 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.2</version>
+				<version>2.4</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
-				<version>1.6</version>
+				<version>1.8.3</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-collections</groupId>
@@ -214,12 +234,12 @@
 			<dependency>
 				<groupId>commons-configuration</groupId>
 				<artifactId>commons-configuration</artifactId>
-				<version>1.6</version>
+				<version>1.9</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-digester</groupId>
 				<artifactId>commons-digester</artifactId>
-				<version>1.8.1</version>
+				<version>2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-httpclient</groupId>
@@ -340,16 +360,16 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>jaxrs-api</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 
 			<!-- Jackson -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jackson-provider</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-core-asl</artifactId>
@@ -373,6 +393,23 @@
 				<version>${jettison.version}</version>
 			</dependency>
 
+			<!-- JSF -->
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>2.1.28</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>2.1.28-jbossorg-1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.spec.javax.faces</groupId>
+				<artifactId>jboss-jsf-api_2.1_spec</artifactId>
+				<version>2.1.28.Final</version>
+			</dependency>
+
 			<!-- Other -->
 			<dependency>
 				<groupId>org.mvel</groupId>
@@ -383,11 +420,6 @@
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr-runtime</artifactId>
 				<version>3.1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-web-api</artifactId>
-				<version>6.0</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -446,29 +478,13 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.version}</version>
 			</dependency>
-
-			<!-- JSF -->
-			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-api</artifactId>
-				<version>2.1.28</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-impl</artifactId>
-				<version>2.1.28-jbossorg-1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.spec.javax.faces</groupId>
-				<artifactId>jboss-jsf-api_2.1_spec</artifactId>
-				<version>2.1.28.Final</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+				<!-- Ensures we are compiling at 1.6 level -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
