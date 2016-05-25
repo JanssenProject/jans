@@ -45,6 +45,8 @@ public abstract class AbstractToken {
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
 
+    private String sessionDn;
+
     /**
      * Creates and initializes the values of an abstract token.
      *
@@ -204,6 +206,14 @@ public abstract class AbstractToken {
      */
 	public void setAuthMode(String authMode) {
 		this.authMode = authMode;
+	}
+
+	public String getSessionDn() {
+		return sessionDn;
+	}
+
+	public void setSessionDn(String sessionDn) {
+		this.sessionDn = sessionDn;
 	}
 
 	/**

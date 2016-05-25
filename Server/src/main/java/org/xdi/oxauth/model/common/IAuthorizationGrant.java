@@ -49,7 +49,7 @@ public interface IAuthorizationGrant {
     public RefreshToken createRefreshToken();
 
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 String authMode)
+    		AuthorizationGrant authorizationGrant)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
             InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException;
 
@@ -116,6 +116,10 @@ public interface IAuthorizationGrant {
     public String getAcrValues();
 
     public void setAcrValues(String authMode);
+
+    public String getSessionDn();
+
+    public void setSessionDn(String sessionDn);
 
     /**
      * Saves changes asynchronously

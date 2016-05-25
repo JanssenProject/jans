@@ -45,6 +45,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String codeChallengeMethod;
 
     private String acrValues;
+    private String sessionDn;
 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
@@ -199,7 +200,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.acrValues = acrValues;
     }
 
-    /**
+    public String getSessionDn() {
+		return sessionDn;
+	}
+
+	public void setSessionDn(String sessionDn) {
+		this.sessionDn = sessionDn;
+	}
+
+	/**
      * Checks the scopes policy configured according to the type of the
      * authorization grant to limit the issued token scopes.
      *
@@ -231,6 +240,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
+        accessToken.setSessionDn(getSessionDn());
 
         return accessToken;
     }
@@ -241,6 +251,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
+        accessToken.setSessionDn(getSessionDn());
 
         return accessToken;
     }
@@ -251,6 +262,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());
+        refreshToken.setSessionDn(getSessionDn());
 
         return refreshToken;
     }
