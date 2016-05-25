@@ -23,6 +23,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -50,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 15, 2015
+ * @version May 24, 2016
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -203,7 +204,7 @@ public class AuthorizeAction {
                     redirectTo = tmpRedirectTo;
                 }
             }
-            
+
             // Store Remote IP
             String remoteIp = networkService.getRemoteIp();
             requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
@@ -219,7 +220,13 @@ public class AuthorizeAction {
             this.sessionState = unauthenticatedSession.getId();
             sessionStateService.createSessionStateCookie(this.sessionState);
 
-            FacesManager.instance().redirect(redirectTo, null, false);
+            Map<String, Object> loginParameters = new HashMap<String, Object>();
+            if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
+                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT,
+                        requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
+            }
+
+            FacesManager.instance().redirect(redirectTo, loginParameters, false);
             return;
         }
 
@@ -255,26 +262,26 @@ public class AuthorizeAction {
                         permissionGranted(session);
                     }
                 }
-                
+
                 if (prompts.contains(Prompt.CONSENT)) {
-                	// The authorization server prompts the user for consent before returning information to the client. 
+                    // The authorization server prompts the user for consent before returning information to the client.
                 } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                	boolean done = false;
-                	if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                    boolean done = false;
+                    if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                         if (client.getTrustedClient()) {
                             permissionGranted(session);
                             done = true;
                         }
-                	}
+                    }
 
-                	if (!done) {
-	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-	                        permissionGranted(session);
-	                    }
-                	}
+                    if (!done) {
+                        ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                        if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                                Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+                                        org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                            permissionGranted(session);
+                        }
+                    }
                 } else {
                     invalidRequest();
                 }
@@ -292,7 +299,7 @@ public class AuthorizeAction {
 
                 // Update Remote IP
                 String remoteIp = networkService.getRemoteIp();
-               	session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
+                session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
 
                 sessionStateService.updateSessionState(session);
                 sessionStateService.reinitLogin(session, false);
@@ -632,12 +639,12 @@ public class AuthorizeAction {
             }
 
             final Client client = clientService.getClient(clientId);
-            
-            if(client.getPersistClientAuthorizations()){
-            	client.setTrustedClient(true);     
-            	clientService.merge(client);
+
+            if (client.getPersistClientAuthorizations()) {
+                client.setTrustedClient(true);
+                clientService.merge(client);
             }
-            
+
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
