@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -45,6 +46,7 @@ import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
+import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
@@ -230,7 +232,9 @@ public class IdTokenFactory {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         return jwtSigner.sign();
@@ -367,7 +371,9 @@ public class IdTokenFactory {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Encryption

@@ -46,6 +46,7 @@ import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
+import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.ws.rs.core.CacheControl;
@@ -292,7 +293,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Signature
@@ -400,7 +403,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Encryption
@@ -538,7 +543,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonWebResponse, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         return jsonWebResponse.toString();
