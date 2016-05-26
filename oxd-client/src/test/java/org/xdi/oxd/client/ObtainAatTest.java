@@ -22,7 +22,7 @@ public class ObtainAatTest {
         try {
             client = new CommandClient(host, port);
 
-            final ObtainAatOpResponse r = TestUtils.obtainAat(client, discoveryUrl, umaDiscoveryUrl, redirectUrl,
+            final ObtainAatOpResponse r = TestUtils.obtainAat(client, null, umaDiscoveryUrl, redirectUrl,
                     clientId, clientSecret, userId, userSecret);
             Assert.assertNotNull(r);
         } finally {
