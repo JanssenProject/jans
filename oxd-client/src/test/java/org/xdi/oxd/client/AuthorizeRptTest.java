@@ -48,14 +48,14 @@ public class AuthorizeRptTest {
         g_amHost = amHost;
         g_rsHost = rsHost;
 
-        final ObtainPatOpResponse patResponse = TestUtils.obtainPat(g_client, discoveryUrl, umaDiscoveryUrl, redirectUrl,
+        final ObtainPatOpResponse patResponse = TestUtils.obtainPat(g_client, null, umaDiscoveryUrl, redirectUrl,
                 clientId, clientSecret, userId, userSecret);
         Assert.assertNotNull(patResponse);
         g_patToken = patResponse.getPatToken();
         Assert.assertTrue(StringUtils.isNotBlank(g_patToken));
 
 
-        final ObtainAatOpResponse aatResponse = TestUtils.obtainAat(g_client, discoveryUrl, umaDiscoveryUrl, redirectUrl,
+        final ObtainAatOpResponse aatResponse = TestUtils.obtainAat(g_client, null, umaDiscoveryUrl, redirectUrl,
                 clientId, clientSecret, userId, userSecret);
         Assert.assertNotNull(aatResponse);
         g_aatToken = aatResponse.getAatToken();

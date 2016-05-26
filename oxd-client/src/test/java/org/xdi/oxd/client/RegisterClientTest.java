@@ -28,7 +28,6 @@ public class RegisterClientTest {
             client = new CommandClient(host, port);
 
             final RegisterClientParams params = new RegisterClientParams();
-            params.setDiscoveryUrl(discoveryUrl);
             params.setRedirectUrl(Lists.newArrayList(redirectUrl));
             params.setClientName(clientName);
 
