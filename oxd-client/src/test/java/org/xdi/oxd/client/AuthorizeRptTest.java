@@ -11,7 +11,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.ResponseStatus;
 import org.xdi.oxd.common.params.AuthorizeRptParams;
-import org.xdi.oxd.common.response.ObtainAatOpResponse;
 import org.xdi.oxd.common.response.ObtainPatOpResponse;
 import org.xdi.oxd.common.response.RegisterPermissionTicketOpResponse;
 import org.xdi.oxd.common.response.RegisterResourceOpResponse;
@@ -55,10 +54,8 @@ public class AuthorizeRptTest {
         Assert.assertTrue(StringUtils.isNotBlank(g_patToken));
 
 
-        final ObtainAatOpResponse aatResponse = TestUtils.obtainAat(g_client, null, umaDiscoveryUrl, redirectUrl,
-                clientId, clientSecret, userId, userSecret);
-        Assert.assertNotNull(aatResponse);
-        g_aatToken = aatResponse.getAatToken();
+
+        g_aatToken = null; // todo ?
         Assert.assertTrue(StringUtils.isNotBlank(g_aatToken));
 
         g_resource = TestUtils.registerResource(g_client, umaDiscoveryUrl, g_patToken, SCOPES);
