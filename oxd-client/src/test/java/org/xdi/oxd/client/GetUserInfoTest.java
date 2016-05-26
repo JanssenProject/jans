@@ -22,14 +22,14 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class GetUserInfoTest {
 
-    @Parameters({"host", "port", "redirectUrl", "userId", "userSecret"})
+    @Parameters({"host", "port", "opHost", "redirectUrl", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String redirectUrl, String userId, String userSecret) throws IOException {
+    public void test(String host, int port, String opHost, String redirectUrl, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl);
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
             final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
 
             GetUserInfoParams params = new GetUserInfoParams();

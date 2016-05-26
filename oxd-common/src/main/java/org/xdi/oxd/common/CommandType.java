@@ -25,24 +25,18 @@ public enum CommandType {
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
 
-    // stateless
-    AUTHORIZE_RPT("authorize_rpt"),
-    REGISTER_CLIENT("register_client"),
-    CLIENT_READ("client_read"),
-    AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
-    IMPLICIT_FLOW("implicit_flow"),
-    OBTAIN_PAT("obtain_pat"),
-    OBTAIN_AAT("obtain_aat"),
-    REGISTER_RESOURCE("register_resource"),
-    RPT_STATUS("rpt_status"),
-    REGISTER_TICKET("register_ticket"),
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
     LICENSE_STATUS("license_status"),
-    DISCOVERY("discovery"),
 
     // UMA
-    RP_GET_RPT("uma_rp_get_rpt");
+    RP_GET_RPT("uma_rp_get_rpt"),
+
+    // stateless
+    AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
+    IMPLICIT_FLOW("implicit_flow");
+
+
 
     private final String value;
 

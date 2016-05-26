@@ -23,14 +23,14 @@ import static junit.framework.Assert.assertTrue;
 
 public class GetLogoutUrlTest {
 
-    @Parameters({"host", "port", "redirectUrl", "userId", "userSecret", "postLogoutRedirectUrl"})
+    @Parameters({"host", "port", "opHost", "redirectUrl", "userId", "userSecret", "postLogoutRedirectUrl"})
     @Test
-    public void test(String host, int port, String redirectUrl, String userId, String userSecret, String postLogoutRedirectUrl) throws IOException {
+    public void test(String host, int port, String opHost, String redirectUrl, String userId, String userSecret, String postLogoutRedirectUrl) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl, postLogoutRedirectUrl, "");
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
 //
 //            GetTokensByCodeTest.tokenByCode(client, site, redirectUrl, userId, userSecret);
 

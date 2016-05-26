@@ -25,61 +25,8 @@
     <parameter name="request_url" value="http://example.com/object/1234"/>
     <parameter name="request_http_method" value="DELETE"/>
 
-    <!-- OIC Tests -->
-    <test name="Discovery" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.DiscoveryTest"/>
-        </classes>
-    </test>
-    <test name="Register client" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterClientTest"/>
-        </classes>
-    </test>
-    <test name="Client read" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.ClientReadTest"/>
-        </classes>
-    </test>
-    <test name="Check IdToken" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.CheckIdTokenTest"/>
-        </classes>
-    </test>
-    <test name="Check AccessToken" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.CheckAccessTokenTest"/>
-        </classes>
-    </test>
 
-    <!-- UMA Tests -->
-    <test name="Obtain PAT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.ObtainPatTest"/>
-        </classes>
-    </test>
-    <test name="Register resource" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterResourceTest"/>
-        </classes>
-    </test>
-    <test name="Register permission ticket" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterTicketTest"/>
-        </classes>
-    </test>
-    <test name="Rpt status check" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RptStatusTest"/>
-        </classes>
-    </test>
-    <test name="Complete flow test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.CompleteFlowTest"/>
-        </classes>
-    </test>
-
-    <!-- oxd RP -->
+    <!-- Connect -->
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RegisterSiteTest"/>
@@ -105,5 +52,17 @@
             <class name="org.xdi.oxd.client.GetLogoutUrlTest"/>
         </classes>
     </test>
+    <test name="Check IdToken" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.CheckIdTokenTest"/>
+        </classes>
+    </test>
+    <test name="Check AccessToken" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.CheckAccessTokenTest"/>
+        </classes>
+    </test>
+
+    <!-- UMA -->
 
 </suite>
