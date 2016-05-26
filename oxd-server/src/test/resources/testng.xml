@@ -33,71 +33,7 @@
         </classes>
     </test>
 
-    <!-- OIC Tests -->
-    <test name="Discovery" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.DiscoveryTest"/>
-        </classes>
-    </test>
-    <test name="Register client" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterClientTest"/>
-        </classes>
-    </test>
-    <test name="Client read" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.ClientReadTest"/>
-        </classes>
-    </test>
-    <test name="Check IdToken" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.CheckIdTokenTest"/>
-        </classes>
-    </test>
-    <test name="Check AccessToken" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.CheckAccessTokenTest"/>
-        </classes>
-    </test>
-    <test name="Authorization code flow prompt=none" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.AuthorizationCodeFlowTest"/>
-        </classes>
-    </test>
-
-    <!-- UMA Tests -->
-    <test name="Obtain PAT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.ObtainPatTest"/>
-        </classes>
-    </test>
-    <test name="Obtain AAT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.ObtainAatTest"/>
-        </classes>
-    </test>
-    <test name="Obtain RPT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RpGetRptTest"/>
-        </classes>
-    </test>
-    <test name="Register resource" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterResourceTest"/>
-        </classes>
-    </test>
-    <test name="Register permission ticket" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RegisterTicketTest"/>
-        </classes>
-    </test>
-    <test name="Rpt status check" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RptStatusTest"/>
-        </classes>
-    </test>
-
-    <!-- State full tests -->
+    <!-- Connect -->
     <test name="Register site" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RegisterSiteTest"/>
@@ -121,6 +57,28 @@
     <test name="Log out" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.GetLogoutUrlTest"/>
+        </classes>
+    </test>
+    <test name="Check IdToken" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.CheckIdTokenTest"/>
+        </classes>
+    </test>
+    <test name="Check AccessToken" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.CheckAccessTokenTest"/>
+        </classes>
+    </test>
+    <test name="Authorization code flow prompt=none" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.AuthorizationCodeFlowTest"/>
+        </classes>
+    </test>
+
+    <!-- UMA Tests -->
+    <test name="RP - Get RPT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
     </test>
 

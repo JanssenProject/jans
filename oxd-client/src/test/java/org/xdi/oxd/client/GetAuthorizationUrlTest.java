@@ -21,14 +21,14 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class GetAuthorizationUrlTest {
 
-    @Parameters({"host", "port", "redirectUrl"})
+    @Parameters({"host", "port", "redirectUrl", "opHost"})
     @Test
-    public void test(String host, int port, String redirectUrl) throws IOException {
+    public void test(String host, int port, String redirectUrl, String opHost) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, redirectUrl);
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
             final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
             commandParams.setOxdId(site.getOxdId());
