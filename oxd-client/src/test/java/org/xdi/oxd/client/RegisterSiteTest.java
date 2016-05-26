@@ -34,7 +34,7 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
-            RegisterSiteResponse resp = registerSite(client, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+            RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
 
             notEmpty(resp.getOxdId());
@@ -125,14 +125,14 @@ public class RegisterSiteTest {
         }
     }
 
-
-    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl) {
-        return registerSite(client, redirectUrl, redirectUrl, "");
+    public static RegisterSiteResponse registerSite(CommandClient client, String opHost, String redirectUrl) {
+        return registerSite(client, opHost, redirectUrl, redirectUrl, "");
     }
 
-    public static RegisterSiteResponse registerSite(CommandClient client, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
+    public static RegisterSiteResponse registerSite(CommandClient client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
         final RegisterSiteParams commandParams = new RegisterSiteParams();
+        commandParams.setOpHost(opHost);
         commandParams.setAuthorizationRedirectUri(redirectUrl);
         commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         commandParams.setClientLogoutUri(Lists.newArrayList(logoutUri));

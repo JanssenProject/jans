@@ -78,7 +78,7 @@
     </test>
     <test name="Obtain RPT" enabled="true">
         <classes>
-            <class name="org.xdi.oxd.client.ObtainRptTest"/>
+            <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
     </test>
     <test name="Register resource" enabled="true">

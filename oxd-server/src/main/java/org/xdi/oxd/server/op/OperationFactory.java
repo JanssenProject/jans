@@ -31,8 +31,8 @@ public class OperationFactory {
                     return new ObtainPatOperation(command, injector);
                 case OBTAIN_AAT:
                     return new ObtainAatOperation(command, injector);
-                case OBTAIN_RPT:
-                    return new ObtainRptOperation(command, injector);
+                case RP_GET_RPT:
+                    return new RpGetRptOperation(command, injector);
                 case REGISTER_CLIENT:
                     return new RegisterClientOperation(command, injector);
                 case CLIENT_READ:

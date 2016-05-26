@@ -68,6 +68,9 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "contacts")
     private List<String> contacts;
 
+    @JsonProperty(value = "aat")
+    private String aat;
+
     public SiteConfiguration() {
     }
 
@@ -101,6 +104,16 @@ public class SiteConfiguration implements Serializable {
         this.acrValues = conf.acrValues;
         this.grantType = conf.grantType;
         this.contacts = conf.contacts;
+
+        this.aat = conf.aat;
+    }
+
+    public String getAat() {
+        return aat;
+    }
+
+    public void setAat(String aat) {
+        this.aat = aat;
     }
 
     public String getSectorIdentifierUri() {
@@ -306,6 +319,7 @@ public class SiteConfiguration implements Serializable {
         sb.append(", claimsLocales=").append(claimsLocales);
         sb.append(", grantType=").append(grantType);
         sb.append(", contacts=").append(contacts);
+        sb.append(", aat=").append(aat);
         sb.append('}');
         return sb.toString();
     }
