@@ -14,6 +14,18 @@ import org.codehaus.jackson.annotate.JsonValue;
 
 public enum CommandType {
 
+    // Register
+    REGISTER_SITE("register_site"),
+    UPDATE_SITE("update_site_registration"),
+
+    // Connect (stateful)
+    GET_AUTHORIZATION_URL("get_authorization_url"),
+    GET_AUTHORIZATION_CODE("get_authorization_code"),
+    GET_TOKENS_BY_CODE("get_tokens_by_code"),
+    GET_USER_INFO("get_user_info"),
+    GET_LOGOUT_URI("get_logout_uri"),
+
+    // stateless
     AUTHORIZE_RPT("authorize_rpt"),
     REGISTER_CLIENT("register_client"),
     CLIENT_READ("client_read"),
@@ -21,7 +33,6 @@ public enum CommandType {
     IMPLICIT_FLOW("implicit_flow"),
     OBTAIN_PAT("obtain_pat"),
     OBTAIN_AAT("obtain_aat"),
-    OBTAIN_RPT("obtain_rpt"),
     REGISTER_RESOURCE("register_resource"),
     RPT_STATUS("rpt_status"),
     REGISTER_TICKET("register_ticket"),
@@ -29,13 +40,9 @@ public enum CommandType {
     CHECK_ACCESS_TOKEN("access_token_status"),
     LICENSE_STATUS("license_status"),
     DISCOVERY("discovery"),
-    GET_AUTHORIZATION_URL("get_authorization_url"),
-    GET_AUTHORIZATION_CODE("get_authorization_code"),
-    GET_TOKENS_BY_CODE("get_tokens_by_code"),
-    GET_USER_INFO("get_user_info"),
-    GET_LOGOUT_URI("get_logout_uri"),
-    REGISTER_SITE("register_site"),
-    UPDATE_SITE("update_site_registration");
+
+    // UMA
+    RP_GET_RPT("uma_rp_get_rpt");
 
     private final String value;
 
