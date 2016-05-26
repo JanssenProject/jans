@@ -8,8 +8,8 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
-import org.xdi.oxd.common.params.DiscoveryParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,29 +22,22 @@ import java.util.Map;
 
 public class CheckIdTokenTest {
 
-    @Parameters({"host", "port", "redirectUrl",
+    @Parameters({"host", "port", "opHost", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String redirectUrl,
+    public void test(String host, int port, String opHost, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
-            RegisterSiteTest.registerSite()
-            final Command command = new Command(CommandType.DISCOVERY);
-            command.setParamsObject(new DiscoveryParams(discoveryUrl));
-            final CommandResponse response = client.send(command);
-            Assert.assertNotNull(response);
-
-            final String authorizationEndpoint = response.getData().get("authorization_endpoint").asText();
-            final String tokenEndpoint = response.getData().get("token_endpoint").asText();
+            RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
             final TokenResponse tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
-                    clientId, clientSecret, redirectUrl, authorizationEndpoint, tokenEndpoint);
+                    clientId, clientSecret, redirectUrl, opHost);
 
             final CheckIdTokenParams params = new CheckIdTokenParams();
-            params.setDiscoveryUrl(discoveryUrl);
+            params.setOxdId(site.getOxdId());
             params.setIdToken(tokenResponse.getIdToken());
 
             final Command checkIdTokenCommand = new Command(CommandType.CHECK_ID_TOKEN);
