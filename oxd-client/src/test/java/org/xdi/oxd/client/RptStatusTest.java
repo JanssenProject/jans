@@ -10,8 +10,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RptStatusParams;
-import org.xdi.oxd.common.response.ObtainAatOpResponse;
-import org.xdi.oxd.common.response.ObtainPatOpResponse;
 import org.xdi.oxd.common.response.RegisterResourceOpResponse;
 import org.xdi.oxd.common.response.RptStatusOpResponse;
 
@@ -43,17 +41,11 @@ public class RptStatusTest {
         g_client = new CommandClient(host, port);
         g_umaDiscoveryUrl = umaDiscoveryUrl;
 
-        final ObtainPatOpResponse patResponse = TestUtils.obtainPat(g_client, discoveryUrl, umaDiscoveryUrl, redirectUrl,
-                clientId, clientSecret, userId, userSecret);
-        Assert.assertNotNull(patResponse);
-        g_patToken = patResponse.getPatToken();
+        g_patToken = null;// todo
         Assert.assertTrue(StringUtils.isNotBlank(g_patToken));
 
 
-        final ObtainAatOpResponse aatResponse = TestUtils.obtainAat(g_client, discoveryUrl, umaDiscoveryUrl, redirectUrl,
-                clientId, clientSecret, userId, userSecret);
-        Assert.assertNotNull(aatResponse);
-        g_aatToken = aatResponse.getAatToken();
+        g_aatToken = null;//aatResponse.getAatToken();
         Assert.assertTrue(StringUtils.isNotBlank(g_aatToken));
 
         g_resource = TestUtils.registerResource(g_client, umaDiscoveryUrl, g_patToken, SCOPES);
