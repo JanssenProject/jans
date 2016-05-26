@@ -154,29 +154,6 @@ public class TestUtils {
         return response.dataAsResponse(ObtainPatOpResponse.class);
     }
 
-    public static ObtainAatOpResponse obtainAat(CommandClient p_commandClient,
-                                                String p_discoveryUrl, String p_umaDiscoveryUrl, String p_redirectUrl,
-                                                String p_clientId, String p_clientSecret,
-                                                String p_userId, String p_userSecret) {
-        final ObtainAatParams params = new ObtainAatParams();
-        params.setDiscoveryUrl(p_discoveryUrl);
-        params.setUmaDiscoveryUrl(p_umaDiscoveryUrl);
-        params.setRedirectUrl(p_redirectUrl);
-        params.setClientId(p_clientId);
-        params.setClientSecret(p_clientSecret);
-        params.setUserId(p_userId);
-        params.setUserSecret(p_userSecret);
-
-        final Command command = new Command(CommandType.OBTAIN_AAT);
-        command.setParamsObject(params);
-
-        final CommandResponse response = p_commandClient.send(command);
-        assertNotNull(response);
-        System.out.println(response);
-
-        return response.dataAsResponse(ObtainAatOpResponse.class);
-    }
-
     public static RegisterResourceOpResponse registerResource(CommandClient p_client, String umaDiscoveryUrl, String patToken, List<String> p_scopes) {
         final RegisterResourceParams params = new RegisterResourceParams();
         params.setUmaDiscoveryUrl(umaDiscoveryUrl);
