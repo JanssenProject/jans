@@ -33,16 +33,13 @@ public class OperationFactory {
                     return new ObtainAatOperation(command, injector);
                 case RP_GET_RPT:
                     return new RpGetRptOperation(command, injector);
-                case REGISTER_CLIENT:
-                    return new RegisterClientOperation(command, injector);
+
                 case CLIENT_READ:
                     return new ClientReadOperation(command, injector);
                 case REGISTER_RESOURCE:
                     return new RegisterResourceOperation(command, injector);
                 case REGISTER_TICKET:
                     return new RegisterTicketOperation(command, injector);
-                case RPT_STATUS:
-                    return new RptStatusOperation(command, injector);
                 case DISCOVERY:
                     return new DiscoveryOperation(command, injector);
                 case CHECK_ID_TOKEN:
