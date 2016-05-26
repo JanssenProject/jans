@@ -8,7 +8,6 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.CheckAccessTokenParams;
-import org.xdi.oxd.common.params.DiscoveryParams;
 import org.xdi.oxd.common.response.CheckAccessTokenResponse;
 
 import java.io.IOException;
@@ -28,19 +27,11 @@ public class CheckAccessTokenTest {
         try {
             client = new CommandClient(host, port);
 
-            final Command command = new Command(CommandType.DISCOVERY);
-            command.setParamsObject(new DiscoveryParams(discoveryUrl));
-            final CommandResponse response = client.send(command);
-            Assert.assertNotNull(response);
-
-            final String authorizationEndpoint = response.getData().get("authorization_endpoint").asText();
-            final String tokenEndpoint = response.getData().get("token_endpoint").asText();
-
-            final TokenResponse tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
-                    clientId, clientSecret, redirectUrl, authorizationEndpoint, tokenEndpoint);
+            // todo
+            final TokenResponse tokenResponse = null;// TestUtils.obtainAccessToken(userId, userSecret,
+//                    clientId, clientSecret, redirectUrl);
 
             final CheckAccessTokenParams params = new CheckAccessTokenParams();
-            params.setDiscoveryUrl(discoveryUrl);
             params.setAccessToken(tokenResponse.getAccessToken());
             params.setIdToken(tokenResponse.getIdToken());
 

@@ -32,7 +32,6 @@ public class AuthorizationCodeFlowTest {
             final AuthorizationCodeFlowParams commandParams = new AuthorizationCodeFlowParams();
             commandParams.setClientId(clientId);
             commandParams.setClientSecret(clientSecret);
-            commandParams.setDiscoveryUrl(discoveryUrl);
             commandParams.setNonce(UUID.randomUUID().toString());
             commandParams.setRedirectUrl(redirectUrl);
             commandParams.setScope("openid");
