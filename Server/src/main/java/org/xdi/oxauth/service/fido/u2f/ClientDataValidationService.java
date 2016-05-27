@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Logger;
@@ -19,6 +20,11 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Client data validation service
@@ -33,8 +39,8 @@ public class ClientDataValidationService {
 	@Logger
 	private Log log;
 
-	public void checkContent(ClientData clientData, String type, String challenge, Set<String> facets) throws BadInputException {
-		if (!type.equals(clientData.getTyp())) {
+	public void checkContent(ClientData clientData, String[] types, String challenge, Set<String> facets) throws BadInputException {
+		if (!ArrayUtils.contains(types, clientData.getTyp())) {
 			throw new BadInputException("Bad clientData: wrong typ " + clientData.getTyp());
 		}
 

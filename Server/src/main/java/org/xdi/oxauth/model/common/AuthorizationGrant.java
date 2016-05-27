@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -20,8 +19,6 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.util.security.StringEncrypter;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
@@ -57,8 +54,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public static IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+            throws Exception {
         JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
@@ -94,12 +90,16 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setNonce(nonce);
                     t.setScope(scopes);
                     t.setAuthMode(getAcrValues());
+                    t.setSessionDn(getSessionDn());
                     t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+                    t.setCodeChallenge(getCodeChallenge());
+                    t.setCodeChallengeMethod(getCodeChallengeMethod());
 
                     final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
+                    LOGGER.trace("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
@@ -150,19 +150,23 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-                                 String authMode)
+    		AuthorizationGrant authorizationGrant)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
             final IdToken idToken = createIdToken(this, nonce, authorizationCode,
                     accessToken, getScopes());
+            final String acrValues = authorizationGrant.getAcrValues();
+            final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
                 final TokenLdap tokenLdap = asToken(idToken);
-                tokenLdap.setAuthMode(authMode);
+                tokenLdap.setAuthMode(acrValues);
+                tokenLdap.setSessionDn(sessionDn);
                 persist(tokenLdap);
             }
 
             // is it really neccessary to propagate to all tokens?
-            setAcrValues(authMode);
+            setAcrValues(acrValues);
+            setSessionDn(sessionDn);
             save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
@@ -227,6 +231,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
         result.setScope(getScopesAsString());
         result.setAuthMode(p_token.getAuthMode());
+        result.setSessionDn(p_token.getSessionDn());
         result.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();

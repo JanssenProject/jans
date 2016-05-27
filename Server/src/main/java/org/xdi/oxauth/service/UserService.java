@@ -6,28 +6,21 @@
 
 package org.xdi.oxauth.service;
 
-import org.xdi.oxauth.model.util.Util;
-
 import com.unboundid.ldap.sdk.Filter;
-
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.token.PersistentJwt;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;

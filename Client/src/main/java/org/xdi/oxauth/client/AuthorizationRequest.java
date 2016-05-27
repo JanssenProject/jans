@@ -9,6 +9,7 @@ package org.xdi.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.authorize.CodeVerifier;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseMode;
@@ -57,6 +58,10 @@ public class AuthorizationRequest extends BaseRequest {
     private String accessToken;
     private boolean useNoRedirectHeader;
 
+    // code verifier according to PKCE spec
+    private String codeChallenge;
+    private String codeChallengeMethod;
+
     /**
      * Constructs an authorization request.
      *
@@ -79,6 +84,29 @@ public class AuthorizationRequest extends BaseRequest {
         this.nonce = nonce;
         prompts = new ArrayList<Prompt>();
         useNoRedirectHeader = false;
+    }
+
+    public CodeVerifier generateAndSetCodeChallengeWithMethod() {
+        CodeVerifier verifier = new CodeVerifier(CodeVerifier.CodeChallengeMethod.S256);
+        codeChallenge = verifier.getCodeChallenge();
+        codeChallengeMethod = verifier.getTransformationType().getPkceString();
+        return verifier;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 
     /**

@@ -8,11 +8,7 @@ package org.xdi.oxauth.service.uma;
 
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -22,8 +18,8 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.federation.FederationTrust;
 import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
@@ -182,7 +178,7 @@ public class UmaValidationService {
    	}
 
     public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
-   		if (resourceSetPermission == null) {
+   		if (resourceSetPermission == null || "invalidated".equalsIgnoreCase(resourceSetPermission.getAmHost())) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}

@@ -27,5 +27,10 @@ public final class Constants extends LDAPConstants {
     public static final String EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL = "org.xdi.oxauth.security.loginSuccessful";
 
 	public static final String U2F_PROTOCOL_VERSION = "U2F_V2";
+	
+	public static final String OX_AUTH_SCOPE_TYPE_OPENID = "openid";
+
+	public static final String REMOTE_IP = "remote_ip";
+	public static final String AUTHENTICATED_USER = "auth_user";
 
 }

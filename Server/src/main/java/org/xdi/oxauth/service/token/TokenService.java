@@ -7,7 +7,7 @@
 package org.xdi.oxauth.service.token;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.common.util.StringHelper;
+import org.xdi.util.StringHelper;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;

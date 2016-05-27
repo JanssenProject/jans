@@ -55,12 +55,6 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		return false;
 	}
 
-	public boolean executeExternalUpdateMethods(List<String> dynamicScopes, JsonWebResponse jsonToken, User user) {
-		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonToken, user);
-
-		return executeExternalUpdateMethods(dynamicScopeContext);
-	}
-
 	public boolean executeExternalUpdateMethods(DynamicScopeExternalContext dynamicScopeContext) {
 		boolean result = true;
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {

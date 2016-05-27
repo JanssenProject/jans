@@ -6,24 +6,14 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.federation.FederationTrust;
-import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.service.FederationDataService;
-import org.xdi.oxauth.service.ScopeService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -51,8 +41,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private IdToken idToken;
     private AuthorizationCode authorizationCode;
     private String nonce;
+    private String codeChallenge;
+    private String codeChallengeMethod;
 
     private String acrValues;
+    private String sessionDn;
 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
@@ -105,6 +98,22 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public void setNonce(String nonce) {
         this.nonce = nonce;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 
     /**
@@ -191,7 +200,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.acrValues = acrValues;
     }
 
-    /**
+    public String getSessionDn() {
+		return sessionDn;
+	}
+
+	public void setSessionDn(String sessionDn) {
+		this.sessionDn = sessionDn;
+	}
+
+	/**
      * Checks the scopes policy configured according to the type of the
      * authorization grant to limit the issued token scopes.
      *
@@ -223,6 +240,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
+        accessToken.setSessionDn(getSessionDn());
 
         return accessToken;
     }
@@ -233,6 +251,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
+        accessToken.setSessionDn(getSessionDn());
 
         return accessToken;
     }
@@ -243,6 +262,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());
+        refreshToken.setSessionDn(getSessionDn());
 
         return refreshToken;
     }

@@ -23,9 +23,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.HttpMethod;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
@@ -93,6 +91,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -162,15 +161,22 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
         final String contact1NewValue = "yuriy@gluu.org";
-        final String contact2NewValue = "yzabrovaniy@gmail.com";
+        final String contact2NewValue = "yuriyz@gmail.com";
+
+        Calendar clientSecretExpiresAtCalendar = Calendar.getInstance();
+        clientSecretExpiresAtCalendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date clientSecretExpiresAt = clientSecretExpiresAtCalendar.getTime();
 
         final RegisterRequest registerRequest = new RegisterRequest(registrationAccessToken1);
         registerRequest.setHttpMethod(HttpMethod.PUT);
         registerRequest.setContacts(Arrays.asList(contact1NewValue, contact2NewValue));
         registerRequest.setLogoUri(logoUriNewValue);
 
+        registerRequest.setClientSecretExpiresAt(clientSecretExpiresAt);
+
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -183,6 +189,10 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         assertTrue(responseContacts.contains(contact1NewValue) && responseContacts.contains(contact2NewValue));
         assertNotNull(responseLogoUri.equals(logoUriNewValue));
+
+        long diff = response.getClientSecretExpiresAt().getTime() / 10000 - clientSecretExpiresAt.getTime() / 10000; // check after division on 1000 because of internal server conversion
+        System.out.println("Diff: " + diff + ", respTime: " + response.getClientSecretExpiresAt().getTime() + ", expAt: " + clientSecretExpiresAt.getTime());
+        assertTrue(Math.abs(diff) == 0);
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
@@ -298,6 +308,27 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerClient.setRequest(request);
 
         RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void registerWithCustomURI(final String redirectUris) throws Exception {
+        showTitle("requestClientAssociate1");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+        redirectUriList.add("myschema://client.example.com/cb"); // URI with custom schema
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.execRegister(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
+                redirectUriList);
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());

@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationCode;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -30,7 +31,6 @@ import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
@@ -46,12 +46,12 @@ import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
+import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.util.*;
 
 /**
@@ -88,8 +88,7 @@ public class IdTokenFactory {
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
-                                     Set<String> scopes) throws SignatureException, InvalidJwtException,
-            StringEncrypter.EncryptionException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+                                     Set<String> scopes) throws Exception {
 
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
@@ -233,7 +232,9 @@ public class IdTokenFactory {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         return jwtSigner.sign();
@@ -370,7 +371,9 @@ public class IdTokenFactory {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Encryption
@@ -418,8 +421,7 @@ public class IdTokenFactory {
     public static JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes)
-            throws InvalidJweException, SignatureException, StringEncrypter.EncryptionException, InvalidJwtException,
-            InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException {
+            throws Exception {
         IdTokenFactory idTokenFactory = IdTokenFactory.instance();
 
         final Client grantClient = grant.getClient();

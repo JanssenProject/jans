@@ -1,9 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-   version="3.0">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0">
 
     <display-name>oxAuth Server</display-name>
+
     <!-- Seam -->
     <listener>
         <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
@@ -54,59 +57,65 @@
     </servlet-mapping>
 
     <!-- Facelets development mode (disable in production) -->
+    <!-- Change to "Production" when you are ready to deploy -->
     <context-param>
-        <param-name>facelets.DEVELOPMENT</param-name>
-        <param-value>@debug@</param-value>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>${javax.faces.PROJECT_STAGE}</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
+        <param-value>org.gluu.oxauth.resource.custom.ExternalResourceHandler</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
     </context-param>
+   <!-- Change to -1 when you don't want the compiler should check for changes -->
+   <context-param>
+      <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+      <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
+   </context-param>
 
-    <!-- swagger servlet reader -->
-    <!--<servlet>-->
-        <!--<servlet-name>DefaultServletReaderConfig</servlet-name>-->
-        <!--<servlet-class>com.wordnik.swagger.servlet.config.DefaultServletReaderConfig</servlet-class>-->
-        <!--<load-on-startup>2</load-on-startup>-->
-        <!--<init-param>-->
-            <!--<param-name>swagger.resource.package</param-name>-->
-            <!--<param-value>org.xdi.oxauth.idgen.ws.rs;org.xdi.oxauth.authorize.ws.rs</param-value>-->
-        <!--</init-param>-->
-        <!--<init-param>-->
-            <!--<param-name>swagger.api.basepath</param-name>-->
-            <!--<param-value>http://localhost:8085</param-value>-->
-            <!--&lt;!&ndash;<param-value>http://seed.gluu.org</param-value>&ndash;&gt;-->
-        <!--</init-param>-->
-        <!--<init-param>-->
-            <!--<param-name>api.version</param-name>-->
-            <!--<param-value>1.0.0</param-value>-->
-        <!--</init-param>-->
-    <!--</servlet>-->
-
-    <!--&lt;!&ndash; swagger api declaration &ndash;&gt;-->
-    <!--<servlet>-->
-        <!--<servlet-name>ApiDeclarationServlet</servlet-name>-->
-        <!--<servlet-class>com.wordnik.swagger.servlet.listing.ApiDeclarationServlet</servlet-class>-->
-    <!--</servlet>-->
-    <!--<servlet-mapping>-->
-        <!--<servlet-name>ApiDeclarationServlet</servlet-name>-->
-        <!--<url-pattern>/api-docs/*</url-pattern>-->
-    <!--</servlet-mapping>-->
+    <!-- Cors -->
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value>*</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/.well-known/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/seam/resource/restv1/oxauth/clientinfo</url-pattern>
+    </filter-mapping>
 
     <!-- JSF -->
     <context-param>
         <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
         <param-value>.xhtml</param-value>
     </context-param>
+
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.seam</url-pattern>
+        <url-pattern>*.htm</url-pattern>
     </servlet-mapping>
+
     <security-constraint>
         <display-name>Restrict raw XHTML Documents</display-name>
         <web-resource-collection>
@@ -130,19 +139,16 @@
     </security-constraint>
     -->
 
+   <!-- Track session only in cookie -->
     <session-config>
         <session-timeout>30</session-timeout>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
-    <!--
-       <persistence-unit-ref>
-          <persistence-unit-ref-name>oxauth/pu</persistence-unit-ref-name>
-          <persistence-unit-name>oxauth</persistence-unit-name>
-       </persistence-unit-ref>
-    -->
-	<env-entry>
-		<env-entry-name>com.sun.faces.ClientStateSavingPassword</env-entry-name>
-		<env-entry-type>java.lang.String</env-entry-type>
-		<env-entry-value>qLIsT+20NUPIyAp0SXHIUEWaXfYqdgM5EWYSx9VE4b0=</env-entry-value>
-	</env-entry>
+
+    <env-entry>
+        <env-entry-name>com.sun.faces.ClientStateSavingPassword</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>qLIsT+20NUPIyAp0SXHIUEWaXfYqdgM5EWYSx9VE4b0=</env-entry-value>
+    </env-entry>
+
 </web-app>
