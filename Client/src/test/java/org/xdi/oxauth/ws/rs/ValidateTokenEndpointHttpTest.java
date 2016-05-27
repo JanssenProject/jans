@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.testng.Assert.*;
+import static org.xdi.oxauth.client.Asserter.assertOk;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
@@ -41,12 +42,8 @@ public class ValidateTokenEndpointHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
+        assertOk(registerResponse);
         assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();

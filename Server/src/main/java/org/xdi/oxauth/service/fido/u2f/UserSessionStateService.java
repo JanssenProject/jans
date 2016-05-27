@@ -6,21 +6,17 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.Map;
-
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
 import org.xdi.util.StringHelper;
+
+import java.util.Map;
 
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication
@@ -38,15 +34,19 @@ public class UserSessionStateService {
 	@In
 	private SessionStateService sessionStateService;
 
-	public void updateUserSessionStateOnFinishRequest(String sessionState, String userInum, DeviceRegistration deviceRegistration, boolean enroll, boolean oneStep)  {
+	public void updateUserSessionStateOnFinishRequest(String sessionState, String userInum, DeviceRegistrationResult deviceRegistrationResult, boolean enroll, boolean oneStep) {
 		SessionState ldapSessionState = getLdapSessionState(sessionState);
 		if (ldapSessionState == null) {
 			return;
 		}
 		
 		Map<String, String> sessionAttributes = ldapSessionState.getSessionAttributes();
-		sessionAttributes.put("session_custom_state", "approved");
-		sessionAttributes.put("oxpush2_u2f_device_id", deviceRegistration.getId());
+		if (DeviceRegistrationResult.Status.APPROVED == deviceRegistrationResult.getStatus()) {
+			sessionAttributes.put("session_custom_state", "approved");
+		} else {
+			sessionAttributes.put("session_custom_state", "declined");
+		}
+		sessionAttributes.put("oxpush2_u2f_device_id", deviceRegistrationResult.getDeviceRegistration().getId());
 		sessionAttributes.put("oxpush2_u2f_device_user_inum", userInum);
 		sessionAttributes.put("oxpush2_u2f_device_enroll", Boolean.toString(enroll));
 		sessionAttributes.put("oxpush2_u2f_device_one_step", Boolean.toString(oneStep));

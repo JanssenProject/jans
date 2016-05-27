@@ -18,11 +18,11 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -32,13 +32,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.jws.ECDSASigner;
-import org.xdi.oxauth.model.jws.HMACSigner;
-import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
@@ -52,6 +46,7 @@ import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
+import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.ws.rs.core.CacheControl;
@@ -196,17 +191,19 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
-                                 Collection<String> scopes) throws StringEncrypter.EncryptionException, InvalidJwtException, InvalidClaimException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+                                 Collection<String> scopes) throws Exception {
         Jwt jwt = new Jwt();
-        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
+                ConfigurationFactory.instance().getConfiguration(),
+                ConfigurationFactory.instance().getWebKeys());
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        List<JSONWebKey> availableKeys = jwks.getKeys(signatureAlgorithm);
-        if (availableKeys.size() > 0) {
-            jwt.getHeader().setKeyId(availableKeys.get(0).getKid());
+        String keyId = cryptoProvider.getKeyId(ConfigurationFactory.instance().getWebKeys(), signatureAlgorithm);
+        if (keyId != null) {
+            jwt.getHeader().setKeyId(keyId);
         }
 
         // Claims
@@ -296,41 +293,15 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwt, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Signature
-        JSONWebKey jwk;
-        switch (signatureAlgorithm) {
-            case HS256:
-            case HS384:
-            case HS512:
-                HMACSigner hmacSigner = new HMACSigner(signatureAlgorithm, authorizationGrant.getClient().getClientSecret());
-                jwt = hmacSigner.sign(jwt);
-                break;
-            case RS256:
-            case RS384:
-            case RS512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getN(),
-                        jwk.getPrivateKey().getE());
-                RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
-                jwt = rsaSigner.sign(jwt);
-                break;
-            case ES256:
-            case ES384:
-            case ES512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(jwk.getPrivateKey().getD());
-                ECDSASigner ecdsaSigner = new ECDSASigner(signatureAlgorithm, ecdsaPrivateKey);
-                jwt = ecdsaSigner.sign(jwt);
-                break;
-            case NONE:
-                break;
-            default:
-                break;
-        }
+        String sharedSecret = authorizationGrant.getClient().getClientSecret();
+        String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
+        jwt.setEncodedSignature(signature);
 
         return jwt.toString();
     }
@@ -432,7 +403,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jwe, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         // Encryption
@@ -570,7 +543,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopes, jsonWebResponse, authorizationGrant.getUser());
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonWebResponse, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
         return jsonWebResponse.toString();

@@ -6,25 +6,15 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
@@ -33,18 +23,24 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
+import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.util.KeyGenerator;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version 0.9 February 12, 2015
+ * @version May 5, 2016
  */
 @Scope(ScopeType.APPLICATION)
 @Name("configurationFactory")
@@ -59,7 +55,9 @@ public class ConfigurationFactory {
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
     static {
-        if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
+    	if (System.getProperty("gluu.conf.folder") != null) {
+            BASE_DIR = System.getProperty("gluu.conf.folder");    		
+    	} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
             BASE_DIR = System.getProperty("catalina.home");
@@ -74,6 +72,7 @@ public class ConfigurationFactory {
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
+	public static final String LDAP_DEFAULT_FILE_PATH = DIR + "ox-ldap.properties";
 
     @Logger
     private Log log;
@@ -94,6 +93,7 @@ public class ConfigurationFactory {
 
     private AtomicBoolean isActive;
 
+	private String prevLdapFileName;
     private long ldapFileLastModifiedTime = -1;
 
     private long loadedRevision = -1;
@@ -103,7 +103,8 @@ public class ConfigurationFactory {
     public void init() {
         this.isActive = new AtomicBoolean(true);
     	try {
-			loadLdapConfiguration();
+        	String ldapFileName = determineLdapConfigurationFileName();
+        	this.prevLdapFileName = loadLdapConfiguration(ldapFileName);
 			this.confDir = confDir();
 			this.configFilePath = confDir + CONFIG_FILE_NAME;
 			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
@@ -153,11 +154,12 @@ public class ConfigurationFactory {
 
     private void reloadConfiguration() {
         // Reload LDAP configuration if needed
-        File ldapFile = new File(LDAP_FILE_PATH);
+    	String ldapFileName = determineLdapConfigurationFileName();
+        File ldapFile = new File(ldapFileName);
         if (ldapFile.exists()) {
             final long lastModified = ldapFile.lastModified();
-            if (lastModified > ldapFileLastModifiedTime) { // reload configuration only if it was modified
-                loadLdapConfiguration();
+            if (!StringHelper.equalsIgnoreCase(this.prevLdapFileName, ldapFileName) || (lastModified > ldapFileLastModifiedTime)) { // reload configuration only if it was modified
+            	this.prevLdapFileName = loadLdapConfiguration(ldapFileName);
                 Events.instance().raiseAsynchronousEvent(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
             }
         }
@@ -300,7 +302,7 @@ public class ConfigurationFactory {
     
     private Conf loadConfigurationFromLdap(String ... returnAttributes) {
         final LdapEntryManager ldapManager = ServerUtil.getLdapManager();
-        final String dn = getLdapConfiguration().getString("configurationEntryDN");
+        final String dn = getLdapConfiguration().getString("oxauth_ConfigurationEntryDN");
         try {
             final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
 
@@ -323,14 +325,19 @@ public class ConfigurationFactory {
     private void initWebKeysFromJson(String p_webKeys) {
         try {
             initJwksFromString(p_webKeys);
-        } catch (JsonProcessingException ex) {
+        } catch (Exception ex) {
             log.error("Failed to load JWKS. Attempting to generate new JWKS...", ex);
 
             String newWebKeys = null;
         	try {
-        		// Generate new JWKS
-				newWebKeys = KeyGenerator.generateJWKS().toString();
-				
+                // Generate new JWKS
+                JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
+                        getConfiguration().getKeyRegenerationInterval(),
+                        getConfiguration().getIdTokenLifetime(),
+                        getConfiguration(),
+                        getWebKeys());
+                newWebKeys = jsonObject.toString();
+
 				// Attempt to load new JWKS
 				initJwksFromString(newWebKeys);
 
@@ -348,8 +355,6 @@ public class ConfigurationFactory {
 			} catch (Exception ex2) {
 	            log.error("Failed to re-generate JWKS keys", ex2);
 			}
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
         }
     }
 
@@ -394,18 +399,31 @@ public class ConfigurationFactory {
         }
     }
 
-	private void loadLdapConfiguration() {
+	private String loadLdapConfiguration(String ldapFileName) {
         try {
-    		ldapConfiguration = new FileConfiguration(LDAP_FILE_PATH);
+    		ldapConfiguration = new FileConfiguration(ldapFileName);
 
-    		File ldapFile = new File(LDAP_FILE_PATH);
+    		File ldapFile = new File(ldapFileName);
     		if (ldapFile.exists()) {
     			this.ldapFileLastModifiedTime = ldapFile.lastModified();
     		}
+            
+            return ldapFileName;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             ldapConfiguration = null;
         }
+
+        return null;
+	}
+
+	private String determineLdapConfigurationFileName() {
+		File ldapFile = new File(LDAP_FILE_PATH);
+		if (ldapFile.exists()) {
+			return LDAP_FILE_PATH;
+		}
+		
+		return LDAP_DEFAULT_FILE_PATH;
 	}
 
 	private Configuration loadConfFromFile() {

@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.service.net;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.net.ssl.SSLContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -42,16 +30,23 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.net.SslDefaultHttpClient;
 import org.xdi.oxauth.model.net.HttpServiceResponse;
 import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
+
+import javax.net.ssl.SSLContext;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Map.Entry;
 /**
  * Provides operations with http requests
  *
@@ -162,6 +157,11 @@ public class HttpService implements Serializable {
         
         return null;
 	}
+
+	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData) {
+		return executePost(httpClient, uri, authData, headers, postData, null);
+	}
+
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType);
 	}

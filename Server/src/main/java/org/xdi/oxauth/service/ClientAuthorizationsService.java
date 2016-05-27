@@ -2,13 +2,13 @@ package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
+import org.xdi.util.StringHelper;
 
 import java.util.*;
 

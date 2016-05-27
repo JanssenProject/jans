@@ -258,6 +258,9 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         if (StringUtils.isNotBlank(getRequest().getCode())) {
             clientRequest.formParameter("code", getRequest().getCode());
         }
+        if (StringUtils.isNotBlank(getRequest().getCodeVerifier())) {
+            clientRequest.formParameter("code_verifier", getRequest().getCodeVerifier());
+        }
         if (StringUtils.isNotBlank(getRequest().getRedirectUri())) {
             clientRequest.formParameter("redirect_uri", getRequest().getRedirectUri());
         }

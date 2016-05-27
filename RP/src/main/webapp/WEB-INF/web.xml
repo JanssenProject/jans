@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0">
+
     <display-name>oxAuth RP</display-name>
-    <!-- RichFaces -->
-    <context-param>
-        <param-name>org.richfaces.SKIN</param-name>
-        <param-value>glassX</param-value>
-    </context-param>
-    <!-- Suppress spurious stylesheets -->
-    <context-param>
-        <param-name>org.richfaces.CONTROL_SKINNING</param-name>
-        <param-value>disable</param-value>
-    </context-param>
-    <context-param>
-        <param-name>org.richfaces.CONTROL_SKINNING_CLASSES</param-name>
-        <param-value>disable</param-value>
-    </context-param>
-    <!-- Change load strategy to DEFAULT to disable sending scripts/styles as packs -->
-    <context-param>
-        <param-name>org.richfaces.LoadStyleStrategy</param-name>
-        <param-value>ALL</param-value>
-    </context-param>
-    <context-param>
-        <param-name>org.richfaces.LoadScriptStrategy</param-name>
-        <param-value>ALL</param-value>
-    </context-param>
+
     <!-- Seam -->
     <listener>
         <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
@@ -37,6 +19,7 @@
         <filter-name>Seam Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
     <servlet>
         <servlet-name>Seam Resource Servlet</servlet-name>
         <servlet-class>org.jboss.seam.servlet.SeamResourceServlet</servlet-class>
@@ -46,25 +29,44 @@
         <url-pattern>/seam/resource/*</url-pattern>
     </servlet-mapping>
 
-    <!-- Facelets development mode (disable in production) -->
+
+    <!-- RichFaces -->
     <context-param>
-        <param-name>facelets.DEVELOPMENT</param-name>
-        <param-value>@debug@</param-value>
+        <param-name>org.richfaces.SKIN</param-name>
+        <param-value>glassX</param-value>
     </context-param>
+
+    <!-- Suppress spurious stylesheets -->
+    <context-param>
+        <param-name>org.richfaces.CONTROL_SKINNING</param-name>
+        <param-value>disable</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.richfaces.CONTROL_SKINNING_CLASSES</param-name>
+        <param-value>disable</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Production</param-value>
+    </context-param>
+
     <!-- JSF -->
     <context-param>
         <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
         <param-value>.xhtml</param-value>
     </context-param>
+
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.seam</url-pattern>
+        <url-pattern>*.htm</url-pattern>
     </servlet-mapping>
+
     <security-constraint>
         <display-name>Restrict raw XHTML Documents</display-name>
         <web-resource-collection>
@@ -73,13 +75,8 @@
         </web-resource-collection>
         <auth-constraint/>
     </security-constraint>
+
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
-    <!--
-       <persistence-unit-ref>
-          <persistence-unit-ref-name>oxauth/pu</persistence-unit-ref-name>
-          <persistence-unit-name>oxauth</persistence-unit-name>
-       </persistence-unit-ref>
-    -->
 </web-app>

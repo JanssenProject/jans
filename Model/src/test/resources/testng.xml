@@ -1,4 +1,10 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="oxAuthModel" parallel="false">
+    <test name="Code Verifier (PKCE)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.model.authorize.CodeVerifierTest"/>
+        </classes>
+    </test>
+
 </suite>

@@ -3,7 +3,7 @@ This is a person authentication module for oxAuth that enables user Certificate 
 The module has a few properties:
 
 1) chain_cert_file_path - It's mandatory property. It's path to file with cert chains in pem format.
-Example: `/etc/certs/chain_cert.pem`
+   Example: '/etc/certs/chain_cert.pem'
 
 2) map_user_cert - Specify if script should map new user to local account.
    Allowed values: true/false
@@ -13,7 +13,10 @@ Example: `/etc/certs/chain_cert.pem`
    Allowed values: true/false
    Example: true
    
- 4) crl_max_response_size - Specify maximum allowed size of CRL response
+4) crl_max_response_size - Specify maximum allowed size of CRL response
    Allowed values: integer value greater that 0
    Example: 10485760
    Default value: 5242880
+
+5) credentials_file - Patch to file with reCAPTCHA credentials.
+   Example: '/etc/certs/cert_credentials.json'

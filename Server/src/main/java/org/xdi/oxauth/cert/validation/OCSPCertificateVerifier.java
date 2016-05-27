@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.cert.validation;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.ocsp.*;
+import org.python.bouncycastle.cert.ocsp.CertificateStatus;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,33 +27,6 @@ import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.x509.AccessDescription;
-import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
-import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.bouncycastle.ocsp.BasicOCSPResp;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.OCSPRespGenerator;
-import org.bouncycastle.ocsp.RevokedStatus;
-import org.bouncycastle.ocsp.SingleResp;
-import org.python.bouncycastle.cert.ocsp.CertificateStatus;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on OCSP
@@ -87,6 +71,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 			CertificateID certificateId = new CertificateID(CertificateID.HASH_SHA1, issuer, certificate.getSerialNumber());
 
+			boolean foundResponse = false;
 			BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp.getResponseObject();
 			SingleResp[] singleResps = basicOCSPResp.getResponses();
 			for (SingleResp singleResp : singleResps) {
@@ -94,6 +79,8 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				if (!certificateId.equals(responseCertificateId)) {
 					continue;
 				}
+
+				foundResponse = true;
 
 				log.debug("OCSP validationDate: " + validationDate);
 				log.debug("OCSP thisUpdate: " + singleResp.getThisUpdate());
@@ -122,7 +109,9 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				}
 			}
 
-			log.error("There is no matching OCSP response entries");
+			if (!foundResponse) {
+				log.error("There is no matching OCSP response entries");
+			}
 		} catch (Exception ex) {
 			log.error("OCSP exception: ", ex);
 		}
