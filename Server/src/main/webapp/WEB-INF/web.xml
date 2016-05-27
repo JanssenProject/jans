@@ -25,4 +25,31 @@
         <servlet-name>Seam Resource Servlet</servlet-name>
         <url-pattern>/seam/resource/*</url-pattern>
     </servlet-mapping>
+
+    <!-- RestEasy -->
+    <context-param>
+        <param-name>resteasy.scan</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/rest</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>
+            org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>resteasy-servlet</servlet-name>
+        <servlet-class>
+            org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>resteasy-servlet</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
 </web-app>
