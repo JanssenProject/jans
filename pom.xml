@@ -20,7 +20,6 @@
 		<httpclient.version>4.3.6</httpclient.version>
 		<slf4j.version>1.7.2</slf4j.version>
 		<seam.version>2.3.1.Final</seam.version>
-		<jboss-embedded.version>beta3</jboss-embedded.version>
 		<drools.version>5.3.3.Final</drools.version>
 		<richfaces.version>4.3.7.Final</richfaces.version>
 		<hibernate.version>4.1.8.Final</hibernate.version>
