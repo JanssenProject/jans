@@ -1,24 +1,20 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.model.token;
 
 import org.python.jline.internal.Preconditions;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-import org.xdi.oxauth.model.jws.ECDSASigner;
-import org.xdi.oxauth.model.jws.HMACSigner;
-import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
-
-import java.security.SignatureException;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,8 +24,7 @@ import java.util.List;
 
 public class JwtSigner {
 
-    private final JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
-
+    private AbstractCryptoProvider cryptoProvider;
     private SignatureAlgorithm signatureAlgorithm;
     private String audience;
     private String hmacSharedSecret;
@@ -44,6 +39,10 @@ public class JwtSigner {
         this.signatureAlgorithm = signatureAlgorithm;
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
+
+        cryptoProvider = CryptoProviderFactory.getCryptoProvider(
+                ConfigurationFactory.instance().getConfiguration(),
+                ConfigurationFactory.instance().getWebKeys());
     }
 
     public static JwtSigner newJwtSigner(Client client) throws StringEncrypter.EncryptionException {
@@ -56,16 +55,16 @@ public class JwtSigner {
         return new JwtSigner(signatureAlgorithm, client.getClientId(), client.getClientSecret());
     }
 
-    public Jwt newJwt() {
+    public Jwt newJwt() throws Exception {
         jwt = new Jwt();
 
         // Header
+        String keyId = cryptoProvider.getKeyId(ConfigurationFactory.instance().getWebKeys(), signatureAlgorithm);
+        if (keyId != null) {
+            jwt.getHeader().setKeyId(keyId);
+        }
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
-        List<JSONWebKey> jsonWebKeys = jwks.getKeys(signatureAlgorithm);
-        if (jsonWebKeys.size() > 0) {
-            jwt.getHeader().setKeyId(jsonWebKeys.get(0).getKid());
-        }
 
         // Claims
         jwt.getClaims().setIssuer(ConfigurationFactory.instance().getConfiguration().getIssuer());
@@ -73,45 +72,12 @@ public class JwtSigner {
         return jwt;
     }
 
-    public Jwt sign() throws SignatureException, InvalidJwtException, StringEncrypter.EncryptionException {
+    public Jwt sign() throws Exception {
         // Signature
-        JSONWebKey jwk = null;
-        switch (signatureAlgorithm) {
-            case HS256:
-            case HS384:
-            case HS512:
-                HMACSigner hmacSigner = new HMACSigner(signatureAlgorithm, hmacSharedSecret);
-                jwt = hmacSigner.sign(jwt);
-                break;
-            case RS256:
-            case RS384:
-            case RS512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                        jwk.getPrivateKey().getN(),
-                        jwk.getPrivateKey().getE());
-                RSASigner rsaSigner = new RSASigner(signatureAlgorithm, rsaPrivateKey);
-                jwt = rsaSigner.sign(jwt);
-                break;
-            case ES256:
-            case ES384:
-            case ES512:
-                jwk = jwks.getKey(jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-                ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(jwk.getPrivateKey().getD());
-                ECDSASigner ecdsaSigner = new ECDSASigner(signatureAlgorithm, ecdsaPrivateKey);
-                jwt = ecdsaSigner.sign(jwt);
-                break;
-            case NONE:
-                break;
-            default:
-                break;
-        }
+        String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), hmacSharedSecret, signatureAlgorithm);
+        jwt.setEncodedSignature(signature);
 
         return jwt;
-    }
-
-    public JSONWebKeySet getJwks() {
-        return jwks;
     }
 
     public Jwt getJwt() {

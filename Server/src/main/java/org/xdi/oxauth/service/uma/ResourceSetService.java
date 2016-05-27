@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 import com.unboundid.ldap.sdk.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.hibernate.annotations.common.util.StringHelper;
+import org.xdi.util.StringHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;

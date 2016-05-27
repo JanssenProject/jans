@@ -1,8 +1,7 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:c="http://java.sun.com/jstl/core"
-                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
@@ -50,6 +49,9 @@
                 font-weight: bold;
             }
         </style>
+        <s:fragment rendered="#{recaptcha_site_key != null}">
+	        <script src="https://www.google.com/recaptcha/api.js" async="async" defer="defer"></script>
+        </s:fragment>
     </ui:define>
 
     <ui:define name="pageTitle">
@@ -69,7 +71,7 @@
                                         <h:outputText value="#{messages['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <c:set var="client" value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+                                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
                                         <s:div rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -80,19 +82,16 @@
                                         </p>
 
                                         <div class="dialog">
-                                            <h:panelGrid columns="2" border="0" rowClasses="prop" columnClasses="name, name">
-                                                <p class="body-list">1. Enter right answer:</p>
-                                                <h:panelGroup>
-			                                        <div id="captchaHolder">
-			                                            <h:outputText value="'recaptcha form'" escape="false" />
-			                                            <h:outputText value="#{recaptcha.html}" escape="false" />
-			                                        </div>
-		                                        </h:panelGroup>
+                                            <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="name, name">
+                                                <s:fragment rendered="#{recaptcha_site_key != null}">
+                                                	<p class="body-list">1. Enter right answer:</p>
+                                                	<div class="g-recaptcha" data-sitekey="#{recaptcha_site_key}"></div>
+                                                </s:fragment>
 		
-                                                <p class="body-list">2. Click «Login» button.</p>
+                                                <p class="body-list">#{recaptcha_site_key == null ? '1' : '2'}. Click «Login» button.</p>
                                                 <p/>
 
-                                                <p class="body-list">3. If the certificates list appears then choose right certificate.</p>
+                                                <p class="body-list">#{recaptcha_site_key == null ? '2' : '3'}. If the certificates list appears then choose right certificate.</p>
                                                 <p/>
                                             </h:panelGrid>
                                         </div>

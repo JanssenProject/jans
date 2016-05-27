@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<arquillian xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://jboss.org/schema/arquillian"
+	xsi:schemaLocation="http://jboss.org/schema/arquillian http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+	<engine>
+		<property name="deploymentExportPath">target</property>
+	</engine>
+
+	<container qualifier="tomcat" default="true">
+		<configuration>
+			<property name="tomcatHome">target/tomcat-embedded-7</property>
+			<property name="workDir">work</property>
+			<property name="appBase">webapps</property>
+			<property name="bindHttpPort">8889</property>
+			<property name="unpackArchive">false</property>
+			<property name="javaVmArguments">-Xmx512m -XX:MaxPermSize=512m</property>
+		</configuration>
+	</container>
+
+	<extension qualifier="seam2">
+		<!-- This way you can override Seam version which you have defined in pom.xml -->
+		<property name="autoPackage">false</property>
+		<property name="seamVersion">2.3.1.Final</property>
+		<property name="jbossElVersion">1.0_02.CR6</property>
+	</extension>
+</arquillian>

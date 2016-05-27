@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.xdi.oxauth.model.util.Util;
 import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.In;
@@ -25,6 +24,7 @@ import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -34,16 +34,10 @@ import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -164,7 +158,7 @@ public class RptPermissionAuthorizationWS {
 
     private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
         try {
-            resourceSetPermission.setTicket(UUID.randomUUID().toString()); // invalidate ticket and persist
+            resourceSetPermission.setAmHost("invalidated"); // invalidate ticket and persist
             ldapEntryManager.merge(resourceSetPermission);
         } catch (Exception e) {
             log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);

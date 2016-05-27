@@ -6,19 +6,17 @@
 
 package org.xdi.oxauth.model.util;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.HasParamName;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -134,7 +132,7 @@ public class Util {
         return null;
     }
 
-    public static boolean isNullOrEmpty(@Nullable String string) {
+    public static boolean isNullOrEmpty(String string) {
         return string == null || string.length() == 0;
     }
 

@@ -5,11 +5,6 @@
  */
 package org.xdi.oxauth.model.fido.u2f;
 
-import java.io.Serializable;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
@@ -19,6 +14,11 @@ import org.xdi.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.xdi.oxauth.model.util.Base64Util;
+
+import java.io.Serializable;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 
 /**
  * U2F Device registration
@@ -56,9 +56,12 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
     @LdapJsonObject
 	@LdapAttribute(name = "oxDeviceData")
 	private DeviceData deviceData;
-	
+
 	@LdapAttribute(name = "creationDate")
 	private Date creationDate;
+
+    @LdapAttribute(name = "oxLastAccessTime")
+    private Date lastAccessTime;
 	
 	public DeviceRegistration() {}
 
@@ -157,6 +160,14 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.deviceData = deviceData;
 	}
 
+	public Date getLastAccessTime() {
+		return lastAccessTime;
+	}
+
+	public void setLastAccessTime(Date lastAccessTime) {
+		this.lastAccessTime = lastAccessTime;
+	}
+
 	public boolean isCompromised() {
 		return DeviceRegistrationStatus.COMPROMISED == this.status;
 	}
@@ -178,7 +189,8 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DeviceRegistration [id=").append(id).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
 				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application).append(", keyHandle=")
-				.append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", creationDate=").append(creationDate).append("]");
+				.append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", deviceData=").append(deviceData)
+				.append(", creationDate=").append(creationDate).append(", lastAccessTime=").append(lastAccessTime).append("]");
 		return builder.toString();
 	}
 

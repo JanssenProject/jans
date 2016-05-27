@@ -1,8 +1,8 @@
 {
     "mode":"ldap",
     "issuer":"${config.oxauth.issuer}",
-    "loginPage":"${config.oxauth.contextPath}/login.seam",
-    "authorizationPage":"${config.oxauth.contextPath}/authorize.seam",
+    "loginPage":"${config.oxauth.contextPath}/login",
+    "authorizationPage":"${config.oxauth.contextPath}/authorize",
     "baseEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1",
     "authorizationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/authorize",
     "tokenEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/token",
@@ -22,6 +22,11 @@
     "introspectionEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/introspection",
     "umaConfigurationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/uma-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
+    "oxElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
+    "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
+    "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
+    "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
+    "oxElevenJwksEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/jwks",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         "code",
@@ -219,5 +224,6 @@
     "metricReporterKeepDataDays":15,
     "pairwiseIdType":"${config.oxauth.pairwiseIdType}",
     "pairwiseCalculationKey":"${config.oxauth.pairwiseCalculationKey}",
-    "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}"
+    "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
+    "webKeysStorage": "ldap"
 }
