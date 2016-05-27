@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<srv:Services xmlns:srv="urn:mace:shibboleth:2.0:services"
+          xmlns:attribute-afp="urn:mace:shibboleth:2.0:afp"
+          xmlns:attribute-authority="urn:mace:shibboleth:2.0:attribute:authority"
+          xmlns:attribute-resolver="urn:mace:shibboleth:2.0:resolver"
+          xmlns:profile="urn:mace:shibboleth:2.0:idp:profile-handler"
+          xmlns:relyingParty="urn:mace:shibboleth:2.0:relying-party"
+          xmlns:resource="urn:mace:shibboleth:2.0:resource"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="urn:mace:shibboleth:2.0:services classpath:/schema/shibboleth-2.0-services.xsd
+                              urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd
+                              urn:mace:shibboleth:2.0:attribute:authority classpath:/schema/shibboleth-2.0-attribute-authority.xsd
+                              urn:mace:shibboleth:2.0:resolver classpath:/schema/shibboleth-2.0-attribute-resolver.xsd
+                              urn:mace:shibboleth:2.0:idp:profile-handler classpath:/schema/shibboleth-2.0-idp-profile-handler.xsd
+                              urn:mace:shibboleth:2.0:relying-party classpath:/schema/shibboleth-2.0-relying-party.xsd
+                              urn:mace:shibboleth:2.0:resource classpath:/schema/shibboleth-2.0-resource.xsd">
+
+    <srv:Service id="shibboleth.AttributeResolver"
+             xsi:type="attribute-resolver:ShibbolethAttributeResolver"
+             configurationResourcePollingFrequency="PT5M"
+             configurationResourcePollingRetryAttempts="3"
+             >
+        <srv:ConfigurationResource file="/opt/idp/conf/attribute-resolver.xml" xsi:type="resource:FilesystemResource"
+             />
+    </srv:Service>
+
+    <srv:Service id="shibboleth.AttributeFilterEngine"
+             xsi:type="attribute-afp:ShibbolethAttributeFilteringEngine"
+             configurationResourcePollingFrequency="PT5M"
+             configurationResourcePollingRetryAttempts="3"
+             >
+        <srv:ConfigurationResource file="/opt/idp/conf/attribute-filter.xml" xsi:type="resource:FilesystemResource"
+             />
+    </srv:Service>
+
+    <srv:Service id="shibboleth.SAML1AttributeAuthority"
+             xsi:type="attribute-authority:SAML1AttributeAuthority"
+             depends-on="shibboleth.AttributeResolver shibboleth.AttributeFilterEngine"
+             resolver="shibboleth.AttributeResolver"
+             filter="shibboleth.AttributeFilterEngine"
+             />
+
+    <srv:Service id="shibboleth.SAML2AttributeAuthority"
+             xsi:type="attribute-authority:SAML2AttributeAuthority"
+             depends-on="shibboleth.AttributeResolver shibboleth.AttributeFilterEngine"
+             resolver="shibboleth.AttributeResolver"
+             filter="shibboleth.AttributeFilterEngine"
+             />
+
+    <srv:Service id="shibboleth.RelyingPartyConfigurationManager"
+             xsi:type="relyingParty:SAMLMDRelyingPartyConfigurationManager"
+             depends-on="shibboleth.SAML1AttributeAuthority shibboleth.SAML2AttributeAuthority"
+             configurationResourcePollingFrequency="PT5M"
+             configurationResourcePollingRetryAttempts="3"
+             >
+        <srv:ConfigurationResource file="/opt/idp/conf/relying-party.xml" xsi:type="resource:FilesystemResource"
+             />
+    </srv:Service>
+
+    <srv:Service id="shibboleth.HandlerManager"
+             depends-on="shibboleth.RelyingPartyConfigurationManager"
+             xsi:type="profile:IdPProfileHandlerManager"
+             configurationResourcePollingFrequency="PT5M"
+             configurationResourcePollingRetryAttempts="3"
+             >
+        <srv:ConfigurationResource file="/opt/idp/conf/handler.xml" xsi:type="resource:FilesystemResource"
+             />
+    </srv:Service>
+
+    <!--
+        A special service that exports all services upon which it depends into the ServletContext as an attribute
+        with the same name as the service's ID.
+    -->
+    <srv:Service id="shibboleth.ServiceServletContextAttributeExporter"
+             depends-on="shibboleth.AttributeResolver shibboleth.AttributeFilterEngine
+                         shibboleth.SAML1AttributeAuthority shibboleth.SAML2AttributeAuthority
+                         shibboleth.RelyingPartyConfigurationManager shibboleth.HandlerManager
+                         shibboleth.StorageService"
+             xsi:type="srv:ServletContextAttributeExporter" />
+</srv:Services>
