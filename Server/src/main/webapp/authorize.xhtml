@@ -2,8 +2,7 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:c="http://java.sun.com/jstl/core"
-                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
@@ -53,7 +52,7 @@
                     <h:outputText value="#{messages['authorize.requestForPermission']}"/>
                 </div>
                 <div class="authorize-panel-body">
-                    <c:set var="client" value='#{clientService.getClient(request.getParameter("client_id"))}'/>
+                	<ui:param name="client" value='#{clientService.getClient(request.getParameter("client_id"))}' />
 
                     <s:div rendered='#{!empty client.getLogoUri()}'>
                         <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -64,11 +63,11 @@
                     </p>
 
                     <ul>
-                        <c:forEach var="scope" items="#{authorizeAction.scopes}">
+                    	<ui:repeat var="_scope" value="#{authorizeAction.scopes}">
                             <li>
-                                #{scope.description}
+                                <h:outputText value="#{_scope.description}" />
                             </li>
-                        </c:forEach>
+                        </ui:repeat>
                     </ul>
 
                     <s:div rendered='#{!empty client.getPolicyUri()}'>

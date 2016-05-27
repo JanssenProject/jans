@@ -16,6 +16,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.Key;
 import org.xdi.oxauth.model.crypto.KeyFactory;
 import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import java.util.UUID;
@@ -24,7 +25,8 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @author Yuriy Movchan
+ * @version May 4, 2016
  */
 public class KeyGenerator {
 
@@ -73,7 +75,7 @@ public class KeyGenerator {
         Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
 
         key.setKeyType("RSA");
-        key.setUse("SIGNATURE");
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.RS256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
@@ -90,7 +92,7 @@ public class KeyGenerator {
         Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
 
         key.setKeyType("RSA");
-        key.setUse("SIGNATURE");
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.RS384.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
@@ -107,7 +109,7 @@ public class KeyGenerator {
         Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
 
         key.setKeyType("RSA");
-        key.setUse("SIGNATURE");
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.RS512.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
@@ -123,12 +125,12 @@ public class KeyGenerator {
 
         Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
 
-        key.setKeyType("EC");
-        key.setUse("SIGNATURE");
+        key.setKeyType(SignatureAlgorithm.ES256.getFamily());
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.ES256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
-        key.setCurve("P-256");
+        key.setCurve(SignatureAlgorithm.ES256.getCurve());
 
         return key.toJSONObject();
     }
@@ -140,12 +142,12 @@ public class KeyGenerator {
 
         Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
 
-        key.setKeyType("EC");
-        key.setUse("SIGNATURE");
+        key.setKeyType(SignatureAlgorithm.ES384.getFamily());
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.ES384.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
-        key.setCurve("P-384");
+        key.setCurve(SignatureAlgorithm.ES384.getCurve());
 
         return key.toJSONObject();
     }
@@ -157,12 +159,12 @@ public class KeyGenerator {
 
         Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
 
-        key.setKeyType("EC");
-        key.setUse("SIGNATURE");
+        key.setKeyType(SignatureAlgorithm.ES512.getFamily());
+        key.setUse(Use.SIGNATURE.toValue());
         key.setAlgorithm(SignatureAlgorithm.ES512.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationTime);
-        key.setCurve("P-521");
+        key.setCurve(SignatureAlgorithm.ES512.getCurve());
 
         return key.toJSONObject();
     }

@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<page xmlns="http://jboss.com/products/seam/pages"
+<page xmlns="http://jboss.org/schema/seam/pages"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://jboss.com/products/seam/pages http://jboss.com/products/seam/pages-2.2.xsd"
+      xsi:schemaLocation="http://jboss.org/schema/seam/pages http://jboss.org/schema/seam/pages-2.3.xsd"
       view-id="/authorize.xhtml"><!-- do not put login-required="true", we need to redirect it via action to pass params -->
 
     <action execute="#{authorizeAction.checkUiLocales}" />
     <action execute="#{authorizeAction.checkPermissionGranted}" on-postback="false"/>
 
     <rewrite pattern="/authorize"/> 
-     	<navigation from-action="#{authorizeAction.checkPermissionGranted}">
-        <rule if-outcome="success">
-            <render view-id="/authorize.xhtml" />
-        </rule>
-        
-        <rule if-outcome="failure">
-            <end-conversation />
-            <redirect view-id="/login.xhtml">                
-            </redirect>
-        </rule>
-    </navigation>
 
     <!-- OAuth 2.0 request parameters -->
     <param name="scope"
@@ -57,6 +46,10 @@
            value="#{authorizeAction.request}"/>
     <param name="request_uri"
            value="#{authorizeAction.requestUri}"/>
+    <param name="code_challenge"
+           value="#{authorizeAction.codeChallenge}"/>
+    <param name="code_challenge_method"
+           value="#{authorizeAction.codeChallengeMethod}"/>
 
     <!-- custom oxAuth parameters -->
     <param name="session_state"

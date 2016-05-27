@@ -1,8 +1,7 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:c="http://java.sun.com/jstl/core"
-                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
@@ -57,7 +56,8 @@
                                         <h:outputText value="#{messages['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <c:set var="client" value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+                                        <ui:param name="client"
+                                                  value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
 
                                         <s:div rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -109,23 +109,28 @@
                                         <div class="actionButtons">
                                             <h:commandButton id="loginButton"
                                                              value="#{messages['login.login']}"
-                                                             action="#{authenticator.authenticate}" />
+                                                             action="#{authenticator.authenticate}"/>
 
-	                                        <s:div id="registerId" style="display:none">
-	                                            <h:commandButton id="registerButton"
-	                                                             value="#{messages['login.register']}"
-	                                                             action="#{authenticator.authenticate}" />
-	                                        </s:div>
+                                            <s:div id="registerId" style="display:none">
+                                                <h:commandButton id="registerButton"
+                                                                 value="#{messages['login.register']}"
+                                                                 action="#{authenticator.authenticate}"/>
+                                            </s:div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="login-panel">
-                                	<s:fragment rendered="#{external_auth_request_uri != Null}">
-                                		<a id="externalAuthButton"
-											href="#{external_auth_request_uri}">
-                                            <input type="button" value="Use External Authentification" />
-										</a>
-                                	</s:fragment>
+                                    <s:fragment rendered="#{external_auth_request_uri != Null}">
+                                        <a id="externalAuthButton"
+                                           href="#{external_auth_request_uri}">
+                                            <input type="button" value="Use External Authentification"/>
+                                        </a>
+                                    </s:fragment>
+                                    <s:fragment rendered="#{external_registration_uri != Null}">
+                                        <a id="externalRegistrationButton" href="#{external_registration_uri}">
+                                            <input type="button" value="Register new user"/>
+                                        </a>
+                                    </s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>
@@ -134,12 +139,24 @@
             </tr>
         </table>
         <script type="text/javascript">
-            window.onload = function() {
-                document.getElementById("loginForm:username").focus();
+            window.onload = function () {
+                var userNameField = document.getElementById("loginForm:username");
+                var passwordField = document.getElementById("loginForm:password");
+                var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
+                if (userName) {
+                    userNameField.value = userName;
+                    userNameField.readOnly = true;
+                    passwordField.focus();
+                } else {
+                    userNameField.focus();
+                }
 
                 var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
                 if (displayRegister) {
-                    document.getElementById("loginForm:registerId").style.display = 'inline';
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null) {
+                        registerButton.style.display = 'inline';
+                    }
                 }
             };
         </script>

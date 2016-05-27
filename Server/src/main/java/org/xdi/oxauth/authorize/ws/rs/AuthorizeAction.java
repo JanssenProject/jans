@@ -23,6 +23,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -39,6 +40,7 @@ import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -49,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 15, 2015
+ * @version May 24, 2016
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -95,6 +97,9 @@ public class AuthorizeAction {
     private LocaleSelector localeSelector;
 
     @In
+    private NetworkService networkService;
+
+    @In
     private Identity identity;
 
     // OAuth 2.0 request parameters
@@ -117,6 +122,8 @@ public class AuthorizeAction {
     private String amrValues;
     private String request;
     private String requestUri;
+    private String codeChallenge;
+    private String codeChallengeMethod;
 
     // custom oxAuth parameters
     private String sessionState;
@@ -139,16 +146,21 @@ public class AuthorizeAction {
         }
     }
 
-    public String checkPermissionGranted() {
+    public void checkPermissionGranted() {
         SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
         try {
             session = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(session, acrValues);
         } catch (AcrChangedException e) {
-            log.error("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
-            log.error("Please perform logout in order to be able login with new ACR value.");
-            permissionDenied();
+            log.debug("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
+            if (prompts.contains(Prompt.LOGIN)) {
+                session = handleAcrChange(session, prompts);
+            } else {
+                log.error("Please provide prompt=login to force login with new ACR or otherwise perform logout and re-authenticate.");
+                permissionDenied();
+                return;
+            }
         }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
@@ -178,7 +190,7 @@ public class AuthorizeAction {
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
                     permissionDenied();
-                    return Constants.RESULT_FAILURE;
+                    return;
                 }
 
                 String acr = customScriptConfiguration.getName();
@@ -193,6 +205,10 @@ public class AuthorizeAction {
                 }
             }
 
+            // Store Remote IP
+            String remoteIp = networkService.getRemoteIp();
+            requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
+
             // Create unauthenticated session
             SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
@@ -204,8 +220,14 @@ public class AuthorizeAction {
             this.sessionState = unauthenticatedSession.getId();
             sessionStateService.createSessionStateCookie(this.sessionState);
 
-            FacesManager.instance().redirect(redirectTo, null, false);
-            return Constants.RESULT_FAILURE;
+            Map<String, Object> loginParameters = new HashMap<String, Object>();
+            if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
+                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT,
+                        requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
+            }
+
+            FacesManager.instance().redirect(redirectTo, loginParameters, false);
+            return;
         }
 
         if (clientId != null && !clientId.isEmpty()) {
@@ -213,12 +235,6 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
-            	
-            	boolean trustedClient = (client.getTrustedClient() != null) && client.getTrustedClient();
-            	if(!client.getPersistClientAuthorizations() || !trustedClient){
-            		return  Constants.RESULT_SUCCESS; 
-            	}
-            	
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
                     permissionDenied();
                 }
@@ -247,25 +263,49 @@ public class AuthorizeAction {
                     }
                 }
 
-                if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                        permissionGranted(session);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (trustedClient && !prompts.contains(Prompt.CONSENT)) {
+                if (prompts.contains(Prompt.CONSENT)) {
+                    // The authorization server prompts the user for consent before returning information to the client.
+                } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
+                    boolean done = false;
+                    if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                        if (client.getTrustedClient()) {
+                            permissionGranted(session);
+                            done = true;
+                        }
+                    }
+
+                    if (!done) {
+                        ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                        if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                                Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+                                        org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
                             permissionGranted(session);
                         }
-                    } else {
-                        consentRequired();
                     }
                 } else {
                     invalidRequest();
                 }
             }
         }
-		return Constants.RESULT_FAILURE;
+
+        return;
+    }
+
+    private SessionState handleAcrChange(SessionState session, List<Prompt> prompts) {
+        if (session != null && prompts.contains(Prompt.LOGIN)) { // change session state only if prompt=none
+            if (session.getState() == SessionIdState.AUTHENTICATED) {
+                session.getSessionAttributes().put("prompt", prompt);
+                session.setState(SessionIdState.UNAUTHENTICATED);
+
+                // Update Remote IP
+                String remoteIp = networkService.getRemoteIp();
+                session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
+
+                sessionStateService.updateSessionState(session);
+                sessionStateService.reinitLogin(session, false);
+            }
+        }
+        return session;
     }
 
     /**
@@ -599,6 +639,12 @@ public class AuthorizeAction {
             }
 
             final Client client = clientService.getClient(clientId);
+
+            if (client.getPersistClientAuthorizations()) {
+                client.setTrustedClient(true);
+                clientService.merge(client);
+            }
+
             final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
@@ -663,5 +709,21 @@ public class AuthorizeAction {
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
 
         FacesManager.instance().redirectToExternalURL(sb.toString());
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
     }
 }

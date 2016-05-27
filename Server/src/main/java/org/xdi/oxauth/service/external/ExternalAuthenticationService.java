@@ -169,6 +169,19 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return false;
 	}
 
+	public int getNextStep(CustomScriptConfiguration customScriptConfiguration, Map<String, String[]> requestParameters, int step) {
+		try {
+			log.debug("Executing python 'getNextStep' authenticator method");
+			PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
+			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+			return externalAuthenticator.getNextStep(configurationAttributes, requestParameters, step);
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+		
+		return -1;
+	}
+
 	public boolean executeExternalLogout(CustomScriptConfiguration customScriptConfiguration, Map<String, String[]> requestParameters) {
 		try {
 			log.debug("Executing python 'logout' authenticator method");

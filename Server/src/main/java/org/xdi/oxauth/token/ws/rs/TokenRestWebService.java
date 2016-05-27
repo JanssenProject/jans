@@ -6,11 +6,7 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
@@ -95,6 +91,9 @@ public interface TokenRestWebService {
             @FormParam("client_secret")
             @ApiParam(value = "The client secret.  The client MAY omit the parameter if the client secret is an empty string.", required = false)
             String clientSecret,
+            @FormParam("code_verifier")
+            @ApiParam(value = "The client's PKCE code verifier.", required = false)
+            String codeVerifier,
             @Context HttpServletRequest request,
             @Context SecurityContext sec);
 }

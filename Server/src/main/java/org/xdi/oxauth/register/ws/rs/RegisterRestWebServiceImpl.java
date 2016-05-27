@@ -329,6 +329,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
+        Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
+        if (clientSecretExpiresAt != null) {
+            p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
+        }
+
         // Federation params
         if (StringUtils.isNotBlank(requestObject.getFederationUrl())) {
             p_client.setFederationURI(requestObject.getFederationUrl());

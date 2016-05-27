@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Internal/external type
@@ -18,7 +18,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum InternalExternal implements LdapEnum {
 
-	INTERNAL("internal", "Internal"), EXTERNAL("external", "External"), EXTERNAL_AUTO("external_auto", "External auto");
+	INTERNAL("internal", "Internal"), EXTERNAL("external", "External"), EXTERNAL_AUTO("external_auto", "External auto"), UMA("uma", "Uma");
 
 	private String value;
 	private String displayName;

@@ -6,15 +6,7 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -26,6 +18,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
@@ -36,10 +29,12 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.fido.u2f.AuthenticationService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
+import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 /**
  * The endpoint allows to start and finish U2F authentication process
@@ -69,9 +64,13 @@ public class U2fAuthenticationWS {
 	@In
 	private UserSessionStateService userSessionStateService;
 
+	@In
+	private ValidationService u2fValidationService;
+
 	@GET
 	@Produces({ "application/json" })
 	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
 			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
 
@@ -81,15 +80,20 @@ public class U2fAuthenticationWS {
 
 			String foundUserInum = null;
 
-			boolean oneStep = StringHelper.isEmpty(userName);
-			if (oneStep) {
+			boolean twoStep = StringHelper.isNotEmpty(userName);
+			if (twoStep) {
+				boolean valid = u2fValidationService.isValidSessionState(userName, sessionState);
+				if (!valid) {
+					throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
+				}
+
+				foundUserInum = userService.getUserInum(userName);
+			} else {
 				// Convert to non padding URL base64 string
 				String keyHandleWithoutPading = Base64Util.base64urlencode(Base64Util.base64urldecode(keyHandle));
 
 				// In one step we expects empty username and not empty keyhandle
 				foundUserInum = u2fAuthenticationService.getUserInumByKeyHandle(appId, keyHandleWithoutPading);
-			} else {
-				foundUserInum = userService.getUserInum(userName);
 			}
 
 			if (StringHelper.isEmpty(foundUserInum)) {
@@ -122,7 +126,7 @@ public class U2fAuthenticationWS {
 
 	@POST
 	@Produces({ "application/json" })
-	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("keyhandle") String keyHandle, @FormParam("tokenResponse") String authenticateResponseString) {
+	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
 			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
@@ -141,14 +145,14 @@ public class U2fAuthenticationWS {
 			AuthenticateRequestMessage authenticateRequestMessage = authenticateRequestMessageLdap.getAuthenticateRequestMessage();
 
 			String foundUserInum = authenticateRequestMessageLdap.getUserInum();
-			DeviceRegistration deviceRegistration = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserInum);
+			DeviceRegistrationResult deviceRegistrationResult = u2fAuthenticationService.finishAuthentication(authenticateRequestMessage, authenticateResponse, foundUserInum);
 
 			// If sessionState is not empty update session
 			if (StringHelper.isNotEmpty(sessionState)) {
 				log.debug("There is session state. Setting session state attributes");
 
 				boolean oneStep = StringHelper.isEmpty(userName);
-				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistration, false, oneStep);
+				userSessionStateService.updateUserSessionStateOnFinishRequest(sessionState, foundUserInum, deviceRegistrationResult, false, oneStep);
 			}
 
 			AuthenticateStatus authenticationStatus = new AuthenticateStatus(Constants.RESULT_SUCCESS, requestId);
