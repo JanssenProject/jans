@@ -12,11 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
@@ -36,14 +32,8 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -124,17 +114,17 @@ public class SessionStateService {
         }
     }
 
-	public void resetToStep(SessionState session, int resetToStep) {
+    public void resetToStep(SessionState session, int resetToStep) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
-        
+
         int currentStep = 1;
         if (sessionAttributes.containsKey("auth_step")) {
-        	currentStep = StringHelper.toInteger(sessionAttributes.get("auth_step"), currentStep);
+            currentStep = StringHelper.toInteger(sessionAttributes.get("auth_step"), currentStep);
         }
-        
+
         for (int i = resetToStep; i <= currentStep; i++) {
             String key = String.format("auth_step_passed_%d", i);
-        	sessionAttributes.remove(key);
+            sessionAttributes.remove(key);
         }
 
         sessionAttributes.put("auth_step", String.valueOf(resetToStep));
@@ -143,7 +133,7 @@ public class SessionStateService {
         if (!updateResult) {
             log.debug("Failed to update session entry: '{0}'", session.getId());
         }
-	}
+    }
 
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
         // Update from request
@@ -323,25 +313,25 @@ public class SessionStateService {
     }
 
     private Jwt generateJwt(SessionState sessionState, String audience) {
-        JwtSigner jwtSigner = new JwtSigner(SignatureAlgorithm.RS512, audience);
-        Jwt jwt = jwtSigner.newJwt();
-
-        // claims
-        jwt.getClaims().setClaim("id", sessionState.getId());
-        jwt.getClaims().setClaim("authentication_time", sessionState.getAuthenticationTime());
-        jwt.getClaims().setClaim("user_dn", sessionState.getUserDn());
-        jwt.getClaims().setClaim("state", sessionState.getState() != null ?
-                sessionState.getState().getValue() : "");
-
-        jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionState.getSessionAttributes()));
-
-        jwt.getClaims().setClaim("last_used_at", sessionState.getLastUsedAt());
-        jwt.getClaims().setClaim("permission_granted", sessionState.getPermissionGranted());
-        jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionState.getPermissionGrantedMap().getPermissionGranted()));
-        jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionState.getInvolvedClients().getPermissionGranted()));
-
-        // sign
         try {
+            JwtSigner jwtSigner = new JwtSigner(SignatureAlgorithm.RS512, audience);
+            Jwt jwt = jwtSigner.newJwt();
+
+            // claims
+            jwt.getClaims().setClaim("id", sessionState.getId());
+            jwt.getClaims().setClaim("authentication_time", sessionState.getAuthenticationTime());
+            jwt.getClaims().setClaim("user_dn", sessionState.getUserDn());
+            jwt.getClaims().setClaim("state", sessionState.getState() != null ?
+                    sessionState.getState().getValue() : "");
+
+            jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionState.getSessionAttributes()));
+
+            jwt.getClaims().setClaim("last_used_at", sessionState.getLastUsedAt());
+            jwt.getClaims().setClaim("permission_granted", sessionState.getPermissionGranted());
+            jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionState.getPermissionGrantedMap().getPermissionGranted()));
+            jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionState.getInvolvedClients().getPermissionGranted()));
+
+            // sign
             return jwtSigner.sign();
         } catch (Exception e) {
             log.error("Failed to sign session jwt! " + e.getMessage(), e);
