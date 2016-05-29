@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents the configuration XML file.
@@ -118,8 +119,10 @@ public class Configuration {
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
+    
+    private Map<Integer,List<String>> authLevelMapping;//auth_level_mapping
 
-    private String applianceInum;
+	private String applianceInum;
     private int sessionIdUnusedLifetime;
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
@@ -1202,5 +1205,14 @@ public class Configuration {
 
     public void setWebKeysStorage(String webKeysStorage) {
         this.webKeysStorage = webKeysStorage;
-    }
+    }    
+	
+    @XmlElement(name = "auth_level_mapping")
+	public Map<Integer, List<String>> getAuthLevelMapping() {
+		return authLevelMapping;
+	}
+
+	public void setAuthLevelMapping(Map<Integer, List<String>> authLevelMapping) {
+		this.authLevelMapping = authLevelMapping;
+	}
 }

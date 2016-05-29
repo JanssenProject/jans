@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.model.configuration;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Javier Rojas Blum
  * @version 0.9 January 22, 2015
@@ -59,4 +62,5 @@ public interface ConfigurationResponseClaim {
     public static final String CLAIMS_KEY = "claims";
     public static final String HTTP_LOGOUT_SUPPORTED = "http_logout_supported";
     public static final String LOGOUT_SESSION_SUPPORTED = "logout_session_supported";
+    public static final String AUTH_LEVEL_MAPPING = "auth_level_mapping";    
 }
