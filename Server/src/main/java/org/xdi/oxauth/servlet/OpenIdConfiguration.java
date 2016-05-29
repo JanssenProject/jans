@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
@@ -75,6 +76,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(FEDERATION_ENDPOINT, configuration.getFederationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, configuration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, configuration.getIntrospectionEndpoint());
+            jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping(configuration.getAuthLevelMapping()));
 
             ScopeService scopeService = ScopeService.instance();
             JSONArray scopesSupported = new JSONArray();
@@ -312,6 +314,23 @@ public class OpenIdConfiguration extends HttpServlet {
         }
         return result;
     }
+    
+    private static JSONObject createAuthLevelMapping(Map<Integer, List<String>>  map) {
+        final JSONObject mappings = new JSONObject();
+        try {        	
+        	for(Integer level: map.keySet()){
+        		final JSONArray mappingList = new JSONArray();                
+        		List<String> list = map.get(level);
+        		for(String mapping : list){
+        			mappingList.put(mapping);
+        		}
+        		mappings.put(level.toString(), mappingList);        		
+        	}          
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return mappings;
+    }    
 
     /**
      * Handles the HTTP
