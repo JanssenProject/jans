@@ -70,7 +70,7 @@ public class ClientAuthorizationsService {
         return null;
     }
 
-    public void add(String userInum, String clientId, List<String> scopes) {
+    public void add(String userInum, String clientId, Set<String> scopes) {
         prepareBranch(userInum);
 
         ClientAuthorizations clientAuthorizations = findClientAuthorizations(userInum, clientId);
