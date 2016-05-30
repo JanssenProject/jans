@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.Component;
@@ -645,7 +646,7 @@ public class AuthorizeAction {
                 clientService.merge(client);
             }
 
-            final List<String> scopes = org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope);
+            final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
             session.addPermission(clientId, true);
