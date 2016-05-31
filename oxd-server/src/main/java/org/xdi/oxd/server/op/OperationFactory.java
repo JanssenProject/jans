@@ -23,25 +23,12 @@ public class OperationFactory {
     public static IOperation create(Command command, final Injector injector) {
         if (command != null && command.getCommandType() != null) {
             switch (command.getCommandType()) {
-                case AUTHORIZE_RPT:
-                    return new AuthorizeRptOperation(command, injector);
+                case RP_AUTHORIZE_RPT:
+                    return new RpAuthorizeRptOperation(command, injector);
                 case AUTHORIZATION_CODE_FLOW:
                     return new AuthorizationCodeFlowOperation(command, injector);
-                case OBTAIN_PAT:
-                    return new ObtainPatOperation(command, injector);
-                case OBTAIN_AAT:
-                    return new ObtainAatOperation(command, injector);
                 case RP_GET_RPT:
                     return new RpGetRptOperation(command, injector);
-
-                case CLIENT_READ:
-                    return new ClientReadOperation(command, injector);
-                case REGISTER_RESOURCE:
-                    return new RegisterResourceOperation(command, injector);
-                case REGISTER_TICKET:
-                    return new RegisterTicketOperation(command, injector);
-                case DISCOVERY:
-                    return new DiscoveryOperation(command, injector);
                 case CHECK_ID_TOKEN:
                     return new CheckIdTokenOperation(command, injector);
                 case CHECK_ACCESS_TOKEN:
@@ -64,6 +51,8 @@ public class OperationFactory {
                     return new GetLogoutUrlOperation(command, injector);
                 case UPDATE_SITE:
                     return new UpdateSiteOperation(command, injector);
+                case RS_PROTECT:
+                    return new RsProtectOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
