@@ -19,7 +19,7 @@ public class JsonTest {
 
     @Test
     public void testCommandType() throws IOException {
-        final String json = CoreUtils.asJson(CommandType.OBTAIN_PAT);
+        final String json = CoreUtils.asJson(CommandType.GET_AUTHORIZATION_URL);
         Assert.assertEquals(json, "\"obtain_pat\"");
         final CommandType obtainPat = CoreUtils.createJsonMapper().readValue(json, CommandType.class);
         Assert.assertNotNull(obtainPat);
@@ -28,7 +28,7 @@ public class JsonTest {
     @Test
     public void testCommand() throws IOException {
         Command c = new Command();
-        c.setCommandType(CommandType.REGISTER_CLIENT);
+        c.setCommandType(CommandType.GET_USER_INFO);
         c.setParams(JsonNodeFactory.instance.textNode("myParams"));
 
         final String cJson = CoreUtils.asJson(c);

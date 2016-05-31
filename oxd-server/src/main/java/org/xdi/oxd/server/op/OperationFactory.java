@@ -23,12 +23,8 @@ public class OperationFactory {
     public static IOperation create(Command command, final Injector injector) {
         if (command != null && command.getCommandType() != null) {
             switch (command.getCommandType()) {
-                case RP_AUTHORIZE_RPT:
-                    return new RpAuthorizeRptOperation(command, injector);
                 case AUTHORIZATION_CODE_FLOW:
                     return new AuthorizationCodeFlowOperation(command, injector);
-                case RP_GET_RPT:
-                    return new RpGetRptOperation(command, injector);
                 case CHECK_ID_TOKEN:
                     return new CheckIdTokenOperation(command, injector);
                 case CHECK_ACCESS_TOKEN:
@@ -53,6 +49,10 @@ public class OperationFactory {
                     return new UpdateSiteOperation(command, injector);
                 case RS_PROTECT:
                     return new RsProtectOperation(command, injector);
+                case RP_GET_RPT:
+                    return new RpGetRptOperation(command, injector);
+                case RP_AUTHORIZE_RPT:
+                    return new RpAuthorizeRptOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {

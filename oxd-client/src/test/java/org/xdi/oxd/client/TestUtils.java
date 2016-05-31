@@ -8,20 +8,13 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
-import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.params.RegisterPermissionTicketParams;
-import org.xdi.oxd.common.params.RegisterResourceParams;
-import org.xdi.oxd.common.response.RegisterPermissionTicketOpResponse;
-import org.xdi.oxd.common.response.RegisterResourceOpResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -99,50 +92,6 @@ public class TestUtils {
             throw new RuntimeException(e.getMessage(), e);
         }
         return null;
-    }
-
-    public static RegisterResourceOpResponse registerResource(CommandClient p_client, String umaDiscoveryUrl, String patToken, List<String> p_scopes) {
-        final RegisterResourceParams params = new RegisterResourceParams();
-        params.setUmaDiscoveryUrl(umaDiscoveryUrl);
-        params.setPatToken(patToken);
-        params.setName("oxd test resource");
-        params.setScopes(p_scopes);
-
-        final Command command = new Command(CommandType.REGISTER_RESOURCE);
-        command.setParamsObject(params);
-
-        final CommandResponse response = p_client.send(command);
-        assertNotNull(response);
-        System.out.println(response);
-
-        final RegisterResourceOpResponse r = response.dataAsResponse(RegisterResourceOpResponse.class);
-        assertNotNull(r);
-        return r;
-    }
-
-    public static RegisterPermissionTicketOpResponse registerTicket(CommandClient p_client, String umaDiscoveryUrl,
-                                                                    String patToken, String resourceId, String amHost, String rsHost,
-                                                                    List<String> p_scopes, String requestHttpMethod, String requestUrl) {
-        final RegisterPermissionTicketParams params = new RegisterPermissionTicketParams();
-        params.setUmaDiscoveryUrl(umaDiscoveryUrl);
-        params.setPatToken(patToken);
-        params.setAmHost(amHost);
-        params.setRsHost(rsHost);
-        params.setResourceSetId(resourceId);
-        params.setScopes(p_scopes);
-        params.setRequestHttpMethod(requestHttpMethod);
-        params.setRequestUrl(requestUrl);
-
-        final Command command = new Command(CommandType.REGISTER_TICKET);
-        command.setParamsObject(params);
-
-        final CommandResponse response = p_client.send(command);
-        assertNotNull(response);
-        System.out.println(response);
-
-        final RegisterPermissionTicketOpResponse r = response.dataAsResponse(RegisterPermissionTicketOpResponse.class);
-        assertNotNull(r);
-        return r;
     }
 
     public static void notEmpty(String str) {

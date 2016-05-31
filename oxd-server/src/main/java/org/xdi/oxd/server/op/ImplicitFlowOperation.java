@@ -38,7 +38,7 @@ public class ImplicitFlowOperation extends BaseOperation {
     public CommandResponse execute() {
         final ImplicitFlowParams params = asParams(ImplicitFlowParams.class);
 
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
             return okResponse(requestToken(discovery, params));
         }

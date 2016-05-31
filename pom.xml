@@ -72,6 +72,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.xdi</groupId>
+                <artifactId>uma-rs-core</artifactId>
+                <version>2.4.4-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>com.sencha.gxt</groupId>
                 <artifactId>gxt</artifactId>
                 <version>${gxt.version}</version>

@@ -10,7 +10,7 @@ import java.util.List;
  * @version 0.9, 14/03/2016
  */
 
-public class UpdateSiteParams  implements IParams {
+public class UpdateSiteParams implements IParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
