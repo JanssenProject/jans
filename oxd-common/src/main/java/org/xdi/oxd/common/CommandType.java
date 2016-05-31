@@ -30,7 +30,11 @@ public enum CommandType {
     LICENSE_STATUS("license_status"),
 
     // UMA
+    RS_PROTECT("uma_rs_protect"),
+    RS_CHECK_ACCESS("uma_rs_check_access"),
     RP_GET_RPT("uma_rp_get_rpt"),
+    RP_GET_GAT("uma_rp_get_gat"),
+    RP_AUTHORIZE_RPT("uma_rp_authorize_rpt"),
 
     // stateless
     AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
