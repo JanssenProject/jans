@@ -68,8 +68,28 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "contacts")
     private List<String> contacts;
 
+    @JsonProperty(value = "user_id")
+    private String userId;
+    @JsonProperty(value = "user_secret")
+    private String userSecret;
+
     @JsonProperty(value = "aat")
     private String aat;
+    @JsonProperty(value = "aat_expires_in")
+    private int aatExpiresIn;
+    @JsonProperty(value = "aat_created_at")
+    private Date aatCreatedAt;
+    @JsonProperty(value = "aat_refresh_token")
+    private String aatRefreshToken;
+
+    @JsonProperty(value = "pat")
+    private String pat;
+    @JsonProperty(value = "pat_expires_in")
+    private int patExpiresIn;
+    @JsonProperty(value = "pat_created_at")
+    private Date patCreatedAt;
+    @JsonProperty(value = "pat_refresh_token")
+    private String patRefreshToken;
 
     public SiteConfiguration() {
     }
@@ -105,7 +125,50 @@ public class SiteConfiguration implements Serializable {
         this.grantType = conf.grantType;
         this.contacts = conf.contacts;
 
+        this.userId = conf.userId;
+        this.userSecret = conf.userSecret;
+
         this.aat = conf.aat;
+        this.aatExpiresIn = conf.aatExpiresIn;
+        this.aatCreatedAt = conf.aatCreatedAt;
+        this.aatRefreshToken = conf.aatRefreshToken;
+
+        this.pat = conf.pat;
+        this.patExpiresIn = conf.patExpiresIn;
+        this.patCreatedAt = conf.patCreatedAt;
+        this.patRefreshToken = conf.patRefreshToken;
+    }
+
+    public String getAatRefreshToken() {
+        return aatRefreshToken;
+    }
+
+    public void setAatRefreshToken(String aatRefreshToken) {
+        this.aatRefreshToken = aatRefreshToken;
+    }
+
+    public String getPatRefreshToken() {
+        return patRefreshToken;
+    }
+
+    public void setPatRefreshToken(String patRefreshToken) {
+        this.patRefreshToken = patRefreshToken;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserSecret() {
+        return userSecret;
+    }
+
+    public void setUserSecret(String userSecret) {
+        this.userSecret = userSecret;
     }
 
     public String getAat() {
@@ -114,6 +177,46 @@ public class SiteConfiguration implements Serializable {
 
     public void setAat(String aat) {
         this.aat = aat;
+    }
+
+    public int getAatExpiresIn() {
+        return aatExpiresIn;
+    }
+
+    public void setAatExpiresIn(int aatExpiresIn) {
+        this.aatExpiresIn = aatExpiresIn;
+    }
+
+    public Date getAatCreatedAt() {
+        return aatCreatedAt;
+    }
+
+    public void setAatCreatedAt(Date aatCreatedAt) {
+        this.aatCreatedAt = aatCreatedAt;
+    }
+
+    public String getPat() {
+        return pat;
+    }
+
+    public void setPat(String pat) {
+        this.pat = pat;
+    }
+
+    public int getPatExpiresIn() {
+        return patExpiresIn;
+    }
+
+    public void setPatExpiresIn(int patExpiresIn) {
+        this.patExpiresIn = patExpiresIn;
+    }
+
+    public Date getPatCreatedAt() {
+        return patCreatedAt;
+    }
+
+    public void setPatCreatedAt(Date patCreatedAt) {
+        this.patCreatedAt = patCreatedAt;
     }
 
     public String getSectorIdentifierUri() {
@@ -320,6 +423,11 @@ public class SiteConfiguration implements Serializable {
         sb.append(", grantType=").append(grantType);
         sb.append(", contacts=").append(contacts);
         sb.append(", aat=").append(aat);
+        sb.append(", aatCreatedAt=").append(aatCreatedAt);
+        sb.append(", aatExpiresIn=").append(aatExpiresIn);
+        sb.append(", pat=").append(pat);
+        sb.append(", patCreatedAt=").append(patCreatedAt);
+        sb.append(", patExpiresIn=").append(patExpiresIn);
         sb.append('}');
         return sb.toString();
     }

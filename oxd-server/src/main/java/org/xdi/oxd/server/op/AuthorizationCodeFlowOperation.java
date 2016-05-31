@@ -41,7 +41,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation {
     public CommandResponse execute() {
         final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
 
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
             return okResponse(requestToken(discovery, params));
         }

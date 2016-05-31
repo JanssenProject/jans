@@ -39,7 +39,7 @@ public class CheckAccessTokenOperation extends BaseOperation {
 
         final CheckAccessTokenParams params = asParams(CheckAccessTokenParams.class);
 
-        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getDiscoveryUrl());
+        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();
 
