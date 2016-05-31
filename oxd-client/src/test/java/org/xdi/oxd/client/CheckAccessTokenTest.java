@@ -18,10 +18,10 @@ import java.io.IOException;
  */
 
 public class CheckAccessTokenTest {
-    @Parameters({"host", "port", "umaDiscoveryUrl", "redirectUrl",
+    @Parameters({"host", "port", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String umaDiscoveryUrl, String redirectUrl,
+    public void test(String host, int port, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {

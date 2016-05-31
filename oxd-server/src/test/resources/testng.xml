@@ -5,7 +5,6 @@
     <parameter name="host" value="localhost"/>
     <parameter name="port" value="8099"/>
     <parameter name="opHost" value="https://ce-dev.gluu.org"/>
-    <parameter name="umaDiscoveryUrl" value="https://ce-dev.gluu.org/.well-known/uma-configuration"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
     <parameter name="logoutUrl" value="https://client.example.com/logout"/>

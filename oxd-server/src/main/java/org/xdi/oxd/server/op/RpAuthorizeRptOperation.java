@@ -28,7 +28,6 @@ public class RpAuthorizeRptOperation extends BaseOperation {
 //        final RpAuthorizeRptParams params = asParams(RpAuthorizeRptParams.class);
 //        if (CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {
 //
-//            final String umaDiscoveryUrl = Utils.getUmaDiscoveryUrl(params.getAmHost());
 //            final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(umaDiscoveryUrl);
 //            if (umaDiscovery != null) {
 //                ClaimTokenList tokenList = new ClaimTokenList();
