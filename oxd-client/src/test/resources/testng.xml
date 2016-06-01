@@ -2,19 +2,17 @@
 
 <suite name="oxD Suite" parallel="tests">
 
-    <parameter name="opHost" value="https://ce-dev.gluu.org"/>
     <parameter name="host" value="localhost"/>
     <parameter name="port" value="8099"/>
+    <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="redirectUrl" value="https://client.example.com/cb"/>
-    <parameter name="logoutUrl" value="https://client.example.com/logout"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
-    <parameter name="userId" value="test_user"/>
-    <parameter name="userSecret" value="test_user_password"/>
-    <parameter name="clientId" value="@!C6D7.3F56.F820.3B0F!0001!2D38.B7FA!0008!FF81!2D39"/>
-    <parameter name="clientSecret" value="8wEJeXmovx0T"/>
-    <parameter name="rsHost" value="photoz.example.com"/>
-    <parameter name="request_url" value="http://example.com/object/1234"/>
-    <parameter name="request_http_method" value="DELETE"/>
+    <parameter name="logoutUrl" value="https://client.example.com/logout"/>
+    <parameter name="userId" value="${auth.user.uid}"/>
+    <parameter name="userSecret" value="${auth.user.password}"/>
+    <parameter name="clientId" value="${auth.client.id}"/>
+    <parameter name="clientSecret" value="${auth.client.secret}"/>
+    <parameter name="licenseServerEndpoint" value="https://${test.server.name}/license-server"/>
 
     <!-- Connect -->
     <test name="Register site" enabled="true">

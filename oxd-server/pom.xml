@@ -18,6 +18,21 @@
     <build>
         <finalName>oxd-server</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+        <filters>
+            <filter>${basedir}/test/test.properties</filter>
+        </filters>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -138,9 +153,9 @@
             <artifactId>jetty-webapp</artifactId>
         </dependency>
         <dependency>
-             <groupId>com.google.inject</groupId>
-             <artifactId>guice</artifactId>
-         </dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-guice</artifactId>
@@ -186,13 +201,14 @@
             <artifactId>oxUtil</artifactId>
         </dependency>
         <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk16</artifactId>
-            <version>1.46</version> <!-- Special version to be compatible with oxAuth client -->
+            <version>1.46</version>
+            <!-- Special version to be compatible with oxAuth client -->
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
