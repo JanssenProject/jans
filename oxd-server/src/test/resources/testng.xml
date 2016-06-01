@@ -64,7 +64,7 @@
     </test>
 
     <!-- UMA Tests -->
-    <test name="RP - Get RPT" enabled="true">
+    <test name="RP - Get RPT" enabled="false">
         <classes>
             <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
