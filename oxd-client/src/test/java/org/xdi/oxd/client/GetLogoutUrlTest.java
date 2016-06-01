@@ -9,6 +9,7 @@ import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertNotNull;
@@ -31,8 +32,6 @@ public class GetLogoutUrlTest {
             client = new CommandClient(host, port);
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, "");
-//
-//            GetTokensByCodeTest.tokenByCode(client, site, redirectUrl, userId, userSecret);
 
             final GetLogoutUrlParams commandParams = new GetLogoutUrlParams();
             commandParams.setOxdId(site.getOxdId());
@@ -45,7 +44,7 @@ public class GetLogoutUrlTest {
 
             final LogoutResponse resp = client.send(command).dataAsResponse(LogoutResponse.class);
             assertNotNull(resp);
-            assertTrue(resp.getUri().contains(postLogoutRedirectUrl));
+            assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
         } finally {
             CommandClient.closeQuietly(client);
         }
