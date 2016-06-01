@@ -1,5 +1,6 @@
 package org.xdi.oxd.client;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.*;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**
@@ -142,6 +143,7 @@ public class RegisterSiteTest {
 
         final RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
     }
 
