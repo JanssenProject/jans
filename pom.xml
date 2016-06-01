@@ -399,7 +399,7 @@
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
                         <suiteXmlFiles>
-                            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
                         </suiteXmlFiles>
                     </configuration>
                 </plugin>
