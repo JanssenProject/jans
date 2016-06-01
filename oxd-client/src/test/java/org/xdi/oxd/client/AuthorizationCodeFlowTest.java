@@ -6,6 +6,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.AuthorizationCodeFlowParams;
 import org.xdi.oxd.common.response.AuthorizationCodeFlowResponse;
+import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -20,16 +21,19 @@ import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 public class AuthorizationCodeFlowTest {
 
-    @Parameters({"host", "port", "redirectUrl",
+    @Parameters({"host", "port", "opHost", "redirectUrl",
             "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void test(String host, int port, String redirectUrl,
+    public void test(String host, int port, String opHost, String redirectUrl,
                      String clientId, String clientSecret, String userId, String userSecret) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
+            RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
             final AuthorizationCodeFlowParams commandParams = new AuthorizationCodeFlowParams();
+            commandParams.setOxdId(site.getOxdId());
             commandParams.setClientId(clientId);
             commandParams.setClientSecret(clientSecret);
             commandParams.setNonce(UUID.randomUUID().toString());
