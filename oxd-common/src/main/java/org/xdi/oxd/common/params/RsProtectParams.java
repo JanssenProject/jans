@@ -8,7 +8,7 @@ import org.xdi.oxd.rs.protect.RsResourceList;
  * @version 0.9, 31/05/2016
  */
 
-public class RsProtectParams implements IParams {
+public class RsProtectParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;

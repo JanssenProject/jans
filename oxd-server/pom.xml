@@ -141,6 +141,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>uma-rs-resteasy</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
         </dependency>

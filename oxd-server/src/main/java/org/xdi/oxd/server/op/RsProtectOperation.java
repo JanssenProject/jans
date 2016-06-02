@@ -7,7 +7,9 @@ import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RsProtectParams;
-import org.xdi.oxd.server.model.UmaToken;
+import org.xdi.oxd.rs.protect.resteasy.PatProvider;
+import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
+import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
 /**
@@ -27,28 +29,32 @@ public class RsProtectOperation extends BaseOperation {
     public CommandResponse execute() throws Exception {
         final RsProtectParams params = asParams(RsProtectParams.class);
 
+        validate(params);
+
         SiteConfiguration site = getSite(params.getOxdId());
         UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
 
-        final UmaToken pat = getUmaTokenService().getPat(params.getOxdId());
+        PatProvider patProvider = new PatProvider() {
+            @Override
+            public String getPatToken() {
+                return getUmaTokenService().getPat(params.getOxdId()).getToken();
+            }
 
+            @Override
+            public void clearPat() {
+                // do nothing
+            }
+        };
 
-//        final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-//                     final ResourceSetRegistrationService registrationService = UmaClientFactory.instance().createResourceSetRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
-//
-//                     final ResourceSet resourceSet = new ResourceSet();
-//                     resourceSet.setName(params.getName());
-//                     resourceSet.setScopes(params.getScopes());
-//
-//                     ResourceSetResponse addResponse = registrationService.addResourceSet("Bearer " + params.getPatToken(), resourceSet);
-//                     if (addResponse != null) {
-//                         final RegisterResourceOpResponse opResponse = new RegisterResourceOpResponse();
-//                         opResponse.setId(addResponse.getId());
-//                         return okResponse(opResponse);
-//                     } else {
-//                         LOG.error("No response on addResourceSet call from OP.");
-//                     }
+        ResourceRegistrar resourceRegistrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
+        resourceRegistrar.register(params.getResources().getResources());
+
         return null;
+    }
+
+    private void validate(RsProtectParams params) {
+
+
     }
 
 
