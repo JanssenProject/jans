@@ -22,13 +22,19 @@ public class SetUpTest {
         CoreUtils.createExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                removeExistingSiteConfigurations();
+
                 ServerLauncher.start();
-                ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllExistingConfigurations();
             }
         });
         // from one side we should give time to start server, from other we can't start in current
         // thread because it will block suite thread, ugly but works...
         CoreUtils.sleep(7);
+    }
+
+    private static void removeExistingSiteConfigurations() {
+        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
+        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllExistingConfigurations();
     }
 
     @AfterSuite
