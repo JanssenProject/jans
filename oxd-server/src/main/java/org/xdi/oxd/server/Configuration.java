@@ -28,7 +28,9 @@ public class Configuration {
     @JsonProperty(value = "localhost_only")
     private Boolean localhostOnly;
     @JsonProperty(value = "use_client_authentication_for_pat")
-    private Boolean useClientAuthenticationForPat;
+    private Boolean useClientAuthenticationForPat = true;
+    @JsonProperty(value = "use_client_authentication_for_aat")
+    private Boolean useClientAuthenticationForAat = true;
     @JsonProperty(value = "trust_all_certs")
     private Boolean trustAllCerts;
     @JsonProperty(value = "trust_store_path")
@@ -130,8 +132,16 @@ public class Configuration {
         return useClientAuthenticationForPat;
     }
 
-    public void setUseClientAuthenticationForPat(Boolean p_useClientAuthenticationForPat) {
-        useClientAuthenticationForPat = p_useClientAuthenticationForPat;
+    public void setUseClientAuthenticationForPat(Boolean useClientAuthenticationForPat) {
+        this.useClientAuthenticationForPat = useClientAuthenticationForPat;
+    }
+
+    public Boolean getUseClientAuthenticationForAat() {
+        return useClientAuthenticationForAat;
+    }
+
+    public void setUseClientAuthenticationForAat(Boolean useClientAuthenticationForAat) {
+        this.useClientAuthenticationForAat = useClientAuthenticationForAat;
     }
 
     public Boolean getLocalhostOnly() {
