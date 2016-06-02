@@ -19,6 +19,7 @@ import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.SiteConfiguration;
 import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.service.UmaTokenService;
 import org.xdi.oxd.server.service.ValidationService;
 
 /**
@@ -71,6 +72,10 @@ public abstract class BaseOperation implements IOperation {
 
     public DiscoveryService getDiscoveryService() {
         return injector.getInstance(DiscoveryService.class);
+    }
+
+    public UmaTokenService getUmaTokenService() {
+        return injector.getInstance(UmaTokenService.class);
     }
 
     public SiteConfigurationService getSiteService() {
