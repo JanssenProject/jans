@@ -64,7 +64,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(ConfigurationService.class).load();
             INJECTOR.getInstance(SiteConfigurationService.class).load();
             INJECTOR.getInstance(SocketService.class).listenSocket();
-            LOG.info("oxd server started successfully.");
+            LOG.info("oxD Server started successfully.");
         } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);
         }

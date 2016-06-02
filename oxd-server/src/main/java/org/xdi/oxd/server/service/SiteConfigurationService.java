@@ -43,6 +43,15 @@ public class SiteConfigurationService {
     @Inject
     ValidationService validationService;
 
+    public void removeAllExistingConfigurations() {
+        for (File file : siteFiles.values()) {
+            String path = file.getAbsolutePath();
+            if (file.delete()) {
+                LOG.debug("Removed site configuration file : " + path);
+            }
+        }
+    }
+
     public void load() {
 
         // load all files
