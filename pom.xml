@@ -73,7 +73,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.xdi</groupId>
-                <artifactId>uma-rs-core</artifactId>
+                <artifactId>uma-rs-resteasy</artifactId>
                 <version>2.4.4-SNAPSHOT</version>
             </dependency>
             <dependency>
