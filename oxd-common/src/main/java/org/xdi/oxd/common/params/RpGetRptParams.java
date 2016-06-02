@@ -10,7 +10,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 02/01/2014
  */
 
-public class RpGetRptParams implements IParams {
+public class RpGetRptParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;

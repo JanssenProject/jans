@@ -9,7 +9,7 @@ import java.util.List;
  * @version 0.9, 06/10/2015
  */
 
-public class GetAuthorizationCodeParams implements IParams {
+public class GetAuthorizationCodeParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;

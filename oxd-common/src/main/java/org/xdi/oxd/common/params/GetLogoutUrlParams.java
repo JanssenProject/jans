@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 17/11/2015
  */
 
-public class GetLogoutUrlParams implements IParams {
+public class GetLogoutUrlParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
