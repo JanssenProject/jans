@@ -51,6 +51,17 @@ public class GluuLdapConfiguration implements Serializable {
 	private boolean useAnonymousBind;
 	private boolean enabled;
 	private int version;
+	
+	@JsonProperty("level")
+    private int level;
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
 
 	public GluuLdapConfiguration() {
 		this.servers = new ArrayList<SimpleProperty>();
