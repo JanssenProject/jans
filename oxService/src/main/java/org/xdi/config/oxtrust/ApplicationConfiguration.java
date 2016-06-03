@@ -7,8 +7,6 @@
 import java.io.Serializable;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 
 /**
  * oxTrust configuration
@@ -136,6 +134,7 @@ public final class ApplicationConfiguration implements Serializable {
 	private String umaClientKeyId;
 	private String umaResourceId;
 	private String umaScope;
+	private String umaClientPrivateKeyPath;
 
 	private String cssLocation;
 	private String jsLocation;
@@ -768,6 +767,14 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setUmaScope(String umaScope) {
 		this.umaScope = umaScope;
+	}
+
+	public String getUmaClientPrivateKeyPath() {
+		return umaClientPrivateKeyPath;
+	}
+
+	public void setUmaClientPrivateKeyPath(String umaClientPrivateKeyPath) {
+		this.umaClientPrivateKeyPath = umaClientPrivateKeyPath;
 	}
 
 	public String getCssLocation() {
