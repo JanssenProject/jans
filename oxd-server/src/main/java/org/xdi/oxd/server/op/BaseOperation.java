@@ -41,8 +41,6 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     private final Class<T> parameterClass;
     private final T params;
 
-    private SiteConfiguration site;
-
     /**
      * Base constructor
      *
@@ -90,14 +88,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public SiteConfiguration getSite() {
-        if (site != null) {
-            return site;
-        }
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
-            site = getSiteService().getSite(hasOxdId.getOxdId());
-            return site;
+            return getSiteService().getSite(hasOxdId.getOxdId());
         }
         throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }
