@@ -39,7 +39,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
     @Override
     public CommandResponse execute(GetAuthorizationCodeParams params) {
-        final SiteConfiguration site = getSite(params.getOxdId());
+        final SiteConfiguration site = getSite();
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
                 site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), UUID.randomUUID().toString());

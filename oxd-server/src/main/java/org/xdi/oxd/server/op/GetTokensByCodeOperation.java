@@ -42,7 +42,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     @Override
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
 
-        final SiteConfiguration site = getSite(params.getOxdId());
+        final SiteConfiguration site = getSite();
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());

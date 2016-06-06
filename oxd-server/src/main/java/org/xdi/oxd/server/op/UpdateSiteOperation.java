@@ -40,7 +40,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     @Override
     public CommandResponse execute(UpdateSiteParams params) {
-        final SiteConfiguration site = getSite(params.getOxdId());
+        final SiteConfiguration site = getSite();
 
         LOG.info("Updating site configuration ...");
         persistSiteConfiguration(site, params);
