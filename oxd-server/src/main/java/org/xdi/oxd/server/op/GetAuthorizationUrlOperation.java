@@ -30,7 +30,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     @Override
     public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
-        final SiteConfiguration site = getSite(params.getOxdId());
+        final SiteConfiguration site = getSite();
 
         String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getIssuer() + "/oxauth/authorize";
 

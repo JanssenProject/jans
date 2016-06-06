@@ -29,7 +29,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     public CommandResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
-        SiteConfiguration site = getSite(params.getOxdId());
+        SiteConfiguration site = getSite();
         UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
 
         PatProvider patProvider = new PatProvider() {

@@ -32,8 +32,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
-
-            final SiteConfiguration site = getSite(params.getOxdId());
+            final SiteConfiguration site = getSite();
 
             String uri = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint() +
                     "?id_token_hint=" + getIdToken(params, site);

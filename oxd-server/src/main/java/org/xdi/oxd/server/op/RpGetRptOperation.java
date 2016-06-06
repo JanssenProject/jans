@@ -33,7 +33,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
     @Override
     public CommandResponse execute(RpGetRptParams params) {
 
-        SiteConfiguration site = getSite(params.getOxdId());
+        SiteConfiguration site = getSite();
         UmaConfiguration discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
 
         final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery, getHttpService().getClientExecutor());

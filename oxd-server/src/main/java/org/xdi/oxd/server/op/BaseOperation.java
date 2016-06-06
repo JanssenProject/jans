@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
-import org.xdi.oxd.server.Configuration;
-import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.Convertor;
 import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.SiteConfiguration;
@@ -37,6 +39,9 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     private final Command command;
     private final Injector injector;
     private final Class<T> parameterClass;
+    private final T params;
+
+    private SiteConfiguration site;
 
     /**
      * Base constructor
@@ -47,11 +52,16 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         this.injector = injector;
         this.command = command;
         this.parameterClass = parameterClass;
+        this.params = Convertor.asParams(parameterClass, command);
     }
 
     @Override
     public Class<T> getParameterClass() {
         return parameterClass;
+    }
+
+    public T getParams() {
+        return params;
     }
 
     /**
@@ -61,10 +71,6 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
      */
     public Injector getInjector() {
         return injector;
-    }
-
-    public Configuration getConfiguration() {
-        return injector.getInstance(ConfigurationService.class).getConfiguration();
     }
 
     public HttpService getHttpService() {
@@ -83,8 +89,17 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInjector().getInstance(SiteConfigurationService.class);
     }
 
-    public SiteConfiguration getSite(String oxdId) {
-        return getSiteService().getSite(oxdId);
+    public SiteConfiguration getSite() {
+        if (site != null) {
+            return site;
+        }
+        if (params instanceof HasOxdIdParams) {
+            getValidationService().validate((HasOxdIdParams) params);
+            HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
+            site = getSiteService().getSite(hasOxdId.getOxdId());
+            return site;
+        }
+        throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }
 
     public ValidationService getValidationService() {
