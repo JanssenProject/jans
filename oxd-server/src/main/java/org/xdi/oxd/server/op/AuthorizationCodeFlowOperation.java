@@ -33,8 +33,8 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationCodeFlowOperation.class);
 
-    protected AuthorizationCodeFlowOperation(Command p_command, final Injector injector) {
-        super(p_command, injector, AuthorizationCodeFlowParams.class);
+    protected AuthorizationCodeFlowOperation(Command command, final Injector injector) {
+        super(command, injector, AuthorizationCodeFlowParams.class);
     }
 
     @Override

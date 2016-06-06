@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.server.license.LicenseService;
@@ -95,7 +94,7 @@ public class Processor {
             try {
                 final IOperation<IParams> operation = (IOperation<IParams>) OperationFactory.create(command, ServerLauncher.getInjector());
                 if (operation != null) {
-                    IParams iParams = asParams(operation.getParameterClass(), command);
+                    IParams iParams = Convertor.asParams(operation.getParameterClass(), command);
                     validationService.validate(iParams);
 
                     CommandResponse operationResponse = operation.execute(iParams);
@@ -117,28 +116,4 @@ public class Processor {
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    /**
-     * Returns parameter object based on string representation.
-     *
-     * @param clazz parameter class
-     * @param <T>     parameter calss
-     * @return parameter object based on string representation
-     */
-    public <T extends IParams> T asParams(Class<T> clazz, Command command) {
-        final String paramsAsString = command.paramsAsString();
-        try {
-            T params = CoreUtils.createJsonMapper().readValue(paramsAsString, clazz);
-            if (params == null) {
-                throw new ErrorResponseException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
-            }
-            LOG.trace("Params: {}", params);
-            return params;
-        } catch (ErrorResponseException e) {
-            throw e;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        LOG.error("Unable to parse string to params, string: {}", paramsAsString);
-        throw new ErrorResponseException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
-    }
 }
