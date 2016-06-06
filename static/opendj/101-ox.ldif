@@ -1490,6 +1490,12 @@ attributeTypes: ( oxDeviceData-oid NAME 'oxDeviceData'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( oxEnrollmentCode-oid NAME 'oxEnrollmentCode'
+  DESC 'oxEnrollmentCode'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxProxyClientId-oid NAME 'oxProxyClientId'
   DESC 'oxProx client id'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2158,7 +2164,7 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
   $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture
   $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified
   $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion
-  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin )
+  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuGroup-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
