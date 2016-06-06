@@ -73,7 +73,7 @@
     <dependencies>
         <dependency>
             <groupId>org.xdi</groupId>
-            <artifactId>uma-rs-core</artifactId>
+            <artifactId>uma-rs-resteasy</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
