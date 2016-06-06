@@ -10,7 +10,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.Processor;
 import org.xdi.oxd.server.ServerLauncher;
-import org.xdi.oxd.server.license.LicenseService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -33,7 +32,7 @@ public class CommandServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        processor = new Processor(ServerLauncher.getInjector().getInstance(LicenseService.class));
+        processor = ServerLauncher.getInjector().getInstance(Processor.class);
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
