@@ -29,18 +29,16 @@ import java.util.UUID;
  * @version 0.9, 19/06/2015
  */
 
-public class AuthorizationCodeFlowOperation extends BaseOperation {
+public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationCodeFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationCodeFlowOperation.class);
 
     protected AuthorizationCodeFlowOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+        super(p_command, injector, AuthorizationCodeFlowParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-        final AuthorizationCodeFlowParams params = asParams(AuthorizationCodeFlowParams.class);
-
+    public CommandResponse execute(AuthorizationCodeFlowParams params) {
         final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
             return okResponse(requestToken(discovery, params));

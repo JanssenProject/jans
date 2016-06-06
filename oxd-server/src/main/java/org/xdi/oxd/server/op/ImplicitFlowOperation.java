@@ -26,18 +26,16 @@ import java.util.UUID;
  * @version 0.9, 23/06/2015
  */
 
-public class ImplicitFlowOperation extends BaseOperation {
+public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImplicitFlowOperation.class);
 
     protected ImplicitFlowOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+        super(p_command, injector, ImplicitFlowParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-        final ImplicitFlowParams params = asParams(ImplicitFlowParams.class);
-
+    public CommandResponse execute(ImplicitFlowParams params) {
         final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         if (discovery != null) {
             return okResponse(requestToken(discovery, params));

@@ -26,19 +26,16 @@ import java.util.Date;
  * @version 0.9, 23/10/2013
  */
 
-public class CheckAccessTokenOperation extends BaseOperation {
+public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckAccessTokenOperation.class);
 
-    protected CheckAccessTokenOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected CheckAccessTokenOperation(Command command, final Injector injector) {
+        super(command, injector, CheckAccessTokenParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
-
-        final CheckAccessTokenParams params = asParams(CheckAccessTokenParams.class);
-
+    public CommandResponse execute(CheckAccessTokenParams params) throws Exception {
         final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();

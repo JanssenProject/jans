@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.params.IParams;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,7 +21,7 @@ public class OperationFactory {
     private OperationFactory() {
     }
 
-    public static IOperation create(Command command, final Injector injector) {
+    public static IOperation<? extends IParams> create(Command command, final Injector injector) {
         if (command != null && command.getCommandType() != null) {
             switch (command.getCommandType()) {
                 case AUTHORIZATION_CODE_FLOW:

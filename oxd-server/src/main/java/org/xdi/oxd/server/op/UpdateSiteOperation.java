@@ -25,22 +25,21 @@ import java.util.List;
  * @version 0.9, 11/03/2016
  */
 
-public class UpdateSiteOperation extends BaseOperation {
+public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 
     /**
      * Base constructor
      *
-     * @param p_command command
+     * @param command command
      */
-    protected UpdateSiteOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected UpdateSiteOperation(Command command, final Injector injector) {
+        super(command, injector, UpdateSiteParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-        final UpdateSiteParams params = asParams(UpdateSiteParams.class);
+    public CommandResponse execute(UpdateSiteParams params) {
         final SiteConfiguration site = getSite(params.getOxdId());
 
         LOG.info("Updating site configuration ...");

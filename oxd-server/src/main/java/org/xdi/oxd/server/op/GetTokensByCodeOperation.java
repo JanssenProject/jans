@@ -26,23 +26,22 @@ import java.util.Map;
  * @version 0.9, 22/09/2015
  */
 
-public class GetTokensByCodeOperation extends BaseOperation {
+public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetTokensByCodeOperation.class);
 
     /**
      * Base constructor
      *
-     * @param p_command command
+     * @param command command
      */
-    protected GetTokensByCodeOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected GetTokensByCodeOperation(Command command, final Injector injector) {
+        super(command, injector, GetTokensByCodeParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
+    public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
 
-        final GetTokensByCodeParams params = asParams(GetTokensByCodeParams.class);
         final SiteConfiguration site = getSite(params.getOxdId());
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);

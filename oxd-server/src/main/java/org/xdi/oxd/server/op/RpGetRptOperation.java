@@ -22,18 +22,16 @@ import org.xdi.oxd.server.service.SiteConfiguration;
  * @version 0.9, 02/01/2014
  */
 
-public class RpGetRptOperation extends BaseOperation {
+public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
 
-    protected RpGetRptOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected RpGetRptOperation(Command command, final Injector injector) {
+        super(command, injector, RpGetRptParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-
-        final RpGetRptParams params = asParams(RpGetRptParams.class);
+    public CommandResponse execute(RpGetRptParams params) {
 
         SiteConfiguration site = getSite(params.getOxdId());
         UmaConfiguration discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
