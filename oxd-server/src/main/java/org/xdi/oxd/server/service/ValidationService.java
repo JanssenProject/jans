@@ -27,10 +27,16 @@ public class ValidationService {
         }
     }
 
-
     public void notBlankOpHost(String opHost) {
         if (Strings.isNullOrEmpty(opHost)) {
             throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
+        }
+    }
+
+    public void validate(IParams params) {
+        notNull(params);
+        if (params instanceof HasOxdIdParams) {
+            validate((HasOxdIdParams) params);
         }
     }
 

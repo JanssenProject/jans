@@ -24,7 +24,7 @@ import java.util.UUID;
  * @version 0.9, 06/10/2015
  */
 
-public class GetAuthorizationCodeOperation extends BaseOperation {
+public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizationCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationCodeOperation.class);
 
@@ -34,13 +34,11 @@ public class GetAuthorizationCodeOperation extends BaseOperation {
      * @param p_command command
      */
     protected GetAuthorizationCodeOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+        super(p_command, injector, GetAuthorizationCodeParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-
-        final GetAuthorizationCodeParams params = asParams(GetAuthorizationCodeParams.class);
+    public CommandResponse execute(GetAuthorizationCodeParams params) {
         final SiteConfiguration site = getSite(params.getOxdId());
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),

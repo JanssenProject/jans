@@ -8,22 +8,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.params.RpAuthorizeRptParams;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 02/01/2014
  */
 
-public class RpAuthorizeRptOperation extends BaseOperation {
+public class RpAuthorizeRptOperation extends BaseOperation<RpAuthorizeRptParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpAuthorizeRptOperation.class);
 
-    protected RpAuthorizeRptOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected RpAuthorizeRptOperation(Command command, final Injector injector) {
+        super(command, injector, RpAuthorizeRptParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
+    public CommandResponse execute(RpAuthorizeRptParams params) {
 
 //        final RpAuthorizeRptParams params = asParams(RpAuthorizeRptParams.class);
 //        if (CoreUtils.allNotBlank(params.getRptToken(), params.getTicket(), params.getAatToken())) {

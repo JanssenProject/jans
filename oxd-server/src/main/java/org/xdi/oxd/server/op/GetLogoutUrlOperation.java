@@ -17,7 +17,7 @@ import java.net.URLEncoder;
  * @version 0.9, 17/11/2015
  */
 
-public class GetLogoutUrlOperation extends BaseOperation {
+public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
@@ -27,13 +27,12 @@ public class GetLogoutUrlOperation extends BaseOperation {
      * @param command command
      */
     protected GetLogoutUrlOperation(Command command, final Injector injector) {
-        super(command, injector);
+        super(command, injector, GetLogoutUrlParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
+    public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
 
-            final GetLogoutUrlParams params = asParams(GetLogoutUrlParams.class);
             final SiteConfiguration site = getSite(params.getOxdId());
 
             String uri = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint() +

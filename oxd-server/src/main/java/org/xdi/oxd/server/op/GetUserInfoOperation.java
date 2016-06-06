@@ -13,7 +13,7 @@ import org.xdi.oxd.common.response.GetUserInfoResponse;
  * @version 0.9, 22/09/2015
  */
 
-public class GetUserInfoOperation extends BaseOperation {
+public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
 //    private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
 
@@ -23,12 +23,11 @@ public class GetUserInfoOperation extends BaseOperation {
      * @param command command
      */
     protected GetUserInfoOperation(Command command, final Injector injector) {
-        super(command, injector);
+        super(command, injector, GetUserInfoParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
-        final GetUserInfoParams params = asParams(GetUserInfoParams.class);
+    public CommandResponse execute(GetUserInfoParams params) {
         getValidationService().validate(params);
 
         UserInfoClient client = new UserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId()).getUserInfoEndpoint());
