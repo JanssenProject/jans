@@ -10,7 +10,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.Processor;
 import org.xdi.oxd.server.ServerLauncher;
-import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.web.CommandService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +37,7 @@ public class CommandWS {
     private final Processor processor;
 
     public CommandWS() {
-        processor = new Processor(ServerLauncher.getInjector().getInstance(LicenseService.class));
+        processor = ServerLauncher.getInjector().getInstance(Processor.class);
     }
 
     @GET
