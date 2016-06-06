@@ -1,7 +1,9 @@
 package org.xdi.oxd.server.service;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.xdi.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -90,6 +92,8 @@ public class SiteConfiguration implements Serializable {
     private Date patCreatedAt;
     @JsonProperty(value = "pat_refresh_token")
     private String patRefreshToken;
+    @JsonProperty(value = "uma_protected_resources")
+    private List<UmaResource> umaProtectedResources = Lists.newArrayList();
 
     public SiteConfiguration() {
     }
@@ -137,6 +141,8 @@ public class SiteConfiguration implements Serializable {
         this.patExpiresIn = conf.patExpiresIn;
         this.patCreatedAt = conf.patCreatedAt;
         this.patRefreshToken = conf.patRefreshToken;
+
+        this.umaProtectedResources = conf.umaProtectedResources;
     }
 
     public String getAatRefreshToken() {
@@ -403,6 +409,17 @@ public class SiteConfiguration implements Serializable {
         this.uiLocales = uiLocales;
     }
 
+    public List<UmaResource> getUmaProtectedResources() {
+        if (umaProtectedResources == null) {
+            umaProtectedResources = Lists.newArrayList();
+        }
+        return umaProtectedResources;
+    }
+
+    public void setUmaProtectedResources(List<UmaResource> umaProtectedResources) {
+        this.umaProtectedResources = umaProtectedResources;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -428,6 +445,7 @@ public class SiteConfiguration implements Serializable {
         sb.append(", pat=").append(pat);
         sb.append(", patCreatedAt=").append(patCreatedAt);
         sb.append(", patExpiresIn=").append(patExpiresIn);
+        sb.append(", umaProtectedResources=").append(umaProtectedResources);
         sb.append('}');
         return sb.toString();
     }

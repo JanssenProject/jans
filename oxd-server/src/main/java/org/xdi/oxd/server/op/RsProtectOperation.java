@@ -6,11 +6,19 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsProtectParams;
+import org.xdi.oxd.rs.protect.RsResource;
+import org.xdi.oxd.rs.protect.resteasy.Key;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
+import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.SiteConfiguration;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,14 +52,34 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         };
 
-        ResourceRegistrar resourceRegistrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
-        resourceRegistrar.register(params.getResources().getResources());
+        ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
+        registrar.register(params.getResources().getResources());
+
+        persist(registrar, site);
+
 
         return null;
     }
 
-    private void validate(RsProtectParams params) {
+    private void persist(ResourceRegistrar registrar, SiteConfiguration site) throws IOException {
+        Map<Key,RsResource> resourceMapCopy = registrar.getResourceMapCopy();
 
+        for (Map.Entry<Key, String> entry : registrar.getIdMapCopy().entrySet()) {
+            UmaResource resource = new UmaResource();
+            resource.setId(entry.getValue());
+            resource.setResource(resourceMapCopy.get(entry.getKey()));
+
+            site.getUmaProtectedResources().add(resource);
+        }
+
+        getSiteService().update(site);
+    }
+
+    private void validate(RsProtectParams params) {
+        if (params.getResources() == null || params.getResources().getResources() == null ||
+                params.getResources().getResources().isEmpty()) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+        }
 
     }
 
