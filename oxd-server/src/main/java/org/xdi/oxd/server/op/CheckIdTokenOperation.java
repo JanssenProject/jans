@@ -34,19 +34,16 @@ import java.util.Date;
  * @version 0.9, 18/10/2013
  */
 
-public class CheckIdTokenOperation extends BaseOperation {
+public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckIdTokenOperation.class);
 
     protected CheckIdTokenOperation(Command command, final Injector injector) {
-        super(command, injector);
+        super(command, injector, CheckIdTokenParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
-
-        final CheckIdTokenParams params = asParams(CheckIdTokenParams.class);
-        getValidationService().validate(params);
+    public CommandResponse execute(CheckIdTokenParams params) throws Exception {
 
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 

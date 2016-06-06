@@ -17,18 +17,16 @@ import org.xdi.oxd.server.service.SiteConfiguration;
  * @version 0.9, 31/05/2016
  */
 
-public class RsProtectOperation extends BaseOperation {
+public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsProtectOperation.class);
 
     protected RsProtectOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+        super(p_command, injector, RsProtectParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
-        final RsProtectParams params = asParams(RsProtectParams.class);
-
+    public CommandResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
         SiteConfiguration site = getSite(params.getOxdId());

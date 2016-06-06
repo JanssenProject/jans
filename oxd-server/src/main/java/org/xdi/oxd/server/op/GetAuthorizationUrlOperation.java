@@ -15,22 +15,21 @@ import java.util.List;
  * @version 0.9, 22/09/2015
  */
 
-public class GetAuthorizationUrlOperation extends BaseOperation {
+public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorizationUrlParams> {
 
 //    private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
 
     /**
      * Base constructor
      *
-     * @param p_command command
+     * @param command command
      */
-    protected GetAuthorizationUrlOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected GetAuthorizationUrlOperation(Command command, final Injector injector) {
+        super(command, injector, GetAuthorizationUrlParams.class);
     }
 
     @Override
-    public CommandResponse execute() throws Exception {
-        final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
+    public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
         final SiteConfiguration site = getSite(params.getOxdId());
 
         String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getIssuer() + "/oxauth/authorize";
@@ -42,14 +41,13 @@ public class GetAuthorizationUrlOperation extends BaseOperation {
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
         authorizationEndpoint += "&state=" + state();
         authorizationEndpoint += "&nonce=" + nonce();
-        authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site));
+        authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
 
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
     }
 
-    private List<String> acrValues(SiteConfiguration site) {
-        final GetAuthorizationUrlParams params = asParams(GetAuthorizationUrlParams.class);
+    private List<String> acrValues(SiteConfiguration site, GetAuthorizationUrlParams params) {
         return params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
     }
 

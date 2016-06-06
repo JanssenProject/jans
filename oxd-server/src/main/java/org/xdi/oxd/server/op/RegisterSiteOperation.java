@@ -31,7 +31,7 @@ import java.util.UUID;
  * @version 0.9, 24/09/2015
  */
 
-public class RegisterSiteOperation extends BaseOperation {
+public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
@@ -40,19 +40,19 @@ public class RegisterSiteOperation extends BaseOperation {
     /**
      * Base constructor
      *
-     * @param p_command command
+     * @param command command
      */
-    protected RegisterSiteOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected RegisterSiteOperation(Command command, final Injector injector) {
+        super(command, injector, RegisterSiteParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
+    public CommandResponse execute(RegisterSiteParams params) {
         try {
             String siteId = UUID.randomUUID().toString();
 
             LOG.info("Creating site configuration ...");
-            persistSiteConfiguration(siteId);
+            persistSiteConfiguration(siteId, params);
 
             LOG.info("Site configuration created: " + siteConfiguration);
 
@@ -65,14 +65,13 @@ public class RegisterSiteOperation extends BaseOperation {
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    private void persistSiteConfiguration(String siteId) {
-        final RegisterSiteParams params = asParams(RegisterSiteParams.class);
+    private void persistSiteConfiguration(String siteId, RegisterSiteParams params) {
 
         try {
             siteConfiguration = createSiteConfiguration(siteId, params);
 
-            if (!hasClient()) {
-                final RegisterResponse registerResponse = registerClient(params.getOpHost());
+            if (!hasClient(params)) {
+                final RegisterResponse registerResponse = registerClient(params);
                 siteConfiguration.setClientId(registerResponse.getClientId());
                 siteConfiguration.setClientSecret(registerResponse.getClientSecret());
                 siteConfiguration.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
@@ -88,14 +87,13 @@ public class RegisterSiteOperation extends BaseOperation {
         }
     }
 
-    private boolean hasClient() {
-        final RegisterSiteParams params = asParams(RegisterSiteParams.class);
+    private boolean hasClient(RegisterSiteParams params) {
         return !Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret());
     }
 
-    private RegisterResponse registerClient(String opHost) {
-        final RegisterClient registerClient = new RegisterClient(getDiscoveryService().getConnectDiscoveryResponse(opHost).getRegistrationEndpoint());
-        registerClient.setRequest(createRegisterClientRequest());
+    private RegisterResponse registerClient(RegisterSiteParams params) {
+        final RegisterClient registerClient = new RegisterClient(getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getRegistrationEndpoint());
+        registerClient.setRequest(createRegisterClientRequest(params));
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
@@ -115,8 +113,7 @@ public class RegisterSiteOperation extends BaseOperation {
         throw new RuntimeException("Failed to register client for site. Details:" + response.getEntity());
     }
 
-    private RegisterRequest createRegisterClientRequest() {
-        final RegisterSiteParams params = asParams(RegisterSiteParams.class);
+    private RegisterRequest createRegisterClientRequest(RegisterSiteParams params) {
         final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
 
         ApplicationType applicationType = null;

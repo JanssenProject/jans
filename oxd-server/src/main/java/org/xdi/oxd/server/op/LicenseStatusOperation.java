@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.params.EmptyParams;
 import org.xdi.oxd.common.response.LicenseStatusOpResponse;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.server.license.LicenseService;
@@ -17,16 +18,16 @@ import org.xdi.oxd.server.license.LicenseService;
  * @version 0.9, 22/11/2014
  */
 
-public class LicenseStatusOperation extends BaseOperation {
+public class LicenseStatusOperation extends BaseOperation<EmptyParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseStatusOperation.class);
 
-    protected LicenseStatusOperation(Command p_command, final Injector injector) {
-        super(p_command, injector);
+    protected LicenseStatusOperation(Command command, final Injector injector) {
+        super(command, injector, EmptyParams.class);
     }
 
     @Override
-    public CommandResponse execute() {
+    public CommandResponse execute(EmptyParams params) {
         try {
             final LicenseService licenseService = getInjector().getInstance(LicenseService.class);
             final LicenseStatusOpResponse opResponse = new LicenseStatusOpResponse();
