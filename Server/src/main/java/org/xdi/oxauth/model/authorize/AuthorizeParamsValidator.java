@@ -48,15 +48,11 @@ public class AuthorizeParamsValidator {
         boolean validParams = responseType != null && !responseType.isEmpty()
                 && clientId != null && !clientId.isEmpty();
 
-        return validParams && validatePrompt(prompts);
+        return validParams && noNonePrompt(prompts);
     }
 
-    public static boolean validatePrompt(List<Prompt> prompts) {
-        if (prompts.contains(Prompt.NONE) && prompts.size() > 1) {
-            return false;
-        }
-
-        return true;
+    public static boolean noNonePrompt(List<Prompt> prompts) {
+        return !(prompts.contains(Prompt.NONE) && prompts.size() > 1);
     }
 
     public static boolean validateResponseTypes(List<ResponseType> responseTypes, Client client) {
