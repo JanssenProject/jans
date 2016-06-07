@@ -74,7 +74,7 @@ public class U2fRegistrationWS {
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState, @QueryParam("enrollment_code") String enrollmentCode) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
+			log.debug("Startig registration with username '{0}' for appId '{1}'. session_state '{2}', enrollment_code '{3}'", userName, appId, sessionState, enrollmentCode);
 
 			String userInum = null;
 
@@ -104,7 +104,7 @@ public class U2fRegistrationWS {
 				
 				if (removeEnrollment) {
 					// We allow to use enrollment code only one time
-					user.removeAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
+					user.setAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, (String) null);
 					userService.updateUser(user);
 				}
 			}
