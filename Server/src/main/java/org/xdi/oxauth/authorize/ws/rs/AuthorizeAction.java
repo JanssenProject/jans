@@ -641,11 +641,6 @@ public class AuthorizeAction {
 
             final Client client = clientService.getClient(clientId);
 
-            if (client.getPersistClientAuthorizations() && !client.getTrustedClient()) { // oxTrust #206 : make client trusted=true after first authorization
-                client.setTrustedClient(true);
-                clientService.merge(client);
-            }
-
             final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
             clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
