@@ -51,6 +51,8 @@ class Setup(object):
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxShibboleth/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.idp3_dist = 'http://shibboleth.net/downloads/identity-provider/3.2.1/shibboleth-identity-provider-3.2.1.tar.gz'
         self.asimba_war = "http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war" % (self.oxVersion, self.oxVersion)
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
@@ -103,6 +105,15 @@ class Setup(object):
         self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
         self.idpWarFolder = "/opt/idp/war"
         self.idpSPFolder = "/opt/idp/sp"
+        
+        self.idp3Folder = "/opt/shibboleth-idp"
+        self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
+        self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
+        self.idp3LibFolder = "/opt/shibboleth-idp/lib"
+        self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
+        self.idp3SslFolder = "/opt/shibboleth-idp/credentials"
+        self.idp3TempMetadataFolder = "/opt/shibboleth-idp/temp_metadata"
+        self.idp3WarFolder = "/opt/shibboleth-idp/war"
 
         self.hostname = None
         self.ip = None
@@ -334,7 +345,7 @@ class Setup(object):
                 + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
                 + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
                 + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
-                + 'Install Shibboleth 2 SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
+                + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                 + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
                 + 'Install CAS'.ljust(30) + repr(self.installCas).rjust(35) + "\n" \
                 + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
@@ -361,12 +372,14 @@ class Setup(object):
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
         realIdpFolder = os.path.realpath(self.idpFolder)
+        realIdp3Folder = os.path.realpath(self.idp3Folder)
 
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
+        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdp3Folder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
@@ -618,6 +631,9 @@ class Setup(object):
 
             self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
+            
+            self.copyTree("%s/static/shibboleth-idp/conf/" % self.install_dir, self.idp3ConfFolder)
+            self.copyFile("%s/static/shibboleth-idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
 
         if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
@@ -702,8 +718,12 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
             print "Downloading oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
-            print "Downloading Shibboleth IDP war file..."
+            print "Downloading Shibboleth 2 IDP war file..."
             self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
+            print "Downloading Shibboleth 3 IDP war file..."
+            self.run(['/usr/bin/wget', self.idp3_war, '-O', '%s/idp.war' % self.idp3WarFolder])
+            print "Downloading Shibboleth 3 IDP binary distributive file..."
+            self.run(['/usr/bin/wget', self.idp3_dist, '-O', '%s/shibboleth-identity-provider.tar.gz' % self.idp3WarFolder])
             print "Downloading CAS war file..."
             self.run(['/usr/bin/wget', self.cas_war, '-O', '%s/oxcas.war' % self.distFolder])
 
@@ -1200,23 +1220,35 @@ class Setup(object):
             # Put files to /opt/idp
             idpWar = "idp.war"
             distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
+            
+            idp3War = "idp.war"
+            distIdp3Path = '%s/%s' % (self.idp3WarFolder, idp3War)
 
             tmpIdpDir = '%s/tmp_idp' % self.distFolder
+            tmpIdp3Dir = '%s/tmp_idp3' % self.distFolder
 
             self.logIt("Unpacking %s..." % idpWar)
             self.removeDirs(tmpIdpDir)
             self.createDirs(tmpIdpDir)
+            
+            self.removeDirs(tmpIdp3Dir)
+            self.createDirs(tmpIdp3Dir)
 
-            self.run([self.jarCommand,
-                      'xf',
-                      distIdpPath], tmpIdpDir)
+            self.run([self.jarCommand,'xf',distIdpPath], tmpIdpDir)
+            self.run([self.jarCommand,'xf',distIdp3Path], tmpIdp3Dir)
 
             self.logIt("Copying files to %s..." % self.idpLibFolder)
             self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
 
+            self.logIt("Copying files to %s..." % self.idp3LibFolder)
+            #self.copyTree('%s/WEB-INF/lib' % tmp3IdpDir, self.idp3LibFolder)
+            #self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idp3LibFolder)
+            #self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idp3LibFolder)
+
             self.removeDirs(tmpIdpDir)
+            self.removeDirs(tmpIdp3Dir)
 
     def install_asimba_war(self):
         if self.installAsimba:
@@ -1409,6 +1441,15 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idpWarFolder])
                 self.run([mkdir, '-p', self.idpSPFolder])
                 self.run([chown, '-R', 'tomcat:tomcat', self.idpFolder])
+                self.run([mkdir, '-p', self.idp3Folder])
+                self.run([mkdir, '-p', self.idp3MetadataFolder])
+                self.run([mkdir, '-p', self.idp3LogsFolder])
+                self.run([mkdir, '-p', self.idp3LibFolder])
+                self.run([mkdir, '-p', self.idp3ConfFolder])
+                self.run([mkdir, '-p', self.idp3SslFolder])
+                self.run([mkdir, '-p', self.idp3TempMetadataFolder])
+                self.run([mkdir, '-p', self.idp3WarFolder])
+                self.run([chown, '-R', 'tomcat:tomcat', self.idp3Folder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1492,7 +1533,7 @@ class Setup(object):
         else:
             self.installHttpd = False
 
-        promptForShibIDP = self.getPrompt("Install Shibboleth 2 SAML IDP?", "No")[0].lower()
+        promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
             self.installSaml = True
         else:
