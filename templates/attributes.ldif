@@ -1056,3 +1056,18 @@ gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: inactive
 urn: oid:1.3.6.1.4.1.5923.1.1.1.11
+
+dn: inum=%(inumOrg)s!0005!5039,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+inum: %(inumOrg)s!0005!5039
+displayName: Enrollment code
+gluuAttributeOrigin: gluuPerson
+gluuAttributeName: oxEnrollmentCode
+description: oxEnrollmentCode
+gluuAttributeViewType: admin
+gluuAttributeEditType: admin
+gluuAttributeType: string
+gluuStatus: active
+urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
+description: Enrollment code, non-reassignable code
