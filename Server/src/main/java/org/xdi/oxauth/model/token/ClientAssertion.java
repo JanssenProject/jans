@@ -42,10 +42,10 @@ public class ClientAssertion {
             if (!load(clientId, clientAssertionType, encodedAssertion)) {
                 throw new InvalidJwtException("Cannot load the JWT");
             }
-        } catch (StringEncrypter.EncryptionException e) {
-            throw new InvalidJwtException(e.getMessage(), e);
-        } catch (Exception e) {
-            throw new InvalidJwtException("Cannot verify the JWT");
+        } catch (StringEncrypter.EncryptionException ex) {
+            throw new InvalidJwtException(exs.getMessage(), ex);
+        } catch (Exception ex) {
+            throw new InvalidJwtException("Cannot verify the JWT", ex);
         }
     }
 
