@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# chkconfig: 2345 20 80
+# chkconfig: 2345 97 80
 # description: tomcat 
 #
 # Copyright (c) 1999, 2010 Tanuki Software, Ltd.
