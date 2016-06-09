@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.crypto;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.*;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
@@ -137,8 +138,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             case RS384:
             case RS512:
                 RSAPublicKey rsaPublicKey = new RSAPublicKey(
-                        new BigInteger(1, JwtUtil.base64urldecode(jwks.getString(MODULUS))),
-                        new BigInteger(1, JwtUtil.base64urldecode(jwks.getString(EXPONENT)))
+                        new BigInteger(1, JwtUtil.base64urldecode(getJWKSValue(jwks, MODULUS))),
+                        new BigInteger(1, JwtUtil.base64urldecode(getJWKSValue(jwks, EXPONENT)))
                 );
                 signer = new RSASigner(signatureAlgorithm, rsaPublicKey);
                 break;
@@ -146,8 +147,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             case ES384:
             case ES512:
                 ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm,
-                        new BigInteger(1, JwtUtil.base64urldecode(jwks.getString(X))),
-                        new BigInteger(1, JwtUtil.base64urldecode(jwks.getString(Y))));
+                        new BigInteger(1, JwtUtil.base64urldecode(getJWKSValue(jwks, X))),
+                        new BigInteger(1, JwtUtil.base64urldecode(getJWKSValue(jwks, Y))));
                 signer = new ECSigner(signatureAlgorithm, ecdsaPublicKey);
                 break;
             default:
@@ -156,6 +157,15 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         return signer.verifySignature(signingInput, signature);
     }
+
+	private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
+		try {
+			return jwks.getString(node);
+		} catch (Exception ex) {
+			JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
+			return publicKey.getString(node);
+		}
+	}
 
     @Override
     public boolean deleteKey(String alias) throws Exception {
