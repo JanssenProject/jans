@@ -5,8 +5,10 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.Jackson;
 import org.xdi.oxd.rs.protect.RsResourceList;
@@ -24,7 +26,7 @@ public class RsProtectTest {
 
     @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtect"})
     @Test
-    public void test(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
+    public void protect(String host, int port, String redirectUrl, String opHost, String rsProtect) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
@@ -40,9 +42,20 @@ public class RsProtectTest {
 
             final RsProtectResponse resp = client.send(command).dataAsResponse(RsProtectResponse.class);
             assertNotNull(resp);
+
+            //checkAccessPositive(client);
         } finally {
             CommandClient.closeQuietly(client);
         }
+    }
+
+    private void checkAccessPositive(CommandClient client) {
+        RsCheckAccessParams params = new RsCheckAccessParams();
+        final Command command = new Command(CommandType.RS_CHECK_ACCESS)
+                .setParamsObject(params);
+
+        final RsCheckAccessResponse resp = client.send(command).dataAsResponse(RsCheckAccessResponse.class);
+        assertNotNull(resp);
     }
 
     private RsResourceList resourceList(String rsProtect) throws IOException {
