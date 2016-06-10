@@ -16,7 +16,7 @@ import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
-import org.xdi.oxd.common.response.RsCheckResponse;
+import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
@@ -84,11 +84,11 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                 if (containsAny) {
                     if (isGat) { // GAT
                         LOG.debug("GAT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
-                        return okResponse(new RsCheckResponse("granted"));
+                        return okResponse(new RsCheckAccessResponse("granted"));
                     }
                     if ((permission.getResourceSetId() != null && permission.getResourceSetId().equals(resource.getId()))) { // normal UMA
                         LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
-                        return okResponse(new RsCheckResponse("granted"));
+                        return okResponse(new RsCheckAccessResponse("granted"));
                     }
                 }
             }
@@ -97,7 +97,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
         final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(params.getPath(), params.getHttpMethod());
 
-        RsCheckResponse opResponse = new RsCheckResponse("denied");
+        RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
         opResponse.setTicket((String) response.getEntity());
         LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
