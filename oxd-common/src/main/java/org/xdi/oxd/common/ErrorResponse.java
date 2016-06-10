@@ -15,36 +15,41 @@ import java.io.Serializable;
 public class ErrorResponse implements Serializable {
 
     @JsonProperty(value = "error")
-    private ErrorResponseCode error;
+    private String error;
     @JsonProperty(value = "error_description")
     private String errorDescription;
 
     public ErrorResponse() {
     }
 
-    public ErrorResponse(ErrorResponseCode p_error) {
-        error = p_error;
+    public ErrorResponse(String error) {
+        this.error = error;
     }
 
-    public ErrorResponse(ErrorResponseCode p_error, String p_errorDescription) {
-        error = p_error;
-        errorDescription = p_errorDescription;
+    public ErrorResponse(ErrorResponseCode code) {
+        this.error = code.getCode();
+        this.errorDescription = code.getDescription();
     }
 
-    public ErrorResponseCode getError() {
+    public ErrorResponse(String error, String errorDescription) {
+        this.error = error;
+        this.errorDescription = errorDescription;
+    }
+
+    public String getError() {
         return error;
     }
 
-    public void setError(ErrorResponseCode p_error) {
-        error = p_error;
+    public void setError(String error) {
+        this.error = error;
     }
 
     public String getErrorDescription() {
         return errorDescription;
     }
 
-    public void setErrorDescription(String p_errorDescription) {
-        errorDescription = p_errorDescription;
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
     }
 
     /**

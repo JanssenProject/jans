@@ -16,7 +16,7 @@ public enum ErrorResponseCode {
 
     INTERNAL_ERROR_UNKNOWN("internal_error", "Unknown internal server error occurs."),
     INTERNAL_ERROR_NO_PARAMS("internal_error", "Command parameters are not specified or otherwise malformed."),
-    BAD_REQUEST_NO_OXD_ID("bad_request", "oxd_id is empty or not specified."),
+    BAD_REQUEST_NO_OXD_ID("bad_request", "oxd_id is empty or not specified or is otherwise invalid (not registered)."),
     INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),
@@ -24,7 +24,9 @@ public enum ErrorResponseCode {
     INVALID_OP_HOST("invalid_op_host", "Invalid op_host (empty or blank)."),
     NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
     NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma-configuration"),
-    NO_UMA_RESOURCES_TO_PROTECT("invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at https://www.gluu.org/docs-oxd");
+    NO_UMA_RESOURCES_TO_PROTECT("invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
+    NO_UMA_HTTP_METHOD("invalid_uma_http_method", "http_method is not specified or otherwise not GET or POST or PUT or DELETE. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
+    NO_UMA_PATH_PARAMETER("invalid_uma_path_parameter", "path parameter is not specified or otherwise not valid");
 
     private final String code;
     private final String description;
