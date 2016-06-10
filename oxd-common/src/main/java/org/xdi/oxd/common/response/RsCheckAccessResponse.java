@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 10/06/2016
  */
 
-public class RsCheckResponse implements IOpResponse {
+public class RsCheckAccessResponse implements IOpResponse {
 
     @JsonProperty(value = "access")
     private String access;
@@ -16,10 +16,10 @@ public class RsCheckResponse implements IOpResponse {
     @JsonProperty(value = "ticket")
     private String ticket;
 
-    public RsCheckResponse() {
+    public RsCheckAccessResponse() {
     }
 
-    public RsCheckResponse(String access) {
+    public RsCheckAccessResponse(String access) {
         this.access = access;
     }
 
