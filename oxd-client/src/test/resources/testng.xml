@@ -53,5 +53,10 @@
     </test>
 
     <!-- UMA -->
+    <test name="RS - Protect" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RsProtectTest"/>
+        </classes>
+    </test>
 
 </suite>
