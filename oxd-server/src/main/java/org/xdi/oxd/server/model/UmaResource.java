@@ -1,7 +1,8 @@
 package org.xdi.oxd.server.model;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.xdi.oxd.rs.protect.RsResource;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -12,8 +13,12 @@ public class UmaResource {
 
     @JsonProperty(value = "id")
     private String id;
-    @JsonProperty(value = "resource")
-    private RsResource resource;
+    @JsonProperty(value = "path")
+      private String path;
+    @JsonProperty(value = "http_methods")
+      private List<String> httpMethods;
+    @JsonProperty(value = "scopes")
+      private List<String> scopes;
 
     public String getId() {
         return id;
@@ -23,12 +28,28 @@ public class UmaResource {
         this.id = id;
     }
 
-    public RsResource getResource() {
-        return resource;
+    public String getPath() {
+        return path;
     }
 
-    public void setResource(RsResource resource) {
-        this.resource = resource;
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public List<String> getHttpMethods() {
+        return httpMethods;
+    }
+
+    public void setHttpMethods(List<String> httpMethods) {
+        this.httpMethods = httpMethods;
+    }
+
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<String> scopes) {
+        this.scopes = scopes;
     }
 
     @Override
@@ -36,7 +57,9 @@ public class UmaResource {
         final StringBuilder sb = new StringBuilder();
         sb.append("UmaResource");
         sb.append("{id='").append(id).append('\'');
-        sb.append(", resource=").append(resource);
+        sb.append(", path='").append(path).append('\'');
+        sb.append(", httpMethods=").append(httpMethods);
+        sb.append(", scopes=").append(scopes);
         sb.append('}');
         return sb.toString();
     }
