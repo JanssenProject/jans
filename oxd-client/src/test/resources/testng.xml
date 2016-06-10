@@ -13,6 +13,7 @@
     <parameter name="clientId" value="${auth.client.id}"/>
     <parameter name="clientSecret" value="${auth.client.secret}"/>
     <parameter name="licenseServerEndpoint" value="https://${test.server.name}/license-server"/>
+    <parameter name="rsProtectJson" value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
 
     <!-- Connect -->
     <test name="Register site" enabled="true">
