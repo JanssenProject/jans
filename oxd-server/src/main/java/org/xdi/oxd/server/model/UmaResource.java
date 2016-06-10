@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.model;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
@@ -14,11 +15,11 @@ public class UmaResource {
     @JsonProperty(value = "id")
     private String id;
     @JsonProperty(value = "path")
-      private String path;
+    private String path;
     @JsonProperty(value = "http_methods")
-      private List<String> httpMethods;
+    private List<String> httpMethods = Lists.newArrayList();
     @JsonProperty(value = "scopes")
-      private List<String> scopes;
+    private List<String> scopes = Lists.newArrayList();
 
     public String getId() {
         return id;
@@ -37,6 +38,9 @@ public class UmaResource {
     }
 
     public List<String> getHttpMethods() {
+        if (httpMethods == null) {
+            httpMethods = Lists.newArrayList();
+        }
         return httpMethods;
     }
 
@@ -45,6 +49,9 @@ public class UmaResource {
     }
 
     public List<String> getScopes() {
+        if (scopes == null) {
+            scopes = Lists.newArrayList();
+        }
         return scopes;
     }
 

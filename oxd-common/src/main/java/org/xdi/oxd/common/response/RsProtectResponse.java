@@ -7,7 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 31/05/2016
  */
 
-public class RsProtectResponse  implements IOpResponse {
+public class RsProtectResponse implements IOpResponse {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
