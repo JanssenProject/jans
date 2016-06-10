@@ -420,6 +420,19 @@ public class SiteConfiguration implements Serializable {
         this.umaProtectedResources = umaProtectedResources;
     }
 
+    public UmaResource umaResource(String path, String httpMethod) {
+        for (UmaResource resource : umaProtectedResources) {
+            if (path.equalsIgnoreCase(resource.getPath()) && resource.getHttpMethods() != null) {
+                for (String http : resource.getHttpMethods()) {
+                    if (http.equalsIgnoreCase(httpMethod)) {
+                        return resource;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

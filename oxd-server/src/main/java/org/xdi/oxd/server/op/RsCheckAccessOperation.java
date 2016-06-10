@@ -1,9 +1,32 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.codehaus.jackson.node.POJONode;
+import org.jboss.resteasy.core.ServerResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.uma.RptStatusService;
+import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
+import org.xdi.oxd.common.response.RsCheckResponse;
+import org.xdi.oxd.rs.protect.resteasy.PatProvider;
+import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
+import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
+import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
+import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.model.UmaResource;
+import org.xdi.oxd.server.service.SiteConfiguration;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -11,6 +34,8 @@ import org.xdi.oxd.common.params.RsCheckAccessParams;
  */
 
 public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RsCheckAccessOperation.class);
 
     /**
      * Constructor
@@ -22,30 +47,70 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     }
 
     @Override
-    public CommandResponse execute(RsCheckAccessParams params) throws Exception {
+    public CommandResponse execute(final RsCheckAccessParams params) throws Exception {
+        validate(params);
 
-//        final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(umaDiscovery, getHttpService().getClientExecutor());
-//
-//              final RptIntrospectionResponse statusResponse = registrationService.requestRptStatus("Bearer " + params.getPatToken(), params.getRpt(), "");
+        SiteConfiguration site = getSite();
+        UmaResource resource = site.umaResource(params.getPath(), params.getHttpMethod());
+        if (resource == null) {
+            final ErrorResponse error = new ErrorResponse("invalid_request");
+            error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
+                    ". Please protect your resource first with uma_rs_protect command. Check details on " + Configuration.DOC_URL);
+            LOG.error(error.getErrorDescription());
+            return CommandResponse.error().setData(new POJONode(error));
+        }
 
-//        final UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscovery(params.getUmaDiscoveryUrl());
-//        final PermissionRegistrationService registrationService = UmaClientFactory.instance().
-//                createResourceSetPermissionRegistrationService(umaDiscovery, getHttpService().getClientExecutor());
-//
-//        final UmaPermission request = new UmaPermission();
-//        request.setResourceSetId(params.getResourceSetId());
-//        request.setScopes(params.getScopes());
-//
-//        final PermissionTicket ticketResponse = registrationService.registerResourceSetPermission(
-//                "Bearer " + params.getPatToken(), params.getAmHost(), request);
-//
-//        if (ticketResponse != null) {
-//            final RegisterPermissionTicketOpResponse opResponse = new RegisterPermissionTicketOpResponse();
-//            opResponse.setTicket(ticketResponse.getTicket());
-//            return okResponse(opResponse);
-//        } else {
-//            LOG.error("No response on requestRptStatus call from OP.");
-//        }
-        return null;
+        PatProvider patProvider = new PatProvider() {
+            @Override
+            public String getPatToken() {
+                return getUmaTokenService().getPat(params.getOxdId()).getToken();
+            }
+
+            @Override
+            public void clearPat() {
+                // do nothing
+            }
+        };
+
+        final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
+        final RptIntrospectionResponse status = registrationService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
+        final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
+
+        if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
+            for (UmaPermission permission : status.getPermissions()) {
+                final List<String> requiredScopes = resource.getScopes();
+                boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
+
+                if (containsAny) {
+                    if (isGat) { // GAT
+                        LOG.debug("GAT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
+                        return okResponse(new RsCheckResponse("granted"));
+                    }
+                    if ((permission.getResourceSetId() != null && permission.getResourceSetId().equals(resource.getId()))) { // normal UMA
+                        LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
+                        return okResponse(new RsCheckResponse("granted"));
+                    }
+                }
+            }
+        }
+
+        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
+        final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(params.getPath(), params.getHttpMethod());
+
+        RsCheckResponse opResponse = new RsCheckResponse("denied");
+        opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
+        opResponse.setTicket((String) response.getEntity());
+        LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
+
+        return okResponse(opResponse);
+    }
+
+    private void validate(RsCheckAccessParams params) {
+        if (Strings.isNullOrEmpty(params.getHttpMethod())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_HTTP_METHOD);
+        }
+        if (Strings.isNullOrEmpty(params.getPath())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_PATH_PARAMETER);
+        }
     }
 }
