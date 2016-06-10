@@ -125,10 +125,10 @@ public class UmaTokenService {
         final UmaToken token;
         if (useClientAuthentication(scopeType)) {
             token = obtainTokenWithClientCredentials(discovery, site, scopeType);
-            LOG.trace("Obtained PAT with client authentication.");
+            LOG.trace("Obtained token with client authentication: " + token);
         } else {
             token = obtainTokenWithUserCredentials(discovery, site, scopeType);
-            LOG.trace("Obtained PAT with user credentials.");
+            LOG.trace("Obtained token with user credentials: " + token);
         }
 
         return token;
@@ -166,8 +166,8 @@ public class UmaTokenService {
 
     private List<String> scopes(UmaScopeType scopeType) {
         final List<String> scopes = new ArrayList<String>();
-        scopes.add("openid");
         scopes.add(scopeType.getValue());
+        scopes.add("openid");
         return scopes;
     }
 
@@ -176,7 +176,7 @@ public class UmaTokenService {
         for (String scope : scopes(scopeType)) {
             scopesAsString += scope + " ";
         }
-        return scopesAsString;
+        return scopesAsString.trim();
     }
 
     private UmaToken obtainTokenWithUserCredentials(OpenIdConfigurationResponse discovery, SiteConfiguration site, UmaScopeType scopeType) {
