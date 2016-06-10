@@ -3,12 +3,12 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RsProtectParams;
+import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.RsResource;
 import org.xdi.oxd.rs.protect.resteasy.Key;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
@@ -38,7 +38,6 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         validate(params);
 
         SiteConfiguration site = getSite();
-        UmaConfiguration umaDiscovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
 
         PatProvider patProvider = new PatProvider() {
             @Override
@@ -57,8 +56,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
         persist(registrar, site);
 
-
-        return null;
+        return okResponse(new RsProtectResponse());
     }
 
     private void persist(ResourceRegistrar registrar, SiteConfiguration site) throws IOException {
@@ -78,10 +76,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     private void validate(RsProtectParams params) {
         if (params.getResources() == null || params.getResources().getResources() == null ||
                 params.getResources().getResources().isEmpty()) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
         }
-
     }
-
-
 }
