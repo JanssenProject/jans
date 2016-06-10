@@ -42,6 +42,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&state=" + state();
         authorizationEndpoint += "&nonce=" + nonce();
         authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
+        authorizationEndpoint += "&prompt=login";
 
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
