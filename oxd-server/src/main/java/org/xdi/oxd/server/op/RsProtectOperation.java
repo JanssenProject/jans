@@ -56,7 +56,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
         persist(registrar, site);
 
-        return okResponse(new RsProtectResponse());
+        return okResponse(new RsProtectResponse(site.getOxdId()));
     }
 
     private void persist(ResourceRegistrar registrar, SiteConfiguration site) throws IOException {
