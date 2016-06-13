@@ -79,7 +79,7 @@ public class AuthenticationFilter extends AbstractFilter {
             public void process() {
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
-                    if (requestUrl.equals(ConfigurationFactory.instance().getConfiguration().getTokenEndpoint()) || isLocalEmbeddedTest(requestUrl)) {
+                    if (requestUrl.equals(ConfigurationFactory.instance().getConfiguration().getTokenEndpoint())) {
                         if (httpRequest.getParameter("client_assertion") != null
                                 && httpRequest.getParameter("client_assertion_type") != null) {
                             processJwtAuth(httpRequest, httpResponse, filterChain);
@@ -126,11 +126,6 @@ public class AuthenticationFilter extends AbstractFilter {
                 }
             }
         }.run();
-    }
-
-    private boolean isLocalEmbeddedTest(String requestUrl) {
-        return Boolean.parseBoolean(System.getProperty("seam.local.test")) &&
-                requestUrl.equals("http://localhost:80/seam/resource/restv1/oxauth/token");
     }
 
     private void processSessionAuth(String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
