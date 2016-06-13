@@ -1,7 +1,5 @@
 package org.xdi.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
@@ -10,20 +8,16 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Shekhar L
  */
 
-@XmlRootElement
 public class ImapPassword implements java.io.Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2631677803214869609L;
 
-	@XmlElement(name = "encryptedString")
 	private String encryptedString;
 
-	@XmlElement(name = "cipher")
 	private String cipher;
 
-	@XmlElement(name = "mode")
 	private String mode;
 
 	public String getEncryptedString() {

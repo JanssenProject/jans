@@ -1,15 +1,13 @@
 package org.xdi.model;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Hold SMTP configuration
+ * Hold IMAP Data configuration
  * 
  * @author Shekhar L
  */
 
-@XmlRootElement
+
 public class GluuIMAPData implements java.io.Serializable {
 
 	/**
