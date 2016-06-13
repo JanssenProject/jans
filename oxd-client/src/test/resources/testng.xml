@@ -58,5 +58,11 @@
             <class name="org.xdi.oxd.client.RsProtectTest"/>
         </classes>
     </test>
+    <test name="RP - Get RPT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RpGetRptTest"/>
+        </classes>
+    </test>
+
 
 </suite>
