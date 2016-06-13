@@ -59,7 +59,6 @@
 						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
 							-Dcatalina.base=${project.build.directory}
 							-Dgluu.conf.folder=${project.build.directory}
-							-Dseam.local.test=true
 						</argLine>
 					</configuration>
 				</plugin>
