@@ -95,6 +95,13 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "uma_protected_resources")
     private List<UmaResource> umaProtectedResources = Lists.newArrayList();
 
+    @JsonProperty(value = "rpt")
+    private String rpt;
+    @JsonProperty(value = "rpt_expires_in")
+    private int rptExpiresIn;
+    @JsonProperty(value = "rpt_created_at")
+    private Date rptCreatedAt;
+
     public SiteConfiguration() {
     }
 
@@ -141,6 +148,10 @@ public class SiteConfiguration implements Serializable {
         this.patExpiresIn = conf.patExpiresIn;
         this.patCreatedAt = conf.patCreatedAt;
         this.patRefreshToken = conf.patRefreshToken;
+
+        this.rpt = conf.rpt;
+        this.rptExpiresIn = conf.rptExpiresIn;
+        this.rptCreatedAt = conf.rptCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
     }
@@ -420,6 +431,30 @@ public class SiteConfiguration implements Serializable {
         this.umaProtectedResources = umaProtectedResources;
     }
 
+    public String getRpt() {
+        return rpt;
+    }
+
+    public void setRpt(String rpt) {
+        this.rpt = rpt;
+    }
+
+    public int getRptExpiresIn() {
+        return rptExpiresIn;
+    }
+
+    public void setRptExpiresIn(int rptExpiresIn) {
+        this.rptExpiresIn = rptExpiresIn;
+    }
+
+    public Date getRptCreatedAt() {
+        return rptCreatedAt;
+    }
+
+    public void setRptCreatedAt(Date rptCreatedAt) {
+        this.rptCreatedAt = rptCreatedAt;
+    }
+
     public UmaResource umaResource(String path, String httpMethod) {
         for (UmaResource resource : umaProtectedResources) {
             if (path.equalsIgnoreCase(resource.getPath()) && resource.getHttpMethods() != null) {
@@ -459,6 +494,9 @@ public class SiteConfiguration implements Serializable {
         sb.append(", patCreatedAt=").append(patCreatedAt);
         sb.append(", patExpiresIn=").append(patExpiresIn);
         sb.append(", umaProtectedResources=").append(umaProtectedResources);
+        sb.append(", rpt=").append(rpt);
+        sb.append(", rptCreatedAt=").append(rptCreatedAt);
+        sb.append(", rptExpiresIn=").append(rptExpiresIn);
         sb.append('}');
         return sb.toString();
     }

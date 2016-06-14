@@ -26,7 +26,8 @@ public enum ErrorResponseCode {
     NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma-configuration"),
     NO_UMA_RESOURCES_TO_PROTECT("invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
     NO_UMA_HTTP_METHOD("invalid_uma_http_method", "http_method is not specified or otherwise not GET or POST or PUT or DELETE. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
-    NO_UMA_PATH_PARAMETER("invalid_uma_path_parameter", "path parameter is not specified or otherwise not valid");
+    NO_UMA_PATH_PARAMETER("invalid_uma_path_parameter", "path parameter is not specified or otherwise not valid"),
+    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT.");
 
     private final String code;
     private final String description;
