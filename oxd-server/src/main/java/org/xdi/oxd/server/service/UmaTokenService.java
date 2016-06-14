@@ -75,7 +75,7 @@ public class UmaTokenService {
 
         final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery, httpService.getClientExecutor());
         final String aat = getAat(oxdId).getToken();
-        final RPTResponse rptResponse = rptService.createRPT("Bearer " + aat, site.getOpHost());
+        final RPTResponse rptResponse = rptService.createRPT("Bearer " + aat, site.opHostWithoutProtocol());
         if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
             RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
             RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + aat, rptResponse.getRpt(), null);
