@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.service;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxd.server.model.UmaResource;
@@ -381,6 +382,13 @@ public class SiteConfiguration implements Serializable {
     }
 
     public String getOpHost() {
+        return opHost;
+    }
+
+    public String opHostWithoutProtocol() {
+        if (StringUtils.contains(opHost, "//")) {
+            return StringUtils.substringAfter(opHost, "//");
+        }
         return opHost;
     }
 
