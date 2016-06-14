@@ -24,9 +24,7 @@ override_dh_auto_install:
 		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp lib/bcprov-jdk16-1.46.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp lib/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp lib/resteasy-jaxrs-2.3.4.Final.jar debian/gluu-oxd-server/opt/oxd-server/lib/
+		cp lib/* debian/gluu-oxd-server/opt/oxd-server/lib/
 
 override_dh_fixperms:
 		dh_fixperms
