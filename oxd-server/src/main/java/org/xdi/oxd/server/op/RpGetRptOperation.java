@@ -27,7 +27,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
     @Override
     public CommandResponse execute(RpGetRptParams params) {
         final RpGetRptOpResponse r = new RpGetRptOpResponse();
-        r.setRpt(getUmaTokenService().getRpt(params.getOxdId()));
+        r.setRpt(getUmaTokenService().getRpt(params.getOxdId(), params.isForceNew()));
         return okResponse(r);
     }
 }

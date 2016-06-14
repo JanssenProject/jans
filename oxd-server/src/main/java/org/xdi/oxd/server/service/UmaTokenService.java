@@ -61,11 +61,11 @@ public class UmaTokenService {
         this.configuration = configuration;
     }
 
-    public String getRpt(String oxdId) {
+    public String getRpt(String oxdId, boolean forceNew) {
         SiteConfiguration site = siteService.getSite(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
-        if (!Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
+        if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
             boolean isExpired = site.getRptExpiresAt().after(new Date());
             if (!isExpired) {
                 LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
@@ -77,7 +77,7 @@ public class UmaTokenService {
         final String aat = getAat(oxdId).getToken();
         final RPTResponse rptResponse = rptService.createRPT("Bearer " + aat, site.getOpHost());
         if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
-            RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery);
+            RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
             RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + aat, rptResponse.getRpt(), null);
             LOG.debug("RPT " + rptResponse.getRpt() + ", status: " + status);
             if (status.getActive()) {
