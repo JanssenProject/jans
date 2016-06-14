@@ -1,23 +1,32 @@
 package org.xdi.oxd.server.service;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.uma.CreateRptService;
+import org.xdi.oxauth.client.uma.RptStatusService;
+import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.model.Aat;
 import org.xdi.oxd.server.model.Pat;
 import org.xdi.oxd.server.model.UmaToken;
 import org.xdi.oxd.server.model.UmaTokenFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,6 +61,41 @@ public class UmaTokenService {
         this.configuration = configuration;
     }
 
+    public String getRpt(String oxdId) {
+        SiteConfiguration site = siteService.getSite(oxdId);
+        UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
+
+        if (!Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
+            boolean isExpired = site.getRptExpiresAt().after(new Date());
+            if (!isExpired) {
+                LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
+                return site.getRpt();
+            }
+        }
+
+        final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery, httpService.getClientExecutor());
+        final String aat = getAat(oxdId).getToken();
+        final RPTResponse rptResponse = rptService.createRPT("Bearer " + aat, site.getOpHost());
+        if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
+            RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery);
+            RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + aat, rptResponse.getRpt(), null);
+            LOG.debug("RPT " + rptResponse.getRpt() + ", status: " + status);
+            if (status.getActive()) {
+                LOG.debug("RPT is successfully obtained from AS. RPT: {}", rptResponse.getRpt());
+
+                site.setRpt(rptResponse.getRpt());
+                site.setRptCreatedAt(status.getIssuedAt());
+                site.setRptExpiresAt(status.getExpiresAt());
+                siteService.updateSilently(site);
+
+                return rptResponse.getRpt();
+            }
+        }
+
+        LOG.error("Failed to get RPT for site: " + site);
+        throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
+    }
+
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
@@ -62,8 +106,8 @@ public class UmaTokenService {
             c.setTime(site.getPatCreatedAt());
             c.add(Calendar.SECOND, site.getPatExpiresIn());
 
-            boolean isPatExpired = c.getTime().after(new Date());
-            if (isPatExpired) {
+            boolean isExpired = c.getTime().after(new Date());
+            if (!isExpired) {
                 LOG.debug("PAT from site configuration, PAT: " + site.getPat());
                 return new Pat(site.getPat(), "", site.getPatExpiresIn());
             }
@@ -76,11 +120,7 @@ public class UmaTokenService {
         site.setPatExpiresIn(token.getExpiresIn());
         site.setPatRefreshToken(token.getRefreshToken());
 
-        try {
-            siteService.update(site);
-        } catch (IOException e) {
-            LOG.error("Failed to persist PAT into site: " + site, e);
-        }
+        siteService.updateSilently(site);
 
         return (Pat) token;
     }
@@ -95,8 +135,8 @@ public class UmaTokenService {
             c.setTime(site.getAatCreatedAt());
             c.add(Calendar.SECOND, site.getAatExpiresIn());
 
-            boolean isAatExpired = c.getTime().after(new Date());
-            if (isAatExpired) {
+            boolean isExpired = c.getTime().after(new Date());
+            if (!isExpired) {
                 LOG.debug("AAT from site configuration, site: " + site);
                 return new Aat(site.getAat(), "", site.getAatExpiresIn());
             }
@@ -109,11 +149,7 @@ public class UmaTokenService {
         site.setAatExpiresIn(token.getExpiresIn());
         site.setAatRefreshToken(token.getRefreshToken());
 
-        try {
-            siteService.update(site);
-        } catch (IOException e) {
-            LOG.error("Failed to persist AAT into site: " + site, e);
-        }
+        siteService.updateSilently(site);
 
         return (Aat) token;
     }

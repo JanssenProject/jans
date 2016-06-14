@@ -97,8 +97,8 @@ public class SiteConfiguration implements Serializable {
 
     @JsonProperty(value = "rpt")
     private String rpt;
-    @JsonProperty(value = "rpt_expires_in")
-    private int rptExpiresIn;
+    @JsonProperty(value = "rpt_expires_at")
+    private Date rptExpiresAt;
     @JsonProperty(value = "rpt_created_at")
     private Date rptCreatedAt;
 
@@ -150,7 +150,7 @@ public class SiteConfiguration implements Serializable {
         this.patRefreshToken = conf.patRefreshToken;
 
         this.rpt = conf.rpt;
-        this.rptExpiresIn = conf.rptExpiresIn;
+        this.rptExpiresAt = conf.rptExpiresAt;
         this.rptCreatedAt = conf.rptCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
@@ -439,12 +439,12 @@ public class SiteConfiguration implements Serializable {
         this.rpt = rpt;
     }
 
-    public int getRptExpiresIn() {
-        return rptExpiresIn;
+    public Date getRptExpiresAt() {
+        return rptExpiresAt;
     }
 
-    public void setRptExpiresIn(int rptExpiresIn) {
-        this.rptExpiresIn = rptExpiresIn;
+    public void setRptExpiresAt(Date rptExpiresAt) {
+        this.rptExpiresAt = rptExpiresAt;
     }
 
     public Date getRptCreatedAt() {
@@ -496,7 +496,7 @@ public class SiteConfiguration implements Serializable {
         sb.append(", umaProtectedResources=").append(umaProtectedResources);
         sb.append(", rpt=").append(rpt);
         sb.append(", rptCreatedAt=").append(rptCreatedAt);
-        sb.append(", rptExpiresIn=").append(rptExpiresIn);
+        sb.append(", rptExpiresIn=").append(rptExpiresAt);
         sb.append('}');
         return sb.toString();
     }
