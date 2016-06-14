@@ -169,10 +169,6 @@
             <artifactId>guice-servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxlicense-client</artifactId>
         </dependency>
