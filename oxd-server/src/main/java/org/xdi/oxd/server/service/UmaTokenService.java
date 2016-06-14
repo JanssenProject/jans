@@ -78,7 +78,7 @@ public class UmaTokenService {
         final RPTResponse rptResponse = rptService.createRPT("Bearer " + aat, site.opHostWithoutProtocol());
         if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
             RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
-            RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + aat, rptResponse.getRpt(), null);
+            RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + getPat(oxdId).getToken(), rptResponse.getRpt(), "");
             LOG.debug("RPT " + rptResponse.getRpt() + ", status: " + status);
             if (status.getActive()) {
                 LOG.debug("RPT is successfully obtained from AS. RPT: {}", rptResponse.getRpt());

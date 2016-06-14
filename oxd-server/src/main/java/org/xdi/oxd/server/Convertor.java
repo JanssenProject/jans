@@ -42,7 +42,6 @@ public class Convertor {
             if (params == null) {
                 throw new ErrorResponseException(ErrorResponseCode.INTERNAL_ERROR_NO_PARAMS);
             }
-            LOG.trace("Params: {}", params);
             return params;
         } catch (ErrorResponseException e) {
             throw e;
