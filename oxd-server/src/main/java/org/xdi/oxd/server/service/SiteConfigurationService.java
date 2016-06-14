@@ -126,6 +126,14 @@ public class SiteConfigurationService {
         sites.put(file.getName(), siteConfiguration);
     }
 
+    public void updateSilently(SiteConfiguration siteConfiguration) {
+        try {
+            update(siteConfiguration);
+        } catch (IOException e) {
+            LOG.error("Failed to update site configuration: " + siteConfiguration, e);
+        }
+    }
+
     public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
         String fileName = siteConfiguration.getOxdId() + ".json";
 

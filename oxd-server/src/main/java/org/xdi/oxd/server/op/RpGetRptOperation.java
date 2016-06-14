@@ -4,18 +4,12 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.CreateRptService;
-import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RpGetRptOpResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,21 +26,8 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     @Override
     public CommandResponse execute(RpGetRptParams params) {
-
-        SiteConfiguration site = getSite();
-        UmaConfiguration discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
-
-        final CreateRptService rptService = UmaClientFactory.instance().createRequesterPermissionTokenService(discovery, getHttpService().getClientExecutor());
-        final RPTResponse rptResponse = rptService.createRPT("Bearer " + site.getAat(), site.getOpHost());
-        if (rptResponse != null && StringUtils.isNotBlank(rptResponse.getRpt())) {
-            final String rpt = rptResponse.getRpt();
-            LOG.debug("RPT is successfully obtained from AS. RPT: {}", rpt);
-            final RpGetRptOpResponse r = new RpGetRptOpResponse();
-            r.setRpt(rpt);
-            return okResponse(r);
-        } else {
-            LOG.error("Failed to get RPT for site: " + site);
-        }
-        return null;
+        final RpGetRptOpResponse r = new RpGetRptOpResponse();
+        r.setRpt(getUmaTokenService().getRpt(params.getOxdId()));
+        return okResponse(r);
     }
 }
