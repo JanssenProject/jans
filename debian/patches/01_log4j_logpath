@@ -1,5 +1,9 @@
-Description: patch for log path in log4j.xml
- This patch fix the log path issue in log4j.xml.
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
  .
  gluu-oxd-server (3.0.7-SNAPSHOT-9) trusty; urgency=low
  .
@@ -7,8 +11,18 @@ Description: patch for log path in log4j.xml
 Author: Adrian Alves <adrian@gluu.org>
 Bug-Debian: http://bugs.debian.org/1232
 
-Origin: gluu, 
-Forwarded: not-needed
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: http://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: <YYYY-MM-DD>
 
 --- gluu-oxd-server-3.0.7-SNAPSHOT.orig/oxd-server/src/main/resources/log4j.xml
 +++ gluu-oxd-server-3.0.7-SNAPSHOT/oxd-server/src/main/resources/log4j.xml
