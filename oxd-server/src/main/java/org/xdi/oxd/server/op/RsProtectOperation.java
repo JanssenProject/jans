@@ -72,11 +72,14 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             resource.setHttpMethods(entry.getKey().getHttpMethods());
 
             Set<String> scopes = Sets.newHashSet();
+            Set<String> scopesForTicket = Sets.newHashSet();
             for (String httpMethod : entry.getKey().getHttpMethods()) {
                 scopes.addAll(resourceMapCopy.get(entry.getKey()).scopes(httpMethod));
+                scopesForTicket.addAll(resourceMapCopy.get(entry.getKey()).scopesForTicket(httpMethod));
             }
 
             resource.setScopes(Lists.newArrayList(scopes));
+            resource.setTicketScopes(Lists.newArrayList(scopesForTicket));
 
             site.getUmaProtectedResources().add(resource);
         }
