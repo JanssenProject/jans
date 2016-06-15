@@ -17,8 +17,7 @@
         <slf4j.version>1.7.11</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
         <oxauth.version>2.4.4-SNAPSHOT</oxauth.version>
-        <!--<resteasy.version>3.0.8.Final</resteasy.version>-->
-        <resteasy.version>2.3.4.Final</resteasy.version>
+        <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
@@ -155,16 +154,6 @@
                 <version>${oxCore.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.xdi</groupId>
-                <artifactId>oxLdap</artifactId>
-                <version>${oxCore.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.xdi</groupId>
-                <artifactId>oxLdap-annotations</artifactId>
-                <version>${oxCore.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
                 <version>${jackson.version}</version>
@@ -270,16 +259,6 @@
                 <groupId>net.nicholaswilliams.java.licensing</groupId>
                 <artifactId>licensing-licensor-base</artifactId>
                 <version>${licensing.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jaxrs</artifactId>
-                <version>${resteasy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-jackson-provider</artifactId>
-                <version>${resteasy.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
