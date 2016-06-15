@@ -37,6 +37,11 @@ public class Command implements Serializable {
         this.params = params;
     }
 
+    public Command(CommandType commandType, IParams params) {
+        this.commandType = commandType;
+        this.params = JsonNodeFactory.instance.POJONode(params);
+    }
+
     public CommandType getCommandType() {
         return commandType;
     }

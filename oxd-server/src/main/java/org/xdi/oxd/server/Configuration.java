@@ -186,20 +186,25 @@ public class Configuration {
         this.timeOutInSeconds = timeOutInSeconds;
     }
 
-    /**
-     * Returns string representation of object
-     *
-     * @return string representation of object
-     */
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Configuration");
         sb.append("{port=").append(port);
         sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
+        sb.append(", jettyPort=").append(jettyPort);
+        sb.append(", startJetty=").append(startJetty);
         sb.append(", localhostOnly=").append(localhostOnly);
-        sb.append(", licenseServerEndpoint=").append(licenseServerEndpoint);
-        sb.append(", licenseId=").append(licenseId);
+        sb.append(", useClientAuthenticationForPat=").append(useClientAuthenticationForPat);
+        sb.append(", useClientAuthenticationForAat=").append(useClientAuthenticationForAat);
+        sb.append(", trustAllCerts=").append(trustAllCerts);
+        sb.append(", keyStorePath='").append(keyStorePath).append('\'');
+        sb.append(", licenseServerEndpoint='").append(licenseServerEndpoint).append('\'');
+        sb.append(", licenseId='").append(licenseId).append('\'');
+        sb.append(", publicKey='").append(publicKey).append('\'');
+        sb.append(", publicPassword='").append(publicPassword).append('\'');
+        sb.append(", licensePassword='").append(licensePassword).append('\'');
+        sb.append(", licenseCheckPeriodInHours=").append(licenseCheckPeriodInHours);
         sb.append('}');
         return sb.toString();
     }
