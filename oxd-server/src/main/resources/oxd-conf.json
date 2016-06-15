@@ -2,8 +2,6 @@
     "port":8099,
     "localhost_only":true,
     "time_out_in_seconds":0,
-    "jetty_port":8098,
-    "start_jetty":false,
     "use_client_authentication_for_pat":true,
     "use_client_authentication_for_aat":true,
     "trust_all_certs":true,
