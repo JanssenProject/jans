@@ -99,7 +99,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             scopes = resource.getScopes();
         }
 
-        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.opHostWithoutProtocol())));
+        final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
         final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
