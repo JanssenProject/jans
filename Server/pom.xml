@@ -281,7 +281,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxAuthStatic</artifactId>
+			<artifactId>oxauth-static</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
