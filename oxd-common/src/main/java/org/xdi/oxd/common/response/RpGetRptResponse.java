@@ -10,12 +10,12 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 02/01/2014
  */
 
-public class RpGetRptOpResponse implements IOpResponse {
+public class RpGetRptResponse implements IOpResponse {
 
     @JsonProperty(value = "rpt")
     private String rpt;
 
-    public RpGetRptOpResponse() {
+    public RpGetRptResponse() {
     }
 
     public String getRpt() {

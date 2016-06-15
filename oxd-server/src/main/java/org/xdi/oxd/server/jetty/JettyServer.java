@@ -35,6 +35,8 @@ public class JettyServer {
     }
 
     public void stop() throws Exception {
-        server.stop();
+        if (server.isRunning()) {
+            server.stop();
+        }
     }
 }

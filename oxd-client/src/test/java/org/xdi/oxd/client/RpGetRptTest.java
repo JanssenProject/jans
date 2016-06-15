@@ -9,7 +9,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.common.response.RpGetRptOpResponse;
+import org.xdi.oxd.common.response.RpGetRptResponse;
 
 import java.io.IOException;
 
@@ -38,7 +38,7 @@ public class RpGetRptTest {
             Assert.assertNotNull(response);
             System.out.println(response);
 
-            final RpGetRptOpResponse rptResponse = response.dataAsResponse(RpGetRptOpResponse.class);
+            final RpGetRptResponse rptResponse = response.dataAsResponse(RpGetRptResponse.class);
             Assert.assertNotNull(rptResponse);
             Assert.assertTrue(StringUtils.isNotBlank(rptResponse.getRpt()));
         } finally {
