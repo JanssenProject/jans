@@ -275,12 +275,14 @@ public class AuthorizeAction {
                     }
 
 
-                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                        permissionGranted(session);
-                        return;
+                    if (client.getPersistClientAuthorizations()) {
+	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+	                        permissionGranted(session);
+	                        return;
+	                    }
                     }
                    
                 } else {
@@ -641,8 +643,10 @@ public class AuthorizeAction {
 
             final Client client = clientService.getClient(clientId);
 
-            final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
-            clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
+            if (client.getPersistClientAuthorizations()) {
+	            final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
+	            clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
+            }
 
             session.addPermission(clientId, true);
             sessionStateService.updateSessionState(session);
