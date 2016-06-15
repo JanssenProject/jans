@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
-import org.xdi.oxd.common.response.RpGetRptOpResponse;
+import org.xdi.oxd.common.response.RpGetRptResponse;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -26,7 +26,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     @Override
     public CommandResponse execute(RpGetRptParams params) {
-        final RpGetRptOpResponse r = new RpGetRptOpResponse();
+        final RpGetRptResponse r = new RpGetRptResponse();
         r.setRpt(getUmaTokenService().getRpt(params.getOxdId(), params.isForceNew()));
         return okResponse(r);
     }

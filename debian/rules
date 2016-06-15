@@ -24,8 +24,7 @@ override_dh_auto_install:
 		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp lib/* debian/gluu-oxd-server/opt/oxd-server/lib/
-
+		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
 override_dh_fixperms:
 		dh_fixperms
 		chmod 755 debian/gluu-oxd-server/opt/oxd-server/bin/oxd-start.sh

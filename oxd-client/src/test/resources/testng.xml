@@ -53,6 +53,11 @@
     </test>
 
     <!-- UMA -->
+    <test name="UMA - Full Flow Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.UmaFullTest"/>
+        </classes>
+    </test>
     <test name="RS - Protect" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RsProtectTest"/>
