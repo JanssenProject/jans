@@ -94,8 +94,13 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         }
 
+        List<String> scopes = resource.getTicketScopes();
+        if (scopes.isEmpty()) {
+            scopes = resource.getScopes();
+        }
+
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
-        final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(params.getPath(), params.getHttpMethod());
+        final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
