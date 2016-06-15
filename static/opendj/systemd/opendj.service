@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenDJ Directory Service
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/opt/opendj/bin/start-ds
+ExecStop=/opt/opendj/bin/stop-ds
+
+[Install]
+WantedBy=multi-user.target

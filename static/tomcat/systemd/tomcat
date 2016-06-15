@@ -1233,7 +1233,8 @@ systemdInstall() {
         eval echo `gettext ' creating default service file...'`
         echo "[Unit]"                            > "${SYSTEMD_SERVICE_FILE}"
         echo "Description=${APP_LONG_NAME}"     >> "${SYSTEMD_SERVICE_FILE}"
-        echo "After=syslog.target"              >> "${SYSTEMD_SERVICE_FILE}"
+        echo "Requires=opendj.service"          >> "${SYSTEMD_SERVICE_FILE}"
+        echo "After=syslog.target opendj.service"   >> "${SYSTEMD_SERVICE_FILE}"
         echo ""                                 >> "${SYSTEMD_SERVICE_FILE}"
         echo "[Service]"                        >> "${SYSTEMD_SERVICE_FILE}"
         echo "Type=forking"                     >> "${SYSTEMD_SERVICE_FILE}"

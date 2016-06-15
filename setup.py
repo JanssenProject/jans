@@ -189,6 +189,7 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
                            '%s/static/opendj/opendj' % self.install_dir]
+        self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
         self.tomcat_template_centos7 = '%s/static/tomcat/systemd/tomcat' % self.install_dir
         self.tomcat_service_centos7 = "%s/bin/tomcat" % self.tomcatHome
         self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
@@ -1756,13 +1757,21 @@ class Setup(object):
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
-        
+
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-              self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
-              self.run(["/usr/sbin/chkconfig", "--add", "opendj"])
+                opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
+                opendj_dest_folder = "/etc/systemd/system"
+                try:
+                    self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
+                    service_path = '/usr/bin/systemctl'
+                    self.run([service_path, 'daemon-reload'])
+                    self.run([service_path, 'enable', 'opendj'])
+                except:
+                    self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
+                    self.logIt(traceback.format_exc(), True)
         else:
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
-
+        
     def setup_init_scripts(self):
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                 script_name = os.path.split(self.tomcat_template_centos7)[-1]
@@ -1783,14 +1792,16 @@ class Setup(object):
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
-
+        
         if self.os_type in ['centos', 'redhat', 'fedora']:
             for service in self.redhat_services:
-                self.run(["/sbin/chkconfig", service, "on"])
+                if service != 'opendj':
+                    self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
+
 
     def start_services(self):
         # Detect sevice path and apache service name
@@ -1826,6 +1837,8 @@ class Setup(object):
                 print ".",
                 i = i + 1
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+               # Stop opendj conventionally and now it'll run via systemctl
+               self.run(['/opt/opendj/bin/stop-ds'])
                self.run([service_path, 'enable', 'tomcat'])
                self.run([service_path, 'start', 'tomcat'])
             else:
