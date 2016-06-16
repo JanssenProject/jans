@@ -22,6 +22,7 @@ import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -42,7 +43,7 @@ import static org.testng.Assert.*;
  * If that user is logged in, the request succeeds, otherwise it fails.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version June 15, 2016
  */
 public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
@@ -104,6 +105,8 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         String sessionState = authorizationResponse1.getSessionState();
 
         // 3. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         //authorizationRequest2.setAuthUsername(userId);
         //authorizationRequest2.setAuthPassword(userSecret);
@@ -111,7 +114,8 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         authorizationRequest2.setState(state);
         authorizationRequest2.setSessionState(sessionState);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest2, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                authorizationRequest2, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.FAMILY_NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
@@ -199,6 +203,8 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -209,10 +215,11 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.FAMILY_NAME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("WRONG_USER_ID")));
 
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);

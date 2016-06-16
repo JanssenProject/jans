@@ -63,7 +63,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -156,7 +156,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                 authorizationGrant.getScopes()));
                     } else if (authorizationGrant.getClient() != null
                             && authorizationGrant.getClient().getUserInfoSignedResponseAlg() != null) {
-                        SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(authorizationGrant.getClient().getUserInfoSignedResponseAlg());
+                        SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(authorizationGrant.getClient().getUserInfoSignedResponseAlg());
                         builder.type("application/jwt");
                         builder.entity(getJwtResponse(algorithm,
                                 currentUser,
@@ -193,9 +193,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws Exception {
         Jwt jwt = new Jwt();
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                ConfigurationFactory.instance().getConfiguration(),
-                ConfigurationFactory.instance().getWebKeys());
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
@@ -294,7 +292,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
@@ -404,7 +402,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
@@ -544,7 +542,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonWebResponse, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonWebResponse, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 

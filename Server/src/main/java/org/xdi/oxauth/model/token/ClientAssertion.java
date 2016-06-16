@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.Component;
@@ -29,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version June 15, 2016
  */
 public class ClientAssertion {
 
@@ -45,7 +46,7 @@ public class ClientAssertion {
         } catch (StringEncrypter.EncryptionException e) {
             throw new InvalidJwtException(e.getMessage(), e);
         } catch (Exception e) {
-            throw new InvalidJwtException("Cannot verify the JWT");
+            throw new InvalidJwtException("Cannot verify the JWT", e);
         }
     }
 
@@ -105,11 +106,12 @@ public class ClientAssertion {
 
                                     // Validate the crypto segment
                                     String keyId = jwt.getHeader().getKeyId();
-                                    JSONObject jwks = JwtUtil.getJsonKey(client.getJwksUri(), client.getJwks(), keyId);
+                                    JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
+                                            JwtUtil.getJSONWebKeys(client.getJwksUri()) :
+                                            new JSONObject(client.getJwks());
                                     String sharedSecret = client.getClientSecret();
                                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                                            ConfigurationFactory.instance().getConfiguration(),
-                                            ConfigurationFactory.instance().getWebKeys());
+                                            ConfigurationFactory.instance().getConfiguration());
                                     boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                                             keyId, jwks, sharedSecret, signatureAlgorithm);
 

@@ -13,8 +13,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -30,16 +29,17 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs extends BaseTest {
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
-            "RS256_modulus", "RS256_privateExponent"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsRS256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS256)");
 
         // 1. Register client
@@ -81,13 +81,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -107,11 +107,12 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
-            "RS384_modulus", "RS384_privateExponent"})
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsRS384(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS384)");
 
         // 1. Register client
@@ -153,13 +154,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -179,11 +180,12 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
-            "RS512_modulus", "RS512_privateExponent"})
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsRS512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (RS512)");
 
         // 1. Register client
@@ -225,13 +227,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -250,11 +252,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri", "ES256_d"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsES256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String d) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES256)");
 
         // 1. Register client
@@ -296,13 +300,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -321,11 +325,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri", "ES384_d"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsES384(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String d) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES384)");
 
         // 1. Register client
@@ -367,13 +373,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -392,11 +398,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri", "ES512_d"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void supportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTsES512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String d) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Support Authentication to Token Endpoint with Asymmetrically Signed JWTs (ES512)");
 
         // 1. Register client
@@ -438,13 +446,13 @@ public class SupportAuthenticationToTokenEndpointWithAsymmetricallySignedJWTs ex
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);

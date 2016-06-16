@@ -6,26 +6,17 @@
 
 package org.xdi.oxauth.model.jwt;
 
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.AGREEMENT_PARTY_U_INFO;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.AGREEMENT_PARTY_V_INFO;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.ALGORITHM;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.COMPRESSION_ALGORITHM;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.CONTENT_TYPE;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.ENCRYPTION_METHOD;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_U_INFO;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_V_INFO;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.EPHEMERAL_PUBLIC_KEY;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.KEY_ID;
-import static org.xdi.oxauth.model.jwt.JwtHeaderName.TYPE;
-
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 
+import static org.xdi.oxauth.model.jwt.JwtHeaderName.*;
+
 /**
- * @author Javier Rojas Blum Date: 11.09.2012
+ * @author Javier Rojas Blum
+ * @version June 15, 2016
  */
 public class JwtHeader extends JwtClaimSet {
 
@@ -61,7 +52,7 @@ public class JwtHeader extends JwtClaimSet {
 
     public SignatureAlgorithm getAlgorithm() {
         String alg = getClaimAsString(ALGORITHM);
-        return SignatureAlgorithm.fromName(alg);
+        return SignatureAlgorithm.fromString(alg);
     }
 
     /**

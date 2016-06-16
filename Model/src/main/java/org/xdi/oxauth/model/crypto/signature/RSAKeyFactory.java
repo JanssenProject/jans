@@ -27,14 +27,16 @@ import java.util.Random;
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
+@Deprecated
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
     private RSAPrivateKey rsaPrivateKey;
     private RSAPublicKey rsaPublicKey;
     private Certificate certificate;
 
+    @Deprecated
     public RSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName)
             throws InvalidParameterException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException,
             InvalidKeyException, CertificateEncodingException {
@@ -79,17 +81,18 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
         }
     }
 
+    @Deprecated
     public RSAKeyFactory(JSONWebKey p_key) {
         if (p_key == null) {
             throw new IllegalArgumentException("Key value must not be null.");
         }
 
         rsaPrivateKey = new RSAPrivateKey(
-                p_key.getPrivateKey().getN(),
-                p_key.getPrivateKey().getE());
+                p_key.getN(),
+                p_key.getE());
         rsaPublicKey = new RSAPublicKey(
-                p_key.getPublicKey().getN(),
-                p_key.getPublicKey().getE());
+                p_key.getN(),
+                p_key.getE());
         certificate = null;
     }
 

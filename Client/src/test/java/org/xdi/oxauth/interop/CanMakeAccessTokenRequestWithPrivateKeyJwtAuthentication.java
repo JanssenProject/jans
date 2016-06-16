@@ -13,7 +13,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -29,16 +29,17 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Can Make Access Token Request with private key jwt Authentication
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends BaseTest {
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri", "clientJwksUri",
-            "RS256_modulus", "RS256_privateExponent"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void canMakeAccessTokenRequestWithPrivateKeyJwtAuthentication(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri, final String clientJwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String sectorIdentifierUri, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Can Make Access Token Request with private key jwt Authentication");
 
         // 1. Register client
@@ -80,13 +81,13 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
