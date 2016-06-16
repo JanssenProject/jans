@@ -40,7 +40,7 @@ import java.util.Set;
  * Provides implementation of Federation Metadata REST web services interface.
  *
  * @author Yuriy Zabrovarnyy
- * @version December 17, 2015
+ * @version June 15, 2016
  */
 @Name("federationMetadataWS")
 public class FederationMetadataWSImpl implements FederationMetadataWS {
@@ -89,7 +89,7 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
     private String asSignedJSON(FederationMetadata p_metadata) throws JSONException, InvalidJwtException {
         try {
             final String keyId = ConfigurationFactory.instance().getConfiguration().getFederationSigningKid();
-            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
+            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
 
             final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
             final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);

@@ -47,7 +47,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version May 5, 2016
+ * @version June 15, 2016
  */
 public class JwtUtil {
 
@@ -74,6 +74,7 @@ public class JwtUtil {
         return bytes;
     }
 
+    @Deprecated
     public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
                                    SignatureAlgorithm algorithm) {
         if (jsonHeader != null && jsonClaim != null && algorithm == SignatureAlgorithm.NONE) {
@@ -82,6 +83,7 @@ public class JwtUtil {
         return null;
     }
 
+    @Deprecated
     public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
                                    SignatureAlgorithm algorithm, String sharedKey) {
         if (jsonHeader != null && jsonClaim != null && algorithm != null && sharedKey != null) {
@@ -90,6 +92,7 @@ public class JwtUtil {
         return null;
     }
 
+    @Deprecated
     public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
                                    SignatureAlgorithm algorithm, RSAPrivateKey privateKey) {
         if (jsonHeader != null && jsonClaim != null && algorithm != null && privateKey != null) {
@@ -98,6 +101,7 @@ public class JwtUtil {
         return null;
     }
 
+    @Deprecated
     public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
                                    SignatureAlgorithm algorithm, ECDSAPrivateKey privateKey) {
         if (jsonHeader != null && jsonClaim != null && algorithm != null && privateKey != null) {
@@ -106,6 +110,7 @@ public class JwtUtil {
         return null;
     }
 
+    @Deprecated
     private static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
                                     SignatureAlgorithm algorithm, String sharedKey,
                                     RSAPrivateKey rsaPrivateKey,
@@ -216,24 +221,28 @@ public class JwtUtil {
         }
     }
 
+    @Deprecated
     public static byte[] getMessageDigestSHA256(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
+    @Deprecated
     public static byte[] getMessageDigestSHA384(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-384", "BC");
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
+    @Deprecated
     public static byte[] getMessageDigestSHA512(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-512", "BC");
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
+    @Deprecated
     public static byte[] getSignatureHS256(byte[] signingInput, byte[] key)
             throws NoSuchAlgorithmException, InvalidKeyException {
         SecretKey secretKey = new SecretKeySpec(key, "HMACSHA256");
@@ -242,6 +251,7 @@ public class JwtUtil {
         return mac.doFinal(signingInput);
     }
 
+    @Deprecated
     public static byte[] getSignatureHS384(byte[] signingInput, byte[] key)
             throws NoSuchAlgorithmException, InvalidKeyException {
         SecretKey secretKey = new SecretKeySpec(key, "HMACSHA384");
@@ -250,6 +260,7 @@ public class JwtUtil {
         return mac.doFinal(signingInput);
     }
 
+    @Deprecated
     public static byte[] getSignatureHS512(byte[] signingInput, byte[] key)
             throws NoSuchAlgorithmException, InvalidKeyException {
         SecretKey secretKey = new SecretKeySpec(key, "HMACSHA512");
@@ -258,6 +269,7 @@ public class JwtUtil {
         return mac.doFinal(signingInput);
     }
 
+    @Deprecated
     public static KeyPair generateRsaKey() throws NoSuchAlgorithmException, NoSuchProviderException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
         keyGen.initialize(2048, new SecureRandom());
@@ -265,6 +277,7 @@ public class JwtUtil {
         return keyGen.generateKeyPair();
     }
 
+    @Deprecated
     public static byte[] getSignatureRS256(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -281,6 +294,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static boolean verifySignatureRS256(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
         RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
                 rsaPublicKey.getModulus(),
@@ -307,6 +321,7 @@ public class JwtUtil {
         }
     }
 
+    @Deprecated
     public static byte[] getSignatureRS384(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -323,6 +338,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static boolean verifySignatureRS384(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
         RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
                 rsaPublicKey.getModulus(),
@@ -349,6 +365,7 @@ public class JwtUtil {
         }
     }
 
+    @Deprecated
     public static byte[] getSignatureRS512(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -365,6 +382,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static boolean verifySignatureRS512(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
         RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
                 rsaPublicKey.getModulus(),
@@ -391,6 +409,7 @@ public class JwtUtil {
         }
     }
 
+    @Deprecated
     public static KeyPair generateKeyES256() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
@@ -401,6 +420,7 @@ public class JwtUtil {
         return keyGen.generateKeyPair();
     }
 
+    @Deprecated
     public static KeyPair generateKeyES384() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
@@ -411,6 +431,7 @@ public class JwtUtil {
         return keyGen.generateKeyPair();
     }
 
+    @Deprecated
     public static KeyPair generateKeyES512() throws NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
@@ -421,6 +442,7 @@ public class JwtUtil {
         return keyGen.generateKeyPair();
     }
 
+    @Deprecated
     public static byte[] getSignatureES256(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
             SignatureException {
@@ -437,6 +459,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static byte[] getSignatureES384(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
             SignatureException {
@@ -453,6 +476,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static byte[] getSignatureES512(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
             SignatureException {
@@ -469,6 +493,7 @@ public class JwtUtil {
         return signature.sign();
     }
 
+    @Deprecated
     public static boolean verifySignatureES256(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
@@ -488,6 +513,7 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
+    @Deprecated
     public static boolean verifySignatureES384(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
@@ -507,6 +533,7 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
+    @Deprecated
     public static boolean verifySignatureES512(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
@@ -526,16 +553,19 @@ public class JwtUtil {
         return signature.verify(sigBytes);
     }
 
+    @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, String keyId) {
-    	return getPublicKey(jwksUri, jwks, null, keyId);
+        return getPublicKey(jwksUri, jwks, null, keyId);
     }
 
+    @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
         log.debug("Retrieving JWK...");
 
         JSONObject jsonKeyValue = getJsonKey(jwksUri, jwks, keyId);
+
         if (jsonKeyValue == null) {
             return null;
         }
@@ -545,7 +575,7 @@ public class JwtUtil {
         try {
             String resultKeyId = jsonKeyValue.getString(KEY_ID);
             if (signatureAlgorithm == null) {
-            	signatureAlgorithm = SignatureAlgorithm.fromName(jsonKeyValue.getString(ALGORITHM));
+                signatureAlgorithm = SignatureAlgorithm.fromString(jsonKeyValue.getString(ALGORITHM));
                 if (signatureAlgorithm == null) {
                     log.error(String.format("Failed to determine key '%s' signature algorithm", resultKeyId));
                     return null;
@@ -555,47 +585,47 @@ public class JwtUtil {
             JSONObject jsonPublicKey = jsonKeyValue;
             if (jsonKeyValue.has(PUBLIC_KEY)) {
                 // Use internal jwks.json format
-            	jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
+                jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
             }
 
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-	            //String alg = jsonKeyValue.getString(ALGORITHM);
-	            //String use = jsonKeyValue.getString(KEY_USE);
-	            String exp = jsonPublicKey.getString(EXPONENT);
-	            String mod = jsonPublicKey.getString(MODULUS);
-	
-	            BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
-	            BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
-	
-	            publicKey = new RSAPublicKey(modulus, publicExponent);
-	        } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-	            //String alg = jsonKeyValue.getString(ALGORITHM);
-	            //String use = jsonKeyValue.getString(KEY_USE);
-	            //String crv = jsonKeyValue.getString(CURVE);
-	            String xx = jsonPublicKey.getString(X);
-	            String yy = jsonPublicKey.getString(Y);
-	
-	            BigInteger x = new BigInteger(1, JwtUtil.base64urldecode(xx));
-	            BigInteger y = new BigInteger(1, JwtUtil.base64urldecode(yy));
-	
-	            publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
-	        }
-	
-	        if (publicKey != null && jsonKeyValue.has(CERTIFICATE_CHAIN)) {
-	            final String BEGIN = "-----BEGIN CERTIFICATE-----";
-	            final String END = "-----END CERTIFICATE-----";
-	
-	            JSONArray certChain = jsonKeyValue.getJSONArray(CERTIFICATE_CHAIN);
-	            String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
-	            StringReader sr = new StringReader(certificateString);
-	            PEMReader pemReader = new PEMReader(sr);
-	            X509Certificate cert = (X509CertificateObject) pemReader.readObject();
-	            Certificate certificate = new Certificate(signatureAlgorithm, cert);
-	            publicKey.setCertificate(certificate);
-	        }
+                //String alg = jsonKeyValue.getString(ALGORITHM);
+                //String use = jsonKeyValue.getString(KEY_USE);
+                String exp = jsonPublicKey.getString(EXPONENT);
+                String mod = jsonPublicKey.getString(MODULUS);
+
+                BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
+                BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
+
+                publicKey = new RSAPublicKey(modulus, publicExponent);
+            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
+                //String alg = jsonKeyValue.getString(ALGORITHM);
+                //String use = jsonKeyValue.getString(KEY_USE);
+                //String crv = jsonKeyValue.getString(CURVE);
+                String xx = jsonPublicKey.getString(X);
+                String yy = jsonPublicKey.getString(Y);
+
+                BigInteger x = new BigInteger(1, JwtUtil.base64urldecode(xx));
+                BigInteger y = new BigInteger(1, JwtUtil.base64urldecode(yy));
+
+                publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
+            }
+
+            if (publicKey != null && jsonKeyValue.has(CERTIFICATE_CHAIN)) {
+                final String BEGIN = "-----BEGIN CERTIFICATE-----";
+                final String END = "-----END CERTIFICATE-----";
+
+                JSONArray certChain = jsonKeyValue.getJSONArray(CERTIFICATE_CHAIN);
+                String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
+                StringReader sr = new StringReader(certificateString);
+                PEMReader pemReader = new PEMReader(sr);
+                X509Certificate cert = (X509CertificateObject) pemReader.readObject();
+                Certificate certificate = new Certificate(signatureAlgorithm, cert);
+                publicKey.setCertificate(certificate);
+            }
             if (publicKey != null) {
-            	publicKey.setKeyId(resultKeyId);
-            	publicKey.setSignatureAlgorithm(signatureAlgorithm);
+                publicKey.setKeyId(resultKeyId);
+                publicKey.setSignatureAlgorithm(signatureAlgorithm);
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -604,6 +634,7 @@ public class JwtUtil {
         return publicKey;
     }
 
+    @Deprecated
     public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
         log.debug("Retrieving JWK Key...");
 
@@ -644,5 +675,30 @@ public class JwtUtil {
         }
 
         return jsonKey;
+    }
+
+    public static JSONObject getJSONWebKeys(String jwksUri) {
+        log.debug("Retrieving jwks...");
+
+        JSONObject jwks = null;
+        try {
+            if (!StringHelper.isEmpty(jwksUri)) {
+                ClientRequest clientRequest = new ClientRequest(jwksUri);
+                clientRequest.setHttpMethod(HttpMethod.GET);
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+
+                int status = clientResponse.getStatus();
+                log.debug(String.format("Status: %n%d", status));
+
+                if (status == 200) {
+                    jwks = new JSONObject(clientResponse.getEntity(String.class));
+                    log.debug(String.format("JWK: %s", jwks));
+                }
+            }
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
+
+        return jwks;
     }
 }

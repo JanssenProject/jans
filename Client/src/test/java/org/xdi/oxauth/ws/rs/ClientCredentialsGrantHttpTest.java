@@ -6,8 +6,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
@@ -20,7 +19,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 16, 2015
+ * @version June 15, 2016
  */
 public class ClientCredentialsGrantHttpTest extends BaseTest {
 
@@ -451,12 +450,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -511,12 +513,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword("INVALID_CLIENT_SECRET");
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -559,12 +564,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -619,12 +627,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword("INVALID_CLIENT_SECRET");
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -667,12 +678,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -728,12 +742,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Client Credentials Grant
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword("INVALID_CLIENT_SECRET");
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -747,10 +764,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS256(final String redirectUris, final String clientJwksUri,
-                                                       final String modulus, final String privateExponent) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS256(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -777,15 +795,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -812,9 +830,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS256Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS256Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -841,17 +861,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String modulus = "AL4LN5Ca4EKj1VDeFBy-ZnzC6LVmQHj8GH0ABpCvGEQ1BpFg5_XS9oTePogFyd0muNhHxW3LXiKGlzUhTR54jN1IDbksbBh_l0ff6NDuH8kjRfDhTuQW6IKORmM673dCzbTNlQe7khST3PdFZfZVdGfzWYYoGsoz-jMgj9gCM84McN_-QJ0xQWZGaetTSkK5z2YPm3zWMli3UshY71ot1FEEl0fcJysK5o-MBPtQj2PVFHG9q33J3gvZcQKCtYKJ1vwQP5TK22wiZQkHOYoRil02H7kIHYbm-EddAdHYXv2eSIsQPFs7Do30mbwM0no_D-5Mcw7rfx0oyMLsei6wa_0";
-        final String privateExponent = "AK6vANQaiCi5D0rV1wbUvL_RKLYU1w5eKuQ7Mc2sJFINq4vV12FOGOronfHJ4FM3VJD457CUTmLN9A8SHSD1DgYYRQUAoBukrBmU5xukxfLMSW2wrCNcKzxWKrzrX1HwRcT7cxE4iH4BrApd7-sNgYJLXO7DzlwuiryUIaQb4iJyF1GR-POcXBX-x5NxFkcAJgR7zX4NuYxzxNvS0f0-JaHPIBEJf5iJ-ezdVsLwBNGQD2c_UsV-CA14IQiOs_hBIRZrI_AR-ORW0jFp8y2iU7PTaQT2vqONg9UckrGLSkbucv_YUOcuq-LV2ZNTbsSfE55fcVEDQR6_gk_goGnaxAE";
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("RS256SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -865,10 +883,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS384_modulus", "RS384_privateExponent"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS384(final String redirectUris, final String clientJwksUri,
-                                                       final String modulus, final String privateExponent) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS384(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -895,15 +914,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -930,9 +949,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS384Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS384Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -959,17 +980,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String modulus = "ALcRt8KqUO39zwkHl3MyX9HZ3Mv7I9LeGIsrsVxxboe3CIdk63HbyRLOIIopMzTfhvBs5zRAYOcY6FlWoe_81rDLnW6tnoAtqAeZnI0oxityYdry3HmQP9OCH9OL8jBjbJ3-kX5isjR0kGK3p233-oPkYX1Aj2jclegxOSbY0mvq45NVRKAhLQ3r56s-jPBQbYTGQKZ3FVHSQaKdXEk6xOnY8soXR5FACmVQk869EIGq6ysKpfFPyJOUNvlNm8tLwe5VAloFGjx8fCNxXLrcOPjqrTNoXjc7hy0InZMlk0ClmjiZtYM0xC2df4npm-bsZCc_44F1H-sCpvYt63vz-q8";
-        final String privateExponent = "XZg_XNT6n1Jd4P3ynkCo4H8D9X2maQ6Hec-S0_JiUhxvzdj4zrNRb73WwQwjU-rb8FudMQehA0WmtNYn4Kxhju3qxUUafenZuFj-wuSPvHK0ON5lffkTyK0EXIF2BusuAvC9reIDvfHCR9YhUYWwnHHMrd6t8yyjr5xK3eOIYQdObagqSzksDR3ND0PUYJxbQyEHXyxVL4SHPVBpPu5DoctZk4pip2JN-4OY7XJlSCeB_AxtNgKPN6U4H3FsVogC3DRL2vHwsGnkPlwPOnNL7F-g7jYYM24fnegxDZ5mz7OobGZiZCLlbf3odhVNJxfczwuEBXr6pGVklRlEqIyOUQ";
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("RS384SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -983,10 +1002,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS512_modulus", "RS512_privateExponent"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS512(final String redirectUris, final String clientJwksUri,
-                                                       final String modulus, final String privateExponent) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS512(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1013,15 +1033,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1048,9 +1068,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodRS512Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodRS512Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1077,17 +1099,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String modulus = "AKfuT2zfMEb0XnruZif50OdvlQaxpJXyk8FBfJUY0DY6IsLDjo3eCvg93iAT6iZlvca5L7Frg5CBUXK_so6-7YsjkXMTGprYB6zrJGf1YTC9xex3BeC2WB5VIUNIqlU1Lpu4BM8p1KzWjkm2tDLmncpdcMjm8T4ztnFs814-Fq5qWKwCQHG4m1u35KUEXGfU2m2B1v0AX701n9EIKo8stfJj8Z3BVaFMUl8sECY_7ONWcj48UkGlv1maNsxQKdwGVkPsZNkOsCjp48bQ3zVKUz7eJae8R1R6Dq3vnk1Tt9iXQQRoADSkvFpoYpWM7Xk8s4fVAiMq6db2otUqZc_D0YU";
-        final String privateExponent = "QKlnleFewoOH-cfgOBZeVS9G79vpJv_P2wMvSG3UhnzeM6Z_NqtACBQyeqGQcJaOe32FGsjuUO8qgIfF5mcoKoJYmDnL7cGvOusUCp-We-Em3AV8kulDhvJ6q2DIjaS7vKQf3fEafi7jfQjH3C2mpmxSaFlcnPnmj0hHcYtwyllyDbPReTk1gk4ONnhrUstCzA22HIMjEAX6c09kpYaO66J1KpepZ44W7de35sMxF3jKBc98ZV81YXqHXLIqfhXQN1SYAtiJ3TiV8V6dvsQcPaP8XhDOmcYuXvkNpvf_hRJY-r3eP1AS9-r2WarrXiwuKj2IuZ0AE2JRCDcNEzEMIQ";
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("RS512SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1101,10 +1121,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES256_d"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES256(final String redirectUris, final String clientJwksUri,
-                                                       final String d) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES256(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1131,15 +1152,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1166,9 +1187,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES256Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES256Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1195,16 +1218,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String d = "AKbn5AHdXYg0SlpDW-rGxRjwrGpl4feIgI9c_O7Z1cuX";
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("ES256SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1218,10 +1240,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES384_d"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES384(final String redirectUris, final String clientJwksUri,
-                                                       final String d) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES384(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1248,15 +1271,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1283,9 +1306,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES384Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES384Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1312,16 +1337,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String d = "TzlwM3FzS6Ee2KWqt_fQqj7j-IAwuzD7ni4aqTcO-2-xs6CDJ-viwOC9O2BW1zsh";
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("ES384SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1335,10 +1359,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES512_d"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES512(final String redirectUris, final String clientJwksUri,
-                                                       final String d) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES512(
+            final String redirectUris, final String clientJwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1365,15 +1390,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1400,9 +1425,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void privateKeyJwtAuthenticationMethodES512Fail(final String redirectUris, final String clientJwksUri) throws Exception {
+    public void privateKeyJwtAuthenticationMethodES512Fail(
+            final String redirectUris, final String clientJwksUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1429,16 +1456,15 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Client Credentials Grant
-        final String d = "Oj7lsmxkMK8NImsrYZIArqbGoIaT72BE2V8duzZtn41dyTV8thaIfWyU7iCesf-BIIVD4YQzBPOY46mWdc7uJuM";
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         tokenRequest.setScope("clientinfo");
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId("ES512SIG_INVALID_KEYID");
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);

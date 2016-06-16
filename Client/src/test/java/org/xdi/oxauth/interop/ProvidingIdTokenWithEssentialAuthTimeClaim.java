@@ -14,6 +14,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -33,14 +34,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing ID Token with Essential auth time Claim
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void providingIdTokenWithEssentialAuthTimeClaim(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Providing ID Token with Essential auth time Claim");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -66,6 +68,8 @@ public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -73,7 +77,7 @@ public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createEssential(true)));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);

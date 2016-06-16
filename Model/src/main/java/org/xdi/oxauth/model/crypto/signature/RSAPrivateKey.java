@@ -20,8 +20,9 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * The Private Key for the RSA Algorithm
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
+@Deprecated
 public class RSAPrivateKey extends PrivateKey {
 
     private BigInteger modulus;

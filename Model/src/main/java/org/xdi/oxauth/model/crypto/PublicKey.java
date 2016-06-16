@@ -12,31 +12,33 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 /**
  * The Public Key for Cryptography algorithms
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version June 15, 2016
  */
+@Deprecated
 public abstract class PublicKey implements JSONable {
 
-	private String keyId;
+    private String keyId;
 
-	private SignatureAlgorithm signatureAlgorithm;
+    private SignatureAlgorithm signatureAlgorithm;
 
     private Certificate certificate;
 
-	public String getKeyId() {
-		return keyId;
-	}
+    public String getKeyId() {
+        return keyId;
+    }
 
-	public void setKeyId(String keyId) {
-		this.keyId = keyId;
-	}
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
 
-	public SignatureAlgorithm getSignatureAlgorithm() {
-		return signatureAlgorithm;
-	}
+    public SignatureAlgorithm getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
 
-	public void setSignatureAlgorithm(SignatureAlgorithm signatureAlgorithm) {
-		this.signatureAlgorithm = signatureAlgorithm;
-	}
+    public void setSignatureAlgorithm(SignatureAlgorithm signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
+    }
 
     public Certificate getCertificate() {
         return certificate;
