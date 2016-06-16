@@ -11,7 +11,7 @@ import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * @author Javier Rojas Blum
- * @version May 4, 2016
+ * @version June 15, 2016
  */
 public enum Use {
 
@@ -39,9 +39,9 @@ public enum Use {
     @JsonCreator
     public static Use fromString(String param) {
         if (param != null) {
-            for (Use rt : Use.values()) {
-                if (param.equals(rt.paramName)) {
-                    return rt;
+            for (Use use : Use.values()) {
+                if (param.equals(use.paramName)) {
+                    return use;
                 }
             }
         }
@@ -53,8 +53,9 @@ public enum Use {
      *
      * @return The string representation of the object.
      */
+    @Override
     @JsonValue
-    public String toValue() {
+    public String toString() {
         return paramName;
     }
 }

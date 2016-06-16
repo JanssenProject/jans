@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.authorize;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -39,7 +40,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version June 15, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -93,8 +94,8 @@ public class JwtAuthorizationRequest {
                         JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
                         JSONWebKey jwk = jwks.getKey(keyId);
                         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                                jwk.getPrivateKey().getN(),
-                                jwk.getPrivateKey().getE());
+                                jwk.getN(),
+                                jwk.getE());
                         jweDecrypter = new JweDecrypterImpl(rsaPrivateKey);
                     } else {
                         jweDecrypter = new JweDecrypterImpl(client.getClientSecret().getBytes(Util.UTF8_STRING_ENCODING));
@@ -142,7 +143,7 @@ public class JwtAuthorizationRequest {
                         keyId = jsonHeader.getString("kid");
                     }
 
-                    SignatureAlgorithm sigAlg = SignatureAlgorithm.fromName(algorithm);
+                    SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
                     if (sigAlg != null) {
                         if (validateSignature(sigAlg, client, signingInput, encodedSignature)) {
                             JSONObject jsonPayload = new JSONObject(payload);
@@ -316,10 +317,11 @@ public class JwtAuthorizationRequest {
 
     private boolean validateSignature(SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
         String sharedSecret = client.getClientSecret();
-        JSONObject jwks = JwtUtil.getJsonKey(client.getJwksUri(), client.getJwks(), keyId);
+        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
+                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
+                new JSONObject(client.getJwks());
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                ConfigurationFactory.instance().getConfiguration(),
-                ConfigurationFactory.instance().getWebKeys());
+                ConfigurationFactory.instance().getConfiguration());
         boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
 
         return validSignature;

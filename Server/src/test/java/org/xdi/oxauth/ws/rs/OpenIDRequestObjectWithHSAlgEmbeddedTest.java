@@ -22,6 +22,7 @@ import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -43,7 +44,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
@@ -77,8 +78,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
                     request.setContent(registerRequestContent.getBytes());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    fail(e.getMessage(), e);
                 }
             }
 
@@ -101,8 +101,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -117,29 +116,36 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String state = "STATE0";
-                String nonce = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String state = "STATE0";
+                    String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId1, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret1);
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS256, clientSecret1, cryptoProvider);
+                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -160,8 +166,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     assertNotNull(params.get("scope"), "The scope is null");
                     assertNotNull(params.get("state"), "The state is null");
                 } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -190,8 +195,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
                     request.setContent(registerRequestContent.getBytes());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    fail(e.getMessage(), e);
                 }
             }
 
@@ -214,8 +218,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     clientSecret2 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -230,35 +233,42 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String nonce = UUID.randomUUID().toString();
-                String state = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String nonce = UUID.randomUUID().toString();
+                    String state = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId2, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId2, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS384, clientSecret2);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS384, clientSecret2, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -279,8 +289,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     assertNotNull(params.get("scope"), "The scope is null");
                     assertNotNull(params.get("state"), "The state is null");
                 } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -309,8 +318,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
                     request.setContent(registerRequestContent.getBytes());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    fail(e.getMessage(), e);
                 }
             }
 
@@ -333,8 +341,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
                     clientSecret3 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -349,35 +356,42 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String nonce = UUID.randomUUID().toString();
-                String state = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String nonce = UUID.randomUUID().toString();
+                    String state = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId3, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId3, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS512, clientSecret3);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS512, clientSecret3, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -398,8 +412,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     assertNotNull(params.get("scope"), "The scope is null");
                     assertNotNull(params.get("state"), "The state is null");
                 } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();

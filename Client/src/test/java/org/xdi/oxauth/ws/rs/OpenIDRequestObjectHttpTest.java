@@ -16,10 +16,9 @@ import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -45,14 +44,14 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
-    public void requestParameterMethod1(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod1(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestParameterMethod1");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -80,6 +79,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -90,7 +91,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                request, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -163,6 +165,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -173,7 +177,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                request, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -243,6 +248,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String state = "STATE0";
 
@@ -252,7 +259,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                request, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("name", ClaimValue.createNull()));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -297,6 +305,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
@@ -307,7 +317,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS384, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS384, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -353,6 +363,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
@@ -363,7 +375,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS512, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                request, SignatureAlgorithm.HS512, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -382,8 +395,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
-    public void requestParameterMethod6(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod6(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestParameterMethod6");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -409,6 +422,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -419,7 +434,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("name", ClaimValue.createEssential(true)));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -449,11 +464,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_modulus", "RS256_privateExponent"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -480,7 +495,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -492,8 +507,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS256, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS256SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS256, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -535,11 +550,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_modulus", "RS384_privateExponent"})
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -566,7 +581,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -578,8 +593,9 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS384, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS384SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                request, SignatureAlgorithm.RS384, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -621,11 +637,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_modulus", "RS512_privateExponent"})
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -651,7 +667,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         String clientId = response.getClientId();
 
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -663,8 +679,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS512, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS512SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS512, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -705,11 +721,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES256_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES256(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -736,7 +753,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -748,8 +765,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES256, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES256SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES256, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -791,11 +808,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES384_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES384(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -823,7 +841,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = response.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -835,8 +853,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES384, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES384SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES384, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -878,11 +896,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES512_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES512(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -909,7 +928,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -921,8 +940,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES512SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -964,11 +983,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_modulus", "RS256_privateExponent"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS256X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS256X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -995,7 +1014,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1007,8 +1026,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS256, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS256SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS256, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1050,11 +1069,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_modulus", "RS384_privateExponent"})
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS384X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS384X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1081,7 +1100,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1093,8 +1112,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS384, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS384SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS384, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1136,11 +1155,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_modulus", "RS512_privateExponent"})
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodRS512X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String modulus, final String privateExponent) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodRS512X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1167,7 +1186,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1179,8 +1198,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS512, privateKey);
-        jwtAuthorizationRequest.setKeyId("RS512SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.RS512, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1221,11 +1240,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES256_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES256X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES256X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1252,7 +1272,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1264,8 +1284,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES256, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES256SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES256, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1307,11 +1327,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES384_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES384X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES384X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1338,7 +1359,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1350,8 +1371,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES384, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES384SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES384, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1393,11 +1414,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "ES512_d"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestParameterMethodES512X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String d) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestParameterMethodES512X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1424,7 +1446,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
@@ -1436,8 +1458,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, privateKey);
-        jwtAuthorizationRequest.setKeyId("ES512SIG");
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.ES512, cryptoProvider);
+        jwtAuthorizationRequest.setKeyId(keyId);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1557,6 +1579,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authorization Request
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1566,7 +1590,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1592,8 +1616,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
-    public void requestParameterMethodFail3(final String userId, final String userSecret,
-                                            final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethodFail3(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestParameterMethodFail3");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1619,6 +1643,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authorization Request
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1628,7 +1654,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthUsername(userId);
         request.setAuthPassword(userSecret);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1655,8 +1681,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
     @Test
-    public void requestParameterMethodFail4(final String userId, final String userSecret,
-                                            final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethodFail4(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
         showTitle("requestParameterMethodFail4");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -1682,6 +1708,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authorization Request
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1691,7 +1719,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthUsername(userId);
         request.setAuthPassword(userSecret);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue("INVALID_USER_ID")));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1708,16 +1736,15 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri",
-            "requestFileBasePath", "requestFileBaseUrl"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl"})
     @Test // This tests requires a place to publish a request object via HTTPS
-    public void requestFileMethod(final String userId, final String userSecret,
-                                  final String redirectUris, final String redirectUri,
-                                  @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+    public void requestFileMethod(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
         showTitle("requestFileMethod");
-        
+
         if (StringHelper.isEmpty(requestFileBasePath)) {
-        	return;
+            return;
         }
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1745,6 +1772,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1756,7 +1785,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         try {
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -1916,9 +1945,9 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                                        final String redirectUris, final String redirectUri,
                                        @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
         showTitle("requestFileMethodFail3");
-        
+
         if (StringHelper.isEmpty(requestFileBasePath)) {
-        	return;
+            return;
         }
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1946,6 +1975,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authorization Request
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -1957,7 +1988,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         try {
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -2026,6 +2057,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         String clientId = response.getClientId();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -2036,7 +2069,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         request.setAuthPassword(userSecret);
         request.getPrompts().add(Prompt.NONE);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(request, SignatureAlgorithm.NONE, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
