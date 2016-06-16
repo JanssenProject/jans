@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.Command;
@@ -104,7 +105,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
-        opResponse.setTicket((String) response.getEntity());
+        opResponse.setTicket(((PermissionTicket) response.getEntity()).getTicket());
         LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
 
         return okResponse(opResponse);
