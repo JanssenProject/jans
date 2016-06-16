@@ -27,7 +27,12 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 
 /**
- * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /Users/JAVIER/tmp/mytestkeystore2 -keypasswd secret -dnname "CN=oxAuth CA Certificates"
+ * Command example:
+ * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512
+ *              -keystore /Users/JAVIER/tmp/mytestkeystore2
+ *              -keypasswd secret
+ *              -dnname "CN=oxAuth CA Certificates"
+ *              -expiration 365
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
@@ -66,6 +71,7 @@ public class KeyGenerator {
             options.addOption("keystore", true, "Key Store file.");
             options.addOption("keypasswd", true, "Key Store password.");
             options.addOption("dnname", true, "DN of certificate issuer.");
+            options.addOption("expiration", true, "Expiration in days.");
             options.addOption("h", "help", false, "show help.");
         }
 
@@ -79,11 +85,13 @@ public class KeyGenerator {
                 if (cmd.hasOption("h"))
                     help();
 
-                if (cmd.hasOption("algorithms") && cmd.hasOption("keystore") && cmd.hasOption("keypasswd") && cmd.hasOption("dnname")) {
+                if (cmd.hasOption("algorithms") && cmd.hasOption("keystore") && cmd.hasOption("keypasswd")
+                        && cmd.hasOption("dnname") && cmd.hasOption("expiration")) {
                     String[] algorithms = cmd.getOptionValues("algorithms");
                     String keystore = cmd.getOptionValue("keystore");
                     String keypasswd = cmd.getOptionValue("keypasswd");
                     String dnName = cmd.getOptionValue("dnname");
+                    int expiration = Integer.parseInt(cmd.getOptionValue("expiration"));
 
                     List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
                     if (signatureAlgorithms.isEmpty()) {
@@ -94,16 +102,18 @@ public class KeyGenerator {
                             OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
 
                             Calendar calendar = new GregorianCalendar();
-                            calendar.add(Calendar.MINUTE, 5);
+                            calendar.add(Calendar.DATE, expiration);
 
                             for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
                                 JSONObject result = cryptoProvider.generateKey(signatureAlgorithm, calendar.getTimeInMillis());
+                                //System.out.println(result);
 
                                 JSONWebKey key = new JSONWebKey();
                                 key.setKid(result.getString(KEY_ID));
                                 key.setUse(Use.SIGNATURE);
                                 key.setAlg(signatureAlgorithm);
                                 key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
                                 key.setCrv(signatureAlgorithm.getCurve());
                                 key.setN(result.optString(MODULUS));
                                 key.setE(result.optString(EXPONENT));
@@ -129,7 +139,7 @@ public class KeyGenerator {
         private void help() {
             HelpFormatter formatter = new HelpFormatter();
 
-            formatter.printHelp("KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /path_to/mykeystore -keypasswd secret -dnname \"CN=oxAuth CA Certificate\"", options);
+            formatter.printHelp("KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /path_to/mykeystore -keypasswd secret -dnname \"CN=oxAuth CA Certificate\" -expiration 365", options);
             System.exit(0);
         }
     }
