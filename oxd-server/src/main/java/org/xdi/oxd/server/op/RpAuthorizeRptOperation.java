@@ -41,10 +41,10 @@ public class RpAuthorizeRptOperation extends BaseOperation<RpAuthorizeRptParams>
         final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(
                 getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
         final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
-                "Bearer " + getUmaTokenService().getAat(params.getOxdId()), getSite().opHostWithoutProtocol(), authorizationRequest);
+                "Bearer " + getUmaTokenService().getAat(params.getOxdId()).getToken(), getSite().opHostWithoutProtocol(), authorizationRequest);
         if (authorizationResponse != null) {
             LOG.trace("RPT is authorized. RPT: {} ", params.getRpt());
-            return okResponse(new RpAuthorizeRptResponse());
+            return okResponse(new RpAuthorizeRptResponse(params.getOxdId()));
         }
 
         return CommandResponse.createErrorResponse(ErrorResponseCode.RPT_NOT_AUTHORIZED);
