@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.action;
 
-import java.util.List;
-
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -23,6 +21,7 @@ import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
@@ -33,8 +32,11 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
+import java.util.List;
+
 /**
- * @author Javier Rojas Blum Date: 02.20.2012
+ * @author Javier Rojas Blum
+ * @version June 15, 2016
  */
 @Name("authorizationAction")
 @Scope(ScopeType.SESSION)
@@ -435,30 +437,36 @@ public class AuthorizationAction {
     public String getOpenIdRequestObject() {
         openIdRequestObject = "";
 
-        if (useOpenIdRequestObject) {
-            AuthorizationRequest req = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-            req.setState(state);
-            req.setRequestUri(requestUri);
-            req.setMaxAge(maxAge);
-            req.setUiLocales(StringUtils.spaceSeparatedToList(uiLocales));
-            req.setClaimsLocales(StringUtils.spaceSeparatedToList(claimsLocales));
-            req.setIdTokenHint(idTokenHint);
-            req.setLoginHint(loginHint);
-            req.setAcrValues(StringUtils.spaceSeparatedToList(acrValues));
-            req.setRegistration(registration);
-            req.setDisplay(display);
-            req.getPrompts().addAll(prompt);
+        try {
+            if (useOpenIdRequestObject) {
+                AuthorizationRequest req = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+                req.setState(state);
+                req.setRequestUri(requestUri);
+                req.setMaxAge(maxAge);
+                req.setUiLocales(StringUtils.spaceSeparatedToList(uiLocales));
+                req.setClaimsLocales(StringUtils.spaceSeparatedToList(claimsLocales));
+                req.setIdTokenHint(idTokenHint);
+                req.setLoginHint(loginHint);
+                req.setAcrValues(StringUtils.spaceSeparatedToList(acrValues));
+                req.setRegistration(registration);
+                req.setDisplay(display);
+                req.getPrompts().addAll(prompt);
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(req, SignatureAlgorithm.NONE, (String) null);
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
-            jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
-            openIdRequestObject = jwtAuthorizationRequest.getDecodedJwt();
+                OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                        req, SignatureAlgorithm.NONE, (String) null, cryptoProvider);
+                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+                jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+                jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
+                openIdRequestObject = jwtAuthorizationRequest.getDecodedJwt();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
 
         return openIdRequestObject;

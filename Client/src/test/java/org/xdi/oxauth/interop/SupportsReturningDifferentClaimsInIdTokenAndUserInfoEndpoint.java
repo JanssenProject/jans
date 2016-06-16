@@ -14,6 +14,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -33,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Supports Returning Different Claims in ID Token and UserInfo Endpoint
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extends BaseTest {
 
@@ -66,6 +67,8 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -73,7 +76,8 @@ public class SupportsReturningDifferentClaimsInIdTokenAndUserInfoEndpoint extend
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createNull()));

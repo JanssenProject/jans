@@ -26,7 +26,6 @@
     "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
     "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
     "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
-    "oxElevenJwksEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/jwks",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         "code",
@@ -225,5 +224,8 @@
     "pairwiseIdType":"${config.oxauth.pairwiseIdType}",
     "pairwiseCalculationKey":"${config.oxauth.pairwiseCalculationKey}",
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
-    "webKeysStorage": "ldap"
+    "webKeysStorage": "keystore",
+    "dnName": "CN=oxAuth CA Certificates",
+    "keyStoreFile": "/etc/certs/keystore.jks",
+    "keyStoreSecret": "secret"
 }

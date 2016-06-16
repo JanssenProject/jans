@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version February 5, 2016
+ * @version June 15, 2016
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -1112,19 +1112,19 @@ public class RegisterRequest extends BaseRequest {
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromName(requestObject.getString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.getString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
                 KeyEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
         result.setIdTokenEncryptedResponseEnc(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()) ?
                 BlockEncryptionAlgorithm.fromName(requestObject.getString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setUserInfoSignedResponseAlg(requestObject.has(USERINFO_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromName(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.getString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
         result.setUserInfoEncryptedResponseAlg(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()) ?
                 KeyEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
         result.setUserInfoEncryptedResponseEnc(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()) ?
                 BlockEncryptionAlgorithm.fromName(requestObject.getString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
         result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.getString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
         result.setRequestObjectEncryptionAlg(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ALG.toString()) ?
                 KeyEncryptionAlgorithm.fromName(requestObject.getString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())) : null);
         result.setRequestObjectEncryptionEnc(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ENC.toString()) ?
@@ -1132,7 +1132,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTokenEndpointAuthMethod(requestObject.has(TOKEN_ENDPOINT_AUTH_METHOD.toString()) ?
                 AuthenticationMethod.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : null);
         result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromName(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
+                SignatureAlgorithm.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
         result.setScopes(scopes);
         result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
