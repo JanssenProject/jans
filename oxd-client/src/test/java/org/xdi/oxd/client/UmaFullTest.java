@@ -81,7 +81,7 @@ public class UmaFullTest {
         CommandResponse response = client.send(new Command(CommandType.RS_CHECK_ACCESS, params));
 
         assertEquals(response.getStatus(), ResponseStatus.ERROR);
-        assertEquals(response.getData().get("code").asText(), "invalid_request");
+        assertEquals(response.getData().get("error").asText(), "invalid_request");
     }
 
     private void authorizeRpt(String rpt, String ticket) {
