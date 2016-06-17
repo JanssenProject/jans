@@ -68,6 +68,11 @@
             <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
     </test>
+    <test name="RP - Get GAT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RpGetGatTest"/>
+        </classes>
+    </test>
 
 
 </suite>
