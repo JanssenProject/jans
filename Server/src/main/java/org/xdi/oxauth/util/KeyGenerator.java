@@ -29,14 +29,14 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * Command example:
  * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512
- *              -keystore /Users/JAVIER/tmp/mytestkeystore2
+ *              -keystore /Users/JAVIER/tmp/mykeystore.jks
  *              -keypasswd secret
  *              -dnname "CN=oxAuth CA Certificates"
  *              -expiration 365
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 15, 2016
+ * @version June 16, 2016
  */
 public class KeyGenerator {
 
@@ -139,7 +139,7 @@ public class KeyGenerator {
         private void help() {
             HelpFormatter formatter = new HelpFormatter();
 
-            formatter.printHelp("KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /path_to/mykeystore -keypasswd secret -dnname \"CN=oxAuth CA Certificate\" -expiration 365", options);
+            formatter.printHelp("KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /path_to/mykeystore.jks -keypasswd secret -dnname \"CN=oxAuth CA Certificate\" -expiration 365", options);
             System.exit(0);
         }
     }
