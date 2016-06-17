@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
@@ -191,6 +192,8 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setScope("openid");
         tokenRequest.setAuthUsername(clientId);
@@ -199,6 +202,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         tokenRequest.addCustomParameter("pwd", userSecret);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
