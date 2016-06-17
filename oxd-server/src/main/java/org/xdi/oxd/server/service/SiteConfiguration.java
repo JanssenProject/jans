@@ -103,6 +103,13 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "rpt_created_at")
     private Date rptCreatedAt;
 
+    @JsonProperty(value = "gat")
+    private String gat;
+    @JsonProperty(value = "gat_expires_at")
+    private Date gatExpiresAt;
+    @JsonProperty(value = "gat_created_at")
+    private Date gatCreatedAt;
+
     public SiteConfiguration() {
     }
 
@@ -153,6 +160,10 @@ public class SiteConfiguration implements Serializable {
         this.rpt = conf.rpt;
         this.rptExpiresAt = conf.rptExpiresAt;
         this.rptCreatedAt = conf.rptCreatedAt;
+
+        this.gat = conf.gat;
+        this.gatExpiresAt = conf.gatExpiresAt;
+        this.gatCreatedAt = conf.gatCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
     }
@@ -476,6 +487,30 @@ public class SiteConfiguration implements Serializable {
         return null;
     }
 
+    public String getGat() {
+        return gat;
+    }
+
+    public void setGat(String gat) {
+        this.gat = gat;
+    }
+
+    public Date getGatExpiresAt() {
+        return gatExpiresAt;
+    }
+
+    public void setGatExpiresAt(Date gatExpiresAt) {
+        this.gatExpiresAt = gatExpiresAt;
+    }
+
+    public Date getGatCreatedAt() {
+        return gatCreatedAt;
+    }
+
+    public void setGatCreatedAt(Date gatCreatedAt) {
+        this.gatCreatedAt = gatCreatedAt;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -505,6 +540,9 @@ public class SiteConfiguration implements Serializable {
         sb.append(", rpt=").append(rpt);
         sb.append(", rptCreatedAt=").append(rptCreatedAt);
         sb.append(", rptExpiresIn=").append(rptExpiresAt);
+        sb.append(", gat=").append(gat);
+        sb.append(", gatCreatedAt=").append(gatCreatedAt);
+        sb.append(", gatExpiresIn=").append(gatExpiresAt);
         sb.append('}');
         return sb.toString();
     }

@@ -19,6 +19,7 @@ public enum ErrorResponseCode {
     BAD_REQUEST_NO_OXD_ID("bad_request", "oxd_id is empty or not specified or is otherwise invalid (not registered)."),
     INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
+    INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),
     UNSUPPORTED_OPERATION("unsupported_operation", "Operation is not supported by server error."),
     INVALID_OP_HOST("invalid_op_host", "Invalid op_host (empty or blank)."),
@@ -29,7 +30,8 @@ public enum ErrorResponseCode {
     NO_UMA_PATH_PARAMETER("invalid_path_parameter", "path parameter is not specified or otherwise not valid"),
     NO_UMA_TICKET_PARAMETER("invalid_ticket_parameter", "ticket parameter is not specified or otherwise is not valid"),
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
-    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT.");
+    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
+    FAILED_TO_GET_GAT("internal_error", "Failed to get GAT.");
 
     private final String code;
     private final String description;
