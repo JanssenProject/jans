@@ -30,7 +30,7 @@ public class RsProtectTest {
 
             final RsProtectParams commandParams = new RsProtectParams();
             commandParams.setOxdId(site.getOxdId());
-            commandParams.setResources(UmaFullTest.resourceList(rsProtect));
+            commandParams.setResources(UmaFullTest.resourceList(rsProtect).getResources());
 
             final Command command = new Command(CommandType.RS_PROTECT)
                     .setParamsObject(commandParams);
