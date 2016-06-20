@@ -1,8 +1,9 @@
 package org.xdi.oxd.common.params;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonUnwrapped;
-import org.xdi.oxd.rs.protect.RsResourceList;
+import org.xdi.oxd.rs.protect.RsResource;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -13,9 +14,8 @@ public class RsProtectParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
-    @JsonUnwrapped
     @JsonProperty(value = "resources")
-    private RsResourceList resources;
+    private List<RsResource> resources;
 
     public RsProtectParams() {
     }
@@ -28,11 +28,11 @@ public class RsProtectParams implements HasOxdIdParams {
         this.oxdId = oxdId;
     }
 
-    public RsResourceList getResources() {
+    public List<RsResource> getResources() {
         return resources;
     }
 
-    public void setResources(RsResourceList resources) {
+    public void setResources(List<RsResource> resources) {
         this.resources = resources;
     }
 
