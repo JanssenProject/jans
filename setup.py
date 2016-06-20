@@ -633,8 +633,8 @@ class Setup(object):
             self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
             
-            self.copyTree("%s/static/shibboleth-idp/conf/" % self.install_dir, self.idp3ConfFolder)
-            self.copyFile("%s/static/shibboleth-idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
+            self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)
+            self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
 
         if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
