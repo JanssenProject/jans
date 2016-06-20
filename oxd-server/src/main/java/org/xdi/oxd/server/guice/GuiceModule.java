@@ -11,6 +11,7 @@ import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.service.SiteStorage;
 import org.xdi.oxd.server.service.SocketService;
 import org.xdi.oxd.server.service.ValidationService;
 
@@ -30,6 +31,7 @@ public class GuiceModule extends AbstractModule {
         bind(HttpService.class).in(Singleton.class);
         bind(DiscoveryService.class).in(Singleton.class);
         bind(ValidationService.class).in(Singleton.class);
+        bind(SiteStorage.class).in(Singleton.class);
 
         bind(Configuration.class).toProvider(ConfigurationService.class);
     }
