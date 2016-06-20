@@ -70,7 +70,7 @@ public class SiteStorage {
     private Object getLock(String fileName) {
         Object lock = locks.get(fileName);
         if (lock == null) {
-            locks.put(fileName, new Object());
+            locks.put(fileName, lock);
         }
         return lock;
     }
@@ -86,6 +86,7 @@ public class SiteStorage {
 
         sites.put(file.getName(), siteConfiguration);
         siteFiles.put(file.getName(), file);
+        locks.put(file.getName(), new Object());
     }
 
     private File createSiteFile(String fileName) throws IOException {
