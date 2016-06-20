@@ -494,4 +494,13 @@ public final class StringHelper {
         }
         return new StringBuffer(prefix.length() + name.length() + 1).append(prefix).append('.').append(name).toString();
     }
+
+	public static String trimAll(String string) {
+		if (isEmpty(string)) {
+			return string;
+		}
+		
+		return string.trim();
+	}
+
 }
