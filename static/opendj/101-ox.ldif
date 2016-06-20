@@ -2148,6 +2148,12 @@ attributeTypes: ( oxCountInvalidLogin-oid NAME 'oxCountInvalidLogin'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( gluuIMAPData-oid NAME 'gluuIMAPData'
+  DESC 'This data has information about your imap connection'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
    ( oxId $ oxSectorIdentifierURI )
     X-ORIGIN 'Gluu created objectclass' )
@@ -2164,7 +2170,7 @@ objectclasses: ( gluuPerson-oid NAME 'gluuPerson' SUP top STRUCTURAL MUST object
   $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture
   $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified
   $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion
-  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode )
+  $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuGroup-oid NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
  ( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
