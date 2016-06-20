@@ -23,6 +23,7 @@ class SiteStorage {
 
     private final Map<String, SiteConfiguration> sites = Maps.newConcurrentMap();
     private final Map<String, File> siteFiles = Maps.newConcurrentMap();
+    private final Map<String, Object> locks = Maps.newConcurrentMap();
 
     private final String confDirectoryPath;
 
@@ -46,6 +47,7 @@ class SiteStorage {
 
             sites.put(name, SiteConfigurationService.createConfiguration(fis));
             siteFiles.put(name, file);
+            locks.put(name, new Object());
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -55,13 +57,24 @@ class SiteStorage {
     }
 
     public void update(SiteConfiguration siteConfiguration) throws IOException {
+
         String fileName = siteConfiguration.getOxdId() + ".json";
 
-        File file = siteFiles.get(fileName);
-        Preconditions.checkNotNull(file);
-        CoreUtils.createJsonMapper().writerWithDefaultPrettyPrinter().writeValue(file, siteConfiguration);
+        synchronized (getLock(fileName)) {
+            File file = siteFiles.get(fileName);
+            Preconditions.checkNotNull(file);
+            CoreUtils.createJsonMapper().writerWithDefaultPrettyPrinter().writeValue(file, siteConfiguration);
 
-        sites.put(file.getName(), siteConfiguration);
+            sites.put(file.getName(), siteConfiguration);
+        }
+    }
+
+    private Object getLock(String fileName) {
+        Object lock = locks.get(fileName);
+        if (lock == null) {
+            locks.put(fileName, new Object());
+        }
+        return lock;
     }
 
     public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
