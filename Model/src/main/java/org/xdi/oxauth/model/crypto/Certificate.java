@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 import org.bouncycastle.jce.provider.JCEECPublicKey;
 import org.bouncycastle.jce.provider.JCERSAPublicKey;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
@@ -90,10 +90,14 @@ public class Certificate {
     public String toString() {
         try {
             StringWriter stringWriter = new StringWriter();
-            PEMWriter pemWriter = new PEMWriter(stringWriter);
-            pemWriter.writeObject(x509Certificate);
-            pemWriter.flush();
-            return stringWriter.toString();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
+            try {
+				pemWriter.writeObject(x509Certificate);
+				pemWriter.flush();
+				return stringWriter.toString();
+			} finally {
+				pemWriter.close();
+			}
         } catch (IOException e) {
             return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
