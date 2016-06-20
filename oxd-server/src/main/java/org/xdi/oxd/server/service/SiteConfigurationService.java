@@ -40,10 +40,10 @@ public class SiteConfigurationService {
     ValidationService validationService;
 
     @Inject
-    public SiteConfigurationService(ConfigurationService configurationService, ValidationService validationService) {
-        storage = new SiteStorage(configurationService.getConfDirectoryPath());
+    public SiteConfigurationService(ConfigurationService configurationService, ValidationService validationService, SiteStorage storage) {
         this.configurationService = configurationService;
         this.validationService = validationService;
+        this.storage = storage;
     }
 
     public void removeAllExistingConfigurations() {

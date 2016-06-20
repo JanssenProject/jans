@@ -2,6 +2,7 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import java.util.Map;
  * @version 0.9, 20/06/2016
  */
 
-class SiteStorage {
+public class SiteStorage {
 
     private static final Logger LOG = LoggerFactory.getLogger(SiteStorage.class);
 
@@ -25,11 +26,8 @@ class SiteStorage {
     private final Map<String, File> siteFiles = Maps.newConcurrentMap();
     private final Map<String, Object> locks = Maps.newConcurrentMap();
 
-    private final String confDirectoryPath;
-
-    SiteStorage(String confDirectoryPath) {
-        this.confDirectoryPath = confDirectoryPath;
-    }
+    @Inject
+    private ConfigurationService configuration;
 
     public Map<String, File> getSiteFiles() {
         return siteFiles;
@@ -91,7 +89,7 @@ class SiteStorage {
     }
 
     private File createSiteFile(String fileName) throws IOException {
-        String filePath = confDirectoryPath;
+        String filePath = configuration.getConfDirectoryPath();
         if (!filePath.endsWith(File.separator)) {
             filePath = filePath + File.separator;
         }
