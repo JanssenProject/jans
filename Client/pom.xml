@@ -138,8 +138,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk16</artifactId>
-			<scope>provided</scope>
+			<artifactId>bcprov-jdk15on</artifactId>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

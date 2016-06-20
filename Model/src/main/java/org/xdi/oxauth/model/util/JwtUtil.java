@@ -19,7 +19,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMParser;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientRequest;
@@ -588,7 +588,7 @@ public class JwtUtil {
 	            JSONArray certChain = jsonKeyValue.getJSONArray(CERTIFICATE_CHAIN);
 	            String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
 	            StringReader sr = new StringReader(certificateString);
-	            PEMReader pemReader = new PEMReader(sr);
+	            PEMParser pemReader = new PEMParser(sr);
 	            X509Certificate cert = (X509CertificateObject) pemReader.readObject();
 	            Certificate certificate = new Certificate(signatureAlgorithm, cert);
 	            publicKey.setCertificate(certificate);
