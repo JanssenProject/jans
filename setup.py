@@ -150,7 +150,9 @@ class Setup(object):
         self.staticFolder = '%s/static/opendj' % self.install_dir
         self.indexJson = '%s/static/opendj/opendj_index.json' % self.install_dir
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
-        self.oxauth_openid_key_json = "%s/oxauth-web-keys.json" % self.certFolder
+        self.oxauth_openid_jwks_fn = "%s/oxauth-keys.json" % self.certFolder
+        self.oxauth_openid_jks_fn = "%s/oxauth-keys.jks" % self.certFolder
+        self.oxauth_openid_jks_pass = None
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
@@ -267,15 +269,23 @@ class Setup(object):
         self.oxasimba_config_base64 = None
 
 
+        # OpenID key generation default setting
+        self.default_openid_jks_dn_name = "CN=oxAuth CA Certificates"
+        self.default_key_algs = "RS256 RS384 RS512 ES256 ES384 ES512"        
+
         # oxTrust SCIM configuration
         self.scim_rs_client_id = None
-        self.scim_rp_client_id = None
         self.scim_rs_client_jwks = None
-        self.scim_rp_client_jwks = None
         self.scim_rs_client_base64_jwks = None
-        self.scim_rp_client_base64_jwks = None
+        self.scim_rs_client_jks_fn = "%s/scim-rs.jks" % self.certFolder
+        self.scim_rs_client_jks_pass = None
+        self.scim_rs_client_jks_pass_encoded = None
 
-        self.scim_rp_client_openid_key_json = '%s/scim-rp-openid-keys.json' % self.outputFolder
+        self.scim_rp_client_id = None
+        self.scim_rp_client_jwks = None
+        self.scim_rp_client_base64_jwks = None
+        self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
+        self.scim_rp_client_jks_pass = 'secret'
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
@@ -443,6 +453,8 @@ class Setup(object):
             self.ldapPass = self.getPW()
         if not self.shibJksPass:
             self.shibJksPass = self.getPW()
+        if not self.oxauthJksPass:
+            self.oxauthJksPass = self.getPW()
         if not self.asimbaJksPass:
             self.asimbaJksPass = self.getPW()
         if not self.encode_salt:
@@ -921,8 +933,41 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), keystoreFN])
         self.run(["/bin/chmod", '700', keystoreFN])
 
-    def gen_openid_keys(self):
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, expiation = 365, dn_name = None, key_algs = None):
         self.logIt("Generating oxAuth OpenID Connect keys")
+        
+        if dn_name == None:
+            dn_name = self.default_openid_jks_dn_name
+        
+        if key_algs == None:
+            key_algs = self.default_key_algs
+
+        if jks_create == True:
+            self.logIt("Creating empty JKS keystore")
+            # Create JKS with dummy key
+            self.run([self.keytoolCommand,
+                      '-genkey',
+                      '-keystore',
+                      jks_path,
+                      '-storepass',
+                      'changeit',
+                      '-keypass',
+                      'changeit',
+                      '-dname',
+                      '"%s"' % dn_name])
+
+            # Delete dummy key from JKS
+            self.run([self.keytoolCommand,
+                      '-delete',
+                      '-keystore',
+                      jks_path,
+                      '-storepass',
+                      'changeit',
+                      '-keypass',
+                      'changeit',
+                      '-dname',
+                      '"%s"' % dn_name])
+
         self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.tomcat_user_home_lib)
@@ -945,7 +990,17 @@ class Setup(object):
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(requiredJars),
-                        "org.xdi.oxauth.util.KeyGenerator"])
+                        "org.xdi.oxauth.util.KeyGenerator",
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-algorithms",
+                        key_algs,
+                        "-dnname",
+                        dn_name,
+                        "-expiration",
+                        key_algs])
         args = ["/bin/su", "tomcat", "-c", cmd]
 
         self.logIt("Runnning: %s" % " ".join(args))
@@ -982,8 +1037,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def generate_oxauth_openid_keys(self):
-        jwks = self.gen_openid_keys()
-        self.write_openid_keys(self.oxauth_openid_key_json, jwks)
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass)
+        self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
         if not lines:
@@ -1003,13 +1058,16 @@ class Setup(object):
                                      + string.digits) for _ in range(N))
 
     def generate_scim_configuration(self):
-        self.scim_rs_client_jwks = self.gen_openid_keys()
-        self.scim_rp_client_jwks = self.gen_openid_keys()
+        self.scim_rs_client_jks_pass = self.getPW()
 
+        cmd = "%s %s" % (self.oxEncodePWCommand, self.scim_rs_client_jks_pass)
+        self.scim_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
+        
+        self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rp_client_jks_pass)
         self.scim_rs_client_base64_jwks = self.generate_base64_string(self.scim_rs_client_jwks, 1)
-        self.scim_rp_client_base64_jwks = self.generate_base64_string(self.scim_rp_client_jwks, 1)
 
-        self.write_openid_keys(self.scim_rp_client_openid_key_json, self.scim_rp_client_jwks)
+        self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
+        self.scim_rp_client_base64_jwks = self.generate_base64_string(self.scim_rp_client_jwks, 1)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -1673,7 +1731,7 @@ class Setup(object):
         self.oxauth_config_base64 = self.generate_base64_ldap_file(self.oxauth_config_json)
         self.oxauth_static_conf_base64 = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
         self.oxauth_error_base64 = self.generate_base64_ldap_file(self.oxauth_error_json)
-        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_key_json)
+        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
 
         self.oxtrust_config_base64 = self.generate_base64_ldap_file(self.oxtrust_config_json);
         self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
