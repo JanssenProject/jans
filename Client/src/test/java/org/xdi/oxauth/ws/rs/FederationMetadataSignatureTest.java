@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
-import org.bouncycastle.jce.provider.JCERSAPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.Test;
@@ -62,8 +62,8 @@ public class FederationMetadataSignatureTest {
         final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
 
         final KeyPair keyPair = JwtUtil.generateRsaKey();
-        final JCERSAPrivateCrtKey jcersaPrivateCrtKey = (JCERSAPrivateCrtKey) keyPair.getPrivate();
-        final JCERSAPublicKey jcersaPublicKey = (JCERSAPublicKey) keyPair.getPublic();
+        final BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
+        final BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
 
         final RSAPrivateKey privateKey = new RSAPrivateKey(
                 jcersaPrivateCrtKey.getModulus(),
