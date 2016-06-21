@@ -27,8 +27,8 @@ import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -64,8 +64,8 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
         keyGen.initialize(ecSpec, new SecureRandom());
 
         this.keyPair = keyGen.generateKeyPair();
-        JCEECPrivateKey privateKeySpec = (JCEECPrivateKey) keyPair.getPrivate();
-        JCEECPublicKey publicKeySpec = (JCEECPublicKey) keyPair.getPublic();
+        BCECPrivateKey privateKeySpec = (BCECPrivateKey) keyPair.getPrivate();
+        BCECPublicKey publicKeySpec = (BCECPublicKey) keyPair.getPublic();
 
         BigInteger x = publicKeySpec.getQ().getX().toBigInteger();
         BigInteger y = publicKeySpec.getQ().getY().toBigInteger();
