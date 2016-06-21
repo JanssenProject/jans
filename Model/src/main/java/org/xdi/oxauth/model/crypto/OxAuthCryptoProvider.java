@@ -22,6 +22,7 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 21, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -69,6 +70,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
             keyStore = KeyStore.getInstance("JKS");
             try {
+                File f = new File(keyStoreFile);
+                if (!f.exists()) {
+                    keyStore.load(null, keyStoreSecret.toCharArray());
+                    FileOutputStream fos = new FileOutputStream(keyStoreFile);
+                    keyStore.store(fos, keyStoreSecret.toCharArray());
+                    fos.close();
+                }
                 final InputStream is = new FileInputStream(keyStoreFile);
                 keyStore.load(is, keyStoreSecret.toCharArray());
             } catch (Exception e) {
