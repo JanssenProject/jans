@@ -473,7 +473,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP256R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
@@ -492,7 +492,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP384R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
@@ -511,7 +511,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP521R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
