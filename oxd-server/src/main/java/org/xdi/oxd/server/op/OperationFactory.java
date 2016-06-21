@@ -56,6 +56,8 @@ public class OperationFactory {
                     return new RpGetRptOperation(command, injector);
                 case RP_AUTHORIZE_RPT:
                     return new RpAuthorizeRptOperation(command, injector);
+                case RP_GET_GAT:
+                    return new RpGetGatOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
