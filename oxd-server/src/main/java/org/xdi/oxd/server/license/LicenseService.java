@@ -154,6 +154,10 @@ public class LicenseService {
         return licenseChanged;
     }
 
+    public boolean isFreeLicense() {
+        return getThreadsCount() == 1 && !isLicenseValid();
+    }
+
     public int getThreadsCount() {
         if (metadata == null || metadata.getThreadsCount() <= 0) {
             return 1; // 0 is used for n/a - gain at least 2 threads
