@@ -55,7 +55,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         };
 
         ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
-        registrar.register(params.getResources().getResources());
+        registrar.register(params.getResources());
 
         persist(registrar, site);
 
@@ -88,8 +88,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     }
 
     private void validate(RsProtectParams params) {
-        if (params.getResources() == null || params.getResources().getResources() == null ||
-                params.getResources().getResources().isEmpty()) {
+        if (params.getResources() == null || params.getResources().isEmpty()) {
             throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
         }
     }

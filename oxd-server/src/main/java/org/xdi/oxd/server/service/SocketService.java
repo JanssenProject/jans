@@ -68,6 +68,11 @@ public class SocketService {
             }
 
             serverSocket.setSoTimeout(conf.getTimeOutInSeconds() * 1000);
+            if (licenseService.isFreeLicense()) {
+                LOG.info("Server runs in free license mode which delays commands execution on 0.5 second for each command.\n " +
+                        "In order to remove the transaction limitations placed on the free version of oxD, " +
+                        "you need to purchase a commercial license at oxd.gluu.org");
+            }
             LOG.info("Server socket is bound to port: {}, with timeout: {} seconds. Start listening for notifications.", port, conf.getTimeOutInSeconds());
             while (!shutdown) {
                 try {

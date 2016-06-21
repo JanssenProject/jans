@@ -98,7 +98,7 @@ public class UmaFullTest {
     private void protect(String rsProtect) throws IOException {
         final RsProtectParams commandParams = new RsProtectParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setResources(resourceList(rsProtect));
+        commandParams.setResources(resourceList(rsProtect).getResources());
 
         final RsProtectResponse resp = client.send(new Command(CommandType.RS_PROTECT, commandParams)).dataAsResponse(RsProtectResponse.class);
         assertNotNull(resp);
