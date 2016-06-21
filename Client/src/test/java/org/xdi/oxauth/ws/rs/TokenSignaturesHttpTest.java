@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.bouncycastle.jce.provider.JCEECPrivateKey;
-import org.bouncycastle.jce.provider.JCEECPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
 import org.bouncycastle.jce.provider.JCERSAPublicKey;
 import org.testng.annotations.Parameters;
@@ -788,8 +788,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate ECDSA Key
         KeyPair keyPair = JwtUtil.generateKeyES256();
-        JCEECPrivateKey privateKey = (JCEECPrivateKey) keyPair.getPrivate();
-        JCEECPublicKey publicKey = (JCEECPublicKey) keyPair.getPublic();
+        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
+        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
 
         ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
         ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
@@ -822,8 +822,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate ECDSA Key
         KeyPair keyPair = JwtUtil.generateKeyES384();
-        JCEECPrivateKey privateKey = (JCEECPrivateKey) keyPair.getPrivate();
-        JCEECPublicKey publicKey = (JCEECPublicKey) keyPair.getPublic();
+        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
+        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
 
         ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
         ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
@@ -856,8 +856,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate ECDSA Key
         KeyPair keyPair = JwtUtil.generateKeyES512();
-        JCEECPrivateKey privateKey = (JCEECPrivateKey) keyPair.getPrivate();
-        JCEECPublicKey publicKey = (JCEECPublicKey) keyPair.getPublic();
+        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
+        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
 
         ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
         ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
