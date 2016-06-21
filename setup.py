@@ -1506,7 +1506,7 @@ class Setup(object):
 
         self.orgName = self.getPrompt("Enter Organization Name")
         self.admin_email = self.getPrompt('Enter email address for support at your organization')
-        self.tomcat_max_ram = self.getPrompt("Enter maximum RAM for tomcat in MB", '1536')
+        self.tomcat_max_ram = self.getPrompt("Enter maximum RAM for tomcat in MB", '3072')
         randomPW = self.getPW()
         self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
