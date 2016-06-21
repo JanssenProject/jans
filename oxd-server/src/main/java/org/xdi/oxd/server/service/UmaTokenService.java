@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.uma.CreateGatService;
 import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
@@ -14,6 +15,7 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.uma.GatRequest;
 import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
@@ -95,6 +97,42 @@ public class UmaTokenService {
         LOG.error("Failed to get RPT for site: " + site);
         throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
+
+    public String getGat(String oxdId, List<String> scopes) {
+           SiteConfiguration site = siteService.getSite(oxdId);
+           UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
+
+           if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
+               boolean isExpired = site.getGatExpiresAt().after(new Date());
+               if (!isExpired) {
+                   LOG.debug("GAT from site configuration, GAT: " + site.getGat() + ", site: " + site);
+                   return site.getGat();
+               }
+           }
+
+           final CreateGatService gatService = UmaClientFactory.instance().createGatService(discovery, httpService.getClientExecutor());
+           final String aat = getAat(oxdId).getToken();
+
+           final RPTResponse response = gatService.createGAT("Bearer " + aat, site.opHostWithoutProtocol(), new GatRequest(scopes));
+           if (response != null && StringUtils.isNotBlank(response.getRpt())) {
+               RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
+               RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + getPat(oxdId).getToken(), response.getRpt(), "");
+               LOG.debug("RPT " + response.getRpt() + ", status: " + status);
+               if (status.getActive()) {
+                   LOG.debug("RPT is successfully obtained from AS. RPT: {}", response.getRpt());
+
+                   site.setGat(response.getRpt());
+                   site.setGatCreatedAt(status.getIssuedAt());
+                   site.setGatExpiresAt(status.getExpiresAt());
+                   siteService.updateSilently(site);
+
+                   return response.getRpt();
+               }
+           }
+
+           LOG.error("Failed to get GAT for site: " + site);
+           throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_GAT);
+       }
 
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
