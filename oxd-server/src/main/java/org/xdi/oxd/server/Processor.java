@@ -73,7 +73,7 @@ public class Processor {
     private void enforceLicenseRestrictions(Command command) {
         try {
             // if thread count 1 and no valid license then force 0.5 seconds delay
-            if (licenseService.getThreadsCount() == 1 && !licenseService.isLicenseValid()) {
+            if (licenseService.isFreeLicense()) {
                 forceWait(500);
             }
         } catch (Exception e) {
