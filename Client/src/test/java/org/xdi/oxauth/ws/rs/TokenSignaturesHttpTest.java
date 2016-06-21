@@ -8,8 +8,8 @@ package org.xdi.oxauth.ws.rs;
 
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
-import org.bouncycastle.jce.provider.JCERSAPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -683,8 +683,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate RSA Key
         KeyPair keyPair = JwtUtil.generateRsaKey();
-        JCERSAPrivateCrtKey jcersaPrivateCrtKey = (JCERSAPrivateCrtKey) keyPair.getPrivate();
-        JCERSAPublicKey jcersaPublicKey = (JCERSAPublicKey) keyPair.getPublic();
+        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
+        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = new RSAPrivateKey(
                 jcersaPrivateCrtKey.getModulus(),
                 jcersaPrivateCrtKey.getPrivateExponent());
@@ -718,8 +718,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate RSA Key
         KeyPair keyPair = JwtUtil.generateRsaKey();
-        JCERSAPrivateCrtKey jcersaPrivateCrtKey = (JCERSAPrivateCrtKey) keyPair.getPrivate();
-        JCERSAPublicKey jcersaPublicKey = (JCERSAPublicKey) keyPair.getPublic();
+        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
+        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = new RSAPrivateKey(
                 jcersaPrivateCrtKey.getModulus(),
                 jcersaPrivateCrtKey.getPrivateExponent());
@@ -753,8 +753,8 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // Generate RSA Key
         KeyPair keyPair = JwtUtil.generateRsaKey();
-        JCERSAPrivateCrtKey jcersaPrivateCrtKey = (JCERSAPrivateCrtKey) keyPair.getPrivate();
-        JCERSAPublicKey jcersaPublicKey = (JCERSAPublicKey) keyPair.getPublic();
+        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
+        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = new RSAPrivateKey(
                 jcersaPrivateCrtKey.getModulus(),
                 jcersaPrivateCrtKey.getPrivateExponent());
