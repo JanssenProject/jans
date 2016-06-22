@@ -1081,7 +1081,7 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
-oxAuthClaimName: IMAP_Data
+oxAuthClaimName: imap_data
 gluuStatus: active
 inum: %(inumOrg)s!0005!42E1
 objectClass: top
