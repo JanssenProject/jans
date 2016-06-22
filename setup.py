@@ -942,6 +942,7 @@ class Setup(object):
         if key_algs == None:
             key_algs = self.default_key_algs
 
+        # We can remove this once KeyGenerator will do the same
         if jks_create == True:
             self.logIt("Creating empty JKS keystore")
             # Create JKS with dummy key
