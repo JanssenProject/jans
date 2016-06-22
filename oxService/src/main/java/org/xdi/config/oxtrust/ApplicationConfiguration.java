@@ -134,7 +134,8 @@ public final class ApplicationConfiguration implements Serializable {
 	private String umaClientKeyId;
 	private String umaResourceId;
 	private String umaScope;
-	private String umaClientPrivateKeyPath;
+	private String umaClientKeyStoreFile;
+	private String umaClientKeyStorePassword;
 
 	private String cssLocation;
 	private String jsLocation;
@@ -769,12 +770,20 @@ public final class ApplicationConfiguration implements Serializable {
 		this.umaScope = umaScope;
 	}
 
-	public String getUmaClientPrivateKeyPath() {
-		return umaClientPrivateKeyPath;
+	public String getUmaClientKeyStoreFile() {
+		return umaClientKeyStoreFile;
 	}
 
-	public void setUmaClientPrivateKeyPath(String umaClientPrivateKeyPath) {
-		this.umaClientPrivateKeyPath = umaClientPrivateKeyPath;
+	public void setUmaClientKeyStoreFile(String umaClientKeyStoreFile) {
+		this.umaClientKeyStoreFile = umaClientKeyStoreFile;
+	}
+
+	public String getUmaClientKeyStorePassword() {
+		return umaClientKeyStorePassword;
+	}
+
+	public void setUmaClientKeyStorePassword(String umaClientKeyStorePassword) {
+		this.umaClientKeyStorePassword = umaClientKeyStorePassword;
 	}
 
 	public String getCssLocation() {
