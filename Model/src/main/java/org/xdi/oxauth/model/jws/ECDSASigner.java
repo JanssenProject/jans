@@ -124,7 +124,7 @@ public class ECDSASigner extends AbstractJwsSigner {
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);
-            BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+            BigInteger q = ((ECCurve.AbstractFp) ecSpec.getCurve()).getField().getCharacteristic();
             ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
             ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
             ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
