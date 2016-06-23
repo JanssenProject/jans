@@ -7,8 +7,8 @@
 package org.xdi.oxauth.model.crypto.signature;
 
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jce.provider.JCERSAPrivateCrtKey;
-import org.bouncycastle.jce.provider.JCERSAPublicKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.KeyFactory;
@@ -49,8 +49,8 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
         KeyPair keyPair = keyGen.generateKeyPair();
 
-        JCERSAPrivateCrtKey jcersaPrivateCrtKey = (JCERSAPrivateCrtKey) keyPair.getPrivate();
-        JCERSAPublicKey jcersaPublicKey = (JCERSAPublicKey) keyPair.getPublic();
+        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
+        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
 
         rsaPrivateKey = new RSAPrivateKey(jcersaPrivateCrtKey.getModulus(),
                 jcersaPrivateCrtKey.getPrivateExponent());
