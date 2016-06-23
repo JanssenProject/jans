@@ -23,25 +23,25 @@ import java.util.UUID;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version May 4, 2016
+ * @version June 15, 2016
  */
 public class KeyGenerator {
-	public static void main(String[] args) throws Exception {
-    	SecurityProviderUtility.installBCProvider(true);
-    	
-    	Calendar cal = Calendar.getInstance();
-    	Date startDate = cal.getTime();
+    public static void main(String[] args) throws Exception {
+        SecurityProviderUtility.installBCProvider(true);
 
-    	cal.add(Calendar.YEAR, 3);
-    	Date expirationDate = cal.getTime();
-    	
-    	String dnName = "C=US,ST=TX,L=Austin,O=Gluu,CN=Gluu oxPush2 U2F v1.0.0";
+        Calendar cal = Calendar.getInstance();
+        Date startDate = cal.getTime();
 
-    	generateU2fAttestationKeys(startDate, expirationDate, dnName);
-	}
+        cal.add(Calendar.YEAR, 3);
+        Date expirationDate = cal.getTime();
+
+        String dnName = "C=US,ST=TX,L=Austin,O=Gluu,CN=Gluu oxPush2 U2F v1.0.0";
+
+        generateU2fAttestationKeys(startDate, expirationDate, dnName);
+    }
 
     public static void generateU2fAttestationKeys(Date startDate, Date expirationDate, String dnName) throws Exception {
-    	ECDSAKeyFactory keyFactory = new ECDSAKeyFactory(
+        ECDSAKeyFactory keyFactory = new ECDSAKeyFactory(
                 SignatureAlgorithm.ES256,
                 null);
         Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
@@ -49,7 +49,7 @@ public class KeyGenerator {
         key.setCertificate(certificate);
 
         key.setKeyType(SignatureAlgorithm.ES256.getFamily());
-        key.setUse(Use.SIGNATURE.toValue());
+        key.setUse(Use.SIGNATURE.toString());
         key.setAlgorithm(SignatureAlgorithm.ES256.getName());
         key.setKeyId(UUID.randomUUID().toString());
         key.setExpirationTime(expirationDate.getTime());

@@ -30,7 +30,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 5, 2016
+ * @version June 15, 2016
  */
 @Name("keyGeneratorTimer")
 @AutoCreate
@@ -107,8 +107,7 @@ public class KeyGeneratorTimer {
         JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
                 configurationFactory.getConfiguration().getKeyRegenerationInterval(),
                 configurationFactory.getConfiguration().getIdTokenLifetime(),
-                ConfigurationFactory.instance().getConfiguration(),
-                ConfigurationFactory.instance().getWebKeys());
+                ConfigurationFactory.instance().getConfiguration());
 
         JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
         for (int i = 0; i < keys.length(); i++) {
@@ -125,8 +124,7 @@ public class KeyGeneratorTimer {
                             key.getString(KEY_ID),
                             key.getString(EXPIRATION_TIME));
                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                            ConfigurationFactory.instance().getConfiguration(),
-                            ConfigurationFactory.instance().getWebKeys());
+                            ConfigurationFactory.instance().getConfiguration());
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
                 } else {
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);

@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version February 5, 2016
+ * @version June 15, 2016
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -107,7 +107,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertTrue(new JSONArray(response.getClaims().get(LOGOUT_URI.toString())).getString(0).equals(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
-                SignatureAlgorithm.fromName(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+                SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
         assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()));
         assertEquals(KeyEncryptionAlgorithm.RSA1_5,
                 KeyEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
@@ -116,7 +116,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 BlockEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
         assertNotNull(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS384,
-                SignatureAlgorithm.fromName(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())));
+                SignatureAlgorithm.fromString(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())));
         assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()));
         assertEquals(KeyEncryptionAlgorithm.A128KW,
                 KeyEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
@@ -125,7 +125,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 BlockEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
         assertNotNull(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS256,
-                SignatureAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())));
+                SignatureAlgorithm.fromString(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())));
         assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString()));
         assertEquals(KeyEncryptionAlgorithm.A256KW,
                 KeyEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
@@ -137,7 +137,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.ES256,
-                SignatureAlgorithm.fromName(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
+                SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
         JSONArray scopesJsonArray = new JSONArray(response.getClaims().get(SCOPES.toString()));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {

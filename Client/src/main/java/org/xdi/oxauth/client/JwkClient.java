@@ -11,7 +11,9 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
@@ -28,7 +30,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
@@ -127,22 +129,22 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
                             jsonWebKey.setUse(Use.fromString(jsonKeyValue.getString(KEY_USE)));
                         }
                         if (jsonKeyValue.has(ALGORITHM)) {
-                            jsonWebKey.setAlg(jsonKeyValue.getString(ALGORITHM));
+                            jsonWebKey.setAlg(SignatureAlgorithm.fromString(jsonKeyValue.getString(ALGORITHM)));
                         }
                         if (jsonKeyValue.has(MODULUS)) {
-                            jsonWebKey.getPublicKey().setN(jsonKeyValue.getString(MODULUS));
+                            jsonWebKey.setN(jsonKeyValue.getString(MODULUS));
                         }
                         if (jsonKeyValue.has(EXPONENT)) {
-                            jsonWebKey.getPublicKey().setE(jsonKeyValue.getString(EXPONENT));
+                            jsonWebKey.setE(jsonKeyValue.getString(EXPONENT));
                         }
                         if (jsonKeyValue.has(CURVE)) {
-                            jsonWebKey.setCrv(jsonKeyValue.getString(CURVE));
+                            jsonWebKey.setCrv(ECEllipticCurve.fromString(jsonKeyValue.getString(CURVE)));
                         }
                         if (jsonKeyValue.has(X)) {
-                            jsonWebKey.getPublicKey().setX(jsonKeyValue.getString(X));
+                            jsonWebKey.setX(jsonKeyValue.getString(X));
                         }
                         if (jsonKeyValue.has(Y)) {
-                            jsonWebKey.getPublicKey().setY(jsonKeyValue.getString(Y));
+                            jsonWebKey.setY(jsonKeyValue.getString(Y));
                         }
 
                         jwkList.add(jsonWebKey);

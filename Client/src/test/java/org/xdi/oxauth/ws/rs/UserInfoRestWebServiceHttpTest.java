@@ -17,6 +17,7 @@ import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
@@ -36,7 +37,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version August 21, 2015
+ * @version June 15, 2016
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -394,6 +395,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -405,7 +408,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
         //jwtAuthorizationRequest.addUserInfoClaim(new Claim("gluuStatus", ClaimValue.createEssential(true)));
