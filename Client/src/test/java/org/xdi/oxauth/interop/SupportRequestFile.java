@@ -14,6 +14,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -36,7 +37,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Support Request File
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class SupportRequestFile extends BaseTest {
 
@@ -79,7 +80,10 @@ public class SupportRequestFile extends BaseTest {
         authorizationRequest.setState(state);
 
         try {
-            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
+            JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                    authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
@@ -92,7 +96,7 @@ public class SupportRequestFile extends BaseTest {
             String hash = JwtUtil.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
             String fileName = UUID.randomUUID().toString() + ".txt";
             String filePath = requestFileBasePath + File.separator + fileName;
-            String fileUrl = requestFileBaseUrl + "/" + fileName;// + "#" + hash;
+            String fileUrl = requestFileBaseUrl + "/" + fileName + "#" + hash;
             FileWriter fw = new FileWriter(filePath);
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(authJwt);

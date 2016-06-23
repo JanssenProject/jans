@@ -6,27 +6,63 @@
 
 package org.xdi.oxauth.model.jwk;
 
+import com.google.common.base.Strings;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+
 import java.util.List;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
+    private String kid;
     private KeyType kty;
     private Use use;
-    private String alg;
-    private String kid;
+    private SignatureAlgorithm alg;
     private Long exp;
-    private String crv;
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    private ECEllipticCurve crv;
     private List<String> x5c;
 
+    /**
+     * Modulus
+     */
+    private String n;
+
+    /**
+     * Exponent
+     */
+    private String e;
+
+    private String x;
+    private String y;
+
     public JSONWebKey() {
-        privateKey = new PrivateKey();
-        publicKey = new PublicKey();
+    }
+
+    /**
+     * Returns the Key ID. The Key ID member can be used to match a specific key. This can be used, for instance,
+     * to choose among a set of keys within the JWK during key rollover.
+     *
+     * @return The Key ID.
+     */
+    public String getKid() {
+        return kid;
+    }
+
+    /**
+     * Sets the Key ID.
+     *
+     * @param kid The Key ID.
+     */
+    public void setKid(String kid) {
+        this.kid = kid;
     }
 
     public KeyType getKty() {
@@ -55,31 +91,12 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         this.use = use;
     }
 
-    public String getAlg() {
+    public SignatureAlgorithm getAlg() {
         return alg;
     }
 
-    public void setAlg(String alg) {
+    public void setAlg(SignatureAlgorithm alg) {
         this.alg = alg;
-    }
-
-    /**
-     * Returns the Key ID. The Key ID member can be used to match a specific key. This can be used, for instance,
-     * to choose among a set of keys within the JWK during key rollover.
-     *
-     * @return The Key ID.
-     */
-    public String getKid() {
-        return kid;
-    }
-
-    /**
-     * Sets the Key ID.
-     *
-     * @param kid The Key ID.
-     */
-    public void setKid(String kid) {
-        this.kid = kid;
     }
 
     public Long getExp() {
@@ -95,7 +112,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @return The curve member that identifies the cryptographic curve used with the key.
      */
-    public String getCrv() {
+    public ECEllipticCurve getCrv() {
         return crv;
     }
 
@@ -104,24 +121,8 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @param crv The curve member that identifies the cryptographic curve used with the key.
      */
-    public void setCrv(String crv) {
+    public void setCrv(ECEllipticCurve crv) {
         this.crv = crv;
-    }
-
-    public PrivateKey getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public PublicKey getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
     }
 
     public List<String> getX5c() {
@@ -130,6 +131,106 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
 
     public void setX5c(List<String> x5c) {
         this.x5c = x5c;
+    }
+
+    /**
+     * Returns the modulus value for the RSA public key. It is represented as the base64url encoding of the value's
+     * representation.
+     *
+     * @return The modulus value for the RSA public key.
+     */
+    public String getN() {
+        return n;
+    }
+
+    /**
+     * Sets the modulus value for the RSA public key.
+     *
+     * @param n The modulus value for the RSA public key.
+     */
+    public void setN(String n) {
+        this.n = n;
+    }
+
+    /**
+     * Returns the exponent value for the RSA public key.
+     *
+     * @return The exponent value for the RSA public key.
+     */
+    public String getE() {
+        return e;
+    }
+
+    /**
+     * Sets the exponent value for the RSA public key.
+     *
+     * @param e The exponent value for the RSA public key.
+     */
+    public void setE(String e) {
+        this.e = e;
+    }
+
+    /**
+     * Returns the x member that contains the x coordinate for the elliptic curve point. It is represented as the
+     * base64url encoding of the coordinate's big endian representation.
+     *
+     * @return The x member that contains the x coordinate for the elliptic curve point.
+     */
+    public String getX() {
+        return x;
+    }
+
+    /**
+     * Sets the x member that contains the x coordinate for the elliptic curve point.
+     *
+     * @param x The x member that contains the x coordinate for the elliptic curve point.
+     */
+    public void setX(String x) {
+        this.x = x;
+    }
+
+    /**
+     * Returns the y member that contains the x coordinate for the elliptic curve point. It is represented as the
+     * base64url encoding of the coordinate's big endian representation.
+     *
+     * @return The y member that contains the x coordinate for the elliptic curve point.
+     */
+    public String getY() {
+        return y;
+    }
+
+    /**
+     * Sets the y member that contains the y coordinate for the elliptic curve point.
+     *
+     * @param y The y member that contains the y coordinate for the elliptic curve point.
+     */
+    public void setY(String y) {
+        this.y = y;
+    }
+
+    public JSONObject toJSONObject() throws JSONException {
+        JSONObject jsonObj = new JSONObject();
+
+        jsonObj.put(KEY_ID, kid);
+        jsonObj.put(KEY_TYPE, kty);
+        jsonObj.put(KEY_USE, use);
+        jsonObj.put(ALGORITHM, alg);
+        jsonObj.put(EXPIRATION_TIME, exp);
+        jsonObj.put(CURVE, crv);
+        if (!Strings.isNullOrEmpty(n)) {
+            jsonObj.put(MODULUS, n);
+        }
+        if (!Strings.isNullOrEmpty(e)) {
+            jsonObj.put(EXPONENT, e);
+        }
+        if (!Strings.isNullOrEmpty(x)) {
+            jsonObj.put(X, x);
+        }
+        if (!Strings.isNullOrEmpty(y)) {
+            jsonObj.put(Y, y);
+        }
+
+        return jsonObj;
     }
 
     @Override

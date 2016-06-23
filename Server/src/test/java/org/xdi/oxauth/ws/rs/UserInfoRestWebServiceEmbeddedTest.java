@@ -22,6 +22,7 @@ import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -42,7 +43,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version August 21, 2015
+ * @version June 15, 2016
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -91,8 +92,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
                     request.setContent(registerRequestContent.getBytes());
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    fail(e.getMessage(), e);
                 }
             }
 
@@ -110,8 +110,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     clientId = registerResponse.getClientId();
                     clientSecret = registerResponse.getClientSecret();
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -597,32 +596,39 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+                    responseTypes.add(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+                    String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim("o", ClaimValue.createEssential(true)));
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim("invalid", ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim("iname", ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim("o", ClaimValue.createEssential(true)));
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -777,32 +783,39 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String nonce = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId1, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret1);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS256, clientSecret1, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -946,32 +959,39 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String nonce = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId2, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId2, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS384, clientSecret2);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS384, clientSecret2, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -1114,32 +1134,39 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                List<String> scopes = Arrays.asList("openid");
-                String nonce = UUID.randomUUID().toString();
+                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+                    List<String> scopes = Arrays.asList("openid");
+                    String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId3, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                            responseTypes, clientId3, scopes, redirectUri, nonce);
+                    authorizationRequest.setState(state);
+                    authorizationRequest.getPrompts().add(Prompt.NONE);
+                    authorizationRequest.setAuthUsername(userId);
+                    authorizationRequest.setAuthPassword(userSecret);
 
-                JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS512, clientSecret3);
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                authorizationRequest.setRequest(authJwt);
-                System.out.println("Request JWT: " + authJwt);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                            authorizationRequest, SignatureAlgorithm.HS512, clientSecret3, cryptoProvider);
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+                    authorizationRequest.setRequest(authJwt);
+                    System.out.println("Request JWT: " + authJwt);
+
+                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.setQueryString(authorizationRequest.getQueryString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override

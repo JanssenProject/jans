@@ -14,8 +14,7 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -32,7 +31,7 @@ import static org.testng.Assert.*;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -171,10 +170,11 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtHS256(
-            final String redirectUris, final String userId, final String userSecret) throws Exception {
+            final String redirectUris, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS256");
 
         // Register client
@@ -197,17 +197,20 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        request.setUsername(userId);
-        request.setPassword(userSecret);
-        request.setScope("openid");
-        request.setAuthUsername(clientId);
-        request.setAuthPassword(clientSecret);
-        request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        request.setAudience(tokenEndpoint);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        tokenRequest.setUsername(userId);
+        tokenRequest.setPassword(userSecret);
+        tokenRequest.setScope("openid");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(request);
+        tokenClient.setRequest(tokenRequest);
         TokenResponse response1 = tokenClient.exec();
 
         showClient(tokenClient);
@@ -220,10 +223,11 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtHS384(
-            final String redirectUris, final String userId, final String userSecret) throws Exception {
+            final String redirectUris, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS384");
 
         // Register client
@@ -246,18 +250,21 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        request.setUsername(userId);
-        request.setPassword(userSecret);
-        request.setScope("openid");
-        request.setAuthUsername(clientId);
-        request.setAuthPassword(clientSecret);
-        request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        request.setAlgorithm(SignatureAlgorithm.HS384);
-        request.setAudience(tokenEndpoint);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        tokenRequest.setUsername(userId);
+        tokenRequest.setPassword(userSecret);
+        tokenRequest.setScope("openid");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(request);
+        tokenClient.setRequest(tokenRequest);
         TokenResponse response1 = tokenClient.exec();
 
         showClient(tokenClient);
@@ -270,10 +277,11 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtHS512(
-            final String redirectUris, final String userId, final String userSecret) throws Exception {
+            final String redirectUris, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS512");
 
         // Register client
@@ -296,18 +304,21 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        TokenRequest request = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-        request.setUsername(userId);
-        request.setPassword(userSecret);
-        request.setScope("openid");
-        request.setAuthUsername(clientId);
-        request.setAuthPassword(clientSecret);
-        request.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-        request.setAlgorithm(SignatureAlgorithm.HS512);
-        request.setAudience(tokenEndpoint);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        tokenRequest.setUsername(userId);
+        tokenRequest.setPassword(userSecret);
+        tokenRequest.setScope("openid");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(request);
+        tokenClient.setRequest(tokenRequest);
         TokenResponse response1 = tokenClient.exec();
 
         showClient(tokenClient);
@@ -320,11 +331,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS256(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256");
 
         // 1. Dynamic Client Registration
@@ -349,7 +361,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -360,8 +372,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -378,11 +390,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_modulus", "RS384_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS384(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384");
 
         // 1. Dynamic Client Registration
@@ -407,7 +420,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -418,8 +431,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -436,11 +449,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_modulus", "RS512_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS512(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512");
 
         // 1. Dynamic Client Registration
@@ -465,19 +479,18 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
         tokenRequest.setScope("openid");
-
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -494,11 +507,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES256(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256");
 
         // 1. Dynamic Client Registration
@@ -523,7 +537,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -534,8 +548,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -552,11 +566,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES384(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384");
 
         // 1. Dynamic Client Registration
@@ -581,7 +596,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -592,8 +607,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -610,11 +625,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES512(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512");
 
         // 1. Dynamic Client Registration
@@ -639,7 +655,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -650,8 +666,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -668,11 +684,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS256X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256X509Cert");
 
         // 1. Dynamic Client Registration
@@ -697,7 +714,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -708,8 +725,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -726,11 +743,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS384_modulus", "RS384_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS384X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384X509Cert");
 
         // 1. Dynamic Client Registration
@@ -755,7 +773,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -766,8 +784,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -784,11 +802,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS512_modulus", "RS512_privateExponent"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtRS512X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512X509Cert");
 
         // 1. Dynamic Client Registration
@@ -813,19 +832,18 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
         tokenRequest.setScope("openid");
-
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -842,11 +860,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES256_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES256X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256X509Cert");
 
         // 1. Dynamic Client Registration
@@ -871,7 +890,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -882,8 +901,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES256SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -900,11 +919,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES384_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES384X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384X509Cert");
 
         // 1. Dynamic Client Registration
@@ -929,7 +949,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -940,8 +960,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES384SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -958,11 +978,12 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "ES512_d"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void requestAccessTokenWithClientSecretJwtES512X509Cert(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
-            final String d) throws Exception {
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512X509Cert");
 
         // 1. Dynamic Client Registration
@@ -987,7 +1008,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
@@ -998,8 +1019,8 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setEcPrivateKey(privateKey);
-        tokenRequest.setKeyId("ES512SIG");
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
         tokenRequest.setAudience(tokenEndpoint);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);

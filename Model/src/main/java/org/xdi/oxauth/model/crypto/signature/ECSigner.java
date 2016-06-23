@@ -24,13 +24,15 @@ import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version June 15, 2016
  */
+@Deprecated
 public class ECSigner extends AbstractSigner {
 
     private ECDSAPrivateKey ecdsaPrivateKey;
     private ECDSAPublicKey ecdsaPublicKey;
 
+    @Deprecated
     public ECSigner(SignatureAlgorithm signatureAlgorithm, ECDSAPrivateKey ecdsaPrivateKey) throws Exception {
         super(signatureAlgorithm);
 
@@ -41,6 +43,7 @@ public class ECSigner extends AbstractSigner {
         this.ecdsaPrivateKey = ecdsaPrivateKey;
     }
 
+    @Deprecated
     public ECSigner(SignatureAlgorithm signatureAlgorithm, ECDSAPublicKey ecdsaPublicKey) throws Exception {
         super(signatureAlgorithm);
 
@@ -51,6 +54,7 @@ public class ECSigner extends AbstractSigner {
         this.ecdsaPublicKey = ecdsaPublicKey;
     }
 
+    @Deprecated
     private ECSigner(SignatureAlgorithm signatureAlgorithm) throws Exception {
         super(signatureAlgorithm);
 
@@ -59,6 +63,7 @@ public class ECSigner extends AbstractSigner {
         }
     }
 
+    @Deprecated
     @Override
     public String sign(String signingInput) throws Exception {
         if (Strings.isNullOrEmpty(signingInput)) {
@@ -66,7 +71,7 @@ public class ECSigner extends AbstractSigner {
         }
 
         try {
-            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve());
+            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());
             ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
 
             KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
@@ -92,6 +97,7 @@ public class ECSigner extends AbstractSigner {
         }
     }
 
+    @Deprecated
     @Override
     public boolean verifySignature(String signingInput, String signature) throws Exception {
         if (Strings.isNullOrEmpty(signingInput)) {
@@ -105,7 +111,7 @@ public class ECSigner extends AbstractSigner {
             byte[] sigBytes = JwtUtil.base64urldecode(signature);
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
-            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve());
+            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());
             BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
             ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
             ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
