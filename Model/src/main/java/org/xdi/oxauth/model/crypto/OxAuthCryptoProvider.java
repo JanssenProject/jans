@@ -6,7 +6,59 @@
 
 package org.xdi.oxauth.model.crypto;
 
-import com.google.common.base.Strings;
+import static org.xdi.oxauth.model.jwk.JWKParameter.ALGORITHM;
+import static org.xdi.oxauth.model.jwk.JWKParameter.CURVE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_TYPE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_USE;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.x500.X500Principal;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.codehaus.jettison.json.JSONArray;
@@ -17,37 +69,15 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.StringHelper;
+
+import com.google.common.base.Strings;
+
 import sun.security.rsa.RSAPublicKeyImpl;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version June 21, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
@@ -64,7 +94,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
-        if (!Strings.isNullOrEmpty(keyStoreFile) && !Strings.isNullOrEmpty(keyStoreSecret) && !Strings.isNullOrEmpty(dnName)) {
+        if (!Strings.isNullOrEmpty(keyStoreFile) && !Strings.isNullOrEmpty(keyStoreSecret) /* && !Strings.isNullOrEmpty(dnName) */) {
             this.keyStoreFile = keyStoreFile;
             this.keyStoreSecret = keyStoreSecret;
             this.dnName = dnName;
@@ -316,4 +346,28 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         return chain;
     }
+
+	public List<String> getKeyAliases() throws KeyStoreException {
+		return Collections.list(this.keyStore.aliases());
+	}
+
+	public SignatureAlgorithm getSignatureAlgorithm(String alias) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+		Certificate[] chain = keyStore.getCertificateChain(alias);
+		if ((chain == null) || chain.length == 0) {
+			return null;
+		}
+		
+		X509Certificate cert = (X509Certificate) chain[0];
+
+		String sighAlgName = cert.getSigAlgName();
+
+		for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
+            if (StringHelper.equalsIgnoreCase(sighAlgName, sa.getAlgorithm())) {
+            	return sa;
+            }
+		}
+
+		return null;
+	}
+
 }
