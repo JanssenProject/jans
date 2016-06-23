@@ -13,6 +13,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -28,7 +29,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Support Authentication to Token Endpoint with Symmetrically Signed JWTs
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 17, 2016
  */
 public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs extends BaseTest {
 
@@ -78,8 +79,11 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -145,8 +149,11 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
@@ -213,8 +220,11 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);

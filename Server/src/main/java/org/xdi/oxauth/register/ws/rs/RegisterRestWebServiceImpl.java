@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 5, 2016
+ * @version June 15, 2016
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -108,7 +108,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             if (r.getIdTokenSignedResponseAlg() == null) {
-                r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
+                r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
             }
 
             log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",

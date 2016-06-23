@@ -21,10 +21,11 @@ import java.util.List;
  * Represents a JSON Web Key (JWK) received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
 public class JwkResponse extends BaseResponse {
 
+    @Deprecated
     private List<JSONWebKey> keys;
 
     /**
@@ -41,6 +42,7 @@ public class JwkResponse extends BaseResponse {
      *
      * @return The list of key values.
      */
+    @Deprecated
     public List<JSONWebKey> getKeys() {
         return keys;
     }
@@ -50,6 +52,7 @@ public class JwkResponse extends BaseResponse {
      *
      * @param keys The list of key values.
      */
+    @Deprecated
     public void setKeys(List<JSONWebKey> keys) {
         this.keys = keys;
     }
@@ -75,22 +78,20 @@ public class JwkResponse extends BaseResponse {
         JSONWebKey JSONWebKey = getKeyValue(keyId);
 
         if (JSONWebKey != null) {
-            if (JSONWebKey.getPublicKey() != null) {
-                switch (JSONWebKey.getKty()) {
-                    case RSA:
-                        publicKey = new RSAPublicKey(
-                                JSONWebKey.getPublicKey().getN(),
-                                JSONWebKey.getPublicKey().getE());
-                        break;
-                    case EC:
-                        publicKey = new ECDSAPublicKey(
-                                SignatureAlgorithm.fromName(JSONWebKey.getCrv()),
-                                JSONWebKey.getPublicKey().getX(),
-                                JSONWebKey.getPublicKey().getY());
-                        break;
-                    default:
-                        break;
-                }
+            switch (JSONWebKey.getKty()) {
+                case RSA:
+                    publicKey = new RSAPublicKey(
+                            JSONWebKey.getN(),
+                            JSONWebKey.getE());
+                    break;
+                case EC:
+                    publicKey = new ECDSAPublicKey(
+                            JSONWebKey.getAlg(),
+                            JSONWebKey.getX(),
+                            JSONWebKey.getY());
+                    break;
+                default:
+                    break;
             }
         }
 
