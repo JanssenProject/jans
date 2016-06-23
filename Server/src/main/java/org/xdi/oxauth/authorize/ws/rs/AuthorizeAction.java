@@ -236,6 +236,7 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client != null) {
+
                 if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
                     permissionDenied();
                 }
@@ -264,25 +265,26 @@ public class AuthorizeAction {
                     }
                 }
 
-                if (prompts.contains(Prompt.CONSENT)) {
-                    // The authorization server prompts the user for consent before returning information to the client.
-                } else if (AuthorizeParamsValidator.validatePrompt(prompts)) {
-                    boolean done = false;
+                if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
+
                     if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (client.getTrustedClient()) {
+                        if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                             permissionGranted(session);
-                            done = true;
+                            return;
                         }
                     }
 
-                    if (!done) {
-                        ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                        if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                                Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                        org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                            permissionGranted(session);
-                        }
+
+                    if (client.getPersistClientAuthorizations()) {
+	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+	                        permissionGranted(session);
+	                        return;
+	                    }
                     }
+                   
                 } else {
                     invalidRequest();
                 }
@@ -642,12 +644,9 @@ public class AuthorizeAction {
             final Client client = clientService.getClient(clientId);
 
             if (client.getPersistClientAuthorizations()) {
-                client.setTrustedClient(true);
-                clientService.merge(client);
+	            final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
+	            clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
             }
-
-            final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
-            clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
 
             session.addPermission(clientId, true);
             sessionStateService.updateSessionState(session);
