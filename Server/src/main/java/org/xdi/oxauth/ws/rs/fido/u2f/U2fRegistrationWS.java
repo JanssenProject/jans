@@ -12,10 +12,12 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.U2fConstants;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
@@ -69,23 +71,41 @@ public class U2fRegistrationWS {
 
 	@GET
 	@Produces({ "application/json" })
-	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
+	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState, @QueryParam("enrollment_code") String enrollmentCode) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig registration with username '{0}' for appId '{1}' and session_state '{2}'", userName, appId, sessionState);
+			log.debug("Startig registration with username '{0}' for appId '{1}'. session_state '{2}', enrollment_code '{3}'", userName, appId, sessionState, enrollmentCode);
 
 			String userInum = null;
 
 			boolean twoStep = StringHelper.isNotEmpty(userName);
 			if (twoStep) {
-				boolean valid = u2fValidationService.isValidSessionState(userName, sessionState);
-				if (!valid) {
-					throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
+				boolean removeEnrollment = false;
+				if (StringHelper.isNotEmpty(sessionState)) {
+					boolean valid = u2fValidationService.isValidSessionState(userName, sessionState);
+					if (!valid) {
+						throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
+					}
+				} else if (StringHelper.isNotEmpty(enrollmentCode)) {
+					boolean valid = u2fValidationService.isValidEnrollmentCode(userName, enrollmentCode);
+					if (!valid) {
+						throw new BadInputException(String.format("enrollment_code '%s' is invalid", enrollmentCode));
+					}
+					removeEnrollment = true;
+				} else {
+					throw new BadInputException(String.format("session_state or enrollment_code is mandatory"));
 				}
-
-				userInum = userService.getUserInum(userName);
+				
+				User user = userService.getUser(userName);
+				userInum = userService.getUserInum(user);
 				if (StringHelper.isEmpty(userInum)) {
 					throw new BadInputException(String.format("Failed to find user '%s' in LDAP", userName));
+				}
+				
+				if (removeEnrollment) {
+					// We allow to use enrollment code only one time
+					user.setAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, (String) null);
+					userService.updateUser(user);
 				}
 			}
 
