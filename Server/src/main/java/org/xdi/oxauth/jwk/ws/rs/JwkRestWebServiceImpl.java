@@ -6,13 +6,11 @@
 
 package org.xdi.oxauth.jwk.ws.rs;
 
-import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -21,7 +19,7 @@ import javax.ws.rs.core.SecurityContext;
  * Provides interface for JWK REST web services
  *
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version June 15, 2016
  */
 @Name("requestJwkRestWebService")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
@@ -35,11 +33,8 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                    ConfigurationFactory.instance().getConfiguration(),
-                    ConfigurationFactory.instance().getWebKeys());
-            JSONObject jwks = cryptoProvider.jwks(ConfigurationFactory.instance().getWebKeys());
-            builder.entity(jwks.toString(4));
+            JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
+            builder.entity(jwks.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500

@@ -36,7 +36,7 @@ import static org.testng.Assert.assertTrue;
  * http://openid.net/specs/openid-connect-messages-1_0.html#sigs
  *
  * @author Yuriy Zabrovarnyy
- * @version December 17, 2015
+ * @version June 15, 2016
  */
 
 public class FederationSigningTest extends BaseComponentTestAdapter {
@@ -61,7 +61,7 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
     @Test
     public void test() throws InvalidJwtException, JSONException, SignatureException, IOException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException {
         final String keyId = testKeyId();
-        final SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
+        final SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
 
         final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
 
