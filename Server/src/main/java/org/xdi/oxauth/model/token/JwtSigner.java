@@ -14,12 +14,11 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.util.security.StringEncrypter;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
 
 public class JwtSigner {
@@ -31,26 +30,24 @@ public class JwtSigner {
 
     private Jwt jwt;
 
-    public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience) {
+    public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
         this(signatureAlgorithm, audience, null);
     }
 
-    public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) {
+    public JwtSigner(SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
         this.signatureAlgorithm = signatureAlgorithm;
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
 
-        cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                ConfigurationFactory.instance().getConfiguration(),
-                ConfigurationFactory.instance().getWebKeys());
+        cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
     }
 
-    public static JwtSigner newJwtSigner(Client client) throws StringEncrypter.EncryptionException {
+    public static JwtSigner newJwtSigner(Client client) throws Exception {
         Preconditions.checkNotNull(client);
 
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm());
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm());
         if (client.getIdTokenSignedResponseAlg() != null) {
-            signatureAlgorithm = SignatureAlgorithm.fromName(client.getIdTokenSignedResponseAlg());
+            signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
         return new JwtSigner(signatureAlgorithm, client.getClientId(), client.getClientSecret());
     }

@@ -14,6 +14,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -32,14 +33,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Request and Use Claims in id token
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 15, 2016
  */
 public class CanRequestAndUseClaimsInIdToken extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void canRequestAndUseClaimsInIdToken(final String redirectUris, final String userId,
-                                                final String userSecret, final String redirectUri) throws Exception {
+    public void canRequestAndUseClaimsInIdToken(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Claims in id token");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -65,6 +67,8 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request Authorization
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
@@ -72,7 +76,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
-        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();

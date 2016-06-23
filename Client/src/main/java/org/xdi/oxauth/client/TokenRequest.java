@@ -7,15 +7,14 @@
 package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jws.ECDSASigner;
-import org.xdi.oxauth.model.jws.HMACSigner;
-import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.token.ClientAssertionType;
@@ -24,16 +23,17 @@ import org.xdi.oxauth.model.uma.UmaScopeType;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.SignatureException;
 import java.util.*;
 
 /**
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 17, 2015
+ * @version June 15, 2016
  */
 public class TokenRequest extends BaseRequest {
+
+    private static final Logger LOG = Logger.getLogger(TokenRequest.class);
 
     public static class Builder {
 
@@ -93,6 +93,7 @@ public class TokenRequest extends BaseRequest {
     private String sharedKey;
     private RSAPrivateKey rsaPrivateKey;
     private ECDSAPrivateKey ecPrivateKey;
+    private AbstractCryptoProvider cryptoProvider;
     private String keyId;
 
     /**
@@ -300,12 +301,18 @@ public class TokenRequest extends BaseRequest {
         this.sharedKey = sharedKey;
     }
 
+    @Deprecated
     public void setRsaPrivateKey(RSAPrivateKey rsaPrivateKey) {
         this.rsaPrivateKey = rsaPrivateKey;
     }
 
+    @Deprecated
     public void setEcPrivateKey(ECDSAPrivateKey ecPrivateKey) {
         this.ecPrivateKey = ecPrivateKey;
+    }
+
+    public void setCryptoProvider(AbstractCryptoProvider cryptoProvider) {
+        this.cryptoProvider = cryptoProvider;
     }
 
     public String getKeyId() {
@@ -344,23 +351,15 @@ public class TokenRequest extends BaseRequest {
 
         // Signature
         try {
-            if (algorithm == SignatureAlgorithm.HS256 || algorithm == SignatureAlgorithm.HS384 || algorithm == SignatureAlgorithm.HS512) {
-                if (sharedKey == null) {
-                    sharedKey = getAuthPassword();
-                }
-                HMACSigner hmacSigner = new HMACSigner(algorithm, sharedKey);
-                clientAssertion = hmacSigner.sign(clientAssertion);
-            } else if (algorithm == SignatureAlgorithm.RS256 || algorithm == SignatureAlgorithm.RS384 || algorithm == SignatureAlgorithm.RS512) {
-                RSASigner rsaSigner = new RSASigner(algorithm, rsaPrivateKey);
-                clientAssertion = rsaSigner.sign(clientAssertion);
-            } else if (algorithm == SignatureAlgorithm.ES256 || algorithm == SignatureAlgorithm.ES384 || algorithm == SignatureAlgorithm.ES512) {
-                ECDSASigner ecdsaSigner = new ECDSASigner(algorithm, ecPrivateKey);
-                clientAssertion = ecdsaSigner.sign(clientAssertion);
+            if (sharedKey == null) {
+                sharedKey = getAuthPassword();
             }
-        } catch (SignatureException e) {
-            return null;
+            String signature = cryptoProvider.sign(clientAssertion.getSigningInput(), keyId, sharedKey, algorithm);
+            clientAssertion.setEncodedSignature(signature);
         } catch (InvalidJwtException e) {
-            return null;
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
 
         return clientAssertion.toString();

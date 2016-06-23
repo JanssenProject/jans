@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.model.jws;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -32,8 +20,14 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version June 15, 2016
  */
 public class ECDSASigner extends AbstractJwsSigner {
 
@@ -68,7 +62,7 @@ public class ECDSASigner extends AbstractJwsSigner {
         }
 
         try {
-            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve());
+            ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());
             ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
 
             KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");

@@ -7,20 +7,13 @@
 package org.xdi.oxauth.model.crypto;
 
 import org.apache.commons.httpclient.HttpStatus;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.client.*;
-import org.gluu.oxeleven.model.JwksRequestParam;
-import org.gluu.oxeleven.model.KeyRequestParam;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 4, 2016
+ * @version June 15, 2016
  */
 public class OxElevenCryptoProvider extends AbstractCryptoProvider {
 
@@ -28,14 +21,12 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     private String signEndpoint;
     private String verifySignatureEndpoint;
     private String deleteKeyEndpoint;
-    private String jwksEndpoint;
 
-    public OxElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint, String deleteKeyEndpoint, String jwksEndpoint) {
+    public OxElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint, String deleteKeyEndpoint) {
         this.generateKeyEndpoint = generateKeyEndpoint;
         this.signEndpoint = signEndpoint;
         this.verifySignatureEndpoint = verifySignatureEndpoint;
         this.deleteKeyEndpoint = deleteKeyEndpoint;
-        this.jwksEndpoint = jwksEndpoint;
     }
 
     @Override
@@ -75,10 +66,10 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public boolean verifySignature(String signingInput, String signature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
         VerifySignatureRequest request = new VerifySignatureRequest();
         request.getVerifySignatureRequestParam().setSigningInput(signingInput);
-        request.getVerifySignatureRequestParam().setSignature(signature);
+        request.getVerifySignatureRequestParam().setSignature(encodedSignature);
         request.getVerifySignatureRequestParam().setAlias(keyId);
         request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
         request.getVerifySignatureRequestParam().setSignatureAlgorithm(signatureAlgorithm.getName());
@@ -108,48 +99,6 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
         DeleteKeyResponse response = client.exec();
         if (response.getStatus() == org.apache.http.HttpStatus.SC_OK) {
             return response.isDeleted();
-        } else {
-            throw new Exception(response.getEntity());
-        }
-    }
-
-    @Override
-    public JSONObject jwks(JSONWebKeySet jsonWebKeySet) throws Exception {
-        JwksRequestParam jwks = getJwksRequestParam(jsonWebKeySet);
-
-        JwksRequest request = new JwksRequest();
-        request.setJwksRequestParam(jwks);
-
-        JwksClient client = new JwksClient(jwksEndpoint);
-        client.setRequest(request);
-
-        JwksResponse response = client.exec();
-        if (response.getStatus() == HttpStatus.SC_OK && response.getJwksRequestParam() != null) {
-            JSONObject jwkJsonObject = new JSONObject();
-            JSONArray keysJsonArray = new JSONArray();
-            for (KeyRequestParam key : response.getJwksRequestParam().getKeyRequestParams()) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(key.getAlg());
-
-                JSONObject keyJsonObject = new JSONObject();
-                keyJsonObject.put(ALGORITHM, key.getAlg());
-                keyJsonObject.put(KEY_ID, key.getKid());
-                keyJsonObject.put(KEY_TYPE, key.getKty());
-                keyJsonObject.put(KEY_USE, key.getUse());
-
-                if (SignatureAlgorithmFamily.RSA.equals( signatureAlgorithm.getFamily())) {
-                    keyJsonObject.put(MODULUS, key.getN());
-                    keyJsonObject.put(EXPONENT, key.getE());
-                } else if (SignatureAlgorithmFamily.EC.equals( signatureAlgorithm.getFamily())) {
-                    keyJsonObject.put(CURVE, key.getCrv());
-                    keyJsonObject.put(X, key.getX());
-                    keyJsonObject.put(Y, key.getY());
-                }
-
-                keysJsonArray.put(keyJsonObject);
-            }
-            jwkJsonObject.put(JSON_WEB_KEY_SET, keysJsonArray);
-
-            return jwkJsonObject;
         } else {
             throw new Exception(response.getEntity());
         }

@@ -6,25 +6,6 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Random;
-
-import javax.security.auth.x500.X500Principal;
-
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
@@ -35,20 +16,31 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.KeyFactory;
 
+import javax.security.auth.x500.X500Principal;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Random;
+
 /**
  * Factory to create asymmetric Public and Private Keys for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version June 15, 2016
  */
 public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> {
 
-	private SignatureAlgorithm signatureAlgorithm;
-	private KeyPair keyPair;
+    private SignatureAlgorithm signatureAlgorithm;
+    private KeyPair keyPair;
 
-	private ECDSAPrivateKey ecdsaPrivateKey;
+    private ECDSAPrivateKey ecdsaPrivateKey;
     private ECDSAPublicKey ecdsaPublicKey;
     private Certificate certificate;
-	
+
     public ECDSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName)
             throws InvalidParameterException, NoSuchProviderException, NoSuchAlgorithmException,
             InvalidAlgorithmParameterException, SignatureException, InvalidKeyException, CertificateEncodingException {
@@ -56,9 +48,9 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
             throw new InvalidParameterException("The signature algorithm cannot be null");
         }
 
-        this.signatureAlgorithm  = signatureAlgorithm;
+        this.signatureAlgorithm = signatureAlgorithm;
 
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(signatureAlgorithm.getCurve());
+        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(signatureAlgorithm.getCurve().getName());
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
         keyGen.initialize(ecSpec, new SecureRandom());
@@ -96,7 +88,7 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
             this.certificate = new Certificate(signatureAlgorithm, x509Certificate);
         }
     }
-    
+
     public Certificate generateV3Certificate(Date startDate, Date expirationDate, String dnName) throws CertificateEncodingException, InvalidKeyException, IllegalStateException, NoSuchProviderException, NoSuchAlgorithmException, SignatureException {
         // Create certificate
         BigInteger serialNumber = new BigInteger(1024, new Random()); // serial number for certificate
