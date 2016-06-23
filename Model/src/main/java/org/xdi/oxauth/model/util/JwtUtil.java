@@ -19,7 +19,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMParser;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientRequest;
@@ -498,7 +498,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP256R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
@@ -518,7 +518,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP384R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
@@ -538,7 +538,7 @@ public class JwtUtil {
             throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
-        BigInteger q = ((ECCurve.Fp) ecSpec.getCurve()).getQ();
+        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP521R1Curve) ecSpec.getCurve()).getQ();
         ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
         ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
         ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
@@ -618,7 +618,7 @@ public class JwtUtil {
                 JSONArray certChain = jsonKeyValue.getJSONArray(CERTIFICATE_CHAIN);
                 String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
                 StringReader sr = new StringReader(certificateString);
-                PEMReader pemReader = new PEMReader(sr);
+                PEMParser pemReader = new PEMParser(sr);
                 X509Certificate cert = (X509CertificateObject) pemReader.readObject();
                 Certificate certificate = new Certificate(signatureAlgorithm, cert);
                 publicKey.setCertificate(certificate);

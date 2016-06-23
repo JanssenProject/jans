@@ -15,6 +15,7 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.x509.NoSuchParserException;
 import org.bouncycastle.x509.util.StreamParsingException;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus;
@@ -218,15 +219,20 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 		return crlNumber;
 	}
 
-	@SuppressWarnings({ "deprecation", "resource" })
 	public String getCrlUri(X509Certificate certificate) throws IOException {
-		byte[] crlDistributionPointsValue = certificate.getExtensionValue(X509Extensions.CRLDistributionPoints.getId());
-		if (crlDistributionPointsValue == null) {
+		ASN1Primitive obj;
+		try {
+			obj = getExtensionValue(certificate, Extension.cRLDistributionPoints.getId());
+		} catch (IOException ex) {
+			log.error("Failed to get CRL URL", ex);
 			return null;
 		}
 
-		DEROctetString oct = (DEROctetString) (new ASN1InputStream(new ByteArrayInputStream(crlDistributionPointsValue)).readObject());
-		CRLDistPoint distPoint = new CRLDistPoint(((ASN1Sequence) new ASN1InputStream(oct.getOctets()).readObject()));
+		if (obj == null) {
+			return null;
+		}
+
+		CRLDistPoint distPoint = CRLDistPoint.getInstance(obj);
 
 		DistributionPoint[] distributionPoints = distPoint.getDistributionPoints();
 		for (DistributionPoint distributionPoint : distributionPoints) {
@@ -242,20 +248,31 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 					continue;
 				}
 
-				String str;
-				if (name.getDERObject() instanceof DERTaggedObject) {
-					DERIA5String derStr = (DERIA5String) ((DERTaggedObject) name.getDERObject()).getObject();
-					str = derStr.toString();
-				} else {
-					DERIA5String derStr = DERIA5String.getInstance(name.getDERObject());
-					str = derStr.getString();
-				}
-
-				return str;
+				DERIA5String derStr = DERIA5String.getInstance((ASN1TaggedObject) name.toASN1Primitive(), false);
+				return derStr.getString();
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * @param certificate
+	 *            the certificate from which we need the ExtensionValue
+	 * @param oid
+	 *            the Object Identifier value for the extension.
+	 * @return the extension value as an ASN1Primitive object
+	 * @throws IOException
+	 */
+	private static ASN1Primitive getExtensionValue(X509Certificate certificate, String oid) throws IOException {
+		byte[] bytes = certificate.getExtensionValue(oid);
+		if (bytes == null) {
+			return null;
+		}
+		ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+		ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
+		aIn = new ASN1InputStream(new ByteArrayInputStream(octs.getOctets()));
+		return aIn.readObject();
 	}
 
 	@Override

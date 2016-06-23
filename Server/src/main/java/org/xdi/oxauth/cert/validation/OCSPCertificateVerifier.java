@@ -10,8 +10,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.ocsp.*;
-import org.python.bouncycastle.cert.ocsp.CertificateStatus;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.*;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
 import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
@@ -24,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
@@ -58,18 +62,19 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 			log.debug("OCSP URL for '" + subjectX500Principal + "' is '" + ocspUrl + "'");
 
+			DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().build().get(CertificateID.HASH_SHA1);
+			CertificateID certificateId = new CertificateID(digestCalculator, new JcaX509CertificateHolder(certificate), certificate.getSerialNumber());
+
 			// Generate OCSP request
-			OCSPReq ocspReq = generateOCSPRequest(certificate, issuer);
+			OCSPReq ocspReq = generateOCSPRequest(certificateId);
 
 			// Get OCSP response from server
 			OCSPResp ocspResp = requestOCSPResponse(ocspUrl, ocspReq);
-			if (ocspResp.getStatus() != OCSPRespGenerator.SUCCESSFUL) {
+			if (ocspResp.getStatus() != OCSPRespBuilder.SUCCESSFUL) {
 				log.error("OCSP response is invalid!");
 				status.setValidity(CertificateValidity.INVALID);
 				return status;
 			}
-
-			CertificateID certificateId = new CertificateID(CertificateID.HASH_SHA1, issuer, certificate.getSerialNumber());
 
 			boolean foundResponse = false;
 			BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp.getResponseObject();
@@ -119,25 +124,30 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 		return status;
 	}
 
-	private OCSPReq generateOCSPRequest(X509Certificate certificate, X509Certificate issuer) throws OCSPException {
-		OCSPReqGenerator ocspReqGenerator = new OCSPReqGenerator();
+	private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
+		OCSPReqBuilder ocspReqGenerator = new OCSPReqBuilder();
 
-		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1, issuer, certificate.getSerialNumber());
-		ocspReqGenerator.addRequest(certId);
+		ocspReqGenerator.addRequest(certificateId);
 
-		OCSPReq ocspReq = ocspReqGenerator.generate();
+		OCSPReq ocspReq = ocspReqGenerator.build();
 		return ocspReq;
 	}
 
 	@SuppressWarnings({ "deprecation", "resource" })
 	private String getOCSPUrl(X509Certificate certificate) throws IOException {
-		byte[] authInfoAccessExtensionValue = certificate.getExtensionValue(X509Extensions.AuthorityInfoAccess.getId());
-		if (authInfoAccessExtensionValue == null) {
+		ASN1Primitive obj;
+		try {
+			obj = getExtensionValue(certificate, Extension.authorityInfoAccess.getId());
+		} catch (IOException ex) {
+			log.error("Failed to get OCSP URL", ex);
 			return null;
 		}
 
-		DEROctetString oct = (DEROctetString) (new ASN1InputStream(new ByteArrayInputStream(authInfoAccessExtensionValue)).readObject());
-		AuthorityInformationAccess authorityInformationAccess = new AuthorityInformationAccess((ASN1Sequence) new ASN1InputStream(oct.getOctets()).readObject());
+		if (obj == null) {
+			return null;
+		}
+
+		AuthorityInformationAccess authorityInformationAccess = AuthorityInformationAccess.getInstance(obj);
 
 		AccessDescription[] accessDescriptions = authorityInformationAccess.getAccessDescriptions();
 		for (AccessDescription accessDescription : accessDescriptions) {
@@ -151,16 +161,8 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				continue;
 			}
 
-			String str;
-			if (name.getDERObject() instanceof DERTaggedObject) {
-				DERIA5String derStr = (DERIA5String) ((DERTaggedObject) name.getDERObject()).getObject();
-				str = derStr.toString();
-			} else {
-				DERIA5String derStr = DERIA5String.getInstance(name.getDERObject());
-				str = derStr.getString();
-			}
-
-			return str;
+			DERIA5String derStr = DERIA5String.getInstance((ASN1TaggedObject) name.toASN1Primitive(), false);
+			return derStr.getString();
 		}
 
 		return null;
@@ -196,6 +198,25 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				con.disconnect();
 			}
 		}
+	}
+
+	/**
+	 * @param certificate
+	 *            the certificate from which we need the ExtensionValue
+	 * @param oid
+	 *            the Object Identifier value for the extension.
+	 * @return the extension value as an ASN1Primitive object
+	 * @throws IOException
+	 */
+	private static ASN1Primitive getExtensionValue(X509Certificate certificate, String oid) throws IOException {
+		byte[] bytes = certificate.getExtensionValue(oid);
+		if (bytes == null) {
+			return null;
+		}
+		ASN1InputStream aIn = new ASN1InputStream(new ByteArrayInputStream(bytes));
+		ASN1OctetString octs = (ASN1OctetString) aIn.readObject();
+		aIn = new ASN1InputStream(new ByteArrayInputStream(octs.getOctets()));
+		return aIn.readObject();
 	}
 
 	@Override
