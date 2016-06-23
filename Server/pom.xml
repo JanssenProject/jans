@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxauth</artifactId>
-		<version>2.4.3-SNAPSHOT</version>
+		<version>2.4.4-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -59,7 +59,6 @@
 						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
 							-Dcatalina.base=${project.build.directory}
 							-Dgluu.conf.folder=${project.build.directory}
-							-Dseam.local.test=true
 						</argLine>
 					</configuration>
 				</plugin>
@@ -282,7 +281,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxAuthStatic</artifactId>
+			<artifactId>oxauth-static</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
@@ -204,6 +205,15 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         return verified;
     }
+
+	private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
+		try {
+			return jwks.getString(node);
+		} catch (Exception ex) {
+			JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
+			return publicKey.getString(node);
+		}
+	}
 
     @Override
     public boolean deleteKey(String alias) throws Exception {
