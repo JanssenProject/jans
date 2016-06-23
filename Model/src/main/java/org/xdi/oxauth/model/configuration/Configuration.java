@@ -7,6 +7,7 @@
 package org.xdi.oxauth.model.configuration;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.xdi.oxauth.model.common.WebKeyStorage;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -20,7 +21,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version April 13, 2016
+ * @version June 15, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -53,13 +54,6 @@ public class Configuration {
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
-
-    //oxEleven
-    private String oxElevenGenerateKeyEndpoint;
-    private String oxElevenSignEndpoint;
-    private String oxElevenVerifySignatureEndpoint;
-    private String oxElevenDeleteKeyEndpoint;
-    private String oxElevenJwksEndpoint;
 
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
@@ -119,10 +113,10 @@ public class Configuration {
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
-    
-    private Map<Integer,List<String>> authLevelMapping;//auth_level_mapping
 
-	private String applianceInum;
+    private Map<Integer, List<String>> authLevelMapping; //auth_level_mapping
+
+    private String applianceInum;
     private int sessionIdUnusedLifetime;
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
@@ -137,7 +131,17 @@ public class Configuration {
     private String pairwiseIdType; // persistent, algorithmic
     private String pairwiseCalculationKey;
     private String pairwiseCalculationSalt;
-    private String webKeysStorage; // ldap, pkcs11
+
+    private WebKeyStorage webKeysStorage;
+    private String dnName;
+    // oxAuth KeyStore
+    private String keyStoreFile;
+    private String keyStoreSecret;
+    //oxEleven
+    private String oxElevenGenerateKeyEndpoint;
+    private String oxElevenSignEndpoint;
+    private String oxElevenVerifySignatureEndpoint;
+    private String oxElevenDeleteKeyEndpoint;
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -473,51 +477,6 @@ public class Configuration {
 
     public void setUmaConfigurationEndpoint(String p_umaConfigurationEndpoint) {
         umaConfigurationEndpoint = p_umaConfigurationEndpoint;
-    }
-
-    @XmlElement(name = "oxeleven-generate-key-endpoint")
-    public String getOxElevenGenerateKeyEndpoint() {
-        return oxElevenGenerateKeyEndpoint;
-    }
-
-    public void setOxElevenGenerateKeyEndpoint(String oxElevenGenerateKeyEndpoint) {
-        this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
-    }
-
-    @XmlElement(name = "oxeleven-sign-endpoint")
-    public String getOxElevenSignEndpoint() {
-        return oxElevenSignEndpoint;
-    }
-
-    public void setOxElevenSignEndpoint(String oxElevenSignEndpoint) {
-        this.oxElevenSignEndpoint = oxElevenSignEndpoint;
-    }
-
-    @XmlElement(name = "oxeleven-verify-signature-endpoint")
-    public String getOxElevenVerifySignatureEndpoint() {
-        return oxElevenVerifySignatureEndpoint;
-    }
-
-    public void setOxElevenVerifySignatureEndpoint(String oxElevenVerifySignatureEndpoint) {
-        this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
-    }
-
-    @XmlElement(name = "oxeleven-delete-key-endpoint")
-    public String getOxElevenDeleteKeyEndpoint() {
-        return oxElevenDeleteKeyEndpoint;
-    }
-
-    public void setOxElevenDeleteKeyEndpoint(String oxElevenDeleteKeyEndpoint) {
-        this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
-    }
-
-    @XmlElement(name = "oxeleven-jwks-endpoint")
-    public String getOxElevenJwksEndpoint() {
-        return oxElevenJwksEndpoint;
-    }
-
-    public void setOxElevenJwksEndpoint(String oxElevenJwksEndpoint) {
-        this.oxElevenJwksEndpoint = oxElevenJwksEndpoint;
     }
 
     @XmlElement(name = "openid-sub-attribute")
@@ -1072,6 +1031,15 @@ public class Configuration {
         return clientAuthenticationFilters;
     }
 
+    @XmlElement(name = "auth_level_mapping")
+    public Map<Integer, List<String>> getAuthLevelMapping() {
+        return authLevelMapping;
+    }
+
+    public void setAuthLevelMapping(Map<Integer, List<String>> authLevelMapping) {
+        this.authLevelMapping = authLevelMapping;
+    }
+
     @XmlElement(name = "appliance-inum")
     public String getApplianceInum() {
         return applianceInum;
@@ -1199,20 +1167,74 @@ public class Configuration {
     }
 
     @XmlElement(name = "web-keys-storage")
-    public String getWebKeysStorage() {
+    public WebKeyStorage getWebKeysStorage() {
         return webKeysStorage;
     }
 
-    public void setWebKeysStorage(String webKeysStorage) {
+    public void setWebKeysStorage(WebKeyStorage webKeysStorage) {
         this.webKeysStorage = webKeysStorage;
-    }    
-	
-    @XmlElement(name = "auth_level_mapping")
-	public Map<Integer, List<String>> getAuthLevelMapping() {
-		return authLevelMapping;
-	}
+    }
 
-	public void setAuthLevelMapping(Map<Integer, List<String>> authLevelMapping) {
-		this.authLevelMapping = authLevelMapping;
-	}
+    @XmlElement(name = "dn-name")
+    public String getDnName() {
+        return dnName;
+    }
+
+    public void setDnName(String dnName) {
+        this.dnName = dnName;
+    }
+
+    @XmlElement(name = "key-store-file")
+    public String getKeyStoreFile() {
+        return keyStoreFile;
+    }
+
+    public void setKeyStoreFile(String keyStoreFile) {
+        this.keyStoreFile = keyStoreFile;
+    }
+
+    @XmlElement(name = "key-store-secret")
+    public String getKeyStoreSecret() {
+        return keyStoreSecret;
+    }
+
+    public void setKeyStoreSecret(String keyStoreSecret) {
+        this.keyStoreSecret = keyStoreSecret;
+    }
+
+    @XmlElement(name = "oxeleven-generate-key-endpoint")
+    public String getOxElevenGenerateKeyEndpoint() {
+        return oxElevenGenerateKeyEndpoint;
+    }
+
+    public void setOxElevenGenerateKeyEndpoint(String oxElevenGenerateKeyEndpoint) {
+        this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-sign-endpoint")
+    public String getOxElevenSignEndpoint() {
+        return oxElevenSignEndpoint;
+    }
+
+    public void setOxElevenSignEndpoint(String oxElevenSignEndpoint) {
+        this.oxElevenSignEndpoint = oxElevenSignEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-verify-signature-endpoint")
+    public String getOxElevenVerifySignatureEndpoint() {
+        return oxElevenVerifySignatureEndpoint;
+    }
+
+    public void setOxElevenVerifySignatureEndpoint(String oxElevenVerifySignatureEndpoint) {
+        this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
+    }
+
+    @XmlElement(name = "oxeleven-delete-key-endpoint")
+    public String getOxElevenDeleteKeyEndpoint() {
+        return oxElevenDeleteKeyEndpoint;
+    }
+
+    public void setOxElevenDeleteKeyEndpoint(String oxElevenDeleteKeyEndpoint) {
+        this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
+    }
 }

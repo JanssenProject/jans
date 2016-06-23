@@ -23,7 +23,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 5, 2016
+ * @version June 15, 2016
  */
 public abstract class AbstractCryptoProvider {
 
@@ -31,19 +31,14 @@ public abstract class AbstractCryptoProvider {
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
-    public abstract boolean verifySignature(String signingInput, String signature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
     public abstract boolean deleteKey(String keyId) throws Exception;
 
-    public abstract JSONObject jwks(JSONWebKeySet jsonWebKeySet) throws Exception;
-
     public String getKeyId(JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm) throws Exception {
-        JSONObject jwks = jwks(jsonWebKeySet);
-
-        for (int i = 0; i < jwks.getJSONArray(JSON_WEB_KEY_SET).length(); i++) {
-            JSONObject key = jwks.getJSONArray(JSON_WEB_KEY_SET).getJSONObject(i);
-            if (signatureAlgorithm.getName().equals(key.optString(ALGORITHM))) {
-                return key.optString(KEY_ID);
+        for (JSONWebKey key : jsonWebKeySet.getKeys()) {
+            if (signatureAlgorithm == key.getAlg()) {
+                return key.getKid();
             }
         }
 
@@ -72,32 +67,14 @@ public abstract class AbstractCryptoProvider {
         return jwks;
     }
 
-    public JwksRequestParam getJwksRequestParam(JSONWebKeySet jsonWebKeySet) {
-        JwksRequestParam jwks = new JwksRequestParam();
-        jwks.setKeyRequestParams(new ArrayList<KeyRequestParam>());
-        for (JSONWebKey jsonWebKey : jsonWebKeySet.getKeys()) {
-            KeyRequestParam key = new KeyRequestParam();
-            key.setAlg(jsonWebKey.getAlg());
-            key.setKid(jsonWebKey.getKid());
-            key.setUse(jsonWebKey.getUse().toValue());
-            key.setKty(jsonWebKey.getKty().toValue());
-            key.setCrv(jsonWebKey.getCrv());
-
-            jwks.getKeyRequestParams().add(key);
-        }
-
-        return jwks;
-    }
-
-    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, Configuration configuration,
-                                          JSONWebKeySet jwks) throws Exception {
+    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, Configuration configuration) throws Exception {
         JSONArray keys = new JSONArray();
 
         GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
         expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
 
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration, jwks);
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         try {
             keys.put(cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime.getTimeInMillis()));
