@@ -6,166 +6,141 @@
 
 package org.xdi.oxauth.util;
 
+import org.apache.commons.cli.*;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.crypto.Key;
-import org.xdi.oxauth.model.crypto.KeyFactory;
-import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
-import java.util.UUID;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 
 /**
+ * Command example:
+ * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512
+ *              -keystore /Users/JAVIER/tmp/mykeystore.jks
+ *              -keypasswd secret
+ *              -dnname "CN=oxAuth CA Certificates"
+ *              -expiration 365
+ *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version May 4, 2016
+ * @version June 16, 2016
  */
 public class KeyGenerator {
 
-	private static final Logger log;
+    private static final Logger log;
 
-	static {
-		// Add console appender
-		LogManager.getRootLogger().removeAllAppenders();
+    static {
+        // Add console appender
+        LogManager.getRootLogger().removeAllAppenders();
 
-		ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
-		LogManager.getRootLogger().addAppender(consoleAppender);
+        ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
+        LogManager.getRootLogger().addAppender(consoleAppender);
 
-		log = Logger.getLogger(KeyGenerator.class);
-	}
-
-	public static JSONObject generateJWKS() throws Exception, JSONException {
-		JSONArray keys = new JSONArray();
-
-        keys.put(generateRS256Keys(null));
-        keys.put(generateRS384Keys(null));
-        keys.put(generateRS512Keys(null));
-
-        keys.put(generateES256Keys(null));
-        keys.put(generateES384Keys(null));
-        keys.put(generateES512Keys(null));
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JSON_WEB_KEY_SET, keys);
-
-        return jsonObject;
-	}
+        log = Logger.getLogger(KeyGenerator.class);
+    }
 
     public static void main(String[] args) throws Exception {
-    	SecurityProviderUtility.installBCProvider(true);
-
-    	JSONObject jsonObject = generateJWKS();
-
-        System.out.println(jsonObject.toString(4).replace("\\/", "/"));
+        new Cli(args).parse();
     }
 
-    public static JSONObject generateRS256Keys(Long expirationTime) throws Exception {
-        KeyFactory<RSAPrivateKey, RSAPublicKey> keyFactory = new RSAKeyFactory(
-                SignatureAlgorithm.RS256,
-                "CN=Test CA Certificate");
+    public static class Cli {
+        private static final Logger log = Logger.getLogger(Cli.class.getName());
+        private String[] args = null;
+        private Options options = new Options();
 
-        Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
+        public Cli(String[] args) {
+            this.args = args;
 
-        key.setKeyType("RSA");
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.RS256.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(JSONObject.NULL);
+            Option algorithmsOption = new Option("algorithms", true, "Algorithms.");
+            algorithmsOption.setArgs(Option.UNLIMITED_VALUES);
 
-        return key.toJSONObject();
-    }
+            options.addOption(algorithmsOption);
+            options.addOption("keystore", true, "Key Store file.");
+            options.addOption("keypasswd", true, "Key Store password.");
+            options.addOption("dnname", true, "DN of certificate issuer.");
+            options.addOption("expiration", true, "Expiration in days.");
+            options.addOption("h", "help", false, "show help.");
+        }
 
-    public static JSONObject generateRS384Keys(Long expirationTime) throws Exception {
-        KeyFactory<RSAPrivateKey, RSAPublicKey> keyFactory = new RSAKeyFactory(
-                SignatureAlgorithm.RS384,
-                "CN=Test CA Certificate");
+        public void parse() {
+            CommandLineParser parser = new BasicParser();
 
-        Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
+            CommandLine cmd = null;
+            try {
+                cmd = parser.parse(options, args);
 
-        key.setKeyType("RSA");
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.RS384.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(JSONObject.NULL);
+                if (cmd.hasOption("h"))
+                    help();
 
-        return key.toJSONObject();
-    }
+                if (cmd.hasOption("algorithms") && cmd.hasOption("keystore") && cmd.hasOption("keypasswd")
+                        && cmd.hasOption("dnname") && cmd.hasOption("expiration")) {
+                    String[] algorithms = cmd.getOptionValues("algorithms");
+                    String keystore = cmd.getOptionValue("keystore");
+                    String keypasswd = cmd.getOptionValue("keypasswd");
+                    String dnName = cmd.getOptionValue("dnname");
+                    int expiration = Integer.parseInt(cmd.getOptionValue("expiration"));
 
-    public static JSONObject generateRS512Keys(Long expirationTime) throws Exception {
-        KeyFactory<RSAPrivateKey, RSAPublicKey> keyFactory = new RSAKeyFactory(
-                SignatureAlgorithm.RS512,
-                "CN=Test CA Certificate");
+                    List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
+                    if (signatureAlgorithms.isEmpty()) {
+                        help();
+                    } else {
+                        try {
+                            JSONWebKeySet jwks = new JSONWebKeySet();
+                            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
 
-        Key<RSAPrivateKey, RSAPublicKey> key = keyFactory.getKey();
+                            Calendar calendar = new GregorianCalendar();
+                            calendar.add(Calendar.DATE, expiration);
 
-        key.setKeyType("RSA");
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.RS512.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(JSONObject.NULL);
+                            for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
+                                JSONObject result = cryptoProvider.generateKey(signatureAlgorithm, calendar.getTimeInMillis());
+                                //System.out.println(result);
 
-        return key.toJSONObject();
-    }
+                                JSONWebKey key = new JSONWebKey();
+                                key.setKid(result.getString(KEY_ID));
+                                key.setUse(Use.SIGNATURE);
+                                key.setAlg(signatureAlgorithm);
+                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
+                                key.setCrv(signatureAlgorithm.getCurve());
+                                key.setN(result.optString(MODULUS));
+                                key.setE(result.optString(EXPONENT));
+                                key.setX(result.optString(X));
+                                key.setY(result.optString(Y));
 
-    public static JSONObject generateES256Keys(Long expirationTime) throws Exception {
-        KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> keyFactory = new ECDSAKeyFactory(
-                SignatureAlgorithm.ES256,
-                "CN=Test CA Certificate");
+                                jwks.getKeys().add(key);
+                            }
 
-        Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
+                            System.out.println(jwks);
+                        } catch (Exception e) {
+                            help();
+                        }
+                    }
+                } else {
+                    help();
+                }
+            } catch (ParseException e) {
+                help();
+            }
+        }
 
-        key.setKeyType(SignatureAlgorithm.ES256.getFamily());
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.ES256.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(SignatureAlgorithm.ES256.getCurve());
+        private void help() {
+            HelpFormatter formatter = new HelpFormatter();
 
-        return key.toJSONObject();
-    }
-
-    public static JSONObject generateES384Keys(Long expirationTime) throws Exception {
-        KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> keyFactory = new ECDSAKeyFactory(
-                SignatureAlgorithm.ES384,
-                "CN=Test CA Certificate");
-
-        Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
-
-        key.setKeyType(SignatureAlgorithm.ES384.getFamily());
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.ES384.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(SignatureAlgorithm.ES384.getCurve());
-
-        return key.toJSONObject();
-    }
-
-    public static JSONObject generateES512Keys(Long expirationTime) throws Exception{
-        KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> keyFactory = new ECDSAKeyFactory(
-                SignatureAlgorithm.ES512,
-                "CN=Test CA Certificate");
-
-        Key<ECDSAPrivateKey, ECDSAPublicKey> key = keyFactory.getKey();
-
-        key.setKeyType(SignatureAlgorithm.ES512.getFamily());
-        key.setUse(Use.SIGNATURE.toValue());
-        key.setAlgorithm(SignatureAlgorithm.ES512.getName());
-        key.setKeyId(UUID.randomUUID().toString());
-        key.setExpirationTime(expirationTime);
-        key.setCurve(SignatureAlgorithm.ES512.getCurve());
-
-        return key.toJSONObject();
+            formatter.printHelp("KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /path_to/mykeystore.jks -keypasswd secret -dnname \"CN=oxAuth CA Certificate\" -expiration 365", options);
+            System.exit(0);
+        }
     }
 }

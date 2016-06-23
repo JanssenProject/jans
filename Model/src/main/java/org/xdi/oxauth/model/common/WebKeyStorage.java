@@ -6,12 +6,15 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+
 /**
  * @author Javier Rojas Blum
- * @version March 19, 2016
+ * @version June 15, 2016
  */
 public enum WebKeyStorage {
-    LDAP("ldap"),
+    KEYSTORE("keystore"),
     PKCS11("pkcs11");
 
     private final String value;
@@ -24,12 +27,24 @@ public enum WebKeyStorage {
         return value;
     }
 
+    @JsonCreator
     public static WebKeyStorage fromString(String string) {
         for (WebKeyStorage v : values()) {
             if (v.getValue().equalsIgnoreCase(string)) {
                 return v;
             }
         }
-        return LDAP;
+        return KEYSTORE;
+    }
+
+    /**
+     * Returns a string representation of the object. In this case the parameter name.
+     *
+     * @return The string representation of the object.
+     */
+    @Override
+    @JsonValue
+    public String toString() {
+        return value;
     }
 }

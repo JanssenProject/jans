@@ -6,11 +6,16 @@
 
 package org.xdi.oxauth.model.crypto.signature;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
 import org.xdi.oxauth.model.jwt.JwtType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version December 17, 2015
+ * @version June 15, 2016
  */
 public enum SignatureAlgorithm {
 
@@ -21,17 +26,17 @@ public enum SignatureAlgorithm {
     RS256("RS256", SignatureAlgorithmFamily.RSA, "SHA256WITHRSA"),
     RS384("RS384", SignatureAlgorithmFamily.RSA, "SHA384WITHRSA"),
     RS512("RS512", SignatureAlgorithmFamily.RSA, "SHA512WITHRSA"),
-    ES256("ES256", SignatureAlgorithmFamily.EC, "SHA256WITHECDSA", ECDSAEllipticCurve.P_256),
-    ES384("ES384", SignatureAlgorithmFamily.EC, "SHA384WITHECDSA", ECDSAEllipticCurve.P_384),
-    ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECDSAEllipticCurve.P_521);
+    ES256("ES256", SignatureAlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256),
+    ES384("ES384", SignatureAlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384),
+    ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521);
 
     private final String name;
     private final String family;
     private final String algorithm;
-    private final String curve;
+    private final ECEllipticCurve curve;
     private final JwtType jwtType;
 
-    private SignatureAlgorithm(String name, String family, String algorithm, String curve) {
+    private SignatureAlgorithm(String name, String family, String algorithm, ECEllipticCurve curve) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -67,7 +72,7 @@ public enum SignatureAlgorithm {
         return algorithm;
     }
 
-    public String getCurve() {
+    public ECEllipticCurve getCurve() {
         return curve;
     }
 
@@ -75,10 +80,30 @@ public enum SignatureAlgorithm {
         return jwtType;
     }
 
-    public static SignatureAlgorithm fromName(String name) {
-        if (name != null) {
+    public static List<SignatureAlgorithm> fromString(String[] params) {
+        List<SignatureAlgorithm> signatureAlgorithms = new ArrayList<SignatureAlgorithm>();
+
+        for (String param : params) {
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(param);
+            if (signatureAlgorithm != null) {
+                signatureAlgorithms.add(signatureAlgorithm);
+            }
+        }
+
+        return signatureAlgorithms;
+    }
+
+    /**
+     * Returns the corresponding {@link SignatureAlgorithm} for a parameter alg of the JWK endpoint.
+     *
+     * @param param The alg parameter.
+     * @return The corresponding alg if found, otherwise <code>null</code>.
+     */
+    @JsonCreator
+    public static SignatureAlgorithm fromString(String param) {
+        if (param != null) {
             for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
-                if (name.equals(sa.name)) {
+                if (param.equals(sa.name)) {
                     return sa;
                 }
             }
@@ -86,7 +111,13 @@ public enum SignatureAlgorithm {
         return null;
     }
 
+    /**
+     * Returns a string representation of the object. In this case the parameter name.
+     *
+     * @return The string representation of the object.
+     */
     @Override
+    @JsonValue
     public String toString() {
         return name;
     }

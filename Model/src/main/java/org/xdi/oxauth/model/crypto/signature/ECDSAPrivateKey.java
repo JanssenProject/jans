@@ -20,8 +20,9 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * The Private Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 15, 2016
  */
+@Deprecated
 public class ECDSAPrivateKey extends PrivateKey {
 
     private BigInteger d;

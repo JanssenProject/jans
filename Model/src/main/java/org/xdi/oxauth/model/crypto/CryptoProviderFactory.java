@@ -8,29 +8,30 @@ package org.xdi.oxauth.model.crypto;
 
 import org.xdi.oxauth.model.common.WebKeyStorage;
 import org.xdi.oxauth.model.configuration.Configuration;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
 /**
  * @author Javier Rojas Blum
- * @version April 13, 2016
+ * @version June 15, 2016
  */
 public class CryptoProviderFactory {
 
-    public static AbstractCryptoProvider getCryptoProvider(Configuration configuration, JSONWebKeySet webKeySet) {
+    public static AbstractCryptoProvider getCryptoProvider(Configuration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
-        WebKeyStorage webKeyStorage = WebKeyStorage.fromString(configuration.getWebKeysStorage());
+        WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
 
         switch (webKeyStorage) {
-            case LDAP:
-                cryptoProvider = new OxAuthCryptoProvider(webKeySet);
+            case KEYSTORE:
+                String keyStoreFile = configuration.getKeyStoreFile();
+                String keyStoreSecret = configuration.getKeyStoreSecret();
+                String dnName = configuration.getDnName();
+                cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
                 break;
             case PKCS11:
                 cryptoProvider = new OxElevenCryptoProvider(
                         configuration.getOxElevenGenerateKeyEndpoint(),
                         configuration.getOxElevenSignEndpoint(),
                         configuration.getOxElevenVerifySignatureEndpoint(),
-                        configuration.getOxElevenDeleteKeyEndpoint(),
-                        configuration.getOxElevenJwksEndpoint());
+                        configuration.getOxElevenDeleteKeyEndpoint());
                 break;
         }
 
