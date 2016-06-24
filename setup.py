@@ -1256,11 +1256,12 @@ class Setup(object):
             self.run(['/bin/chmod', '-R', '755', endorsedFolder])
             
             # Copy  files into endorsed
-            bcFilePath = '%s/WEB-INF/lib/bcprov-jdk15on-1.54.jar' % tmpOxAuthDir
-            bcFilePath = '%s/WEB-INF/lib/bcpkix-jdk15on-1.54.jar' % tmpOxAuthDir
+            bcFilePath1 = '%s/WEB-INF/lib/bcprov-jdk15on-1.54.jar' % tmpOxAuthDir
+            bcFilePath2 = '%s/WEB-INF/lib/bcpkix-jdk15on-1.54.jar' % tmpOxAuthDir
 
             self.logIt("Copying files to %s..." % endorsedFolder)
-            self.copyFile(bcFilePath, endorsedFolder)
+            self.copyFile(bcFilePath1, endorsedFolder)
+            self.copyFile(bcFilePath2, endorsedFolder)
 
             self.removeDirs(tmpOxAuthDir)
 
