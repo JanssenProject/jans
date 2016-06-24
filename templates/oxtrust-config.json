@@ -126,6 +126,8 @@
     "umaClientKeyId":"",
     "umaResourceId":"1447184268430",
     "umaScope":"https://%(hostname)s/oxauth/seam/resource/restv1/uma/scopes/scim_access",
+    "umaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
+    "umaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
 
     "cssLocation":"",
     "jsLocation":"",
