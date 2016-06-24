@@ -972,14 +972,16 @@ class Setup(object):
         self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/bcprov-jdk16-1.46.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/bcprov-jdk15on-1.54.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/bcpkix-jdk15on-1.54.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.tomcat_user_home_lib)
 
         self.change_ownership()
 
-        requiredJars =['%s/bcprov-jdk16-1.46.jar' % self.tomcat_user_home_lib,
+        requiredJars =['%s/bcprov-jdk15on-1.54.jar' % self.tomcat_user_home_lib,
+                       '%s/bcpkix-jdk15on-1.54.jar' % self.tomcat_user_home_lib,
                        '%s/commons-lang-2.6.jar' % self.tomcat_user_home_lib,
                        '%s/log4j-1.2.14.jar' % self.tomcat_user_home_lib,
                        '%s/commons-codec-1.5.jar' % self.tomcat_user_home_lib,
@@ -1239,7 +1241,8 @@ class Setup(object):
             self.run(['/bin/chmod', '-R', '755', endorsedFolder])
             
             # Copy  files into endorsed
-            bcFilePath = '%s/WEB-INF/lib/bcprov-jdk16-1.46.jar' % tmpOxAuthDir
+            bcFilePath = '%s/WEB-INF/lib/bcprov-jdk15on-1.54.jar' % tmpOxAuthDir
+            bcFilePath = '%s/WEB-INF/lib/bcpkix-jdk15on-1.54.jar' % tmpOxAuthDir
 
             self.logIt("Copying files to %s..." % endorsedFolder)
             self.copyFile(bcFilePath, endorsedFolder)
