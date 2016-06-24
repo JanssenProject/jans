@@ -1081,7 +1081,7 @@ class Setup(object):
         cmd = "%s %s" % (self.oxEncodePWCommand, self.scim_rs_client_jks_pass)
         self.scim_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
         
-        self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rp_client_jks_pass)
+        self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rs_client_jks_pass)
         self.scim_rs_client_base64_jwks = self.generate_base64_string(self.scim_rs_client_jwks, 1)
 
         self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
