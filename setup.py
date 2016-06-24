@@ -53,8 +53,8 @@ class Setup(object):
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxShibboleth/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist = 'http://shibboleth.net/downloads/identity-provider/3.2.1/shibboleth-identity-provider-3.2.1.tar.gz'
-        self.asimba_war = "http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war" % (self.oxVersion, self.oxVersion)
-        self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
+        self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
+        self.cas_war = 'http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
@@ -74,19 +74,19 @@ class Setup(object):
         self.apache_version = None
         self.opendj_version = None
 
-        self.distFolder = "/opt/dist"
-        self.setup_properties_fn = "%s/setup.properties" % self.install_dir
+        self.distFolder = '/opt/dist'
+        self.setup_properties_fn = '%s/setup.properties' % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
-        self.savedProperties = "%s/setup.properties.last" % self.install_dir
+        self.savedProperties = '%s/setup.properties.last' % self.install_dir
 
-        self.gluuOptFolder = "/opt/gluu"
-        self.gluuOptBinFolder = "/opt/gluu/bin"
+        self.gluuOptFolder = '/opt/gluu'
+        self.gluuOptBinFolder = '/opt/gluu/bin'
         self.configFolder = '/etc/gluu/config'
         self.certFolder = '/etc/certs'
         self.tomcatHome = '/opt/tomcat'
-        self.tomcat_user_home_lib = "/home/tomcat/lib"
-        self.oxauth_lib = "/opt/tomcat/webapps/oxauth/WEB-INF/lib"
+        self.tomcat_user_home_lib = '/home/tomcat/lib'
+        self.oxauth_lib = '/opt/tomcat/webapps/oxauth/WEB-INF/lib'
         self.tomcatWebAppFolder = "/opt/tomcat/webapps"
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
@@ -270,8 +270,9 @@ class Setup(object):
 
 
         # OpenID key generation default setting
-        self.default_openid_jks_dn_name = "CN=oxAuth CA Certificates"
-        self.default_key_algs = "RS256 RS384 RS512 ES256 ES384 ES512"        
+        self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
+        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'        
+        self.default_key_expiration = 365
 
         # oxTrust SCIM configuration
         self.scim_rs_client_id = None
@@ -382,15 +383,17 @@ class Setup(object):
         realCertFolder = os.path.realpath(self.certFolder)
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
-        realIdpFolder = os.path.realpath(self.idpFolder)
-        realIdp3Folder = os.path.realpath(self.idp3Folder)
 
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdp3Folder])
+
+        if self.installSaml:
+            realIdpFolder = os.path.realpath(self.idpFolder)
+            realIdp3Folder = os.path.realpath(self.idp3Folder)
+            self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
+            self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdp3Folder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
@@ -453,8 +456,8 @@ class Setup(object):
             self.ldapPass = self.getPW()
         if not self.shibJksPass:
             self.shibJksPass = self.getPW()
-        if not self.oxauthJksPass:
-            self.oxauthJksPass = self.getPW()
+        if not self.oxauth_openid_jks_pass:
+            self.oxauth_openid_jks_pass = self.getPW()
         if not self.asimbaJksPass:
             self.asimbaJksPass = self.getPW()
         if not self.encode_salt:
@@ -933,7 +936,7 @@ class Setup(object):
         self.run(["/bin/chown", '%s:%s' % (user, user), keystoreFN])
         self.run(["/bin/chmod", '700', keystoreFN])
 
-    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, expiation = 365, dn_name = None, key_algs = None):
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, key_expiration = None, dn_name = None, key_algs = None):
         self.logIt("Generating oxAuth OpenID Connect keys")
         
         if dn_name == None:
@@ -942,32 +945,42 @@ class Setup(object):
         if key_algs == None:
             key_algs = self.default_key_algs
 
+        if key_expiration == None:
+            key_expiration = self.default_key_expiration
+
+
         # We can remove this once KeyGenerator will do the same
         if jks_create == True:
             self.logIt("Creating empty JKS keystore")
             # Create JKS with dummy key
-            self.run([self.keytoolCommand,
+            cmd = " ".join([self.keytoolCommand,
                       '-genkey',
+                      '-alias',
+                      'dummy',
                       '-keystore',
                       jks_path,
                       '-storepass',
-                      'changeit',
+                      jks_pwd,
                       '-keypass',
-                      'changeit',
+                      jks_pwd,
                       '-dname',
                       '"%s"' % dn_name])
+            self.run(['/bin/sh', '-c', cmd])
 
             # Delete dummy key from JKS
-            self.run([self.keytoolCommand,
+            cmd = " ".join([self.keytoolCommand,
                       '-delete',
+                      '-alias',
+                      'dummy',
                       '-keystore',
                       jks_path,
                       '-storepass',
-                      'changeit',
+                      jks_pwd,
                       '-keypass',
-                      'changeit',
+                      jks_pwd,
                       '-dname',
                       '"%s"' % dn_name])
+            self.run(['/bin/sh', '-c', cmd])
 
         self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
@@ -976,6 +989,7 @@ class Setup(object):
         self.copyFile("%s/static/oxauth/lib/bcpkix-jdk15on-1.54.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-cli-1.2.jar" % self.install_dir, self.tomcat_user_home_lib)
         self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.tomcat_user_home_lib)
 
         self.change_ownership()
@@ -985,6 +999,7 @@ class Setup(object):
                        '%s/commons-lang-2.6.jar' % self.tomcat_user_home_lib,
                        '%s/log4j-1.2.14.jar' % self.tomcat_user_home_lib,
                        '%s/commons-codec-1.5.jar' % self.tomcat_user_home_lib,
+                       '%s/commons-cli-1.2.jar' % self.tomcat_user_home_lib,
                        '%s/jettison-1.3.jar' % self.tomcat_user_home_lib,
                        '%s/oxauth-model.jar' % self.tomcat_user_home_lib,
                        '%s/oxauth.jar' % self.tomcat_user_home_lib]
@@ -999,12 +1014,12 @@ class Setup(object):
                         "-keypasswd",
                         jks_pwd,
                         "-algorithms",
-                        key_algs,
+                        "%s" % key_algs,
                         "-dnname",
-                        dn_name,
+                        '"%s"' % dn_name,
                         "-expiration",
-                        key_algs])
-        args = ["/bin/su", "tomcat", "-c", cmd]
+                        "%s" % key_expiration])
+        args = ['/bin/sh', '-c', cmd]
 
         self.logIt("Runnning: %s" % " ".join(args))
         try:
