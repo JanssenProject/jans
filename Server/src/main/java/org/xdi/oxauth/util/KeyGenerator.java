@@ -125,6 +125,7 @@ public class KeyGenerator {
 
                             System.out.println(jwks);
                         } catch (Exception e) {
+                        	log.error("Failed to generate keys", e);
                             help();
                         }
                     }
@@ -132,6 +133,7 @@ public class KeyGenerator {
                     help();
                 }
             } catch (ParseException e) {
+            	log.error("Failed to generate keys", e);
                 help();
             }
         }
