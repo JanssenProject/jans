@@ -71,8 +71,6 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
-import com.google.common.base.Strings;
-
 import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
@@ -94,7 +92,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
-        if (!Strings.isNullOrEmpty(keyStoreFile) && !Strings.isNullOrEmpty(keyStoreSecret) /* && !Strings.isNullOrEmpty(dnName) */) {
+        if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
             this.keyStoreFile = keyStoreFile;
             this.keyStoreSecret = keyStoreSecret;
             this.dnName = dnName;
@@ -195,7 +193,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         boolean verified = false;
 
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
-            return Strings.isNullOrEmpty(encodedSignature);
+            return Util.isNullOrEmpty(encodedSignature);
         } else if (SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
             String expectedSignature = sign(signingInput, null, sharedSecret, signatureAlgorithm);
             return expectedSignature.equals(encodedSignature);
@@ -288,7 +286,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         PublicKey publicKey = null;
 
         try {
-            if (Strings.isNullOrEmpty(alias)) {
+            if (Util.isNullOrEmpty(alias)) {
                 return null;
             }
 
@@ -306,7 +304,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
     private PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-        if (Strings.isNullOrEmpty(alias)) {
+        if (Util.isNullOrEmpty(alias)) {
             return null;
         }
 
