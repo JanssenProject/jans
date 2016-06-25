@@ -1071,6 +1071,7 @@ gluuAttributeType: string
 gluuStatus: active
 urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
 description: Enrollment code, non-reassignable code
+oxSCIMCustomAttribute: true
 
 dn: inum=%(inumOrg)s!0005!42E1,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: IMAP Data
