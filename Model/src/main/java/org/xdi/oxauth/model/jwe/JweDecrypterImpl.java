@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.util.Arrays;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -43,11 +22,23 @@ import org.xdi.oxauth.model.exception.InvalidParameterException;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.util.Arrays;
+
 /**
- * @author Javier Rojas Blum Date: 12.04.2012
+ * @author Javier Rojas Blum
+ * @version June 25, 2016
  */
 public class JweDecrypterImpl extends AbstractJweDecrypter {
 
+    private PrivateKey privateKey;
     private RSAPrivateKey rsaPrivateKey;
     private byte[] sharedSymmetricKey;
 
@@ -59,6 +50,10 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
 
     public JweDecrypterImpl(RSAPrivateKey rsaPrivateKey) {
         this.rsaPrivateKey = rsaPrivateKey;
+    }
+
+    public JweDecrypterImpl(PrivateKey privateKey) {
+        this.privateKey = privateKey;
     }
 
     @Override
@@ -73,16 +68,22 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
         try {
             if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA_OAEP
                     || getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA1_5) {
-                if (rsaPrivateKey == null) {
+                if (rsaPrivateKey == null && privateKey == null) {
                     throw new InvalidJweException("The RSA private key is null");
                 }
-                KeyFactory keyFactory = KeyFactory.getInstance(getKeyEncryptionAlgorithm().getFamily(), "BC");
-                RSAPrivateKeySpec privKeySpec = new RSAPrivateKeySpec(rsaPrivateKey.getModulus(), rsaPrivateKey.getPrivateExponent());
-                java.security.interfaces.RSAPrivateKey privKey = (java.security.interfaces.RSAPrivateKey) keyFactory.generatePrivate(privKeySpec);
 
-                Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
+                //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
+                Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
 
-                cipher.init(Cipher.DECRYPT_MODE, privKey);
+                if (rsaPrivateKey != null) {
+                    KeyFactory keyFactory = KeyFactory.getInstance(getKeyEncryptionAlgorithm().getFamily(), "BC");
+                    RSAPrivateKeySpec privKeySpec = new RSAPrivateKeySpec(rsaPrivateKey.getModulus(), rsaPrivateKey.getPrivateExponent());
+                    java.security.interfaces.RSAPrivateKey privKey = (java.security.interfaces.RSAPrivateKey) keyFactory.generatePrivate(privKeySpec);
+                    cipher.init(Cipher.DECRYPT_MODE, privKey);
+                } else {
+                    cipher.init(Cipher.DECRYPT_MODE, privateKey);
+                }
+
                 byte[] decryptedKey = cipher.doFinal(JwtUtil.base64urldecode(encodedEncryptedKey));
 
                 return decryptedKey;

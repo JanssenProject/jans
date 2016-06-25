@@ -21,7 +21,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JSONWebKeySet {
 
@@ -96,5 +96,19 @@ public class JSONWebKeySet {
             LOG.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    public static JSONWebKeySet fromJSONObject(JSONObject jwksJSONObject) throws JSONException {
+        JSONWebKeySet jwks = new JSONWebKeySet();
+
+        JSONArray jwksJsonArray = jwksJSONObject.getJSONArray(JSON_WEB_KEY_SET);
+        for (int i = 0; i < jwksJsonArray.length(); i++) {
+            JSONObject jwkJsonObject = jwksJsonArray.getJSONObject(i);
+
+            JSONWebKey jwk = JSONWebKey.fromJSONObject(jwkJsonObject);
+            jwks.getKeys().add(jwk);
+        }
+
+        return jwks;
     }
 }

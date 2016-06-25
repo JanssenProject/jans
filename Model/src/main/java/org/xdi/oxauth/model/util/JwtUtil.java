@@ -47,7 +47,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JwtUtil {
 
@@ -559,7 +559,6 @@ public class JwtUtil {
         return getPublicKey(jwksUri, jwks, null, keyId);
     }
 
-    @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
         log.debug("Retrieving JWK...");
