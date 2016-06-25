@@ -226,6 +226,6 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "webKeysStorage": "keystore",
     "dnName": "CN=oxAuth CA Certificates",
-    "keyStoreFile": "/etc/certs/keystore.jks",
+    "keyStoreFile": "./conf/keystore.jks",
     "keyStoreSecret": "secret"
 }
