@@ -48,7 +48,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 21, 2016
+ * @version June 25, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -206,14 +206,14 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return verified;
     }
 
-	private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
-		try {
-			return jwks.getString(node);
-		} catch (Exception ex) {
-			JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
-			return publicKey.getString(node);
-		}
-	}
+    private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
+        try {
+            return jwks.getString(node);
+        } catch (Exception ex) {
+            JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
+            return publicKey.getString(node);
+        }
+    }
 
     @Override
     public boolean deleteKey(String alias) throws Exception {
@@ -274,7 +274,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return publicKey;
     }
 
-    private PrivateKey getPrivateKey(String alias)
+    public PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         if (Strings.isNullOrEmpty(alias)) {
             return null;

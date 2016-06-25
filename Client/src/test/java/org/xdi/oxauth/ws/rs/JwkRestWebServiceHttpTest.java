@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.JwkClient;
@@ -18,7 +19,7 @@ import static org.testng.Assert.*;
  * Functional tests for JWK Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version June 25, 2016
  */
 public class JwkRestWebServiceHttpTest extends BaseTest {
 
@@ -32,10 +33,32 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         showClient(jwkClient);
         assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getEntity(), "Unexpected result: entity is null");
-        assertNotNull(response.getKeys(), "Unexpected result: keys is null");
-        assertTrue(response.getKeys().size() > 0, "Unexpected result: keys is empty");
+        assertNotNull(response.getJwks(), "Unexpected result: jwks is null");
+        assertNotNull(response.getJwks().getKeys(), "Unexpected result: keys is null");
+        assertTrue(response.getJwks().getKeys().size() > 0, "Unexpected result: keys is empty");
 
-        for (JSONWebKey JSONWebKey : response.getKeys()) {
+        for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
+            assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
+            assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
+        }
+    }
+
+    @Parameters({"clientJwksUri"})
+    @Test
+    public void requestClientJwks(final String clientJwksUri) throws Exception {
+        showTitle("requestJwks");
+
+        JwkClient jwkClient = new JwkClient(clientJwksUri);
+        JwkResponse response = jwkClient.exec();
+
+        showClient(jwkClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getEntity(), "Unexpected result: entity is null");
+        assertNotNull(response.getJwks(), "Unexpected result: jwks is null");
+        assertNotNull(response.getJwks().getKeys(), "Unexpected result: keys is null");
+        assertTrue(response.getJwks().getKeys().size() > 0, "Unexpected result: keys is empty");
+
+        for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
             assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
         }

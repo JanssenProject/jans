@@ -44,7 +44,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 

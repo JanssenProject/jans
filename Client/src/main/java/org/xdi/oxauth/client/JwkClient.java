@@ -7,30 +7,23 @@
 package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.KeyType;
-import org.xdi.oxauth.model.jwk.Use;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * Encapsulates functionality to make JWK request calls to an authorization
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
@@ -112,45 +105,8 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
                 if (jsonObj.has(JSON_WEB_KEY_SET)) {
-                    JSONArray jwks = jsonObj.getJSONArray(JSON_WEB_KEY_SET);
-                    List<JSONWebKey> jwkList = new ArrayList<JSONWebKey>();
-
-                    for (int i = 0; i < jwks.length(); i++) {
-                        JSONObject jsonKeyValue = jwks.getJSONObject(i);
-                        JSONWebKey jsonWebKey = new JSONWebKey();
-
-                        if (jsonKeyValue.has(KEY_TYPE)) {
-                            jsonWebKey.setKty(KeyType.fromString(jsonKeyValue.getString(KEY_TYPE)));
-                        }
-                        if (jsonKeyValue.has(KEY_ID)) {
-                            jsonWebKey.setKid(jsonKeyValue.getString(KEY_ID));
-                        }
-                        if (jsonKeyValue.has(KEY_USE)) {
-                            jsonWebKey.setUse(Use.fromString(jsonKeyValue.getString(KEY_USE)));
-                        }
-                        if (jsonKeyValue.has(ALGORITHM)) {
-                            jsonWebKey.setAlg(SignatureAlgorithm.fromString(jsonKeyValue.getString(ALGORITHM)));
-                        }
-                        if (jsonKeyValue.has(MODULUS)) {
-                            jsonWebKey.setN(jsonKeyValue.getString(MODULUS));
-                        }
-                        if (jsonKeyValue.has(EXPONENT)) {
-                            jsonWebKey.setE(jsonKeyValue.getString(EXPONENT));
-                        }
-                        if (jsonKeyValue.has(CURVE)) {
-                            jsonWebKey.setCrv(ECEllipticCurve.fromString(jsonKeyValue.getString(CURVE)));
-                        }
-                        if (jsonKeyValue.has(X)) {
-                            jsonWebKey.setX(jsonKeyValue.getString(X));
-                        }
-                        if (jsonKeyValue.has(Y)) {
-                            jsonWebKey.setY(jsonKeyValue.getString(Y));
-                        }
-
-                        jwkList.add(jsonWebKey);
-                    }
-
-                    getResponse().setKeys(jwkList);
+                    JSONWebKeySet jwks = JSONWebKeySet.fromJSONObject(jsonObj);
+                    getResponse().setJwks(jwks);
                 }
             }
         } catch (Exception e) {
