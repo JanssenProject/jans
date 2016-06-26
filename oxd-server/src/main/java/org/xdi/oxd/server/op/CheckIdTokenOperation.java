@@ -83,7 +83,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             }
 
             // 2. validate signature
-            final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(algorithm);
+            final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
 
             final RSAPublicKey publicKey = getRSAPublicKey(jwkUrl, kid);
             final RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
