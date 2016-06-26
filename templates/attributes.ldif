@@ -1071,6 +1071,7 @@ gluuAttributeType: string
 gluuStatus: active
 urn: urn:gluu:dir:attribute-def:oxEnrollmentCode
 description: Enrollment code, non-reassignable code
+oxSCIMCustomAttribute: true
 
 dn: inum=%(inumOrg)s!0005!42E1,ou=attributes,o=%(inumOrg)s,o=gluu
 displayName: IMAP Data
@@ -1081,10 +1082,27 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
-oxAuthClaimName: IMAP_Data
+oxAuthClaimName: imap_data
 gluuStatus: active
 inum: %(inumOrg)s!0005!42E1
 objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:gluuIMAPData
 description: IMAP Data
+
+dn: inum=%(inumOrg)s!0005!42E2,ou=attributes,o=%(inumOrg)s,o=gluu
+displayName: Status
+gluuAttributeName: gluuStatus
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuAttributeEditType: admin
+gluuAttributeEditType: user
+oxAuthClaimName: gluu_status
+gluuStatus: active
+inum: %(inumOrg)s!0005!42E2
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:gluuStatus
+description: Gluu Status
