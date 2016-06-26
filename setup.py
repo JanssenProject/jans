@@ -53,6 +53,7 @@ class Setup(object):
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxShibboleth/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist = 'http://shibboleth.net/downloads/identity-provider/3.2.1/shibboleth-identity-provider-3.2.1.tar.gz'
+        self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibboleth/%s/shibboleth-idp-3.2.1.jar'
         self.asimba_war = "http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war" % (self.oxVersion, self.oxVersion)
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
@@ -64,6 +65,8 @@ class Setup(object):
         self.installLdap = True
         self.installHttpd = True
         self.installSaml = False
+        self.installSamlIDP2 = False
+        self.installSamlIDP3 = False
         self.installAsimba = False
         self.installCas = False
         self.installOxAuthRP = False
@@ -151,6 +154,8 @@ class Setup(object):
         self.indexJson = '%s/static/opendj/opendj_index.json' % self.install_dir
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
         self.oxauth_openid_key_json = "%s/oxauth-web-keys.json" % self.certFolder
+        self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
+        self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
 
         self.httpdKeyPass = None
         self.httpdKeyFn = '%s/httpd.key' % self.certFolder
@@ -249,6 +254,14 @@ class Setup(object):
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
         self.network = "/etc/sysconfig/network"
+        
+        self.idp3_configuration_properties = '/idp.properties' 
+        self.idp3_configuration_ldap_properties = '/ldap.properties'
+        self.idp3_configuration_login = '/login.config' 
+        self.idp3_configuration_saml_nameid = '/saml-nameid.properties' 
+        self.idp3_configuration_services = '/services.properties' 
+        self.idp3_configuration_jaas = '/authn/jaas.config' 
+        self.idp3_metadata = '/idp-metadata.xml' 
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -716,17 +729,17 @@ class Setup(object):
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '--retry-connrefused', '--tries=10', '%s/oxauth.war' % self.tomcatWebAppFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '%s/identity.war' % self.tomcatWebAppFolder])
-            print "Downloading Shibboleth 2 IDP war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '-O', '%s/idp.war' % self.idpWarFolder])
-            print "Downloading Shibboleth 3 IDP war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '-O', '%s/idp.war' % self.idp3WarFolder])
-            print "Downloading Shibboleth 3 IDP binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist, '-O', '%s/shibboleth-identity-provider.tar.gz' % self.idp3WarFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '--retry-connrefused', '--tries=10', '%s/identity.war' % self.tomcatWebAppFolder])
+            print "Downloading Shibboleth IDP 2 war file..."
+            self.run(['/usr/bin/wget', self.idp_war, '-O', '--retry-connrefused', '--tries=10', '%s/idp.war' % self.idpWarFolder])
+            print "Downloading Shibboleth IDP 3 war file..."
+            self.run(['/usr/bin/wget', self.idp3_war, '-O', '-c', '--retry-connrefused', '--tries=10', '%s/idp.war' % self.idp3WarFolder])
+            print "Downloading Shibboleth IDP 3 binary distributive file..."
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-O', '-c', '--retry-connrefused', '--tries=10', '/opt/shibboleth-idp.jar'])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '-O', '%s/oxcas.war' % self.distFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '-O', '--retry-connrefused', '--tries=10', '%s/oxcas.war' % self.distFolder])
 
             print "Finished downloading latest war files"
 
@@ -1222,34 +1235,56 @@ class Setup(object):
             idpWar = "idp.war"
             distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
             
-            idp3War = "idp.war"
-            distIdp3Path = '%s/%s' % (self.idp3WarFolder, idp3War)
+            #idp3War = "idp.war"
+            #distIdp3Path = '%s/%s' % (self.idp3WarFolder, idp3War)
 
             tmpIdpDir = '%s/tmp_idp' % self.distFolder
-            tmpIdp3Dir = '%s/tmp_idp3' % self.distFolder
+            #tmpIdp3Dir = '%s/tmp_idp3' % self.distFolder
 
             self.logIt("Unpacking %s..." % idpWar)
             self.removeDirs(tmpIdpDir)
             self.createDirs(tmpIdpDir)
             
-            self.removeDirs(tmpIdp3Dir)
-            self.createDirs(tmpIdp3Dir)
+            #self.removeDirs(tmpIdp3Dir)
+            #self.createDirs(tmpIdp3Dir)
 
             self.run([self.jarCommand,'xf',distIdpPath], tmpIdpDir)
-            self.run([self.jarCommand,'xf',distIdp3Path], tmpIdp3Dir)
+            #self.run([self.jarCommand,'xf',distIdp3Path], tmpIdp3Dir)
 
             self.logIt("Copying files to %s..." % self.idpLibFolder)
             self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
             self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
 
-            self.logIt("Copying files to %s..." % self.idp3LibFolder)
+            #self.logIt("Copying files to %s..." % self.idp3LibFolder)
             #self.copyTree('%s/WEB-INF/lib' % tmp3IdpDir, self.idp3LibFolder)
             #self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idp3LibFolder)
             #self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idp3LibFolder)
 
             self.removeDirs(tmpIdpDir)
-            self.removeDirs(tmpIdp3Dir)
+            #self.removeDirs(tmpIdp3Dir)
+
+	if (self.installSamlIDP3)
+	    # unpack IDP3 JAR with static configs
+            self.run([self.jarCommand, 'xf', '/opt/shibboleth-idp.jar'], "/opt")
+            
+            # copy templates
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_ldap_properties, self.idp3ConfFolder + self.idp3_configuration_ldap_properties)
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_login, self.idp3ConfFolder + self.idp3_configuration_login)
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_saml_nameid, self.idp3ConfFolder + self.idp3_configuration_saml_nameid)
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_services, self.idp3ConfFolder + self.idp3_configuration_services)
+            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_jaas, self.idp3ConfFolder + self.idp3_configuration_jaas)
+            self.copyFile(self.staticIDP3FolderMetadata + self.idp3_metadata, self.idp3MetadataFolder + self.idp3_metadata)
+            
+            # Process templates
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_properties, self.idp3ConfFolder, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_ldap_properties, self.idp3ConfFolder, self.idp3ConfFolder) 
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_login, self.idp3ConfFolder, self.idp3ConfFolder) 
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_saml_nameid, self.idp3ConfFolder, self.idp3ConfFolder)
+            #self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_services, self.idp3ConfFolder, self.idp3ConfFolder) 
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_jaas, self.idp3ConfFolder + '/authn', self.idp3ConfFolder + '/authn') 
+            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder) 
 
     def install_asimba_war(self):
         if self.installAsimba:
@@ -1586,15 +1621,18 @@ class Setup(object):
 
         return file_paths
 
-    def renderTemplate(self, filePath):
+    def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
         self.logIt("Rendering template %s" % filePath)
         fn = os.path.split(filePath)[-1]
-        f = open(os.path.join(self.templateFolder, fn))
+        f = open(os.path.join(templateFolder, fn))
         template_text = f.read()
         f.close()
-        newFn = open(os.path.join(self.outputFolder, fn), 'w+')
+        newFn = open(os.path.join(outputFolder, fn), 'w+')
         newFn.write(template_text % self.__dict__)
         newFn.close()
+
+    def renderTemplate(self, filePath):
+        self.renderTemplateInOut(filePath, self.templateFolder, self.outputFolder)
 
     def render_templates(self):
         self.logIt("Rendering templates")
