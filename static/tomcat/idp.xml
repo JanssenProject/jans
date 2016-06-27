@@ -1,4 +1,4 @@
-<Context docBase="/opt/idp/war/idp.war"
+<Context docBase="%(idpWarFullPath)s"
          privileged="true"
          antiResourceLocking="false"
          antiJARLocking="false"
