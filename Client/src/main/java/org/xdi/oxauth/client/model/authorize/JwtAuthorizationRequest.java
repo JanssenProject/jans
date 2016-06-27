@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version June 27, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -82,6 +82,7 @@ public class JwtAuthorizationRequest {
     private RSAPublicKey rsaPublicKey;
     private byte[] sharedSymmetricKey;
 
+    @Deprecated
     public JwtAuthorizationRequest(AuthorizationRequest authorizationRequest) {
         this.type = JwtType.JWT;
         this.signatureAlgorithm = SignatureAlgorithm.NONE;
