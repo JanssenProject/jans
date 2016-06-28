@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -43,7 +44,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 27, 2016
  */
 public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
@@ -1097,26 +1098,35 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
     /**
      * Call to Token Endpoint with Auth Method <code>client_secret_Jwt</code>.
      */
-    @Parameters({"tokenPath", "redirectUri", "audience"})
+    @Parameters({"tokenPath", "redirectUri", "audience", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = {"tokenEndpointAuthMethodClientSecretJwtStep3"})
-    public void tokenEndpointAuthMethodClientSecretJwtStep4(final String tokenPath, final String redirectUri,
-                                                            final String audience) throws Exception {
+    public void tokenEndpointAuthMethodClientSecretJwtStep4(
+            final String tokenPath, final String redirectUri, final String audience, final String keyId,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+                try {
+                    super.prepareRequest(request);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAudience(audience);
-                tokenRequest.setCode(authorizationCode4);
-                tokenRequest.setRedirectUri(redirectUri);
-                tokenRequest.setAuthUsername(clientId4);
-                tokenRequest.setAuthPassword(clientSecret4);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setAudience(audience);
+                    tokenRequest.setCode(authorizationCode4);
+                    tokenRequest.setRedirectUri(redirectUri);
+                    tokenRequest.setAuthUsername(clientId4);
+                    tokenRequest.setAuthPassword(clientSecret4);
+
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -1138,12 +1148,8 @@ public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
                     assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
