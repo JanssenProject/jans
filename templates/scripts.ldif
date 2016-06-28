@@ -2363,8 +2363,8 @@ programmingLanguage: python
 dn: inum=%(inumOrg)s!0011!D40C.1CA3,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
-description: Saml authentication module
-displayName: saml
+description: Inbound SAML via Asimba
+displayName: asimba
 gluuStatus: false
 inum: %(inumOrg)s!0011!D40C.1CA3
 oxConfigurationProperty: {"value1":"saml_certificate_file","value2":"/etc/ce
