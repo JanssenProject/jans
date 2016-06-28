@@ -20,6 +20,7 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -36,7 +37,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for the Use Authentication Filter (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 23, 2015
+ * @version June 28, 2016
  */
 public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
@@ -473,28 +474,37 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenCustomAuth4Step1")
-    public void requestAccessTokenCustomAuth4Step2(final String tokenPath,
-                                                   final String userId, final String userSecret, final String audience) throws Exception {
+    public void requestAccessTokenCustomAuth4Step2(
+            final String tokenPath, final String userId, final String userSecret, final String audience,
+            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-                tokenRequest.setAuthUsername(clientId4);
-                tokenRequest.setAuthPassword(clientSecret4);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAudience(audience);
-                tokenRequest.addCustomParameter("uid", userId);
-                tokenRequest.addCustomParameter("pwd", userSecret);
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                request.addParameters(tokenRequest.getParameters());
+                    tokenRequest.setAuthUsername(clientId4);
+                    tokenRequest.setAuthPassword(clientSecret4);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setAudience(audience);
+                    tokenRequest.addCustomParameter("uid", userId);
+                    tokenRequest.addCustomParameter("pwd", userSecret);
+
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -516,9 +526,8 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
                     assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
