@@ -6,37 +6,30 @@
 
 package org.xdi.oxauth.comp;
 
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.*;
 import org.xdi.oxauth.model.util.JwtUtil;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
+import org.xdi.oxauth.model.util.Util;
 
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * https://localhost:8443/oxauth/seam/resource/restv1/oxauth/jwk
  * http://openid.net/specs/openid-connect-messages-1_0.html#sigs
  *
  * @author Yuriy Zabrovarnyy
- * @version June 15, 2016
+ * @author Javier Rojas Blum
+ * @version June 28, 2016
  */
 
 public class FederationSigningTest extends BaseComponentTestAdapter {
@@ -59,32 +52,44 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
             "}";
 
     @Test
-    public void test() throws InvalidJwtException, JSONException, SignatureException, IOException, IllegalBlockSizeException, NoSuchProviderException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException {
-        final String keyId = testKeyId();
-        final SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
+    public void test() {
+        try {
+            final String keyId = testKeyId();
+            final SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
 
-        final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
+            final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
 
-        final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
+            final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
 
-        final JSONObject jsonHeader = JwtHeader.instance().
-                setType(JwtType.JWT).setAlgorithm(algorithm).setKeyId(keyId).
-                toJsonObject();
-        final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
+            final JSONObject jsonHeader = JwtHeader.instance().
+                    setType(JwtType.JWT).setAlgorithm(algorithm).setKeyId(keyId).
+                    toJsonObject();
+            final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
 
-        final String signedJwt = JwtUtil.encodeJwt(jsonHeader, jsonPayload, algorithm, factory.getPrivateKey());
+            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
 
-        ////////////// VERIFICATION //////////////
-        final PureJwt jwt = PureJwt.parse(signedJwt);
+            String header = jsonHeader.toString();
+            String payload = jsonPayload.toString();
+            header = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            payload = JwtUtil.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
+            final String signingInput = header + "." + payload;
 
-        // 1. check signing
-        RSASigner rsaSigner = new RSASigner(algorithm, factory.getPublicKey());
-        assertTrue(rsaSigner.validateSignature(jwt.getSigningInput(), jwt.getEncodedSignature()));//
+            final String signature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
+            final String signedJwt = signingInput + "." + signature;
 
-        // 2. chtestKeyIdeyId and jwtPath
-        final JwtHeader header = Jwt.parse(signedJwt).getHeader();
-        assertTrue(header.getClaim(JwtHeaderName.KEY_ID).equals(keyId));
+            ////////////// VERIFICATION //////////////
+            final PureJwt jwt = PureJwt.parse(signedJwt);
 
+            // 1. check signing
+            RSASigner rsaSigner = new RSASigner(algorithm, factory.getPublicKey());
+            assertTrue(rsaSigner.validateSignature(jwt.getSigningInput(), jwt.getEncodedSignature()));//
+
+            // 2. chtestKeyIdeyId and jwtPath
+            final JwtHeader jwtHeader = Jwt.parse(signedJwt).getHeader();
+            assertTrue(jwtHeader.getClaim(JwtHeaderName.KEY_ID).equals(keyId));
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
     public static String testKeyId() {
