@@ -18,6 +18,7 @@ import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -98,7 +99,9 @@ public class KeyGenerator {
                         help();
                     } else {
                         try {
-                            JSONWebKeySet jwks = new JSONWebKeySet();
+                        	SecurityProviderUtility.installBCProvider(true);
+
+                        	JSONWebKeySet jwks = new JSONWebKeySet();
                             OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
 
                             Calendar calendar = new GregorianCalendar();
@@ -125,6 +128,7 @@ public class KeyGenerator {
 
                             System.out.println(jwks);
                         } catch (Exception e) {
+                        	log.error("Failed to generate keys", e);
                             help();
                         }
                     }
@@ -132,6 +136,7 @@ public class KeyGenerator {
                     help();
                 }
             } catch (ParseException e) {
+            	log.error("Failed to generate keys", e);
                 help();
             }
         }

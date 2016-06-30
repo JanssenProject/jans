@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.model.jwk;
 
-import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.util.Util;
 
 import java.util.List;
 
@@ -217,16 +217,16 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         jsonObj.put(ALGORITHM, alg);
         jsonObj.put(EXPIRATION_TIME, exp);
         jsonObj.put(CURVE, crv);
-        if (!Strings.isNullOrEmpty(n)) {
+        if (!Util.isNullOrEmpty(n)) {
             jsonObj.put(MODULUS, n);
         }
-        if (!Strings.isNullOrEmpty(e)) {
+        if (!Util.isNullOrEmpty(e)) {
             jsonObj.put(EXPONENT, e);
         }
-        if (!Strings.isNullOrEmpty(x)) {
+        if (!Util.isNullOrEmpty(x)) {
             jsonObj.put(X, x);
         }
-        if (!Strings.isNullOrEmpty(y)) {
+        if (!Util.isNullOrEmpty(y)) {
             jsonObj.put(Y, y);
         }
 
