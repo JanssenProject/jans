@@ -15,17 +15,16 @@ import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.registration.Client;
@@ -35,12 +34,13 @@ import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -91,12 +91,11 @@ public class JwtAuthorizationRequest {
 
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
-                        JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
-                        JSONWebKey jwk = jwks.getKey(keyId);
-                        RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(
-                                jwk.getN(),
-                                jwk.getE());
-                        jweDecrypter = new JweDecrypterImpl(rsaPrivateKey);
+                        Configuration configuration = ConfigurationFactory.instance().getConfiguration();
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(configuration.getKeyStoreFile(),
+                                configuration.getKeyStoreSecret(), configuration.getDnName());
+                        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+                        jweDecrypter = new JweDecrypterImpl(privateKey);
                     } else {
                         jweDecrypter = new JweDecrypterImpl(client.getClientSecret().getBytes(Util.UTF8_STRING_ENCODING));
                     }

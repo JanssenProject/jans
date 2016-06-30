@@ -38,7 +38,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 27, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -82,6 +82,7 @@ public class JwtAuthorizationRequest {
     private RSAPublicKey rsaPublicKey;
     private byte[] sharedSymmetricKey;
 
+    @Deprecated
     public JwtAuthorizationRequest(AuthorizationRequest authorizationRequest) {
         this.type = JwtType.JWT;
         this.signatureAlgorithm = SignatureAlgorithm.NONE;
@@ -119,7 +120,6 @@ public class JwtAuthorizationRequest {
         this.cryptoProvider = cryptoProvider;
     }
 
-    @Deprecated
     public JwtAuthorizationRequest(
             AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
             BlockEncryptionAlgorithm blockEncryptionAlgorithm, RSAPublicKey rsaPublicKey) {
@@ -131,6 +131,21 @@ public class JwtAuthorizationRequest {
         this.idTokenMember = new IdTokenMember();
 
         this.rsaPublicKey = rsaPublicKey;
+
+        setAuthorizationRequestParams(authorizationRequest);
+    }
+
+    public JwtAuthorizationRequest(
+            AuthorizationRequest authorizationRequest, KeyEncryptionAlgorithm keyEncryptionAlgorithm,
+            BlockEncryptionAlgorithm blockEncryptionAlgorithm, AbstractCryptoProvider cryptoProvider) {
+        this.type = JwtType.JWT;
+        this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
+        this.blockEncryptionAlgorithm = blockEncryptionAlgorithm;
+
+        this.userInfoMember = new UserInfoMember();
+        this.idTokenMember = new IdTokenMember();
+
+        this.cryptoProvider = cryptoProvider;
 
         setAuthorizationRequestParams(authorizationRequest);
     }

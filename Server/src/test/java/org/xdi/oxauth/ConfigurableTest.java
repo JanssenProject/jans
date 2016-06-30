@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.seam.mock.SeamTest;
 import org.jboss.shrinkwrap.api.Archive;
@@ -26,6 +18,14 @@ import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * Base class for all seam test which requre external configuration

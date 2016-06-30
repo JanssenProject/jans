@@ -22,7 +22,6 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Deprecated
 public class RSAPublicKey extends PublicKey {
 
     private static final String RSA_ALGORITHM = "RSA";

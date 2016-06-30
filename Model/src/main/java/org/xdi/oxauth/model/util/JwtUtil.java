@@ -16,7 +16,6 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.openssl.PEMParser;
@@ -47,7 +46,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JwtUtil {
 
@@ -559,7 +558,6 @@ public class JwtUtil {
         return getPublicKey(jwksUri, jwks, null, keyId);
     }
 
-    @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
         log.debug("Retrieving JWK...");

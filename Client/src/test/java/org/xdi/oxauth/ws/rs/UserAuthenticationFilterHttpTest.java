@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 25, 2016
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 

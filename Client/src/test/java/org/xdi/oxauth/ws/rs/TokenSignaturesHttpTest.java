@@ -6,20 +6,15 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.signature.*;
-import org.xdi.oxauth.model.jws.ECDSASigner;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.HMACSigner;
-import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -29,7 +24,6 @@ import org.xdi.oxauth.model.util.StringUtils;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -43,7 +37,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version June 25, 2016
  */
 public class TokenSignaturesHttpTest extends BaseTest {
 
@@ -294,11 +288,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS256);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
@@ -359,11 +356,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS384);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
@@ -424,11 +424,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.RS512);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
@@ -489,11 +492,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES256, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES256);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
@@ -554,11 +560,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES384, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES384);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
@@ -619,11 +628,14 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES512, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        String keyId = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), keyId,
+                jwkResponse.getJwks().toJSONObject(), null, SignatureAlgorithm.ES512);
+        assertTrue(validJwt);
     }
 
     @Test
@@ -635,251 +647,221 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
     @Test
     public void hs256() throws InvalidKeyException, NoSuchAlgorithmException {
-        showTitle("hs256");
+        try {
+            showTitle("hs256");
 
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-        String key = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-        byte[] signature = JwtUtil.getSignatureHS256(signingInput.getBytes(), key.getBytes());
-        String encodedSignature = JwtUtil.base64urlencode(signature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS256);
 
-        System.out.println("Encoded Signature: " + encodedSignature);
-        assertEquals(encodedSignature, "BQwm1HCz0cjHYbulWMumkhZgyb2dD93uScXmC6Fv8Ik");
+            System.out.println("Encoded Signature: " + encodedSignature);
+            assertEquals(encodedSignature, "BQwm1HCz0cjHYbulWMumkhZgyb2dD93uScXmC6Fv8Ik");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
     @Test
     public void hs384() throws InvalidKeyException, NoSuchAlgorithmException {
-        showTitle("hs384");
+        try {
+            showTitle("hs384");
 
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-        String key = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-        byte[] signature = JwtUtil.getSignatureHS384(signingInput.getBytes(), key.getBytes());
-        String encodedSignature = JwtUtil.base64urlencode(signature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS384);
 
-        System.out.println("Encoded Signature: " + encodedSignature);
-        assertEquals(encodedSignature, "pe7gU1XxroqizSzucuHOor36L-M9_XPZ7KZcR6JW6xQAa2fmTLSDCc02fNER9atB");
+            System.out.println("Encoded Signature: " + encodedSignature);
+            assertEquals(encodedSignature, "pe7gU1XxroqizSzucuHOor36L-M9_XPZ7KZcR6JW6xQAa2fmTLSDCc02fNER9atB");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
     @Test
     public void hs512() throws InvalidKeyException, NoSuchAlgorithmException {
-        showTitle("hs512");
+        try {
+            showTitle("hs512");
 
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-        String key = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String secret = "071d68a5-9eb0-47fb-8608-f54a0d9c8ede";
 
-        byte[] signature = JwtUtil.getSignatureHS512(signingInput.getBytes(), key.getBytes());
-        String encodedSignature = JwtUtil.base64urlencode(signature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+            String encodedSignature = cryptoProvider.sign(signingInput, null, secret, SignatureAlgorithm.HS512);
 
-        System.out.println("Encoded Signature: " + encodedSignature);
-        assertEquals(encodedSignature, "IZsXiRrRfP9eNFj6snm_MGEnrtfvX8vOF43Z-FuFkRj29y0WUaPR50IXRDI5uGatJvVdr_i7eJCJ4N_EwwrIhQ");
+            System.out.println("Encoded Signature: " + encodedSignature);
+            assertEquals(encodedSignature, "IZsXiRrRfP9eNFj6snm_MGEnrtfvX8vOF43Z-FuFkRj29y0WUaPR50IXRDI5uGatJvVdr_i7eJCJ4N_EwwrIhQ");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
+    @Parameters({"clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs256() throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException,
-            InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
+    public void testRS256(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
+            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+        try {
+            showTitle("Test RS256");
+
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
+
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS256);
+
+            System.out.println("Encoded Signature: " + encodedSignature);
+
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.RS256);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
+    }
+
+    @Parameters({"clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Test
+    public void testRS384(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
+            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+        try {
+            showTitle("Test RS384");
+
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
+
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS384);
+
+            System.out.println("Encoded Signature: " + encodedSignature);
+
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.RS384);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
+    }
+
+    @Parameters({"clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Test
+    public void testRS512(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException,
+            InvalidKeySpecException, IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
+        try {
+            showTitle("Test RS512");
+
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
+
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
+
+            System.out.println("Encoded Signature: " + encodedSignature);
+
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.RS512);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
+    }
+
+    @Parameters({"clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Test
+    public void testES256(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
             NoSuchPaddingException, BadPaddingException {
-        showTitle("rs256");
+        try {
+            showTitle("Test ES256");
 
-        // Generate RSA Key
-        KeyPair keyPair = JwtUtil.generateRsaKey();
-        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
-        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = new RSAPrivateKey(
-                jcersaPrivateCrtKey.getModulus(),
-                jcersaPrivateCrtKey.getPrivateExponent());
-        System.out.println("PRIVATE KEY");
-        System.out.println("Modulus: " + privateKey.getModulus());
-        System.out.println("Private Exponent: " + privateKey.getPrivateExponent());
-        RSAPublicKey publicKey = new RSAPublicKey(
-                jcersaPublicKey.getModulus(),
-                jcersaPublicKey.getPublicExponent());
-        System.out.println("PUBLIC KEY");
-        System.out.println("Modulus: " + publicKey.getModulus());
-        System.out.println("Public Exponent: " + publicKey.getPublicExponent());
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
 
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-        byte[] signature = JwtUtil.getSignatureRS256(signingInput.getBytes(), privateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES256);
 
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureRS256(signingInput.getBytes(), signature, publicKey);
-        assertTrue(signatureVerified, "Invalid signature");
+            System.out.println("Encoded Signature: " + encodedSignature);
+
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.ES256);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
+    @Parameters({"clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs384() throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException,
-            InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
+    public void testES384(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
             NoSuchPaddingException, BadPaddingException {
-        showTitle("rs384");
+        try {
+            showTitle("Test ES384");
 
-        // Generate RSA Key
-        KeyPair keyPair = JwtUtil.generateRsaKey();
-        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
-        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = new RSAPrivateKey(
-                jcersaPrivateCrtKey.getModulus(),
-                jcersaPrivateCrtKey.getPrivateExponent());
-        System.out.println("PRIVATE KEY");
-        System.out.println("Modulus: " + privateKey.getModulus());
-        System.out.println("Private Exponent: " + privateKey.getPrivateExponent());
-        RSAPublicKey publicKey = new RSAPublicKey(
-                jcersaPublicKey.getModulus(),
-                jcersaPublicKey.getPublicExponent());
-        System.out.println("PUBLIC KEY");
-        System.out.println("Modulus: " + publicKey.getModulus());
-        System.out.println("Public Exponent: " + publicKey.getPublicExponent());
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
 
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-        byte[] signature = JwtUtil.getSignatureRS384(signingInput.getBytes(), privateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES384);
 
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureRS384(signingInput.getBytes(), signature, publicKey);
-        assertTrue(signatureVerified, "Invalid signature");
+            System.out.println("Encoded Signature: " + encodedSignature);
+
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.ES384);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
+    @Parameters({"clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
-    public void rs512() throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException,
-            InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
+    public void testES512(final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret)
+            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
+            SignatureException, InvalidKeyException, InvalidKeySpecException, IllegalBlockSizeException, IOException,
             NoSuchPaddingException, BadPaddingException {
-        showTitle("rs512");
+        try {
+            showTitle("Test ES512");
 
-        // Generate RSA Key
-        KeyPair keyPair = JwtUtil.generateRsaKey();
-        BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
-        BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = new RSAPrivateKey(
-                jcersaPrivateCrtKey.getModulus(),
-                jcersaPrivateCrtKey.getPrivateExponent());
-        System.out.println("PRIVATE KEY");
-        System.out.println("Modulus: " + privateKey.getModulus());
-        System.out.println("Private Exponent: " + privateKey.getPrivateExponent());
-        RSAPublicKey publicKey = new RSAPublicKey(
-                jcersaPublicKey.getModulus(),
-                jcersaPublicKey.getPublicExponent());
-        System.out.println("PUBLIC KEY");
-        System.out.println("Modulus: " + publicKey.getModulus());
-        System.out.println("Public Exponent: " + publicKey.getPublicExponent());
+            JwkClient jwkClient = new JwkClient(clientJwksUri);
+            JwkResponse jwkResponse = jwkClient.exec();
 
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
+            String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
 
-        byte[] signature = JwtUtil.getSignatureRS512(signingInput.getBytes(), privateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.ES512);
 
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureRS512(signingInput.getBytes(), signature, publicKey);
-        assertTrue(signatureVerified, "Invalid signature");
-    }
+            System.out.println("Encoded Signature: " + encodedSignature);
 
-    @Test
-    public void es256() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, SignatureException, InvalidKeyException, InvalidKeySpecException,
-            IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
-        showTitle("es256");
-
-        // Generate ECDSA Key
-        KeyPair keyPair = JwtUtil.generateKeyES256();
-        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
-        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
-
-        ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
-        ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
-                SignatureAlgorithm.ES256,
-                publicKey.getQ().getX().toBigInteger(),
-                publicKey.getQ().getY().toBigInteger());
-        System.out.println("PRIVATE KEY");
-        System.out.println("D: " + ecdsaPrivateKey.getD());
-        System.out.println("PUBLIC KEY");
-        System.out.println("X: " + ecdsaPublicKey.getX());
-        System.out.println("Y: " + ecdsaPublicKey.getY());
-
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        byte[] signature = JwtUtil.getSignatureES256(signingInput.getBytes(), ecdsaPrivateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureES256(signingInput.getBytes(), signature, ecdsaPublicKey);
-        assertTrue(signatureVerified, "Invalid signature");
-    }
-
-    @Test
-    public void es384() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, SignatureException, InvalidKeyException, InvalidKeySpecException,
-            IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
-        showTitle("es384");
-
-        // Generate ECDSA Key
-        KeyPair keyPair = JwtUtil.generateKeyES384();
-        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
-        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
-
-        ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
-        ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
-                SignatureAlgorithm.ES384,
-                publicKey.getQ().getX().toBigInteger(),
-                publicKey.getQ().getY().toBigInteger());
-        System.out.println("PRIVATE KEY");
-        System.out.println("D: " + ecdsaPrivateKey.getD());
-        System.out.println("PUBLIC KEY");
-        System.out.println("X: " + ecdsaPublicKey.getX());
-        System.out.println("Y: " + ecdsaPublicKey.getY());
-
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        byte[] signature = JwtUtil.getSignatureES384(signingInput.getBytes(), ecdsaPrivateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureES384(signingInput.getBytes(), signature, ecdsaPublicKey);
-        assertTrue(signatureVerified, "Invalid signature");
-    }
-
-    @Test
-    public void es512() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException, SignatureException, InvalidKeyException, InvalidKeySpecException,
-            IllegalBlockSizeException, IOException, NoSuchPaddingException, BadPaddingException {
-        showTitle("es512");
-
-        // Generate ECDSA Key
-        KeyPair keyPair = JwtUtil.generateKeyES512();
-        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
-        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
-
-        ECDSAPrivateKey ecdsaPrivateKey = new ECDSAPrivateKey(privateKey.getD());
-        ECDSAPublicKey ecdsaPublicKey = new ECDSAPublicKey(
-                SignatureAlgorithm.ES512,
-                publicKey.getQ().getX().toBigInteger(),
-                publicKey.getQ().getY().toBigInteger());
-        System.out.println("PRIVATE KEY");
-        System.out.println("D: " + ecdsaPrivateKey.getD());
-        System.out.println("PUBLIC KEY");
-        System.out.println("X: " + ecdsaPublicKey.getX());
-        System.out.println("Y: " + ecdsaPublicKey.getY());
-
-        // Encode message
-        String signingInput = "eyJhbGciOiJIUzI1NiJ9.eyJub25jZSI6ICI2Qm9HN1QwR0RUZ2wiLCAiaWRfdG9rZW4iOiB7Im1heF9hZ2UiOiA4NjQwMH0sICJzdGF0ZSI6ICJTVEFURTAiLCAicmVkaXJlY3RfdXJpIjogImh0dHBzOi8vbG9jYWxob3N0L2NhbGxiYWNrMSIsICJ1c2VyaW5mbyI6IHsiY2xhaW1zIjogeyJuYW1lIjogbnVsbH19LCAiY2xpZW50X2lkIjogIkAhMTExMSEwMDA4IUU2NTQuQjQ2MCIsICJzY29wZSI6IFsib3BlbmlkIl0sICJyZXNwb25zZV90eXBlIjogWyJjb2RlIl19";
-
-        byte[] signature = JwtUtil.getSignatureES512(signingInput.getBytes(), ecdsaPrivateKey);
-        String encodedSignature = JwtUtil.base64urlencode(signature);
-        System.out.println("Encoded Signature: " + encodedSignature);
-
-        // Verify signature
-        boolean signatureVerified = JwtUtil.verifySignatureES512(signingInput.getBytes(), signature, ecdsaPublicKey);
-        assertTrue(signatureVerified, "Invalid signature");
+            boolean signatureVerified = cryptoProvider.verifySignature(
+                    signingInput, encodedSignature, keyId, jwkResponse.getJwks().toJSONObject(), null,
+                    SignatureAlgorithm.ES512);
+            assertTrue(signatureVerified, "Invalid signature");
+        } catch (Exception e) {
+            fail(e.getMessage(), e);
+        }
     }
 
     @Test

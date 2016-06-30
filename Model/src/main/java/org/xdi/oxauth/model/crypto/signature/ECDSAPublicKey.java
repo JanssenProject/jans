@@ -20,9 +20,8 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * The Public Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
-@Deprecated
 public class ECDSAPublicKey extends PublicKey {
 
     private static final String ECDSA_ALGORITHM = "EC";
