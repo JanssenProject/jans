@@ -185,7 +185,7 @@
     "federationSkipPolicy":"OR",
     "federationScopePolicy":"JOIN",
     "federationSigningAlg":"RS512",
-    "federationSigningKid":"6898cff9-4f92-4b58-b37c-2a2b6779b0b3",
+    "federationSigningKid":"c9e1c25a-9826-4162-8698-54a15a284ffe",
     "authenticationFiltersEnabled":true,
     "clientAuthenticationFiltersEnabled":true,
     "authenticationFilters":[
@@ -226,6 +226,6 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "webKeysStorage": "keystore",
     "dnName": "CN=oxAuth CA Certificates",
-    "keyStoreFile": "/etc/certs/keystore.jks",
+    "keyStoreFile": "./conf/keystore.jks",
     "keyStoreSecret": "secret"
 }

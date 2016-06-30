@@ -50,7 +50,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 27, 2016
  */
 public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
@@ -1222,7 +1222,10 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                     authorizationRequest.setAuthUsername(userId);
                     authorizationRequest.setAuthPassword(userSecret);
 
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+
+                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                            SignatureAlgorithm.NONE, cryptoProvider);
                     jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
                     jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
                     jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));

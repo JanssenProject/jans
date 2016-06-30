@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -30,15 +18,22 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for Token Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 04.12.2013
+ * @author Javier Rojas Blum
+ * @version June 27, 2016
  */
 public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
@@ -107,27 +102,33 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
     @Parameters({"tokenPath", "userId", "userSecret", "audience"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtHS256Step1")
-    public void requestAccessTokenWithClientSecretJwtHS256Step2(final String tokenPath,
-                                                                final String userId, final String userSecret,
-                                                                final String audience) throws Exception {
+    public void requestAccessTokenWithClientSecretJwtHS256Step2(
+            final String tokenPath, final String userId, final String userSecret, final String audience) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                tokenRequest.setAuthUsername(clientId1);
-                tokenRequest.setAuthPassword(clientSecret1);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAudience(audience);
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                request.addParameters(tokenRequest.getParameters());
+                    tokenRequest.setAuthUsername(clientId1);
+                    tokenRequest.setAuthPassword(clientSecret1);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
+
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -137,10 +138,10 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -149,9 +150,8 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
                     assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -213,28 +213,34 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
     @Parameters({"tokenPath", "userId", "userSecret", "audience"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtHS384Step1")
-    public void requestAccessTokenWithClientSecretJwtHS384Step2(final String tokenPath,
-                                                                final String userId, final String userSecret,
-                                                                final String audience) throws Exception {
+    public void requestAccessTokenWithClientSecretJwtHS384Step2(
+            final String tokenPath, final String userId, final String userSecret, final String audience) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                tokenRequest.setAuthUsername(clientId2);
-                tokenRequest.setAuthPassword(clientSecret2);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
-                tokenRequest.setAudience(audience);
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                request.addParameters(tokenRequest.getParameters());
+                    tokenRequest.setAuthUsername(clientId2);
+                    tokenRequest.setAuthPassword(clientSecret2);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+                    tokenRequest.setAudience(audience);
+
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -244,10 +250,10 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -256,9 +262,8 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
                     assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();
@@ -320,28 +325,34 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
     @Parameters({"tokenPath", "userId", "userSecret", "audience"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtHS512Step1")
-    public void requestAccessTokenWithClientSecretJwtHS512Step2(final String tokenPath,
-                                                                final String userId, final String userSecret,
-                                                                final String audience) throws Exception {
+    public void requestAccessTokenWithClientSecretJwtHS512Step2(
+            final String tokenPath, final String userId, final String userSecret, final String audience) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                tokenRequest.setAuthUsername(clientId3);
-                tokenRequest.setAuthPassword(clientSecret3);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
-                tokenRequest.setAudience(audience);
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                request.addParameters(tokenRequest.getParameters());
+                    tokenRequest.setAuthUsername(clientId3);
+                    tokenRequest.setAuthPassword(clientSecret3);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+                    tokenRequest.setAudience(audience);
+
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
+                }
             }
 
             @Override
@@ -351,10 +362,10 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertTrue(response.getHeader("Cache-Control") != null
-                        && response.getHeader("Cache-Control").equals("no-store"),
+                                && response.getHeader("Cache-Control").equals("no-store"),
                         "Unexpected result: " + response.getHeader("Cache-Control"));
                 assertTrue(response.getHeader("Pragma") != null
-                        && response.getHeader("Pragma").equals("no-cache"),
+                                && response.getHeader("Pragma").equals("no-cache"),
                         "Unexpected result: " + response.getHeader("Pragma"));
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
@@ -363,9 +374,8 @@ public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
                     assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                } catch (Exception e) {
+                    fail(e.getMessage(), e);
                 }
             }
         }.run();

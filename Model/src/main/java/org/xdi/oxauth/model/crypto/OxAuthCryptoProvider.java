@@ -6,78 +6,14 @@
 
 package org.xdi.oxauth.model.crypto;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.ALGORITHM;
-import static org.xdi.oxauth.model.jwk.JWKParameter.CURVE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
-import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_TYPE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_USE;
-import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.security.AlgorithmParameters;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.Extension;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.bc.BcX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
@@ -92,14 +28,41 @@ import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
-
 import sun.security.rsa.RSAPublicKeyImpl;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 21, 2016
+ * @version June 25, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -259,14 +222,14 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return verified;
     }
 
-	private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
-		try {
-			return jwks.getString(node);
-		} catch (Exception ex) {
-			JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
-			return publicKey.getString(node);
-		}
-	}
+    private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
+        try {
+            return jwks.getString(node);
+        } catch (Exception ex) {
+            JSONObject publicKey = jwks.getJSONObject(PUBLIC_KEY);
+            return publicKey.getString(node);
+        }
+    }
 
     @Override
     public boolean deleteKey(String alias) throws Exception {
@@ -327,7 +290,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return publicKey;
     }
 
-    private PrivateKey getPrivateKey(String alias)
+    public PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         if (Util.isNullOrEmpty(alias)) {
             return null;
@@ -341,92 +304,93 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         return privateKey;
     }
-/*
-    private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm,
-                                                    Long expirationTime)
-            throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException,
-            SignatureException {
-        X500Principal principal = new X500Principal(dnName);
-        BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
 
-        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+    /*
+        private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm,
+                                                        Long expirationTime)
+                throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException,
+                SignatureException {
+            X500Principal principal = new X500Principal(dnName);
+            BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
 
-        certGen.setSerialNumber(serialNumber);
-        certGen.setIssuerDN(principal);
-        certGen.setNotBefore(new Date(System.currentTimeMillis() - 10000));
-        certGen.setNotAfter(new Date(expirationTime));
-        certGen.setSubjectDN(principal);
-        certGen.setPublicKey(pair.getPublic());
-        certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());
+            X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
 
-        //certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-        //certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
-        //certGen.addExtension(X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
-        //certGen.addExtension(X509Extensions.SubjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
+            certGen.setSerialNumber(serialNumber);
+            certGen.setIssuerDN(principal);
+            certGen.setNotBefore(new Date(System.currentTimeMillis() - 10000));
+            certGen.setNotAfter(new Date(expirationTime));
+            certGen.setSubjectDN(principal);
+            certGen.setPublicKey(pair.getPublic());
+            certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());
 
-        X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = certGen.generate(pair.getPrivate());
+            //certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
+            //certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
+            //certGen.addExtension(X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
+            //certGen.addExtension(X509Extensions.SubjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
 
-        return chain;
+            X509Certificate[] chain = new X509Certificate[1];
+            chain[0] = certGen.generate(pair.getPrivate());
+
+            return chain;
+        }
+    */
+    public X509Certificate generateV3Certificate(KeyPair keyPair, String issuer, String signatureAlgorithm, Long expirationTime) throws CertIOException, OperatorCreationException, CertificateException {
+
+        PrivateKey privateKey = keyPair.getPrivate();
+        PublicKey publicKey = keyPair.getPublic();
+
+        // Signers name
+        X500Name issuerName = new X500Name(issuer);
+
+        // Subjects name - the same as we are self signed.
+        X500Name subjectName = new X500Name(issuer);
+
+        // Serial
+        BigInteger serial = new BigInteger(256, new SecureRandom());
+
+        // Not before
+        Date notBefore = new Date(System.currentTimeMillis() - 10000);
+        Date notAfter = new Date(expirationTime);
+
+        // Create the certificate - version 3
+        JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(issuerName, serial, notBefore, notAfter, subjectName, publicKey);
+
+        ASN1EncodableVector purposes = new ASN1EncodableVector();
+        purposes.add(KeyPurposeId.id_kp_serverAuth);
+        purposes.add(KeyPurposeId.id_kp_clientAuth);
+        purposes.add(KeyPurposeId.anyExtendedKeyUsage);
+
+        ASN1ObjectIdentifier extendedKeyUsage = new ASN1ObjectIdentifier("2.5.29.37").intern();
+        builder.addExtension(extendedKeyUsage, false, new DERSequence(purposes));
+
+        ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
+        X509CertificateHolder holder = builder.build(signer);
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
+
+        return cert;
     }
-*/    
-	public X509Certificate generateV3Certificate(KeyPair keyPair, String issuer, String signatureAlgorithm, Long expirationTime) throws CertIOException, OperatorCreationException, CertificateException {
-		
-		PrivateKey privateKey = keyPair.getPrivate();
-		PublicKey publicKey = keyPair.getPublic();
 
-		// Signers name
-		X500Name issuerName = new X500Name(issuer);
+    public List<String> getKeyAliases() throws KeyStoreException {
+        return Collections.list(this.keyStore.aliases());
+    }
 
-		// Subjects name - the same as we are self signed.
-		X500Name subjectName = new X500Name(issuer);
+    public SignatureAlgorithm getSignatureAlgorithm(String alias) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+        Certificate[] chain = keyStore.getCertificateChain(alias);
+        if ((chain == null) || chain.length == 0) {
+            return null;
+        }
 
-		// Serial
-		BigInteger serial = new BigInteger(256, new SecureRandom());
+        X509Certificate cert = (X509Certificate) chain[0];
 
-		// Not before
-		Date notBefore = new Date(System.currentTimeMillis() - 10000);
-		Date notAfter = new Date(expirationTime);
+        String sighAlgName = cert.getSigAlgName();
 
-		// Create the certificate - version 3
-		JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(issuerName, serial, notBefore, notAfter, subjectName, publicKey);
-
-		ASN1EncodableVector purposes = new ASN1EncodableVector();
-		purposes.add(KeyPurposeId.id_kp_serverAuth);
-		purposes.add(KeyPurposeId.id_kp_clientAuth);
-		purposes.add(KeyPurposeId.anyExtendedKeyUsage);
-
-	    ASN1ObjectIdentifier extendedKeyUsage = new ASN1ObjectIdentifier("2.5.29.37").intern();
-		builder.addExtension(extendedKeyUsage, false, new DERSequence(purposes));
-
-		ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
-		X509CertificateHolder holder = builder.build(signer);
-		X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
-
-		return cert;
-	}
-
-	public List<String> getKeyAliases() throws KeyStoreException {
-		return Collections.list(this.keyStore.aliases());
-	}
-
-	public SignatureAlgorithm getSignatureAlgorithm(String alias) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
-		Certificate[] chain = keyStore.getCertificateChain(alias);
-		if ((chain == null) || chain.length == 0) {
-			return null;
-		}
-		
-		X509Certificate cert = (X509Certificate) chain[0];
-
-		String sighAlgName = cert.getSigAlgName();
-
-		for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
+        for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
             if (StringHelper.equalsIgnoreCase(sighAlgName, sa.getAlgorithm())) {
-            	return sa;
+                return sa;
             }
-		}
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 }

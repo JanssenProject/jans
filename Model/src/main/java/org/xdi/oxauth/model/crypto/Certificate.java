@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.model.crypto;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -21,8 +16,14 @@ import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+
 /**
- * @author Javier Rojas Blum Date: 10.22.2012
+ * @author Javier Rojas Blum
+ * @version June 29, 2016
  */
 public class Certificate {
 
@@ -38,11 +39,11 @@ public class Certificate {
         PublicKey publicKey = null;
 
         if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
-        	BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
+            BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new RSAPublicKey(jcersaPublicKey.getModulus(), jcersaPublicKey.getPublicExponent());
         } else if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCECPublicKey) {
-        	BCECPublicKey jceecPublicKey = (BCECPublicKey) x509Certificate.getPublicKey();
+            BCECPublicKey jceecPublicKey = (BCECPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getQ().getX().toBigInteger(),
                     jceecPublicKey.getQ().getY().toBigInteger());
@@ -55,7 +56,7 @@ public class Certificate {
         RSAPublicKey rsaPublicKey = null;
 
         if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
-        	BCRSAPublicKey publicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
+            BCRSAPublicKey publicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
 
             rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
         }
@@ -67,7 +68,7 @@ public class Certificate {
         ECDSAPublicKey ecdsaPublicKey = null;
 
         if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCECPublicKey) {
-        	BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
+            BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
 
             ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getX().toBigInteger(),
                     publicKey.getQ().getY().toBigInteger());
@@ -92,12 +93,12 @@ public class Certificate {
             StringWriter stringWriter = new StringWriter();
             JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
             try {
-				pemWriter.writeObject(x509Certificate);
-				pemWriter.flush();
-				return stringWriter.toString();
-			} finally {
-				pemWriter.close();
-			}
+                pemWriter.writeObject(x509Certificate);
+                pemWriter.flush();
+                return stringWriter.toString();
+            } finally {
+                pemWriter.close();
+            }
         } catch (IOException e) {
             return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
