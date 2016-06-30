@@ -70,9 +70,11 @@ public class FederationMetadataEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"federationMetadataPath", "federationMetadataId"})
+    //@Parameters({"federationMetadataPath", "federationMetadataId"})
     @Test
-    public void requestFederationMetadataByIdSigned(final String federationMetadataPath, final String federationMetadataId) throws Exception {
+    public void requestFederationMetadataByIdSigned(/*final String federationMetadataPath, final String federationMetadataId*/) throws Exception {
+        final String federationMetadataPath = "/restv1/oxauth/federationmetadata";
+        final String federationMetadataId ="@!90CC.2E38.774C.610B!0001!FD3B.B0A0!0008!00F1!0001";
         baseTest(federationMetadataPath, federationMetadataId, true);
     }
 
