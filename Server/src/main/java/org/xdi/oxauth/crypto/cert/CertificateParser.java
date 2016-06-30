@@ -18,13 +18,13 @@ import java.security.cert.X509Certificate;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMParser;
 
 public class CertificateParser {
 
 	public static X509Certificate parsePem(String pemEncodedCert) throws CertificateException {
 		StringReader sr = new StringReader(pemEncodedCert);
-		PEMReader pemReader = new PEMReader(sr);
+		PEMParser pemReader = new PEMParser(sr);
 		try {
 			X509Certificate cert = (X509CertificateObject) pemReader.readObject();
 

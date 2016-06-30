@@ -27,6 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -102,7 +103,7 @@ public abstract class BaseTest {
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
             //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
-            //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
+            propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
         FileInputStream conf = new FileInputStream(propertiesFile);
@@ -253,8 +254,8 @@ public abstract class BaseTest {
     }
 
     public void startSelenium() {
-        //System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
-        //driver = new ChromeDriver();
+        System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
+        driver = new ChromeDriver();
 
         //driver = new SafariDriver();
 
@@ -262,7 +263,7 @@ public abstract class BaseTest {
 
         //driver = new InternetExplorerDriver();
 
-        driver = new HtmlUnitDriver(true);
+        //driver = new HtmlUnitDriver(true);
     }
 
     public void stopSelenium() {
