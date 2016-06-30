@@ -18,7 +18,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 25, 2016
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
@@ -240,5 +240,32 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         }
 
         return getExp().compareTo(o.getExp());
+    }
+
+    public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) {
+        JSONWebKey jwk = new JSONWebKey();
+
+        jwk.setKid(jwkJSONObject.optString(KEY_ID));
+        jwk.setKty(KeyType.fromString(jwkJSONObject.optString(KEY_TYPE)));
+        jwk.setUse(Use.fromString(jwkJSONObject.optString(KEY_USE)));
+        jwk.setAlg(SignatureAlgorithm.fromString(jwkJSONObject.optString(ALGORITHM)));
+        if (jwkJSONObject.has(EXPIRATION_TIME)) {
+            jwk.setExp(jwkJSONObject.optLong(EXPIRATION_TIME));
+        }
+        jwk.setCrv(ECEllipticCurve.fromString(jwkJSONObject.optString(CURVE)));
+        if (jwkJSONObject.has(MODULUS)) {
+            jwk.setN(jwkJSONObject.optString(MODULUS));
+        }
+        if (jwkJSONObject.has(EXPONENT)) {
+            jwk.setE(jwkJSONObject.optString(EXPONENT));
+        }
+        if (jwkJSONObject.has(X)) {
+            jwk.setX(jwkJSONObject.optString(X));
+        }
+        if (jwkJSONObject.has(Y)) {
+            jwk.setY(jwkJSONObject.optString(Y));
+        }
+
+        return jwk;
     }
 }

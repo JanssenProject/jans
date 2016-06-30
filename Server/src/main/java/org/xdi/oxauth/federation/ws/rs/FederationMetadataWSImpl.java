@@ -15,7 +15,8 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.crypto.signature.RSAKeyFactory;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -23,10 +24,10 @@ import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.federation.FederationMetadata;
 import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
-import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.FederationMetadataService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +41,8 @@ import java.util.Set;
  * Provides implementation of Federation Metadata REST web services interface.
  *
  * @author Yuriy Zabrovarnyy
- * @version June 15, 2016
+ * @author Javier Rojas Blum
+ * @version June 29, 2016
  */
 @Name("federationMetadataWS")
 public class FederationMetadataWSImpl implements FederationMetadataWS {
@@ -91,14 +93,23 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
             final String keyId = ConfigurationFactory.instance().getConfiguration().getFederationSigningKid();
             final SignatureAlgorithm algorithm = SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getFederationSigningAlg());
 
-            final JSONWebKey JSONWebKey = ConfigurationFactory.instance().getWebKeys().getKey(keyId);
-            final RSAKeyFactory factory = RSAKeyFactory.valueOf(JSONWebKey);
+            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
 
             final JSONObject jsonHeader = JwtHeader.instance().
                     setType(JwtType.JWT).setAlgorithm(algorithm).setKeyId(keyId).
                     toJsonObject();
             final JSONObject jsonPayload = asJSON(p_metadata);
-            return JwtUtil.encodeJwt(jsonHeader, jsonPayload, algorithm, factory.getPrivateKey());
+
+            String header = jsonHeader.toString();
+            String payload = jsonPayload.toString();
+            header = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            payload = JwtUtil.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
+            final String signingInput = header + "." + payload;
+
+            final String signature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
+            final String signedJwt = signingInput + "." + signature;
+
+            return signedJwt;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return asJSON(p_metadata).toString(); // in case we failed to sign it for some return plain json
