@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.util.List;
-
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
@@ -26,6 +19,10 @@ import org.xdi.oxauth.client.FederationMetadataResponse;
 import org.xdi.oxauth.model.federation.FederationMetadata;
 import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
+
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -70,11 +67,9 @@ public class FederationMetadataEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    //@Parameters({"federationMetadataPath", "federationMetadataId"})
+    @Parameters({"federationMetadataPath", "federationMetadataId"})
     @Test
-    public void requestFederationMetadataByIdSigned(/*final String federationMetadataPath, final String federationMetadataId*/) throws Exception {
-        final String federationMetadataPath = "/restv1/oxauth/federationmetadata";
-        final String federationMetadataId ="@!90CC.2E38.774C.610B!0001!FD3B.B0A0!0008!00F1!0001";
+    public void requestFederationMetadataByIdSigned(final String federationMetadataPath, final String federationMetadataId) throws Exception {
         baseTest(federationMetadataPath, federationMetadataId, true);
     }
 
