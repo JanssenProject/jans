@@ -71,7 +71,7 @@ public abstract class ConfigurableTest extends SeamTest {
         }
 
         // Load test paramters
-        //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
+        propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         FileInputStream conf = new FileInputStream(propertiesFile);
         Properties prop = new Properties();
         prop.load(conf);
