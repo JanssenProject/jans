@@ -7,9 +7,9 @@
 package org.xdi.oxauth.model.crypto.signature;
 
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
