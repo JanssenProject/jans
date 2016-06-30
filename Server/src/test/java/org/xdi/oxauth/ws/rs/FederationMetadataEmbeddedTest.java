@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.util.List;
-
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
 import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
@@ -26,6 +19,10 @@ import org.xdi.oxauth.client.FederationMetadataResponse;
 import org.xdi.oxauth.model.federation.FederationMetadata;
 import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
+
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
