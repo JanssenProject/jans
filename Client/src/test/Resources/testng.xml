@@ -6,7 +6,6 @@
     <parameter name="signEndpoint" value="https://ce-dev2.gluu.org/oxeleven/rest/oxeleven/sign"/>
     <parameter name="verifySignatureEndpoint" value="https://ce-dev2.gluu.org/oxeleven/rest/oxeleven/verifySignature"/>
     <parameter name="deleteKeyEndpoint" value="https://ce-dev2.gluu.org/oxeleven/rest/oxeleven/deleteKey"/>
-    <parameter name="jwksEndpoint" value="https://ce-dev2.gluu.org/oxeleven/rest/oxeleven/jwks"/>
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
 
@@ -15,7 +14,6 @@
     <parameter name="signEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/sign"/>
     <parameter name="verifySignatureEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/verifySignature"/>
     <parameter name="deleteKeyEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/deleteKey"/>
-    <parameter name="jwksEndpoint" value="https://ce.gluu.info:8443/oxeleven/rest/oxeleven/jwks"/>
     <parameter name="signingInput" value="Signing Input"/>
     <parameter name="sharedSecret" value="Secret"/>
 -->
