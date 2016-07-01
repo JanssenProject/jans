@@ -53,6 +53,7 @@ class Setup(object):
         self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
+        self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
         self.asimba_war = "http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war" % (self.oxVersion, self.oxVersion)
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
@@ -116,6 +117,7 @@ class Setup(object):
         self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
         self.idp3LibFolder = "/opt/shibboleth-idp/lib"
         self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
+        self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
         self.idp3SslFolder = "/opt/shibboleth-idp/credentials"
         self.idp3TempMetadataFolder = "/opt/shibboleth-idp/temp_metadata"
         self.idp3WarFolder = "/opt/shibboleth-idp/war"
@@ -748,17 +750,13 @@ class Setup(object):
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '-O', '--retry-connrefused', '--tries=10', '%s/oxauth.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '-O', '--retry-connrefused', '--tries=10', '%s/identity.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.tomcatWebAppFolder])
             print "Downloading Shibboleth IDP 2 war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '-O', '--retry-connrefused', '--tries=10', '%s/idp.war' % self.idpWarFolder])
-            print "Downloading Shibboleth IDP 3 war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '-O', '-c', '--retry-connrefused', '--tries=10', '%s/idp.war' % self.idp3WarFolder])
-            print "Downloading Shibboleth IDP 3 binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-O', '-c', '--retry-connrefused', '--tries=10', '%s/shibboleth-idp.jar' % self.outputFolder])
+            self.run(['/usr/bin/wget', self.idp_war, '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idpWarFolder])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '-O', '--retry-connrefused', '--tries=10', '%s/oxcas.war' % self.distFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxcas.war' % self.distFolder])
 
             print "Finished downloading latest war files"
 
@@ -1329,12 +1327,8 @@ class Setup(object):
             # Put files to /opt/idp
             idpWar = "idp.war"
             distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
-            
-            #idp3War = "idp.war"
-            #distIdp3Path = '%s/%s' % (self.idp3WarFolder, idp3War)
 
             tmpIdpDir = '%s/tmp_idp' % self.distFolder
-            #tmpIdp3Dir = '%s/tmp_idp3' % self.distFolder
 
             self.logIt("Unpacking %s..." % idpWar)
             self.removeDirs(tmpIdpDir)
@@ -1353,8 +1347,16 @@ class Setup(object):
 
         if self.installSamlIDP3:
             self.logIt("Install Saml Shibboleth IDP v3...")
+            
+            print "Downloading Shibboleth IDP 3 war file..."
+            self.run(['/usr/bin/wget', self.idp3_war, '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
+            print "Downloading Shibboleth IDP 3 keygenerator..."
+            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '-c', '--retry-connrefused', '--tries=10', '-O', self.distFolder + '/idp3_cml_keygenerator.jar'])
+            print "Downloading Shibboleth IDP 3 binary distributive file..."
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-c', '--retry-connrefused', '--tries=10', '-O', self.distFolder + '/shibboleth-idp.jar'])
+            
             # unpack IDP3 JAR with static configs
-            self.run([self.jarCommand, 'xf', '%s/shibboleth-idp.jar' % self.outputFolder], '/opt')
+            self.run([self.jarCommand, 'xf', self.distFolder + '/shibboleth-idp.jar'], '/opt')
             
             # copy templates
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
@@ -1375,6 +1377,11 @@ class Setup(object):
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder) 
             
             self.idpWarFullPath = '%s/idp.war' % self.idp3WarFolder
+            
+            #TODO: unpack idp.war to webapp
+            
+            # generate new keys
+            self.run(['java','jar', self.distFolder + '/idp3_cml_keygenerator.jar', self.certFolder, self.shibJksPass], self.certFolder)
 
     def install_asimba_war(self):
         if self.installAsimba:
@@ -1384,7 +1391,7 @@ class Setup(object):
             # Asimba is not part of CE package. We need to download it if needed
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '-O', '%s/oxasimba.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxasimba.war' % self.distFolder])
 
             tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
 
@@ -1458,7 +1465,7 @@ class Setup(object):
             # oxAuth RP is not part of CE package. We need to download it if needed
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '-O', '%s/oxauth-rp.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distFolder])
 
             self.logIt("Copying oxauth-rp.war into tomcat webapps folder...")
             self.copyFile('%s/oxauth-rp.war' % self.distFolder, self.tomcatWebAppFolder)
@@ -1572,6 +1579,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idp3LogsFolder])
                 self.run([mkdir, '-p', self.idp3LibFolder])
                 self.run([mkdir, '-p', self.idp3ConfFolder])
+                self.run([mkdir, '-p', self.idp3ConfAuthnFolder])
                 self.run([mkdir, '-p', self.idp3SslFolder])
                 self.run([mkdir, '-p', self.idp3TempMetadataFolder])
                 self.run([mkdir, '-p', self.idp3WarFolder])
