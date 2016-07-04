@@ -18,6 +18,7 @@ import org.xdi.oxd.server.service.SiteConfiguration;
 
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -97,8 +98,14 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             site.setApplicationType(applicationType.name());
         }
 
-        if (params.getClientSecretExpiresAt() != null) {
-            request.setClientSecretExpiresAt(params.getClientSecretExpiresAt());
+        Date clientSecretExpiresAt = params.getClientSecretExpiresAt();
+        if (clientSecretExpiresAt != null) {
+            // translate it into milliseconds if someone sends it in seconds by miskate
+            if (clientSecretExpiresAt.getTime() != 0 && String.valueOf(clientSecretExpiresAt.getTime()).length() < 11) {
+                clientSecretExpiresAt = new Date(clientSecretExpiresAt.getTime() * 1000);
+            }
+            request.setClientSecretExpiresAt(clientSecretExpiresAt);
+            site.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
         List<ResponseType> responseTypes = Lists.newArrayList();
