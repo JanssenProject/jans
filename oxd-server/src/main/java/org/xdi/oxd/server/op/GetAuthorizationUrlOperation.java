@@ -42,7 +42,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&state=" + state();
         authorizationEndpoint += "&nonce=" + nonce();
         authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
-        authorizationEndpoint += "&prompt=login";
+//        authorizationEndpoint += "&prompt=login"; //  temp comment until oxauth #249 is resolved
 
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
