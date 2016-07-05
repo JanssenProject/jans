@@ -889,6 +889,8 @@ class Setup(object):
             self.logIt('Generating certificates and keystores')
             self.gen_cert('httpd', self.httpdKeyPass, 'tomcat')
             self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
+            self.gen_cert('idp-encryption', self.shibJksPass, 'tomcat')
+            self.gen_cert('idp-signing', self.shibJksPass, 'tomcat')
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
@@ -1286,7 +1288,7 @@ class Setup(object):
             # choose SAML IDP version
             if self.allowPreReleasedApplications:
                 saml_version_var = self.choose_from_list(['IDP v2', 'IDP v3'], "Shibboleth IDP version")
-                if '3' in saml_version_var: 
+                if 'IDP v3' in saml_version_var: 
                     self.installSamlIDP3 = True
                 else:
                     self.installSamlIDP2 = True
@@ -1303,11 +1305,11 @@ class Setup(object):
             self.removeDirs(tmpIdentityDir)
             self.createDirs(tmpIdentityDir)
 
-            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
+            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-*.jar'
 
             self.run([self.jarCommand,
                       'xf',
-                      distIdentityPath, identityConfFilePattern], tmpIdentityDir)
+                      distIdentityPath], tmpIdentityDir)
 
             self.logIt("Unpacking %s..." % 'oxtrust-configuration.jar')
             self.run([self.jarCommand,
@@ -1316,7 +1318,7 @@ class Setup(object):
 
             self.logIt("Preparing Saml templates...")
             self.removeDirs('%s/conf/shibboleth2' % self.tomcatHome)
-            self.createDirs('%s/conf/shibboleth2' % self.tomcatHome)
+            self.createDirs('%s/conf/shibboleth2/idp' % self.tomcatHome)
 
             self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
 
@@ -1357,6 +1359,7 @@ class Setup(object):
             
             # unpack IDP3 JAR with static configs
             self.run([self.jarCommand, 'xf', self.distFolder + '/shibboleth-idp.jar'], '/opt')
+            self.removeDirs('/opt/META-INF')
             
             # copy templates
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
@@ -1374,15 +1377,15 @@ class Setup(object):
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_saml_nameid, self.idp3ConfFolder, self.idp3ConfFolder)
             #self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_services, self.idp3ConfFolder, self.idp3ConfFolder) 
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_jaas, self.idp3ConfFolder + '/authn', self.idp3ConfFolder + '/authn') 
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder) 
+            self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder) 
             
             self.idpWarFullPath = '%s/idp.war' % self.idp3WarFolder
             
-            #TODO: unpack idp.war to webapp
-            
-            # generate new keys
+            # generate new keystore with AES symmetric key
             self.run(['java','jar', self.distFolder + '/idp3_cml_keygenerator.jar', self.certFolder, self.shibJksPass], self.certFolder)
-
+            
+            # chown -R tomcat:tomcat /opt/shibboleth-idp
+            self.run(['chown','-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
     def install_asimba_war(self):
         if self.installAsimba:
             asimbaWar = 'oxasimba.war'
