@@ -118,7 +118,7 @@ class Setup(object):
         self.idp3LibFolder = "/opt/shibboleth-idp/lib"
         self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
         self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
-        self.idp3SslFolder = "/opt/shibboleth-idp/credentials"
+        self.idp3CredentialsFolder = "/opt/shibboleth-idp/credentials"
         self.idp3TempMetadataFolder = "/opt/shibboleth-idp/temp_metadata"
         self.idp3WarFolder = "/opt/shibboleth-idp/war"
 
@@ -1305,7 +1305,7 @@ class Setup(object):
             self.removeDirs(tmpIdentityDir)
             self.createDirs(tmpIdentityDir)
 
-            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-*.jar'
+            identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
 
             self.run([self.jarCommand,
                       'xf',
@@ -1322,7 +1322,7 @@ class Setup(object):
 
             self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
 
-            self.removeDirs(tmpIdentityDir)
+            #self.removeDirs(tmpIdentityDir)
         
         if self.installSamlIDP2:
             self.logIt("Install Saml Shibboleth IDP v2...")
@@ -1382,7 +1382,8 @@ class Setup(object):
             self.idpWarFullPath = '%s/idp.war' % self.idp3WarFolder
             
             # generate new keystore with AES symmetric key
-            self.run(['java','jar', self.distFolder + '/idp3_cml_keygenerator.jar', self.certFolder, self.shibJksPass], self.certFolder)
+            # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
+            self.run(['java','-classpath', self.distFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run(['chown','-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
@@ -1583,7 +1584,7 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idp3LibFolder])
                 self.run([mkdir, '-p', self.idp3ConfFolder])
                 self.run([mkdir, '-p', self.idp3ConfAuthnFolder])
-                self.run([mkdir, '-p', self.idp3SslFolder])
+                self.run([mkdir, '-p', self.idp3CredentialsFolder])
                 self.run([mkdir, '-p', self.idp3TempMetadataFolder])
                 self.run([mkdir, '-p', self.idp3WarFolder])
                 self.run([chown, '-R', 'tomcat:tomcat', self.idp3Folder])
