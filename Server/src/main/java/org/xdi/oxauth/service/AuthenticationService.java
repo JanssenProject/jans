@@ -219,7 +219,10 @@ public class AuthenticationService {
         return authenticated;
     }
 
-    private boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
+	/*
+	 * Utility method which can be used in custom scripts
+	 */
+    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}'", primaryKey, keyValue);
 
         List<?> baseDNs;
