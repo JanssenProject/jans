@@ -12,7 +12,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>org.jboss.resteasy:resteasy-jaxrs</include>
-                <include>org.bouncycastle:bcprov-jdk16</include>
+                <include>org.bouncycastle:bcprov-jdk15on</include>
             </includes>
             <scope>runtime</scope>
         </dependencySet>
