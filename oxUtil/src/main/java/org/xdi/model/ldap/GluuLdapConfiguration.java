@@ -70,20 +70,20 @@ public class GluuLdapConfiguration implements Serializable {
 		updateStringsLists();
 	}
 
-	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<SimpleProperty> servers, int maxConnections,
-			boolean useSSL, List<SimpleProperty> baseDNs, String primaryKey, String localPrimaryKey, boolean useAnonymousBind) {
+	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<String> servers, int maxConnections,
+			boolean useSSL, List<String> baseDNs, String primaryKey, String localPrimaryKey, boolean useAnonymousBind) {
 		this.configId = configId;
 		this.bindDN = bindDN;
 		this.bindPassword = bindPassword;
-		this.servers = servers;
+		this.serversStringsList = servers;
 		this.maxConnections = maxConnections;
 		this.useSSL = useSSL;
-		this.baseDNs = baseDNs;
+		this.baseDNsStringsList = baseDNs;
 		this.primaryKey = primaryKey;
 		this.localPrimaryKey = localPrimaryKey;
 		this.useAnonymousBind = useAnonymousBind;
 
-		updateStringsLists();
+		updateSimplePropertiesLists();
 	}
 
 	public String getConfigId() {
