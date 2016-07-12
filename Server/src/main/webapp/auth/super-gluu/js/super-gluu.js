@@ -83,15 +83,15 @@ var super_gluu = {
 		var options = this.cloneObject(this.QR_CODE_DEFAULT_OPTIONS);
 		options.text = request;
 		
-		if (typeof label !== 'undefined') {
+		if ((typeof label !== 'undefined') && (label != null) && (label != '')) {
 			options.label = label
 		}
 		
 		return options;
 	},
 	
-	renderQrCode: function(container, request) {
-		var options = this.getQrCodeOptions(request);
+	renderQrCode: function(container, request, label) {
+	    var options = this.getQrCodeOptions(request, label);
 	    $(container).qrcode(options);
 	},
 
