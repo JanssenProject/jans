@@ -101,7 +101,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate for step 1"
             if self.oneStep:
   
-                session_device_status = self.getSessionDeviceStatus(session_attributes, user_name);
+                session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
                     return
 
@@ -137,7 +137,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 print "Super-Gluu. Authenticate for step 1. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 
-                return True;
+                return True
             elif self.twoStep:
                 authenticated_user = self.processBasicAuthentication(credentials)
                 if authenticated_user == None:
@@ -166,7 +166,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate for step 2"
             session_attributes = context.get("sessionAttributes")
 
-            session_device_status = self.getSessionDeviceStatus(session_attributes, user_name);
+            session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
             if session_device_status == None:
                 return False
 
@@ -527,7 +527,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
 
                         title = "Super-Gluu"
-                        msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single");
+                        msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
 
                         send_notification_result = self.pushAndroidService.send(msgBuilder.build(), push_token, 3)
                         if debug:
@@ -566,11 +566,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def determineGeolocationData(self, remote_ip):
         print "Super-Gluu. Determine remote location. remote_ip: '%s'" % remote_ip
-        httpService = HttpService.instance();
+        httpService = HttpService.instance()
 
-        http_client = httpService.getHttpsClient();
-        http_client_params = http_client.getParams();
-        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
+        http_client = httpService.getHttpsClient()
+        http_client_params = http_client.getParams()
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000)
         
         geolocation_service_url = "http://ip-api.com/json/%s?fields=49177" % remote_ip
         geolocation_service_headers = { "Accept" : "application/json" }
