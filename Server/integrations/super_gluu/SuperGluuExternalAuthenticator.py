@@ -63,7 +63,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if configurationAttributes.containsKey("label"):
             self.customLabel = configurationAttributes.get("label").getValue2()
 
-        print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications. self.customLabel)
+        print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications, self.customLabel)
 
         return True   
 
@@ -559,6 +559,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 remote_loc_dic = self.determineGeolocationData(remote_ip)
                 if remote_loc_dic == None:
                     print "Super-Gluu. Prepare for step 2. Failed to determine remote location by remote IP '%s'" % remote_ip
+                    return
 
                 remote_loc = "%s, %s, %s" % ( remote_loc_dic['country'], remote_loc_dic['regionName'], remote_loc_dic['city'] )
                 remote_loc_encoded = urllib.quote(remote_loc)
