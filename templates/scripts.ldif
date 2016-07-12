@@ -3056,7 +3056,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: OTP Validation of passwords using Yubicloud
 displayName: yubicloud
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!0011!24FD.B96E
 oxConfigurationProperty: {"value1":"yubicloud_uri","value2":"api.yubico.com"
  ,"description":""}
@@ -3064,12 +3064,12 @@ oxConfigurationProperty: {"value1":"yubicloud_api_key","value2":"","descript
  ion":""}
 oxConfigurationProperty: {"value1":"yubicloud_id","value2":"","description":
  ""}
-oxLevel: 1
+oxLevel: 90
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description
  ":""}
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""
  }
-oxRevision: 18
+oxRevision: 1
 oxScript:: IyBveEF1dGggaXMgYXZhaWxhYmxlIHVuZGVyIHRoZSBNSVQgTGljZW5zZSAoMjAwO
  CkuIFNlZSBodHRwOi8vb3BlbnNvdXJjZS5vcmcvbGljZW5zZXMvTUlUIGZvciBmdWxsIHRleHQu
  DQojIENvcHlyaWdodCAoYykgMjAxNiwgR2x1dQ0KIw0KIyBBdXRob3I6IFl1cml5IE1vdmNoYW4
@@ -3141,4 +3141,3 @@ oxScript:: IyBveEF1dGggaXMgYXZhaWxhYmxlIHVuZGVyIHRoZSBNSVQgTGljZW5zZSAoMjAwO
  RQYXJhbWV0ZXJzKToNCiAgICAgICAgcmV0dXJuIFRydWUNCg==
 oxScriptType: person_authentication
 programmingLanguage: python
-
