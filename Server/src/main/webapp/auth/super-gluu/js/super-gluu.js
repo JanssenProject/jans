@@ -4,9 +4,9 @@
 
 'use strict';
 
-/** oxPush2 API.
+/** Super-Gluu API.
  */
-var oxpush2 = {
+var super_gluu = {
 		
 	//--------------------------------------------------------------------------------
 	// Utility methods
@@ -72,16 +72,20 @@ var oxpush2 = {
 		mPosX : 0.5,
 		mPosY : 0.5,
 	
-		label : 'oxPush2',
+		label : 'Super-Gluu',
 		fontname : 'sans',
 		fontcolor : '#000',
 	
 		image : null
 	},
 	
-	getQrCodeOptions:  function(request) {
+	getQrCodeOptions:  function(request, label) {
 		var options = this.cloneObject(this.QR_CODE_DEFAULT_OPTIONS);
 		options.text = request;
+		
+		if (typeof label !== 'undefined') {
+			options.label = label
+		}
 		
 		return options;
 	},
@@ -107,19 +111,19 @@ var oxpush2 = {
 		this.progress.container = $(container);
 	
 		this.progress.container.progressbar({
-			value : oxpush2.progress.value,
-			max : oxpush2.progress.maxValue
+			value : super_gluu.progress.value,
+			max : super_gluu.progress.maxValue
 		});
 
 		function worker() {
-			oxpush2.progress.container.progressbar({
-				value : ++oxpush2.progress.value
+			super_gluu.progress.container.progressbar({
+				value : ++super_gluu.progress.value
 			});
 		
-			if (oxpush2.progress.value >= oxpush2.progress.maxValue) {
-				clearInterval(oxpush2.progress.timer);
-				oxpush2.progress.timer = null;
-				oxpush2.progress.container = null;
+			if (super_gluu.progress.value >= super_gluu.progress.maxValue) {
+				clearInterval(super_gluu.progress.timer);
+				super_gluu.progress.timer = null;
+				super_gluu.progress.container = null;
 			}
 		}
 
@@ -137,13 +141,13 @@ var oxpush2 = {
 	},
 
 	startSessionChecker : function(callback, timeout) {
-		oxpush2.checker.stop = false;
-		oxpush2.endTime = (new Date()).getTime() + timeout * 1000;
+		super_gluu.checker.stop = false;
+		super_gluu.endTime = (new Date()).getTime() + timeout * 1000;
 
 		(function worker() {
 			$.ajax({
 				url: '/oxauth/seam/resource/restv1/oxauth/session_status',
-				timeout: oxpush2.checker.timeout,
+				timeout: super_gluu.checker.timeout,
 				success: function(result, status, xhr) {
 					if ((result.state == 'unknown') || ((result.state == 'unauthenticated') && ((result.custom_state == 'declined') || (result.custom_state == 'expired')))) {
 						callCallback(callback, 'error');
@@ -156,19 +160,19 @@ var oxpush2 = {
 					callCallback(callback, 'error');
 				},
 				complete: function(xhr, status) {
-					if (oxpush2.endTime < (new Date()).getTime()) {
+					if (super_gluu.endTime < (new Date()).getTime()) {
 						callCallback(callback, 'error');
 					}
 					// Schedule the next request when the current one's complete
-					if (!oxpush2.checker.stop) {
-						setTimeout(worker, oxpush2.checker.poolInterval);
+					if (!super_gluu.checker.stop) {
+						setTimeout(worker, super_gluu.checker.poolInterval);
 					}
 				}
 			});
 		})();
 		
 		function callCallback(callback, status) {
-			oxpush2.checker.stop = true
+			super_gluu.checker.stop = true
 			callback.call(status);
 		}
 	},

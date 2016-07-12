@@ -389,11 +389,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
             
             self.recaptcha_creds = { 'site_key' : site_key, "secret_key" : secret_key }
-            print "oxPush2. Initialize recaptcha. Recaptcha is configured correctly"
+            print "Cert. Initialize recaptcha. Recaptcha is configured correctly"
 
             return True
         else:
-            print "oxPush2. Initialize recaptcha. Recaptcha is disabled"
+            print "Cert. Initialize recaptcha. Recaptcha is disabled"
 
         return False
 
