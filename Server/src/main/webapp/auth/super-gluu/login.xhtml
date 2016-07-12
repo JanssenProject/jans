@@ -11,7 +11,7 @@
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.11.4.min.js"/>
-        <script src="./js/oxpush2.js"/>
+        <script src="./js/super-gluu.js"/>
 
         <script>
 			var helper = (function() {
@@ -43,16 +43,17 @@
 			  helper.onSignInCallback(authResult);
 			}
 
-			var request = '${oxpush2_request}';
+			var request = '${super_gluu_request}';
+			var label = '${super_gluu_label}';
 			$(document).ready(function() {
 
 				if (request == '') {
 					onSignInCallback('error');
 				}
 
-				oxpush2.renderQrCode('#container', request);
-		        oxpush2.startProgressBar('#progressbar', 60);
-		        oxpush2.startSessionChecker(onSignInCallback, 60);
+				super_gluu.renderQrCode('#container', request, label);
+				super_gluu.startProgressBar('#progressbar', 60);
+				super_gluu.startSessionChecker(onSignInCallback, 60);
 			});
 
         </script>
@@ -116,7 +117,7 @@
                                         </s:div>
 
                                         <div class="dialog">
-                                        	<p>Scan QR code using oxPush2</p>
+                                        	<p>Scan QR code using Super-Gluu</p>
                                         	<div id="container"></div>
                                         	<div id="progressbar"></div>
                                         </div>

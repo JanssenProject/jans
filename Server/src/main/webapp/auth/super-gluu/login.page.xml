@@ -2,15 +2,15 @@
 <page xmlns="http://jboss.org/schema/seam/pages"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://jboss.org/schema/seam/pages http://jboss.org/schema/seam/pages-2.3.xsd"
-	  view-id="/auth/oxpush2/login.xhtml">
+	  view-id="/auth/super-gluu/login.xhtml">
 
     <action execute="#{authenticator.prepareAuthenticationForStep}" on-postback="false" if="#{not identity.loggedIn}"/>
 
-    <rewrite pattern="/auth/oxpush2/login" />
+    <rewrite pattern="/auth/super-gluu/login" />
 
     <navigation from-action="#{authenticator.prepareAuthenticationForStep}">
         <rule if-outcome="success">
-            <render view-id="/auth/oxpush2/login.xhtml" />
+            <render view-id="/auth/super-gluu/login.xhtml" />
         </rule>
 
         <rule if-outcome="no_permissions">
