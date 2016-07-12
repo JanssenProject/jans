@@ -93,7 +93,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setRegistrationUri(context)
+        self.setEventContextParameters(context)
 
         userService = UserService.instance()
         deviceRegistrationService = DeviceRegistrationService.instance()
@@ -216,7 +216,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setRegistrationUri(context)
+        self.setEventContextParameters(context)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -542,9 +542,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setRegistrationUri(self, context):
+    def setEventContextParameters(self, context):
         if self.registrationUri != None:
             context.set("external_registration_uri", self.registrationUri)
+
+        if self.customLabel != None:
+            context.set("super_gluu_label", self.customLabel)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):
