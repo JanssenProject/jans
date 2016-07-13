@@ -759,6 +759,12 @@
 					<name>!disable-push-messages</name>
 				</property>
 			</activation>
+			<repositories>
+				<repository>
+					<id>push_sender-local</id>
+					<url>file://${project.basedir}/integrations/super_gluu/repository</url>
+				</repository>
+			</repositories>
 			<dependencies>
 				<dependency>
 					<groupId>com.notnoop.apns</groupId>
@@ -767,9 +773,9 @@
 					<scope>compile</scope>
 				</dependency>
 				<dependency>
-					<groupId>com.ganyo</groupId>
+					<groupId>com.google.gcm</groupId>
 					<artifactId>gcm-server</artifactId>
-					<version>1.0.2</version>
+					<version>1.0.1.gluu</version>
 					<scope>compile</scope>
 				</dependency>
 			</dependencies>
