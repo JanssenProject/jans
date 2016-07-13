@@ -11,15 +11,19 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
+import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.U2fConstants;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
+import org.xdi.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
@@ -31,6 +35,8 @@ import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
 import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import java.util.List;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -78,6 +84,7 @@ public class U2fRegistrationWS {
 
 			String userInum = null;
 
+			boolean sessionBasedEnrollment = false;
 			boolean twoStep = StringHelper.isNotEmpty(userName);
 			if (twoStep) {
 				boolean removeEnrollment = false;
@@ -86,6 +93,7 @@ public class U2fRegistrationWS {
 					if (!valid) {
 						throw new BadInputException(String.format("session_state '%s' is invalid", sessionState));
 					}
+					sessionBasedEnrollment = true;
 				} else if (StringHelper.isNotEmpty(enrollmentCode)) {
 					boolean valid = u2fValidationService.isValidEnrollmentCode(userName, enrollmentCode);
 					if (!valid) {
@@ -108,6 +116,13 @@ public class U2fRegistrationWS {
 					userService.updateUser(user);
 				}
 			}
+			
+			if (sessionBasedEnrollment) {
+				List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
+				if (deviceRegistrations.size() > 0) {
+					throw new RegistrationNotAllowed(String.format("It's not possible to start registration with user_name and session_state becuase user '%s' has already enrolled device", userName));
+				}
+			}
 
 			RegisterRequestMessage registerRequestMessage = u2fRegistrationService.builRegisterRequestMessage(appId, userInum);
 			u2fRegistrationService.storeRegisterRequestMessage(registerRequestMessage, userInum, sessionState);
@@ -120,6 +135,11 @@ public class U2fRegistrationWS {
 			log.error("Exception happened", ex);
 			if (ex instanceof WebApplicationException) {
 				throw (WebApplicationException) ex;
+			}
+
+			if (ex instanceof RegistrationNotAllowed) {
+				throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
+						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.REGISTRATION_NOT_ALLOWED)).build());
 			}
 
 			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)

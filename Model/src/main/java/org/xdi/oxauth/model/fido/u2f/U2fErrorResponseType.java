@@ -42,7 +42,12 @@ public enum U2fErrorResponseType implements IErrorType {
 	/**
 	 * The authentication or registration session was expired
 	 */
-	SESSION_EXPIRED("session_expired");
+	SESSION_EXPIRED("session_expired"),
+
+	/**
+	 * The user has registered device already.
+	 */
+	REGISTRATION_NOT_ALLOWED("registration_not_allowed");
 	
 
 	private static Map<String, U2fErrorResponseType> lookup = new HashMap<String, U2fErrorResponseType>();
