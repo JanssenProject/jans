@@ -119,7 +119,6 @@ class Setup(object):
         self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
         self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
         self.idp3CredentialsFolder = "/opt/shibboleth-idp/credentials"
-        self.idp3TempMetadataFolder = "/opt/shibboleth-idp/temp_metadata"
         self.idp3WarFolder = "/opt/shibboleth-idp/war"
 
         self.hostname = None
@@ -666,9 +665,6 @@ class Setup(object):
 
             self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
-            
-            self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)
-            self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
 
         if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
@@ -1585,7 +1581,6 @@ class Setup(object):
                 self.run([mkdir, '-p', self.idp3ConfFolder])
                 self.run([mkdir, '-p', self.idp3ConfAuthnFolder])
                 self.run([mkdir, '-p', self.idp3CredentialsFolder])
-                self.run([mkdir, '-p', self.idp3TempMetadataFolder])
                 self.run([mkdir, '-p', self.idp3WarFolder])
                 self.run([chown, '-R', 'tomcat:tomcat', self.idp3Folder])
         except:
