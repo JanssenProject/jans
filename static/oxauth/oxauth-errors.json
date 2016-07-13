@@ -352,6 +352,11 @@
             "id":"session_expired",
             "description":"The authentication or registration session was expired.",
             "uri":null
+        },
+        {
+            "id":"registration_not_allowed",
+            "description":"The user has registered device already.",
+            "uri":null
         }
     ]
 }
