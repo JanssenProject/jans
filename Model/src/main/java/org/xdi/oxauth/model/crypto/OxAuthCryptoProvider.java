@@ -168,7 +168,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         } else { // EC or RSA
             PrivateKey privateKey = getPrivateKey(alias);
 
-            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm());
+            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes());
 
@@ -200,7 +200,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
                 byte[] signature = JwtUtil.base64urldecode(encodedSignature);
 
-                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm());
+                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
