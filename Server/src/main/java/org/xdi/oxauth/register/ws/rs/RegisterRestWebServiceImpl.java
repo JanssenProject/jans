@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version June 15, 2016
+ * @version July 15, 2016
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -97,94 +97,99 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            final RegisterRequest r = RegisterRequest.fromJson(requestParams);
-
-            if (r.getSubjectType() == null) {
-                if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
-                    r.setSubjectType(SubjectType.PUBLIC);
-                } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
-                    r.setSubjectType(SubjectType.PAIRWISE);
-                }
-            }
-
-            if (r.getIdTokenSignedResponseAlg() == null) {
-                r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
-            }
-
-            log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
-                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
-
             if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
+                final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
-                if (RegisterParamsValidator.validateParamsClientRegister(r.getApplicationType(), r.getSubjectType(),
-                        r.getRedirectUris(), r.getSectorIdentifierUri())) {
-                    if (!RegisterParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(),
+                log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
+                        r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
+
+                if (r.getSubjectType() == null) {
+                    if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
+                        r.setSubjectType(SubjectType.PUBLIC);
+                    } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
+                        r.setSubjectType(SubjectType.PAIRWISE);
+                    }
+                }
+
+                if (r.getIdTokenSignedResponseAlg() == null) {
+                    r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
+                }
+
+                if (r.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE) {
+                    if (RegisterParamsValidator.validateParamsClientRegister(r.getApplicationType(), r.getSubjectType(),
                             r.getRedirectUris(), r.getSectorIdentifierUri())) {
-                        builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
-                        builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
-                    } else {
-                        RegisterParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
-
-                        String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
-
-                        String inum = inumService.generateClientInum();
-                        String generatedClientSecret = UUID.randomUUID().toString();
-
-                        String[] scopes = new String[0];
-                        if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
-                                && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()
-                                && r.getScopes().size() > 0) {
-                            scopes = scopeService.getScopesDn(r.getScopes()).toArray(scopes);
+                        if (!RegisterParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(),
+                                r.getRedirectUris(), r.getSectorIdentifierUri())) {
+                            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
+                            builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                         } else {
-                            scopes = scopeService.getDefaultScopesDn().toArray(scopes);
-                        }
+                            RegisterParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
-                        final Client client = new Client();
-                        client.setDn("inum=" + inum + "," + clientsBaseDN);
-                        client.setClientId(inum);
-                        client.setClientSecret(generatedClientSecret);
-                        client.setScopes(scopes);
-                        client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
+                            String clientsBaseDN = ConfigurationFactory.instance().getBaseDn().getClients();
 
-                        final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                        client.setClientIdIssuedAt(calendar.getTime());
+                            String inum = inumService.generateClientInum();
+                            String generatedClientSecret = UUID.randomUUID().toString();
 
-                        if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime() > 0) {
-                            calendar.add(Calendar.SECOND, ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime());
-                            client.setClientSecretExpiresAt(calendar.getTime());
-                        }
-
-                        if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
-                            try {
-                                URI redUri = new URI(r.getRedirectUris().get(0));
-                                client.setClientName(redUri.getHost());
-                            } catch (Exception e) {
-                                //ignore
-                                log.error(e.getMessage(), e);
-                                client.setClientName("Unknown");
+                            String[] scopes = new String[0];
+                            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
+                                    && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()
+                                    && r.getScopes().size() > 0) {
+                                scopes = scopeService.getScopesDn(r.getScopes()).toArray(scopes);
+                            } else {
+                                scopes = scopeService.getDefaultScopesDn().toArray(scopes);
                             }
+
+                            final Client client = new Client();
+                            client.setDn("inum=" + inum + "," + clientsBaseDN);
+                            client.setClientId(inum);
+                            client.setClientSecret(generatedClientSecret);
+                            client.setScopes(scopes);
+                            client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
+
+                            final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                            client.setClientIdIssuedAt(calendar.getTime());
+
+                            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime() > 0) {
+                                calendar.add(Calendar.SECOND, ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime());
+                                client.setClientSecretExpiresAt(calendar.getTime());
+                            }
+
+                            if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
+                                try {
+                                    URI redUri = new URI(r.getRedirectUris().get(0));
+                                    client.setClientName(redUri.getHost());
+                                } catch (Exception e) {
+                                    //ignore
+                                    log.error(e.getMessage(), e);
+                                    client.setClientName("Unknown");
+                                }
+                            }
+
+                            updateClientFromRequestObject(client, r);
+
+                            if (externalDynamicClientRegistrationService.isEnabled()) {
+                                externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
+                            }
+
+                            Date currentTime = Calendar.getInstance().getTime();
+                            client.setLastAccessTime(currentTime);
+                            client.setLastLogonTime(currentTime);
+
+                            Boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
+                            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
+
+                            clientService.persist(client);
+
+                            JSONObject jsonObject = getJSONObject(client);
+                            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
                         }
-
-                        updateClientFromRequestObject(client, r);
-
-                        if (externalDynamicClientRegistrationService.isEnabled()) {
-                            externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
-                        }
-
-                        Date currentTime = Calendar.getInstance().getTime();
-                        client.setLastAccessTime(currentTime);
-                        client.setLastLogonTime(currentTime);
-
-                        Boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
-                        client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
-
-                        clientService.persist(client);
-
-                        JSONObject jsonObject = getJSONObject(client);
-                        builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+                    } else {
+                        log.trace("Client parameters are invalid, returns invalid_request error.");
+                        builder = Response.status(Response.Status.BAD_REQUEST).
+                                entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                     }
                 } else {
-                    log.trace("Client parameters are invalid, returns invalid_request error.");
+                    log.debug("The signature algorithm for id_token cannot be none.");
                     builder = Response.status(Response.Status.BAD_REQUEST).
                             entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                 }
