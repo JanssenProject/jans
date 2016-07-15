@@ -268,7 +268,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getSubjectType() != null) {
             p_client.setSubjectType(requestObject.getSubjectType().toString());
         }
-        if (requestObject.getIdTokenSignedResponseAlg() != null) {
+        if (requestObject.getIdTokenSignedResponseAlg() != null
+                && requestObject.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE) {
             p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
         }
         if (requestObject.getIdTokenEncryptedResponseAlg() != null) {
