@@ -1,7 +1,0 @@
-<suite name="oxAuthRpDemo" parallel="false">
-  <test name="Hash parser test" enabled="true">
-    <classes>
-      <class name="org.xdi.oxauth.rp.demo.HashParserTest"/>
-    </classes>
-  </test>
-</suite>
