@@ -989,4 +989,53 @@ public class OpenIdConfigurationResponse extends BaseResponse {
 	public void setOpTosUri(String opTosUri) {
 		this.opTosUri = opTosUri;
 	}
+
+	@Override
+	public String toString() {
+		return "OpenIdConfigurationResponse{" +
+				"issuer='" + issuer + '\'' +
+				", authorizationEndpoint='" + authorizationEndpoint + '\'' +
+				", tokenEndpoint='" + tokenEndpoint + '\'' +
+				", userInfoEndpoint='" + userInfoEndpoint + '\'' +
+				", clientInfoEndpoint='" + clientInfoEndpoint + '\'' +
+				", checkSessionIFrame='" + checkSessionIFrame + '\'' +
+				", endSessionEndpoint='" + endSessionEndpoint + '\'' +
+				", jwksUri='" + jwksUri + '\'' +
+				", registrationEndpoint='" + registrationEndpoint + '\'' +
+				", validateTokenEndpoint='" + validateTokenEndpoint + '\'' +
+				", federationMetadataEndpoint='" + federationMetadataEndpoint + '\'' +
+				", federationEndpoint='" + federationEndpoint + '\'' +
+				", idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
+				", introspectionEndpoint='" + introspectionEndpoint + '\'' +
+				", scopesSupported=" + scopesSupported +
+				", responseTypesSupported=" + responseTypesSupported +
+				", grantTypesSupported=" + grantTypesSupported +
+				", acrValuesSupported=" + acrValuesSupported +
+				", subjectTypesSupported=" + subjectTypesSupported +
+				", userInfoSigningAlgValuesSupported=" + userInfoSigningAlgValuesSupported +
+				", userInfoEncryptionAlgValuesSupported=" + userInfoEncryptionAlgValuesSupported +
+				", userInfoEncryptionEncValuesSupported=" + userInfoEncryptionEncValuesSupported +
+				", idTokenSigningAlgValuesSupported=" + idTokenSigningAlgValuesSupported +
+				", idTokenEncryptionAlgValuesSupported=" + idTokenEncryptionAlgValuesSupported +
+				", idTokenEncryptionEncValuesSupported=" + idTokenEncryptionEncValuesSupported +
+				", requestObjectSigningAlgValuesSupported=" + requestObjectSigningAlgValuesSupported +
+				", requestObjectEncryptionAlgValuesSupported=" + requestObjectEncryptionAlgValuesSupported +
+				", requestObjectEncryptionEncValuesSupported=" + requestObjectEncryptionEncValuesSupported +
+				", tokenEndpointAuthMethodsSupported=" + tokenEndpointAuthMethodsSupported +
+				", tokenEndpointAuthSigningAlgValuesSupported=" + tokenEndpointAuthSigningAlgValuesSupported +
+				", displayValuesSupported=" + displayValuesSupported +
+				", claimTypesSupported=" + claimTypesSupported +
+				", claimsSupported=" + claimsSupported +
+				", serviceDocumentation='" + serviceDocumentation + '\'' +
+				", claimsLocalesSupported=" + claimsLocalesSupported +
+				", uiLocalesSupported=" + uiLocalesSupported +
+				", claimsParameterSupported=" + claimsParameterSupported +
+				", requestParameterSupported=" + requestParameterSupported +
+				", requestUriParameterSupported=" + requestUriParameterSupported +
+				", requireRequestUriRegistration=" + requireRequestUriRegistration +
+				", opPolicyUri='" + opPolicyUri + '\'' +
+				", opTosUri='" + opTosUri + '\'' +
+				", scopeToClaimsMapping=" + scopeToClaimsMapping +
+				'}';
+	}
 }
