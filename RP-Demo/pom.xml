@@ -67,32 +67,10 @@
     <dependency>
       <groupId>org.xdi</groupId>
       <artifactId>oxauth-client</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>jsr250-api</artifactId>
-          <groupId>javax.annotation</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jcip-annotations</artifactId>
-          <groupId>net.jcip</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jaxb-impl</artifactId>
-          <groupId>com.sun.xml.bind</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>scannotation</artifactId>
-          <groupId>org.scannotation</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
