@@ -45,7 +45,7 @@
   </filter>
   <filter-mapping>
     <filter-name>loginFilter</filter-name>
-    <url-pattern>/rp-demo</url-pattern>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -55,7 +55,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>RP Demo Servlet</servlet-name>
-    <url-pattern>/rp-demo</url-pattern>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
 </web-app>
