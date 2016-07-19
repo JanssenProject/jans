@@ -6,10 +6,10 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.GrantType;
 
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author yuriyz on 07/19/2016.
@@ -37,24 +37,22 @@ public class LoginFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        printRequest(request);
-        fetchTokenIfCodeIsPresent(request);
+        boolean redirectForLogin = fetchTokenIfCodeIsPresent(request);
 
         Object accessToken = request.getSession(true).getAttribute("access_token");
         if (accessToken == null) {
-            redirectToLogin(request, response);
+            if (redirectForLogin) {
+                redirectToLogin(request, response);
+            } else {
+                LOG.trace("Login failed.");
+                response.setContentType("text/html;charset=utf-8");
+
+                PrintWriter pw = response.getWriter();
+                pw.println("<h3>Login failed.</h3>");
+            }
         } else {
             LOG.trace("User is already authenticated.");
             filterChain.doFilter(servletRequest, servletResponse);
-        }
-    }
-
-    private void printRequest(HttpServletRequest request) {
-        LOG.trace("Remote addr: " + request.getRemoteAddr() + ", queryString: " + request.getQueryString());
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                LOG.trace("Cookie - name: " + cookie.getName() + ", value: " + cookie.getValue() + ", domain: " + cookie.getDomain());
-            }
         }
     }
 
@@ -81,7 +79,11 @@ public class LoginFilter implements Filter {
         throw new RuntimeException("Failed to fetch discovery information at : " + authorizationServerHost + WELL_KNOWN_CONNECT_PATH);
     }
 
-    private void fetchTokenIfCodeIsPresent(HttpServletRequest request) {
+    /**
+     * @param request request
+     * @return whether login is still required
+     */
+    private boolean fetchTokenIfCodeIsPresent(HttpServletRequest request) {
         String code = request.getParameter("code");
         if (code != null && !code.trim().isEmpty()) {
             LOG.trace("Fetching token for code " + code + " ...");
@@ -101,8 +103,12 @@ public class LoginFilter implements Filter {
 
                 request.getSession(true).setAttribute("access_token", tokenResponse.getAccessToken());
                 request.getSession(true).setAttribute("id_token", tokenResponse.getIdToken());
+            } else {
+                LOG.trace("Failed to obtain token.");
             }
+            return false;
         }
+        return true;
     }
 
     private void redirectToLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
