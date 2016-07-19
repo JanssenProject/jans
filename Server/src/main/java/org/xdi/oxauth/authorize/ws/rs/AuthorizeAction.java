@@ -9,6 +9,7 @@ package org.xdi.oxauth.authorize.ws.rs;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.In;
@@ -148,7 +149,29 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
-        SessionState session = getSession();
+
+        if ((clientId == null) || clientId.isEmpty()) {
+            log.error("Permission denied. client_id should be not empty.");
+        	permissionDenied();
+        	return;
+        }
+        
+        Client client = null;
+		try {
+			client = clientService.getClient(clientId);
+		} catch (EntryPersistenceException ex) {
+            log.error("Permission denied. Failed to find client by inum '{0}' in LDAP.", clientId, ex);
+        	permissionDenied();
+        	return;
+		}
+
+		if (client == null) {
+            log.error("Permission denied. Failed to find client_id '{0}' in LDAP.", clientId);
+        	permissionDenied();
+        	return;
+        }
+
+		SessionState session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
 
         try {
@@ -231,64 +254,56 @@ public class AuthorizeAction {
             return;
         }
 
-        if (clientId != null && !clientId.isEmpty()) {
+        if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
+            permissionDenied();
+        }
 
-            final Client client = clientService.getClient(clientId);
+        final User user = userService.getUserByDn(session.getUserDn());
+        log.trace("checkPermissionGranted, user = " + user);
 
-            if (client != null) {
+        // OXAUTH-87 : if user is not in group then deny permission
+        if (user != null && client.hasUserGroups()) {
+            // if user is not in any group then deny permissions
+            if (!userGroupService.isInAnyGroup(client.getUserGroups(), user.getDn())) {
+                permissionDenied();
+            }
+        }
 
-                if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
-                    permissionDenied();
-                }
+        // OXAUTH-88 : federation support
+        if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
+            final List<FederationTrust> list = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
 
-                final User user = userService.getUserByDn(session.getUserDn());
-                log.trace("checkPermissionGranted, user = " + user);
+            if (list == null || list.isEmpty()) {
+                log.trace("Deny authorization, client is not in any federation trust, client: {0}", client.getDn());
+                permissionDenied();
+            } else if (FederationDataService.skipAuthorization(list)) {
+                log.trace("Skip authorization (permissions granted), client is in federation trust where skip is allowed, client: {1}", client.getDn());
+                permissionGranted(session);
+            }
+        }
 
-                // OXAUTH-87 : if user is not in group then deny permission
-                if (user != null && client.hasUserGroups()) {
-                    // if user is not in any group then deny permissions
-                    if (!userGroupService.isInAnyGroup(client.getUserGroups(), user.getDn())) {
-                        permissionDenied();
-                    }
-                }
+        if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
 
-                // OXAUTH-88 : federation support
-                if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
-                    final List<FederationTrust> list = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
-
-                    if (list == null || list.isEmpty()) {
-                        log.trace("Deny authorization, client is not in any federation trust, client: {0}", client.getDn());
-                        permissionDenied();
-                    } else if (FederationDataService.skipAuthorization(list)) {
-                        log.trace("Skip authorization (permissions granted), client is in federation trust where skip is allowed, client: {1}", client.getDn());
-                        permissionGranted(session);
-                    }
-                }
-
-                if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
-
-                    if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
-                        if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
-                            permissionGranted(session);
-                            return;
-                        }
-                    }
-
-
-                    if (client.getPersistClientAuthorizations()) {
-	                    ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-	                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-	                            Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-	                                    org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-	                        permissionGranted(session);
-	                        return;
-	                    }
-                    }
-                   
-                } else {
-                    invalidRequest();
+            if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+                if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+                    permissionGranted(session);
+                    return;
                 }
             }
+
+
+            if (client.getPersistClientAuthorizations()) {
+                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                        Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+                                org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                    permissionGranted(session);
+                    return;
+                }
+            }
+           
+        } else {
+            invalidRequest();
         }
 
         return;
