@@ -82,9 +82,9 @@ public class LoginFilter implements Filter {
     }
 
     private void fetchTokenIfCodeIsPresent(HttpServletRequest request) {
-        String queryString = request.getQueryString();
-        String code = HashParser.getCodeFromHash(queryString);
+        String code = request.getParameter("code");
         if (code != null && !code.trim().isEmpty()) {
+            LOG.trace("Fetching token for code " + code + " ...");
             fetchDiscovery(request);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
