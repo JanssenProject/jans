@@ -10,6 +10,7 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 
 import javax.net.ssl.SSLException;
@@ -28,7 +29,7 @@ import java.security.cert.X509Certificate;
  */
 public class Utils {
 
-    public static ApacheHttpClient4Executor createTrustAllExecutor() {
+    public static ClientExecutor createTrustAllExecutor() {
         try {
             return new ApacheHttpClient4Executor(createHttpClientTrustAll());
         } catch (Exception e) {
