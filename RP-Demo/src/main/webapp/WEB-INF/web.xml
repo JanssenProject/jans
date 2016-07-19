@@ -16,22 +16,22 @@
 
   2. Get public address of you site and put that public address as redirectUri parameter below.
   -->
-  <context-param>
-    <param-name>authorizationServerHost</param-name>
-    <param-value>https://ce-dev2.gluu.org</param-value>
-  </context-param>
-  <context-param>
-    <param-name>authorizeParameters</param-name>
-    <param-value>scope=openid+profile&amp;response_type=code+id_token&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B</param-value>
-  </context-param>
-  <context-param>
-    <param-name>redirectUri</param-name>
-    <param-value>https://ce-dev2.gluu.org/oxauth-rp-demo</param-value>
-  </context-param>
 
   <filter>
     <filter-name>loginFilter</filter-name>
     <filter-class>org.xdi.oxauth.rp.demo.LoginFilter</filter-class>
+    <init-param>
+      <param-name>authorizationServerHost</param-name>
+      <param-value>https://ce-dev2.gluu.org</param-value>
+    </init-param>
+    <init-param>
+      <param-name>authorizeParameters</param-name>
+      <param-value>scope=openid+profile&amp;response_type=code+id_token&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B</param-value>
+    </init-param>
+    <init-param>
+      <param-name>redirectUri</param-name>
+      <param-value>https://ce-dev2.gluu.org/oxauth-rp-demo</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>loginFilter</filter-name>
