@@ -12,9 +12,19 @@
   1. First of all you need to register your own client for your RP (Client):
      a) via Admin UI (Example: https://ce-dev2.gluu.org)
      b) via Dynamic Registration Endpoint
-  Result: you will get client_id (example: @!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B).
+
+     Client must :
+     a) has redirect_uri that point to your side
+     b) scopes which you will use during authorization request (in this demo it is open_id and profile)
+     c) response type and grant type for authorization grant type
+     d) auth_mode is up to you (for simplicity here we are using basic acr)
+
+     Result: you will get client_id (example: @!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B)
+             which must be put into authorize parameters as client_id=<your client id>
 
   2. Get public address of you site and put that public address as redirectUri parameter below.
+
+  3. Specify authorizationServerHost address
   -->
 
   <filter>
@@ -26,11 +36,11 @@
     </init-param>
     <init-param>
       <param-name>authorizeParameters</param-name>
-      <param-value>scope=openid+profile&amp;response_type=code+id_token&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B</param-value>
+      <param-value>scope=openid+profile&amp;response_type=code+id_token&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!D5B4.E490</param-value>
     </init-param>
     <init-param>
       <param-name>redirectUri</param-name>
-      <param-value>https://ce-dev2.gluu.org/oxauth-rp-demo</param-value>
+      <param-value>https://ce-dev2.gluu.org/rp-demo</param-value>
     </init-param>
   </filter>
   <filter-mapping>
