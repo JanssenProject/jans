@@ -97,6 +97,8 @@ public class LoginFilter implements Filter {
 
             TokenResponse tokenResponse = tokenClient.exec();
             if (!Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+                LOG.trace("Token is successfully fetched.");
+
                 request.getSession(true).setAttribute("access_token", tokenResponse.getAccessToken());
                 request.getSession(true).setAttribute("id_token", tokenResponse.getIdToken());
             }
