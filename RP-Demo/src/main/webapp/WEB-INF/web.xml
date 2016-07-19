@@ -36,7 +36,7 @@
     </init-param>
     <init-param>
       <param-name>authorizeParameters</param-name>
-      <param-value>scope=openid+profile&amp;response_type=code+id_token&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!D5B4.E490</param-value>
+      <param-value>scope=openid+profile&amp;response_type=code&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!0068.3E20</param-value>
     </init-param>
     <init-param>
       <param-name>redirectUri</param-name>
@@ -45,7 +45,7 @@
   </filter>
   <filter-mapping>
     <filter-name>loginFilter</filter-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/rp-demo</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -55,7 +55,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>RP Demo Servlet</servlet-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/rp-demo</url-pattern>
   </servlet-mapping>
 
 </web-app>

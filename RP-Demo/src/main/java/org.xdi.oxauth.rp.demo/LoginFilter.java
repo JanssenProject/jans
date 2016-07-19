@@ -6,6 +6,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.GrantType;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class LoginFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+        printRequest(request);
         fetchTokenIfCodeIsPresent(request);
 
         Object accessToken = request.getSession(true).getAttribute("access_token");
@@ -44,6 +46,15 @@ public class LoginFilter implements Filter {
         } else {
             LOG.trace("User is already authenticated.");
             filterChain.doFilter(servletRequest, servletResponse);
+        }
+    }
+
+    private void printRequest(HttpServletRequest request) {
+        LOG.trace("Remote addr: " + request.getRemoteAddr() + ", queryString: " + request.getQueryString());
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                LOG.trace("Cookie - name: " + cookie.getName() + ", value: " + cookie.getValue() + ", domain: " + cookie.getDomain());
+            }
         }
     }
 
