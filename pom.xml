@@ -69,7 +69,7 @@
 		<module>oxAuthStatic</module>
 		<module>Server</module>
 		<module>RP</module>
-		<!--<module>UmaRpDemo</module> -->
+		<module>RP-Demo</module>
 	</modules>
 
 	<dependencyManagement>
