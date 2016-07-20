@@ -297,6 +297,27 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
     @Parameters({"redirectUris"})
     @Test
+    public void requestClientRegistrationFail4(final String redirectUris) throws Exception {
+        showTitle("requestClientRegistrationFail4");
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE); // id_token signature cannot be none
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 400);
+        assertNotNull(response.getEntity());
+        assertNotNull(response.getErrorType());
+        assertNotNull(response.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
     public void requestClientAssociateWithFederationAttributes(final String redirectUris) throws Exception {
         showTitle("requestClientAssociateWithFederationAttributes");
 
