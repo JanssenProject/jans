@@ -513,11 +513,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
                         msgBuilder.category('ACTIONABLE').badge(0)
+                        msgBuilder.forNewsstand()
                         msgBuilder.customFields(additional_fields)
+                        push_message = msgBuilder.build()
 
-                        send_notification_result = self.pushAppleService.push(push_token, msgBuilder.build())
+                        send_notification_result = self.pushAppleService.push(push_token, push_message)
                         if debug:
-                            print "Super-Gluu. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
+                            print "Super-Gluu. Send iOS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
@@ -528,10 +530,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         title = "Super-Gluu"
                         msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
+                        push_message = msgBuilder.build()
 
-                        send_notification_result = self.pushAndroidService.send(msgBuilder.build(), push_token, 3)
+                        send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
                         if debug:
-                            print "Super-Gluu. Send push notification. token: '%s', send_notification_result: '%s'" % (push_token, send_notification_result)
+                            print "Super-Gluu. Send Android push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
 
         print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
