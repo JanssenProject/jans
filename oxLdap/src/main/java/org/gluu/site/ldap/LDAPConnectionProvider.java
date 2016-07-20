@@ -113,29 +113,12 @@ public class LDAPConnectionProvider {
 		}
 
 		int maxConnections = Integer.parseInt(props.getProperty("maxconnections"));
-		try {
-			connectionPool = new LDAPConnectionPool(failoverSet, bindRequest, maxConnections);
-		} catch (LDAPException ex) {
-			if (!this.useSSL) {
-				throw ex;
-			}
-
-			// Error when LDAP server not supports specified encryption
-			if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
-				throw ex;
-			}
-			
-			log.info("Attempting to use older SSL protocols", ex);
-			connectionPool = createSSLConnectionPoolWithPreviousProtocols(sslUtil, bindRequest, connectionOptions, maxConnections);
-			if (connectionPool == null) {
-				throw ex;
-			}
-		}
-		if (connectionPool != null) {
-			connectionPool.setCreateIfNecessary(true);
+		this.connectionPool = createConnectionPoolWithWaitImpl(props, failoverSet, bindRequest, connectionOptions, maxConnections, sslUtil);
+		if (this.connectionPool != null) {
+			this.connectionPool.setCreateIfNecessary(true);
 			String connectionMaxWaitTime = props.getProperty("connection-max-wait-time");
 			if (StringHelper.isNotEmpty(connectionMaxWaitTime)) {
-				connectionPool.setMaxWaitTimeMillis(Long.parseLong(connectionMaxWaitTime));
+				this.connectionPool.setMaxWaitTimeMillis(Long.parseLong(connectionMaxWaitTime));
 			}
 		}
 		
@@ -149,6 +132,72 @@ public class LDAPConnectionProvider {
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.creationResultCode = ResultCode.SUCCESS;
+	}
+	private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
+			int maxConnections, SSLUtil sslUtil) throws LDAPException {		
+		String connectionPoolMaxWaitTime = props.getProperty("connection-pool-max-wait-time");
+		int connectionPoolMaxWaitTimeSeconds = 30;
+		if (StringHelper.isNotEmpty(connectionPoolMaxWaitTime)) {
+			connectionPoolMaxWaitTimeSeconds = Integer.parseInt(connectionPoolMaxWaitTime);
+		}
+		log.debug("Using LDAP connection pool timeout: '" + connectionPoolMaxWaitTimeSeconds + "'");
+
+		LDAPConnectionPool createdConnectionPool = null;
+
+		int attempt = 0;
+		long currentTime = System.currentTimeMillis();
+		long maxWaitTime = currentTime + connectionPoolMaxWaitTimeSeconds * 1000;
+		do {
+			attempt++;
+			if (attempt > 0) {
+				log.info("Attempting to create connection pool: " + attempt);
+			}
+
+			try {
+				createdConnectionPool = createConnectionPoolImpl(failoverSet, bindRequest, connectionOptions, maxConnections, sslUtil);
+				break;
+			} catch (LDAPException ex) {
+				if (ex.getResultCode().intValue() != ResultCode.CONNECT_ERROR_INT_VALUE) {
+					throw ex;
+				}
+			}
+			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException ex) {
+				log.error("Exception happened in sleep", ex);
+				return null;
+			}
+			currentTime = System.currentTimeMillis();
+		} while (maxWaitTime > currentTime);
+		
+		return createdConnectionPool;
+	}
+
+	private LDAPConnectionPool createConnectionPoolImpl(FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
+			int maxConnections, SSLUtil sslUtil) throws LDAPException {
+
+		LDAPConnectionPool createdConnectionPool;
+		try {
+			createdConnectionPool = new LDAPConnectionPool(failoverSet, bindRequest, maxConnections);
+		} catch (LDAPException ex) {
+			if (!this.useSSL) {
+				throw ex;
+			}
+
+			// Error when LDAP server not supports specified encryption
+			if (ex.getResultCode() != ResultCode.SERVER_DOWN) {
+				throw ex;
+			}
+			
+			log.info("Attempting to use older SSL protocols", ex);
+			createdConnectionPool = createSSLConnectionPoolWithPreviousProtocols(sslUtil, bindRequest, connectionOptions, maxConnections);
+			if (createdConnectionPool == null) {
+				throw ex;
+			}
+		}
+		
+		return createdConnectionPool;
 	}
 
 	private LDAPConnectionPool createSSLConnectionPoolWithPreviousProtocols(SSLUtil sslUtil, BindRequest bindRequest, LDAPConnectionOptions connectionOptions, int maxConnections) throws LDAPException {
