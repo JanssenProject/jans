@@ -74,8 +74,6 @@ public class LoginFilter implements Filter {
             LOG.trace("Discovery: " + discoveryResponse);
 
             if (discoveryResponse.getStatus() == 200) {
-                request.getSession(true).setAttribute("userinfo_endpoint", discoveryResponse.getUserInfoEndpoint());
-                LOG.trace("Put in session userinfo_endpoint.");
                 return;
             }
         } catch (Exception e) {
@@ -110,8 +108,10 @@ public class LoginFilter implements Filter {
             if (!Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                 LOG.trace("Token is successfully fetched.");
 
+                LOG.trace("Put in session access_token: " + tokenResponse.getAccessToken() + ", id_token: " + tokenResponse.getIdToken() + ", userinfo_endpoint: " + discoveryResponse.getUserInfoEndpoint());
                 request.getSession(true).setAttribute("access_token", tokenResponse.getAccessToken());
                 request.getSession(true).setAttribute("id_token", tokenResponse.getIdToken());
+                request.getSession(true).setAttribute("userinfo_endpoint", discoveryResponse.getUserInfoEndpoint());
             } else {
                 LOG.trace("Failed to obtain token. Status: " + tokenResponse.getStatus() + ", entity: " + tokenResponse.getEntity());
             }
