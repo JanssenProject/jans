@@ -69,7 +69,7 @@
 		<module>oxAuthStatic</module>
 		<module>Server</module>
 		<module>RP</module>
-		<!--<module>UmaRpDemo</module> -->
+		<module>RP-Demo</module>
 	</modules>
 
 	<dependencyManagement>
@@ -420,6 +420,11 @@
 			</dependency>
 
 			<!-- Other -->
+			<dependency>
+			    <groupId>com.googlecode.json-simple</groupId>
+			    <artifactId>json-simple</artifactId>
+			    <version>1.1.1</version>
+			</dependency>
 			<dependency>
 				<groupId>org.mvel</groupId>
 				<artifactId>mvel2</artifactId>

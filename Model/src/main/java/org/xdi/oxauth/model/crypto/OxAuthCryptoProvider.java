@@ -108,11 +108,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         if (signatureAlgorithm == null) {
             throw new RuntimeException("The signature algorithm parameter cannot be null");
         } else if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
-            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily());
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily(), "BC");
             keyGen.initialize(2048, new SecureRandom());
         } else if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
             ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily());
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily(), "BC");
             keyGen.initialize(eccgen, new SecureRandom());
         } else {
             throw new RuntimeException("The provided signature algorithm parameter is not supported");
@@ -168,7 +168,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         } else { // EC or RSA
             PrivateKey privateKey = getPrivateKey(alias);
 
-            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm());
+            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes());
 
@@ -200,7 +200,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
                 byte[] signature = JwtUtil.base64urldecode(encodedSignature);
 
-                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm());
+                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
