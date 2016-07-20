@@ -74,7 +74,8 @@ public class LoginFilter implements Filter {
             LOG.trace("Discovery: " + discoveryResponse);
 
             if (discoveryResponse.getStatus() == 200) {
-                request.getSession(true).setAttribute("discovery", discoveryResponse);
+                request.getSession(true).setAttribute("userinfo_endpoint", discoveryResponse.getUserInfoEndpoint());
+                LOG.trace("Put in session userinfo_endpoint.");
                 return;
             }
         } catch (Exception e) {
