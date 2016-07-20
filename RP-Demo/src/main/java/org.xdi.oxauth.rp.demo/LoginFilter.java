@@ -3,6 +3,7 @@ package org.xdi.oxauth.rp.demo;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 
 import javax.servlet.*;
@@ -23,6 +24,8 @@ public class LoginFilter implements Filter {
     private String authorizeParameters;
     private String redirectUri;
     private String authorizationServerHost;
+    private String clientId;
+    private String clientSecret;
     private OpenIdConfigurationResponse discoveryResponse;
 
     @Override
@@ -30,6 +33,8 @@ public class LoginFilter implements Filter {
         authorizeParameters = filterConfig.getInitParameter("authorizeParameters");
         redirectUri = filterConfig.getInitParameter("redirectUri");
         authorizationServerHost = filterConfig.getInitParameter("authorizationServerHost");
+        clientId = filterConfig.getInitParameter("clientId");
+        clientSecret = filterConfig.getInitParameter("clientSecret");
     }
 
     @Override
@@ -92,6 +97,9 @@ public class LoginFilter implements Filter {
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
             tokenRequest.setRedirectUri(redirectUri);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
             TokenClient tokenClient = new TokenClient(discoveryResponse.getTokenEndpoint());
             tokenClient.setExecutor(Utils.createTrustAllExecutor());
@@ -104,7 +112,7 @@ public class LoginFilter implements Filter {
                 request.getSession(true).setAttribute("access_token", tokenResponse.getAccessToken());
                 request.getSession(true).setAttribute("id_token", tokenResponse.getIdToken());
             } else {
-                LOG.trace("Failed to obtain token.");
+                LOG.trace("Failed to obtain token. Status: " + tokenResponse.getStatus() + ", entity: " + tokenResponse.getEntity());
             }
             return false;
         }
@@ -115,7 +123,7 @@ public class LoginFilter implements Filter {
         fetchDiscovery(request);
 
         String redirectTo = discoveryResponse.getAuthorizationEndpoint() +
-                "?redirect_uri=" + redirectUri + "&" + authorizeParameters;
+                "?redirect_uri=" + redirectUri + "&client_id=" + clientId + "&" + authorizeParameters;
         LOG.trace("Redirecting to authorization url : " + redirectTo);
         response.sendRedirect(redirectTo);
     }

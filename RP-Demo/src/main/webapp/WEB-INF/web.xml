@@ -19,8 +19,8 @@
      c) response type and grant type for authorization grant type
      d) auth_mode is up to you (for simplicity here we are using basic acr)
 
-     Result: you will get client_id (example: @!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B)
-             which must be put into authorize parameters as client_id=<your client id>
+     Result: you will get client_id (example: @!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!6BDC.2E0B) and client_secret
+             which must be put into init parameters of login filter
 
   2. Get public address of you site and put that public address as redirectUri parameter below.
 
@@ -35,8 +35,16 @@
       <param-value>https://ce-dev2.gluu.org</param-value>
     </init-param>
     <init-param>
+      <param-name>clientId</param-name>
+      <param-value>@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!0068.3E20</param-value>
+    </init-param>
+    <init-param>
+      <param-name>clientSecret</param-name>
+      <param-value>0BJtgc27iOo5</param-value>
+    </init-param>
+    <init-param>
       <param-name>authorizeParameters</param-name>
-      <param-value>scope=openid+profile&amp;response_type=code&amp;nonce=nonce&amp;auth_mode=basic&amp;client_id=@!40EA.D454.9D4F.E876!0001!ECE8.BBEF!0008!0068.3E20</param-value>
+      <param-value>scope=openid+profile&amp;response_type=code&amp;nonce=nonce&amp;auth_mode=basic</param-value>
     </init-param>
     <init-param>
       <param-name>redirectUri</param-name>
