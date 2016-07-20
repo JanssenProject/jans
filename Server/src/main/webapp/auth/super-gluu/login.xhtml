@@ -45,13 +45,14 @@
 
 			var request = '${super_gluu_request}';
 			var label = '${super_gluu_label}';
+			var qr_options = ${super_gluu_qr_options};
 			$(document).ready(function() {
 
 				if (request == '') {
 					onSignInCallback('error');
 				}
 
-				super_gluu.renderQrCode('#container', request, label);
+				super_gluu.renderQrCode('#container', request, qr_options, label);
 				super_gluu.startProgressBar('#progressbar', 60);
 				super_gluu.startSessionChecker(onSignInCallback, 60);
 			});

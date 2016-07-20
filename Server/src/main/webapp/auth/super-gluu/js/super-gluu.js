@@ -13,7 +13,7 @@ var super_gluu = {
 	//--------------------------------------------------------------------------------
 	cloneObject: function(obj) {
 		var clone = {};
-		for ( var i in obj) {
+		for (var i in obj) {
 			if ((typeof (obj[i]) == "object") && (obj[i] != null)) {
 				clone[i] = this.cloneObject(obj[i]);
 			} else {
@@ -22,6 +22,14 @@ var super_gluu = {
 		}
 	
 		return clone;
+	},
+
+	updateObject: function(obj, updObj) {
+		for (var i in updObj) {
+			obj[i] = updObj[i];
+		}
+	
+		return obj;
 	},
 
 	//--------------------------------------------------------------------------------
@@ -79,8 +87,10 @@ var super_gluu = {
 		image : null
 	},
 	
-	getQrCodeOptions:  function(request, label) {
+	getQrCodeOptions:  function(request, custom_qr_options, label) {
 		var options = this.cloneObject(this.QR_CODE_DEFAULT_OPTIONS);
+		var options = this.updateObject(options, custom_qr_options);
+
 		options.text = request;
 		
 		if ((typeof label !== 'undefined') && (label != null) && (label != '')) {
@@ -90,8 +100,8 @@ var super_gluu = {
 		return options;
 	},
 	
-	renderQrCode: function(container, request, label) {
-	    var options = this.getQrCodeOptions(request, label);
+	renderQrCode: function(container, request, custom_qr_options, label) {
+	    var options = this.getQrCodeOptions(request, custom_qr_options, label);
 	    $(container).qrcode(options);
 	},
 

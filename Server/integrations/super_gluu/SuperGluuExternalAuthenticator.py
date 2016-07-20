@@ -63,6 +63,10 @@ class PersonAuthentication(PersonAuthenticationType):
         if configurationAttributes.containsKey("label"):
             self.customLabel = configurationAttributes.get("label").getValue2()
 
+        self.customQrOptions = {}
+        if configurationAttributes.containsKey("qr_options"):
+            self.customQrOptions = configurationAttributes.get("qr_options").getValue2()
+
         print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications, self.customLabel)
 
         return True   
@@ -551,6 +555,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if self.customLabel != None:
             context.set("super_gluu_label", self.customLabel)
+
+        context.set("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):
