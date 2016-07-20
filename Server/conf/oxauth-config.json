@@ -69,7 +69,6 @@
         "A256GCM"
     ],
     "idTokenSigningAlgValuesSupported":[
-        "none",
         "HS256",
         "HS384",
         "HS512",
