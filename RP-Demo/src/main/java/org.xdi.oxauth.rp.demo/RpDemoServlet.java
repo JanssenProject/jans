@@ -1,7 +1,6 @@
 package org.xdi.oxauth.rp.demo;
 
 import org.apache.log4j.Logger;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoResponse;
 
@@ -31,9 +30,11 @@ public class RpDemoServlet extends HttpServlet {
             pw.println("<br/><br/>");
 
             String accessToken = (String) req.getSession().getAttribute("access_token");
-            OpenIdConfigurationResponse discovery = (OpenIdConfigurationResponse) req.getSession().getAttribute("discovery");
+            String userInfoEndpoint = (String) req.getSession().getAttribute("userinfo_endpoint");
 
-            UserInfoClient userInfoClient = new UserInfoClient(discovery.getUserInfoEndpoint());
+            LOG.trace("access_token: " + accessToken + ", user_endpoint: " + userInfoEndpoint);
+
+            UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
             UserInfoResponse response = userInfoClient.execUserInfo(accessToken);
             LOG.trace("UserInfo response: " + response);
 
