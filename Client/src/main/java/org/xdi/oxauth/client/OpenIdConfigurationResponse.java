@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version 0.9 January 22, 2015
  */
-public class OpenIdConfigurationResponse extends BaseResponse {
+public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
 	private String issuer;
 	private String authorizationEndpoint;
