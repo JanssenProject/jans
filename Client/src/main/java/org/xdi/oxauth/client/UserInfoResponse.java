@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.client;
 
+import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 
 /**
  * Represents an user info response received from the authorization server.
@@ -112,5 +112,18 @@ public class UserInfoResponse extends BaseResponse {
         }
 
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "UserInfoResponse{" +
+                "status=" + status +
+                "entity=" + entity +
+                "headers=" + headers +
+                "claims=" + claims +
+                ", errorType=" + errorType +
+                ", errorDescription='" + errorDescription + '\'' +
+                ", errorUri='" + errorUri + '\'' +
+                '}';
     }
 }
