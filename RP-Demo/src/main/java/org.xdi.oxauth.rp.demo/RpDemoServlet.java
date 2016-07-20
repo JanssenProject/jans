@@ -32,7 +32,7 @@ public class RpDemoServlet extends HttpServlet {
             String accessToken = (String) req.getSession().getAttribute("access_token");
             String userInfoEndpoint = (String) req.getSession().getAttribute("userinfo_endpoint");
 
-            LOG.trace("access_token: " + accessToken + ", user_endpoint: " + userInfoEndpoint);
+            LOG.trace("access_token: " + accessToken + ", userinfo_endpoint: " + userInfoEndpoint);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
             UserInfoResponse response = userInfoClient.execUserInfo(accessToken);
