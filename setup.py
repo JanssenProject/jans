@@ -1944,10 +1944,13 @@ class Setup(object):
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
         
-        if self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
                 if service != 'opendj':
                     self.run(["/sbin/chkconfig", service, "on"])
+        elif self.os_type in ['redhat']:
+            for service in self.redhat_services:
+                self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
