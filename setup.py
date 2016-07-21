@@ -1949,6 +1949,7 @@ class Setup(object):
                 if service != 'opendj':
                     self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
