@@ -15,8 +15,18 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
     private String oxdId;
     @JsonProperty(value = "acr_values")
     private List<String> acrValues;
+    @JsonProperty(value = "prompt")
+    private String prompt;
 
     public GetAuthorizationUrlParams() {
+    }
+
+    public String getPrompt() {
+        return prompt;
+    }
+
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
     }
 
     public String getOxdId() {
@@ -62,6 +72,7 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         sb.append("GetAuthorizationUrlParams");
         sb.append("{acrValues=").append(acrValues);
         sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", prompt='").append(prompt).append('\'');
         sb.append('}');
         return sb.toString();
     }
