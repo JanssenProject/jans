@@ -5,9 +5,11 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.BaseEntry;
 
+import java.net.URI;
+
 /**
  * @author Javier Rojas Blum
- * @version August 21, 2015
+ * @version July 22, 2016
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "pairwiseIdentifier"})
@@ -16,14 +18,14 @@ public class PairwiseIdentifier extends BaseEntry {
     @LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
     private String id;
 
-    @LdapAttribute(name = "oxSectorIdentifierURI")
-    private String sectorIdentifierUri;
+    @LdapAttribute(name = "oxSectorIdentifier")
+    private String sectorIdentifier;
 
     public PairwiseIdentifier() {
     }
 
     public PairwiseIdentifier(String sectorIdentifierUri) {
-        this.sectorIdentifierUri = sectorIdentifierUri;
+        this.sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
     }
 
     public String getId() {
@@ -34,12 +36,12 @@ public class PairwiseIdentifier extends BaseEntry {
         this.id = id;
     }
 
-    public String getSectorIdentifierUri() {
-        return sectorIdentifierUri;
+    public String getSectorIdentifier() {
+        return sectorIdentifier;
     }
 
-    public void setSectorIdentifierUri(String sectorIdentifierUri) {
-        this.sectorIdentifierUri = sectorIdentifierUri;
+    public void setSectorIdentifier(String sectorIdentifierUri) {
+        this.sectorIdentifier = sectorIdentifierUri;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class PairwiseIdentifier extends BaseEntry {
         StringBuilder builder = new StringBuilder();
         builder.append("PairwiseIdentifier [id=")
                 .append(id)
-                .append(", sectorIdentifierUri=").append(sectorIdentifierUri)
+                .append(", sectorIdentifier=").append(sectorIdentifier)
                 .append("]");
         return builder.toString();
     }
