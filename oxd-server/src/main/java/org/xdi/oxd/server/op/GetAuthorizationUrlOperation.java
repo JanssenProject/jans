@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -42,8 +43,10 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&state=" + state();
         authorizationEndpoint += "&nonce=" + nonce();
         authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
-//        authorizationEndpoint += "&prompt=login"; //  temp comment until oxauth #249 is resolved
 
+        if (!Strings.isNullOrEmpty(params.getPrompt())) {
+            authorizationEndpoint += "&prompt=" + params.getPrompt();
+        }
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
     }
