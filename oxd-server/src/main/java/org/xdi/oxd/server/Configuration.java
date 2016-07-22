@@ -37,6 +37,8 @@ public class Configuration {
     private Boolean trustAllCerts;
     @JsonProperty(value = "trust_store_path")
     private String keyStorePath;
+    @JsonProperty(value = "trust_store_password")
+    private String keyStorePassword;
     @JsonProperty(value = "license_server_endpoint")
     private String licenseServerEndpoint;
     @JsonProperty(value = "license_id")
@@ -49,6 +51,14 @@ public class Configuration {
     private String licensePassword;
     @JsonProperty(value = "license_check_period_in_hours")
     private Integer licenseCheckPeriodInHours = 24;
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
+    }
 
     public int getJettyPort() {
         return jettyPort;
@@ -199,6 +209,7 @@ public class Configuration {
         sb.append(", useClientAuthenticationForAat=").append(useClientAuthenticationForAat);
         sb.append(", trustAllCerts=").append(trustAllCerts);
         sb.append(", keyStorePath='").append(keyStorePath).append('\'');
+        sb.append(", keyStorePassword='").append(keyStorePassword).append('\'');
         sb.append(", licenseServerEndpoint='").append(licenseServerEndpoint).append('\'');
         sb.append(", licenseId='").append(licenseId).append('\'');
         sb.append(", publicKey='").append(publicKey).append('\'');
