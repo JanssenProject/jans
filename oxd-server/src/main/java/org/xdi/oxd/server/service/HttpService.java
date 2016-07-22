@@ -45,7 +45,7 @@ public class HttpService {
                 if (!keyStoreFile.exists()) {
                     LOG.error("ERROR in configuration. Key store path is invalid! Please fix key_store_path in oxd configuration");
                 } else {
-                    return CoreUtils.createHttpClientWithKeyStore(keyStoreFile);
+                    return CoreUtils.createHttpClientWithKeyStore(keyStoreFile, configuration.getKeyStorePassword());
                 }
             }
         } catch (Exception e) {
