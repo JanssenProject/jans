@@ -34,7 +34,7 @@
         <module>oxd-common</module>
         <module>oxd-client</module>
         <module>oxd-server</module>
-        <module>oxd-ping</module>
+        <!--<module>oxd-ping</module>-->
         <module>oxd-rp-client</module>
         <!--<module>oxd-rp-client-demo</module>-->
     </modules>
