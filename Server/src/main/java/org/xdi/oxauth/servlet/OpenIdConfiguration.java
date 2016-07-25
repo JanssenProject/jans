@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.servlet;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -14,6 +16,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
@@ -76,7 +80,6 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(FEDERATION_ENDPOINT, configuration.getFederationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, configuration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, configuration.getIntrospectionEndpoint());
-            jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping(configuration.getAuthLevelMapping()));
 
             ScopeService scopeService = ScopeService.instance();
             JSONArray scopesSupported = new JSONArray();
@@ -103,12 +106,13 @@ public class OpenIdConfiguration extends HttpServlet {
                 jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
             }
 
-            JSONArray acrValuesSupported = new JSONArray();
             ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService.instance();
+            JSONArray acrValuesSupported = new JSONArray();
             for (String acr : externalAuthenticationService.getAcrValuesList()) {
                 acrValuesSupported.put(acr);
             }
             jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
+            jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
             JSONArray subjectTypesSupported = new JSONArray();
             for (String subjectType : configuration.getSubjectTypesSupported()) {
@@ -315,17 +319,30 @@ public class OpenIdConfiguration extends HttpServlet {
         return result;
     }
     
-    private static JSONObject createAuthLevelMapping(Map<Integer, List<String>>  map) {
+    private JSONObject createAuthLevelMapping() {
         final JSONObject mappings = new JSONObject();
-        try {        	
-        	for(Integer level: map.keySet()){
-        		final JSONArray mappingList = new JSONArray();                
-        		List<String> list = map.get(level);
-        		for(String mapping : list){
-        			mappingList.put(mapping);
-        		}
-        		mappings.put(level.toString(), mappingList);        		
-        	}          
+        try {
+            ExternalAuthenticationService service = ExternalAuthenticationService.instance();
+
+            Map<Integer, Set<String>> map = Maps.newHashMap();
+            for (CustomScriptConfiguration script : service.getCustomScriptConfigurationsMap()) {
+                int level = script.getLevel();
+                String acr = script.getName();
+
+                Set<String> acrs = map.get(level);
+                if (acrs == null) {
+                    acrs = Sets.newHashSet();
+                    map.put(level, acrs);
+                }
+                acrs.add(acr);
+            }
+
+            for (Integer level : map.keySet()) {
+                final JSONArray mappingList = new JSONArray();
+                mappingList.put(map.get(level));
+
+                mappings.put(level.toString(), mappingList);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
