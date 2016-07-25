@@ -155,9 +155,9 @@ def getOldEntryMap(folder):
     admin_dn = getDns('/opt/opendj/ldif/people.ldif')[0]
 
     for fn in files:
-        # oxIDPAuthentication in appliance.ldif file is incompatible with
-        # the new version of gluu-server. Hence skip the file
-        if 'appliance' in fn and '2.3' in backup_version:
+        # oxIDPAuthentication in appliance.ldif file  in 2.3 is incompatible with
+        # the gluu-server version > 2.4. Hence skip the file
+        if 'appliance' in fn and backup_version < 240:
             continue
         dnList = getDns("%s/%s" % (folder, fn))
         for dn in dnList:
@@ -206,6 +206,10 @@ def getOutput(args):
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     logging.info('Comparing old LDAP data and creating `modify` files.')
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
+    multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
+                       'oxTrustPhotos', 'oxTrustAddresses', 'memberOf',
+                       'oxTrustEntitilements', 'oxTrustRole',
+                       'oxTrustx509Certificate']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
     for dn in oldDnMap.keys():
@@ -224,7 +228,18 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             if attr in ignoreList:
                 continue
 
-            if attr not in new_entry:
+            if current_version >= 244 and backup_version < 244 and \
+                    attr in multivalueAttrs:
+                # transform the multiValueAttrs from JSON arrays to multi
+                # value attrs in the LDAP
+                try:
+                    valueList = json.loads(old_entry[attr][0])
+                    writeMod(dn, attr, valueList, filename, True)
+                except:
+                    logging.error(
+                        'Failed array to multivalue conversion for: %s',
+                        attr)
+            elif attr not in new_entry:
                 writeMod(dn, attr, old_entry[attr], filename, True)
                 logging.debug("Adding attr %s to %s", attr, dn)
             elif old_entry[attr] != new_entry[attr]:
@@ -297,7 +312,7 @@ def uploadLDIF(ldifFolder, outputLdifFolder):
 
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
-    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+    if current_version >= 243 and backup_version < 243:
         ignore_folders = ['opendj', 'template', 'endorsed']
         for folder in ignore_folders:
             if folder in directory:
@@ -366,7 +381,7 @@ def getCurrentVersion():
     with open('/opt/tomcat/webapps/oxauth/META-INF/MANIFEST.MF', 'r') as f:
         for line in f:
             if 'Implementation-Version' in line:
-                return line.split(':')[-1].strip()
+                return int(line.split(':')[-1].replace('.', '').strip())
 
 
 def getBackupProperty(prop):
@@ -463,13 +478,13 @@ def main(folder_name):
         sys.exit(1)
 
     # Identify the version of the backup and installation
-    backup_version = getBackupProperty('version')
+    backup_version = int(getBackupProperty('version').replace('.', '').strip())
     current_version = getCurrentVersion()
 
     hostname = getBackupProperty('hostname')
 
     # some version specific adjustment
-    if '2.4.3' in current_version and '2.4.3' not in backup_version:
+    if current_version >= 243 and backup_version < 243:
         skip_files = ['oxauth.xml',  # /opt/tomcat/conf/Catalina/localhost
                       'oxasimba-ldap.properties',
                       'oxauth-ldap.properties',
