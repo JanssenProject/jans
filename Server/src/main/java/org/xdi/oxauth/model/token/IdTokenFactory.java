@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.seam.Component;
@@ -16,7 +17,9 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
+import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.GluuAttribute;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -41,6 +44,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
@@ -69,6 +73,9 @@ public class IdTokenFactory {
 
     @In
     private ExternalDynamicScopeService externalDynamicScopeService;
+
+    @In
+    private ExternalAuthenticationService externalAuthenticationService;
 
     @In
     private ScopeService scopeService;
@@ -100,6 +107,7 @@ public class IdTokenFactory {
 
         if (authorizationGrant.getAcrValues() != null) {
             jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
+            setAmrClaim(jwt, authorizationGrant.getAcrValues());
         }
         if (StringUtils.isNotBlank(nonce)) {
             jwt.getClaims().setClaim(JwtClaimName.NONCE, nonce);
@@ -236,6 +244,18 @@ public class IdTokenFactory {
         return jwtSigner.sign();
     }
 
+    private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
+        List<String> amrList = Lists.newArrayList();
+
+        CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfiguration(
+                AuthenticationScriptUsageType.BOTH, acrValues);
+        if (script != null) {
+            amrList.add(Integer.toString(script.getLevel()));
+        }
+
+        jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
+    }
+
     public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                         AuthorizationCode authorizationCode, AccessToken accessToken,
                                         Set<String> scopes) throws InvalidJweException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
@@ -263,6 +283,7 @@ public class IdTokenFactory {
 
         if (authorizationGrant.getAcrValues() != null) {
             jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
+            setAmrClaim(jwe, authorizationGrant.getAcrValues());
         }
         if (StringUtils.isNotBlank(nonce)) {
             jwe.getClaims().setClaim(JwtClaimName.NONCE, nonce);
