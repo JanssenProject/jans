@@ -63,7 +63,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version July 22, 2016
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -266,18 +266,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifier);
+                    userInum, sectorIdentifierUri);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -376,18 +376,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifier);
+                    userInum, sectorIdentifierUri);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -516,18 +516,18 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifier);
+                    userInum, sectorIdentifierUri);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),

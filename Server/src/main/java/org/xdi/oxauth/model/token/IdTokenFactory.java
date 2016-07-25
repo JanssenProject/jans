@@ -18,11 +18,7 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCode;
-import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -64,7 +60,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version February 15, 2015
+ * @version July 22, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -207,18 +203,18 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier = null;
+            String sectorIdentifierUri = null;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifier);
+                    userInum, sectorIdentifierUri);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -233,7 +229,7 @@ public class IdTokenFactory {
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
@@ -346,18 +342,18 @@ public class IdTokenFactory {
         // Check for Subject Identifier Type
         if (authorizationGrant.getClient().getSubjectType() != null &&
                 SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-            String sectorIdentifier;
+            String sectorIdentifierUri;
             if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifier = authorizationGrant.getClient().getSectorIdentifierUri();
+                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
             } else {
-                sectorIdentifier = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
             PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifier);
+                    userInum, sectorIdentifierUri);
             if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier);
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
                 pairwiseIdentifier.setId(UUID.randomUUID().toString());
                 pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
                         pairwiseIdentifier.getId(),
@@ -372,7 +368,7 @@ public class IdTokenFactory {
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-    		DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
