@@ -219,7 +219,7 @@ public class AuthorizeAction {
 
                 String acr = customScriptConfiguration.getName();
 
-                requestParameterMap.put(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, acr);
+                requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, acr);
                 requestParameterMap.put("auth_step", Integer.toString(1));
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);

@@ -43,12 +43,18 @@ public final class JwtClaimName {
     public static final String PRINCIPAL = "prn";
     public static final String JWT_ID = "jti";
     public static final String TYPE = "typ";
+
     /**
      * Authentication Methods References.
+     *
+     * JSON array of strings that are identifiers for authentication methods used in the authentication.
+     * For instance, values might indicate that both password and OTP authentication methods were used.
+     * The definition of particular values to be used in the amr Claim is beyond the scope of this specification.
+     * Parties using this claim will need to agree upon the meanings of the values used, which may be context-specific.
+     * The amr value is an array of case sensitive strings.
      */
-    public static final String AUTHENTICATION_METHOD_REFERENCES = "acr"; // ID Token
+    public static final String AUTHENTICATION_METHOD_REFERENCES = "amr";
 
-    // ID Token
     /**
      * A locally unique and never reassigned identifier within the Issuer for the End-User,
      * which is intended to be consumed by the Client.
