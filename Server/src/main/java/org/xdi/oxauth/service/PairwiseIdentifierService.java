@@ -13,13 +13,14 @@ import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
 
+import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 15, 2015
+ * @version July 22, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("pairwiseIdentifierService")
@@ -56,18 +57,19 @@ public class PairwiseIdentifierService {
 
     public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) throws InvalidKeyException, NoSuchAlgorithmException {
         PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(ConfigurationFactory.instance().getConfiguration().getPairwiseIdType());
+        String sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
 
         if (PairwiseIdType.PERSISTENT == pairwiseIdType) {
             prepareBranch(userInum);
 
             String baseDnForPairwiseIdentifiers = getBaseDnForPairwiseIdentifiers(userInum);
-            Filter filter = Filter.createEqualityFilter("oxSectorIdentifierURI", sectorIdentifierUri);
+            Filter filter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
 
             List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 // if more then one entry then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
-                    log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifierUri);
+                    log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifier);
                     for (PairwiseIdentifier pairwiseIdentifier : entries) {
                         log.error(pairwiseIdentifier);
                     }
