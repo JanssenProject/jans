@@ -32,7 +32,8 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 /**
  * Functional tests for Token Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 04.12.2013
+ * @author Javier Rojas Blum
+ * @version July 26, 2016
  */
 public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 

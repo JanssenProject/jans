@@ -28,7 +28,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 25, 2016
+ * @version July 26, 2016
  */
 public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
