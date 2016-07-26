@@ -207,8 +207,8 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     logging.info('Comparing old LDAP data and creating `modify` files.')
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
     multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
-                       'oxTrustPhotos', 'oxTrustAddresses', 'memberOf',
-                       'oxTrustEntitilements', 'oxTrustRole',
+                       'oxTrustPhotos', 'oxTrustAddresses',
+                       'oxTrustEntitlements', 'oxTrustRole',
                        'oxTrustx509Certificate']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
