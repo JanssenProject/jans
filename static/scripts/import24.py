@@ -52,7 +52,7 @@ ldap_creds = ['-h', 'localhost',
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    format='%(asctime)s %(levelname)-8s %(module)s %(message)s',
                     filename='import_24.log',
                     filemode='w')
 console = logging.StreamHandler()
@@ -97,9 +97,35 @@ def addEntry(dn, entry, ldifModFolder):
     newLdif = """dn: %s
 changetype: add
 """ % dn
+
+    multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
+                       'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
+                       'oxTrustEntitlements', 'oxTrustx509Certificate']
     for attr in entry.keys():
+        # transform the multiValueAttrs from JSON arrays to multi
+        # value attrs in the LDAP
+        multivalTransform = (current_version >= 244) and \
+                             (backup_version < 244) and \
+                             (attr in multivalueAttrs)
         for value in entry[attr]:
-            newLdif = newLdif + getMod(attr, value)
+            if multivalTransform:
+                try:
+                    value = json.loads(value)
+                except ValueError:
+                    logging.error("Cannot parse as JSON. Attr: %s, Value: %s",
+                                  attr, value)
+
+            if type(value) is str:  # For most cases as NO multivaltransforms
+                newLdif = newLdif + getMod(attr, value)
+            elif type(value) is dict:
+                newLdif = newLdif + getMod(attr, json.dumps(value))
+            elif type(value) is list:
+                logging.debug("Converting %s from JSON array to multivalue",
+                              attr)
+                logging.debug("Value: %s", value)
+                for val in value:
+                    newLdif = newLdif + getMod(attr, json.dumps(val))
+
     newLdif = newLdif + "\n"
     new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
     filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
@@ -206,10 +232,6 @@ def getOutput(args):
 def restoreConfig(ldifFolder, newLdif, ldifModFolder):
     logging.info('Comparing old LDAP data and creating `modify` files.')
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
-    multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
-                       'oxTrustPhotos', 'oxTrustAddresses',
-                       'oxTrustEntitlements', 'oxTrustRole',
-                       'oxTrustx509Certificate']
     current_config_dns = getDns(newLdif)
     oldDnMap = getOldEntryMap(ldifFolder)
     for dn in oldDnMap.keys():
@@ -228,18 +250,7 @@ def restoreConfig(ldifFolder, newLdif, ldifModFolder):
             if attr in ignoreList:
                 continue
 
-            if current_version >= 244 and backup_version < 244 and \
-                    attr in multivalueAttrs:
-                # transform the multiValueAttrs from JSON arrays to multi
-                # value attrs in the LDAP
-                try:
-                    valueList = json.loads(old_entry[attr][0])
-                    writeMod(dn, attr, valueList, filename, True)
-                except:
-                    logging.error(
-                        'Failed array to multivalue conversion for: %s',
-                        attr)
-            elif attr not in new_entry:
+            if attr not in new_entry:
                 writeMod(dn, attr, old_entry[attr], filename, True)
                 logging.debug("Adding attr %s to %s", attr, dn)
             elif old_entry[attr] != new_entry[attr]:
