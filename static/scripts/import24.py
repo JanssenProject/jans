@@ -381,7 +381,7 @@ def getCurrentVersion():
     with open('/opt/tomcat/webapps/oxauth/META-INF/MANIFEST.MF', 'r') as f:
         for line in f:
             if 'Implementation-Version' in line:
-                return int(line.split(':')[-1].replace('.', '').strip())
+                return int(line.split(':')[-1].replace('.', '').strip()[:3])
 
 
 def getBackupProperty(prop):
@@ -478,7 +478,7 @@ def main(folder_name):
         sys.exit(1)
 
     # Identify the version of the backup and installation
-    backup_version = int(getBackupProperty('version').replace('.', '').strip())
+    backup_version = int(getBackupProperty('version').replace('.', '').strip()[:3])
     current_version = getCurrentVersion()
 
     hostname = getBackupProperty('hostname')
