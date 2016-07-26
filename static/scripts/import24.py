@@ -52,7 +52,7 @@ ldap_creds = ['-h', 'localhost',
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(module)s %(message)s',
+                    format='%(asctime)s %(levelname)-8s %(name)s %(message)s',
                     filename='import_24.log',
                     filemode='w')
 console = logging.StreamHandler()
