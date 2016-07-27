@@ -42,6 +42,7 @@ ignore_files = ['101-ox.ldif',
                 'oxauth.config.reload',
                 'oxauth-static-conf.json',
                 'oxtrust.config.reload',
+                'config.ldif',
                 ]
 
 ldap_creds = ['-h', 'localhost',
