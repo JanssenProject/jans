@@ -254,10 +254,14 @@ public class IdTokenFactory {
             amrList.add(Integer.toString(script.getLevel()));
 
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) script.getExternalType();
-            Map<String, String> additionalAmrsOrNull = externalAuthenticator.getAdditionalAmrsOrNull();
-            if (additionalAmrsOrNull != null) {
-                for (String key : additionalAmrsOrNull.keySet()) {
-                    amrList.add(key + ":" + additionalAmrsOrNull.get(key));
+            int apiVersion = externalAuthenticator.getApiVersion();
+
+            if (apiVersion > 2) {
+                Map<String, String> additionalAmrsOrNull = externalAuthenticator.getAdditionalAmrsOrNull();
+                if (additionalAmrsOrNull != null) {
+                    for (String key : additionalAmrsOrNull.keySet()) {
+                        amrList.add(key + ":" + additionalAmrsOrNull.get(key));
+                    }
                 }
             }
         }
