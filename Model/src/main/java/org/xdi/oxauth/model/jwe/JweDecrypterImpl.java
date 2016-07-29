@@ -34,7 +34,7 @@ import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version July 28, 2016
  */
 public class JweDecrypterImpl extends AbstractJweDecrypter {
 
@@ -48,6 +48,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
         }
     }
 
+    @Deprecated
     public JweDecrypterImpl(RSAPrivateKey rsaPrivateKey) {
         this.rsaPrivateKey = rsaPrivateKey;
     }
