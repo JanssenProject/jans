@@ -6,11 +6,11 @@
 
 package org.xdi.model.custom.script.type.auth;
 
-import java.util.List;
-import java.util.Map;
-
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Dummy implementation of interface PersonAuthenticationType
@@ -27,6 +27,11 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	@Override
 	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
 		return true;
+	}
+
+	@Override
+	public Map<String, String> getAdditionalAmrsOrNull() {
+		return null;
 	}
 
 	@Override

@@ -6,12 +6,12 @@
 
 package org.xdi.model.custom.script.type.auth;
 
-import java.util.List;
-import java.util.Map;
-
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.BaseExternalType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base interface for external authentication python script
@@ -19,6 +19,8 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  * @author Yuriy Movchan Date: 08/21/2012
  */
 public interface PersonAuthenticationType extends BaseExternalType {
+
+	public Map<String, String> getAdditionalAmrsOrNull();
 
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
