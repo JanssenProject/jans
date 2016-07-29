@@ -19,8 +19,8 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.GluuAttribute;
-import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -253,9 +253,12 @@ public class IdTokenFactory {
         if (script != null) {
             amrList.add(Integer.toString(script.getLevel()));
 
-            Map<String, SimpleCustomProperty> configurationAttributes = script.getConfigurationAttributes();
-            for (SimpleCustomProperty property : configurationAttributes.values()) {
-                amrList.add(property.getValue1() + ":" + property.getValue2());
+            PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) script.getExternalType();
+            Map<String, String> additionalAmrsOrNull = externalAuthenticator.getAdditionalAmrsOrNull();
+            if (additionalAmrsOrNull != null) {
+                for (String key : additionalAmrsOrNull.keySet()) {
+                    amrList.add(key + ":" + additionalAmrsOrNull.get(key));
+                }
             }
         }
 
