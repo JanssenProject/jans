@@ -50,7 +50,7 @@ public class DeviceRegistrationService {
 
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
-		branch.setOrganizationalUnitName("u2f_devices");
+		branch.setOrganizationalUnitName("fido");
 		branch.setDn(getBaseDnForU2fUserDevices(userInum));
 
 		ldapEntryManager.persist(branch);
@@ -177,8 +177,8 @@ public class DeviceRegistrationService {
 	}
 
 	public String getBaseDnForU2fUserDevices(String userInum) {
-		final String userBaseDn = userService.getDnForUser(userInum); // "ou=u2f_devices,inum=1234,ou=people,o=@!1111,o=gluu"
-		return String.format("ou=u2f_devices,%s", userBaseDn);
+		final String userBaseDn = userService.getDnForUser(userInum); // "ou=fido,inum=1234,ou=people,o=@!1111,o=gluu"
+		return String.format("ou=fido,%s", userBaseDn);
 	}
 
 	public String getDnForOneStepU2fDevice(String deviceRegistrationId) {
