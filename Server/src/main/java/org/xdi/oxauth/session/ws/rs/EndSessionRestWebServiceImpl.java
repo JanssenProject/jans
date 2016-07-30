@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import org.xdi.oxauth.model.util.Util;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -22,7 +21,9 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.session.EndSessionResponseParam;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
@@ -151,6 +152,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         authorizationGrant.revokeAllTokens();
+        GrantService.instance().removeAllTokensBySession(ldapSessionState.getDn());
+
         if (identity != null) {
             identity.logout();
         }
