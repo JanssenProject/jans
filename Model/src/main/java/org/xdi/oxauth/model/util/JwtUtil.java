@@ -15,9 +15,6 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECFieldElement;
-import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.openssl.PEMParser;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -46,32 +43,11 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 25, 2016
+ * @version July 31, 2016
  */
 public class JwtUtil {
 
     private static final Logger log = Logger.getLogger(JwtUtil.class);
-
-    public static String base64urlencodeUnsignedBigInt(BigInteger bigInteger) {
-        byte[] array = bigInteger.toByteArray();
-        if (array[0] == 0) {
-            byte[] tmp = new byte[array.length - 1];
-            System.arraycopy(array, 1, tmp, 0, tmp.length);
-            array = tmp;
-        }
-
-        return JwtUtil.base64urlencode(array);
-    }
-
-    public static byte[] unsignedToBytes(int[] plaintextUnsignedBytes) {
-        byte[] bytes = new byte[plaintextUnsignedBytes.length];
-
-        for (int i = 0; i < plaintextUnsignedBytes.length; i++) {
-            bytes[i] = (byte) plaintextUnsignedBytes[i];
-        }
-
-        return bytes;
-    }
 
     @Deprecated
     public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
@@ -120,8 +96,8 @@ public class JwtUtil {
         String claim = jsonClaim.toString();
 
         try {
-            header = base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
-            claim = base64urlencode(claim.getBytes(Util.UTF8_STRING_ENCODING));
+            header = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            claim = Base64Util.base64urlencode(claim.getBytes(Util.UTF8_STRING_ENCODING));
 
             String signingInput = header + "." + claim;
             byte[] sign = null;
@@ -164,7 +140,7 @@ public class JwtUtil {
             }
 
             if (sign != null) {
-                signature = base64urlencode(sign);
+                signature = Base64Util.base64urlencode(sign);
             }
         } catch (NoSuchAlgorithmException e) {
             log.error(e.getMessage(), e);
@@ -183,14 +159,6 @@ public class JwtUtil {
         final StringBuilder builder = new StringBuilder();
         builder.append(header).append('.').append(claim).append('.').append(signature);
         return builder.toString();
-    }
-
-    public static String base64urlencode(byte[] arg) {
-        return Base64Util.base64urlencode(arg);
-    }
-
-    public static byte[] base64urldecode(String arg) throws IllegalArgumentException {
-        return Base64Util.base64urldecode(arg);
     }
 
     public static void printAlgorithmsAndProviders() {
@@ -294,33 +262,6 @@ public class JwtUtil {
     }
 
     @Deprecated
-    public static boolean verifySignatureRS256(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
-                rsaPublicKey.getModulus(),
-                rsaPublicKey.getPublicExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-256", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
-    }
-
-    @Deprecated
     public static byte[] getSignatureRS384(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
             throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
         RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
@@ -335,33 +276,6 @@ public class JwtUtil {
         signature.update(signingInput);
 
         return signature.sign();
-    }
-
-    @Deprecated
-    public static boolean verifySignatureRS384(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
-                rsaPublicKey.getModulus(),
-                rsaPublicKey.getPublicExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-384", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
     }
 
     @Deprecated
@@ -406,39 +320,6 @@ public class JwtUtil {
         } finally {
             IOUtils.closeQuietly(aIn);
         }
-    }
-
-    @Deprecated
-    public static KeyPair generateKeyES256() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
-
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
-        keyGen.initialize(ecSpec, new SecureRandom());
-
-        return keyGen.generateKeyPair();
-    }
-
-    @Deprecated
-    public static KeyPair generateKeyES384() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
-
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
-        keyGen.initialize(ecSpec, new SecureRandom());
-
-        return keyGen.generateKeyPair();
-    }
-
-    @Deprecated
-    public static KeyPair generateKeyES512() throws NoSuchProviderException, NoSuchAlgorithmException,
-            InvalidAlgorithmParameterException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
-
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", "BC");
-        keyGen.initialize(ecSpec, new SecureRandom());
-
-        return keyGen.generateKeyPair();
     }
 
     @Deprecated
@@ -493,66 +374,6 @@ public class JwtUtil {
     }
 
     @Deprecated
-    public static boolean verifySignatureES256(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
-        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP256R1Curve) ecSpec.getCurve()).getQ();
-        ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
-        ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
-        ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-        Signature signature = Signature.getInstance("SHA256WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
-    @Deprecated
-    public static boolean verifySignatureES384(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
-        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP384R1Curve) ecSpec.getCurve()).getQ();
-        ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
-        ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
-        ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-        Signature signature = Signature.getInstance("SHA384WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
-    @Deprecated
-    public static boolean verifySignatureES512(byte[] signingInput, byte[] sigBytes, ECDSAPublicKey ecdsaPublicKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
-        BigInteger q = ((org.bouncycastle.math.ec.custom.sec.SecP521R1Curve) ecSpec.getCurve()).getQ();
-        ECFieldElement xFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getX());
-        ECFieldElement yFieldElement = new ECFieldElement.Fp(q, ecdsaPublicKey.getY());
-        ECPoint pointQ = new ECPoint.Fp(ecSpec.getCurve(), xFieldElement, yFieldElement);
-        ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-        Signature signature = Signature.getInstance("SHA512WITHECDSA", "BC");
-        signature.initVerify(publicKey);
-        signature.update(signingInput);
-        return signature.verify(sigBytes);
-    }
-
-    @Deprecated
     public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, String keyId) {
         return getPublicKey(jwksUri, jwks, null, keyId);
@@ -592,8 +413,8 @@ public class JwtUtil {
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 
-                BigInteger publicExponent = new BigInteger(1, JwtUtil.base64urldecode(exp));
-                BigInteger modulus = new BigInteger(1, JwtUtil.base64urldecode(mod));
+                BigInteger publicExponent = new BigInteger(1, Base64Util.base64urldecode(exp));
+                BigInteger modulus = new BigInteger(1, Base64Util.base64urldecode(mod));
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
@@ -603,8 +424,8 @@ public class JwtUtil {
                 String xx = jsonPublicKey.getString(X);
                 String yy = jsonPublicKey.getString(Y);
 
-                BigInteger x = new BigInteger(1, JwtUtil.base64urldecode(xx));
-                BigInteger y = new BigInteger(1, JwtUtil.base64urldecode(yy));
+                BigInteger x = new BigInteger(1, Base64Util.base64urldecode(xx));
+                BigInteger y = new BigInteger(1, Base64Util.base64urldecode(yy));
 
                 publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
             }

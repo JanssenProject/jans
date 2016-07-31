@@ -19,7 +19,7 @@ import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidParameterException;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.crypto.*;
@@ -34,7 +34,7 @@ import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2016
+ * @version July 31, 2016
  */
 public class JweDecrypterImpl extends AbstractJweDecrypter {
 
@@ -48,7 +48,6 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
         }
     }
 
-    @Deprecated
     public JweDecrypterImpl(RSAPrivateKey rsaPrivateKey) {
         this.rsaPrivateKey = rsaPrivateKey;
     }
@@ -85,7 +84,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
                     cipher.init(Cipher.DECRYPT_MODE, privateKey);
                 }
 
-                byte[] decryptedKey = cipher.doFinal(JwtUtil.base64urldecode(encodedEncryptedKey));
+                byte[] decryptedKey = cipher.doFinal(Base64Util.base64urldecode(encodedEncryptedKey));
 
                 return decryptedKey;
             } else if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.A128KW
@@ -98,7 +97,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
                     sharedSymmetricKey = sha.digest(sharedSymmetricKey);
                     sharedSymmetricKey = Arrays.copyOf(sharedSymmetricKey, 16);
                 }
-                byte[] encryptedKey = JwtUtil.base64urldecode(encodedEncryptedKey);
+                byte[] encryptedKey = Base64Util.base64urldecode(encodedEncryptedKey);
                 SecretKeySpec keyEncryptionKey = new SecretKeySpec(sharedSymmetricKey, "AES");
                 AESWrapEngine aesWrapEngine = new AESWrapEngine();
                 CipherParameters params = new KeyParameter(keyEncryptionKey.getEncoded());
@@ -151,7 +150,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             if (getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A128GCM
                     || getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A256GCM) {
                 final int MAC_SIZE_BITS = 128;
-                byte[] cipherText = JwtUtil.base64urldecode(encodedCipherText);
+                byte[] cipherText = Base64Util.base64urldecode(encodedCipherText);
 
                 KeyParameter key = new KeyParameter(contentMasterKey);
                 AEADParameters aeadParameters = new AEADParameters(key, MAC_SIZE_BITS, initializationVector, additionalAuthenticatedData);
@@ -175,7 +174,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
                 return plaintext;
             } else if (getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A128CBC_PLUS_HS256
                     || getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A256CBC_PLUS_HS512) {
-                byte[] cipherText = JwtUtil.base64urldecode(encodedCipherText);
+                byte[] cipherText = Base64Util.base64urldecode(encodedCipherText);
 
                 byte[] cek = KeyDerivationFunction.generateCek(contentMasterKey, getBlockEncryptionAlgorithm());
                 Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm());

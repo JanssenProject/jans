@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
@@ -73,11 +73,12 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                 java.security.interfaces.RSAPublicKey pubKey = (java.security.interfaces.RSAPublicKey) keyFactory.generatePublic(pubKeySpec);
 
                 Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
+                //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
 
                 cipher.init(Cipher.ENCRYPT_MODE, pubKey);
                 byte[] encryptedKey = cipher.doFinal(contentMasterKey);
 
-                String encodedEncryptedKey = JwtUtil.base64urlencode(encryptedKey);
+                String encodedEncryptedKey = Base64Util.base64urlencode(encryptedKey);
                 return encodedEncryptedKey;
             } else if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.A128KW
                     || getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.A256KW) {
@@ -96,7 +97,7 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                 aesWrapEngine.init(true, params);
                 byte[] wrappedKey = aesWrapEngine.wrap(contentMasterKey, 0, contentMasterKey.length);
 
-                String encodedEncryptedKey = JwtUtil.base64urlencode(wrappedKey);
+                String encodedEncryptedKey = Base64Util.base64urlencode(wrappedKey);
                 return encodedEncryptedKey;
             } else {
                 throw new InvalidJweException("The key encryption algorithm is not supported");
@@ -162,8 +163,8 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                 byte[] authenticationTag = new byte[macSize];
                 System.arraycopy(out, outOff - macSize, authenticationTag, 0, authenticationTag.length);
 
-                String encodedCipherText = JwtUtil.base64urlencode(cipherText);
-                String encodedAuthenticationTag = JwtUtil.base64urlencode(authenticationTag);
+                String encodedCipherText = Base64Util.base64urlencode(cipherText);
+                String encodedAuthenticationTag = Base64Util.base64urlencode(authenticationTag);
 
                 return new Pair<String, String>(encodedCipherText, encodedAuthenticationTag);
             } else if (getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A128CBC_PLUS_HS256
@@ -171,11 +172,12 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                 byte[] cek = KeyDerivationFunction.generateCek(contentMasterKey, getBlockEncryptionAlgorithm());
                 IvParameterSpec parameters = new IvParameterSpec(initializationVector);
                 Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm(), "BC");
+                //Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm());
                 SecretKeySpec secretKeySpec = new SecretKeySpec(cek, "AES");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameters);
                 byte[] cipherText = cipher.doFinal(plainText);
 
-                String encodedCipherText = JwtUtil.base64urlencode(cipherText);
+                String encodedCipherText = Base64Util.base64urlencode(cipherText);
 
                 String securedInputValue = new String(additionalAuthenticatedData, Charset.forName(Util.UTF8_STRING_ENCODING))
                         + "." + encodedCipherText;
@@ -186,7 +188,7 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                 mac.init(secretKey);
                 byte[] integrityValue = mac.doFinal(securedInputValue.getBytes(Util.UTF8_STRING_ENCODING));
 
-                String encodedIntegrityValue = JwtUtil.base64urlencode(integrityValue);
+                String encodedIntegrityValue = Base64Util.base64urlencode(integrityValue);
 
                 return new Pair<String, String>(encodedCipherText, encodedIntegrityValue);
             } else {

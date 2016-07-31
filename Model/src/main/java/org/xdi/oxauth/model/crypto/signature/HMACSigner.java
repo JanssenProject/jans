@@ -7,7 +7,7 @@
 package org.xdi.oxauth.model.crypto.signature;
 
 import com.google.common.base.Strings;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.crypto.Mac;
@@ -19,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * @author Javier Rojas Blum
- * @version April 22, 2016
+ * @version July 31, 2016
  */
 public class HMACSigner extends AbstractSigner {
 
@@ -49,7 +49,7 @@ public class HMACSigner extends AbstractSigner {
             Mac mac = Mac.getInstance(getSignatureAlgorithm().getAlgorithm());
             mac.init(secretKey);
             byte[] sig = mac.doFinal(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
-            return JwtUtil.base64urlencode(sig);
+            return Base64Util.base64urlencode(sig);
         } catch (NoSuchAlgorithmException e) {
             throw new Exception("There was a problem in HMAC signing", e);
         } catch (InvalidKeyException e) {

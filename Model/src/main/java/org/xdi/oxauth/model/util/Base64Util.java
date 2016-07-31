@@ -9,6 +9,12 @@ package org.xdi.oxauth.model.util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import java.math.BigInteger;
+
+/**
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
+ */
 public class Base64Util {
 
     private static final Logger log = Logger.getLogger(Base64Util.class);
@@ -46,4 +52,24 @@ public class Base64Util {
 		return s;
 	}
 
+    public static String base64urlencodeUnsignedBigInt(BigInteger bigInteger) {
+        byte[] array = bigInteger.toByteArray();
+        if (array[0] == 0) {
+            byte[] tmp = new byte[array.length - 1];
+            System.arraycopy(array, 1, tmp, 0, tmp.length);
+            array = tmp;
+        }
+
+        return Base64Util.base64urlencode(array);
+    }
+
+    public static byte[] unsignedToBytes(int[] plaintextUnsignedBytes) {
+        byte[] bytes = new byte[plaintextUnsignedBytes.length];
+
+        for (int i = 0; i < plaintextUnsignedBytes.length; i++) {
+            bytes[i] = (byte) plaintextUnsignedBytes[i];
+        }
+
+        return bytes;
+    }
 }

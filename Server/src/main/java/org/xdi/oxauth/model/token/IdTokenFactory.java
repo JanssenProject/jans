@@ -28,7 +28,6 @@ import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
@@ -50,8 +49,6 @@ import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -64,7 +61,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version July 22, 2016
+ * @version July 31, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -256,9 +253,9 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    public Jwe generateEncryptedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
-                                        AuthorizationCode authorizationCode, AccessToken accessToken,
-                                        Set<String> scopes) throws InvalidJweException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+    public Jwe generateEncryptedIdToken(
+            IAuthorizationGrant authorizationGrant, String nonce, AuthorizationCode authorizationCode,
+            AccessToken accessToken, Set<String> scopes) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header

@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.util.StringHelper;
@@ -50,7 +51,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 27, 2016
+ * @version July 31, 2016
  */
 public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
@@ -876,7 +877,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                     jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
                     jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
                     String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                    String hash = JwtUtil.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
+                    String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
                     String fileName = UUID.randomUUID().toString() + ".txt";
                     String filePath = requestFileBasePath + File.separator + fileName;
                     String fileUrl = requestFileBaseUrl + "/" + fileName + "#" + hash;
