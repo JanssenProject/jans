@@ -129,7 +129,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        return asGrant(grantServive.getGrantsByCode(idToken));
+        TokenLdap tokenLdap = grantServive.getGrantsByCode(idToken);
+        if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ID_TOKEN)) {
+            return asGrant(tokenLdap);
+        }
+        return null;
     }
 
     public AuthorizationGrant load(String clientId, String p_code) {
