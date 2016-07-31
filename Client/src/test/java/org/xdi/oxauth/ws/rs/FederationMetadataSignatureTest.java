@@ -17,6 +17,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
@@ -34,7 +35,8 @@ import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version December 17, 2015
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 
 public class FederationMetadataSignatureTest {
@@ -82,12 +84,12 @@ public class FederationMetadataSignatureTest {
             String encodedPayload = parts[1];
             String encodedSignature = parts[2];
 
-            String header = new String(JwtUtil.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-            String payload = new String(JwtUtil.base64urldecode(encodedPayload), Util.UTF8_STRING_ENCODING);
+            String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
+            String payload = new String(Base64Util.base64urldecode(encodedPayload), Util.UTF8_STRING_ENCODING);
             System.out.println("Header: " + header);
             System.out.println("Payload: " + payload);
 
-            byte[] signature = JwtUtil.base64urldecode(encodedSignature);
+            byte[] signature = Base64Util.base64urldecode(encodedSignature);
 
             final String signingInput = encodedHeader + "." + encodedPayload;
 

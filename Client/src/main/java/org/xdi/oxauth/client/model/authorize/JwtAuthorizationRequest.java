@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
@@ -38,7 +39,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 27, 2016
+ * @version July 31, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -410,10 +411,10 @@ public class JwtAuthorizationRequest {
             }
 
             String header = headerToJSONObject().toString();
-            String encodedHeader = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
             String claims = payloadToJSONObject().toString();
-            String encodedClaims = JwtUtil.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
             byte[] contentMasterKey = new byte[blockEncryptionAlgorithm.getCmkLength() / 8];
             SecureRandom random = new SecureRandom();
@@ -422,7 +423,7 @@ public class JwtAuthorizationRequest {
 
             byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
             random.nextBytes(initializationVector);
-            String encodedInitializationVector = JwtUtil.base64urlencode(initializationVector);
+            String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
 
             String additionalAuthenticatedData = encodedHeader + "."
                     + encodedEncryptedKey + "."
@@ -448,8 +449,8 @@ public class JwtAuthorizationRequest {
             JSONObject payloadJsonObject = payloadToJSONObject();
             String headerString = headerJsonObject.toString();
             String payloadString = payloadJsonObject.toString();
-            String encodedHeader = JwtUtil.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
-            String encodedPayload = JwtUtil.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
             String signingInput = encodedHeader + "." + encodedPayload;
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
 
@@ -481,10 +482,10 @@ public class JwtAuthorizationRequest {
                 }
 
                 String header = headerToJSONObject().toString();
-                String encodedHeader = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+                String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
                 String claims = payloadJsonObject.toString();
-                String encodedClaims = JwtUtil.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
+                String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
 
                 byte[] contentMasterKey = new byte[blockEncryptionAlgorithm.getCmkLength() / 8];
                 SecureRandom random = new SecureRandom();
@@ -493,7 +494,7 @@ public class JwtAuthorizationRequest {
 
                 byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
                 random.nextBytes(initializationVector);
-                String encodedInitializationVector = JwtUtil.base64urlencode(initializationVector);
+                String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
 
                 String additionalAuthenticatedData = encodedHeader + "."
                         + encodedEncryptedKey + "."

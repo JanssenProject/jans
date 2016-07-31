@@ -10,7 +10,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -19,7 +19,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version Jun 10, 2015
+ * @version July 31, 2016
  */
 public abstract class JwtClaimSet {
 
@@ -213,19 +213,19 @@ public abstract class JwtClaimSet {
         try {
             String jsonObjectString = toJsonString();
             byte[] jsonObjectBytes = jsonObjectString.getBytes(Util.UTF8_STRING_ENCODING);
-            return JwtUtil.base64urlencode(jsonObjectBytes);
+            return Base64Util.base64urlencode(jsonObjectBytes);
         } catch (UnsupportedEncodingException e) {
             return null;
         }
     }
 
     public String toJsonString() throws InvalidJwtException {
-		JSONObject jsonObject = toJsonObject();
-		String jsonObjectString = jsonObject.toString();
-		jsonObjectString = jsonObjectString.replace("\\/", "/");
+        JSONObject jsonObject = toJsonObject();
+        String jsonObjectString = jsonObject.toString();
+        jsonObjectString = jsonObjectString.replace("\\/", "/");
 
-		return jsonObjectString;
-	}
+        return jsonObjectString;
+    }
 
     public Map<String, List<String>> toMap() throws InvalidJwtException {
         Map<String, List<String>> map = new HashMap<String, java.util.List<String>>();
@@ -267,7 +267,7 @@ public abstract class JwtClaimSet {
 
     public void load(String base64JsonObject) throws InvalidJwtException {
         try {
-            String jsonObjectString = new String(JwtUtil.base64urldecode(base64JsonObject), Util.UTF8_STRING_ENCODING);
+            String jsonObjectString = new String(Base64Util.base64urldecode(base64JsonObject), Util.UTF8_STRING_ENCODING);
             load(new JSONObject(jsonObjectString));
         } catch (UnsupportedEncodingException e) {
             throw new InvalidJwtException(e);

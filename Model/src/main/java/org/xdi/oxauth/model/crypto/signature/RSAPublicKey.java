@@ -9,7 +9,7 @@ package org.xdi.oxauth.model.crypto.signature;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.PublicKey;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.math.BigInteger;
@@ -20,7 +20,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * The Public Key for the RSA Algorithm
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version July 31, 2016
  */
 public class RSAPublicKey extends PublicKey {
 
@@ -36,8 +36,8 @@ public class RSAPublicKey extends PublicKey {
     }
 
     public RSAPublicKey(String modulus, String publicExponent) {
-        this(new BigInteger(1, JwtUtil.base64urldecode(modulus)),
-                new BigInteger(1, JwtUtil.base64urldecode(publicExponent)));
+        this(new BigInteger(1, Base64Util.base64urldecode(modulus)),
+                new BigInteger(1, Base64Util.base64urldecode(publicExponent)));
     }
 
     public BigInteger getModulus() {
@@ -60,8 +60,8 @@ public class RSAPublicKey extends PublicKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObject = new JSONObject();
 
-        jsonObject.put(MODULUS, JwtUtil.base64urlencodeUnsignedBigInt(modulus));
-        jsonObject.put(EXPONENT, JwtUtil.base64urlencodeUnsignedBigInt(publicExponent));
+        jsonObject.put(MODULUS, Base64Util.base64urlencodeUnsignedBigInt(modulus));
+        jsonObject.put(EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(publicExponent));
         jsonObject.put(X, JSONObject.NULL);
         jsonObject.put(Y, JSONObject.NULL);
 

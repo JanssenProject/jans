@@ -6,26 +6,6 @@
 
 package org.xdi.oxauth.model.jws;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -34,11 +14,23 @@ import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public class RSASigner extends AbstractJwsSigner {
 
@@ -84,7 +76,7 @@ public class RSASigner extends AbstractJwsSigner {
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
-            return JwtUtil.base64urlencode(signature.sign());
+            return Base64Util.base64urlencode(signature.sign());
         } catch (InvalidKeySpecException e) {
             throw new SignatureException(e);
         } catch (InvalidKeyException e) {
@@ -131,7 +123,7 @@ public class RSASigner extends AbstractJwsSigner {
 
         ASN1InputStream aIn = null;
         try {
-            byte[] sigBytes = JwtUtil.base64urldecode(signature);
+            byte[] sigBytes = Base64Util.base64urldecode(signature);
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
             RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
