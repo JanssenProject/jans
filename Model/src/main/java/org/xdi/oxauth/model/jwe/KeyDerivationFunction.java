@@ -6,20 +6,21 @@
 
 package org.xdi.oxauth.model.jwe;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
+import org.xdi.oxauth.model.exception.InvalidParameterException;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.util.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidParameterException;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.Util;
-
 /**
- * @author Javier Rojas Blum Date: 12.11.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public class KeyDerivationFunction {
 
@@ -36,16 +37,16 @@ public class KeyDerivationFunction {
             throw new InvalidParameterException("The block encryption algorithm is not supported");
         }
 
-        byte[] round1 = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 1});
+        byte[] round1 = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 1});
         byte[] outputBitSize = null;
         if (blockEncryptionAlgorithm != BlockEncryptionAlgorithm.A128CBC_PLUS_HS256) {
-            outputBitSize = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 128});
+            outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 128});
         } else { //A256CBC_PLUS_HS512
-            outputBitSize = JwtUtil.unsignedToBytes(new int[]{0, 0, 1, 0});
+            outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 1, 0});
         }
         byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(Util.UTF8_STRING_ENCODING);
-        byte[] epu = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 0});
-        byte[] epv = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 0});
+        byte[] epu = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
+        byte[] epv = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
         byte[] label = "Encryption".getBytes(Util.UTF8_STRING_ENCODING);
         byte[] round1Input = ArrayUtils.addAll(round1, cmk);
         round1Input = ArrayUtils.addAll(round1Input, outputBitSize);
@@ -74,16 +75,16 @@ public class KeyDerivationFunction {
             throw new InvalidParameterException("The block encryption algorithm is not supported");
         }
 
-        byte[] round1 = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 1});
+        byte[] round1 = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 1});
         byte[] outputBitSize = null;
         if (blockEncryptionAlgorithm != BlockEncryptionAlgorithm.A128CBC_PLUS_HS256) {
-            outputBitSize = JwtUtil.unsignedToBytes(new int[]{0, 0, 1, 0});
+            outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 1, 0});
         } else { //A256CBC_PLUS_HS512
-            outputBitSize = JwtUtil.unsignedToBytes(new int[]{0, 0, 2, 0});
+            outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 2, 0});
         }
         byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(Util.UTF8_STRING_ENCODING);
-        byte[] epu = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 0});
-        byte[] epv = JwtUtil.unsignedToBytes(new int[]{0, 0, 0, 0});
+        byte[] epu = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
+        byte[] epv = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
         byte[] label = "Integrity".getBytes(Util.UTF8_STRING_ENCODING);
         byte[] round1Input = ArrayUtils.addAll(round1, cmk);
         round1Input = ArrayUtils.addAll(round1Input, outputBitSize);

@@ -8,7 +8,6 @@ package org.xdi.oxauth.userinfo.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -54,8 +53,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.*;
 
@@ -63,7 +60,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version July 22, 2016
+ * @version July 31, 2016
  */
 @Name("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -304,9 +301,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jwt.toString();
     }
 
-    public String getJweResponse(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
-                                 User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
-            throws InvalidClaimException, InvalidJweException, NoSuchAlgorithmException, InvalidKeyException {
+    public String getJweResponse(
+            KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
+            User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header
@@ -438,7 +435,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
-            throws JSONException, InvalidClaimException, NoSuchAlgorithmException, InvalidKeyException {
+            throws Exception {
         JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
         // Claims

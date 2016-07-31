@@ -17,7 +17,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.*;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import static org.testng.Assert.assertTrue;
@@ -29,7 +29,7 @@ import static org.testng.Assert.fail;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 28, 2016
+ * @version July 31, 2016
  */
 
 public class FederationSigningTest extends BaseComponentTestAdapter {
@@ -70,8 +70,8 @@ public class FederationSigningTest extends BaseComponentTestAdapter {
 
             String header = jsonHeader.toString();
             String payload = jsonPayload.toString();
-            header = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
-            payload = JwtUtil.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
+            header = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            payload = Base64Util.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
             final String signingInput = header + "." + payload;
 
             final String signature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
