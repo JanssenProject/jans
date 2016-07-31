@@ -179,6 +179,19 @@ public class GrantService {
         return Collections.emptyList();
     }
 
+    public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
+        try {
+            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthSessionDn=%s", sessionDn)));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
+
+    public void removeAllTokensBySession(String sessionDn) {
+        removeSilently(getGrantsBySessionDn(sessionDn));
+    }
+
     /**
      * Removes grant with particular code.
      *
