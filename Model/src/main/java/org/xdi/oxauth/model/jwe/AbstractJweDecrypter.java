@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -16,11 +14,14 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+
 /**
- * @author Javier Rojas Blum Date: 12.04.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public abstract class AbstractJweDecrypter implements JweDecrypter {
 
@@ -76,8 +77,8 @@ public abstract class AbstractJweDecrypter implements JweDecrypter {
                     jwe.getHeader().getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
 
             byte[] contentMasterKey = decryptEncryptionKey(encodedEncryptedKey);
-            byte[] initializationVector = JwtUtil.base64urldecode(encodedInitializationVector);
-            byte[] authenticationTag = JwtUtil.base64urldecode(encodedIntegrityValue);
+            byte[] initializationVector = Base64Util.base64urldecode(encodedInitializationVector);
+            byte[] authenticationTag = Base64Util.base64urldecode(encodedIntegrityValue);
             byte[] additionalAuthenticatedData = jwe.getAdditionalAuthenticatedData().getBytes(Util.UTF8_STRING_ENCODING);
 
             String plainText = decryptCipherText(encodedCipherText, contentMasterKey, initializationVector,

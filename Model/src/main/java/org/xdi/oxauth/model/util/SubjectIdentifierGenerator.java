@@ -1,19 +1,21 @@
 package org.xdi.oxauth.model.util;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Javier Rojas Blum
- * @version February 15, 2015
+ * @version July 31, 2016
  */
 public class SubjectIdentifierGenerator {
 
-    public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key, String salt)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        byte[] signingInput = (sectorIdentifier + localAccountId + salt).getBytes();
-        byte[] hashedOutput = JwtUtil.getSignatureHS256(signingInput, key.getBytes());
+    public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,
+                                                           String salt, Configuration configuration) throws Exception {
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
-        return JwtUtil.base64urlencode(hashedOutput);
+        String signingInput = sectorIdentifier + localAccountId + salt;
+        return cryptoProvider.sign(signingInput, null, key, SignatureAlgorithm.HS256);
     }
 }
