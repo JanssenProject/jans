@@ -133,6 +133,13 @@
 	},
 
 	{
+		"attribute": "oxAuthSessionDn",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxExternalUid",
 		"type": "string",
 		"index": ["equality"],
