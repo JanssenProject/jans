@@ -32,7 +32,7 @@ ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
 keytool = '/usr/bin/keytool'
-defaultKeyStore = '/usr/java/latest/lib/security/cacerts'
+key_store = '/usr/java/latest/lib/security/cacerts'
 os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
 
 ignore_files = ['101-ox.ldif',
@@ -447,8 +447,9 @@ def updateCertKeystore():
     openDjTruststore = '/opt/opendj/config/truststore'
     openDjPin = None
 
+    used_keystore = key_store
     if getOsType() in ['debian', 'ubuntu']:
-        defaultKeystore = '/etc/ssl/certs/java/cacerts'
+        used_keystore = '/etc/ssl/certs/java/cacerts'
 
     try:
         f = open(openDjPinFn)
@@ -475,7 +476,7 @@ def updateCertKeystore():
         # delete the old key from the keystore
         logging.debug('Deleting new %s', alias)
         result = getOutput([keytool, '-delete', '-alias', alias, '-keystore',
-                            defaultKeystore, '-storepass', 'changeit',
+                            used_keystore, '-storepass', 'changeit',
                             '-noprompt'])
         if 'error' in result:
             logging.error(result)
@@ -485,7 +486,7 @@ def updateCertKeystore():
         logging.debug('Importing old %s', alias)
         result = getOutput([keytool, '-import', '-trustcacerts', '-file',
                             filename, '-alias', alias, '-keystore',
-                            defaultKeystore, '-storepass', 'changeit',
+                            used_keystore, '-storepass', 'changeit',
                             '-noprompt'])
         if 'error' in result:
             logging.error(result)
