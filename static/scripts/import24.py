@@ -32,7 +32,8 @@ ldapmodify = "/opt/opendj/bin/ldapmodify"
 ldapsearch = "/opt/opendj/bin/ldapsearch"
 ldapdelete = "/opt/opendj/bin/ldapdelete"
 keytool = '/usr/bin/keytool'
-defaultKeystore = '/etc/ssl/certs/java/cacerts'
+defaultKeyStore = '/usr/java/latest/lib/security/cacerts'
+os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
 
 ignore_files = ['101-ox.ldif',
                 'gluuImportPerson.properties',
@@ -418,6 +419,24 @@ def setPermissions():
     getOutput(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
 
 
+def getOsType():
+    try:
+        with open('/etc/redhat-release', 'r') as f:
+            contents = f.read()
+    except IOError:
+        with open('/etc/os-release', 'r') as f:
+            contents = f.read()
+
+    if 'CentOS' in contents:
+        return os_types[0]
+    elif 'Red Hat' in contents:
+        return os_types[1]
+    elif 'Ubuntu' in contents:
+        return os_types[3]
+    elif 'Debian' in contents:
+        return os_types[4]
+
+
 def updateCertKeystore():
     logging.info('Updating the SSL Keystore')
     keys = ['httpd', 'asimba', 'shibIDP', 'opendj']
@@ -427,6 +446,10 @@ def updateCertKeystore():
     openDjPinFn = '/opt/opendj/config/keystore.pin'
     openDjTruststore = '/opt/opendj/config/truststore'
     openDjPin = None
+
+    if getOsType() in ['debian', 'ubuntu']:
+        defaultKeystore = '/etc/ssl/certs/java/cacerts'
+
     try:
         f = open(openDjPinFn)
         openDjPin = f.read().splitlines()[0]
