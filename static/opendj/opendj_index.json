@@ -42,7 +42,7 @@
 	},
 
     	{
-        	"attribute": "oxSectorIdentifierURI",
+        	"attribute": "oxSectorIdentifier",
 	        "type": "string",
         	"index": ["equality"],
 		"backend": ["userRoot"]
