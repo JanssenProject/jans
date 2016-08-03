@@ -6,13 +6,13 @@
     <groupId>org.gluu</groupId>
     <artifactId>oxEleven</artifactId>
     <packaging>pom</packaging>
-    <version>2.4.4-SNAPSHOT</version>
+    <version>2.4.5-SNAPSHOT</version>
     <name>oxEleven</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ox.version>2.4.4-SNAPSHOT</ox.version>
+        <ox.version>2.4.5-SNAPSHOT</ox.version>
         <slf4j.version>1.6.5</slf4j.version>
         <seam.version>2.3.1.Final</seam.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
