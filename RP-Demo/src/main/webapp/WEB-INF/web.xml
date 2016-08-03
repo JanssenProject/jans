@@ -44,7 +44,7 @@
     </init-param>
     <init-param>
       <param-name>authorizeParameters</param-name>
-      <param-value>scope=openid+profile&amp;response_type=code&amp;nonce=nonce&amp;auth_mode=basic</param-value>
+      <param-value>scope=openid+profile&amp;response_type=code&amp;nonce=nonce&amp;acr_values=basic</param-value>
     </init-param>
     <init-param>
       <param-name>redirectUri</param-name>
