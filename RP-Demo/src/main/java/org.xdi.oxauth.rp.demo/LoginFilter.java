@@ -1,5 +1,6 @@
 package org.xdi.oxauth.rp.demo;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.client.*;
@@ -35,6 +36,8 @@ public class LoginFilter implements Filter {
         authorizationServerHost = filterConfig.getInitParameter("authorizationServerHost");
         clientId = filterConfig.getInitParameter("clientId");
         clientSecret = filterConfig.getInitParameter("clientSecret");
+
+        Preconditions.checkState(redirectUri.startsWith("https:"), "Redirect URI must use https protocol for client application_type=web.");
     }
 
     @Override
