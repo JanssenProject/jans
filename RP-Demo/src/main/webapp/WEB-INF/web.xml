@@ -40,7 +40,7 @@
     </init-param>
     <init-param>
       <param-name>clientSecret</param-name>
-      <param-value>0BJtgc27iOo5</param-value>
+      <param-value>0BJtgc27iOo5</param-value> <!-- plain unencrypted client secret-->
     </init-param>
     <init-param>
       <param-name>authorizeParameters</param-name>
