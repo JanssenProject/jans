@@ -35,6 +35,7 @@ public class RpDemoServlet extends HttpServlet {
             LOG.trace("access_token: " + accessToken + ", userinfo_endpoint: " + userInfoEndpoint);
 
             UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+            userInfoClient.setExecutor(Utils.createTrustAllExecutor());
             UserInfoResponse response = userInfoClient.execUserInfo(accessToken);
             LOG.trace("UserInfo response: " + response);
 

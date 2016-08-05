@@ -128,6 +128,7 @@ public class Authenticator implements Serializable {
     public boolean authenticateImpl(Context context, boolean interactive, boolean skipPassword) {
         boolean authenticated = false;
         try {
+            log.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword + ", credentials.username: " + credentials.getUsername() + ")");
             if (StringHelper.isNotEmpty(credentials.getUsername()) && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword()))
                     && credentials.getUsername().startsWith("@!")) {
                 authenticated = clientAuthentication(context, interactive, skipPassword);
@@ -246,7 +247,7 @@ public class Authenticator implements Serializable {
             	overrideCurrentStep = true;
             	// Reload session state
                 sessionState = sessionStateService.getSessionState();
-                
+
                 // Reset to pecified step
             	sessionStateService.resetToStep(sessionState, overridenNextStep);
 
@@ -263,7 +264,7 @@ public class Authenticator implements Serializable {
             	int nextStep;
             	if (overrideCurrentStep) {
             		nextStep = overridenNextStep;
-            	} else { 
+            	} else {
             		nextStep = this.authStep + 1;
             	}
 
@@ -278,7 +279,7 @@ public class Authenticator implements Serializable {
                 if (!overrideCurrentStep) {
 	                // Update auth_step
 	                sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
-	
+
 	                // Mark step as passed
 	                markAuthStepAsPassed(sessionIdAttributes, this.authStep);
                 }
@@ -339,7 +340,7 @@ public class Authenticator implements Serializable {
 		    log.debug("Failed to update session entry: '{0}'", sessionState.getId());
 		    return false;
 		}
-		
+
 		return true;
 	}
 
