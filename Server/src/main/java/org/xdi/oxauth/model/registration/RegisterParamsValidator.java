@@ -139,6 +139,7 @@ public class RegisterParamsValidator {
                         switch (applicationType) {
                             case WEB:
                                 if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
+                                    LOG.error("Invalid protocol for redirect_uri: " + redirectUri + " (only https protocol is allowed for application_type=web)");
                                     return false;
                                 } else if (LOCALHOST.equalsIgnoreCase(uri.getHost())) {
                                     return false;
