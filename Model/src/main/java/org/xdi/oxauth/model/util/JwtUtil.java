@@ -6,36 +6,26 @@
 
 package org.xdi.oxauth.model.util;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.openssl.PEMParser;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.crypto.Certificate;
-import org.xdi.oxauth.model.crypto.signature.*;
+import org.xdi.oxauth.model.crypto.PublicKey;
+import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.util.StringHelper;
 
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.HttpMethod;
-import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Set;
 
 import static org.xdi.oxauth.model.jwk.JWKParameter.*;
@@ -48,118 +38,6 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 public class JwtUtil {
 
     private static final Logger log = Logger.getLogger(JwtUtil.class);
-
-    @Deprecated
-    public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
-                                   SignatureAlgorithm algorithm) {
-        if (jsonHeader != null && jsonClaim != null && algorithm == SignatureAlgorithm.NONE) {
-            return encodeJwt(jsonHeader, jsonClaim, algorithm, null, null, null);
-        }
-        return null;
-    }
-
-    @Deprecated
-    public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
-                                   SignatureAlgorithm algorithm, String sharedKey) {
-        if (jsonHeader != null && jsonClaim != null && algorithm != null && sharedKey != null) {
-            return encodeJwt(jsonHeader, jsonClaim, algorithm, sharedKey, null, null);
-        }
-        return null;
-    }
-
-    @Deprecated
-    public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
-                                   SignatureAlgorithm algorithm, RSAPrivateKey privateKey) {
-        if (jsonHeader != null && jsonClaim != null && algorithm != null && privateKey != null) {
-            return encodeJwt(jsonHeader, jsonClaim, algorithm, null, privateKey, null);
-        }
-        return null;
-    }
-
-    @Deprecated
-    public static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
-                                   SignatureAlgorithm algorithm, ECDSAPrivateKey privateKey) {
-        if (jsonHeader != null && jsonClaim != null && algorithm != null && privateKey != null) {
-            return encodeJwt(jsonHeader, jsonClaim, algorithm, null, null, privateKey);
-        }
-        return null;
-    }
-
-    @Deprecated
-    private static String encodeJwt(JSONObject jsonHeader, JSONObject jsonClaim,
-                                    SignatureAlgorithm algorithm, String sharedKey,
-                                    RSAPrivateKey rsaPrivateKey,
-                                    ECDSAPrivateKey ecdsaPrivateKey) {
-        String signature = "";
-
-        String header = jsonHeader.toString();
-        String claim = jsonClaim.toString();
-
-        try {
-            header = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
-            claim = Base64Util.base64urlencode(claim.getBytes(Util.UTF8_STRING_ENCODING));
-
-            String signingInput = header + "." + claim;
-            byte[] sign = null;
-
-            switch (algorithm) {
-                case NONE:
-                    break;
-                case HS256:
-                    sign = getSignatureHS256(signingInput.getBytes(Util.UTF8_STRING_ENCODING),
-                            sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
-                    break;
-                case HS384:
-                    sign = getSignatureHS384(signingInput.getBytes(Util.UTF8_STRING_ENCODING),
-                            sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
-                    break;
-                case HS512:
-                    sign = getSignatureHS512(signingInput.getBytes(Util.UTF8_STRING_ENCODING),
-                            sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
-                    break;
-                case RS256:
-                    sign = getSignatureRS256(signingInput.getBytes(Util.UTF8_STRING_ENCODING), rsaPrivateKey);
-                    break;
-                case RS384:
-                    sign = getSignatureRS384(signingInput.getBytes(Util.UTF8_STRING_ENCODING), rsaPrivateKey);
-                    break;
-                case RS512:
-                    sign = getSignatureRS512(signingInput.getBytes(Util.UTF8_STRING_ENCODING), rsaPrivateKey);
-                    break;
-                case ES256:
-                    sign = getSignatureES256(signingInput.getBytes(Util.UTF8_STRING_ENCODING), ecdsaPrivateKey);
-                    break;
-                case ES384:
-                    sign = getSignatureES384(signingInput.getBytes(Util.UTF8_STRING_ENCODING), ecdsaPrivateKey);
-                    break;
-                case ES512:
-                    sign = getSignatureES512(signingInput.getBytes(Util.UTF8_STRING_ENCODING), ecdsaPrivateKey);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Algorithm not supported");
-            }
-
-            if (sign != null) {
-                signature = Base64Util.base64urlencode(sign);
-            }
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(), e);
-        } catch (InvalidKeyException e) {
-            log.error(e.getMessage(), e);
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-        } catch (InvalidKeySpecException e) {
-            log.error(e.getMessage(), e);
-        } catch (NoSuchProviderException e) {
-            log.error(e.getMessage(), e);
-        } catch (SignatureException e) {
-            log.error(e.getMessage(), e);
-        }
-
-        final StringBuilder builder = new StringBuilder();
-        builder.append(header).append('.').append(claim).append('.').append(signature);
-        return builder.toString();
-    }
 
     public static void printAlgorithmsAndProviders() {
         Set<String> algorithms = Security.getAlgorithms("Signature");
@@ -209,177 +87,7 @@ public class JwtUtil {
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
-    @Deprecated
-    public static byte[] getSignatureHS256(byte[] signingInput, byte[] key)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        SecretKey secretKey = new SecretKeySpec(key, "HMACSHA256");
-        Mac mac = Mac.getInstance("HMACSHA256");
-        mac.init(secretKey);
-        return mac.doFinal(signingInput);
-    }
-
-    @Deprecated
-    public static byte[] getSignatureHS384(byte[] signingInput, byte[] key)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        SecretKey secretKey = new SecretKeySpec(key, "HMACSHA384");
-        Mac mac = Mac.getInstance("HMACSHA384");
-        mac.init(secretKey);
-        return mac.doFinal(signingInput);
-    }
-
-    @Deprecated
-    public static byte[] getSignatureHS512(byte[] signingInput, byte[] key)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        SecretKey secretKey = new SecretKeySpec(key, "HMACSHA512");
-        Mac mac = Mac.getInstance("HMACSHA512");
-        mac.init(secretKey);
-        return mac.doFinal(signingInput);
-    }
-
-    @Deprecated
-    public static KeyPair generateRsaKey() throws NoSuchAlgorithmException, NoSuchProviderException {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
-        keyGen.initialize(2048, new SecureRandom());
-
-        return keyGen.generateKeyPair();
-    }
-
-    @Deprecated
-    public static byte[] getSignatureRS256(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
-            throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
-        RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
-                rsaPrivateKey.getModulus(),
-                rsaPrivateKey.getPrivateExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(rsaPrivateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA256withRSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static byte[] getSignatureRS384(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
-            throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
-        RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
-                rsaPrivateKey.getModulus(),
-                rsaPrivateKey.getPrivateExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(rsaPrivateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA384withRSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static byte[] getSignatureRS512(byte[] signingInput, RSAPrivateKey rsaPrivateKey)
-            throws SignatureException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException {
-        RSAPrivateKeySpec rsaPrivateKeySpec = new RSAPrivateKeySpec(
-                rsaPrivateKey.getModulus(),
-                rsaPrivateKey.getPrivateExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(rsaPrivateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA512withRSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static boolean verifySignatureRS512(byte[] signingInput, byte[] sigBytes, RSAPublicKey rsaPublicKey) throws IllegalBlockSizeException, IOException, InvalidKeyException, NoSuchProviderException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchPaddingException, BadPaddingException {
-        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
-                rsaPublicKey.getModulus(),
-                rsaPublicKey.getPublicExponent());
-
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
-        PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
-
-        Cipher cipher = Cipher.getInstance("RSA/None/PKCS1Padding", "BC");
-        cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-        byte[] decSig = cipher.doFinal(sigBytes);
-        ASN1InputStream aIn = new ASN1InputStream(decSig);
-        try {
-            ASN1Sequence seq = (ASN1Sequence) aIn.readObject();
-
-            MessageDigest hash = MessageDigest.getInstance("SHA-512", "BC");
-            hash.update(signingInput);
-
-            ASN1OctetString sigHash = (ASN1OctetString) seq.getObjectAt(1);
-            return MessageDigest.isEqual(hash.digest(), sigHash.getOctets());
-        } finally {
-            IOUtils.closeQuietly(aIn);
-        }
-    }
-
-    @Deprecated
-    public static byte[] getSignatureES256(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
-            SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-256");
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA256WITHECDSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static byte[] getSignatureES384(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
-            SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-384");
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA384WITHECDSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static byte[] getSignatureES512(byte[] signingInput, ECDSAPrivateKey ecdsaPrivateKey)
-            throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException,
-            SignatureException {
-        ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("P-521");
-        ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
-        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-        Signature signature = Signature.getInstance("SHA512WITHECDSA", "BC");
-        signature.initSign(privateKey);
-        signature.update(signingInput);
-
-        return signature.sign();
-    }
-
-    @Deprecated
-    public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
-            String jwksUri, String jwks, String keyId) {
-        return getPublicKey(jwksUri, jwks, null, keyId);
-    }
-
-    public static org.xdi.oxauth.model.crypto.PublicKey getPublicKey(
+    public static PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
         log.debug("Retrieving JWK...");
 
