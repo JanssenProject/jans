@@ -101,25 +101,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 		uiLocalesSupported = new ArrayList<String>();
 	}
 
-	/**
-	 * Gets scopes to claims map.
-	 *
-	 * @return scopes to claims map
-	 */
-	public Map<String, List<String>> getScopeToClaimsMapping() {
-		return scopeToClaimsMapping;
-	}
-
-	/**
-	 * Sets scope to claim map.
-	 *
-	 * @param p_scopeToClaimsMapping
-	 *            scope to claim map
-	 */
-	public void setScopeToClaimsMapping(Map<String, List<String>> p_scopeToClaimsMapping) {
-		scopeToClaimsMapping = p_scopeToClaimsMapping;
-	}
-
 	public static Map<String, List<String>> parseScopeToClaimsMapping(String p_scopeToClaimsJson) throws JSONException {
 		return parseScopeToClaimsMapping(new JSONArray(p_scopeToClaimsJson));
 	}
@@ -143,6 +124,29 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
 		}
 		return map;
+	}
+
+	/**
+	 * Gets scopes to claims map.
+	 *
+	 * @return scopes to claims map
+	 *
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
+	public Map<String, List<String>> getScopeToClaimsMapping() {
+		return scopeToClaimsMapping;
+	}
+
+	/**
+	 * Sets scope to claim map.
+	 *
+	 * @param p_scopeToClaimsMapping scope to claim map
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
+	public void setScopeToClaimsMapping(Map<String, List<String>> p_scopeToClaimsMapping) {
+		scopeToClaimsMapping = p_scopeToClaimsMapping;
 	}
 
 	/**
@@ -246,7 +250,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 * client.
 	 *
 	 * @return The Check Session iFrame URL.
+	 *
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
+	@Deprecated
 	public String getCheckSessionIFrame() {
 		return checkSessionIFrame;
 	}
@@ -258,7 +265,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 *
 	 * @param checkSessionIFrame
 	 *            The Check Session iFrame URL.
+	 *
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
+	@Deprecated
 	public void setCheckSessionIFrame(String checkSessionIFrame) {
 		this.checkSessionIFrame = checkSessionIFrame;
 	}
@@ -267,7 +277,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 * Returns the URL of the End Session endpoint.
 	 *
 	 * @return The URL of the End Session endpoint.
+	 *
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
+	@Deprecated
 	public String getEndSessionEndpoint() {
 		return endSessionEndpoint;
 	}
@@ -277,7 +290,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 *
 	 * @param endSessionEndpoint
 	 *            The URL of the End Session endpoint.
+	 *
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
+	@Deprecated
 	public void setEndSessionEndpoint(String endSessionEndpoint) {
 		this.endSessionEndpoint = endSessionEndpoint;
 	}
@@ -326,42 +342,82 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 		this.registrationEndpoint = registrationEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public String getValidateTokenEndpoint() {
 		return validateTokenEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public void setValidateTokenEndpoint(String validateTokenEndpoint) {
 		this.validateTokenEndpoint = validateTokenEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public String getFederationMetadataEndpoint() {
 		return federationMetadataEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
 		this.federationMetadataEndpoint = federationMetadataEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public String getFederationEndpoint() {
 		return federationEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public void setFederationEndpoint(String federationEndpoint) {
 		this.federationEndpoint = federationEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public String getIdGenerationEndpoint() {
 		return idGenerationEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public void setIdGenerationEndpoint(String p_idGenerationEndpoint) {
 		idGenerationEndpoint = p_idGenerationEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public String getIntrospectionEndpoint() {
 		return introspectionEndpoint;
 	}
 
+	/**
+	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+	 */
+	@Deprecated
 	public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
 		introspectionEndpoint = p_introspectionEndpoint;
 	}
