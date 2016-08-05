@@ -11,10 +11,11 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jws.JwsValidator;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
@@ -149,8 +150,17 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                         getResponse().setClaims(jwe.getClaims().toMap());
                     } else {
                         Jwt jwt = Jwt.parse(entity);
-                        JwsValidator jwtValidator = new JwsValidator(jwt, sharedKey, jwksUri, null);
-                        if (jwtValidator.validateSignature()) {
+
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        boolean signatureVerified = cryptoProvider.verifySignature(
+                                jwt.getSigningInput(),
+                                jwt.getEncodedSignature(),
+                                jwt.getHeader().getKeyId(),
+                                JwtUtil.getJSONWebKeys(jwksUri),
+                                sharedKey,
+                                jwt.getHeader().getAlgorithm());
+
+                        if (signatureVerified) {
                             getResponse().setClaims(jwt.getClaims().toMap());
                         }
                     }
