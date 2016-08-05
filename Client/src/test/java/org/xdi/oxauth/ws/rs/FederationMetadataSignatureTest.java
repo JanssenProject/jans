@@ -6,37 +6,23 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
-
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version August 5, 2016
  */
 
 public class FederationMetadataSignatureTest {
@@ -59,42 +45,24 @@ public class FederationMetadataSignatureTest {
             "}";
 
     @Test
-    public void test() throws JSONException, NoSuchProviderException, NoSuchAlgorithmException, IOException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException, InvalidJwtException {
-        final JSONObject jsonHeader = JwtHeader.instance().setType(JwtType.JWT).setAlgorithm(SignatureAlgorithm.RS512).toJsonObject();
-        final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
+    @Parameters({"RS512_keyId", "keyStoreFile", "keyStoreSecret"})
+    public void test(final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+        try {
+            final JSONObject jsonHeader = JwtHeader.instance().setType(JwtType.JWT).setAlgorithm(SignatureAlgorithm.RS512).toJsonObject();
+            final JSONObject jsonPayload = new JSONObject(TEST_METADATA);
 
-        final KeyPair keyPair = JwtUtil.generateRsaKey();
-        final BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
-        final BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
+            final String header = Base64Util.base64urlencode(jsonHeader.toString().getBytes(Util.UTF8_STRING_ENCODING));
+            final String payload = Base64Util.base64urlencode(jsonPayload.toString().getBytes(Util.UTF8_STRING_ENCODING));
 
-        final RSAPrivateKey privateKey = new RSAPrivateKey(
-                jcersaPrivateCrtKey.getModulus(),
-                jcersaPrivateCrtKey.getPrivateExponent());
-        final RSAPublicKey publicKey = new RSAPublicKey(
-                jcersaPublicKey.getModulus(),
-                jcersaPublicKey.getPublicExponent());
+            final String signingInput = header + "." + payload;
 
-        String encodedString = JwtUtil.encodeJwt(jsonHeader, jsonPayload, SignatureAlgorithm.RS512, privateKey);
+            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);
 
-        System.out.println("Encoded string: " + encodedString);
-        String[] parts = encodedString.split("\\.");
-
-        if (parts.length == 3) {
-            String encodedHeader = parts[0];
-            String encodedPayload = parts[1];
-            String encodedSignature = parts[2];
-
-            String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-            String payload = new String(Base64Util.base64urldecode(encodedPayload), Util.UTF8_STRING_ENCODING);
-            System.out.println("Header: " + header);
-            System.out.println("Payload: " + payload);
-
-            byte[] signature = Base64Util.base64urldecode(encodedSignature);
-
-            final String signingInput = encodedHeader + "." + encodedPayload;
-
-            boolean signatureVerified = JwtUtil.verifySignatureRS512(signingInput.getBytes(Util.UTF8_STRING_ENCODING), signature, publicKey);
-            assertTrue(signatureVerified, "Invalid signature");
+            boolean signatureVerified = cryptoProvider.verifySignature(signingInput, encodedSignature, keyId, null, null, SignatureAlgorithm.RS512);
+            assertTrue(signatureVerified);
+        } catch (Exception ex) {
+            fail(ex.getMessage(), ex);
         }
     }
 }

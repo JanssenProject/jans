@@ -22,13 +22,11 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
@@ -39,7 +37,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version August 5, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -460,66 +458,62 @@ public class JwtAuthorizationRequest {
         return encodedJwt;
     }
 
-    public String getEncodedJwt(String payload) {
+    public String getEncodedJwt(String payload) throws Exception {
         String encodedJwt = null;
 
-        try {
-            JSONObject payloadJsonObject = new JSONObject(payload);
-            if (signatureAlgorithm == SignatureAlgorithm.NONE) {
-                encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm);
-            } else if (signatureAlgorithm == SignatureAlgorithm.HS256 || signatureAlgorithm == SignatureAlgorithm.HS384 || signatureAlgorithm == SignatureAlgorithm.HS512) {
-                encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm, sharedKey);
-            } else if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm, rsaPrivateKey);
-            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                encodedJwt = JwtUtil.encodeJwt(headerToJSONObject(), payloadJsonObject, signatureAlgorithm, ecPrivateKey);
-            } else if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-                JweEncrypterImpl jweEncrypter;
-                if (rsaPublicKey != null) {
-                    jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
-                } else {
-                    jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
-                }
-
-                String header = headerToJSONObject().toString();
-                String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
-
-                String claims = payloadJsonObject.toString();
-                String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
-
-                byte[] contentMasterKey = new byte[blockEncryptionAlgorithm.getCmkLength() / 8];
-                SecureRandom random = new SecureRandom();
-                random.nextBytes(contentMasterKey);
-                String encodedEncryptedKey = jweEncrypter.generateEncryptedKey(contentMasterKey);
-
-                byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
-                random.nextBytes(initializationVector);
-                String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
-
-                String additionalAuthenticatedData = encodedHeader + "."
-                        + encodedEncryptedKey + "."
-                        + encodedInitializationVector;
-
-                Pair<String, String> result = jweEncrypter.generateCipherTextAndIntegrityValue(contentMasterKey, initializationVector,
-                        additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING),
-                        encodedClaims.getBytes(Util.UTF8_STRING_ENCODING));
-                String encodedCipherText = result.getFirst();
-                String encodedIntegrityValue = result.getSecond();
-
-                encodedJwt = encodedHeader + "."
-                        + encodedEncryptedKey + "."
-                        + encodedInitializationVector + "."
-                        + encodedCipherText + "."
-                        + encodedIntegrityValue;
+        if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
+            JweEncrypterImpl jweEncrypter;
+            if (rsaPublicKey != null) {
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, rsaPublicKey);
+            } else {
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InvalidJwtException e) {
-            e.printStackTrace();
-        } catch (InvalidJweException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+
+            String header = headerToJSONObject().toString();
+            String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+
+            String claims = new JSONObject(payload).toString();
+            String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
+
+            byte[] contentMasterKey = new byte[blockEncryptionAlgorithm.getCmkLength() / 8];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(contentMasterKey);
+            String encodedEncryptedKey = jweEncrypter.generateEncryptedKey(contentMasterKey);
+
+            byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
+            random.nextBytes(initializationVector);
+            String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
+
+            String additionalAuthenticatedData = encodedHeader + "."
+                    + encodedEncryptedKey + "."
+                    + encodedInitializationVector;
+
+            Pair<String, String> result = jweEncrypter.generateCipherTextAndIntegrityValue(contentMasterKey, initializationVector,
+                    additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING),
+                    encodedClaims.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedCipherText = result.getFirst();
+            String encodedIntegrityValue = result.getSecond();
+
+            encodedJwt = encodedHeader + "."
+                    + encodedEncryptedKey + "."
+                    + encodedInitializationVector + "."
+                    + encodedCipherText + "."
+                    + encodedIntegrityValue;
+        } else {
+            if (cryptoProvider == null) {
+                throw new Exception("The Crypto Provider cannot be null.");
+            }
+
+            JSONObject headerJsonObject = headerToJSONObject();
+            JSONObject payloadJsonObject = new JSONObject(payload);
+            String headerString = headerJsonObject.toString();
+            String payloadString = payloadJsonObject.toString();
+            String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
+            String signingInput = encodedHeader + "." + encodedPayload;
+            String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
+
+            encodedJwt = encodedHeader + "." + encodedPayload + "." + encodedSignature;
         }
 
         return encodedJwt;
