@@ -54,7 +54,7 @@ public class GluuConfigurationWS {
     @GET
     @Produces({"application/json"})
     @ApiOperation(value = "Provides configuration data as json document. It contains non-standard OpenID Connect discovery metadata supported by the Gluu server.", response = GluuConfiguration.class)
-    @ApiResponses(value = {@ApiResponse(code = 500, message = "Failed to build FIDO U2F configuration json object.")})
+    @ApiResponses(value = {@ApiResponse(code = 500, message = "Failed to build gluu configuration json object.")})
     public Response getConfiguration() {
         try {
             final Configuration configuration = ConfigurationFactory.instance().getConfiguration();
