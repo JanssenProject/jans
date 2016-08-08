@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version July 31, 2016
+ * @version August 8, 2016
  */
 public class JwtUtil {
 
@@ -66,21 +66,18 @@ public class JwtUtil {
         }
     }
 
-    @Deprecated
     public static byte[] getMessageDigestSHA256(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
-    @Deprecated
     public static byte[] getMessageDigestSHA384(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-384", "BC");
         return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
     }
 
-    @Deprecated
     public static byte[] getMessageDigestSHA512(String data)
             throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest mda = MessageDigest.getInstance("SHA-512", "BC");
@@ -161,7 +158,6 @@ public class JwtUtil {
         return publicKey;
     }
 
-    @Deprecated
     public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
         log.debug("Retrieving JWK Key...");
 
