@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -10,6 +11,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 23/11/2014
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LicenseStatusParams implements IParams {
 
     @JsonProperty(value = "features")

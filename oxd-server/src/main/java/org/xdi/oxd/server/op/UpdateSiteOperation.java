@@ -9,7 +9,6 @@ import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.UpdateSiteParams;
@@ -89,14 +88,6 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         final RegisterRequest request = new RegisterRequest(site.getClientRegistrationAccessToken());
         request.setHttpMethod(HttpMethod.PUT); // force update
-
-        ApplicationType applicationType = null;
-        if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
-            applicationType = ApplicationType.fromString(params.getApplicationType());
-
-            request.setApplicationType(applicationType);
-            site.setApplicationType(applicationType.name());
-        }
 
         Date clientSecretExpiresAt = params.getClientSecretExpiresAt();
         if (clientSecretExpiresAt != null) {

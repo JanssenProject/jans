@@ -1,6 +1,5 @@
 {
     "op_host":"",
-    "application_type":"web",
     "response_types":["code", "id_token", "token"],
     "scope":["openid", "profile"],
     "max_age":"4665665",
