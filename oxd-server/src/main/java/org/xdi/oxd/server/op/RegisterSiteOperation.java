@@ -207,8 +207,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         if (grantTypes.isEmpty()) {
             grantTypes.add(GrantType.AUTHORIZATION_CODE);
-            grantTypes.add(GrantType.IMPLICIT);
-            grantTypes.add(GrantType.REFRESH_TOKEN);
         }
         return grantTypes;
     }
