@@ -13,11 +13,9 @@ import os.path
 import shutil
 import sys
 import traceback
-from ldif import LDIFParser
+from ldif import LDIFParser, LDIFWriter
 from jsonmerge import merge
-import base64
 import json
-import uuid
 import tempfile
 import logging
 
@@ -56,14 +54,15 @@ ldap_creds = ['-h', 'localhost',
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)-8s %(name)s.%(module)s %(message)s',
-                    filename='import_24.log',
+                    format='%(asctime)s %(levelname)-8s %(name)s %(message)s',
+                    filename='import_244.log',
                     filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 formatter = logging.Formatter('%(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
+logging.getLogger('jsonmerge').setLevel(logging.WARNING)
 
 
 class MyLDIF(LDIFParser):
@@ -97,60 +96,6 @@ class MyLDIF(LDIFParser):
                 self.targetAttr = entry[self.targetAttr]
 
 
-def addEntry(dn, entry, ldifModFolder):
-    newLdif = """dn: %s
-changetype: add
-""" % dn
-
-    multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
-                       'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
-                       'oxTrustEntitlements', 'oxTrustx509Certificate']
-    for attr in entry.keys():
-        # transform the multiValueAttrs from JSON arrays to multi
-        # value attrs in the LDAP
-        multivalTransform = (current_version >= 244) and \
-                             (backup_version < 244) and \
-                             (attr in multivalueAttrs)
-        for value in entry[attr]:
-            if multivalTransform:
-                try:
-                    value = json.loads(value)
-                except ValueError:
-                    logging.error("Cannot parse as JSON. Attr: %s, Value: %s",
-                                  attr, value)
-
-            if type(value) is str:  # For most cases as NO multivaltransforms
-                newLdif = newLdif + getMod(attr, value)
-            elif type(value) is dict:
-                newLdif = newLdif + getMod(attr, json.dumps(value))
-            elif type(value) is list:
-                logging.debug("Converting %s from JSON array to multivalue",
-                              attr)
-                logging.debug("Value: %s", value)
-                for val in value:
-                    newLdif = newLdif + getMod(attr, json.dumps(val))
-
-    newLdif = newLdif + "\n"
-    new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
-    filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
-    f = open(filename, 'w')
-    f.write(newLdif)
-    f.close()
-
-
-def getNewConfig(fn):
-    # Backup the appliance config just in case!
-    args = [ldapsearch] + ldap_creds + \
-           ['-b',
-            'o=gluu',
-            'objectclass=*']
-    output = getOutput(args)
-    f = open(fn, 'w')
-    f.write(output)
-    f.close()
-    logging.info("Created backup of new ldif to %s" % fn)
-
-
 def copyFiles(backup24_folder):
     logging.info('Copying backup files from /etc, /opt and /usr')
     os.path.walk("%s/etc" % backup24_folder, walk_function, None)
@@ -158,48 +103,24 @@ def copyFiles(backup24_folder):
     os.path.walk("%s/usr" % backup24_folder, walk_function, None)
 
 
-def deleteEntries(dn_list):
-    for dn in dn_list:
-        cmd = [ldapdelete] + ldap_creds + [dn]
-        output = getOutput(cmd)
-        if output:
-            logging.info(output)
-        else:
-            logging.error("Error deleting %s" % dn)
-
-
-def getAttributeValue(fn, targetAttr):
-    # Load oxAuth Config From LDIF
-    parser = MyLDIF(open(fn, 'rb'), sys.stdout)
-    parser.targetAttr = targetAttr
-    parser.parse()
-    value = parser.targetAttr
-    return value
-
-
 def getOldEntryMap(folder):
     files = os.listdir(folder)
     dnMap = {}
 
     # get the new admin DN
-    # admin_dn = getDns('/opt/opendj/ldif/people.ldif')[0]
+    admin_dn = getDns('/opt/opendj/ldif/people.ldif')[0]
 
     for fn in files:
-        # AAAS skipping people and clients
-        if fn == 'people.ldif' or fn == 'clients.ldif':
-            continue
-
-        # oxIDPAuthentication in appliance.ldif file  in 2.3 is incompatible with
-        # the gluu-server version > 2.4. Hence skip the file
+        # oxIDPAuthentication in appliance.ldif file  in 2.3 is incompatible
+        # with the gluu-server version > 2.4. Hence skip the file
         if 'appliance' in fn and backup_version < 240:
             continue
         dnList = getDns("%s/%s" % (folder, fn))
         for dn in dnList:
-            dnMap[dn] = fn
             # skip the entry of Admin DN and its leaves
-            # TODO make this dn management when you process the ldif file
-            # if fn == 'people.ldif' and admin_dn in dn:
-            #    continue
+            if fn == 'people.ldif' and admin_dn in dn:
+                continue
+            dnMap[dn] = fn
     return dnMap
 
 
@@ -216,17 +137,6 @@ def getDns(fn):
     return parser.DNs
 
 
-def getMod(attr, s):
-    val = str(s).strip()
-    if val.find('\n') > -1:
-        val = base64.b64encode(val)
-        return "%s\n" % tab_attr(attr, val, True)
-    elif len(val) > (78 - len(attr)):
-        return "%s\n" % tab_attr(attr, val)
-    else:
-        return "%s: %s\n" % (attr, val)
-
-
 def getOutput(args):
         try:
             logging.debug("Running command : %s" % " ".join(args))
@@ -236,48 +146,6 @@ def getOutput(args):
             logging.error("Error running command : %s" % " ".join(args))
             logging.error(traceback.format_exc())
             sys.exit(1)
-
-
-def restoreConfig(ldifFolder, newLdif, ldifModFolder):
-    logging.info('Comparing old LDAP data and creating `modify` files.')
-    ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
-    current_config_dns = getDns(newLdif)
-    oldDnMap = getOldEntryMap(ldifFolder)
-    for dn in oldDnMap.keys():
-        old_entry = getEntry("%s/%s" % (ldifFolder, oldDnMap[dn]), dn)
-        if dn not in current_config_dns:
-            addEntry(dn, old_entry, ldifModFolder)
-            continue
-        new_entry = getEntry(newLdif, dn)
-        for attr in old_entry.keys():
-            # Note: Prefixing with part length helps in inserting base
-            # before leaf entries in the LDAP
-            # Filename = DN_part_length + unique random string
-            new_fn = str(len(dn.split(','))) + '_' + str(uuid.uuid4())
-            filename = '%s/%s.ldif' % (ldifModFolder, new_fn)
-
-            if attr in ignoreList:
-                continue
-
-            if attr not in new_entry:
-                writeMod(dn, attr, old_entry[attr], filename, True)
-                logging.debug("Adding attr %s to %s", attr, dn)
-            elif old_entry[attr] != new_entry[attr]:
-                mod_list = None
-                if len(old_entry[attr]) == 1:
-                    try:
-                        logging.debug("Merging json value for %s", attr)
-                        old_json = json.loads(old_entry[attr][0])
-                        new_json = json.loads(new_entry[attr][0])
-                        new_json = merge(new_json, old_json)
-                        mod_list = [json.dumps(new_json)]
-                    except:
-                        mod_list = old_entry[attr]
-                        logging.debug("Keeping old value for %s", attr)
-                else:
-                    mod_list = old_entry[attr]
-                    logging.debug("Keeping multiple old value for %s", attr)
-                writeMod(dn, attr, mod_list, filename)
 
 
 def startOpenDJ():
@@ -300,34 +168,6 @@ def stopOpenDJ():
         logging.critical("OpenDJ did not stop properly... exiting."
                          " Check /opt/opendj/logs/errors")
         sys.exit(3)
-
-
-def tab_attr(attr, value, encoded=False):
-    lines = ['%s: ' % attr]
-    if encoded:
-        lines = ['%s:: ' % attr]
-    for char in value:
-        current_line = lines[-1]
-        if len(current_line) < 80:
-            new_line = current_line + char
-            del lines[-1]
-            lines.append(new_line)
-        else:
-            lines.append(" " + char)
-    return "\n".join(lines)
-
-
-def uploadLDIF(ldifFolder, outputLdifFolder):
-    logging.info('Uploading LDAP data.')
-    files = sorted(os.listdir(outputLdifFolder))
-    for fn in files:
-        cmd = [ldapmodify] + ldap_creds + ['-a', '-f',
-                                           "%s/%s" % (outputLdifFolder, fn)]
-        output = getOutput(cmd)
-        if output:
-            logging.debug(output)
-        else:
-            logging.error("Error adding file %s", fn)
 
 
 def walk_function(a, directory, files):
@@ -353,25 +193,6 @@ def walk_function(a, directory, files):
                 shutil.copyfile(fn, targetFn)
             except:
                 logging.error("Error copying %s", targetFn)
-
-
-def writeMod(dn, attr, value_list, fn, add=False):
-    operation = "replace"
-    if add:
-        operation = "add"
-    modLdif = """dn: %s
-changetype: modify
-%s: %s\n""" % (dn, operation, attr)
-    if value_list is None:
-        logging.warning('Skipping emtry value %s', attr)
-        return
-    for val in value_list:
-        modLdif = modLdif + getMod(attr, val)
-    modLdif = modLdif + "\n"
-    f = open(fn, 'w')
-    f.write(modLdif)
-    f.close()
-    logging.debug('Writing Mod for %s at %s', attr, fn)
 
 
 def stopTomcat():
@@ -502,7 +323,8 @@ def updateCertKeystore():
 
 
 def processPeople(ldif_folder):
-    logging.info('Updating oxSectorIdentifierURI to oxSectorIdentifier in people.ldif')
+    logging.info('Updating oxSectorIdentifierURI to oxSectorIdentifier in' +
+                 ' people.ldif')
     peopleldif = os.path.join(ldif_folder, 'people.ldif')
     new_peopleldif = os.path.join(ldif_folder, 'people_updated.ldif')
 
@@ -514,7 +336,8 @@ def processPeople(ldif_folder):
                 outfile.write(line)
 
 
-def importLDIF(ldif_file):
+def importLDIF(folder):
+    ldif_file = os.path.join(folder, 'processed.ldif')
     logging.info("Running ldif-import on %s", ldif_file)
     command = [ldif_import, '-n', 'userRoot',
                '-l', ldif_file, '-R', ldif_file+'.rejects']
@@ -530,24 +353,56 @@ def exportLDIF(folder):
     logging.debug(output)
 
 
-def joinLDIFs(ldif_folder, outputFolder):
-    logging.info('Joining all LDIFs for import.')
-    current = os.path.join(outputFolder, 'current.ldif')
-    joined = os.path.join(outputFolder, 'joined.ldif')
-    shutil.copyfile(current, joined)
+def processLDIF(backupFolder, newFolder):
+    logging.info('Processing the LDIF data')
+    current = os.path.join(newFolder, 'current.ldif')
+    currentDNs = getDns(current)
 
-    files = os.listdir(ldif_folder)
+    ldifFile = open(os.path.join(newFolder, 'processed.ldif'), 'w')
+    ldif_writer = LDIFWriter(ldifFile)
 
-    with open(joined, 'a') as outfile:
-        outfile.write('\n')
-        for f in files:
-            # Skip people.ldif, people_updated.ldif is used in its place
-            if f == 'people.ldif':
+    ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
+    # TODO update all the attribute changes
+    dnMap = getOldEntryMap(backupFolder)
+
+    # Rewriting all the new DNs in the new installation to ldif file
+    for dn in currentDNs:
+        new_entry = getEntry(current, dn)
+        if dn not in dnMap.keys():
+            #  Write directly to the file if there is no matching old DN data
+            ldif_writer.unparse(dn, new_entry)
+            continue
+
+        old_entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
+        for attr in old_entry.keys():
+            if attr in ignoreList:
                 continue
-            with open(os.path.join(ldif_folder, f), 'r') as infile:
-                for line in infile:
-                    outfile.write(line)
-            outfile.write('\n\n')
+
+            if attr not in new_entry:
+                new_entry[attr] = old_entry[attr]
+            elif old_entry[attr] != new_entry[attr]:
+                if len(old_entry[attr]) == 1:
+                    try:
+                        old_json = json.loads(old_entry[attr][0])
+                        new_json = json.loads(new_entry[attr][0])
+                        new_json = merge(new_json, old_json)
+                        new_entry[attr] = [json.dumps(new_json)]
+                    except:
+                        new_entry[attr] = old_entry[attr]
+                        logging.debug("Keeping old value for %s", attr)
+                else:
+                    new_entry[attr] = old_entry[attr]
+                    logging.debug("Keep multiple old values for %s", attr)
+        ldif_writer.unparse(dn, new_entry)
+
+    # Pick all the left out DNs from the old DN map and write them to the LDIF
+    for dn in dnMap.keys():
+        if dn not in currentDNs:
+            entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
+            ldif_writer.unparse(dn, entry)
+
+    # Finally
+    ldifFile.close()
 
 
 def main(folder_name):
@@ -591,7 +446,7 @@ def main(folder_name):
 
     outputFolder = "./output_ldif"
     outputLdifFolder = "%s/config" % outputFolder
-    newLdif = "%s/current_config.ldif" % outputFolder
+    # newLdif = "%s/current_config.ldif" % outputFolder
 
     if not os.path.exists(outputFolder):
         os.mkdir(outputFolder)
@@ -608,15 +463,12 @@ def main(folder_name):
     copyFiles(backup24_folder)
     updateCertKeystore()
 
+    # processPeople(ldif_folder)  # FIXME make attribute changes
     exportLDIF(outputFolder)
-    processPeople(ldif_folder)
-    joinLDIFs(ldif_folder, outputFolder)
-    importLDIF(os.path.join(outputFolder, 'joined.ldif'))
+    processLDIF(ldif_folder, outputFolder)
+    importLDIF(outputFolder)
 
     startOpenDJ()
-    getNewConfig(newLdif)
-    restoreConfig(ldif_folder, newLdif, outputLdifFolder)
-    uploadLDIF(ldif_folder, outputLdifFolder)
     setPermissions()
     startTomcat()
 
