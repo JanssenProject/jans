@@ -1,10 +1,10 @@
 {
     "op_host":"",
-    "response_types":["code", "id_token", "token"],
+    "response_types":["code"],
     "scope":["openid", "profile"],
     "max_age":"4665665",
     "ui_locales":["en"],
     "claims_locales":["en"],
     "acr_values":[""],
-    "grant_type":"authorization_code"
+    "grant_type":["authorization_code"]
 }
