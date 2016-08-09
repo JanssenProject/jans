@@ -29,7 +29,7 @@ public class SiteConfigurationService {
      */
     private static final Logger LOG = LoggerFactory.getLogger(SiteConfigurationService.class);
 
-    private static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
+    public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
 
     private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
 
