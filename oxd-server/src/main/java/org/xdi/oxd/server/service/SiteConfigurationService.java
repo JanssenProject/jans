@@ -60,13 +60,11 @@ public class SiteConfigurationService {
         // load all files
         final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(configurationService.getConfDirectoryFile()));
         for (File file : files) {
-            if (!file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) &&
-                    (file.getName().length() != FILE_NAME_LENGTH ||
-                            !file.getName().endsWith(".json"))) { // precondition
-
-                continue;
+            if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) ||
+                    (file.getName().length() == FILE_NAME_LENGTH &&
+                            file.getName().endsWith(".json"))) {
+                loadFile(file);
             }
-            loadFile(file);
         }
     }
 
