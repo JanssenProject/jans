@@ -17,9 +17,12 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,6 +52,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     @Override
     public CommandResponse execute(RegisterSiteParams params) {
         try {
+            validateOpHost(params);
+
             String siteId = UUID.randomUUID().toString();
 
             LOG.info("Creating site configuration ...");
@@ -63,6 +68,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
+    }
+
+    private void validateOpHost(RegisterSiteParams params) {
+        if (Strings.isNullOrEmpty(params.getOpHost())) {
+            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            String fallbackOpHost = getSiteService().defaultSiteConfiguration().getOpHost();
+            if (Strings.isNullOrEmpty(fallbackOpHost)) {
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
+            }
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON);
+            params.setOpHost(fallbackOpHost);
+        }
     }
 
     private void persistSiteConfiguration(String siteId, RegisterSiteParams params) {
