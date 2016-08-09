@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
  * @version 0.9, 06/10/2015
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GetAuthorizationCodeParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")

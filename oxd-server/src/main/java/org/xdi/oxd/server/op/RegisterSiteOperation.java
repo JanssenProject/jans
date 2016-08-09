@@ -133,14 +133,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     private RegisterRequest createRegisterClientRequest(RegisterSiteParams params) {
         final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
 
-        ApplicationType applicationType = null;
-        if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
-            applicationType = ApplicationType.fromString(params.getApplicationType());
-        }
-        if (applicationType == null && fallback.getApplicationType() != null) {
-            applicationType = ApplicationType.fromString(fallback.getApplicationType());
-        }
-
         List<ResponseType> responseTypes = Lists.newArrayList();
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
             for (String type : params.getResponseTypes()) {
@@ -164,7 +156,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             }
         }
 
-        final RegisterRequest request = new RegisterRequest(applicationType, clientName, Lists.newArrayList(redirectUris));
+        final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, Lists.newArrayList(redirectUris));
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
@@ -238,13 +230,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         siteConf.setRedirectUris(params.getRedirectUris());
+        siteConf.setApplicationType("web");
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
             siteConf.setAcrValues(params.getAcrValues());
         }
-        if (!Strings.isNullOrEmpty(params.getApplicationType())) {
-            siteConf.setApplicationType(params.getApplicationType());
-        }
+
         if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
             siteConf.setClaimsLocales(params.getClaimsLocales());
         }
