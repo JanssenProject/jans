@@ -46,7 +46,6 @@ public class RegisterSiteTest {
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setApplicationType("web");
             commandParams.setRedirectUris(Arrays.asList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
@@ -103,7 +102,6 @@ public class RegisterSiteTest {
 
             commandParams.setAuthorizationRedirectUri("https://gluu.loc/wp-login.php?option=oxdOpenId");
             commandParams.setPostLogoutRedirectUri("https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129");
-            commandParams.setApplicationType("web");
 
             commandParams.setRedirectUris(Arrays.asList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
             commandParams.setAcrValues(new ArrayList<String>());

@@ -125,6 +125,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (responseTypes.isEmpty()) {
             responseTypes.add("code");
         }
+        params.setResponseTypes(responseTypes);
 
         // redirect_uris
         Set<String> redirectUris = Sets.newHashSet();
