@@ -2412,4 +2412,3 @@ objectClasses: ( oxAsimbaSPRequestor-oid NAME 'oxAsimbaSPRequestor' SUP top STRU
 objectclasses: ( oxPassportConfiguration-oid NAME 'oxPassportConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
  ( ou $ gluuPassportConfiguration $ gluuStatus) 
   X-ORIGIN 'Gluu created objectclass' )
-  
