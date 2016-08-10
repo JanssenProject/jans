@@ -792,6 +792,10 @@ class Setup(object):
         except:
             self.logIt("Error installing jython-installer-%s.jar" % (self.jython_version))
             self.logIt(traceback.format_exc(), True)
+            
+        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % (self.jython_version)])
+        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
+
 
         try:
             self.run(['ln', '-sf', '/opt/jython-%s' % (self.jython_version), '/opt/jython'])
