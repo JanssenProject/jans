@@ -150,9 +150,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (params.getAcrValues() == null || params.getAcrValues().isEmpty()) {
             params.setAcrValues(fallback.getAcrValues());
         }
-        if (params.getAcrValues() == null || params.getAcrValues().isEmpty()) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_ACR_VALUES);
-        }
 
         // client_jwks_uri
         if (Strings.isNullOrEmpty(params.getClientJwksUri()) && !Strings.isNullOrEmpty(fallback.getClientJwksUri())) {
@@ -237,6 +234,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
+        request.setDefaultAcrValues(params.getAcrValues());
 
         List<GrantType> grantTypes = Lists.newArrayList();
         for (String grantType : params.getGrantType()) {
