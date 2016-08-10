@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.List;
  * @version 0.9, 14/03/2016
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateSiteParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
@@ -19,8 +21,6 @@ public class UpdateSiteParams implements HasOxdIdParams {
     @JsonProperty(value = "post_logout_redirect_uri")
     private String postLogoutRedirectUri;
 
-    @JsonProperty(value = "application_type")
-    private String applicationType;
     @JsonProperty(value = "redirect_uris")
     private List<String> redirectUris;
     @JsonProperty(value = "response_types")
@@ -211,14 +211,6 @@ public class UpdateSiteParams implements HasOxdIdParams {
         this.contacts = contacts;
     }
 
-    public String getApplicationType() {
-        return applicationType;
-    }
-
-    public void setApplicationType(String applicationType) {
-        this.applicationType = applicationType;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -226,7 +218,6 @@ public class UpdateSiteParams implements HasOxdIdParams {
         sb.append("{acrValues=").append(acrValues);
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
-        sb.append(", applicationType='").append(applicationType).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');

@@ -1,10 +1,14 @@
 {
-    "application_type":"web",
-    "response_types":["code", "id_token", "token"],
+    "op_host":"",
+    "authorization_redirect_uri":"",
+    "post_logout_redirect_uri":"",
+    "redirect_uris":"",
+    "response_types":["code"],
+    "grant_type":"authorization_code",
+    "acr_values":[""],
     "scope":["openid", "profile"],
-    "max_age":"4665665",
     "ui_locales":["en"],
     "claims_locales":["en"],
-    "acr_values":[""],
-    "grant_type":"authorization_code"
+    "client_jwks_uri":"",
+    "contacts":[]
 }

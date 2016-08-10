@@ -17,9 +17,12 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.SiteConfigurationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,6 +52,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     @Override
     public CommandResponse execute(RegisterSiteParams params) {
         try {
+            validateParametersAndFallbackIfNeeded(params);
+
             String siteId = UUID.randomUUID().toString();
 
             LOG.info("Creating site configuration ...");
@@ -63,6 +68,110 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
+    }
+
+    private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
+        SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
+
+        // op_host
+        if (Strings.isNullOrEmpty(params.getOpHost())) {
+            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            String fallbackOpHost = fallback.getOpHost();
+            if (Strings.isNullOrEmpty(fallbackOpHost)) {
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
+            }
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON);
+            params.setOpHost(fallbackOpHost);
+        }
+
+        // grant_type
+        List<String> grantTypes = Lists.newArrayList();
+
+        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
+            grantTypes.addAll(params.getGrantType());
+        }
+
+        if (grantTypes.isEmpty() && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
+            grantTypes.addAll(fallback.getGrantType());
+        }
+
+        if (grantTypes.isEmpty()) {
+            grantTypes.add(GrantType.AUTHORIZATION_CODE.getValue());
+        }
+
+        params.setGrantType(grantTypes);
+
+        // authorization_redirect_uri
+        if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
+            params.setAuthorizationRedirectUri(fallback.getAuthorizationRedirectUri());
+        }
+        if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
+            throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_REDIRECT_URI);
+        }
+
+        //post_logout_redirect_uri
+        if (Strings.isNullOrEmpty(params.getPostLogoutRedirectUri()) && !Strings.isNullOrEmpty(fallback.getPostLogoutRedirectUri())) {
+            params.setPostLogoutRedirectUri(fallback.getPostLogoutRedirectUri());
+        }
+
+        // response_type
+        List<String> responseTypes = Lists.newArrayList();
+        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
+            responseTypes.addAll(params.getResponseTypes());
+        }
+        if (responseTypes.isEmpty() && fallback.getResponseTypes() != null && !fallback.getResponseTypes().isEmpty()) {
+            responseTypes.addAll(fallback.getResponseTypes());
+        }
+        if (responseTypes.isEmpty()) {
+            responseTypes.add("code");
+        }
+
+        // redirect_uris
+        Set<String> redirectUris = Sets.newHashSet();
+        redirectUris.add(params.getAuthorizationRedirectUri());
+        if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
+            redirectUris.addAll(params.getRedirectUris());
+            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+                redirectUris.add(params.getPostLogoutRedirectUri());
+            }
+        }
+        params.setRedirectUris(Lists.newArrayList(redirectUris));
+
+        // scope
+        if (params.getScope() == null || params.getScope().isEmpty()) {
+            params.setScope(fallback.getScope());
+        }
+        if (params.getScope() == null || params.getScope().isEmpty()) {
+            throw new ErrorResponseException(ErrorResponseCode.INVALID_SCOPE);
+        }
+
+        // acr_values
+        if (params.getAcrValues() == null || params.getAcrValues().isEmpty()) {
+            params.setAcrValues(fallback.getAcrValues());
+        }
+        if (params.getAcrValues() == null || params.getAcrValues().isEmpty()) {
+            throw new ErrorResponseException(ErrorResponseCode.INVALID_ACR_VALUES);
+        }
+
+        // client_jwks_uri
+        if (Strings.isNullOrEmpty(params.getClientJwksUri()) && !Strings.isNullOrEmpty(fallback.getClientJwksUri())) {
+            params.setClientJwksUri(fallback.getClientJwksUri());
+        }
+
+        // contacts
+        if (params.getContacts() == null || params.getContacts().isEmpty()) {
+            params.setContacts(fallback.getContacts());
+        }
+
+        // ui_locales
+        if (params.getUiLocales() == null || params.getUiLocales().isEmpty()) {
+            params.setUiLocales(fallback.getUiLocales());
+        }
+
+        // claims_locales
+        if (params.getClaimsLocales() == null || params.getClaimsLocales().isEmpty()) {
+            params.setClaimsLocales(fallback.getClaimsLocales());
+        }
     }
 
     private void persistSiteConfiguration(String siteId, RegisterSiteParams params) {
@@ -114,47 +223,26 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterRequest createRegisterClientRequest(RegisterSiteParams params) {
-        final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
-
-        ApplicationType applicationType = null;
-        if (!Strings.isNullOrEmpty(params.getApplicationType()) && ApplicationType.fromString(params.getApplicationType()) != null) {
-            applicationType = ApplicationType.fromString(params.getApplicationType());
-        }
-        if (applicationType == null && fallback.getApplicationType() != null) {
-            applicationType = ApplicationType.fromString(fallback.getApplicationType());
-        }
-
         List<ResponseType> responseTypes = Lists.newArrayList();
-        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
-            for (String type : params.getResponseTypes()) {
-                responseTypes.add(ResponseType.fromString(type));
-            }
-        }
-        if (responseTypes.isEmpty() && fallback.getResponseTypes() != null) {
-            for (String type : fallback.getResponseTypes()) {
-                responseTypes.add(ResponseType.fromString(type));
-            }
+        for (String type : params.getResponseTypes()) {
+            responseTypes.add(ResponseType.fromString(type));
         }
 
         String clientName = "oxD client for site: " + siteConfiguration.getOxdId();
 
-        Set<String> redirectUris = Sets.newHashSet();
-        redirectUris.add(params.getAuthorizationRedirectUri());
-        if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
-            redirectUris.addAll(params.getRedirectUris());
-            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-                redirectUris.add(params.getPostLogoutRedirectUri());
-            }
-        }
-
-        final RegisterRequest request = new RegisterRequest(applicationType, clientName, Lists.newArrayList(redirectUris));
+        final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, params.getRedirectUris());
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
 
-        request.setGrantTypes(grantTypes(params));
+        List<GrantType> grantTypes = Lists.newArrayList();
+        for (String grantType : params.getGrantType()) {
+            grantTypes.add(GrantType.fromString(grantType));
+        }
+        request.setGrantTypes(grantTypes);
+
         request.setLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
@@ -172,44 +260,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
-        siteConfiguration.setResponseTypes(asString(responseTypes));
+        siteConfiguration.setResponseTypes(params.getResponseTypes());
         siteConfiguration.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         siteConfiguration.setContacts(params.getContacts());
-        siteConfiguration.setRedirectUris(Lists.newArrayList(redirectUris));
+        siteConfiguration.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
         return request;
-    }
-
-    private List<GrantType> grantTypes(RegisterSiteParams params) {
-
-        List<GrantType> grantTypes = Lists.newArrayList();
-
-        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
-            for (String grantType : params.getGrantType()) {
-                grantTypes.add(GrantType.fromString(grantType));
-            }
-        }
-
-        final SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
-        if (fallback != null && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
-            for (String grantType : fallback.getGrantType()) {
-                grantTypes.add(GrantType.fromString(grantType));
-            }
-        }
-
-        if (grantTypes.isEmpty()) {
-            grantTypes.add(GrantType.AUTHORIZATION_CODE);
-            grantTypes.add(GrantType.IMPLICIT);
-            grantTypes.add(GrantType.REFRESH_TOKEN);
-        }
-        return grantTypes;
-    }
-
-    public static List<String> asString(List<ResponseType> responseTypes) {
-        List<String> list = Lists.newArrayList();
-        for (ResponseType r : responseTypes) {
-            list.add(r.getValue());
-        }
-        return list;
     }
 
     private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {
@@ -221,13 +276,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         siteConf.setRedirectUris(params.getRedirectUris());
+        siteConf.setApplicationType("web");
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
             siteConf.setAcrValues(params.getAcrValues());
         }
-        if (!Strings.isNullOrEmpty(params.getApplicationType())) {
-            siteConf.setApplicationType(params.getApplicationType());
-        }
+
         if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
             siteConf.setClaimsLocales(params.getClaimsLocales());
         }
@@ -241,13 +295,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             siteConf.setContacts(params.getContacts());
         }
 
-        if (params.getGrantType() != null && !params.getGrantType().isEmpty()) {
-            siteConf.setGrantType(params.getGrantType());
-        }
-
-        if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
-            siteConf.setResponseTypes(params.getResponseTypes());
-        }
+        siteConf.setGrantType(params.getGrantType());
+        siteConf.setResponseTypes(params.getResponseTypes());
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {
             siteConf.setScope(params.getScope());
