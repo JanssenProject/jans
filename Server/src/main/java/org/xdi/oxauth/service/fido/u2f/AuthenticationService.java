@@ -212,7 +212,6 @@ public class AuthenticationService extends RequestService {
 		removeRequestMessage(authenticateRequestMessageLdap);
 	}
 
-
 	public String getUserInumByKeyHandle(String appId, String keyHandle) throws InvalidKeyHandleDeviceException {
 		if (org.xdi.util.StringHelper.isEmpty(appId) || StringHelper.isEmpty(keyHandle)) {
 			return null;

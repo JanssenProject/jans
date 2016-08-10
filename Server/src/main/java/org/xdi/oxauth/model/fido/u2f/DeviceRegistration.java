@@ -34,6 +34,12 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	@LdapAttribute(ignoreDuringUpdate = true, name = "oxId")
 	private String id;
 
+	@LdapAttribute
+	private String displayName;
+
+	@LdapAttribute
+	private String description;
+
     @LdapJsonObject
     @LdapAttribute(name = "oxDeviceRegistrationConf")
 	private DeviceRegistrationConfiguration deviceRegistrationConfiguration;
@@ -94,6 +100,22 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public DeviceRegistrationConfiguration getDeviceRegistrationConfiguration() {
@@ -187,10 +209,12 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("DeviceRegistration [id=").append(id).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
-				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application).append(", keyHandle=")
-				.append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", deviceData=").append(deviceData)
-				.append(", creationDate=").append(creationDate).append(", lastAccessTime=").append(lastAccessTime).append("]");
+		builder.append("DeviceRegistration [id=").append(id).append(", displayName=").append(displayName).append(", description=")
+				.append(description).append(", deviceRegistrationConfiguration=").append(deviceRegistrationConfiguration)
+				.append(", counter=").append(counter).append(", status=").append(status).append(", application=").append(application)
+				.append(", keyHandle=").append(keyHandle).append(", keyHandleHashCode=").append(keyHandleHashCode).append(", deviceData=")
+				.append(deviceData).append(", creationDate=").append(creationDate).append(", lastAccessTime=").append(lastAccessTime)
+				.append("]");
 		return builder.toString();
 	}
 
