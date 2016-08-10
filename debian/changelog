@@ -1,4 +1,4 @@
-gluu-oxd-server (2.4.4-5~trusty+Ub14.04) trusty; urgency=low
+gluu-oxd-server (2.4.5-SNAPSHOT-5~trusty+Ub14.04) trusty; urgency=low
 
   * Initial release (Closes: #1232)
 
