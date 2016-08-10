@@ -57,6 +57,8 @@ public class SiteConfiguration implements Serializable {
     private String clientName;
     @JsonProperty(value = "sector_identifier_uri")
     private String sectorIdentifierUri;
+    @JsonProperty(value = "client_jwks_uri")
+    private String clientJwksUri;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -136,6 +138,7 @@ public class SiteConfiguration implements Serializable {
         this.clientSecretExpiresAt = conf.clientSecretExpiresAt;
         this.clientName = conf.clientName;
         this.sectorIdentifierUri = conf.sectorIdentifierUri;
+        this.clientJwksUri = conf.clientJwksUri;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -166,6 +169,14 @@ public class SiteConfiguration implements Serializable {
         this.gatCreatedAt = conf.gatCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
+    }
+
+    public String getClientJwksUri() {
+        return clientJwksUri;
+    }
+
+    public void setClientJwksUri(String clientJwksUri) {
+        this.clientJwksUri = clientJwksUri;
     }
 
     public String getAatRefreshToken() {
@@ -525,6 +536,7 @@ public class SiteConfiguration implements Serializable {
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
+        sb.append(", clientJwksUri='").append(clientJwksUri).append('\'');
         sb.append(", scope=").append(scope);
         sb.append(", uiLocales=").append(uiLocales);
         sb.append(", claimsLocales=").append(claimsLocales);

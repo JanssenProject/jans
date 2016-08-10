@@ -105,7 +105,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 responseTypes.add(ResponseType.fromString(type));
 
                 request.setResponseTypes(responseTypes);
-                site.setResponseTypes(RegisterSiteOperation.asString(responseTypes));
+                site.setResponseTypes(params.getResponseTypes());
             }
         }
 
