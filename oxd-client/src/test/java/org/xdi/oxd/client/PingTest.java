@@ -40,7 +40,6 @@ public class PingTest {
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setApplicationType("web");
             commandParams.setRedirectUris(Arrays.asList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
