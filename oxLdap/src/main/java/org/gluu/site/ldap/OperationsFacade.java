@@ -16,6 +16,7 @@ import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
+import org.xdi.util.StringHelper;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.Attribute;
@@ -204,6 +205,11 @@ public class OperationsFacade {
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
+		
+		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
+			System.err.println("!!!!!!!!!! LDAP");
+			(new Exception()).printStackTrace();
+		}
 
 		if (attributes == null) {
 			searchRequest = new SearchRequest(dn, scope, filter);
@@ -259,6 +265,11 @@ public class OperationsFacade {
 	}
 
 	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
+
+		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
+			System.err.println("!!!!!!!!!! LDAP");
+			(new Exception()).printStackTrace();
+		}
 
 		SearchRequest searchRequest;
 
@@ -338,6 +349,11 @@ public class OperationsFacade {
 	 * @throws ConnectionException
 	 */
 	public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException {
+		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
+			System.err.println("!!!!!!!!!! LDAP");
+			(new Exception()).printStackTrace();
+		}
+
 		try {
 			if (attributes == null) {
 				return getConnectionPool().getEntry(dn);
