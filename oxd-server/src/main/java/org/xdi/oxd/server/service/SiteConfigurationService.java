@@ -29,7 +29,7 @@ public class SiteConfigurationService {
      */
     private static final Logger LOG = LoggerFactory.getLogger(SiteConfigurationService.class);
 
-    private static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
+    public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
 
     private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
 
@@ -60,13 +60,11 @@ public class SiteConfigurationService {
         // load all files
         final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(configurationService.getConfDirectoryFile()));
         for (File file : files) {
-            if (!file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) &&
-                    (file.getName().length() != FILE_NAME_LENGTH ||
-                            !file.getName().endsWith(".json"))) { // precondition
-
-                continue;
+            if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) ||
+                    (file.getName().length() == FILE_NAME_LENGTH &&
+                            file.getName().endsWith(".json"))) {
+                loadFile(file);
             }
-            loadFile(file);
         }
     }
 

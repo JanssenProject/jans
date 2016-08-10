@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -7,6 +8,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 06/06/2016
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RsCheckAccessParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
