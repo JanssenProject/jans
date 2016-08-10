@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -12,6 +13,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.9, 23/10/2013
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CheckAccessTokenParams implements HasOxdIdParams {
 
     /**
