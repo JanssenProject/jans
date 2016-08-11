@@ -31,4 +31,4 @@ This module has only one property:
       ]
    }
    
-   The names/values of properties are simular to oxAuth/oxTrust ldap configuration files.
+   The names/values of properties are similar to oxAuth/oxTrust ldap configuration files.
