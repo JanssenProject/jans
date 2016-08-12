@@ -250,10 +250,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 * client.
 	 *
 	 * @return The Check Session iFrame URL.
-	 *
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
-	@Deprecated
 	public String getCheckSessionIFrame() {
 		return checkSessionIFrame;
 	}
@@ -265,10 +262,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 *
 	 * @param checkSessionIFrame
 	 *            The Check Session iFrame URL.
-	 *
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
-	@Deprecated
 	public void setCheckSessionIFrame(String checkSessionIFrame) {
 		this.checkSessionIFrame = checkSessionIFrame;
 	}
@@ -277,10 +271,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 * Returns the URL of the End Session endpoint.
 	 *
 	 * @return The URL of the End Session endpoint.
-	 *
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
-	@Deprecated
 	public String getEndSessionEndpoint() {
 		return endSessionEndpoint;
 	}
@@ -290,10 +281,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	 *
 	 * @param endSessionEndpoint
 	 *            The URL of the End Session endpoint.
-	 *
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
 	 */
-	@Deprecated
 	public void setEndSessionEndpoint(String endSessionEndpoint) {
 		this.endSessionEndpoint = endSessionEndpoint;
 	}
@@ -342,18 +330,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 		this.registrationEndpoint = registrationEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public String getValidateTokenEndpoint() {
 		return validateTokenEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public void setValidateTokenEndpoint(String validateTokenEndpoint) {
 		this.validateTokenEndpoint = validateTokenEndpoint;
 	}
