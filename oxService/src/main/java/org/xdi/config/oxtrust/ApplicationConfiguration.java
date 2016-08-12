@@ -146,6 +146,12 @@ public final class ApplicationConfiguration implements Serializable {
 	private boolean scimTestMode;
 	private String scimTestModeAccessToken;
 
+	private boolean rptConnectionPoolUseConnectionPooling;
+	private int rptConnectionPoolMaxTotal;
+	private int rptConnectionPoolDefaultMaxPerRoute;
+	private int rptConnectionPoolValidateAfterInactivity;  // In seconds; will be converted to millis
+	private int rptConnectionPoolCustomKeepAliveTimeout;  // In seconds; will be converted to millis
+
 	public String getBaseDN() {
 		return baseDN;
 	}
@@ -832,5 +838,45 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setScimTestModeAccessToken(String scimTestModeAccessToken) {
 		this.scimTestModeAccessToken = scimTestModeAccessToken;
+	}
+
+	public boolean isRptConnectionPoolUseConnectionPooling() {
+		return rptConnectionPoolUseConnectionPooling;
+	}
+
+	public void setRptConnectionPoolUseConnectionPooling(boolean rptConnectionPoolUseConnectionPooling) {
+		this.rptConnectionPoolUseConnectionPooling = rptConnectionPoolUseConnectionPooling;
+	}
+
+	public int getRptConnectionPoolMaxTotal() {
+		return rptConnectionPoolMaxTotal;
+	}
+
+	public void setRptConnectionPoolMaxTotal(int rptConnectionPoolMaxTotal) {
+		this.rptConnectionPoolMaxTotal = rptConnectionPoolMaxTotal;
+	}
+
+	public int getRptConnectionPoolDefaultMaxPerRoute() {
+		return rptConnectionPoolDefaultMaxPerRoute;
+	}
+
+	public void setRptConnectionPoolDefaultMaxPerRoute(int rptConnectionPoolDefaultMaxPerRoute) {
+		this.rptConnectionPoolDefaultMaxPerRoute = rptConnectionPoolDefaultMaxPerRoute;
+	}
+
+	public int getRptConnectionPoolValidateAfterInactivity() {
+		return rptConnectionPoolValidateAfterInactivity;
+	}
+
+	public void setRptConnectionPoolValidateAfterInactivity(int rptConnectionPoolValidateAfterInactivity) {
+		this.rptConnectionPoolValidateAfterInactivity = rptConnectionPoolValidateAfterInactivity;
+	}
+
+	public int getRptConnectionPoolCustomKeepAliveTimeout() {
+		return rptConnectionPoolCustomKeepAliveTimeout;
+	}
+
+	public void setRptConnectionPoolCustomKeepAliveTimeout(int rptConnectionPoolCustomKeepAliveTimeout) {
+		this.rptConnectionPoolCustomKeepAliveTimeout = rptConnectionPoolCustomKeepAliveTimeout;
 	}
 }
