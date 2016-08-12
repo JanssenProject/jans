@@ -44,6 +44,7 @@ import java.util.*;
 @Path("/oxauth/gluu-configuration")
 @Api(value = "/.well-known/gluu-configuration", description = "Endpoint for non-standard OpenID Connect discovery configuration data in a JSON [RFC4627] document that resides in at /.well-known/gluu-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the Gluu server.")
 public class GluuConfigurationWS {
+
     @Logger
     private Log log;
 
@@ -61,10 +62,6 @@ public class GluuConfigurationWS {
 
             final GluuConfiguration conf = new GluuConfiguration();
 
-            conf.setClientinfoEndpoint(configuration.getClientInfoEndpoint());
-            conf.setCheckSessionIframe(configuration.getCheckSessionIFrame());
-            conf.setEndSessionEndpoint(configuration.getEndSessionEndpoint());
-            conf.setValidateTokenEndpoint(configuration.getValidateTokenEndpoint());
             conf.setFederationMetadataEndpoint(configuration.getFederationMetadataEndpoint());
             conf.setFederationEndpoint(configuration.getFederationEndpoint());
             conf.setIdGenerationEndpoint(configuration.getIdGenerationEndpoint());
@@ -88,10 +85,9 @@ public class GluuConfigurationWS {
     }
 
     public Map<Integer, Set<String>> createAuthLevelMapping() {
+        ExternalAuthenticationService service = ExternalAuthenticationService.instance();
+        Map<Integer, Set<String>> map = Maps.newHashMap();
         try {
-            ExternalAuthenticationService service = ExternalAuthenticationService.instance();
-
-            Map<Integer, Set<String>> map = Maps.newHashMap();
             for (CustomScriptConfiguration script : service.getCustomScriptConfigurationsMap()) {
                 String acr = script.getName();
                 int level = script.getLevel();
@@ -103,25 +99,20 @@ public class GluuConfigurationWS {
                 }
                 acrs.add(acr);
             }
-
-            return map;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return null;
+        return map;
     }
 
-    private List<Map<String, Set<String>>> createScopeToClaimsMapping() {
-        List<Map<String, Set<String>>> result = new ArrayList<Map<String, Set<String>>>();
+    private Map<String, Set<String>> createScopeToClaimsMapping() {
+        Map<String, Set<String>> result = new HashMap<String, Set<String>>();
         try {
             final AttributeService attributeService = AttributeService.instance();
             final ScopeService scopeService = ScopeService.instance();
             for (Scope scope : scopeService.getAllScopesList()) {
                 final Set<String> claimsList = new HashSet<String>();
-                final Map<String, Set<String>> mapping = new HashMap<String, Set<String>>();
-                mapping.put(scope.getDisplayName(), claimsList);
-
-                result.add(mapping);
+                result.put(scope.getDisplayName(), claimsList);
 
                 final List<String> claimIdList = scope.getOxAuthClaims();
                 if (claimIdList != null && !claimIdList.isEmpty()) {
