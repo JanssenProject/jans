@@ -293,10 +293,6 @@ public class OpenIdConfiguration extends HttpServlet {
     /**
      *  @deprecated theses params:
      *  <ul>
-     *      <li>clientinfo_endpoint</li>
-     *      <li>check_session_iframe</li>
-     *      <li>end_session_endpoint</li>
-     *      <li>validate_token_endpoint</li>
      *      <li>federation_metadata_endpoint</li>
      *      <li>federation_endpoint</li>
      *      <li>id_generation_endpoint</li>
@@ -341,10 +337,6 @@ public class OpenIdConfiguration extends HttpServlet {
     /**
      *  @deprecated theses params:
      *  <ul>
-     *      <li>clientinfo_endpoint</li>
-     *      <li>check_session_iframe</li>
-     *      <li>end_session_endpoint</li>
-     *      <li>validate_token_endpoint</li>
      *      <li>federation_metadata_endpoint</li>
      *      <li>federation_endpoint</li>
      *      <li>id_generation_endpoint</li>
