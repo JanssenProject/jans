@@ -41,15 +41,10 @@ public class GluuConfigurationWSTest extends BaseTest {
                 try {
                     configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), GluuConfiguration.class);
                     assertNotNull(configuration, "Meta data configuration is null");
-                    assertNotNull(configuration.getFederationMetadataEndpoint());
-                    assertNotNull(configuration.getFederationEndpoint());
                     assertNotNull(configuration.getIdGenerationEndpoint());
                     assertNotNull(configuration.getIntrospectionEndpoint());
                     assertNotNull(configuration.getAuthLevelMapping());
                     assertNotNull(configuration.getScopeToClaimsMapping());
-                    assertEquals(configuration.getHttpLogoutSupported(), "true");
-                    assertEquals(configuration.getLogoutSessionSupported(), "true");
-
                 } catch (IOException e) {
                     e.printStackTrace();
                     fail();

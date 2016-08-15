@@ -338,34 +338,18 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 		this.validateTokenEndpoint = validateTokenEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public String getFederationMetadataEndpoint() {
 		return federationMetadataEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
 		this.federationMetadataEndpoint = federationMetadataEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public String getFederationEndpoint() {
 		return federationEndpoint;
 	}
 
-	/**
-	 * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-	 */
-	@Deprecated
 	public void setFederationEndpoint(String federationEndpoint) {
 		this.federationEndpoint = federationEndpoint;
 	}

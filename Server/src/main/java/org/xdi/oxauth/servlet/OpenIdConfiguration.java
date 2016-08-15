@@ -293,14 +293,10 @@ public class OpenIdConfiguration extends HttpServlet {
     /**
      *  @deprecated theses params:
      *  <ul>
-     *      <li>federation_metadata_endpoint</li>
-     *      <li>federation_endpoint</li>
      *      <li>id_generation_endpoint</li>
      *      <li>introspection_endpoint</li>
      *      <li>auth_level_mapping</li>
      *      <li>scope_to_claims_mapping</li>
-     *      <li>http_logout_supported</li>
-     *      <li>logout_session_supported</li>
      *  </ul>
      *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
@@ -337,14 +333,10 @@ public class OpenIdConfiguration extends HttpServlet {
     /**
      *  @deprecated theses params:
      *  <ul>
-     *      <li>federation_metadata_endpoint</li>
-     *      <li>federation_endpoint</li>
      *      <li>id_generation_endpoint</li>
      *      <li>introspection_endpoint</li>
      *      <li>auth_level_mapping</li>
      *      <li>scope_to_claims_mapping</li>
-     *      <li>http_logout_supported</li>
-     *      <li>logout_session_supported</li>
      *  </ul>
      *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */

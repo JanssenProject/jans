@@ -62,14 +62,10 @@ public class GluuConfigurationWS {
 
             final GluuConfiguration conf = new GluuConfiguration();
 
-            conf.setFederationMetadataEndpoint(configuration.getFederationMetadataEndpoint());
-            conf.setFederationEndpoint(configuration.getFederationEndpoint());
             conf.setIdGenerationEndpoint(configuration.getIdGenerationEndpoint());
             conf.setIntrospectionEndpoint(configuration.getIntrospectionEndpoint());
             conf.setAuthLevelMapping(createAuthLevelMapping());
             conf.setScopeToClaimsMapping(createScopeToClaimsMapping());
-            conf.setHttpLogoutSupported("true");
-            conf.setLogoutSessionSupported("true");
 
             // convert manually to avoid possible conflicts between resteasy
             // providers, e.g. jettison, jackson
