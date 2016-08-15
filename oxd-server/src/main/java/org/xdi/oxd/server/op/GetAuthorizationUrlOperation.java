@@ -33,7 +33,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
         final SiteConfiguration site = getSite();
 
-        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getIssuer() + "/oxauth/authorize";
+        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();
