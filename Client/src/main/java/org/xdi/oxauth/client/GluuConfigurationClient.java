@@ -78,12 +78,6 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
 
-                if (jsonObj.has(FEDERATION_METADATA_ENDPOINT)) {
-                    getResponse().setFederationMetadataEndpoint(jsonObj.getString(FEDERATION_METADATA_ENDPOINT));
-                }
-                if (jsonObj.has(FEDERATION_ENDPOINT)) {
-                    getResponse().setFederationEndpoint(jsonObj.getString(FEDERATION_ENDPOINT));
-                }
                 if (jsonObj.has(ID_GENERATION_ENDPOINT)) {
                     getResponse().setIdGenerationEndpoint(jsonObj.getString(ID_GENERATION_ENDPOINT));
                 }
@@ -95,12 +89,6 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
                 }
                 if (jsonObj.has(SCOPE_TO_CLAIMS_MAPPING)) {
                     getResponse().setScopeToClaimsMapping(mapJsonToScopeToClaimsMapping(jsonObj.getJSONObject(SCOPE_TO_CLAIMS_MAPPING)));
-                }
-                if (jsonObj.has(HTTP_LOGOUT_SUPPORTED)) {
-                    getResponse().setHttpLogoutSupported(jsonObj.getString(HTTP_LOGOUT_SUPPORTED));
-                }
-                if (jsonObj.has(LOGOUT_SESSION_SUPPORTED)) {
-                    getResponse().setLogoutSessionSupported(jsonObj.getString(LOGOUT_SESSION_SUPPORTED));
                 }
             }
         } catch (Exception e) {

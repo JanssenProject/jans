@@ -11,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,23 +19,13 @@ import java.util.Set;
  */
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({
-        "federation_metadata_endpoint",
-        "federation_endpoint",
         "id_generation_endpoint",
         "introspection_endpoint",
         "auth_level_mapping",
-        "scope_to_claims_mapping",
-        "http_logout_supported",
-        "logout_session_supported"
+        "scope_to_claims_mapping"
 })
 @ApiModel(value = "Gluu Configuration")
 public class GluuConfiguration {
-
-    @JsonProperty(value = "federation_metadata_endpoint")
-    private String federationMetadataEndpoint;
-
-    @JsonProperty(value = "federation_endpoint")
-    private String federationEndpoint;
 
     @JsonProperty(value = "id_generation_endpoint")
     private String idGenerationEndpoint;
@@ -50,27 +39,6 @@ public class GluuConfiguration {
     @JsonProperty(value = "scope_to_claims_mapping")
     private Map<String, Set<String>> scopeToClaimsMapping;
 
-    @JsonProperty(value = "http_logout_supported")
-    private String httpLogoutSupported;
-
-    @JsonProperty(value = "logout_session_supported")
-    private String logoutSessionSupported;
-
-    public String getFederationMetadataEndpoint() {
-        return federationMetadataEndpoint;
-    }
-
-    public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
-        this.federationMetadataEndpoint = federationMetadataEndpoint;
-    }
-
-    public String getFederationEndpoint() {
-        return federationEndpoint;
-    }
-
-    public void setFederationEndpoint(String federationEndpoint) {
-        this.federationEndpoint = federationEndpoint;
-    }
 
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
@@ -104,33 +72,13 @@ public class GluuConfiguration {
         this.scopeToClaimsMapping = scopeToClaimsMapping;
     }
 
-    public String getHttpLogoutSupported() {
-        return httpLogoutSupported;
-    }
-
-    public void setHttpLogoutSupported(String httpLogoutSupported) {
-        this.httpLogoutSupported = httpLogoutSupported;
-    }
-
-    public String getLogoutSessionSupported() {
-        return logoutSessionSupported;
-    }
-
-    public void setLogoutSessionSupported(String logoutSessionSupported) {
-        this.logoutSessionSupported = logoutSessionSupported;
-    }
-
     @Override
     public String toString() {
         return "GluuConfiguration{" +
-                "federationMetadataEndpoint='" + federationMetadataEndpoint + '\'' +
-                ", federationEndpoint='" + federationEndpoint + '\'' +
-                ", idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
+                "idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", authLevelMapping=" + authLevelMapping +
                 ", scopeToClaimsMapping=" + scopeToClaimsMapping +
-                ", httpLogoutSupported='" + httpLogoutSupported + '\'' +
-                ", logoutSessionSupported='" + logoutSessionSupported + '\'' +
                 '}';
     }
 }
