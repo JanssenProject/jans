@@ -39,34 +39,6 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
     }
 
     @Override
-    public EndSessionRequest getRequest() {
-        if (request instanceof EndSessionRequest) {
-            return (EndSessionRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(EndSessionRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public EndSessionResponse getResponse() {
-        if (response instanceof EndSessionResponse) {
-            return (EndSessionResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(EndSessionResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }
