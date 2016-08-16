@@ -36,8 +36,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
     private String url;
 
-    protected BaseRequest request;
-    protected BaseResponse response;
+    protected T request;
+    protected V response;
     protected ClientRequest clientRequest = null;
     protected ClientResponse<String> clientResponse = null;
     private final List<Cookie> cookies = new ArrayList<Cookie>();
@@ -59,13 +59,13 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         this.url = url;
     }
 
-    public abstract T getRequest();
+    public T getRequest() { return request;}
 
-    public abstract void setRequest(T request);
+    public void setRequest(T request) { this.request = request; }
 
-    public abstract V getResponse();
+    public V getResponse() { return  response; }
 
-    public abstract void setResponse(V response);
+    public void setResponse(V response) { this.response = response; }
 
     public ClientExecutor getExecutor() {
         return executor;
