@@ -40,34 +40,6 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
     }
 
     @Override
-    public OpenIdConfigurationRequest getRequest() {
-        if (request instanceof OpenIdConfigurationRequest) {
-            return (OpenIdConfigurationRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(OpenIdConfigurationRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public OpenIdConfigurationResponse getResponse() {
-        if (response instanceof OpenIdConfigurationResponse) {
-            return (OpenIdConfigurationResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(OpenIdConfigurationResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }

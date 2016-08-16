@@ -23,34 +23,6 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     @Override
-    public GluuConfigurationRequest getRequest() {
-        if (request instanceof GluuConfigurationRequest) {
-            return (GluuConfigurationRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(GluuConfigurationRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public GluuConfigurationResponse getResponse() {
-        if (response instanceof GluuConfigurationResponse) {
-            return (GluuConfigurationResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(GluuConfigurationResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }
