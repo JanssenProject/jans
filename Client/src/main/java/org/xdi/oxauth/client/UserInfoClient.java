@@ -47,34 +47,6 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
     }
 
     @Override
-    public UserInfoRequest getRequest() {
-        if (request instanceof UserInfoRequest) {
-            return (UserInfoRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(UserInfoRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public UserInfoResponse getResponse() {
-        if (response instanceof UserInfoResponse) {
-            return (UserInfoResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(UserInfoResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         if (request.getAuthorizationMethod() == null
                 || request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD

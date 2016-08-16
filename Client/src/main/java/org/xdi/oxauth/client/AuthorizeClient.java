@@ -44,34 +44,6 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     }
 
     @Override
-    public AuthorizationRequest getRequest() {
-        if (request instanceof AuthorizationRequest) {
-            return (AuthorizationRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(AuthorizationRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public AuthorizationResponse getResponse() {
-        if (response instanceof AuthorizationResponse) {
-            return (AuthorizationResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(AuthorizationResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         if (request.getAuthorizationMethod() == null
                 || request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
