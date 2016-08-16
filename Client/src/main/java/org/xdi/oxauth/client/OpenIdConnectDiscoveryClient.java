@@ -45,34 +45,6 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
     }
 
     @Override
-    public OpenIdConnectDiscoveryRequest getRequest() {
-        if (request instanceof OpenIdConnectDiscoveryRequest) {
-            return (OpenIdConnectDiscoveryRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(OpenIdConnectDiscoveryRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public OpenIdConnectDiscoveryResponse getResponse() {
-        if (response instanceof OpenIdConnectDiscoveryResponse) {
-            return (OpenIdConnectDiscoveryResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(OpenIdConnectDiscoveryResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }
