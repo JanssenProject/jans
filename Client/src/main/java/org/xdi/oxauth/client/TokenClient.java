@@ -35,34 +35,6 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
     }
 
     @Override
-    public TokenRequest getRequest() {
-        if (request instanceof TokenRequest) {
-            return (TokenRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(TokenRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public TokenResponse getResponse() {
-        if (response instanceof TokenResponse) {
-            return (TokenResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(TokenResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.POST;
     }

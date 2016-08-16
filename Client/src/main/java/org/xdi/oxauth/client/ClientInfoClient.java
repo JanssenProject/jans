@@ -42,34 +42,6 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     }
 
     @Override
-    public ClientInfoRequest getRequest() {
-        if (request instanceof ClientInfoRequest) {
-            return (ClientInfoRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(ClientInfoRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public ClientInfoResponse getResponse() {
-        if (response instanceof ClientInfoResponse) {
-            return (ClientInfoResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(ClientInfoResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         if (getRequest().getAuthorizationMethod() == null
                 || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
