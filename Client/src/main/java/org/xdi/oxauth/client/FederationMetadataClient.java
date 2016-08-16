@@ -38,34 +38,6 @@ public class FederationMetadataClient extends BaseClient<FederationMetadataReque
     }
 
     @Override
-    public FederationMetadataRequest getRequest() {
-        if (request instanceof FederationMetadataRequest) {
-            return (FederationMetadataRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(FederationMetadataRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public FederationMetadataResponse getResponse() {
-        if (response instanceof FederationMetadataResponse) {
-            return (FederationMetadataResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(FederationMetadataResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }

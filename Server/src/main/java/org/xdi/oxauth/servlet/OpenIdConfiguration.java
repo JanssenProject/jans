@@ -229,7 +229,7 @@ public class OpenIdConfiguration extends HttpServlet {
             JSONArray claimsSupported = new JSONArray();
             List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
 
-            // Preload all scopes to avoid sending request to LDAP per claim 
+            // Preload all scopes to avoid sending request to LDAP per claim
             List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
 
             for (GluuAttribute gluuAttribute : gluuAttributes) {
@@ -290,6 +290,17 @@ public class OpenIdConfiguration extends HttpServlet {
         }
     }
 
+    /**
+     *  @deprecated theses params:
+     *  <ul>
+     *      <li>id_generation_endpoint</li>
+     *      <li>introspection_endpoint</li>
+     *      <li>auth_level_mapping</li>
+     *      <li>scope_to_claims_mapping</li>
+     *  </ul>
+     *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+     */
+    @Deprecated
     private static JSONArray createScopeToClaimsMapping() {
         final JSONArray result = new JSONArray();
         try {
@@ -318,7 +329,18 @@ public class OpenIdConfiguration extends HttpServlet {
         }
         return result;
     }
-    
+
+    /**
+     *  @deprecated theses params:
+     *  <ul>
+     *      <li>id_generation_endpoint</li>
+     *      <li>introspection_endpoint</li>
+     *      <li>auth_level_mapping</li>
+     *      <li>scope_to_claims_mapping</li>
+     *  </ul>
+     *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
+     */
+    @Deprecated
     private JSONObject createAuthLevelMapping() {
         final JSONObject mappings = new JSONObject();
         try {
