@@ -43,19 +43,21 @@ public class SocketService {
     private volatile boolean shutdown = false;
 
     private Configuration conf;
+    private HttpService httpService;
 
     /**
      * Avoid direct instance creation
      */
     @Inject
-    public SocketService(Configuration conf) {
+    public SocketService(Configuration conf, HttpService httpService) {
         this.conf = conf;
+        this.httpService = httpService;
     }
 
     public void listenSocket() throws IOException {
         final int port = conf.getPort();
 
-        final LicenseService licenseService = new LicenseService(conf);
+        final LicenseService licenseService = new LicenseService(conf, httpService);
         final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.getThreadsCount(), CoreUtils.daemonThreadFactory());
 
         try {
