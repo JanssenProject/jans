@@ -12,8 +12,10 @@ import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
 import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.service.HttpService;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +30,11 @@ public class LicenseUpdateService {
     private static final Logger LOG = LoggerFactory.getLogger(LicenseUpdateService.class);
 
     private final Configuration conf;
+    private final HttpService httpService;
 
-    public LicenseUpdateService(Configuration conf) {
+    public LicenseUpdateService(Configuration conf, HttpService httpService) {
         this.conf = conf;
+        this.httpService = httpService;
     }
 
     public void start() {
@@ -54,13 +58,13 @@ public class LicenseUpdateService {
 
     private void updateLicenseFromServer() {
         try {
-            final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint());
+            final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint(), httpService.getClientExecutor());
 
-            final LicenseResponse generatedLicense = generateWS.generatePost(conf.getLicenseId());
-            if (!Strings.isNullOrEmpty(generatedLicense.getEncodedLicense())) {
+            final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId());
+            if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseService.getLicenseFile();
                 if (file != null) {
-                    final String json = new LicenseFile(generatedLicense.getEncodedLicense()).asJson();
+                    final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense()).asJson();
                     FileUtils.write(file, json);
                     LOG.trace("License file updated successfully.");
                     return;
