@@ -11,7 +11,7 @@
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.11.4.min.js"/>
-        <script src="./js/super-gluu.js"/>
+        <script src="./js/uaf-api.js"/>
 
         <script>
 			var helper = (function() {
@@ -21,16 +21,17 @@
 	 			    /**
 	 			    * Resume on getting authentication result from server
 	 			    */
-					onSignInCallback: function(authResult) {
+					onSignInCallback: function(authResult, authHandle) {
 				        console.log('Get authentication result: ' + authResult);
-						helper.resumeAuthentication(authResult);
+						helper.resumeAuthentication(authResult, authHandle);
 					},
 
 					/**
 					* Send form to server to resume authentication workflow
 					*/
-					resumeAuthentication: function(authResult) {
+					resumeAuthentication: function(authResult, authHandle) {
 						$('input#auth_result').val(authResult);
+						$('input#auth_handle').val(authHandle);
 						$('form#response').submit();
 					},
 				};
@@ -39,22 +40,23 @@
 			/**
 			 * Calls the helper method that handles the authentication flow.
 			 */
-			function onSignInCallback(authResult) {
-			  helper.onSignInCallback(authResult);
+			function onSignInCallback(authResult, authHandle) {
+			  helper.onSignInCallback(authResult, authHandle);
 			}
 
-			var request = '${super_gluu_request}';
-			var label = '${super_gluu_label}';
-			var qr_options = ${super_gluu_qr_options};
-			$(document).ready(function() {
+			var qr_image = '${qr_image}';
+			var qr_options = ${qr_options};
+			var server_uri = '${uaf_obb_server_uri}';
+			var status_request = ${uaf_obb_status_request};
 
-				if (request == '') {
+			$(document).ready(function() {
+				if (qr_image == '') {
 					onSignInCallback('error');
 				}
 
-				super_gluu.renderQrCode('#container', request, qr_options, label);
-				super_gluu.startProgressBar('#progressbar', 60);
-				super_gluu.startSessionChecker(onSignInCallback, 60);
+				uaf_api.renderQrCode('#container', qr_image, qr_options);
+				uaf_api.startProgressBar('#progressbar', 60);
+				uaf_api.startStatusChecker(onSignInCallback, server_uri, status_request, 60);
 			});
 
         </script>
@@ -92,11 +94,12 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
+    <ui:define name="pageTitle">oxAuth - UAF Login</ui:define>
 
     <ui:define name="body">
-        <form method="post" id="response" action="#{request.contextPath}/postlogin">
+        <form id="response" method="post" action="#{request.contextPath}/postlogin">
             <input type="hidden" id="auth_result" name="auth_result" />
+            <input type="hidden" id="auth_handle" name="auth_handle" />
         </form>
 
         <table border="0" align="center">
@@ -118,7 +121,7 @@
                                         </s:div>
 
                                         <div class="dialog">
-                                        	<p>Scan QR code using Super-Gluu</p>
+                                        	<p>Scan QR code using UAF mobile authenticator</p>
                                         	<div id="container"></div>
                                         	<div id="progressbar"></div>
                                         </div>

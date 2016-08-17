@@ -7,7 +7,7 @@
 /** Super-Gluu API.
  */
 var super_gluu = {
-		
+
 	//--------------------------------------------------------------------------------
 	// Utility methods
 	//--------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ var super_gluu = {
 		
 		function callCallback(callback, status) {
 			super_gluu.checker.stop = true
-			callback.call(status);
+			callback.call(this, status);
 		}
 	},
 };
