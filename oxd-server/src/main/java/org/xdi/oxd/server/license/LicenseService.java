@@ -16,6 +16,7 @@ import org.xdi.oxd.license.client.lib.ALicense;
 import org.xdi.oxd.license.client.lib.ALicenseManager;
 import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.service.HttpService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,9 +49,9 @@ public class LicenseService {
     private volatile boolean licenseValid = false;
 
     @Inject
-    public LicenseService(Configuration conf) {
+    public LicenseService(Configuration conf, HttpService httpService) {
         this.conf = conf;
-        this.updateService = new LicenseUpdateService(conf);
+        this.updateService = new LicenseUpdateService(conf, httpService);
         this.updateService.start();
 
         licenseValid = validate();
