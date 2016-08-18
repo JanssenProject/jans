@@ -19,7 +19,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -28,7 +27,6 @@ import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -40,7 +38,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.Key;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -49,9 +46,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +56,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 25, 2016
+ * @version August 17, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -202,6 +196,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 byte[] signature = Base64Util.base64urldecode(encodedSignature);
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+                //Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm());
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
@@ -238,37 +233,6 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         FileOutputStream stream = new FileOutputStream(keyStoreFile);
         keyStore.store(stream, keyStoreSecret.toCharArray());
         return true;
-    }
-
-    public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
-        PublicKey publicKey = null;
-
-        JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
-        for (int i = 0; i < webKeys.length(); i++) {
-            JSONObject key = webKeys.getJSONObject(i);
-            if (alias.equals(key.getString(KEY_ID))) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(key.getString(ALGORITHM));
-                if (signatureAlgorithm != null) {
-                    if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
-                        publicKey = new RSAPublicKeyImpl(
-                                new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
-                                new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
-                    } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
-                        AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
-                        parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
-                        ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
-
-                        publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC).generatePublic(new ECPublicKeySpec(
-                                new ECPoint(
-                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
-                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
-                                ), ecParameters));
-                    }
-                }
-            }
-        }
-
-        return publicKey;
     }
 
     public PublicKey getPublicKey(String alias) {

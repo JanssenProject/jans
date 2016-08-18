@@ -16,8 +16,8 @@ import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
+import org.xdi.oxauth.model.exception.InvalidParameterException;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
@@ -28,17 +28,15 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version August 17, 2016
  */
 public class JweEncrypterImpl extends AbstractJweEncrypter {
 
-    private RSAPublicKey rsaPublicKey;
+    private PublicKey publicKey;
     private byte[] sharedSymmetricKey;
 
     public JweEncrypterImpl(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm, byte[] sharedSymmetricKey) {
@@ -48,9 +46,9 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         }
     }
 
-    public JweEncrypterImpl(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm, RSAPublicKey rsaPublicKey) {
+    public JweEncrypterImpl(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm, PublicKey publicKey) {
         super(keyEncryptionAlgorithm, blockEncryptionAlgorithm);
-        this.rsaPublicKey = rsaPublicKey;
+        this.publicKey = publicKey;
     }
 
     @Override
@@ -65,21 +63,19 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         try {
             if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA_OAEP
                     || getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA1_5) {
-                if (rsaPublicKey == null) {
+                if (publicKey != null) {
+                    Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
+                    //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
+
+                    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+                    byte[] encryptedKey = cipher.doFinal(contentMasterKey);
+
+                    String encodedEncryptedKey = Base64Util.base64urlencode(encryptedKey);
+                    return encodedEncryptedKey;
+                } else {
                     throw new InvalidJweException("The RSA public key is null");
                 }
-                KeyFactory keyFactory = KeyFactory.getInstance(getKeyEncryptionAlgorithm().getFamily(), "BC");
-                RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(rsaPublicKey.getModulus(), rsaPublicKey.getPublicExponent());
-                java.security.interfaces.RSAPublicKey pubKey = (java.security.interfaces.RSAPublicKey) keyFactory.generatePublic(pubKeySpec);
 
-                Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
-                //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
-
-                cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-                byte[] encryptedKey = cipher.doFinal(contentMasterKey);
-
-                String encodedEncryptedKey = Base64Util.base64urlencode(encryptedKey);
-                return encodedEncryptedKey;
             } else if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.A128KW
                     || getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.A256KW) {
                 if (sharedSymmetricKey == null) {
@@ -110,11 +106,9 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
             throw new InvalidJweException(e);
         } catch (BadPaddingException e) {
             throw new InvalidJweException(e);
-        } catch (NoSuchProviderException e) {
-            throw new InvalidJweException(e);
         } catch (InvalidKeyException e) {
             throw new InvalidJweException(e);
-        } catch (InvalidKeySpecException e) {
+        } catch (NoSuchProviderException e) {
             throw new InvalidJweException(e);
         }
     }
@@ -212,7 +206,7 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
             throw new InvalidJweException(e);
         } catch (NoSuchPaddingException e) {
             throw new InvalidJweException(e);
-        } catch (org.xdi.oxauth.model.exception.InvalidParameterException e) {
+        } catch (InvalidParameterException e) {
             throw new InvalidJweException(e);
         }
     }

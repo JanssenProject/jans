@@ -11,21 +11,22 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
+import sun.security.rsa.RSAPublicKeyImpl;
 
 import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 
 import static org.testng.Assert.assertEquals;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version August 17, 2016
  */
 public class EncryptionTest extends BaseTest {
 
@@ -96,11 +97,11 @@ public class EncryptionTest extends BaseTest {
                 224, 173, 56, 224, 201
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, publicKey);
         String encodedEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
         byte[] initVector = Base64Util.unsignedToBytes(new int[]{
@@ -207,11 +208,11 @@ public class EncryptionTest extends BaseTest {
                 130, 89
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, publicKey);
         String encodedJweEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
         byte[] initVector = Base64Util.unsignedToBytes(new int[]{
@@ -316,11 +317,11 @@ public class EncryptionTest extends BaseTest {
                 130, 89
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, publicKey);
         String encodedJweEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
         byte[] initVector = Base64Util.unsignedToBytes(new int[]{
