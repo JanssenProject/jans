@@ -265,12 +265,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml. Authenticate for step 1. Using next attributes mapping", currentAttributesMapping
                     
                     local_uid = saml_response_normalized_attributes.get(self.uidMapping)
-                    if StringHelper.isEmpty(local_uid):
+                    if local_uid == None:
                         print "Saml. Authenticate for step 1. Failed to find uid of user: '%s'" % saml_user_uid
                         return False
 
                     newUser = User()
-                    newUser.setUserId(local_uid)
+                    newUser.setAttribute("uid", local_uid)
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
