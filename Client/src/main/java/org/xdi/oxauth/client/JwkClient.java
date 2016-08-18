@@ -40,34 +40,6 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
     }
 
     @Override
-    public JwkRequest getRequest() {
-        if (request instanceof JwkRequest) {
-            return (JwkRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(JwkRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public JwkResponse getResponse() {
-        if (response instanceof JwkResponse) {
-            return (JwkResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(JwkResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
     }

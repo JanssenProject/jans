@@ -27,34 +27,6 @@ public class FederationDataClient extends BaseClient<FederationDataRequest, Fede
     }
 
     @Override
-    public FederationDataRequest getRequest() {
-        if (request instanceof FederationDataRequest) {
-            return (FederationDataRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(FederationDataRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public FederationDataResponse getResponse() {
-        if (response instanceof FederationDataResponse) {
-            return (FederationDataResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(FederationDataResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return HttpMethod.POST;
     }
