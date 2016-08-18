@@ -24,7 +24,6 @@ from org.apache.http.params import CoreConnectionPNames
 from com.notnoop.apns import APNS
 from com.google.android.gcm.server import Sender, Message
 
-
 try:
     import json
 except ImportError:
@@ -343,7 +342,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         find_user_by_uid = userService.getUser(user_name)
         if find_user_by_uid == None:
-            print "oxPush. Process basic authentication. Failed to find user '%s'" % user_name
+            print "Super-Gluu. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
         return find_user_by_uid
