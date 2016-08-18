@@ -16,7 +16,9 @@ from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.model.common import User
 from org.xdi.ldap.model import CustomAttribute
+from java.lang import String
 
+from jarray import array
 import java
 
 try:
@@ -68,6 +70,10 @@ class PersonAuthentication(PersonAuthenticationType):
         if not configurationAttributes.containsKey("eppn_uid"):
             print "Saml. Initialization. Property eppn_uid is mandatory"
             return False
+
+        self.userObjectClasses = None
+        if not configurationAttributes.containsKey("user_object_classes"):
+            self.userObjectClasses = self.prepareUserObjectClasses(configurationAttributes)
         
         self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
 
@@ -270,6 +276,11 @@ class PersonAuthentication(PersonAuthenticationType):
                         return False
 
                     newUser = User()
+                    
+                    # Set custom object classes
+                    if self.userObjectClasses != None:
+                        newUser.setCustomObjectClasses(self.userObjectClasses)
+
                     newUser.setAttribute("uid", local_uid)
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
@@ -609,6 +620,15 @@ class PersonAuthentication(PersonAuthenticationType):
             i = i + 1
         
         return attributeMapping
+
+    def prepareUserObjectClasses(self, configurationAttributes):
+        user_object_classes = configurationAttributes.get("user_object_classes")
+
+        user_object_classes_list_array = StringHelper.split(user_object_classes, ",")
+        if (ArrayHelper.isEmpty(user_object_classes_list_array)):
+            return None
+        
+        return user_object_classes_list_array
 
     def prepareCurrentAttributesMapping(self, currentAttributesMapping, configurationAttributes, requestParameters):
         saml_client_configuration = self.getClientConfiguration(configurationAttributes, requestParameters)
