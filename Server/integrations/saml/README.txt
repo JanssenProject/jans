@@ -45,13 +45,16 @@ This module has next properties:
    The count of attributes in this property should be equal to count attributes in saml_local_attributes_list property.
    Example: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname, http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
 
-10) saml_local_attributes_list - Comma separated list of attribute names. Specify list of local attributes mapped from Saml response.
+10) eppn_uid - Specify IdP attribute which Saml scrpt should use to map to uid attribute.
+   Example: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+
+11) saml_local_attributes_list - Comma separated list of attribute names. Specify list of local attributes mapped from Saml response.
     It's optional property. It's manadatory only if saml_deployment_type has value 'enroll'.
     The count of attributes in this property should be equal to count attributes in saml_idp_attributes_list property.
     Local attributes list should contains next mandatory attributes: uid, mail, givenName, sn, cn.
     Example: uid, mail, givenName, sn, cn
 
-11) saml_extension_module - Specify external module name. It's optional property. External module should implements 2 methods:
+12) saml_extension_module - Specify external module name. It's optional property. External module should implements 2 methods:
     def init(conf_attr):
     ...
     return True/False
@@ -61,5 +64,5 @@ This module has next properties:
     return True/False
 
     SAML scripts calls init method at initialization, and calls postLogin after to execute additional custom workflow.
-12) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
+13) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
    Example: false

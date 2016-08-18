@@ -64,6 +64,13 @@ class PersonAuthentication(PersonAuthenticationType):
         
         self.samlConfiguration = samlConfiguration
 
+        self.uidMapping = None
+        if not configurationAttributes.containsKey("eppn_uid"):
+            print "Saml. Initialization. Property eppn_uid is mandatory"
+            return False
+        
+        self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
+
         self.attributesMapping = None
         if (configurationAttributes.containsKey("saml_idp_attributes_list") and
             configurationAttributes.containsKey("saml_local_attributes_list")):
@@ -256,8 +263,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
                     print "Saml. Authenticate for step 1. Using next attributes mapping", currentAttributesMapping
+                    
+                    local_uid = saml_response_normalized_attributes.get(self.uidMapping)
+                    if local_uid == None:
+                        print "Saml. Authenticate for step 1. Failed to find uid of user: '%s'" % saml_user_uid
+                        return False
 
                     newUser = User()
+                    newUser.setAttribute("uid", local_uid)
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
@@ -277,7 +290,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 user_authenticated = authenticationService.authenticate(found_user_name)
                 if (user_authenticated == False):
-                    print "Saml. Authenticate for step 1. Failed to authenticate user"
+                    print "Saml. Authenticate for step 1. Failed to authenticate user: '%s'" % found_user_name
                     return False
 
                 print "Saml. Authenticate for step 1. Setting count steps to 1"
@@ -586,7 +599,6 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
         
         attributeMapping = IdentityHashMap()
-        containsUid = False
         i = 0
         count = len(saml_idp_attributes_list_array)
         while (i < count):
@@ -594,14 +606,7 @@ class PersonAuthentication(PersonAuthenticationType):
             localAttribute = StringHelper.toLowerCase(saml_local_attributes_list_array[i])
             attributeMapping.put(idpAttribute, localAttribute)
 
-            if (StringHelper.equalsIgnoreCase(localAttribute, "uid")):
-                containsUid = True
-
             i = i + 1
-
-        if (not containsUid):
-            print "Saml. PrepareAttributesMapping. There is no mapping to mandatory 'uid' attribute"
-            return None
         
         return attributeMapping
 
