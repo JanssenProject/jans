@@ -36,34 +36,6 @@ public class ValidateTokenClient extends BaseClient<ValidateTokenRequest, Valida
     }
 
     @Override
-    public ValidateTokenRequest getRequest() {
-        if (request instanceof ValidateTokenRequest) {
-            return (ValidateTokenRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(ValidateTokenRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public ValidateTokenResponse getResponse() {
-        if (response instanceof ValidateTokenResponse) {
-            return (ValidateTokenResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(ValidateTokenResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         return httpMethod;
     }

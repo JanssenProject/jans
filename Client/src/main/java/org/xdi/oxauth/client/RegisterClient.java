@@ -44,34 +44,6 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
     }
 
     @Override
-    public RegisterRequest getRequest() {
-        if (request instanceof RegisterRequest) {
-            return (RegisterRequest) request;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setRequest(RegisterRequest request) {
-        super.request = request;
-    }
-
-    @Override
-    public RegisterResponse getResponse() {
-        if (response instanceof RegisterResponse) {
-            return (RegisterResponse) response;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setResponse(RegisterResponse response) {
-        super.response = response;
-    }
-
-    @Override
     public String getHttpMethod() {
         if (getRequest() != null) {
             if (StringUtils.isNotBlank(getRequest().getHttpMethod())) {
