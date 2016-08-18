@@ -24,19 +24,15 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.oxauth.model.util.Util;
 
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version August 17, 2016
  */
 @Name("authorizationAction")
 @Scope(ScopeType.SESSION)
@@ -103,33 +99,34 @@ public class AuthorizationAction {
             if (useOpenIdRequestObject) {
                 JwtAuthorizationRequest jwtAuthorizationRequest;
                 if (isJWSSelected()) {
+                    // TODO: Use CryptoProvider class
                     if (isClientSecretRequired()) {
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, clientSecret);
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, clientSecret);
                     } else if (isPrivateExponentRequired()) {
-                        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
-                        jwtAuthorizationRequest.setKeyId(keyId);
+                        //RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
+                        //jwtAuthorizationRequest.setKeyId(keyId);
                     } else if (isDRequired()) {
-                        ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
-                        jwtAuthorizationRequest.setKeyId(keyId);
+                        //ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
+                        //jwtAuthorizationRequest.setKeyId(keyId);
                     } else {
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, (String) null);
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, (String) null);
                     }
                 } else {
                     if (isPublicExponentRequired()) {
-                        RSAPublicKey publicKey = new RSAPublicKey(modulus, publicExponent);
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
-                                requestObjectEncryptionEnc, publicKey);
+                        //RSAPublicKey publicKey = new RSAPublicKey(modulus, publicExponent);
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
+                        //        requestObjectEncryptionEnc, publicKey);
                     } else {
-                        jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
-                                requestObjectEncryptionEnc, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
+                        //        requestObjectEncryptionEnc, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
                     }
                 }
 
-                if (jwtAuthorizationRequest != null) {
+                /*if (jwtAuthorizationRequest != null) {
                     req.setRequest(jwtAuthorizationRequest.getEncodedJwt(openIdRequestObject));
-                }
+                }*/
             }
 
             String authorizationRequest = authorizationEndpoint + "?" + req.getQueryString();
