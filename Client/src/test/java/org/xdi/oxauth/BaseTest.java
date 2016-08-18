@@ -70,6 +70,7 @@ public abstract class BaseTest {
 
     protected String authorizationEndpoint;
     protected String authorizationPageEndpoint;
+    protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
@@ -473,6 +474,7 @@ public abstract class BaseTest {
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
+            gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
         } else {
             showTitle("Loading configuration endpoints from properties file");
 
@@ -498,6 +500,10 @@ public abstract class BaseTest {
 
     private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
         return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+    }
+
+    private String determineGluuConfigurationEndpoint(String host) {
+        return host + "/oxauth/seam/resource/restv1/oxauth/gluu-configuration";
     }
 
     public void showTitle(String title) {
