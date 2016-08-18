@@ -31,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "Saml. Initialization"
 
-        saml_certificate_file = configurationAttributes.get("saml_certificate_file").getValue2()
+        asimba_saml_certificate_file = configurationAttributes.get("asimba_saml_certificate_file").getValue2()
         saml_idp_sso_target_url = configurationAttributes.get("saml_idp_sso_target_url").getValue2()
         saml_issuer = configurationAttributes.get("saml_issuer").getValue2()
         saml_use_authn_context = StringHelper.toBoolean(configurationAttributes.get("saml_use_authn_context").getValue2(), True)
@@ -40,8 +40,8 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             saml_name_identifier_format = None
 
-        saml_certificate = self.loadCeritificate(saml_certificate_file)
-        if (StringHelper.isEmpty(saml_certificate)):
+        asimba_saml_certificate = self.loadCeritificate(asimba_saml_certificate_file)
+        if (StringHelper.isEmpty(asimba_saml_certificate)):
             print "Saml. Initialization. File with x509 certificate should be not empty"
             return False
 
@@ -60,7 +60,7 @@ class PersonAuthentication(PersonAuthenticationType):
         samlConfiguration.setUseRequestedAuthnContext(saml_use_authn_context)
         
         # Load x509 certificate
-        samlConfiguration.loadCertificateFromString(saml_certificate)
+        samlConfiguration.loadCertificateFromString(asimba_saml_certificate)
         
         self.samlConfiguration = samlConfiguration
 
@@ -488,20 +488,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return passed_step1
 
-    def loadCeritificate(self, saml_certificate_file):
-        saml_certificate = None
+    def loadCeritificate(self, asimba_saml_certificate_file):
+        asimba_saml_certificate = None
 
         # Load certificate from file
-        f = open(saml_certificate_file, 'r')
+        f = open(asimba_saml_certificate_file, 'r')
         try:
-            saml_certificate = f.read()
+            asimba_saml_certificate = f.read()
         except:
-            print "Failed to load certificate from file:", saml_certificate_file
+            print "Failed to load certificate from file:", asimba_saml_certificate_file
             return None
         finally:
             f.close()
         
-        return saml_certificate
+        return asimba_saml_certificate
 
     def getClientConfiguration(self, configurationAttributes, requestParameters):
         # Get client configuration
@@ -548,18 +548,18 @@ class PersonAuthentication(PersonAuthenticationType):
         
         saml_client_configuration_value = json.loads(saml_client_configuration.getValue())
 
-        client_saml_certificate = None      
-        client_saml_certificate_file = saml_client_configuration_value["saml_certificate_file"]
-        if (StringHelper.isNotEmpty(client_saml_certificate_file)):
-            client_saml_certificate = self.loadCeritificate(client_saml_certificate_file)
-            if (StringHelper.isEmpty(client_saml_certificate)):
+        client_asimba_saml_certificate = None      
+        client_asimba_saml_certificate_file = saml_client_configuration_value["asimba_saml_certificate_file"]
+        if (StringHelper.isNotEmpty(client_asimba_saml_certificate_file)):
+            client_asimba_saml_certificate = self.loadCeritificate(client_asimba_saml_certificate_file)
+            if (StringHelper.isEmpty(client_asimba_saml_certificate)):
                 print "Saml. BuildClientSamlConfiguration. File with x509 certificate should be not empty. Using default configuration"
                 return currentSamlConfiguration
 
         clientSamlConfiguration = currentSamlConfiguration.clone()
         
-        if (client_saml_certificate != None):
-            clientSamlConfiguration.loadCertificateFromString(client_saml_certificate)
+        if (client_asimba_saml_certificate != None):
+            clientSamlConfiguration.loadCertificateFromString(client_asimba_saml_certificate)
 
         client_saml_issuer = saml_client_configuration_value["saml_issuer"]
         clientSamlConfiguration.setIssuer(client_saml_issuer)
