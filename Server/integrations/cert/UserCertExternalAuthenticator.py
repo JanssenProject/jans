@@ -171,7 +171,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     context.set("cert_user_external_uid", cert_user_external_uid)
                     return True
                 else:
-                    print "Cert. Authenticate for step 2. Mapping cet to user account is not allowed"
+                    print "Cert. Authenticate for step 2. Mapping cert to user account is not allowed"
                     context.set("cert_count_login_steps", 2)
                     return False
 
