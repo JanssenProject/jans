@@ -69,7 +69,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Saml. Initialization. Property eppn_uid is mandatory"
             return False
         
-        self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid"))
+        self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
 
         self.attributesMapping = None
         if (configurationAttributes.containsKey("saml_idp_attributes_list") and
