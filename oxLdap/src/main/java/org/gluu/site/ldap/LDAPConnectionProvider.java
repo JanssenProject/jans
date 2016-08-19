@@ -61,8 +61,14 @@ public class LDAPConnectionProvider {
 			init(props);
 		} catch (LDAPException ex) {
 			creationResultCode = ex.getResultCode();
+			if(props.getProperty("bindPassword") != null){
+				props.setProperty("bindPassword" , "XXXXX");				
+			}
 			log.error("Failed to create connection pool with properties: " + props, ex);
 		} catch (Exception ex) {
+			if(props.getProperty("bindPassword") != null){
+				props.setProperty("bindPassword" , "XXXXX");				
+			}
 			log.error("Failed to create connection pool with properties: " + props, ex);
 		}
 	}
