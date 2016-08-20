@@ -132,6 +132,12 @@
     "cssLocation":"",
     "jsLocation":"",
 
+    "rptConnectionPoolUseConnectionPooling":false,
+    "rptConnectionPoolMaxTotal":200,
+    "rptConnectionPoolDefaultMaxPerRoute":20,
+    "rptConnectionPoolValidateAfterInactivity":10,
+    "rptConnectionPoolCustomKeepAliveTimeout":5,
+
     "scimTestMode":false,
     "scimTestModeAccessToken":""
 }
