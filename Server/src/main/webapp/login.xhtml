@@ -26,8 +26,8 @@
                          </div><!-- end logo-->
 
                          <div class="login span4 offset6">
-                         Need an account?
-                         <a class="register" href="/identity/register?redirectUri=https://support.gluu.org">Register</a>
+                         Need a Gluu account?
+                         <a class="register,need-account" href="/identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
                         </div>
                     </div><!-- end header-->
                </div>
@@ -63,7 +63,7 @@
                                     <input type="hidden" name="auth_mode" value="#{param.auth_mode}"/>
                                     <input type="hidden" name="auth_level" value="#{param.auth_level}"/>
 
-					<h:messages style="color:red;margin:8px;" />
+					<h:messages style="color:red;" />
 				<div class="row-fluid">
 							<span class="input-name span3">
 								<h:outputLabel for="username" value="Email" />
@@ -88,7 +88,7 @@
                      <li class="row-fluid submit-container">
 	                   <div class="gradient contact-button green span2 offset3">
                               <div id="submit_block" class="login_input">
-                                        <h:commandButton id="login_button" value="#{messages['login.login']}" action="#{authenticator.authenticate}"/>
+                                        <h:commandButton id="login_button" style="padding-left: 35%;" value="#{messages['login.login']}" action="#{authenticator.authenticate}"/>
                               </div>
                               <span class="sprite-green_click_icon"></span>
                          </div>
@@ -96,7 +96,7 @@
 
                     <li class="row-fluid">
                          <div class="span9 offset3">
-                              <a class="need-account" href="/identity/person/passwordReminder.htm">Forgot your password?</a>
+                              <a class="need-account,register" href="/identity/person/passwordReminder.htm">Forgot your password?</a>
                          </div>
                     </li>
 
