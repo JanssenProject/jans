@@ -43,8 +43,8 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '2.4.4-SNAPSHOT'
-        self.githubBranchName = 'master'
+        self.oxVersion = '2.4.5-SNAPSHOT'
+        self.githubBranchName = 'install_procedures_ganesh'
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -77,6 +77,8 @@ class Setup(object):
         self.os_initdaemon = None
         self.apache_version = None
         self.opendj_version = None
+        self.tomcat_version = '7.0.65'
+        self.jython_version = '2.7.0'
 
         self.distFolder = '/opt/dist'
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
@@ -742,6 +744,65 @@ class Setup(object):
             return "2.6"
 
         return "3.0"
+
+    def extractOpenDJ(self):
+        openDJArchive = 'opendj-server-3.0.0.zip'
+        try:
+            self.logIt("Unzipping %s in /opt/" % openDJArchive)
+            self.run(['unzip', '-n', '%s/%s' % (self.distFolder, openDJArchive), '-d', '/opt/' ])
+        except:
+            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distFolder, openDJArchive))
+            self.logIt(traceback.format_exc(), True)
+
+    def installTomcat(self):
+        self.logIt("Installing tomcat %s..." % (self.tomcat_version))
+        tomcatArchive = 'apache-tomcat-%s.zip' % (self.tomcat_version)
+        try:
+            self.logIt("Unzipping %s in /opt/" % tomcatArchive)
+            self.run(['unzip', '-n', '%s/%s' % (self.distFolder, tomcatArchive), '-d', '/opt/' ])
+        except:
+            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distFolder, tomcatArchive))
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.run(['ln', '-sf', '/opt/apache-tomcat-%s' % (self.tomcat_version), '/opt/tomcat'])
+        except:
+            self.logIt("Error creating symlink /opt/tomcat from /opt/apache-tomcat-%s" % (self.tomcat_version))
+            self.logIt(traceback.format_exc(), True)
+
+        self.removeDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
+        self.createDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
+
+        self.logIt("Copying identity.war into tomcat webapps folder...")
+        self.copyFile('%s/identity.war' % self.distFolder, self.tomcatWebAppFolder)
+        self.logIt("Copying oxauth.war into tomcat webapps folder...")
+        self.copyFile('%s/oxauth.war' % self.distFolder, self.tomcatWebAppFolder)
+
+        self.run(["/bin/chmod", '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
+        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
+        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/tomcat'])
+
+    def installJython(self):
+        self.logIt("Installing Jython %s..." % (self.jython_version))
+        jythonInstaller = 'jython-%s.jar' % (self.jython_version)
+
+        try:
+            self.run(['rm', '-fr', '/opt/jython-%s' % self.jython_version])
+            self.run(['java', '-jar', '%s/jython-installer-%s.jar' % (self.distFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
+        except:
+            self.logIt("Error installing jython-installer-%s.jar" % (self.jython_version))
+            self.logIt(traceback.format_exc(), True)
+            
+        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % (self.jython_version)])
+        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
+
+
+        try:
+            self.run(['ln', '-sf', '/opt/jython-%s' % (self.jython_version), '/opt/jython'])
+        except:
+            self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % (self.jython_version))
+            self.logIt(traceback.format_exc(), True)
+
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1944,11 +2005,15 @@ class Setup(object):
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
         
-        if self.os_type in ['centos', 'redhat', 'fedora']:
+        if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
                 if service != 'opendj':
                     self.run(["/sbin/chkconfig", service, "on"])
+        elif self.os_type in ['redhat']:
+            for service in self.redhat_services:
+                self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
             self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
@@ -2135,6 +2200,9 @@ if __name__ == '__main__':
     installObject.os_initdaemon = installObject.detect_initd()
     # Get apache version   
     installObject.apache_version = installObject.determineApacheVersionForOS()
+    
+    installObject.extractOpenDJ()
+
     # Get OpenDJ version   
     installObject.opendj_version = installObject.determineOpenDJVersion()
 
@@ -2181,6 +2249,8 @@ if __name__ == '__main__':
         try:
             installObject.configureOsPatches()
             installObject.makeFolders()
+            installObject.installTomcat()
+            installObject.installJython()
             installObject.make_salt()
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
