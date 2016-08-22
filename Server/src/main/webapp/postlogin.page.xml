@@ -9,6 +9,7 @@
     <navigation from-action="#{authenticator.authenticateWithOutcome}">
         <rule if-outcome="failure">
             <redirect view-id="/error.xhtml">
+            	<param name="faces-redirect" value="true"/>
                 <message severity="ERROR">Failed to authenticate</message>
             </redirect>
         </rule>
