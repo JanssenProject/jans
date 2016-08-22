@@ -10,8 +10,7 @@ from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper, Util
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.model.common import User
@@ -35,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         asimba_saml_certificate_file = configurationAttributes.get("asimba_saml_certificate_file").getValue2()
         saml_idp_sso_target_url = configurationAttributes.get("saml_idp_sso_target_url").getValue2()
-        saml_issuer = configurationAttributes.get("saml_issuer").getValue2()
+        asimba_entity_id = configurationAttributes.get("asimba_entity_id").getValue2()
         saml_use_authn_context = StringHelper.toBoolean(configurationAttributes.get("saml_use_authn_context").getValue2(), True)
         if (saml_use_authn_context):
             saml_name_identifier_format = configurationAttributes.get("saml_name_identifier_format").getValue2()
@@ -50,7 +49,7 @@ class PersonAuthentication(PersonAuthenticationType):
         samlConfiguration = SamlConfiguration()
 
         # Set the issuer of the authentication request. This would usually be the URL of the issuing web application
-        samlConfiguration.setIssuer(saml_issuer)
+        samlConfiguration.setIssuer(asimba_entity_id)
 
         # Tells the IdP to return a persistent identifier for the user
         samlConfiguration.setNameIdentifierFormat(saml_name_identifier_format)
@@ -281,7 +280,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     
                     # Set custom object classes
                     if self.userObjectClasses != None:
-                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % StringHelper.toString(self.userObjectClasses)
+                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
                         newUser.setCustomObjectClasses(self.userObjectClasses)
 
                     newUser.setAttribute("uid", local_uid)
@@ -324,6 +323,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml. Authenticate for step 1. Failed to find user"
 
                     user = User()
+                    
+                    # Set custom object classes
+                    if self.userObjectClasses != None:
+                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
+                        newUser.setCustomObjectClasses(self.userObjectClasses)
+
                     customAttributes = ArrayList()
                     for key in attributes.keySet():
                         ldapAttributes = attributeService.getAllAttributes()
@@ -588,8 +593,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if (client_asimba_saml_certificate != None):
             clientSamlConfiguration.loadCertificateFromString(client_asimba_saml_certificate)
 
-        client_saml_issuer = saml_client_configuration_value["saml_issuer"]
-        clientSamlConfiguration.setIssuer(client_saml_issuer)
+        client_asimba_entity_id = saml_client_configuration_value["asimba_entity_id"]
+        clientSamlConfiguration.setIssuer(client_asimba_entity_id)
         
         saml_use_authn_context = saml_client_configuration_value["saml_use_authn_context"]
         client_use_saml_use_authn_context = StringHelper.toBoolean(saml_use_authn_context, True)
