@@ -6,7 +6,9 @@
 
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
+from org.jboss.seam import Component
 from javax.faces.context import FacesContext
+from org.jboss.seam.faces import FacesMessages
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
@@ -70,10 +72,13 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Saml. Initialization. Property eppn_uid is mandatory"
             return False
 
-
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
             self.userObjectClasses = self.prepareUserObjectClasses(configurationAttributes)
+
+        self.userEnforceAttributesUniqueness = None
+        if configurationAttributes.containsKey("enforce_uniqueness_attr_list"):
+            self.userEnforceAttributesUniqueness = self.prepareUserEnforceUniquenessAttributes(configurationAttributes)
         
         self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
 
@@ -295,6 +300,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % ( saml_user_uid, newUser.getCustomAttributes() )
 
+                    user_unique = self.checkUserUniqueness(newUser)
+                    if not user_unique:
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        facesMessages = FacesMessages.instance()
+                        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
+                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        return False
+
                     find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
 
@@ -327,7 +340,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Set custom object classes
                     if self.userObjectClasses != None:
                         print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
-                        newUser.setCustomObjectClasses(self.userObjectClasses)
+                        user.setCustomObjectClasses(self.userObjectClasses)
 
                     customAttributes = ArrayList()
                     for key in attributes.keySet():
@@ -355,6 +368,14 @@ class PersonAuthentication(PersonAuthenticationType):
                         attribute = CustomAttribute("cn")
                         attribute.setValue(saml_user_uid)
                         customAttributes.add(attribute)
+
+                    user_unique = self.checkUserUniqueness(user)
+                    if not user_unique:
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        facesMessages = FacesMessages.instance()
+                        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
+                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        return False
 
                     find_user_by_uid = userService.addUser(user, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
@@ -638,6 +659,15 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return user_object_classes_list_array
 
+    def prepareUserEnforceUniquenessAttributes(self, configurationAttributes):
+        enforce_uniqueness_attr_list = configurationAttributes.get("enforce_uniqueness_attr_list").getValue2()
+
+        enforce_uniqueness_attr_list_array = StringHelper.split(enforce_uniqueness_attr_list, ",")
+        if (ArrayHelper.isEmpty(enforce_uniqueness_attr_list_array)):
+            return None
+        
+        return enforce_uniqueness_attr_list_array
+
     def prepareCurrentAttributesMapping(self, currentAttributesMapping, configurationAttributes, requestParameters):
         saml_client_configuration = self.getClientConfiguration(configurationAttributes, requestParameters)
         if (saml_client_configuration == None):
@@ -653,19 +683,44 @@ class PersonAuthentication(PersonAuthenticationType):
         return clientAttributesMapping
 
     def samlExtensionPostLogin(self, configurationAttributes, user):
-        if (self.samlExtensionModule != None):
-            try:
-                post_login_result = self.samlExtensionModule.postLogin(configurationAttributes, user)
-                print "Saml. ExtensionPostlogin result: '%s'" % post_login_result
+        if (self.samlExtensionModule == None):
+            return True
+        try:
+            post_login_result = self.samlExtensionModule.postLogin(configurationAttributes, user)
+            print "Saml. ExtensionPostlogin result: '%s'" % post_login_result
 
-                return post_login_result
-            except Exception, ex:
-                print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
-                print "Saml. ExtensionPostlogin. Unexpected error:", ex
-                return False
-            except java.lang.Throwable, ex:
-                print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
-                ex.printStackTrace() 
-                return False
+            return post_login_result
+        except Exception, ex:
+            print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
+            print "Saml. ExtensionPostlogin. Unexpected error:", ex
+            return False
+        except java.lang.Throwable, ex:
+            print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
+            ex.printStackTrace() 
+            return False
+
+    def checkUserUniqueness(self, user):
+        if (self.userEnforceAttributesUniqueness == None):
+            return True
+
+        userService = UserService.instance()
+
+        # Prepare user object to search by pattern
+        userBaseDn = userService.getDnForUser(None) 
+
+        userToSearch = User()
+        userToSearch.setDn(userBaseDn)
+
+        for userAttributeName in self.userEnforceAttributesUniqueness:
+            attribute_values_list = user.getAttributeValues(userAttributeName)
+            if (attribute_values_list != None) and (attribute_values_list.size() > 0):
+                userToSearch.setAttribute(userAttributeName, attribute_values_list)
+
+        ldapEntryManager = Component.getInstance("ldapEntryManager");
+
+        # TODO: Replace with userService.findEntries in CE 2.4.5
+        users = ldapEntryManager.findEntries(userToSearch, 1, 1)
+        if users.size() > 0:
+            return False;
                     
         return True
