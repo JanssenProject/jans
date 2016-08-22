@@ -217,6 +217,15 @@ public class UserService {
         }
     }
 
+    public User getUserBySample(User user, int limit) {
+        log.debug("Getting user by sample");
+
+        List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
+        log.debug("Found '{0}' entries", entries.size());
+
+        return (User) entries;
+    }
+
     public User addUserAttribute(String userId, String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
