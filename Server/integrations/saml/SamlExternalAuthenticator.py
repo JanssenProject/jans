@@ -67,11 +67,6 @@ class PersonAuthentication(PersonAuthenticationType):
         
         self.samlConfiguration = samlConfiguration
 
-        self.uidMapping = None
-        if not configurationAttributes.containsKey("eppn_uid"):
-            print "Saml. Initialization. Property eppn_uid is mandatory"
-            return False
-
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
             self.userObjectClasses = self.prepareUserObjectClasses(configurationAttributes)
@@ -79,8 +74,6 @@ class PersonAuthentication(PersonAuthenticationType):
         self.userEnforceAttributesUniqueness = None
         if configurationAttributes.containsKey("enforce_uniqueness_attr_list"):
             self.userEnforceAttributesUniqueness = self.prepareUserEnforceUniquenessAttributes(configurationAttributes)
-
-        self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
 
         self.attributesMapping = None
         if (configurationAttributes.containsKey("saml_idp_attributes_list") and
@@ -275,11 +268,6 @@ class PersonAuthentication(PersonAuthenticationType):
                     currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
                     print "Saml. Authenticate for step 1. Using next attributes mapping '%s'" % currentAttributesMapping
                     
-                    local_uid = saml_response_normalized_attributes.get(self.uidMapping)
-                    if local_uid == None:
-                        print "Saml. Authenticate for step 1. Failed to find uid of user: '%s'" % saml_user_uid
-                        return False
-
                     newUser = User()
                     
                     # Set custom object classes
@@ -287,7 +275,6 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
                         newUser.setCustomObjectClasses(self.userObjectClasses)
 
-                    newUser.setAttribute("uid", local_uid)
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
