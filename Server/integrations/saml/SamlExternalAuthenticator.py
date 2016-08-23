@@ -79,7 +79,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.userEnforceAttributesUniqueness = None
         if configurationAttributes.containsKey("enforce_uniqueness_attr_list"):
             self.userEnforceAttributesUniqueness = self.prepareUserEnforceUniquenessAttributes(configurationAttributes)
-        
+
         self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
 
         self.attributesMapping = None
@@ -113,7 +113,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Initialization. Failed to load saml_extension_module: '%s'" % saml_extension_module_name
                 print "Saml. Initialization. Unexpected error:", ex
                 return False
-
 
         print "Saml. Initialized successfully"
         return True   
