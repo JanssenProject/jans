@@ -6,17 +6,20 @@
 
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
+from org.jboss.seam import Component
 from javax.faces.context import FacesContext
+from org.jboss.seam.faces import FacesMessages
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper, Util
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.model.common import User
 from org.xdi.ldap.model import CustomAttribute
+from java.lang import String
 
+from jarray import array
 import java
 
 try:
@@ -31,24 +34,24 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, configurationAttributes):
         print "Saml. Initialization"
 
-        saml_certificate_file = configurationAttributes.get("saml_certificate_file").getValue2()
+        asimba_saml_certificate_file = configurationAttributes.get("asimba_saml_certificate_file").getValue2()
         saml_idp_sso_target_url = configurationAttributes.get("saml_idp_sso_target_url").getValue2()
-        saml_issuer = configurationAttributes.get("saml_issuer").getValue2()
+        asimba_entity_id = configurationAttributes.get("asimba_entity_id").getValue2()
         saml_use_authn_context = StringHelper.toBoolean(configurationAttributes.get("saml_use_authn_context").getValue2(), True)
         if (saml_use_authn_context):
             saml_name_identifier_format = configurationAttributes.get("saml_name_identifier_format").getValue2()
         else:
             saml_name_identifier_format = None
 
-        saml_certificate = self.loadCeritificate(saml_certificate_file)
-        if (StringHelper.isEmpty(saml_certificate)):
+        asimba_saml_certificate = self.loadCeritificate(asimba_saml_certificate_file)
+        if (StringHelper.isEmpty(asimba_saml_certificate)):
             print "Saml. Initialization. File with x509 certificate should be not empty"
             return False
 
         samlConfiguration = SamlConfiguration()
 
         # Set the issuer of the authentication request. This would usually be the URL of the issuing web application
-        samlConfiguration.setIssuer(saml_issuer)
+        samlConfiguration.setIssuer(asimba_entity_id)
 
         # Tells the IdP to return a persistent identifier for the user
         samlConfiguration.setNameIdentifierFormat(saml_name_identifier_format)
@@ -60,16 +63,17 @@ class PersonAuthentication(PersonAuthenticationType):
         samlConfiguration.setUseRequestedAuthnContext(saml_use_authn_context)
         
         # Load x509 certificate
-        samlConfiguration.loadCertificateFromString(saml_certificate)
+        samlConfiguration.loadCertificateFromString(asimba_saml_certificate)
         
         self.samlConfiguration = samlConfiguration
 
-        self.uidMapping = None
-        if not configurationAttributes.containsKey("eppn_uid"):
-            print "Saml. Initialization. Property eppn_uid is mandatory"
-            return False
-        
-        self.uidMapping = StringHelper.toLowerCase(configurationAttributes.get("eppn_uid").getValue2())
+        self.userObjectClasses = None
+        if configurationAttributes.containsKey("user_object_classes"):
+            self.userObjectClasses = self.prepareUserObjectClasses(configurationAttributes)
+
+        self.userEnforceAttributesUniqueness = None
+        if configurationAttributes.containsKey("enforce_uniqueness_attr_list"):
+            self.userEnforceAttributesUniqueness = self.prepareUserEnforceUniquenessAttributes(configurationAttributes)
 
         self.attributesMapping = None
         if (configurationAttributes.containsKey("saml_idp_attributes_list") and
@@ -99,7 +103,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (not saml_extension_module_init_result):
                     return False
             except ImportError, ex:
-                print "Saml. Initialization. Failed to load saml_extension_module:", saml_extension_module_name
+                print "Saml. Initialization. Failed to load saml_extension_module: '%s'" % saml_extension_module_name
                 print "Saml. Initialization. Unexpected error:", ex
                 return False
 
@@ -189,7 +193,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             saml_response = saml_response_array[0]
 
-            print "Saml. Authenticate for step 1. saml_response:", saml_response
+            print "Saml. Authenticate for step 1. saml_response: '%s'" % saml_response
 
             samlResponse = Response(currentSamlConfiguration)
             samlResponse.loadXmlFromBase64(saml_response)
@@ -207,17 +211,17 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Authenticate for step 1. saml_response_name_id is invalid"
                 return False
 
-            print "Saml. Authenticate for step 1. saml_response_name_id:", saml_response_name_id
+            print "Saml. Authenticate for step 1. saml_response_name_id: '%s'" % saml_response_name_id
 
             saml_response_attributes = samlResponse.getAttributes()
-            print "Saml. Authenticate for step 1. attributes: ", saml_response_attributes
+            print "Saml. Authenticate for step 1. attributes: '%s'" % saml_response_attributes
 
             # Use persistent Id as saml_user_uid
             saml_user_uid = saml_response_name_id
             
             if (saml_map_user):
                 # Use mapping to local IDP user
-                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:", saml_user_uid
+                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
                 # Check if the is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
@@ -230,7 +234,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return True
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "Saml. Authenticate for step 1. found_user_name:", found_user_name
+                print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
                 
                 user_authenticated = authenticationService.authenticate(found_user_name)
                 if (user_authenticated == False):
@@ -241,12 +245,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("saml_count_login_steps", 1)
 
                 post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                print "Saml. Authenticate for step 1. post_login_result:", post_login_result
+                print "Saml. Authenticate for step 1. post_login_result: '%s'" % post_login_result
 
                 return post_login_result
             elif (saml_enroll_user):
                 # Use auto enrollment to local IDP
-                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:", saml_user_uid
+                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
                 # Check if the is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
@@ -262,15 +266,15 @@ class PersonAuthentication(PersonAuthenticationType):
                             StringHelper.toLowerCase(saml_response_attribute_entry.getKey()), saml_response_attribute_entry.getValue())
 
                     currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
-                    print "Saml. Authenticate for step 1. Using next attributes mapping", currentAttributesMapping
+                    print "Saml. Authenticate for step 1. Using next attributes mapping '%s'" % currentAttributesMapping
                     
-                    local_uid = saml_response_normalized_attributes.get(self.uidMapping)
-                    if StringHelper.isEmpty(local_uid):
-                        print "Saml. Authenticate for step 1. Failed to find uid of user: '%s'" % saml_user_uid
-                        return False
-
                     newUser = User()
-                    newUser.setUserId(local_uid)
+                    
+                    # Set custom object classes
+                    if self.userObjectClasses != None:
+                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
+                        newUser.setCustomObjectClasses(self.userObjectClasses)
+
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
@@ -280,13 +284,21 @@ class PersonAuthentication(PersonAuthenticationType):
                             newUser.setAttribute(localAttribute, localAttributeValue)
 
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
-                    print "Saml. Authenticate for step 1. Attempting to add user", saml_user_uid, " with next attributes", newUser.getCustomAttributes()
+                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % ( saml_user_uid, newUser.getCustomAttributes() )
+
+                    user_unique = self.checkUserUniqueness(newUser)
+                    if not user_unique:
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        facesMessages = FacesMessages.instance()
+                        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
+                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        return False
 
                     find_user_by_uid = userService.addUser(newUser, True)
-                    print "Saml. Authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
+                    print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "Saml. Authenticate for step 1. found_user_name:", found_user_name
+                print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
 
                 user_authenticated = authenticationService.authenticate(found_user_name)
                 if (user_authenticated == False):
@@ -297,7 +309,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("saml_count_login_steps", 1)
 
                 post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                print "Saml. Authenticate for step 1. post_login_result:", post_login_result
+                print "Saml. Authenticate for step 1. post_login_result: '%s'" % post_login_result
 
                 return post_login_result
             elif (saml_enroll_all_user_attr):
@@ -310,6 +322,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml. Authenticate for step 1. Failed to find user"
 
                     user = User()
+                    
+                    # Set custom object classes
+                    if self.userObjectClasses != None:
+                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
+                        user.setCustomObjectClasses(self.userObjectClasses)
+
                     customAttributes = ArrayList()
                     for key in attributes.keySet():
                         ldapAttributes = attributeService.getAllAttributes()
@@ -337,11 +355,19 @@ class PersonAuthentication(PersonAuthenticationType):
                         attribute.setValue(saml_user_uid)
                         customAttributes.add(attribute)
 
+                    user_unique = self.checkUserUniqueness(user)
+                    if not user_unique:
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        facesMessages = FacesMessages.instance()
+                        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
+                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        return False
+
                     find_user_by_uid = userService.addUser(user, True)
-                    print "Saml. Authenticate for step 1. Added new user with UID", find_user_by_uid.getUserId()
+                    print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "Saml. Authenticate for step 1. found_user_name:", found_user_name
+                print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
 
                 user_authenticated = authenticationService.authenticate(found_user_name)
                 if (user_authenticated == False):
@@ -352,12 +378,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("saml_count_login_steps", 1)
 
                 post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                print "Saml. Authenticate for step 1. post_login_result:", post_login_result
+                print "Saml. Authenticate for step 1. post_login_result: '%s'" % post_login_result
 
                 return post_login_result
             else:
                 # Check if the is user with specified saml_user_uid
-                print "Saml. Authenticate for step 1. Attempting to find user by uid:", saml_user_uid
+                print "Saml. Authenticate for step 1. Attempting to find user by uid: '%s'" % saml_user_uid
 
                 find_user_by_uid = userService.getUser(saml_user_uid)
                 if (find_user_by_uid == None):
@@ -365,7 +391,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 found_user_name = find_user_by_uid.getUserId()
-                print "Saml. Authenticate for step 1. found_user_name:", found_user_name
+                print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
 
                 user_authenticated = authenticationService.authenticate(found_user_name)
                 if (user_authenticated == False):
@@ -376,7 +402,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("saml_count_login_steps", 1)
 
                 post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                print "Saml. Authenticate for step 1. post_login_result:", post_login_result
+                print "Saml. Authenticate for step 1. post_login_result: '%s'" % post_login_result
 
                 return post_login_result
         elif (step == 2):
@@ -415,16 +441,16 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                print "Saml. Authenticate for step 2. post_login_result:", post_login_result
+                print "Saml. Authenticate for step 2. post_login_result: '%s'" % post_login_result
 
                 return post_login_result
             else:
                 found_user_name = find_user_by_uid.getUserId()
-                print "Saml. Authenticate for step 2. found_user_name:", found_user_name
+                print "Saml. Authenticate for step 2. found_user_name: '%s'" % found_user_name
     
                 if StringHelper.equals(user_name, found_user_name):
                     post_login_result = self.samlExtensionPostLogin(configurationAttributes, find_user_by_uid)
-                    print "Saml. Authenticate for step 2. post_login_result:", post_login_result
+                    print "Saml. Authenticate for step 2. post_login_result: '%s'" % post_login_result
     
                     return post_login_result
         
@@ -442,7 +468,7 @@ class PersonAuthentication(PersonAuthenticationType):
             httpService = HttpService.instance();
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin"
-            print "Saml. Prepare for step 1. Prepared assertionConsumerServiceUrl:", assertionConsumerServiceUrl
+            print "Saml. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
             
             currentSamlConfiguration = self.getCurrentSamlConfiguration(self.samlConfiguration, configurationAttributes, requestParameters)
             if (currentSamlConfiguration == None):
@@ -453,7 +479,7 @@ class PersonAuthentication(PersonAuthenticationType):
             samlAuthRequest = AuthRequest(currentSamlConfiguration)
             external_auth_request_uri = currentSamlConfiguration.getIdpSsoTargetUrl() + "?SAMLRequest=" + samlAuthRequest.getRequest(True, assertionConsumerServiceUrl)
 
-            print "Saml. Prepare for step 1. external_auth_request_uri:", external_auth_request_uri
+            print "Saml. Prepare for step 1. external_auth_request_uri: '%s'" % external_auth_request_uri
             
             context.set("external_auth_request_uri", external_auth_request_uri)
 
@@ -501,26 +527,26 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return passed_step1
 
-    def loadCeritificate(self, saml_certificate_file):
-        saml_certificate = None
+    def loadCeritificate(self, asimba_saml_certificate_file):
+        asimba_saml_certificate = None
 
         # Load certificate from file
-        f = open(saml_certificate_file, 'r')
+        f = open(asimba_saml_certificate_file, 'r')
         try:
-            saml_certificate = f.read()
+            asimba_saml_certificate = f.read()
         except:
-            print "Failed to load certificate from file:", saml_certificate_file
+            print "Failed to load certificate from file: '%s'" % asimba_saml_certificate_file
             return None
         finally:
             f.close()
         
-        return saml_certificate
+        return asimba_saml_certificate
 
     def getClientConfiguration(self, configurationAttributes, requestParameters):
         # Get client configuration
         if (configurationAttributes.containsKey("saml_client_configuration_attribute")):
             saml_client_configuration_attribute = configurationAttributes.get("saml_client_configuration_attribute").getValue2()
-            print "Saml. GetClientConfiguration. Using client attribute:", saml_client_configuration_attribute
+            print "Saml. GetClientConfiguration. Using client attribute: '%s'" % saml_client_configuration_attribute
 
             if (requestParameters == None):
                 return None
@@ -542,14 +568,14 @@ class PersonAuthentication(PersonAuthenticationType):
             clientService = ClientService.instance()
             client = clientService.getClient(client_id)
             if (client == None):
-                print "Saml. GetClientConfiguration. Failed to find client", client_id, " in local LDAP"
+                print "Saml. GetClientConfiguration. Failed to find client '%s' in local LDAP" % client_id
                 return None
 
             saml_client_configuration = clientService.getCustomAttribute(client, saml_client_configuration_attribute)
             if ((saml_client_configuration == None) or StringHelper.isEmpty(saml_client_configuration.getValue())):
-                print "Saml. GetClientConfiguration. Client", client_id, " attribute", saml_client_configuration_attribute, " is empty"
+                print "Saml. GetClientConfiguration. Client '%s' attribute '%s' is empty" % ( client_id, saml_client_configuration_attribute )
             else:
-                print "Saml. GetClientConfiguration. Client", client_id, " attribute", saml_client_configuration_attribute, " is", saml_client_configuration
+                print "Saml. GetClientConfiguration. Client '%s' attribute '%s' is '%s'" % ( client_id, saml_client_configuration_attribute, saml_client_configuration )
                 return saml_client_configuration
 
         return None
@@ -561,21 +587,21 @@ class PersonAuthentication(PersonAuthenticationType):
         
         saml_client_configuration_value = json.loads(saml_client_configuration.getValue())
 
-        client_saml_certificate = None      
-        client_saml_certificate_file = saml_client_configuration_value["saml_certificate_file"]
-        if (StringHelper.isNotEmpty(client_saml_certificate_file)):
-            client_saml_certificate = self.loadCeritificate(client_saml_certificate_file)
-            if (StringHelper.isEmpty(client_saml_certificate)):
+        client_asimba_saml_certificate = None      
+        client_asimba_saml_certificate_file = saml_client_configuration_value["asimba_saml_certificate_file"]
+        if (StringHelper.isNotEmpty(client_asimba_saml_certificate_file)):
+            client_asimba_saml_certificate = self.loadCeritificate(client_asimba_saml_certificate_file)
+            if (StringHelper.isEmpty(client_asimba_saml_certificate)):
                 print "Saml. BuildClientSamlConfiguration. File with x509 certificate should be not empty. Using default configuration"
                 return currentSamlConfiguration
 
         clientSamlConfiguration = currentSamlConfiguration.clone()
         
-        if (client_saml_certificate != None):
-            clientSamlConfiguration.loadCertificateFromString(client_saml_certificate)
+        if (client_asimba_saml_certificate != None):
+            clientSamlConfiguration.loadCertificateFromString(client_asimba_saml_certificate)
 
-        client_saml_issuer = saml_client_configuration_value["saml_issuer"]
-        clientSamlConfiguration.setIssuer(client_saml_issuer)
+        client_asimba_entity_id = saml_client_configuration_value["asimba_entity_id"]
+        clientSamlConfiguration.setIssuer(client_asimba_entity_id)
         
         saml_use_authn_context = saml_client_configuration_value["saml_use_authn_context"]
         client_use_saml_use_authn_context = StringHelper.toBoolean(saml_use_authn_context, True)
@@ -610,6 +636,24 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return attributeMapping
 
+    def prepareUserObjectClasses(self, configurationAttributes):
+        user_object_classes = configurationAttributes.get("user_object_classes").getValue2()
+
+        user_object_classes_list_array = StringHelper.split(user_object_classes, ",")
+        if (ArrayHelper.isEmpty(user_object_classes_list_array)):
+            return None
+        
+        return user_object_classes_list_array
+
+    def prepareUserEnforceUniquenessAttributes(self, configurationAttributes):
+        enforce_uniqueness_attr_list = configurationAttributes.get("enforce_uniqueness_attr_list").getValue2()
+
+        enforce_uniqueness_attr_list_array = StringHelper.split(enforce_uniqueness_attr_list, ",")
+        if (ArrayHelper.isEmpty(enforce_uniqueness_attr_list_array)):
+            return None
+        
+        return enforce_uniqueness_attr_list_array
+
     def prepareCurrentAttributesMapping(self, currentAttributesMapping, configurationAttributes, requestParameters):
         saml_client_configuration = self.getClientConfiguration(configurationAttributes, requestParameters)
         if (saml_client_configuration == None):
@@ -625,19 +669,44 @@ class PersonAuthentication(PersonAuthenticationType):
         return clientAttributesMapping
 
     def samlExtensionPostLogin(self, configurationAttributes, user):
-        if (self.samlExtensionModule != None):
-            try:
-                post_login_result = self.samlExtensionModule.postLogin(configurationAttributes, user)
-                print "Saml. ExtensionPostlogin result:", post_login_result
+        if (self.samlExtensionModule == None):
+            return True
+        try:
+            post_login_result = self.samlExtensionModule.postLogin(configurationAttributes, user)
+            print "Saml. ExtensionPostlogin result: '%s'" % post_login_result
 
-                return post_login_result
-            except Exception, ex:
-                print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
-                print "Saml. ExtensionPostlogin. Unexpected error:", ex
-                return False
-            except java.lang.Throwable, ex:
-                print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
-                ex.printStackTrace() 
-                return False
+            return post_login_result
+        except Exception, ex:
+            print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
+            print "Saml. ExtensionPostlogin. Unexpected error:", ex
+            return False
+        except java.lang.Throwable, ex:
+            print "Saml. ExtensionPostlogin. Failed to execute postLogin method"
+            ex.printStackTrace() 
+            return False
+
+    def checkUserUniqueness(self, user):
+        if (self.userEnforceAttributesUniqueness == None):
+            return True
+
+        userService = UserService.instance()
+
+        # Prepare user object to search by pattern
+        userBaseDn = userService.getDnForUser(None) 
+
+        userToSearch = User()
+        userToSearch.setDn(userBaseDn)
+
+        for userAttributeName in self.userEnforceAttributesUniqueness:
+            attribute_values_list = user.getAttributeValues(userAttributeName)
+            if (attribute_values_list != None) and (attribute_values_list.size() > 0):
+                userToSearch.setAttribute(userAttributeName, attribute_values_list)
+
+        ldapEntryManager = Component.getInstance("ldapEntryManager");
+
+        # TODO: Replace with userService.findEntries in CE 2.4.5
+        users = ldapEntryManager.findEntries(userToSearch, 1, 1)
+        if users.size() > 0:
+            return False;
                     
         return True
