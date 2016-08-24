@@ -33,7 +33,7 @@ This list of steps needed to do to enable SAML person authentication module.
     - Enter name = uaf
     - Enter level = 0-100 (priority of this method).
     - Select usage type "Interactive".
-    - Add custom required and optional properties which specified in README.txt.
+    - Add custom required and optional properties which specified in "Properties description.md".
     - Copy/paste script from UafExternalAuthenticator.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
