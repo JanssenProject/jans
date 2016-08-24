@@ -50,7 +50,6 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenRequest.setAuthUsername(site.getClientId());
         tokenRequest.setAuthPassword(site.getClientSecret());
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-        tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
 
         final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
         tokenClient.setExecutor(getHttpService().getClientExecutor());
@@ -85,13 +84,5 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
         return null;
-    }
-
-    private static String asCommaSeparatedString(List<String> scope) {
-        String result = "";
-        for (String s : scope) {
-            result = result + " " + s;
-        }
-        return result.trim();
     }
 }
