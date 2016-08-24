@@ -26,13 +26,14 @@ import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 17, 2016
+ * @version August 24, 2016
  */
 @Name("authorizationAction")
 @Scope(ScopeType.SESSION)
@@ -43,6 +44,7 @@ public class AuthorizationAction {
     private Log log;
 
     private String authorizationEndpoint;
+    private String jwksUri;
     private List<ResponseType> responseTypes;
     private String clientId;
     private List<String> scopes;
@@ -63,15 +65,13 @@ public class AuthorizationAction {
 
     private boolean useOpenIdRequestObject;
     private String signOrEncryptRequestObject = "JWS";
+    private String keyStoreFile;
+    private String keyStoreSecret;
     private SignatureAlgorithm requestObjectSigningAlg = SignatureAlgorithm.NONE;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg = KeyEncryptionAlgorithm.RSA1_5;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc = BlockEncryptionAlgorithm.A128CBC_PLUS_HS256;
     private String keyId;
     private String clientSecret;
-    private String modulus;
-    private String privateExponent;
-    private String publicExponent;
-    private String d;
     private String openIdRequestObject;
 
     private boolean showResults;
@@ -97,36 +97,36 @@ public class AuthorizationAction {
             req.getPrompts().addAll(prompt);
 
             if (useOpenIdRequestObject) {
-                JwtAuthorizationRequest jwtAuthorizationRequest;
+                JwtAuthorizationRequest jwtAuthorizationRequest = null;
                 if (isJWSSelected()) {
-                    // TODO: Use CryptoProvider class
-                    if (isClientSecretRequired()) {
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, clientSecret);
-                    } else if (isPrivateExponentRequired()) {
-                        //RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
-                        //jwtAuthorizationRequest.setKeyId(keyId);
-                    } else if (isDRequired()) {
-                        //ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, privateKey);
-                        //jwtAuthorizationRequest.setKeyId(keyId);
+                    if (isKeyIdRequired()) {
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+                        jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                                req, requestObjectSigningAlg, cryptoProvider);
+                        jwtAuthorizationRequest.setKeyId(keyId);
                     } else {
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(requestObjectSigningAlg, (String) null);
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                                req, requestObjectSigningAlg, clientSecret, cryptoProvider);
                     }
+
+                    req.setRequest(jwtAuthorizationRequest.getEncodedJwt());
                 } else {
-                    if (isPublicExponentRequired()) {
-                        //RSAPublicKey publicKey = new RSAPublicKey(modulus, publicExponent);
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
-                        //        requestObjectEncryptionEnc, publicKey);
+                    if (isKeyIdRequired()) {
+                        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                                req, requestObjectEncryptionAlg, requestObjectEncryptionEnc, cryptoProvider);
+                        jwtAuthorizationRequest.setKeyId(keyId);
+
+                        req.setRequest(jwtAuthorizationRequest.getEncodedJwt(jwks));
                     } else {
-                        //jwtAuthorizationRequest = new JwtAuthorizationRequest(req, requestObjectEncryptionAlg,
-                        //        requestObjectEncryptionEnc, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+                        jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                                req, requestObjectEncryptionAlg, requestObjectEncryptionEnc, clientSecret);
+
+                        req.setRequest(jwtAuthorizationRequest.getEncodedJwt());
                     }
                 }
-
-                /*if (jwtAuthorizationRequest != null) {
-                    req.setRequest(jwtAuthorizationRequest.getEncodedJwt(openIdRequestObject));
-                }*/
             }
 
             String authorizationRequest = authorizationEndpoint + "?" + req.getQueryString();
@@ -142,6 +142,14 @@ public class AuthorizationAction {
 
     public void setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+    }
+
+    public String getJwksUri() {
+        return jwksUri;
+    }
+
+    public void setJwksUri(String jwksUri) {
+        this.jwksUri = jwksUri;
     }
 
     public List<ResponseType> getResponseTypes() {
@@ -296,6 +304,22 @@ public class AuthorizationAction {
         this.signOrEncryptRequestObject = signOrEncryptRequestObject;
     }
 
+    public String getKeyStoreFile() {
+        return keyStoreFile;
+    }
+
+    public void setKeyStoreFile(String keyStoreFile) {
+        this.keyStoreFile = keyStoreFile;
+    }
+
+    public String getKeyStoreSecret() {
+        return keyStoreSecret;
+    }
+
+    public void setKeyStoreSecret(String keyStoreSecret) {
+        this.keyStoreSecret = keyStoreSecret;
+    }
+
     public SignatureAlgorithm getRequestObjectSigningAlg() {
         return requestObjectSigningAlg;
     }
@@ -336,38 +360,6 @@ public class AuthorizationAction {
         this.clientSecret = clientSecret;
     }
 
-    public String getModulus() {
-        return modulus;
-    }
-
-    public void setModulus(String modulus) {
-        this.modulus = modulus;
-    }
-
-    public String getPrivateExponent() {
-        return privateExponent;
-    }
-
-    public void setPrivateExponent(String privateExponent) {
-        this.privateExponent = privateExponent;
-    }
-
-    public String getPublicExponent() {
-        return publicExponent;
-    }
-
-    public void setPublicExponent(String publicExponent) {
-        this.publicExponent = publicExponent;
-    }
-
-    public String getD() {
-        return d;
-    }
-
-    public void setD(String d) {
-        this.d = d;
-    }
-
     public boolean isJWSSelected() {
         return "JWS".equals(signOrEncryptRequestObject);
     }
@@ -377,7 +369,30 @@ public class AuthorizationAction {
     }
 
     public boolean isKeyIdRequired() {
-        return isPrivateExponentRequired() || isDRequired();
+        if (isJWSSelected()) {
+            return requestObjectSigningAlg == SignatureAlgorithm.RS256
+                    || requestObjectSigningAlg == SignatureAlgorithm.RS384
+                    || requestObjectSigningAlg == SignatureAlgorithm.RS512
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES256
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES384
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES512;
+        } else {
+            return requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA1_5
+                    || requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA_OAEP;
+        }
+    }
+
+    public boolean isKeyStoreRequired() {
+        if (isJWSSelected()) {
+            return requestObjectSigningAlg == SignatureAlgorithm.RS256
+                    || requestObjectSigningAlg == SignatureAlgorithm.RS384
+                    || requestObjectSigningAlg == SignatureAlgorithm.RS512
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES256
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES384
+                    || requestObjectSigningAlg == SignatureAlgorithm.ES512;
+        } else {
+            return false;
+        }
     }
 
     public boolean isClientSecretRequired() {
@@ -388,46 +403,6 @@ public class AuthorizationAction {
         } else {
             return requestObjectEncryptionAlg == KeyEncryptionAlgorithm.A128KW
                     || requestObjectEncryptionAlg == KeyEncryptionAlgorithm.A256KW;
-        }
-    }
-
-    public boolean isModulusRequired() {
-        if (isJWSSelected()) {
-            return requestObjectSigningAlg == SignatureAlgorithm.RS256
-                    || requestObjectSigningAlg == SignatureAlgorithm.RS384
-                    || requestObjectSigningAlg == SignatureAlgorithm.RS512;
-        } else {
-            return requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA_OAEP
-                    || requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA1_5;
-        }
-    }
-
-    public boolean isPublicExponentRequired() {
-        if (isJWESelected()) {
-            return requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA_OAEP
-                    || requestObjectEncryptionAlg == KeyEncryptionAlgorithm.RSA1_5;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isPrivateExponentRequired() {
-        if (isJWSSelected()) {
-            return requestObjectSigningAlg == SignatureAlgorithm.RS256
-                    || requestObjectSigningAlg == SignatureAlgorithm.RS384
-                    || requestObjectSigningAlg == SignatureAlgorithm.RS512;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isDRequired() {
-        if (isJWSSelected()) {
-            return requestObjectSigningAlg == SignatureAlgorithm.ES256
-                    || requestObjectSigningAlg == SignatureAlgorithm.ES384
-                    || requestObjectSigningAlg == SignatureAlgorithm.ES512;
-        } else {
-            return false;
         }
     }
 
@@ -471,29 +446,5 @@ public class AuthorizationAction {
 
     public void setOpenIdRequestObject(String openIdRequestObject) {
         this.openIdRequestObject = openIdRequestObject;
-    }
-
-    public boolean isShowResults() {
-        return showResults;
-    }
-
-    public void setShowResults(boolean showResults) {
-        this.showResults = showResults;
-    }
-
-    public String getRequestString() {
-        return requestString;
-    }
-
-    public void setRequestString(String requestString) {
-        this.requestString = requestString;
-    }
-
-    public String getResponseString() {
-        return responseString;
-    }
-
-    public void setResponseString(String responseString) {
-        this.responseString = responseString;
     }
 }

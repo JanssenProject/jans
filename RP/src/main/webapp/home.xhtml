@@ -649,6 +649,21 @@
 									</h:selectOneMenu>
 									<h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
 
+                                    <h:outputLabel for="keyStoreFile"
+                                                   rendered="#{authorizationAction.keyStoreRequired}">Key Store File</h:outputLabel>
+                                    <h:inputText id="keyStoreFile"
+                                                 value="#{authorizationAction.keyStoreFile}"
+                                                 rendered="#{authorizationAction.keyStoreRequired}" size="40" />
+                                    <h:outputText value="eg: /etc/certs/client_keystore.jks"
+                                                  rendered="#{authorizationAction.keyStoreRequired}"/>
+
+                                    <h:outputLabel for="keyStoreSecret"
+                                                   rendered="#{authorizationAction.keyStoreRequired}">Key Store Secret</h:outputLabel>
+                                    <h:inputText id="keyStoreSecret"
+                                                 value="#{authorizationAction.keyStoreSecret}"
+                                                 rendered="#{authorizationAction.keyStoreRequired}" size="40" />
+                                    <h:outputText rendered="#{authorizationAction.keyStoreRequired}"></h:outputText>
+
 									<h:outputLabel for="authorizationKeyId"
 										rendered="#{authorizationAction.keyIdRequired}">Key ID</h:outputLabel>
 									<h:inputText id="authorizationKeyId"
@@ -664,37 +679,6 @@
 										size="40" />
 									<h:outputText
 										rendered="#{authorizationAction.clientSecretRequired}" />
-
-									<h:outputLabel for="modulus"
-										rendered="#{authorizationAction.modulusRequired}">Modulus</h:outputLabel>
-									<h:inputText id="modulus"
-										value="#{authorizationAction.modulus}"
-										rendered="#{authorizationAction.modulusRequired}" size="40" />
-									<h:outputText rendered="#{authorizationAction.modulusRequired}" />
-
-									<h:outputLabel for="privateExponent"
-										rendered="#{authorizationAction.privateExponentRequired}">Private Exponent</h:outputLabel>
-									<h:inputText id="privateExponent"
-										value="#{authorizationAction.privateExponent}"
-										rendered="#{authorizationAction.privateExponentRequired}"
-										size="40" />
-									<h:outputText
-										rendered="#{authorizationAction.privateExponentRequired}" />
-
-									<h:outputLabel for="publicExponent"
-										rendered="#{authorizationAction.publicExponentRequired}">Public Exponent</h:outputLabel>
-									<h:inputText id="publicExponent"
-										value="#{authorizationAction.publicExponent}"
-										rendered="#{authorizationAction.publicExponentRequired}"
-										size="40" />
-									<h:outputText
-										rendered="#{authorizationAction.publicExponentRequired}" />
-
-									<h:outputLabel for="d"
-										rendered="#{authorizationAction.DRequired}">D</h:outputLabel>
-									<h:inputText id="d" value="#{authorizationAction.d}"
-										rendered="#{authorizationAction.DRequired}" size="40" />
-									<h:outputText rendered="#{authorizationAction.DRequired}" />
 
 									<h:outputLabel for="openIdRequestObject">OpenID Request Object</h:outputLabel>
 									<h:inputTextarea id="openIdRequestObject"
