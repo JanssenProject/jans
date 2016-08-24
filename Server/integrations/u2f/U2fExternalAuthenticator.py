@@ -180,7 +180,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return True
         elif (step == 3):
-            print "U2F. Prepare for step 2"
+            print "U2F. Prepare for step 3"
 
             return True
         else:
