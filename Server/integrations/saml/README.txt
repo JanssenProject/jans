@@ -48,17 +48,14 @@ This module has next properties:
     The count of attributes in this property should be equal to count attributes in saml_idp_attributes_list property.
     Local attributes list should contains next mandatory attributes: uid, mail, givenName, sn, cn.
     Example: uid, mail, givenName, sn, cn
-
-11) eppn_uid - Specify IdP attribute which Saml scrpt should use to map to uid attribute.
-   Example: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
    
-12) user_object_classes - Specify custom list of LDAP user object classes
+11) user_object_classes - Specify custom list of LDAP user object classes
    Example: eduPerson
 
-13) enforce_uniqueness_attr_list - Specify list of unique user attributes to validate if there is no user with simular attributes already
+12) enforce_uniqueness_attr_list - Specify list of unique user attributes to validate if there is no user with simular attributes already
    Example: uid, mail
 
-12) saml_extension_module - Specify external module name. It's optional property. External module should implements 2 methods:
+13) saml_extension_module - Specify external module name. It's optional property. External module should implements 2 methods:
     def init(conf_attr):
     ...
     return True/False
@@ -68,5 +65,5 @@ This module has next properties:
     return True/False
 
     SAML scripts calls init method at initialization, and calls postLogin after to execute additional custom workflow.
-13) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
+14) saml_allow_basic_login - Specify if authentication module should allow both: basic and saml authentications
    Example: false

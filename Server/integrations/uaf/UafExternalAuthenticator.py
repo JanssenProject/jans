@@ -5,16 +5,13 @@
 #
 
 # Requires the following custom properties and values:
-#   uaf_server_uri: https://evaluation4.noknoktest.com:8443
+#   uaf_server_uri: https://ce-dev.gluu.org
 #
 # These are non mandatory custom properties and values:
 #   uaf_policy_name: default
 #   send_push_notifaction: false
 #   registration_uri: https://ce-dev.gluu.org/identity/register
 #   qr_options: { width: 400, height: 400 }
-            
-            
-#{"id":"START_OOB_AUTH_1470770174091","statusCode":4000,"lifetimeMillis":180000,"oobStatusHandle":"2OIwkMvdqnyUSLvXGZsefIbsAw-NvMKHal1tsb3xqRU-xUDg3wZAmbMzbvoYiQIly4j2APgrjkodCiACkRd7nvDzE4sP8tYN2Y3Zsq49BzpKng","modeResult":{"qrCode":{"qrImage":"iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQAAAABRBrPYAAADaklEQVR42u2aPW7jQAyFKbhQ6SPMTaKLGbAAX8y6yRzBpQpB3PcelawUpwi24mAVYO3Y86ngDn8fY/6bn5ed2Imd2H+IVTO7VF+vi9nH9eHzh1mZOxzMOLEmMPx7eD+9wD7xPX67WY8zm4c4zY/NBvvMYCmx4s/rA4dgYfOlIQxWPap1sK9/4oH+abfSGIbvL/Q8/HQ+FpzdvR1M/uYT3uh0Pne4J96Y/+CWSTFF/YyAf3t5Tw45Mf3wxpbNPj6FFLbYe4pOitWehyBo83WEcVfnx6UcLys15q7KMZoeUOjb4GNUkyYwG17IuCsyFeJmLIgbBTwSl9m9toAxZ7FU0FJGvQOrEf/GatIAJn9jyCBuOhJrRD38jS8tYK4uymma6ZD+hm/HYof/kMwY6zfLB+wbfCkw3Hlj9EFcYAsYy4ciA5fFXtZYAXF3sHR4XWoTGPIsLwZW4Z4uVZiMVCFpAoOX8UXtOLIwQwaeF5lgn3sTY3iHQRPnCHYfMBI+2PGB6dhxJca2gq0W5LZNeANrSLfvQ1Jja3R+IJSzVrs4bowh0wrGRjDyrFpCeZ4mCrzfSguYaxxitTN2JPYZLQv7wkdtAlP9pjZQNCPBy3A4xS3uq0xijDGi7sOVexX69hHTktcWMBLKXlaCBeGhdhyKeGZsi5HwrdEi1lcNSvC8FjAqTfQ32cwr6uh5ks2O/pYXw3DHEUL1YthyLQmW830fkhgLolchmaIl1FM36q9/+5DUmLF+q6vt9ZHjkUv063yfHBJjGumYpJxzdhRxj1T8ureBUbJ0OZiqtlqQ7eOuoc2MVQUKBVcqZoukVzVVFDr27UpejOERM7Wpq7UulAM9fxhjE2Oc5oxhTu2MbWw0VQX5eJ8cEmOS76UUax6aY9a7Ui/4ppjlxVa7h7/Z1tVufYjakjYwzqe9h2R5K2pBtJyzg79lxmDkUiLZSsHsPKTwEhu6BrDKCli/VL4YUqkeW2waG8D8SywzKn8uhSZ62XUfMokx7bMCnr82Wz9MRpmx2LBHC6J9Fou4S/nbTx+ZMe52WfK0yholdBQJBHZYuKTHpDl9bhWtfLrfWJrBXHO2vIzzKSPo7tKhmsDob1oGUTNGazuxqeqk2ry+/cFMVkwbdo3TM/cOyr8qg9pstYCdf2N2Yid2Yv+K/QFgb4RfHYIpYgAAAABJRU5ErkJggg=="},"rawData":"https://evaluation4.noknoktest.com:8443/tutorial/auth|a|Guz4Gkq_wsiKfY4RaawhJpczn0ONApdR3N9KO8SqW5Zzmo3YQUNJdUikfUw0hm0pYcKdS1iVJ_qX2GC4A7lYR6nud8T43nt35bAAqGGtzqSh-xHdgbAazNTKvVk"}}
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Context, Contexts
