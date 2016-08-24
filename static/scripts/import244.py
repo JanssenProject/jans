@@ -172,7 +172,7 @@ def stopOpenDJ():
 
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
-    if current_version >= 243 and backup_version < 243:
+    if current_version >= 243:
         ignore_folders = ['opendj', 'template', 'endorsed']
         for folder in ignore_folders:
             if folder in directory:
