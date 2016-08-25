@@ -95,5 +95,9 @@ public final class ArrayHelper {
 
 		return arrayMerge(array, array2);
 	}
+	
+	public static String toString(Object[] array) {
+		return StringHelper.toString(array);
+	}
 
 }

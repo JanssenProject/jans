@@ -205,11 +205,12 @@ public class OperationsFacade {
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
-		
-		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
-			System.err.println("!!!!!!!!!! LDAP");
-			(new Exception()).printStackTrace();
-		}
+
+//		Find whole tree search
+//		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
+//			System.err.println("!!!!!!!!!! LDAP");
+//			(new Exception()).printStackTrace();
+//		}
 
 		if (attributes == null) {
 			searchRequest = new SearchRequest(dn, scope, filter);

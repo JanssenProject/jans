@@ -158,6 +158,7 @@ public final class StringHelper {
 			if (filter.startsWith(" and "))
 				filter = filter.substring(4);
 		}
+
 		return filter;
 	}
 
