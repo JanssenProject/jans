@@ -11,16 +11,16 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.jws.JwsValidator;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
+import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,12 +29,12 @@ import java.util.List;
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version July 29, 2016
  */
 public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse> {
 
     private String sharedKey;
-    private RSAPrivateKey rsaPrivateKey;
+    private PrivateKey privateKey;
     private String jwksUri;
 
     /**
@@ -118,12 +118,21 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     String[] jwtParts = entity.split("\\.");
                     if (jwtParts.length == 5) {
                         byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(Util.UTF8_STRING_ENCODING) : null;
-                        Jwe jwe = Jwe.parse(entity, rsaPrivateKey, sharedSymmetricKey);
+                        Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
                         getResponse().setClaims(jwe.getClaims().toMap());
                     } else {
                         Jwt jwt = Jwt.parse(entity);
-                        JwsValidator jwtValidator = new JwsValidator(jwt, sharedKey, jwksUri, null);
-                        if (jwtValidator.validateSignature()) {
+
+                        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+                        boolean signatureVerified = cryptoProvider.verifySignature(
+                                jwt.getSigningInput(),
+                                jwt.getEncodedSignature(),
+                                jwt.getHeader().getKeyId(),
+                                JwtUtil.getJSONWebKeys(jwksUri),
+                                sharedKey,
+                                jwt.getHeader().getAlgorithm());
+
+                        if (signatureVerified) {
                             getResponse().setClaims(jwt.getClaims().toMap());
                         }
                     }
@@ -183,8 +192,8 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         this.sharedKey = sharedKey;
     }
 
-    public void setRsaPrivateKey(RSAPrivateKey rsaPrivateKey) {
-        this.rsaPrivateKey = rsaPrivateKey;
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
     }
 
     public String getJwksUri() {

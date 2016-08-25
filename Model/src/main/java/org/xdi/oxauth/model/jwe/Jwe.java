@@ -6,13 +6,15 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 
+import java.security.PrivateKey;
+
 /**
- * @author Javier Rojas Blum Date: 12.03.2012
+ * @author Javier Rojas Blum
+ * @version July 29, 2016
  */
 public class Jwe extends JsonWebResponse {
 
@@ -78,11 +80,11 @@ public class Jwe extends JsonWebResponse {
         return additionalAuthenticatedData;
     }
 
-    public static Jwe parse(String encodedJwe, RSAPrivateKey rsaPrivateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
         Jwe jwe = null;
 
-        if (rsaPrivateKey != null) {
-            JweDecrypter jweDecrypter = new JweDecrypterImpl(rsaPrivateKey);
+        if (privateKey != null) {
+            JweDecrypter jweDecrypter = new JweDecrypterImpl(privateKey);
             jwe = jweDecrypter.decrypt(encodedJwe);
         } else if (sharedSymmetricKey != null) {
             JweDecrypter jweDecrypter = new JweDecrypterImpl(sharedSymmetricKey);

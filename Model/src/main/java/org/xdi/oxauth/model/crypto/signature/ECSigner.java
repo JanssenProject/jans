@@ -14,7 +14,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -24,7 +24,7 @@ import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version July 31, 2016
  */
 @Deprecated
 public class ECSigner extends AbstractSigner {
@@ -81,7 +81,7 @@ public class ECSigner extends AbstractSigner {
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
-            return JwtUtil.base64urlencode(signature.sign());
+            return Base64Util.base64urlencode(signature.sign());
         } catch (NoSuchAlgorithmException e) {
             throw new Exception("There was a problem in EC signing", e);
         } catch (UnsupportedEncodingException e) {
@@ -108,7 +108,7 @@ public class ECSigner extends AbstractSigner {
         }
 
         try {
-            byte[] sigBytes = JwtUtil.base64urldecode(signature);
+            byte[] sigBytes = Base64Util.base64urldecode(signature);
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());

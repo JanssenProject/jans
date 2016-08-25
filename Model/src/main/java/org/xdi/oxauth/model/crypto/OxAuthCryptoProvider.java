@@ -19,16 +19,14 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.jwk.Use;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -40,7 +38,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.Key;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
@@ -49,9 +46,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -62,7 +56,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 25, 2016
+ * @version August 17, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -143,13 +137,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         jsonObject.put(EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
-            jsonObject.put(MODULUS, JwtUtil.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
-            jsonObject.put(EXPONENT, JwtUtil.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
+            jsonObject.put(MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
+            jsonObject.put(EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
             jsonObject.put(CURVE, signatureAlgorithm.getCurve());
-            jsonObject.put(X, JwtUtil.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
-            jsonObject.put(Y, JwtUtil.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
+            jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
+            jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         }
 
         return jsonObject;
@@ -164,15 +158,16 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             Mac mac = Mac.getInstance(signatureAlgorithm.getAlgorithm());
             mac.init(secretKey);
             byte[] sig = mac.doFinal(signingInput.getBytes());
-            return JwtUtil.base64urlencode(sig);
+            return Base64Util.base64urlencode(sig);
         } else { // EC or RSA
             PrivateKey privateKey = getPrivateKey(alias);
 
             Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+            //Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm());
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes());
 
-            return JwtUtil.base64urlencode(signature.sign());
+            return Base64Util.base64urlencode(signature.sign());
         }
     }
 
@@ -198,9 +193,10 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                     return false;
                 }
 
-                byte[] signature = JwtUtil.base64urldecode(encodedSignature);
+                byte[] signature = Base64Util.base64urldecode(encodedSignature);
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+                //Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm());
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
@@ -239,37 +235,6 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return true;
     }
 
-    public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
-        PublicKey publicKey = null;
-
-        JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
-        for (int i = 0; i < webKeys.length(); i++) {
-            JSONObject key = webKeys.getJSONObject(i);
-            if (alias.equals(key.getString(KEY_ID))) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(key.getString(ALGORITHM));
-                if (signatureAlgorithm != null) {
-                    if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
-                        publicKey = new RSAPublicKeyImpl(
-                                new BigInteger(1, JwtUtil.base64urldecode(key.getString(MODULUS))),
-                                new BigInteger(1, JwtUtil.base64urldecode(key.getString(EXPONENT))));
-                    } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
-                        AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
-                        parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
-                        ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
-
-                        publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC).generatePublic(new ECPublicKeySpec(
-                                new ECPoint(
-                                        new BigInteger(1, JwtUtil.base64urldecode(key.getString(X))),
-                                        new BigInteger(1, JwtUtil.base64urldecode(key.getString(Y)))
-                                ), ecParameters));
-                    }
-                }
-            }
-        }
-
-        return publicKey;
-    }
-
     public PublicKey getPublicKey(String alias) {
         PublicKey publicKey = null;
 
@@ -305,37 +270,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return privateKey;
     }
 
-    /*
-        private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm,
-                                                        Long expirationTime)
-                throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException,
-                SignatureException {
-            X500Principal principal = new X500Principal(dnName);
-            BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
-
-            X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-
-            certGen.setSerialNumber(serialNumber);
-            certGen.setIssuerDN(principal);
-            certGen.setNotBefore(new Date(System.currentTimeMillis() - 10000));
-            certGen.setNotAfter(new Date(expirationTime));
-            certGen.setSubjectDN(principal);
-            certGen.setPublicKey(pair.getPublic());
-            certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());
-
-            //certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-            //certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
-            //certGen.addExtension(X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
-            //certGen.addExtension(X509Extensions.SubjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
-
-            X509Certificate[] chain = new X509Certificate[1];
-            chain[0] = certGen.generate(pair.getPrivate());
-
-            return chain;
-        }
-    */
     public X509Certificate generateV3Certificate(KeyPair keyPair, String issuer, String signatureAlgorithm, Long expirationTime) throws CertIOException, OperatorCreationException, CertificateException {
-
         PrivateKey privateKey = keyPair.getPrivate();
         PublicKey publicKey = keyPair.getPublic();
 
