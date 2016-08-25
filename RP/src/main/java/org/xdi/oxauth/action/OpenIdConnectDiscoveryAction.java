@@ -20,13 +20,9 @@ import java.net.URISyntaxException;
 
 import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
 
-import java.net.URISyntaxException;
-
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version August 24, 2016
  */
 @Name("openIdConnectDiscoveryAction")
 @Scope(ScopeType.SESSION)
@@ -100,6 +96,7 @@ public class OpenIdConnectDiscoveryAction {
 
                 registrationAction.setRegistrationEndpoint(openIdConfigurationResponse.getRegistrationEndpoint());
                 authorizationAction.setAuthorizationEndpoint(openIdConfigurationResponse.getAuthorizationEndpoint());
+                authorizationAction.setJwksUri(openIdConfigurationResponse.getJwksUri());
                 tokenAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
                 userInfoAction.setUserInfoEndpoint(openIdConfigurationResponse.getUserInfoEndpoint());
                 checkSessionAction.setCheckSessionEndpoint(openIdConfigurationResponse.getCheckSessionIFrame());

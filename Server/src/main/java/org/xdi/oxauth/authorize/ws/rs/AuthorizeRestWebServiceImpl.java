@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.*;
@@ -57,7 +58,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version July 31, 2016
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -138,7 +139,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 state, request, securityContext.isSecure(), requestSessionState, sessionState);
 
         log.debug("Attempting to request authorization: "
-                + "acrValues = {0}, amrValues = {1}, originHeaders = {4}, codeChallenge = {5}, codeChallengeMethod = {6}",
+                        + "acrValues = {0}, amrValues = {1}, originHeaders = {4}, codeChallenge = {5}, codeChallengeMethod = {6}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
 
         ResponseBuilder builder = Response.ok();
@@ -236,7 +237,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         if (StringUtils.isBlank(reqUriHash)) {
                                             validRequestUri = true;
                                         } else {
-                                            String hash = JwtUtil.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
                                             validRequestUri = StringUtils.equals(reqUriHash, hash);
                                         }
                                     }
@@ -579,16 +580,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     /**
      * 1) https://ce-dev.gluu.org/oxauth/authorize -> session created with parameter list 1
      * 2) https://ce-dev.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize -> with parameter list 2
-     *
+     * <p/>
      * Second call will try to reuse session data from call 1 (parameter list1). Here we overriding them.
      *
      * @param httpRequest http request
-     * @param prompts prompts
+     * @param prompts     prompts
      */
     private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
         if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
-        	Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
-        	
+            Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
+
             Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
@@ -605,14 +606,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-	private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
-		Map<String, String> result = new HashMap<String, String>();
-		for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
-			result.put(entry.getKey(), entry.getValue()[0]);
-		}
-		
-		return result;
-	}
+    private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
+        Map<String, String> result = new HashMap<String, String>();
+        for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
+            result.put(entry.getKey(), entry.getValue()[0]);
+        }
+
+        return result;
+    }
 
     private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
         return Response.status(p_status.getStatusCode()).entity(errorResponseFactory.getErrorAsJson(p_type, p_state));

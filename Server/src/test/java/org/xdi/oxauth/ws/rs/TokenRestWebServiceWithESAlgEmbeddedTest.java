@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import javax.ws.rs.core.MediaType;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
@@ -30,16 +18,22 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.MediaType;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+
 /**
  * Functional tests for Token Web Services (embedded)
  *
- * @author Javier Rojas Blum Date: 04.12.2013
+ * @author Javier Rojas Blum
+ * @version July 26, 2016
  */
 public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
 
@@ -115,34 +109,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES256_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES256_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES256Step1")
     public void requestAccessTokenWithClientSecretJwtES256Step2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId1);
-                tokenRequest.setAuthPassword(clientSecret1);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES256SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId1);
+                    tokenRequest.setAuthPassword(clientSecret1);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override
@@ -226,34 +224,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES384_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES384_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES384Step1")
     public void requestAccessTokenWithClientSecretJwtES384Step2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId2);
-                tokenRequest.setAuthPassword(clientSecret2);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES384SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId2);
+                    tokenRequest.setAuthPassword(clientSecret2);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override
@@ -337,34 +339,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES512_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES512_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES512Step1")
     public void requestAccessTokenWithClientSecretJwtES512Step2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId3);
-                tokenRequest.setAuthPassword(clientSecret3);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES512SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId3);
+                    tokenRequest.setAuthPassword(clientSecret3);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override
@@ -448,34 +454,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES256_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES256_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES256X509CertStep1")
     public void requestAccessTokenWithClientSecretJwtES256X509CertStep2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId4);
-                tokenRequest.setAuthPassword(clientSecret4);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES256SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId4);
+                    tokenRequest.setAuthPassword(clientSecret4);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override
@@ -559,34 +569,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES384_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES384_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES384X509CertStep1")
     public void requestAccessTokenWithClientSecretJwtES384X509CertStep2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId5);
-                tokenRequest.setAuthPassword(clientSecret5);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES384SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId5);
+                    tokenRequest.setAuthPassword(clientSecret5);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override
@@ -671,34 +685,38 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES512_d"})
+    @Parameters({"tokenPath", "userId", "userSecret", "audience", "ES512_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test(dependsOnMethods = "requestAccessTokenWithClientSecretJwtES512X509CertStep1")
     public void requestAccessTokenWithClientSecretJwtES512X509CertStep2(
             final String tokenPath, final String userId, final String userSecret, final String audience,
-            final String d) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.POST, tokenPath) {
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                try {
+                    super.prepareRequest(request);
+                    request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                ECDSAPrivateKey privateKey = new ECDSAPrivateKey(d);
+                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
-                tokenRequest.setUsername(userId);
-                tokenRequest.setPassword(userSecret);
-                tokenRequest.setScope("email read_stream manage_pages");
+                    TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+                    tokenRequest.setUsername(userId);
+                    tokenRequest.setPassword(userSecret);
+                    tokenRequest.setScope("email read_stream manage_pages");
 
-                tokenRequest.setAuthUsername(clientId6);
-                tokenRequest.setAuthPassword(clientSecret6);
-                tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-                tokenRequest.setEcPrivateKey(privateKey);
-                tokenRequest.setKeyId("ES512SIG");
-                tokenRequest.setAudience(audience);
+                    tokenRequest.setAuthUsername(clientId6);
+                    tokenRequest.setAuthPassword(clientSecret6);
+                    tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+                    tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+                    tokenRequest.setKeyId(keyId);
+                    tokenRequest.setCryptoProvider(cryptoProvider);
+                    tokenRequest.setAudience(audience);
 
-                request.addParameters(tokenRequest.getParameters());
+                    request.addParameters(tokenRequest.getParameters());
+                } catch (Exception ex) {
+                    fail(ex.getMessage(), ex);
+                }
             }
 
             @Override

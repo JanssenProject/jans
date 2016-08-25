@@ -6,19 +6,20 @@
 
 package org.xdi.oxauth.model.jwe;
 
-import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
-
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
 
+import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
+
 /**
- * @author Javier Rojas Blum Date: 12.03.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public abstract class AbstractJweEncrypter implements JweEncrypter {
 
@@ -52,7 +53,7 @@ public abstract class AbstractJweEncrypter implements JweEncrypter {
 
             byte[] initializationVector = new byte[blockEncryptionAlgorithm.getInitVectorLength() / 8];
             random.nextBytes(initializationVector);
-            String encodedInitializationVector = JwtUtil.base64urlencode(initializationVector);
+            String encodedInitializationVector = Base64Util.base64urlencode(initializationVector);
             jwe.setEncodedInitializationVector(encodedInitializationVector);
 
             Pair<String, String> result = generateCipherTextAndIntegrityValue(contentMasterKey, initializationVector,
