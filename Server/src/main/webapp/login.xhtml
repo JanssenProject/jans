@@ -1,50 +1,59 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:s="http://jboss.com/products/seam/taglib"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:a="http://richfaces.org/a4j"
-      xmlns:gluufn="http://www.gluu.org/jsf/functions"
-      template="/WEB-INF/incl/layout/template.xhtml"
-      contentType="text/html">
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:s="http://jboss.org/schema/seam/taglib"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
 
-     <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-          <title>Gluu Inc.</title>
+    <ui:define name="head">
           <meta name="description" content="Gluu Inc." />
-          <link rel="stylesheet" href="stylesheet/bootstrap.css" />
-          <link rel="stylesheet" href="stylesheet/bootstrap-responsive.css" />
-          <link rel="stylesheet" href="stylesheet/style.css" />
-     </head>
-
-     <body>
+          
+     </ui:define>
+     
+     <ui:define name="pageTitle">
+        <h:outputText value="#{messages['login.pageTitle']}"/>
+    </ui:define>
+    
+ <ui:define name="body">
           <header>
                <div class="container">
                     <div id="header" class="row-fluid">
                          <div class="logo span2">
-                         <a href="http://www.gluu.org/"><img src="img/logo.png" /></a>
+                         <ui:param name="client"
+                                 value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+
+                              <s:div rendered='#{!empty client.getLogoUri()}'>
+                                   <h:graphicImage url='#{client.getLogoUri()}'/>
+                              </s:div>
+                               <s:div rendered='#{empty client.getLogoUri()}'>
+                               	<a href="http://www.gluu.org/">
+                                    <h:graphicImage url="img/logo.png" />
+                                </a>
+                              </s:div>
                          </div><!-- end logo-->
 
                          <div class="login span4 offset6">
-                         Need a Gluu account?
-                         <a class="register,need-account" href="/identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
+                         Need a Gluu account?                         
+                         <a class="register,need-account" href="../identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
+                       	                        	 
                         </div>
-                    </div><!-- end header-->
+                    </div>
                </div>
 
           </header>
-
-
+          <!-- end header-->
           <div class="container">
                <div id="content" class="sign-in-page">
 		        <div class="row-fluid">
 			       <h:form id="loginForm" class="signin-form span6 offset3">
+			        <h:panelGroup rendered="#{not identity.loggedIn}">
 				      <div class="inner-form-container row-fluid">
 					     <ul class="offset2 span10">
 
                                     <s:token/>
 
-                                    <input type="hidden" name="auth_step" value="1"/>
+                                    <!-- <input type="hidden" name="auth_step" value="1"/>
                                     <input type="hidden" name="response_type" value="${param.response_type}"/>
                                     <input type="hidden" name="scope" value="#{param.scope}"/>
                                     <input type="hidden" name="client_id" value="#{param.client_id}"/>
@@ -62,11 +71,11 @@
                                     <input type="hidden" name="request" value="#{param.request}"/>
                                     <input type="hidden" name="auth_mode" value="#{param.auth_mode}"/>
                                     <input type="hidden" name="auth_level" value="#{param.auth_level}"/>
-
-					<h:messages style="color:red;" />
+ -->
+				<h:messages style="color:red;" />
 				<div class="row-fluid">
 							<span class="input-name span3">
-								<h:outputLabel for="username" value="Email" />
+								<h:outputLabel for="username" value="#{messages['login.username']}"/>
 							</span>
 
 						 <div class="span6">
@@ -89,29 +98,89 @@
 	                   <div class="gradient contact-button green span2 offset3">
                               <div id="submit_block" class="login_input">
                                         <h:commandButton id="loginButton" style="padding-left: 35%;" value="#{messages['login.login']}" action="#{authenticator.authenticate}"/>
-                              </div>
+                              </div>                
                               <span class="sprite-green_click_icon"></span>
                          </div>
                     </li>
-
+                    <s:div id="registerId" style="display:none">
+                     <li class="row-fluid submit-container">
+	                   <div class="gradient contact-button green span2 offset3">
+                              <div id="submit_block" class="login_input">
+                                        <h:commandButton id="registerButton" style="padding-left: 35%;" value="#{messages['login.register']}" action="#{authenticator.authenticate}"/>
+                              </div>                
+                              <span class="sprite-green_click_icon"></span>
+                         </div>
+                    </li>
+                    </s:div> 
                     <li class="row-fluid">
                          <div class="span9 offset3">
                               <a class="need-account,register" href="/identity/person/passwordReminder.htm">Forgot your password?</a>
                          </div>
                     </li>
+                     <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <p>
+                          <h:outputText value="#{messages['common.agreePolicy']}"/>
+                          <a target="_blank" href='#{client.getPolicyUri()}'>
+                                 <h:outputText value="#{messages['common.privacyPolicy']}"/>
+                         </a>
+                        </p>
+                    </s:div>
 
-
+                    <s:div rendered='#{!empty client.getTosUri()}'>
+                         <p>
+                            <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+                           <a target="_blank" href='#{client.getTosUri()}'>
+                        	   <h:outputText value="#{messages['common.termsOfService']}"/>
+                           </a>
+                         </p>
+                    </s:div>
+                    <br/>
+                    <div class="login-panel">
+                                    <s:fragment rendered="#{external_auth_request_uri != Null}">
+                                        <a id="externalAuthButton"
+                                           href="#{external_auth_request_uri}">
+                                            <input type="button" value="Use External Authentification"/>
+                                        </a>
+                                    </s:fragment>
+                                    <s:fragment rendered="#{external_registration_uri != Null}">
+                                        <a id="externalRegistrationButton" href="#{external_registration_uri}">
+                                            <input type="button" value="Register new user"/>
+                                        </a>
+                                    </s:fragment>
+                      </div>
                          </ul>
+                     
                     </div>
+                    </h:panelGroup>
                     </h:form>
                     </div>
-               </div>
-
-
+               </div> 
                <div id="footer">
-                    <p>Gluu, Inc,  |  Commercial use of support without express authorization is prohibited.</p>
+                    <p><h:outputText value="#{messages['common.gluuInc']}" />,  |  <h:outputText value="#{messages['common.caution']}" /></p>
+               </div>                             
                </div>
+               
+            <script type="text/javascript">
+            window.onload = function () {
+                var userNameField = document.getElementById("loginForm:username");
+                var passwordField = document.getElementById("loginForm:password");
+                var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
+                if (userName) {
+                    userNameField.value = userName;
+                    userNameField.readOnly = true;
+                    passwordField.focus();
+                } else {
+                    userNameField.focus();
+                }
 
-               </div>
-</body>
-</html>
+                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null) {
+                        registerButton.style.display = 'inline';
+                    }
+                }
+            };
+        </script>
+    </ui:define>
+</ui:composition>
