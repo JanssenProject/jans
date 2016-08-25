@@ -37,7 +37,6 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();
-        authorizationEndpoint += "&client_secret=" + site.getClientSecret();
         authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
         authorizationEndpoint += "&state=" + state();
