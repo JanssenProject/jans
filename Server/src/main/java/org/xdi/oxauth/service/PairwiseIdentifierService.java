@@ -9,18 +9,17 @@ import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.PairwiseIdType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
 
 import java.net.URI;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version July 22, 2016
+ * @version July 31, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("pairwiseIdentifierService")
@@ -55,7 +54,7 @@ public class PairwiseIdentifierService {
         }
     }
 
-    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) throws InvalidKeyException, NoSuchAlgorithmException {
+    public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) throws Exception {
         PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(ConfigurationFactory.instance().getConfiguration().getPairwiseIdType());
         String sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
 
@@ -77,10 +76,12 @@ public class PairwiseIdentifierService {
                 return entries.get(0);
             }
         } else { // PairwiseIdType.ALGORITHMIC
-            String key = ConfigurationFactory.instance().getConfiguration().getPairwiseCalculationKey();
-            String salt = ConfigurationFactory.instance().getConfiguration().getPairwiseCalculationSalt();
+            Configuration configuration = ConfigurationFactory.instance().getConfiguration();
+            String key = configuration.getPairwiseCalculationKey();
+            String salt = configuration.getPairwiseCalculationSalt();
 
-            String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(sectorIdentifierUri, userInum, key, salt);
+            String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
+                    sectorIdentifierUri, userInum, key, salt, configuration);
 
             PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
             pairwiseIdentifier.setId(calculatedSub);

@@ -28,6 +28,7 @@ import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.security.StringEncrypter;
@@ -40,7 +41,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version July 31, 2016
  */
 public class JwtAuthorizationRequest {
 
@@ -103,16 +104,16 @@ public class JwtAuthorizationRequest {
                     jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
 
                     byte[] contentMasterKey = jweDecrypter.decryptEncryptionKey(encodedEncryptedKey);
-                    byte[] initializationVector = JwtUtil.base64urldecode(encodedInitializationVector);
-                    byte[] authenticationTag = JwtUtil.base64urldecode(encodedIntegrityValue);
+                    byte[] initializationVector = Base64Util.base64urldecode(encodedInitializationVector);
+                    byte[] authenticationTag = Base64Util.base64urldecode(encodedIntegrityValue);
                     String additionalAuthenticatedData = encodedHeader + "."
                             + encodedEncryptedKey + "."
                             + encodedInitializationVector;
 
                     String encodedClaim = jweDecrypter.decryptCipherText(encodedCipherText, contentMasterKey, initializationVector,
                             authenticationTag, additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
-                    String header = new String(JwtUtil.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-                    String payload = new String(JwtUtil.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
+                    String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
+                    String payload = new String(Base64Util.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
                     payload = payload.replace("\\", "");
 
                     loadHeader(header);
@@ -126,8 +127,8 @@ public class JwtAuthorizationRequest {
                     }
 
                     String signingInput = encodedHeader + "." + encodedClaim;
-                    String header = new String(JwtUtil.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-                    String payload = new String(JwtUtil.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
+                    String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
+                    String payload = new String(Base64Util.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
                     payload = payload.replace("\\", "");
 
                     JSONObject jsonHeader = new JSONObject(header);

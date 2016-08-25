@@ -6,22 +6,22 @@
 
 package org.xdi.oxauth.model.jws;
 
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.model.util.StringUtils;
+import org.xdi.oxauth.model.util.Util;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.util.JwtUtil;
-import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.oxauth.model.util.Util;
-
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public class HMACSigner extends AbstractJwsSigner {
 
@@ -64,7 +64,7 @@ public class HMACSigner extends AbstractJwsSigner {
             Mac mac = Mac.getInstance(algorithm);
             mac.init(secretKey);
             byte[] sig = mac.doFinal(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
-            return JwtUtil.base64urlencode(sig);
+            return Base64Util.base64urlencode(sig);
         } catch (NoSuchAlgorithmException e) {
             throw new SignatureException(e);
         } catch (InvalidKeyException e) {

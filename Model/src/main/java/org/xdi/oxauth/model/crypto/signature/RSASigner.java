@@ -7,7 +7,7 @@
 package org.xdi.oxauth.model.crypto.signature;
 
 import com.google.common.base.Strings;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -18,7 +18,7 @@ import java.security.spec.RSAPublicKeySpec;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2016
+ * @version July 31, 2016
  */
 public class RSASigner extends AbstractSigner {
 
@@ -71,7 +71,7 @@ public class RSASigner extends AbstractSigner {
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
-            return JwtUtil.base64urlencode(signature.sign());
+            return Base64Util.base64urlencode(signature.sign());
         } catch (NoSuchAlgorithmException e) {
             throw new Exception("There was a problem in RSA signing", e);
         } catch (UnsupportedEncodingException e) {
@@ -97,7 +97,7 @@ public class RSASigner extends AbstractSigner {
         }
 
         try {
-            byte[] signatureBytes = JwtUtil.base64urldecode(signature);
+            byte[] signatureBytes = Base64Util.base64urldecode(signature);
             RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
                     rsaPublicKey.getModulus(),
                     rsaPublicKey.getPublicExponent());

@@ -15,7 +15,6 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -29,7 +28,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version July 26, 2016
  */
 public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
@@ -398,11 +397,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void tokenEndpointAuthMethodClientSecretBasicFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail3");
 
         // 1. Register client
@@ -480,13 +479,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -819,11 +818,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void tokenEndpointAuthMethodClientSecretPostFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail3");
 
         // 1. Register client
@@ -901,13 +900,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
@@ -1244,11 +1243,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_modulus", "RS256_privateExponent"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String modulus, final String privateExponent) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail3");
 
         // 1. Register client
@@ -1326,13 +1325,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        RSAPrivateKey privateKey = new RSAPrivateKey(modulus, privateExponent);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setRsaPrivateKey(privateKey);
-        tokenRequest.setKeyId("RS256SIG");
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);

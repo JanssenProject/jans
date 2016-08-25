@@ -6,25 +6,27 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.jwe.JweDecrypterImpl;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.model.util.Util;
+import sun.security.rsa.RSAPublicKeyImpl;
+
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+
+import static org.testng.Assert.assertEquals;
 
 /**
- * @author Javier Rojas Blum Date: 11.30.2012
+ * @author Javier Rojas Blum
+ * @version August 17, 2016
  */
 public class EncryptionTest extends BaseTest {
 
@@ -35,13 +37,13 @@ public class EncryptionTest extends BaseTest {
         // {"alg":"RSA-OAEP","enc":"A256GCM"}
         String encodedHeader = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ";
         String plainText = "Live long and prosper.";
-        byte[] cmk = JwtUtil.unsignedToBytes(new int[]{
+        byte[] cmk = Base64Util.unsignedToBytes(new int[]{
                 177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154,
                 212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
                 234, 64, 252
         });
 
-        BigInteger modulus = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger modulus = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 161, 168, 84, 34, 133, 176, 208, 173, 46, 176, 163,
                 110, 57, 30, 135, 227, 9, 31, 226, 128, 84, 92, 116,
                 241, 70, 248, 27, 227, 193, 62, 5, 91, 241, 145, 224,
@@ -67,9 +69,9 @@ public class EncryptionTest extends BaseTest {
                 190, 253, 186, 186, 27
         }));
 
-        BigInteger exponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{1, 0, 1}));
+        BigInteger exponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{1, 0, 1}));
 
-        BigInteger privateExponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger privateExponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 144, 183, 109, 34, 62, 134, 108, 57, 44, 252, 10,
                 66, 73, 54, 16, 181, 233, 92, 54, 219, 101, 42, 35,
                 178, 63, 51, 43, 92, 119, 136, 251, 41, 53, 23, 191,
@@ -95,17 +97,17 @@ public class EncryptionTest extends BaseTest {
                 224, 173, 56, 224, 201
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, publicKey);
         String encodedEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
-        byte[] initVector = JwtUtil.unsignedToBytes(new int[]{
+        byte[] initVector = Base64Util.unsignedToBytes(new int[]{
                 227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219
         });
-        String encodedInitVector = JwtUtil.base64urlencode(initVector);
+        String encodedInitVector = Base64Util.base64urlencode(initVector);
         assertEquals(encodedInitVector, "48V1_ALb6US04U3b");
 
         String additionalAuthenticatedData = encodedHeader + "."
@@ -134,7 +136,7 @@ public class EncryptionTest extends BaseTest {
         assertEquals(encryptionKey, cmk);
 
         String decodedPlainText = decrypter.decryptCipherText(encodedCipherText, encryptionKey, initVector,
-                JwtUtil.base64urldecode(encodedAuthenticationTag),
+                Base64Util.base64urldecode(encodedAuthenticationTag),
                 additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
         assertEquals(decodedPlainText, plainText);
     }
@@ -146,13 +148,13 @@ public class EncryptionTest extends BaseTest {
         // {"alg":"RSA1_5","enc":"A128CBC+HS256"}
         String encodedHeader = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDK0hTMjU2In0";
         String plainText = "No matter where you go, there you are.";
-        byte[] cmk = JwtUtil.unsignedToBytes(new int[]{
+        byte[] cmk = Base64Util.unsignedToBytes(new int[]{
                 4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
                 206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
                 44, 207
         });
 
-        BigInteger modulus = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger modulus = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 177, 119, 33, 13, 164, 30, 108, 121, 207, 136, 107,
                 242, 12, 224, 19, 226, 198, 134, 17, 71, 173, 75, 42,
                 61, 48, 162, 206, 161, 97, 108, 185, 234, 226, 219,
@@ -178,9 +180,9 @@ public class EncryptionTest extends BaseTest {
                 239, 71
         }));
 
-        BigInteger exponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{1, 0, 1}));
+        BigInteger exponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{1, 0, 1}));
 
-        BigInteger privateExponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger privateExponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 84, 80, 150, 58, 165, 235, 242, 123, 217, 55, 38,
                 154, 36, 181, 221, 156, 211, 215, 100, 164, 90, 88,
                 40, 228, 83, 148, 54, 122, 4, 16, 165, 48, 76, 194,
@@ -206,17 +208,17 @@ public class EncryptionTest extends BaseTest {
                 130, 89
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, publicKey);
         String encodedJweEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
-        byte[] initVector = JwtUtil.unsignedToBytes(new int[]{
+        byte[] initVector = Base64Util.unsignedToBytes(new int[]{
                 3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101
         });
-        String encodedInitVector = JwtUtil.base64urlencode(initVector);
+        String encodedInitVector = Base64Util.base64urlencode(initVector);
         assertEquals(encodedInitVector, "AxY8DCtDaGlsbGljb3RoZQ");
 
         String additionalAuthenticatedData = encodedHeader + "."
@@ -245,7 +247,7 @@ public class EncryptionTest extends BaseTest {
         assertEquals(encryptionKey, cmk);
 
         String decodedPlainText = decrypter.decryptCipherText(encodedCipherText, encryptionKey, initVector,
-                JwtUtil.base64urldecode(encodedAuthenticationTag),
+                Base64Util.base64urldecode(encodedAuthenticationTag),
                 additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
         assertEquals(decodedPlainText, plainText);
     }
@@ -261,7 +263,7 @@ public class EncryptionTest extends BaseTest {
         SecureRandom random = new SecureRandom();
         random.nextBytes(cmk);
 
-        BigInteger modulus = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger modulus = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 177, 119, 33, 13, 164, 30, 108, 121, 207, 136, 107,
                 242, 12, 224, 19, 226, 198, 134, 17, 71, 173, 75, 42,
                 61, 48, 162, 206, 161, 97, 108, 185, 234, 226, 219,
@@ -287,9 +289,9 @@ public class EncryptionTest extends BaseTest {
                 239, 71
         }));
 
-        BigInteger exponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{1, 0, 1}));
+        BigInteger exponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{1, 0, 1}));
 
-        BigInteger privateExponent = new BigInteger(1, JwtUtil.unsignedToBytes(new int[]{
+        BigInteger privateExponent = new BigInteger(1, Base64Util.unsignedToBytes(new int[]{
                 84, 80, 150, 58, 165, 235, 242, 123, 217, 55, 38,
                 154, 36, 181, 221, 156, 211, 215, 100, 164, 90, 88,
                 40, 228, 83, 148, 54, 122, 4, 16, 165, 48, 76, 194,
@@ -315,17 +317,17 @@ public class EncryptionTest extends BaseTest {
                 130, 89
         }));
 
-        RSAPublicKey rsaPublicKey = new RSAPublicKey(modulus, exponent);
+        PublicKey publicKey = new RSAPublicKeyImpl(modulus, exponent);
         RSAPrivateKey rsaPrivateKey = new RSAPrivateKey(modulus, privateExponent);
 
         // Encrypt
-        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, rsaPublicKey);
+        JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, publicKey);
         String encodedJweEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
-        byte[] initVector = JwtUtil.unsignedToBytes(new int[]{
+        byte[] initVector = Base64Util.unsignedToBytes(new int[]{
                 3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101
         });
-        String encodedInitVector = JwtUtil.base64urlencode(initVector);
+        String encodedInitVector = Base64Util.base64urlencode(initVector);
         assertEquals(encodedInitVector, "AxY8DCtDaGlsbGljb3RoZQ");
 
         String additionalAuthenticatedData = encodedHeader + "."
@@ -354,7 +356,7 @@ public class EncryptionTest extends BaseTest {
         assertEquals(encryptionKey, cmk);
 
         String decodedPlainText = decrypter.decryptCipherText(encodedCipherText, encryptionKey, initVector,
-                JwtUtil.base64urldecode(encodedAuthenticationTag),
+                Base64Util.base64urldecode(encodedAuthenticationTag),
                 additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
         assertEquals(decodedPlainText, plainText);
     }
@@ -366,11 +368,11 @@ public class EncryptionTest extends BaseTest {
         // {"alg":"A128KW","enc":"A128GCM"}
         String encodedHeader = "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0";
         String plainText = "The true sign of intelligence is not knowledge but imagination.";
-        byte[] cmk = JwtUtil.unsignedToBytes(new int[]{
+        byte[] cmk = Base64Util.unsignedToBytes(new int[]{
                 64, 154, 239, 170, 64, 40, 195, 99, 19, 84, 192, 142, 192, 238, 207, 217
         });
 
-        byte[] sharedSymmetricKey = JwtUtil.unsignedToBytes(new int[]{
+        byte[] sharedSymmetricKey = Base64Util.unsignedToBytes(new int[]{
                 25, 172, 32, 130, 225, 114, 26, 181, 138, 106, 254, 192, 95, 133, 74, 82
         });
 
@@ -379,10 +381,10 @@ public class EncryptionTest extends BaseTest {
         String encodedEncryptedKey = encrypter.generateEncryptedKey(cmk);
         assertEquals(encodedEncryptedKey, "pP_7AUDIQcgixVGPK9PwJr-htXV3RCxQ");
 
-        byte[] initVector = JwtUtil.unsignedToBytes(new int[]{
+        byte[] initVector = Base64Util.unsignedToBytes(new int[]{
                 253, 220, 80, 25, 166, 152, 178, 168, 97, 99, 67, 89
         });
-        String encodedInitVector = JwtUtil.base64urlencode(initVector);
+        String encodedInitVector = Base64Util.base64urlencode(initVector);
         assertEquals(encodedInitVector, "_dxQGaaYsqhhY0NZ");
 
         String additionalAuthenticatedData = encodedHeader + "."
@@ -414,7 +416,7 @@ public class EncryptionTest extends BaseTest {
         assertEquals(encryptionKey, cmk);
 
         String decodedPlainText = decrypter.decryptCipherText(encodedCipherText, encryptionKey, initVector,
-                JwtUtil.base64urldecode(encodedAuthenticationTag),
+                Base64Util.base64urldecode(encodedAuthenticationTag),
                 additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
         assertEquals(decodedPlainText, plainText);
     }
@@ -430,7 +432,7 @@ public class EncryptionTest extends BaseTest {
         SecureRandom random = new SecureRandom();
         random.nextBytes(cmk);
 
-        byte[] sharedSymmetricKey = JwtUtil.unsignedToBytes(new int[]{
+        byte[] sharedSymmetricKey = Base64Util.unsignedToBytes(new int[]{
                 25, 172, 32, 130, 225, 114, 26, 181, 138, 106, 254, 192, 95, 133, 74, 82
         });
 
@@ -438,10 +440,10 @@ public class EncryptionTest extends BaseTest {
         JweEncrypterImpl encrypter = new JweEncrypterImpl(KeyEncryptionAlgorithm.A256KW, BlockEncryptionAlgorithm.A256GCM, sharedSymmetricKey);
         String encodedEncryptedKey = encrypter.generateEncryptedKey(cmk);
 
-        byte[] initVector = JwtUtil.unsignedToBytes(new int[]{
+        byte[] initVector = Base64Util.unsignedToBytes(new int[]{
                 253, 220, 80, 25, 166, 152, 178, 168, 97, 99, 67, 89
         });
-        String encodedInitVector = JwtUtil.base64urlencode(initVector);
+        String encodedInitVector = Base64Util.base64urlencode(initVector);
         assertEquals(encodedInitVector, "_dxQGaaYsqhhY0NZ");
 
         String additionalAuthenticatedData = encodedHeader + "."
@@ -470,7 +472,7 @@ public class EncryptionTest extends BaseTest {
         assertEquals(encryptionKey, cmk);
 
         String decodedPlainText = decrypter.decryptCipherText(encodedCipherText, encryptionKey, initVector,
-                JwtUtil.base64urldecode(encodedAuthenticationTag),
+                Base64Util.base64urldecode(encodedAuthenticationTag),
                 additionalAuthenticatedData.getBytes(Util.UTF8_STRING_ENCODING));
         assertEquals(decodedPlainText, plainText);
     }

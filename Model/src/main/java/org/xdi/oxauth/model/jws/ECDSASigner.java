@@ -17,7 +17,7 @@ import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -27,7 +27,7 @@ import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version July 31, 2016
  */
 public class ECDSASigner extends AbstractJwsSigner {
 
@@ -72,7 +72,7 @@ public class ECDSASigner extends AbstractJwsSigner {
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
-            return JwtUtil.base64urlencode(signature.sign());
+            return Base64Util.base64urlencode(signature.sign());
         } catch (InvalidKeySpecException e) {
             throw new SignatureException(e);
         } catch (InvalidKeyException e) {
@@ -120,7 +120,7 @@ public class ECDSASigner extends AbstractJwsSigner {
         }
 
         try {
-            byte[] sigBytes = JwtUtil.base64urldecode(signature);
+            byte[] sigBytes = Base64Util.base64urldecode(signature);
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);

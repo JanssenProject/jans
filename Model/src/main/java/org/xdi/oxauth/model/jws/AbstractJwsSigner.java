@@ -6,20 +6,22 @@
 
 package org.xdi.oxauth.model.jws;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 public abstract class AbstractJwsSigner implements JwsSigner {
 
@@ -95,7 +97,7 @@ public abstract class AbstractJwsSigner implements JwsSigner {
                 if (digest != null) {
                     byte[] lefMostHalf = new byte[digest.length / 2];
                     System.arraycopy(digest, 0, lefMostHalf, 0, lefMostHalf.length);
-                    String hash = JwtUtil.base64urlencode(lefMostHalf);
+                    String hash = Base64Util.base64urlencode(lefMostHalf);
 
                     result = hash.equals(tokenHash);
                 }
