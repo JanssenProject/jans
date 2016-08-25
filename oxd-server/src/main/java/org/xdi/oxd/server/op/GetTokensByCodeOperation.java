@@ -50,7 +50,6 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenRequest.setAuthUsername(site.getClientId());
         tokenRequest.setAuthPassword(site.getClientSecret());
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-        tokenRequest.setScope(asCommaSeparatedString(site.getScope()));
 
         final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
         tokenClient.setExecutor(getHttpService().getClientExecutor());
@@ -59,7 +58,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         ClientUtils.showClient(tokenClient);
 
         if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
-            if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
+            if (Util.allNotBlank(response.getAccessToken())) {
                 final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
                 opResponse.setAccessToken(response.getAccessToken());
                 opResponse.setIdToken(response.getIdToken());
@@ -85,13 +84,5 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
         return null;
-    }
-
-    private static String asCommaSeparatedString(List<String> scope) {
-        String result = "";
-        for (String s : scope) {
-            result = result + " " + s;
-        }
-        return result.trim();
     }
 }
