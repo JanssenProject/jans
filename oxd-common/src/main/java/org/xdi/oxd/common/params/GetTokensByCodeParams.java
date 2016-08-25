@@ -3,8 +3,6 @@ package org.xdi.oxd.common.params;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/09/2015
@@ -17,20 +15,8 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
     private String oxdId;
     @JsonProperty(value = "code")
     private String code;
-    @JsonProperty(value = "state")
-    private String state;
-    @JsonProperty(value = "scopes")
-    private List<String> scopes;
 
     public GetTokensByCodeParams() {
-    }
-
-    public List<String> getScopes() {
-        return scopes;
-    }
-
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
     }
 
     public String getCode() {
@@ -49,14 +35,6 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         this.oxdId = oxdId;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -64,16 +42,13 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
 
         GetTokensByCodeParams that = (GetTokensByCodeParams) o;
 
-        if (code != null ? !code.equals(that.code) : that.code != null) return false;
-        if (oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null) return false;
-        return !(state != null ? !state.equals(that.state) : that.state != null);
+        return !(code != null ? !code.equals(that.code) : that.code != null) && !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
     }
 
     @Override
     public int hashCode() {
         int result = oxdId != null ? oxdId.hashCode() : 0;
         result = 31 * result + (code != null ? code.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
         return result;
     }
 
@@ -83,7 +58,6 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         sb.append("GetTokensByCodeParams");
         sb.append("{code='").append(code).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
-        sb.append(", state='").append(state).append('\'');
         sb.append('}');
         return sb.toString();
     }
