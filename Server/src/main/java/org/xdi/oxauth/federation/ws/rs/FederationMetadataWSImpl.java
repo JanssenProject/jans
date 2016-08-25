@@ -26,7 +26,7 @@ import org.xdi.oxauth.model.federation.FederationOP;
 import org.xdi.oxauth.model.federation.FederationRP;
 import org.xdi.oxauth.model.jwt.JwtHeader;
 import org.xdi.oxauth.model.jwt.JwtType;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.FederationMetadataService;
 
@@ -42,7 +42,7 @@ import java.util.Set;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 29, 2016
+ * @version July 31, 2016
  */
 @Name("federationMetadataWS")
 public class FederationMetadataWSImpl implements FederationMetadataWS {
@@ -102,8 +102,8 @@ public class FederationMetadataWSImpl implements FederationMetadataWS {
 
             String header = jsonHeader.toString();
             String payload = jsonPayload.toString();
-            header = JwtUtil.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
-            payload = JwtUtil.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
+            header = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            payload = Base64Util.base64urlencode(payload.getBytes(Util.UTF8_STRING_ENCODING));
             final String signingInput = header + "." + payload;
 
             final String signature = cryptoProvider.sign(signingInput, keyId, null, SignatureAlgorithm.RS512);

@@ -6,15 +6,16 @@
 
 package org.xdi.oxauth.model.jwt;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.util.JwtUtil;
+import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/11/2012
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
  */
 
 public class PureJwt {
@@ -37,8 +38,8 @@ public class PureJwt {
         String decodedPayloadTemp = null;
         String decodedHeaderTemp = null;
         try {
-            decodedHeaderTemp = new String(JwtUtil.base64urldecode(p_encodedHeader), Util.UTF8_STRING_ENCODING);
-            decodedPayloadTemp = new String(JwtUtil.base64urldecode(p_encodedPayload), Util.UTF8_STRING_ENCODING);
+            decodedHeaderTemp = new String(Base64Util.base64urldecode(p_encodedHeader), Util.UTF8_STRING_ENCODING);
+            decodedPayloadTemp = new String(Base64Util.base64urldecode(p_encodedPayload), Util.UTF8_STRING_ENCODING);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
