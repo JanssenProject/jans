@@ -58,7 +58,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         ClientUtils.showClient(tokenClient);
 
         if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
-            if (Util.allNotBlank(response.getAccessToken(), response.getRefreshToken())) {
+            if (Util.allNotBlank(response.getAccessToken())) {
                 final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
                 opResponse.setAccessToken(response.getAccessToken());
                 opResponse.setIdToken(response.getIdToken());
