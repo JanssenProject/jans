@@ -1,22 +1,20 @@
 # FIDO UAF Authenticator
 
-The UAF allows applications to take advantage of the security capabilities of modern devices such as fingerprint 
-biometrics, iris recognition, voice biometrics and others. It provides a unified infrastructure that allows you to integrate these capabilities in a simple manner to enable authentication that is both more user friendly and more secure than password
+UAF allows applications to take advantage of the security capabilities of modern devices such as fingerprint, iris, and voice biometrics. It provides a unified infrastructure that allows you to integrate these capabilities in a simple manner to enable authentication that is both more user friendly and more secure than passwords.
 
 ## Typical UAF architecture
 
-This is generic diagram which provides UAF architecture overview. There are 2 parts. One part contains components that resides on the user’s device. Another part is RP and UAF server. The typical gateway between these 2 parts is mobile browser with UAF plugin. The RP should provides proxy capabilities to deliver messages from mobile browser plugin to UAF server.
+THe following diagram provides an overview of the UAF infrastructure, which contains (1) components that resides on the user’s device, and (2) server side components that connect to a UAF server. The typical gateway between these two parts is a mobile browser with a UAF plugin. The RP should provide proxy capabilities to deliver messages from the mobile browser plugin to the UAF server.
 
 ![Typical UAF design](./img/typical_uaf_architecture.png)
 
-It's not very convinient when RP is an second device. Non Nok offer OOB API which simplify UAF integration in this case.   
+It's not very convenient when the RP is a second device. Non Nok offers an Out-of-band (OOB) API which simplifies UAF integration in this case.   
 
 ## Out-of-Band Authentication 
-Out-of-Band (OOB) authentication allows your users to employ your mobile app to authenticate 
-with UAF even on devices that do not have any UAF components installed. In this form of 
-authentication typically, the user of a laptop authenticates to a web application using their 
-mobile device. The user binds the browser session to his or her mobile device by scanning a 
-QR code using the mobile device or by triggering a push notification. The user then performs 
+Out-of-Band authentication allows mobile device authenticatation with UAF even on devices that 
+do not have any UAF components installed. Using this workflow, the user of a laptop authenticates 
+to a web application using their mobile device. The user binds the browser session to his or her 
+mobile device by scanning a QR code, or by triggering a push notification. The user then performs 
 the UAF authentication on an out-of-band channel between the mobile device and the Nok Nok 
 Authentication Server. Once the user authenticates successfully, the Authentication Server 
 notifies your application server. OOB is a proprietary feature developed by Nok Nok Labs on top 
@@ -24,11 +22,12 @@ of the FIDO UAF protocol.
 
 ![OOB with QR codes](./img/oob_qr_code.png)
 
-Also it allows to use platform push notification messages.
+Also it allows push notification messages to be sent by the platform.
 
 ## Device integration models
 
-This is not part of UAF authentication script but shows modular architecture of UAF mobile authentication part.
+This is not a part of the UAF authentication script, but it shows the modular
+architecture of the UAF mobile authentication stack.
 
 Some devices will feature a preloaded UAF Client and one or more UAF ASMs. In some cases, 
 devices may only feature a preloaded UAF ASM, rather than both a UAF Client and ASM. Older 
@@ -40,7 +39,8 @@ can support each of these three scenarios illustrated below from the same mobile
 
 ## Integration with oxAuth
 
-The integrations with oxAuth has been done via Person Authentication module. This  workflow shows communication process between components.
+The oxAuth UAF integration leverages the Person Authentication module. This workflow shows
+the communication process between the components.
 
 ![Typical UAF design](./img/gluu_uaf_integration_authentication_workflow.png)
 
