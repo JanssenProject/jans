@@ -6,10 +6,15 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.xdi.oxauth.dev.HostnameVerifierType;
 
 import static org.testng.Assert.*;
 
@@ -17,13 +22,28 @@ import static org.testng.Assert.*;
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 22, 2015
+ * @version August 28, 2016
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
     @Test
-    public void requestOpenIdConfiguration() throws Exception {
-        showTitle("requestOpenIdConfiguration");
+    @Parameters({"swdResource"})
+    public void requestOpenIdConfiguration(final String resource) throws Exception {
+        showTitle("OpenID Connect Discovery");
+
+        OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
+        OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
+                new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+
+        showClient(openIdConnectDiscoveryClient);
+        assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");
+        assertNotNull(openIdConnectDiscoveryResponse.getSubject());
+        assertTrue(openIdConnectDiscoveryResponse.getLinks().size() > 0);
+
+        String configurationEndpoint = openIdConnectDiscoveryResponse.getLinks().get(0).getHref() +
+                "/.well-known/openid-configuration";
+
+        showTitle("OpenID Connect Configuration");
 
         OpenIdConfigurationClient client = new OpenIdConfigurationClient(configurationEndpoint);
         OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
