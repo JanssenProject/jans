@@ -9,6 +9,7 @@ from org.jboss.seam.security import Identity
 from org.jboss.seam import Component
 from javax.faces.context import FacesContext
 from org.jboss.seam.faces import FacesMessages
+from org.jboss.seam.international import StatusMessage
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.xdi.oxauth.service.net import HttpService
