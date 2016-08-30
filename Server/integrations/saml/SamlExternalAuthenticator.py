@@ -100,6 +100,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Initialization. Failed to load saml_extension_module: '%s'" % saml_extension_module_name
                 print "Saml. Initialization. Unexpected error:", ex
                 return False
+            
+        self.debugEnrollment = False
 
         print "Saml. Initialized successfully"
         return True   
@@ -272,9 +274,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
                         idpAttribute = attributesMappingEntry.getKey()
                         localAttribute = attributesMappingEntry.getValue()
+                        
+                        if self.debugEnrollment:
+                            print "Saml. Authenticate for step 1. Trying to map '%s' into '%s'" % ( idpAttribute, localAttribute)
 
                         localAttributeValue = saml_response_normalized_attributes.get(idpAttribute)
-                        if (localAttribute != None):
+                        if (localAttributeValue != None):
+                            if self.debugEnrollment:
+                                print "Saml. Authenticate for step 1. Setting attribute '%s' value '%s'" % ( localAttribute, localAttributeValue)
                             newUser.setAttribute(localAttribute, localAttributeValue)
 
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
