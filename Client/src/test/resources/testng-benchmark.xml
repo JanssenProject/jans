@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthClientBenchamrk" parallel="false">
+<suite name="oxAuthClientBenchmark" parallel="false">
 
     <!-- Authorization Benchmark test -->
     <test name="Authorization Benchmark tests" enabled="true">
