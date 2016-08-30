@@ -58,7 +58,6 @@ public class SocketService {
         final int port = conf.getPort();
 
         final LicenseService licenseService = new LicenseService(conf, httpService);
-        final ExecutorService executorService = Executors.newFixedThreadPool(999, CoreUtils.daemonThreadFactory());
 
         try {
             final Boolean localhostOnly = conf.getLocalhostOnly();
@@ -90,11 +89,10 @@ public class SocketService {
 
                     final Socket clientSocket = serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    executorService.execute(new SocketProcessor(clientSocket));
+                    executorService().execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;
-                    //System.exit(-1);
                 }
             }
         } catch (IOException e) {
@@ -103,6 +101,10 @@ public class SocketService {
         } finally {
             IOUtils.closeQuietly(serverSocket);
         }
+    }
+
+    private ExecutorService executorService() {
+        return Executors.newSingleThreadExecutor(CoreUtils.daemonThreadFactory());
     }
 
     public void shutdownNow() {
