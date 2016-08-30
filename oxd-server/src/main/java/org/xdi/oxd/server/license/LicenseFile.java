@@ -65,7 +65,11 @@ public class LicenseFile implements Serializable {
             try {
                 return CoreUtils.createJsonMapper().readValue(p_stream, LicenseFile.class);
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                if (e.getMessage().startsWith("No content to map to Object")) { // quick trick to make it less verbose for empty file
+                    LOG.error(e.getMessage());
+                } else {
+                    LOG.error(e.getMessage(), e);
+                }
             }
             return null;
         } catch (Exception e) {
@@ -79,9 +83,11 @@ public class LicenseFile implements Serializable {
         try {
             File file = getLicenseFile();
             inputStream = new FileInputStream(file);
-            LicenseFile licenseFile = LicenseFile.create(inputStream);
-            licenseFile.setLastModified(file.lastModified());
-            return Optional.of(licenseFile);
+            LicenseFile licenseFile = create(inputStream);
+            if (licenseFile != null) {
+                licenseFile.setLastModified(file.lastModified());
+                return Optional.of(licenseFile);
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
