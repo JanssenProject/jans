@@ -69,6 +69,10 @@ public class SocketService {
             }
 
             serverSocket.setSoTimeout(conf.getTimeOutInSeconds() * 1000);
+            if (conf.getTimeOutInSeconds() > 0) {
+                LOG.info("time_out_in_seconds of socket is not zero, server automatically shutdown socket after this timeout.");
+            }
+
             // todo
 //            if (licenseService.isFreeLicense()) {
 //                LOG.info("Server runs in free license mode which delays commands execution on 0.5 second for each command.\n " +
