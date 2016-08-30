@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.server.license;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -25,61 +26,70 @@ import java.util.concurrent.TimeUnit;
  * @version 0.9, 12/10/2014
  */
 
-public class LicenseUpdateService {
+class LicenseFileUpdateService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LicenseUpdateService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LicenseFileUpdateService.class);
+
+    private static final int ONE_HOUR_AS_MILLIS = 3600000;
+    private static final int TWELVE_HOUR_AS_MILLIS = 12 * ONE_HOUR_AS_MILLIS;
 
     private final Configuration conf;
     private final HttpService httpService;
 
-    public LicenseUpdateService(Configuration conf, HttpService httpService) {
+    LicenseFileUpdateService(Configuration conf, HttpService httpService) {
         this.conf = conf;
         this.httpService = httpService;
     }
 
-    public void start() {
-        if (hasLicenseConfig()) {
+    public void start(Optional<LicenseFile> licenseFile) {
+        if (!licenseFile.isPresent() || !lastModifiedLessThan12HoursAgo(licenseFile.get().getLastModified())) {
             updateLicenseFromServer();
-            scheduleUpdatePinger();
-        } else {
-            LOG.error("Failed to start LicenseUpdateService. Configuration licenseId or licenseServerEndpoint is empty.");
         }
+        scheduleUpdatePinger();
+    }
+
+    private boolean lastModifiedLessThan12HoursAgo(long lastModified) {
+        long diff = System.currentTimeMillis() - lastModified;
+        return diff < TWELVE_HOUR_AS_MILLIS;
     }
 
     private void scheduleUpdatePinger() {
+        Integer licenseCheckPeriodInHours = conf.getLicenseCheckPeriodInHours();
+        int sevenDaysInHours = 24 * 7;
+        if (licenseCheckPeriodInHours <= 0 || licenseCheckPeriodInHours > sevenDaysInHours) {
+            licenseCheckPeriodInHours = 24;
+        }
+
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 updateLicenseFromServer();
             }
-        }, 1, conf.getLicenseCheckPeriodInHours(), TimeUnit.HOURS);
+        }, licenseCheckPeriodInHours, licenseCheckPeriodInHours, TimeUnit.HOURS);
     }
 
     private void updateLicenseFromServer() {
         try {
             final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint(), httpService.getClientExecutor());
 
+            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", license_endpoint: " + conf.getLicenseServerEndpoint() + " ... ");
             final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId());
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
-                final File file = LicenseService.getLicenseFile();
+                final File file = LicenseFile.getLicenseFile();
                 if (file != null) {
                     final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense()).asJson();
                     FileUtils.write(file, json);
-                    LOG.trace("License file updated successfully.");
+                    LOG.info("License file updated successfully.");
                     return;
                 }
             } else {
-                LOG.trace("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+                LOG.info("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
                 return;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
         LOG.trace("Failed to update license file from server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
-    }
-
-    public boolean hasLicenseConfig() {
-        return !Strings.isNullOrEmpty(conf.getLicenseId()) && !Strings.isNullOrEmpty(conf.getLicenseServerEndpoint());
     }
 }
