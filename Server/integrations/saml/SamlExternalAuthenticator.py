@@ -76,20 +76,13 @@ class PersonAuthentication(PersonAuthenticationType):
             self.userEnforceAttributesUniqueness = self.prepareUserEnforceUniquenessAttributes(configurationAttributes)
 
         self.attributesMapping = None
-        if (configurationAttributes.containsKey("saml_idp_attributes_list") and
-            configurationAttributes.containsKey("saml_local_attributes_list")):
-
-            saml_idp_attributes_list = configurationAttributes.get("saml_idp_attributes_list").getValue2()
-            if (StringHelper.isEmpty(saml_idp_attributes_list)):
-                print "Saml. Initialization. The property saml_idp_attributes_list is empty"
+        if configurationAttributes.containsKey("saml_idp_attributes_mapping"):
+            saml_idp_attributes_mapping = configurationAttributes.get("saml_idp_attributes_mapping").getValue2()
+            if (StringHelper.isEmpty(saml_idp_attributes_mapping)):
+                print "Saml. Initialization. The property saml_idp_attributes_mapping is empty"
                 return False
 
-            saml_local_attributes_list = configurationAttributes.get("saml_local_attributes_list").getValue2()
-            if (StringHelper.isEmpty(saml_local_attributes_list)):
-                print "Saml. Initialization. The property saml_local_attributes_list is empty"
-                return False
-
-            self.attributesMapping = self.prepareAttributesMapping(saml_idp_attributes_list, saml_local_attributes_list)
+            self.attributesMapping = self.prepareAttributesMapping(saml_idp_attributes_mapping)
             if (self.attributesMapping == None):
                 print "Saml. Initialization. The attributes mapping isn't valid"
                 return False
@@ -329,7 +322,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         user.setCustomObjectClasses(self.userObjectClasses)
 
                     customAttributes = ArrayList()
-                    for key in attributes.keySet():
+                    for key in saml_response_attributes.keySet():
                         ldapAttributes = attributeService.getAllAttributes()
                         for ldapAttribute in ldapAttributes:
                             saml2Uri = ldapAttribute.getSaml2Uri()
@@ -609,30 +602,19 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return clientSamlConfiguration
 
-    def prepareAttributesMapping(self, saml_idp_attributes_list, saml_local_attributes_list):
-        saml_idp_attributes_list_array = StringHelper.split(saml_idp_attributes_list, ",")
-        if (ArrayHelper.isEmpty(saml_idp_attributes_list_array)):
-            print "Saml. PrepareAttributesMapping. There is no attributes specified in saml_idp_attributes_list property"
-            return None
+    def prepareAttributesMapping(self, saml_idp_attributes_mapping):
+        saml_idp_attributes_mapping_json = json.loads(saml_idp_attributes_mapping)
         
-        saml_local_attributes_list_array = StringHelper.split(saml_local_attributes_list, ",")
-        if (ArrayHelper.isEmpty(saml_local_attributes_list_array)):
-            print "Saml. PrepareAttributesMapping. There is no attributes specified in saml_local_attributes_list property"
+        if len(saml_idp_attributes_mapping_json) == 0:
+            print "Saml. PrepareAttributesMapping. There is no attributes mapping specified in saml_idp_attributes_mapping property"
             return None
 
-        if (len(saml_idp_attributes_list_array) != len(saml_local_attributes_list_array)):
-            print "Saml. PrepareAttributesMapping. The number of attributes in saml_idp_attributes_list and saml_local_attributes_list isn't equal"
-            return None
-        
         attributeMapping = IdentityHashMap()
-        i = 0
-        count = len(saml_idp_attributes_list_array)
-        while (i < count):
-            idpAttribute = StringHelper.toLowerCase(saml_idp_attributes_list_array[i])
-            localAttribute = StringHelper.toLowerCase(saml_local_attributes_list_array[i])
-            attributeMapping.put(idpAttribute, localAttribute)
-
-            i = i + 1
+        for local_attribute_name in saml_idp_attributes_mapping_json:
+            localAttribute = StringHelper.toLowerCase(local_attribute_name)
+            for idp_attribute_name in saml_idp_attributes_mapping_json[local_attribute_name]:
+                idpAttribute = StringHelper.toLowerCase(idp_attribute_name)
+                attributeMapping.put(idpAttribute, localAttribute)
         
         return attributeMapping
 
@@ -661,7 +643,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         saml_client_configuration_value = json.loads(saml_client_configuration.getValue())
 
-        clientAttributesMapping = self.prepareAttributesMapping(saml_client_configuration_value["saml_idp_attributes_list"], saml_client_configuration_value["saml_local_attributes_list"])
+        clientAttributesMapping = self.prepareAttributesMapping(saml_client_configuration_value["saml_idp_attributes_mapping"])
         if (clientAttributesMapping == None):
             print "Saml. PrepareCurrentAttributesMapping. Client attributes mapping is invalid. Using default one"
             return currentAttributesMapping
