@@ -44,21 +44,23 @@ public class SocketService {
 
     private Configuration conf;
     private HttpService httpService;
+    private TimeService timeService;
 
     /**
      * Avoid direct instance creation
      */
     @Inject
-    public SocketService(Configuration conf, HttpService httpService) {
+    public SocketService(Configuration conf, HttpService httpService, TimeService timeService) {
         this.conf = conf;
         this.httpService = httpService;
+        this.timeService = timeService;
     }
 
     public void listenSocket() throws IOException {
         final int port = conf.getPort();
 
-        final LicenseService licenseService = new LicenseService(conf, httpService);
-        final ExecutorService executorService = Executors.newFixedThreadPool(licenseService.getThreadsCount(), CoreUtils.daemonThreadFactory());
+        final LicenseService licenseService = new LicenseService(conf, httpService, timeService);
+        licenseService.start();
 
         try {
             final Boolean localhostOnly = conf.getLocalhostOnly();
@@ -70,30 +72,24 @@ public class SocketService {
             }
 
             serverSocket.setSoTimeout(conf.getTimeOutInSeconds() * 1000);
-            if (licenseService.isFreeLicense()) {
-                LOG.info("Server runs in free license mode which delays commands execution on 0.5 second for each command.\n " +
-                        "In order to remove the transaction limitations placed on the free version of oxD, " +
-                        "you need to purchase a commercial license at oxd.gluu.org");
+            if (conf.getTimeOutInSeconds() > 0) {
+                LOG.info("time_out_in_seconds of socket is not zero, server automatically shutdown socket after this timeout.");
             }
+
             LOG.info("Server socket is bound to port: {}, with timeout: {} seconds. Start listening for notifications.", port, conf.getTimeOutInSeconds());
             while (!shutdown) {
                 try {
-                    if (licenseService.isLicenseChanged()) {
-                        licenseService.reset();
-                        LOG.info("License was changed. Restart oxd server to enforce new license!");
-                        shutdownNow();
-                        shutdown = false;
-                        LOG.info("Starting...");
-                        listenSocket();
+                    final Socket clientSocket = serverSocket.accept();
+
+                    if (!licenseService.isLicenseValid()) {
+                        LOG.warn("License is invalid. Please check your license_id and make sure it is not expired.");
                     }
 
-                    final Socket clientSocket = serverSocket.accept();
                     LOG.debug("Start new SocketProcessor...");
-                    executorService.execute(new SocketProcessor(clientSocket));
+                    executorService().execute(new SocketProcessor(clientSocket));
                 } catch (IOException e) {
                     LOG.error("Accept failed, port: {}", port);
                     throw e;
-                    //System.exit(-1);
                 }
             }
         } catch (IOException e) {
@@ -102,6 +98,10 @@ public class SocketService {
         } finally {
             IOUtils.closeQuietly(serverSocket);
         }
+    }
+
+    private ExecutorService executorService() {
+        return Executors.newSingleThreadExecutor(CoreUtils.daemonThreadFactory());
     }
 
     public void shutdownNow() {

@@ -3,25 +3,21 @@
  */
 package org.xdi.oxd.server.license;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import net.nicholaswilliams.java.licensing.SignedLicense;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.license.client.Jackson;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
-import org.xdi.oxd.license.client.lib.ALicense;
-import org.xdi.oxd.license.client.lib.ALicenseManager;
-import org.xdi.oxd.license.client.lib.LicenseSerializationUtilities;
+import org.xdi.oxd.license.client.js.Product;
+import org.xdi.oxd.license.validator.LicenseContent;
+import org.xdi.oxd.license.validator.LicenseValidator;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.service.HttpService;
+import org.xdi.oxd.server.service.TimeService;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,28 +31,46 @@ public class LicenseService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseService.class);
 
-    public static final String LICENSE_FILE_NAME = ".oxd-license";
-
-    public static final String LICENSE_FILE_PATH = /*System.getProperty("user.home") +*/ LICENSE_FILE_NAME;
-
     private final Configuration conf;
-    private final LicenseUpdateService updateService;
+    private final LicenseFileUpdateService updateService;
+    private final TimeService timeService;
 
-    private boolean licenseChanged = false;
-    private String encodedLicense = null;
-    private LicenseMetadata metadata = null;
-
+    private volatile LicenseMetadata metadata = null;
     private volatile boolean licenseValid = false;
 
     @Inject
-    public LicenseService(Configuration conf, HttpService httpService) {
+    public LicenseService(Configuration conf, HttpService httpService, TimeService timeService) {
         this.conf = conf;
-        this.updateService = new LicenseUpdateService(conf, httpService);
-        this.updateService.start();
+        this.timeService = timeService;
+        this.updateService = new LicenseFileUpdateService(conf, httpService);
+    }
 
-        licenseValid = validate();
+    public void start() {
+        validateConfiguration();
+
+        Optional<LicenseFile> licenseFile = LicenseFile.load();
+        this.updateService.start(licenseFile);
+
+        licenseValid = validateLicense();
         if (licenseValid) {
             schedulePeriodicValidation();
+        } else {
+            throw new ShutdownException("Failed to validate license, shutdown server ... ");
+        }
+    }
+
+    private void validateConfiguration() {
+        if (Strings.isNullOrEmpty(conf.getLicenseId())) {
+            throw new ShutdownException("Unable to validate license. license_id is not set in oxd configuration.");
+        }
+        if (Strings.isNullOrEmpty(conf.getLicenseServerEndpoint())) {
+            throw new ShutdownException("Unable to validate license. license_server_endpoint is not set in oxd configuration.");
+        }
+        if (Strings.isNullOrEmpty(conf.getPublicKey())) {
+            throw new ShutdownException("Unable to validate license. public_key is not set in oxd configuration.");
+        }
+        if (Strings.isNullOrEmpty(conf.getPublicPassword())) {
+            throw new ShutdownException("Unable to validate license. public_password is not set in oxd configuration.");
         }
     }
 
@@ -68,51 +82,38 @@ public class LicenseService {
         return licenseValid;
     }
 
-    private boolean validate() {
-        LOG.debug("licenseChanged: " + licenseChanged);
+    private boolean validateLicense() {
         try {
-            final LicenseFile licenseFile = loadLicenseFile();
-            if (licenseFile == null || Strings.isNullOrEmpty(licenseFile.getEncodedLicense())) {
-                reset();
+            LOG.trace("Validating license ...");
+
+            metadata = null;
+            licenseValid = false;
+
+            final Optional<LicenseFile> licenseFile = LicenseFile.load();
+            if (!licenseFile.isPresent() || Strings.isNullOrEmpty(licenseFile.get().getEncodedLicense())) {
+                LOG.error("Failed to load license file : " + LicenseFile.getLicenseFile().getAbsolutePath());
                 return false;
             }
 
-            // state
-            if (!licenseChanged) {
-                licenseChanged = encodedLicense != null && !licenseFile.getEncodedLicense().equals(encodedLicense);
-                if (licenseChanged) {
-                    LOG.debug("License was changed!");
-                }
-            }
-            encodedLicense = licenseFile.getEncodedLicense();
+            LicenseContent licenseContent = LicenseValidator.validate(
+                    conf.getPublicKey(),
+                    conf.getPublicPassword(),
+                    conf.getLicensePassword(),
+                    licenseFile.get().getEncodedLicense(),
+                    Product.OXD,
+                    timeService.getCurrentLicenseServerTime()
+            );
 
-            // validation
-            final SignedLicense signedLicense = LicenseSerializationUtilities.deserialize(licenseFile.getEncodedLicense());
-            ALicenseManager manager = new ALicenseManager(conf.getPublicKey(), conf.getPublicPassword(), signedLicense, conf.getLicensePassword());
+            metadata = licenseContent.getMetadata();
+            licenseValid = true;
 
-            ALicense decryptedLicense = manager.decryptAndVerifyLicense(signedLicense);// DECRYPT signed license
-            manager.validateLicense(decryptedLicense);
-            LOG.trace("License is valid!");
-
-            final String subject = decryptedLicense.getSubject();
-            metadata = Jackson.createJsonMapper().readValue(subject, LicenseMetadata.class);
-
-            LOG.trace("License metadata: " + metadata);
-
+            LOG.trace("License is validated successfully.");
+            LOG.trace("License data: " + metadata);
             return true;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-
-        LOG.debug("Unable to validate license, defaults to FREE license.");
-        reset();
         return false;
-    }
-
-    public void reset() {
-        metadata = null;
-        licenseChanged = false;
-        licenseValid = false;
     }
 
     private void schedulePeriodicValidation() {
@@ -120,49 +121,8 @@ public class LicenseService {
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                licenseValid = validate();
+                licenseValid = validateLicense();
             }
         }, 1, 24, TimeUnit.HOURS);
-    }
-
-    private LicenseFile loadLicenseFile() {
-        InputStream inputStream = null;
-        try {
-            File file = getLicenseFile();
-            inputStream = new FileInputStream(file);
-            return LicenseFile.create(inputStream);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-        return null;
-    }
-
-    public static File getLicenseFile() throws IOException {
-        File file = new File(LICENSE_FILE_PATH);
-        if (!file.exists()) {
-            final boolean fileCreated = file.createNewFile();
-            if (!fileCreated) {
-                throw new RuntimeException("Failed to create license file, path:" + file.getAbsolutePath());
-            }
-        }
-        LOG.debug("License file location: " + file.getAbsolutePath());
-        return file;
-    }
-
-    public boolean isLicenseChanged() {
-        return licenseChanged;
-    }
-
-    public boolean isFreeLicense() {
-        return getThreadsCount() == 1 && !isLicenseValid();
-    }
-
-    public int getThreadsCount() {
-        if (metadata == null || metadata.getThreadsCount() <= 0) {
-            return 1; // 0 is used for n/a - gain at least 2 threads
-        }
-        return metadata.getThreadsCount();
     }
 }
