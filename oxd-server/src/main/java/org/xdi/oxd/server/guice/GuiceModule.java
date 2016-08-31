@@ -7,13 +7,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
-import org.xdi.oxd.server.service.ConfigurationService;
-import org.xdi.oxd.server.service.DiscoveryService;
-import org.xdi.oxd.server.service.HttpService;
-import org.xdi.oxd.server.service.SiteConfigurationService;
-import org.xdi.oxd.server.service.SiteStorage;
-import org.xdi.oxd.server.service.SocketService;
-import org.xdi.oxd.server.service.ValidationService;
+import org.xdi.oxd.server.service.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,6 +26,7 @@ public class GuiceModule extends AbstractModule {
         bind(DiscoveryService.class).in(Singleton.class);
         bind(ValidationService.class).in(Singleton.class);
         bind(SiteStorage.class).in(Singleton.class);
+        bind(TimeService.class).in(Singleton.class);
 
         bind(Configuration.class).toProvider(ConfigurationService.class);
     }
