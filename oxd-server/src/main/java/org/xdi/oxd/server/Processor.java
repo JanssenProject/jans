@@ -52,7 +52,6 @@ public class Processor {
         try {
             if (StringUtils.isNotBlank(p_command)) {
                 final Command command = CoreUtils.createJsonMapper().readValue(p_command, Command.class);
-                enforceLicenseRestrictions(command);
                 final CommandResponse response = process(command);
                 if (response != null) {
                     final String json = CoreUtils.asJson(response);
@@ -68,25 +67,6 @@ public class Processor {
         }
         LOG.trace("No command or it's corrupted. Stop handling commands for this client.");
         return CommandResponse.INTERNAL_ERROR_RESPONSE_AS_STRING;
-    }
-
-    private void enforceLicenseRestrictions(Command command) {
-        try {
-            // if thread count 1 and no valid license then force 0.5 seconds delay
-            if (licenseService.isFreeLicense()) {
-                forceWait(500);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private void forceWait(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
     public CommandResponse process(Command command) {

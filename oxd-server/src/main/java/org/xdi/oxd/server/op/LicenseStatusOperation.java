@@ -35,11 +35,7 @@ public class LicenseStatusOperation extends BaseOperation<EmptyParams> {
 
             if (licenseService.isLicenseValid()) {
                 final LicenseMetadata metadata = licenseService.getMetadata();
-
-                opResponse.setThreadCount(metadata.getThreadsCount());
                 opResponse.setName(metadata.getLicenseName());
-                opResponse.setFeatures(metadata.getLicenseFeatures());
-
             }
 
             return okResponse(opResponse);
