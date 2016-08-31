@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
@@ -32,21 +34,28 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
-            final SiteConfiguration site = getSite();
+        final SiteConfiguration site = getSite();
 
-            String uri = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint() +
-                    "?id_token_hint=" + getIdToken(params, site);
-            if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-                uri += "&post_logout_redirect_uri=" + URLEncoder.encode(params.getPostLogoutRedirectUri(), "UTF-8");
-            }
-            if (!Strings.isNullOrEmpty(params.getState())) {
-                uri += "&state=" + params.getState();
-            }
-            if (!Strings.isNullOrEmpty(params.getSessionState())) {
-                uri += "&session_state=" + params.getSessionState();
-            }
+        String endSessionEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint();
 
-            return okResponse(new LogoutResponse(uri));
+        if (Strings.isNullOrEmpty(endSessionEndpoint)) {
+            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
+            throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
+        }
+
+        String uri = endSessionEndpoint +
+                "?id_token_hint=" + getIdToken(params, site);
+        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+            uri += "&post_logout_redirect_uri=" + URLEncoder.encode(params.getPostLogoutRedirectUri(), "UTF-8");
+        }
+        if (!Strings.isNullOrEmpty(params.getState())) {
+            uri += "&state=" + params.getState();
+        }
+        if (!Strings.isNullOrEmpty(params.getSessionState())) {
+            uri += "&session_state=" + params.getSessionState();
+        }
+
+        return okResponse(new LogoutResponse(uri));
     }
 
     private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {

@@ -33,6 +33,7 @@ public enum ErrorResponseCode {
     NO_UMA_PATH_PARAMETER("invalid_path_parameter", "path parameter is not specified or otherwise not valid"),
     NO_UMA_TICKET_PARAMETER("invalid_ticket_parameter", "ticket parameter is not specified or otherwise is not valid"),
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
+    FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
     FAILED_TO_GET_GAT("internal_error", "Failed to get GAT.");
 
