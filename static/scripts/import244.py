@@ -172,7 +172,7 @@ def stopOpenDJ():
 
 def walk_function(a, directory, files):
     # Skip copying the openDJ config from older versions to 2.4.3
-    if current_version >= 243 and backup_version < 243:
+    if current_version >= 243:
         ignore_folders = ['opendj', 'template', 'endorsed']
         for folder in ignore_folders:
             if folder in directory:
@@ -334,6 +334,7 @@ def processPeople(ldif_folder):
                 if 'oxSectorIdentifierURI' in line:
                     line.replace('oxSectorIdentifierURI', 'oxSectorIdentifier')
                 outfile.write(line)
+    shutil.move(new_peopleldif, peopleldif)
 
 
 def importLDIF(folder):
@@ -362,7 +363,6 @@ def processLDIF(backupFolder, newFolder):
     ldif_writer = LDIFWriter(ldifFile)
 
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
-    # TODO update all the attribute changes
     dnMap = getOldEntryMap(backupFolder)
 
     # Rewriting all the new DNs in the new installation to ldif file
@@ -463,8 +463,8 @@ def main(folder_name):
     copyFiles(backup24_folder)
     updateCertKeystore()
 
-    # processPeople(ldif_folder)  # FIXME make attribute changes
     exportLDIF(outputFolder)
+    processPeople(ldif_folder)
     processLDIF(ldif_folder, outputFolder)
     importLDIF(outputFolder)
 
