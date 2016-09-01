@@ -88,44 +88,6 @@ ou: scripts
 
 ################################
 
-# Oauth2 federation data - LEVEL 3
-dn: ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: federation
-
-# OAuth2 federation Metadata - LEVEL 4
-dn: ou=metadata,ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: metadata
-
-# OAuth2 federation OP's - LEVEL 4
-dn: ou=op,ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: op
-
-# OAuth2 federation RP's - LEVEL 4
-dn: ou=rp,ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: rp
-
-# OAuth2 federation requests - LEVEL 4
-dn: ou=request,ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: request
-
-# oxTrust Federation configuration data - LEVEL 4
-dn: ou=trust,ou=federation,o=%(inumOrg)s,o=gluu
-objectclass: top
-objectclass: organizationalUnit
-ou: trust
-
-################################
-
 # UMA data - LEVEL 3
 # Perhaps this should be under ou=uma,o=<org-inum>,o=gluu
 dn: ou=uma,o=%(inumOrg)s,o=gluu
