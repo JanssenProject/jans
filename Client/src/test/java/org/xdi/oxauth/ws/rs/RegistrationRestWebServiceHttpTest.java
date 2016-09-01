@@ -318,28 +318,6 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
     @Parameters({"redirectUris"})
     @Test
-    public void requestClientAssociateWithFederationAttributes(final String redirectUris) throws Exception {
-        showTitle("requestClientAssociateWithFederationAttributes");
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterRequest request = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        request.setFederationId("1234");
-        request.setFederationUrl("http://federationMetadataUrl.org");
-        registerClient.setRequest(request);
-
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-    }
-
-    @Parameters({"redirectUris"})
-    @Test
     public void registerWithCustomURI(final String redirectUris) throws Exception {
         showTitle("requestClientAssociate1");
 

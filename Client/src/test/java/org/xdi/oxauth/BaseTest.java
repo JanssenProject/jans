@@ -79,8 +79,6 @@ public abstract class BaseTest {
     protected String jwksUri;
     protected String registrationEndpoint;
     protected String validateTokenEndpoint;
-    protected String federationMetadataEndpoint;
-    protected String federationEndpoint;
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
@@ -203,22 +201,6 @@ public abstract class BaseTest {
 
     public void setValidateTokenEndpoint(String validateTokenEndpoint) {
         this.validateTokenEndpoint = validateTokenEndpoint;
-    }
-
-    public String getFederationMetadataEndpoint() {
-        return federationMetadataEndpoint;
-    }
-
-    public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
-        this.federationMetadataEndpoint = federationMetadataEndpoint;
-    }
-
-    public String getFederationEndpoint() {
-        return federationEndpoint;
-    }
-
-    public void setFederationEndpoint(String federationEndpoint) {
-        this.federationEndpoint = federationEndpoint;
     }
 
     public String getIntrospectionEndpoint() {
@@ -469,8 +451,6 @@ public abstract class BaseTest {
             jwksUri = response.getJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
             validateTokenEndpoint = response.getValidateTokenEndpoint();
-            federationMetadataEndpoint = response.getFederationMetadataEndpoint();
-            federationEndpoint = response.getFederationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
@@ -487,8 +467,6 @@ public abstract class BaseTest {
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
             validateTokenEndpoint = context.getCurrentXmlTest().getParameter("validateTokenEndpoint");
-            federationMetadataEndpoint = context.getCurrentXmlTest().getParameter("federationMetadataEndpoint");
-            federationEndpoint = context.getCurrentXmlTest().getParameter("federationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");

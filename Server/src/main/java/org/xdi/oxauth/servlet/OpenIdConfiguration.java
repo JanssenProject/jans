@@ -76,8 +76,6 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(JWKS_URI, configuration.getJwksUri());
             jsonObj.put(REGISTRATION_ENDPOINT, configuration.getRegistrationEndpoint());
             jsonObj.put(VALIDATE_TOKEN_ENDPOINT, configuration.getValidateTokenEndpoint());
-            jsonObj.put(FEDERATION_METADATA_ENDPOINT, configuration.getFederationMetadataEndpoint());
-            jsonObj.put(FEDERATION_ENDPOINT, configuration.getFederationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, configuration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, configuration.getIntrospectionEndpoint());
 

@@ -340,14 +340,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
-        // Federation params
-        if (StringUtils.isNotBlank(requestObject.getFederationUrl())) {
-            p_client.setFederationURI(requestObject.getFederationUrl());
-        }
-        if (StringUtils.isNotBlank(requestObject.getFederationId())) {
-            p_client.setFederationId(requestObject.getFederationId());
-        }
-
         if (requestObject.getJsonObject() != null) {
             // Custom params
             putCustomStuffIntoObject(p_client, requestObject.getJsonObject());
@@ -492,10 +484,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         // Logout params
         Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_URI.toString(), client.getLogoutUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, LOGOUT_SESSION_REQUIRED.toString(), client.getLogoutSessionRequired());
-
-        // Federation Params
-        Util.addToJSONObjectIfNotNull(responseJsonObject, FEDERATION_METADATA_URL.toString(), client.getFederationURI());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, FEDERATION_METADATA_ID.toString(), client.getFederationId());
 
         // Custom Params
         String[] scopeNames = null;
