@@ -16,7 +16,6 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
-import org.xdi.oxauth.model.federation.FederationErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -132,8 +131,6 @@ public class ErrorResponseFactory {
             List<ErrorMessage> list = null;
             if (type instanceof AuthorizeErrorResponseType) {
                 list = messages.getAuthorize();
-            } else if (type instanceof FederationErrorResponseType) {
-                list = messages.getFederation();
             } else if (type instanceof ClientInfoErrorResponseType) {
                 list = messages.getClientInfo();
             } else if (type instanceof EndSessionErrorResponseType) {

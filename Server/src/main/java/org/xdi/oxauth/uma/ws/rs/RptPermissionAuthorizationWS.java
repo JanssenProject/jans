@@ -14,11 +14,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.federation.FederationTrust;
-import org.xdi.oxauth.model.federation.FederationTrustStatus;
-import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -26,7 +22,6 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.FederationDataService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
@@ -37,7 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -59,8 +53,6 @@ public class RptPermissionAuthorizationWS {
     private UmaValidationService umaValidationService;
     @In
     private AuthorizationService umaAuthorizationService;
-    @In
-    private FederationDataService federationDataService;
     @In
     private ClientService clientService;
     @In
@@ -119,30 +111,6 @@ public class RptPermissionAuthorizationWS {
 
         // Validate resource set permission
         umaValidationService.validateResourceSetPermission(resourceSetPermission);
-
-        final Boolean federationEnabled = ConfigurationFactory.instance().getConfiguration().getFederationEnabled();
-        if (federationEnabled != null && federationEnabled) {
-            final Client client = clientService.getClient(rpt.getClientId());
-            final List<FederationTrust> trustList = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
-            if (trustList != null && !trustList.isEmpty()) {
-                for (FederationTrust t : trustList) {
-                    final Boolean skipAuthorization = t.getSkipAuthorization();
-                    if (skipAuthorization != null && skipAuthorization) {
-                        // grant access directly, client is in trust and skipAuthorization=true
-                        log.trace("grant access directly, client is in trust and skipAuthorization=true");
-                        rptManager.addPermissionToRPT(rpt, resourceSetPermission);
-                        invalidateTicket(resourceSetPermission);
-                        return rpt;
-                    }
-                }
-            } else {
-                log.trace("Forbid RPT authorization - client is not in any trust however federation is enabled on server.");
-                // throw not authorized exception
-                throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
-
-            }
-        }
 
         // Add permission to RPT
         if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest.getClaims())) {

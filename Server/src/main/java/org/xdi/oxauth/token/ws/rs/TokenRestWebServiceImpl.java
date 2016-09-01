@@ -9,14 +9,12 @@ package org.xdi.oxauth.token.ws.rs;
 import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.xdi.util.StringHelper;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.authorize.CodeVerifier;
 import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -25,8 +23,12 @@ import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AuthenticationFilterService;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -68,9 +70,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private AuthenticationFilterService authenticationFilterService;
 
     @In
-    private FederationDataService federationDataService;
-
-    @In
     private AuthenticationService authenticationService;
 
     @Override
@@ -96,14 +95,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 GrantType gt = GrantType.fromString(grantType);
 
                 Client client = sessionClient.getClient();
-
-                if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
-                    if (!federationDataService.hasAnyActiveTrust(client)) {
-                        log.debug("Forbid token issuing. Client is not in any trust relationship however federation is enabled for server. Client id: {0}, redirectUris: {1}",
-                                client.getClientId(), client.getRedirectUris());
-                        return error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT).build();
-                    }
-                }
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
     				if (client == null) {
