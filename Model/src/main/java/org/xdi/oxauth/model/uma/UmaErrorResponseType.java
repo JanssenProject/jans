@@ -48,11 +48,6 @@ public enum UmaErrorResponseType implements IErrorType {
 	 */
 	INVALID_CLIENT_SCOPE("invalid_client_scope"),
 
-    /**
-     * Client is not in trust relationship however federation is enabled on server.
-     */
-    CLIENT_NOT_IN_FEDERATED_TRUST("client_not_in_trust_relationship"),
-
 	/**
 	 * The AM server encountered an unexpected condition which
 	 * prevented it from fulfilling the request.

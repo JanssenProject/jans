@@ -71,8 +71,6 @@ public class RegisterRequest extends BaseRequest {
     private List<String> requestUris;
     private List<String> scopes;
     private Date clientSecretExpiresAt;
-    private String federationId;
-    private String federationUrl;
     private Map<String, String> customAttributes;
 
     // internal state
@@ -800,22 +798,6 @@ public class RegisterRequest extends BaseRequest {
         this.scopes = scopes;
     }
 
-    public String getFederationId() {
-        return federationId;
-    }
-
-    public void setFederationId(String p_federationId) {
-        federationId = p_federationId;
-    }
-
-    public String getFederationUrl() {
-        return federationUrl;
-    }
-
-    public void setFederationUrl(String p_federationUrl) {
-        federationUrl = p_federationUrl;
-    }
-
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -955,13 +937,7 @@ public class RegisterRequest extends BaseRequest {
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
-        // Federation params
-        if (!StringUtils.isBlank(federationUrl)) {
-            parameters.put(FEDERATION_METADATA_URL.toString(), federationUrl);
-        }
-        if (!StringUtils.isBlank(federationId)) {
-            parameters.put(FEDERATION_METADATA_ID.toString(), federationId);
-        }
+
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -1100,8 +1076,6 @@ public class RegisterRequest extends BaseRequest {
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
         result.setClientSecretExpiresAt(clientSecretExpiresAt);
-        result.setFederationUrl(requestObject.optString(FEDERATION_METADATA_URL.toString()));
-        result.setFederationId(requestObject.optString(FEDERATION_METADATA_ID.toString()));
         result.setRequestUris(requestUris);
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
@@ -1258,13 +1232,6 @@ public class RegisterRequest extends BaseRequest {
         }
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes));
-        }
-        // Federation params
-        if (!StringUtils.isBlank(federationUrl)) {
-            parameters.put(FEDERATION_METADATA_URL.toString(), federationUrl);
-        }
-        if (!StringUtils.isBlank(federationId)) {
-            parameters.put(FEDERATION_METADATA_ID.toString(), federationId);
         }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());

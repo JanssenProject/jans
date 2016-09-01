@@ -6,13 +6,8 @@
 
 package org.xdi.oxauth.model.error;
 
+import javax.xml.bind.annotation.*;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,9 +26,6 @@ public class ErrorMessages {
     @XmlElementWrapper(name = "end-session")
     @XmlElement(name = "error")
     private List<ErrorMessage> endSession;
-    @XmlElementWrapper(name = "federation")
-    @XmlElement(name = "error")
-    private List<ErrorMessage> federation;
     @XmlElementWrapper(name = "register")
     @XmlElement(name = "error")
     private List<ErrorMessage> register;
@@ -76,14 +68,6 @@ public class ErrorMessages {
 
     public void setEndSession(List<ErrorMessage> p_endSession) {
         endSession = p_endSession;
-    }
-
-    public List<ErrorMessage> getFederation() {
-        return federation;
-    }
-
-    public void setFederation(List<ErrorMessage> p_federation) {
-        federation = p_federation;
     }
 
     public List<ErrorMessage> getRegister() {
