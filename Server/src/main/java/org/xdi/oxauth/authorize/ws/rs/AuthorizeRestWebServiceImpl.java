@@ -547,6 +547,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 //            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
 //                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
 //            log.error(e.getMessage(), e);
+        } catch (AcrChangedException e) { // Acr changed
+            log.error("ACR is changed, please use prompt=login in order to alter existing session.");
+            log.error(e.getMessage(), e);
+
+            RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+            redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                    AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, state));
+            redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
+            return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
             log.error(e.getMessage(), e);
