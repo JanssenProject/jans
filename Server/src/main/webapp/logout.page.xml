@@ -10,10 +10,8 @@
     <rewrite pattern="/logout" />
 
     <param name="id_token_hint"
-           value="#{logoutAction.idTokenHint}"
-           required="true"/>
+           value="#{logoutAction.idTokenHint}"/>
     <param name="post_logout_redirect_uri"
-           value="#{logoutAction.postLogoutRedirectUri}"
-           required="true"/>
+           value="#{logoutAction.postLogoutRedirectUri}"/>
 
 </page>
