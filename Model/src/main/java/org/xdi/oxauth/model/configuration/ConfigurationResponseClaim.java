@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.model.configuration;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Javier Rojas Blum
  * @version 0.9 January 22, 2015
@@ -25,8 +22,6 @@ public interface ConfigurationResponseClaim {
     public static final String JWKS_URI = "jwks_uri";
     public static final String VALIDATE_TOKEN_ENDPOINT = "validate_token_endpoint";
     public static final String REGISTRATION_ENDPOINT = "registration_endpoint";
-    public static final String FEDERATION_METADATA_ENDPOINT = "federation_metadata_endpoint";
-    public static final String FEDERATION_ENDPOINT = "federation_endpoint";
     public static final String ID_GENERATION_ENDPOINT = "id_generation_endpoint";
     public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
     public static final String SCOPES_SUPPORTED = "scopes_supported";

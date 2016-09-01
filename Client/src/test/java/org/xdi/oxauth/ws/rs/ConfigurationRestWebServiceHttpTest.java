@@ -60,8 +60,6 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getJwksUri(), "The jwksUri is null");
         assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
         assertNotNull(response.getValidateTokenEndpoint(), "The validateTokenEndpoint is null");
-        assertNotNull(response.getFederationMetadataEndpoint(), "The federationMetadataEndpoint is null");
-        assertNotNull(response.getFederationEndpoint(), "The federationEndpoint is null");
         assertNotNull(response.getIntrospectionEndpoint(), "The introspectionEndpoint is null");
         assertNotNull(response.getIdGenerationEndpoint(), "The idGenerationEndpoint is null");
 

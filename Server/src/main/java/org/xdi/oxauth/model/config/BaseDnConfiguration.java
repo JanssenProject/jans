@@ -36,16 +36,6 @@ public class BaseDnConfiguration {
     private String scripts;
     @XmlElement(name = "sessionId")
     private String sessionId;
-    @XmlElement(name = "federationMetadata")
-    private String federationMetadata;
-    @XmlElement(name = "federationRP")
-    private String federationRP;
-    @XmlElement(name = "federationOP")
-    private String federationOP;
-    @XmlElement(name = "federationRequest")
-    private String federationRequest;
-    @XmlElement(name = "federationTrust")
-    private String federationTrust;
     @XmlElement(name = "umaBase")
     private String umaBase;
     @XmlElement(name = "umaPolicy")
@@ -103,46 +93,6 @@ public class BaseDnConfiguration {
 
     public void setClients(String p_clients) {
         clients = p_clients;
-    }
-
-    public String getFederationMetadata() {
-        return federationMetadata;
-    }
-
-    public void setFederationMetadata(String p_federationMetadata) {
-        federationMetadata = p_federationMetadata;
-    }
-
-    public String getFederationOP() {
-        return federationOP;
-    }
-
-    public void setFederationOP(String p_federationOP) {
-        federationOP = p_federationOP;
-    }
-
-    public String getFederationRequest() {
-        return federationRequest;
-    }
-
-    public void setFederationRequest(String p_federationRequest) {
-        federationRequest = p_federationRequest;
-    }
-
-    public String getFederationRP() {
-        return federationRP;
-    }
-
-    public void setFederationRP(String p_federationRP) {
-        federationRP = p_federationRP;
-    }
-
-    public String getFederationTrust() {
-        return federationTrust;
-    }
-
-    public void setFederationTrust(String p_federationTrust) {
-        federationTrust = p_federationTrust;
     }
 
     public String getPeople() {

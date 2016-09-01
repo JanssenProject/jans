@@ -205,13 +205,6 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(SCOPES.toString(), new JSONArray(getRequest().getScopes()));
                 }
 
-                // Federation params
-                if (StringUtils.isNotBlank(getRequest().getFederationUrl())) {
-                    requestBody.put(FEDERATION_METADATA_URL.toString(), getRequest().getFederationUrl());
-                }
-                if (StringUtils.isNotBlank(getRequest().getFederationId())) {
-                    requestBody.put(FEDERATION_METADATA_ID.toString(), getRequest().getFederationId());
-                }
                 // Custom params
                 final Map<String, String> customAttributes = getRequest().getCustomAttributes();
                 if (customAttributes != null && !customAttributes.isEmpty()) {

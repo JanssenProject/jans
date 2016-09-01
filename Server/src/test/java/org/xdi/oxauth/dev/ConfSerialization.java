@@ -71,7 +71,7 @@ public class ConfSerialization {
     public void errorJsonDeserializer() throws IOException {
         final ErrorMessages object = loadJson(new File(CONFIG_FOLDER + "oxauth-errors.json"), ErrorMessages.class);
         Assert.assertTrue(object != null && notEmpty(object.getAuthorize()) &&
-                notEmpty(object.getFederation()) && notEmpty(object.getUma()) && notEmpty(object.getUserInfo()) &&
+                notEmpty(object.getUma()) && notEmpty(object.getUserInfo()) &&
                 notEmpty(object.getClientInfo()) && notEmpty(object.getToken()) && notEmpty(object.getEndSession()));
     }
 
@@ -95,11 +95,6 @@ public class ConfSerialization {
         baseDn.setScopes("ou=scopes,o=@!1111,o=gluu");
         baseDn.setAttributes("ou=attributes,o=@!1111,o=gluu");
         baseDn.setSessionId("ou=session,o=@!1111,o=gluu");
-        baseDn.setFederationMetadata("ou=metadata,ou=federation,o=@!1111,o=gluu");
-        baseDn.setFederationRP("ou=rp,ou=federation,o=@!1111,o=gluu");
-        baseDn.setFederationOP("ou=op,ou=federation,o=@!1111,o=gluu");
-        baseDn.setFederationRequest("ou=request,ou=federation,o=@!1111,o=gluu");
-        baseDn.setFederationTrust("ou=trust,ou=federation,o=@!1111,o=gluu");
 
         final StaticConf c = new StaticConf();
         c.setBaseDn(baseDn);

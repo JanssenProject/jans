@@ -112,12 +112,6 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 if (jsonObj.has(VALIDATE_TOKEN_ENDPOINT)) {
                     getResponse().setValidateTokenEndpoint(jsonObj.getString(VALIDATE_TOKEN_ENDPOINT));
                 }
-                if (jsonObj.has(FEDERATION_METADATA_ENDPOINT)) {
-                    getResponse().setFederationMetadataEndpoint(jsonObj.getString(FEDERATION_METADATA_ENDPOINT));
-                }
-                if (jsonObj.has(FEDERATION_ENDPOINT)) {
-                    getResponse().setFederationEndpoint(jsonObj.getString(FEDERATION_ENDPOINT));
-                }
                 if (jsonObj.has(ID_GENERATION_ENDPOINT)) {
                     getResponse().setIdGenerationEndpoint(jsonObj.getString(ID_GENERATION_ENDPOINT));
                 }
