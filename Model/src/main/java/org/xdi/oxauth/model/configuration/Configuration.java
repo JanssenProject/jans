@@ -40,8 +40,6 @@ public class Configuration {
     private String jwksUri;
     private String registrationEndpoint;
     private String validateTokenEndpoint;
-    private String federationMetadataEndpoint;
-    private String federationEndpoint;
     private String openIdDiscoveryEndpoint;
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
@@ -89,7 +87,6 @@ public class Configuration {
     private int longLivedAccessTokenLifetime;
 
     private int cleanServiceInterval;
-    private int federationCheckInterval;
     private Boolean keyRegenerationEnabled;
     private int keyRegenerationInterval;
     private String defaultSignatureAlgorithm;
@@ -435,24 +432,6 @@ public class Configuration {
 
     public void setValidateTokenEndpoint(String validateTokenEndpoint) {
         this.validateTokenEndpoint = validateTokenEndpoint;
-    }
-
-    @XmlElement(name = "federation-metadata-endpoint")
-    public String getFederationMetadataEndpoint() {
-        return federationMetadataEndpoint;
-    }
-
-    public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
-        this.federationMetadataEndpoint = federationMetadataEndpoint;
-    }
-
-    @XmlElement(name = "federation-endpoint")
-    public String getFederationEndpoint() {
-        return federationEndpoint;
-    }
-
-    public void setFederationEndpoint(String federationEndpoint) {
-        this.federationEndpoint = federationEndpoint;
     }
 
     @XmlElement(name = "openid-discovery-endpoint")
@@ -823,15 +802,6 @@ public class Configuration {
 
     public void setCleanServiceInterval(int p_cleanServiceInterval) {
         cleanServiceInterval = p_cleanServiceInterval;
-    }
-
-    @XmlElement(name = "federation-check-interval")
-    public int getFederationCheckInterval() {
-        return federationCheckInterval;
-    }
-
-    public void setFederationCheckInterval(int p_federationCheckInterval) {
-        federationCheckInterval = p_federationCheckInterval;
     }
 
     @XmlElement(name = "key-regeneration-enabled")

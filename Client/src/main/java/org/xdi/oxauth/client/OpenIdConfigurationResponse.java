@@ -35,8 +35,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	private String jwksUri;
 	private String registrationEndpoint;
 	private String validateTokenEndpoint;
-	private String federationMetadataEndpoint;
-	private String federationEndpoint;
 	private String idGenerationEndpoint;
 	private String introspectionEndpoint;
 	private List<String> scopesSupported;
@@ -336,22 +334,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
 	public void setValidateTokenEndpoint(String validateTokenEndpoint) {
 		this.validateTokenEndpoint = validateTokenEndpoint;
-	}
-
-	public String getFederationMetadataEndpoint() {
-		return federationMetadataEndpoint;
-	}
-
-	public void setFederationMetadataEndpoint(String federationMetadataEndpoint) {
-		this.federationMetadataEndpoint = federationMetadataEndpoint;
-	}
-
-	public String getFederationEndpoint() {
-		return federationEndpoint;
-	}
-
-	public void setFederationEndpoint(String federationEndpoint) {
-		this.federationEndpoint = federationEndpoint;
 	}
 
 	/**
@@ -1024,8 +1006,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 				", jwksUri='" + jwksUri + '\'' +
 				", registrationEndpoint='" + registrationEndpoint + '\'' +
 				", validateTokenEndpoint='" + validateTokenEndpoint + '\'' +
-				", federationMetadataEndpoint='" + federationMetadataEndpoint + '\'' +
-				", federationEndpoint='" + federationEndpoint + '\'' +
 				", idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
 				", introspectionEndpoint='" + introspectionEndpoint + '\'' +
 				", scopesSupported=" + scopesSupported +

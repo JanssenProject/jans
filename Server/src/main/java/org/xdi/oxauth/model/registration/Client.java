@@ -158,12 +158,6 @@ public class Client {
     @LdapAttribute(name = "oxAuthClientUserGroup")
     private String[] userGroups;
 
-    @LdapAttribute(name = "oxAuthFederationId")
-    private String federationId;
-
-    @LdapAttribute(name = "oxAuthFederationMetadataURI")
-    private String federationURI;
-
     @LdapAttribute(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
@@ -993,22 +987,6 @@ public class Client {
         if (LdapUtils.isValidDNs(p_userGroups)) {
             userGroups = p_userGroups;
         }
-    }
-
-    public String getFederationId() {
-        return federationId;
-    }
-
-    public void setFederationId(String p_federationId) {
-        federationId = p_federationId;
-    }
-
-    public String getFederationURI() {
-        return federationURI;
-    }
-
-    public void setFederationURI(String p_federationURI) {
-        federationURI = p_federationURI;
     }
 
     public Date getLastAccessTime() {
