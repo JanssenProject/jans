@@ -79,8 +79,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @In
     private UserGroupService userGroupService;
     @In
-    private FederationDataService federationDataService;
-    @In
     private Identity identity;
     @In
     private AuthenticationFilterService authenticationFilterService;
@@ -193,14 +191,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                     if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)) {
                         if (validRedirectUri) {
-
-                            if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
-                                if (!federationDataService.hasAnyActiveTrust(client)) {
-                                    log.debug("Forbid authorization. Client is not in any trust relationship however federation is enabled for server. Client id: {0}, client redirectUris: {1}",
-                                            client.getClientId(), client.getRedirectUris());
-                                    return error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state).build();
-                                }
-                            }
 
                             if (StringUtils.isNotBlank(accessToken)) {
                                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);

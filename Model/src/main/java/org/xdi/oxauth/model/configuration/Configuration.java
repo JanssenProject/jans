@@ -103,12 +103,6 @@ public class Configuration {
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
 
-    private Boolean federationEnabled;
-    private String federationSkipPolicy;
-    private String federationScopePolicy;
-    private String federationSigningAlg;
-    private String federationSigningKid;
-
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
@@ -946,51 +940,6 @@ public class Configuration {
 
     public void setDynamicRegistrationCustomObjectClass(String p_dynamicRegistrationCustomObjectClass) {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
-    }
-
-    @XmlElement(name = "federation-enabled")
-    public Boolean getFederationEnabled() {
-        return federationEnabled;
-    }
-
-    public void setFederationEnabled(Boolean p_federationEnabled) {
-        federationEnabled = p_federationEnabled;
-    }
-
-    @XmlElement(name = "federation-skip-policy")
-    public String getFederationSkipPolicy() {
-        return federationSkipPolicy;
-    }
-
-    public void setFederationSkipPolicy(String p_federationSkipPolicy) {
-        federationSkipPolicy = p_federationSkipPolicy;
-    }
-
-    @XmlElement(name = "federation-signing-kid")
-    public String getFederationSigningKid() {
-        return federationSigningKid;
-    }
-
-    public void setFederationSigningKid(String p_federationSigningKid) {
-        federationSigningKid = p_federationSigningKid;
-    }
-
-    @XmlElement(name = "federation-signing-alg")
-    public String getFederationSigningAlg() {
-        return federationSigningAlg;
-    }
-
-    public void setFederationSigningAlg(String p_federationSigningAlg) {
-        federationSigningAlg = p_federationSigningAlg;
-    }
-
-    @XmlElement(name = "federation-scope-policy")
-    public String getFederationScopePolicy() {
-        return federationScopePolicy;
-    }
-
-    public void setFederationScopePolicy(String p_federationScopePolicy) {
-        federationScopePolicy = p_federationScopePolicy;
     }
 
     @XmlElement(name = "auth-filters-enabled")

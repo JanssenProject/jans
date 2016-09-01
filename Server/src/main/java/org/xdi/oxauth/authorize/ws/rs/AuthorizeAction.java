@@ -33,8 +33,6 @@ import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.federation.FederationTrust;
-import org.xdi.oxauth.model.federation.FederationTrustStatus;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
@@ -70,9 +68,6 @@ public class AuthorizeAction {
 
     @In
     private UserGroupService userGroupService;
-
-    @In
-    private FederationDataService federationDataService;
 
     @In
     private SessionStateService sessionStateService;
@@ -266,19 +261,6 @@ public class AuthorizeAction {
             // if user is not in any group then deny permissions
             if (!userGroupService.isInAnyGroup(client.getUserGroups(), user.getDn())) {
                 permissionDenied();
-            }
-        }
-
-        // OXAUTH-88 : federation support
-        if (ConfigurationFactory.instance().getConfiguration().getFederationEnabled()) {
-            final List<FederationTrust> list = federationDataService.getTrustByClient(client, FederationTrustStatus.ACTIVE);
-
-            if (list == null || list.isEmpty()) {
-                log.trace("Deny authorization, client is not in any federation trust, client: {0}", client.getDn());
-                permissionDenied();
-            } else if (FederationDataService.skipAuthorization(list)) {
-                log.trace("Skip authorization (permissions granted), client is in federation trust where skip is allowed, client: {1}", client.getDn());
-                permissionGranted(session);
             }
         }
 
