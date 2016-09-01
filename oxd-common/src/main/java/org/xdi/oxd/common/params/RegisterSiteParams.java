@@ -29,6 +29,8 @@ public class RegisterSiteParams implements IParams {
     private String clientId;
     @JsonProperty(value = "client_secret")
     private String clientSecret;
+    @JsonProperty(value = "client_name")
+    private String clientName;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
     @JsonProperty(value = "client_token_endpoint_auth_method")
@@ -54,6 +56,14 @@ public class RegisterSiteParams implements IParams {
     private List<String> contacts;
 
     public RegisterSiteParams() {
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public String getOpHost() {
@@ -211,6 +221,7 @@ public class RegisterSiteParams implements IParams {
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
+        sb.append(", clientName='").append(clientName).append('\'');
         sb.append(", sectorIdentifierUri='").append(clientSectorIdentifierUri).append('\'');
         sb.append(", scope=").append(scope);
         sb.append(", uiLocales=").append(uiLocales);
