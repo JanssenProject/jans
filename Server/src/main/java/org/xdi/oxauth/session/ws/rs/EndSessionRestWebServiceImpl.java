@@ -151,8 +151,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
-        authorizationGrant.revokeAllTokens();
-        GrantService.instance().removeAllTokensBySession(ldapSessionState.getDn());
+        if (ldapSessionState != null) {
+            GrantService.instance().removeAllTokensBySession(ldapSessionState.getDn());
+        }
 
         if (identity != null) {
             identity.logout();
