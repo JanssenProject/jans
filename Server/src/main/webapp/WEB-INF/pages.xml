@@ -20,8 +20,7 @@
     <exception class="javax.faces.validator.ValidatorException">
         <redirect view-id="/error.xhtml">
             <message severity="error">
-                Invalid Request. The request is missing a required parameter, includes an unsupported parameter value,
-                or is otherwise malformed.
+                #{logout.missingParameters}
             </message>
         </redirect>
     </exception>
