@@ -177,31 +177,6 @@
         </classes>
     </test>
 
-    <!-- Federation tests -->
-    <test name="Federation metadata test (HTTP)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationMetadataWebServiceHttpTest"/>
-        </classes>
-    </test>
-    <test name="Federation data (join) test (HTTP)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationDataWebServiceHttpTest"/>
-        </classes>
-    </test>
-    <test name="Federation metadata signature test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationMetadataSignatureTest"/>
-        </classes>
-    </test>
-
-    <!-- Federation tests -->
-    <!-- This test must be enabled only in case federation feature is enabled on server side. -->
-    <test name="Federation scopes handling test (HTTP)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationScopesWSHttpTest"/>
-        </classes>
-    </test>
-
     <!-- Dev tests-->
     <test name="Custom token issuing test via session" enabled="false">
         <classes>

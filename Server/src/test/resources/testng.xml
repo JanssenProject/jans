@@ -155,28 +155,6 @@
         </classes>
     </test>
 
-    <!-- Federation metadata test -->
-    <test name="Federation metadata test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationMetadataEmbeddedTest"/>
-        </classes>
-    </test>
-    <test name="Federation data test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.FederationDataEmbeddedTest"/>
-        </classes>
-    </test>
-    <test name="Federation service component test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.comp.FederationServiceTest"/>
-        </classes>
-    </test>
-    <test name="Federation signing test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.comp.FederationSigningTest"/>
-        </classes>
-    </test>
-
     <test name="Utility methods test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.comp.UtilityMethodsTest"/>
@@ -198,12 +176,6 @@
     <test name="Session ID service test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.comp.SessionStateServiceTest"/>
-        </classes>
-    </test>
-
-    <test name="Federation interval checker test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.comp.FederationIntervalCheckerTest"/>
         </classes>
     </test>
 
@@ -290,8 +262,6 @@
     <parameter name="endSessionPath" value="/restv1/oxauth/end_session"/>
     <parameter name="endSessionPagePath" value="/restv1/oxauth/end_session_page"/>
     <parameter name="registerPath" value="/restv1/oxauth/register"/>
-    <parameter name="federationMetadataPath" value="/restv1/oxauth/federationmetadata"/>
-    <parameter name="federationPath" value="/restv1/oxauth/federation"/>
     <parameter name="idGenerationPath" value="/restv1/id"/>
     <parameter name="userId" value="${auth.user.uid}"/>
     <parameter name="userSecret" value="${auth.user.password}"/>
@@ -305,14 +275,7 @@
     <parameter name="ldapAdminPassword" value="${ldap.admin.password}"/>
     <parameter name="audience" value="${test.server.url}/seam/resource/restv1/oxauth/token"/>
     <parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth/sectoridentifier/${config.oxauth.organization}!0012!D426.70FD"/>
-    <parameter name="federationMetadataId" value="${federation.metadata.id}"/>
-    <parameter name="federationRpDisplayName" value="Federation RP Test display name"/>
-    <parameter name="federationRpRedirectUri" value="https://client.example.com/cb"/>
-    <parameter name="federationRpRedirectUris" value="https://client.example.com/cb https://client.example.com/cb1?foo=bar"/>
-    <parameter name="federationOpDisplayName" value="Federation OP Test display name"/>
-    <parameter name="federationOpId" value="http://example.com/op1"/>
-    <parameter name="federationOpDomain" value="example.com"/>
-    <!-- By enabling this block, you require a place to publish files via HTTP or HTTPS-->
+     <!-- By enabling this block, you require a place to publish files via HTTP or HTTPS-->
     <!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/>-->
     <!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/>-->
 
