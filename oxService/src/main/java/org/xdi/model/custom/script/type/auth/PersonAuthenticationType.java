@@ -38,4 +38,6 @@ public interface PersonAuthenticationType extends BaseExternalType {
 
 	public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
+	public String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
+
 }

@@ -75,6 +75,11 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	}
 
 	@Override
+	public String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters) {
+		return null;
+	}
+
+	@Override
 	public int getApiVersion() {
 		return 1;
 	}
