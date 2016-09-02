@@ -8,8 +8,7 @@
     "trust_store_path":"",
     "trust_store_password":"",
     "license_server_endpoint":"https://license.gluu.org/oxLicense",
-    "license_id":"d6bfeec7-b77f-417e-995e-bf05660ab04d",
-    "license_check_period_in_hours": 24,
+    "license_id":"d6bfeec7-b77f-417e-995e-bf05660ab04d"
     "public_key":"ydEcNeUzT7Ey73oL1MrZVWLAUEAZkFJDaUurhBOX0/DXWVpSsoZLamu2M0uSb1kDro3EwetBzdtHrJ+KI+CaD0oXM4kQl0B9YSqb88R559ivLLm7OT8/S+VMzFavPUNr6dM6GxF3BqnoybUwXZEl0C3wIVWcrulYWBpTUdiAlp66asqQGLumWuor90/ndnMmNc6+NM9L/T5CGC45UIEpKUuJfH5oCP/KybinUbq02DbCCWCazvzsGcAIjpkUi3/G931S4BFaZ7p02g3kowUzoSXzFs8kdrRoKgtd2KVryLIQtR7/MR6MlkOYxZUh0PeNqhC3JTIXeik9xsECQ/JPRa2fM/MJPilmux0wSkJZt8GuvYZYINuXLFsnTuY8bTbpbMgZAFp584mtRp6BaF1VEA==",
     "public_password":"KN8bol2fjzPeCMOjlpIq",
     "license_password":"8Udn8shi73Mrk83s1JOI"

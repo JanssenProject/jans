@@ -49,8 +49,6 @@ public class Configuration {
     private String publicPassword;
     @JsonProperty(value = "license_password")
     private String licensePassword;
-    @JsonProperty(value = "license_check_period_in_hours")
-    private Integer licenseCheckPeriodInHours = 24;
 
     public String getKeyStorePassword() {
         return keyStorePassword;
@@ -74,14 +72,6 @@ public class Configuration {
 
     public void setStartJetty(boolean startJetty) {
         this.startJetty = startJetty;
-    }
-
-    public Integer getLicenseCheckPeriodInHours() {
-        return licenseCheckPeriodInHours;
-    }
-
-    public void setLicenseCheckPeriodInHours(Integer licenseCheckPeriodInHours) {
-        this.licenseCheckPeriodInHours = licenseCheckPeriodInHours;
     }
 
     public String getLicenseId() {
@@ -215,7 +205,6 @@ public class Configuration {
         sb.append(", publicKey='").append(publicKey).append('\'');
         sb.append(", publicPassword='").append(publicPassword).append('\'');
         sb.append(", licensePassword='").append(licensePassword).append('\'');
-        sb.append(", licenseCheckPeriodInHours=").append(licenseCheckPeriodInHours);
         sb.append('}');
         return sb.toString();
     }
