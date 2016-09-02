@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -35,10 +36,17 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
         String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint();
 
+        List<String> scope = Lists.newArrayList();
+        if (params.getScope() != null && !params.getScope().isEmpty()) {
+            scope.addAll(params.getScope());
+        } else if (site.getScope() != null) {
+            scope.addAll(site.getScope());
+        }
+
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(site.getResponseTypes());
         authorizationEndpoint += "&client_id=" + site.getClientId();
         authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
-        authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(site.getScope());
+        authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + state();
         authorizationEndpoint += "&nonce=" + nonce();
         authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));

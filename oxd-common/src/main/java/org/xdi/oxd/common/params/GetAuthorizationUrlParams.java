@@ -19,8 +19,18 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
     private List<String> acrValues;
     @JsonProperty(value = "prompt")
     private String prompt;
+    @JsonProperty(value = "scope")
+    private List<String> scope;
 
     public GetAuthorizationUrlParams() {
+    }
+
+    public List<String> getScope() {
+        return scope;
+    }
+
+    public void setScope(List<String> scope) {
+        this.scope = scope;
     }
 
     public String getPrompt() {
@@ -56,9 +66,8 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         GetAuthorizationUrlParams that = (GetAuthorizationUrlParams) o;
 
         if (acrValues != null ? !acrValues.equals(that.acrValues) : that.acrValues != null) return false;
-        if (oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null) return false;
+        return !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
 
-        return true;
     }
 
     @Override
@@ -75,6 +84,7 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         sb.append("{acrValues=").append(acrValues);
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", prompt='").append(prompt).append('\'');
+        sb.append(", scope='").append(scope).append('\'');
         sb.append('}');
         return sb.toString();
     }
