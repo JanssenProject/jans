@@ -31,7 +31,7 @@ class LicenseFileUpdateService {
     private static final Logger LOG = LoggerFactory.getLogger(LicenseFileUpdateService.class);
 
     private static final int ONE_HOUR_AS_MILLIS = 3600000;
-    private static final int TWELVE_HOUR_AS_MILLIS = 12 * ONE_HOUR_AS_MILLIS;
+    private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;
 
     private final Configuration conf;
     private final HttpService httpService;
@@ -50,23 +50,17 @@ class LicenseFileUpdateService {
 
     private boolean lastModifiedLessThan12HoursAgo(long lastModified) {
         long diff = System.currentTimeMillis() - lastModified;
-        return diff < TWELVE_HOUR_AS_MILLIS;
+        return diff < _24_HOURS_AS_MILLIS;
     }
 
     private void scheduleUpdatePinger() {
-        Integer licenseCheckPeriodInHours = conf.getLicenseCheckPeriodInHours();
-        int sevenDaysInHours = 24 * 7;
-        if (licenseCheckPeriodInHours <= 0 || licenseCheckPeriodInHours > sevenDaysInHours) {
-            licenseCheckPeriodInHours = 24;
-        }
-
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 updateLicenseFromServer();
             }
-        }, licenseCheckPeriodInHours, licenseCheckPeriodInHours, TimeUnit.HOURS);
+        }, 24, 24, TimeUnit.HOURS);
     }
 
     private void updateLicenseFromServer() {
