@@ -7,8 +7,7 @@
     "trust_all_certs":true,
     "trust_store_path":"",
     "trust_store_password":"",
-    "license_server_endpoint":"https://license.gluu.org/oxLicense",
-    "license_check_period_in_hours": 24,
+    "license_server_endpoint":"https://license.gluu.org/oxLicense"
     "license_id":"",
     "public_key":"",
     "public_password":"",
