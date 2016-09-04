@@ -11,6 +11,7 @@
         "user_name"
     ],
     "openIdRedirectUrl": "https://%(hostname)s/cas/login",
+    "openIdPostLogoutRedirectUri": "https://%(hostname)s/identity/authentication/finishlogout",
     "openIdDefaultAuthenticator":true,
     "openIdClaimMapping":[
         {
