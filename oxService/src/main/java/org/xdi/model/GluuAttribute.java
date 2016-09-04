@@ -8,6 +8,10 @@ package org.xdi.model;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
+import javax.faces.context.FacesContext;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -15,6 +19,7 @@ import javax.validation.constraints.Size;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.Entry;
 import org.xdi.ldap.model.GluuStatus;
@@ -118,6 +123,10 @@ public class GluuAttribute extends Entry implements Serializable {
 
     @LdapAttribute(name = "gluuRegExp")
     private String regExp;
+    
+	@LdapJsonObject
+	@LdapAttribute(name = "oxValidation")
+    private AttributeValidation attributeValidation;
 
     @LdapAttribute(name = "gluuTooltip")
     private String gluuTooltip;
@@ -374,6 +383,14 @@ public class GluuAttribute extends Entry implements Serializable {
         return allowEditBy(GluuUserRole.USER);
     }
 
+	public AttributeValidation getAttributeValidation() {
+		return attributeValidation;
+	}
+
+	public void setAttributeValidation(AttributeValidation attributeValidation) {
+		this.attributeValidation = attributeValidation;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -450,5 +467,52 @@ public class GluuAttribute extends Entry implements Serializable {
 		} else if (!description.equals(other.description))
 			return false;
         return true;
+	}
+	
+	
+	public void validateAttribute(FacesContext context, UIComponent comp,
+			Object value) {
+		String minvalue = this.attributeValidation != null ? this.attributeValidation.getMinLength() : null;
+		String maxValue = this.attributeValidation != null ? this.attributeValidation.getMaxLength() : null;
+		String regexpValue = this.attributeValidation != null ? this.attributeValidation.getRegexp() : null;
+
+		String attribute = (String) value;
+		
+		//Minimum length validation 
+		if ((minvalue != null) && !(minvalue.trim().equals(""))) {
+			int min = Integer.parseInt(this.attributeValidation.getMinLength());
+
+			if ((attribute.length() < min)) {
+				((UIInput) comp).setValid(false);
+
+				FacesMessage message = new FacesMessage(this.displayName + " should be at least " + min + " symbols. ");
+				context.addMessage(comp.getClientId(context), message);
+			}
+		}
+		
+		//Maximum Length validation 
+		if ((maxValue != null) && !(maxValue.trim().equals(""))) {
+			int max = Integer.parseInt(this.attributeValidation.getMaxLength());
+			if ((attribute.length() > max)) {
+				((UIInput) comp).setValid(false);
+
+				FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
+				context.addMessage(comp.getClientId(context), message);
+			}
+		}
+		
+		//Regex Pattern Validation 
+		if((regexpValue != null)  && (regexpValue.trim().equals(""))){
+			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);;
+			java.util.regex.Matcher matcher = pattern.matcher(attribute);
+			boolean flag =  matcher.matches();
+			if(flag){
+				((UIInput) comp).setValid(false);
+
+				FacesMessage message = new FacesMessage(this.displayName + " Format is invalid. ");
+				context.addMessage(comp.getClientId(context), message);
+			}
+			
+		}
 	}
 }
