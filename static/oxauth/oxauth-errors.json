@@ -95,58 +95,6 @@
             "uri":null
         }
     ],
-    "federation":[
-        {
-            "id":"invalid_request",
-            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
-            "uri":null
-        },
-        {
-            "id":"invalid_federation_id",
-            "description":"The value of federation_id is invalid.",
-            "uri":null
-        },
-        {
-            "id":"invalid_entity_type",
-            "description":"The request value of \"invalid_entity_type\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_display_name",
-            "description":"The request value of \"invalid_display_name\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_op_id",
-            "description":"The request value of \"invalid_op_id\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_domain",
-            "description":"The request value of \"invalid_domain\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_redirect_uri",
-            "description":"The request value of \"invalid_redirect_uri\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_x509_url",
-            "description":"The request value of \"invalid_x509_url\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"invalid_x509_pem",
-            "description":"The request value of \"invalid_x509_pem\" is invalid or not supported.",
-            "uri":null
-        },
-        {
-            "id":"request_forbidden",
-            "description":"The request is forbidden and is not processed. (Federation does not join new members right now.)",
-            "uri":null
-        }
-    ],
     "register":[
         {
             "id":"invalid_request",

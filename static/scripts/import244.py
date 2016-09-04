@@ -365,6 +365,9 @@ def processLDIF(backupFolder, newFolder):
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
     dnMap = getOldEntryMap(backupFolder)
 
+    multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
+                       'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
+                       'oxTrustEntitlements', 'oxTrustx509Certificate']
     # Rewriting all the new DNs in the new installation to ldif file
     for dn in currentDNs:
         new_entry = getEntry(current, dn)
@@ -377,6 +380,17 @@ def processLDIF(backupFolder, newFolder):
         for attr in old_entry.keys():
             if attr in ignoreList:
                 continue
+
+            # Convert the JSON list into multi value attributes
+            if attr in multivalueAttrs:
+                current_value = None
+                try:
+                    current_value = json.loads(old_entry[attr][0])
+                except:
+                    logging.debug("Skipping multival %s.Not an JSON Array.",
+                                  attr)
+                if type(current_value) is list:
+                    old_entry[attr] = current_value
 
             if attr not in new_entry:
                 new_entry[attr] = old_entry[attr]
