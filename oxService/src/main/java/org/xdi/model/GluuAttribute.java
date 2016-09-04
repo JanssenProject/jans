@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
@@ -482,10 +483,11 @@ public class GluuAttribute extends Entry implements Serializable {
 		if ((minvalue != null) && !(minvalue.trim().equals(""))) {
 			int min = Integer.parseInt(this.attributeValidation.getMinLength());
 
-			if ((attribute.length() < min)) {
+			if ((attribute != null)  && (attribute.length() < min)) {
 				((UIInput) comp).setValid(false);
 
 				FacesMessage message = new FacesMessage(this.displayName + " should be at least " + min + " symbols. ");
+				message.setSeverity(FacesMessage.SEVERITY_ERROR);
 				context.addMessage(comp.getClientId(context), message);
 			}
 		}
@@ -493,26 +495,29 @@ public class GluuAttribute extends Entry implements Serializable {
 		//Maximum Length validation 
 		if ((maxValue != null) && !(maxValue.trim().equals(""))) {
 			int max = Integer.parseInt(this.attributeValidation.getMaxLength());
-			if ((attribute.length() > max)) {
+			if ((attribute != null)  &&  (attribute.length() > max)) {
 				((UIInput) comp).setValid(false);
 
 				FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
+				message.setSeverity(FacesMessage.SEVERITY_ERROR);
 				context.addMessage(comp.getClientId(context), message);
 			}
 		}
 		
 		//Regex Pattern Validation 
-		if((regexpValue != null)  && (regexpValue.trim().equals(""))){
-			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);;
+		if((regexpValue != null)  && !(regexpValue.trim().equals(""))){
+			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
+			if((attribute != null) && !(attribute.trim().equals(""))){
 			java.util.regex.Matcher matcher = pattern.matcher(attribute);
 			boolean flag =  matcher.matches();
-			if(flag){
+			if(!flag){
 				((UIInput) comp).setValid(false);
 
 				FacesMessage message = new FacesMessage(this.displayName + " Format is invalid. ");
+				message.setSeverity(FacesMessage.SEVERITY_ERROR);
 				context.addMessage(comp.getClientId(context), message);
 			}
-			
+		  }
 		}
 	}
 }
