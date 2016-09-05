@@ -97,11 +97,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 Client client = sessionClient.getClient();
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
-    				if (client == null) {
-    					return response(error(400, TokenErrorResponseType.INVALID_GRANT));
-    				}
+                    if (client == null) {
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
+                    }
 
-    				GrantService grantService = GrantService.instance();
+                    GrantService grantService = GrantService.instance();
                     AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
 
                     if (authorizationCodeGrant != null) {
@@ -137,25 +137,26 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.REFRESH_TOKEN) {
-    				if (client == null) {
-    					return response(error(401, TokenErrorResponseType.INVALID_GRANT));
-    				}
+                    if (client == null) {
+                        return response(error(401, TokenErrorResponseType.INVALID_GRANT));
+                    }
 
                     AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                     if (authorizationGrant != null) {
                         AccessToken accToken = authorizationGrant.createAccessToken();
+
+                        /*
+                        The authorization server MAY issue a new refresh token, in which case
+                        the client MUST discard the old refresh token and replace it with the
+                        new refresh token.
+                        */
                         RefreshToken reToken = authorizationGrant.createRefreshToken();
+                        GrantService grantService = GrantService.instance();
+                        grantService.removeByCode(refreshToken, client.getClientId());
 
                         if (scope != null && !scope.isEmpty()) {
                             scope = authorizationGrant.checkScopesPolicy(scope);
-                        }
-
-                        IdToken idToken = null;
-                        if (authorizationGrant.getScopes().contains("openid")) {
-                            idToken = authorizationGrant.createIdToken(
-                                    null, null, null,
-                                    authorizationGrant);
                         }
 
                         builder.entity(getJSonResponse(accToken,
@@ -163,14 +164,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 accToken.getExpiresIn(),
                                 reToken,
                                 scope,
-                                idToken));
+                                null));
                     } else {
                         builder = error(401, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-    				if (client == null) {
-    					return response(error(401, TokenErrorResponseType.INVALID_GRANT));
-    				}
+                    if (client == null) {
+                        return response(error(401, TokenErrorResponseType.INVALID_GRANT));
+                    }
 
                     ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
 
@@ -193,11 +194,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope,
                             idToken));
                 } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-    				if (client == null) {
-    					log.error("Invalid client", new RuntimeException("Client is empty"));
-    					return response(error(401, TokenErrorResponseType.INVALID_CLIENT));
-    				}
-    				
+                    if (client == null) {
+                        log.error("Invalid client", new RuntimeException("Client is empty"));
+                        return response(error(401, TokenErrorResponseType.INVALID_CLIENT));
+                    }
+
 
                     User user = null;
                     if (authenticationFilterService.isEnabled()) {
@@ -236,7 +237,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 scope,
                                 idToken));
                     } else {
-    					log.error("Invalid user", new RuntimeException("User is empty"));
+                        log.error("Invalid user", new RuntimeException("User is empty"));
                         builder = error(401, TokenErrorResponseType.INVALID_CLIENT);
                     }
                 } else if (gt == GrantType.EXTENSION) {
@@ -294,13 +295,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private Response response(ResponseBuilder builder) {
-		CacheControl cacheControl = new CacheControl();
+        CacheControl cacheControl = new CacheControl();
         cacheControl.setNoTransform(false);
         cacheControl.setNoStore(true);
         builder.cacheControl(cacheControl);
         builder.header("Pragma", "no-cache");
         return builder.build();
-	}
+    }
 
     private ResponseBuilder error(int p_status, TokenErrorResponseType p_type) {
         return Response.status(p_status).entity(errorResponseFactory.getErrorAsJson(p_type));
