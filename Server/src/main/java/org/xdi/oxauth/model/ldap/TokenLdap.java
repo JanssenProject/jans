@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 16, 2015
+ * @version September 5, 2016
  */
 
 @LdapEntry
@@ -222,14 +222,14 @@ public class TokenLdap {
     }
 
     public String getSessionDn() {
-		return sessionDn;
-	}
+        return sessionDn;
+    }
 
-	public void setSessionDn(String sessionDn) {
-		this.sessionDn = sessionDn;
-	}
+    public void setSessionDn(String sessionDn) {
+        this.sessionDn = sessionDn;
+    }
 
-	@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
