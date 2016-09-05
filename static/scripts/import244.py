@@ -381,17 +381,6 @@ def processLDIF(backupFolder, newFolder):
             if attr in ignoreList:
                 continue
 
-            # Convert the JSON list into multi value attributes
-            if attr in multivalueAttrs:
-                current_value = None
-                try:
-                    current_value = json.loads(old_entry[attr][0])
-                except:
-                    logging.debug("Skipping multival %s.Not an JSON Array.",
-                                  attr)
-                if type(current_value) is list:
-                    old_entry[attr] = current_value
-
             if attr not in new_entry:
                 new_entry[attr] = old_entry[attr]
             elif old_entry[attr] != new_entry[attr]:
@@ -411,9 +400,25 @@ def processLDIF(backupFolder, newFolder):
 
     # Pick all the left out DNs from the old DN map and write them to the LDIF
     for dn in dnMap.keys():
-        if dn not in currentDNs:
-            entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
-            ldif_writer.unparse(dn, entry)
+        if dn in currentDNs:
+            continue  # Already processed
+
+        entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
+
+        for attr in entry.keys():
+            if attr not in multivalueAttrs:
+                continue  # skip conversion
+
+            json_value = None
+            try:
+                json_value = json.loads(entry[attr][0])
+            except:
+                loggin.debug('Cannot parse multival %s in DN %s', attr, dn)
+
+            if type(json_value) is list:
+                entry[attr] = [json.dumps(v) for v in json_value]
+
+        ldif_writer.unparse(dn, entry)
 
     # Finally
     ldifFile.close()
@@ -488,7 +493,8 @@ def main(folder_name):
 
     # remove the password_file
     os.remove(password_file)
-    logging.info("Import finished.")
+    logging.info("Import finished. Check output_ldif/processed.ldif.rejects" +
+                 " for DN's that were rejected during import.")
 
 
 if __name__ == '__main__':
