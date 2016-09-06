@@ -993,7 +993,7 @@
                 var clientId = document.getElementById("mainForm:authorizationClientId").value;
                 var opOrigin = document.getElementById("mainForm:checkSessionOpOrigin").value;
 
-                var rpIFrame = "./rpiframe.seam?session_state=" + param[1]
+                var rpIFrame = "./rpiframe.htm?session_state=" + param[1]
                         + "&client_id=" + clientId + "&op_origin=" + opOrigin;
 
                 document.getElementById("mainForm:rpIFrame").value = rpIFrame;
