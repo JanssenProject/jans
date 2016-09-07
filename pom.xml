@@ -103,6 +103,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>
+				<artifactId>oxServer</artifactId>
+				<version>${oxCore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
 				<artifactId>oxLdap-annotations</artifactId>
 				<version>${oxCore.version}</version>
 			</dependency>

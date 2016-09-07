@@ -307,6 +307,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
+			<artifactId>oxServer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
 			<artifactId>oxUtil</artifactId>
 			<exclusions>
 				<exclusion>
