@@ -66,7 +66,7 @@ public class ServerLauncher {
     private static void printBuildNumber() {
         InputStream is = null;
         try {
-            is = ServerLauncher.class.getResourceAsStream("git.properties");
+            is = ClassLoader.getSystemClassLoader().getResourceAsStream("git.properties");
             Properties properties = new Properties();
             properties.load(is);
             LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
