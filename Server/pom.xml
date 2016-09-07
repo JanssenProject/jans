@@ -252,6 +252,21 @@
 					<doUpdate>false</doUpdate>
 				</configuration>
 			</plugin>
+
+			<!-- Jetty plugin -->
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<webAppConfig>
+						<descriptor>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</descriptor>
+						<contextPath>/oxauth</contextPath>
+					</webAppConfig>
+
+					<webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+					<scanIntervalSeconds>3</scanIntervalSeconds>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
