@@ -7,6 +7,9 @@
 package org.xdi.oxauth.model.error;
 
 import javax.xml.bind.annotation.*;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.List;
 
 /**
@@ -15,6 +18,7 @@ import java.util.List;
  */
 @XmlRootElement(name = "errors")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ErrorMessages {
 
     @XmlElementWrapper(name = "authorize")
