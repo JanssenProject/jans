@@ -18,6 +18,7 @@ from jsonmerge import merge
 import json
 import tempfile
 import logging
+import filecmp
 
 password_file = tempfile.mkstemp()[1]
 backup24_folder = None
@@ -424,6 +425,24 @@ def processLDIF(backupFolder, newFolder):
     ldifFile.close()
 
 
+def copyCustomLDAPSchema(backup):
+    logging.info("Copying the Custom LDAP Schema")
+    backup_schema_dir = os.path.join(backup, 'opt/opendj/config/schema/')
+    present_schema_dir = '/opt/opendj/config/schema/'
+    shutil.copyfile(
+        os.path.join(backup_schema_dir, '100-user.ldif'),
+        os.path.join(present_schema_dir, '100-user.ldif')
+    )
+
+    diff = filecmp.dircmp(backup_schema_dir, present_schema_dir)
+    # Copy the extra files like user created custom schema files
+    for ldif_file in diff.left_only:
+        shutil.copyfile(
+            os.path.join(backup_schema_dir, ldif_file),
+            os.path.join(present_schema_dir, ldif_file)
+        )
+
+
 def main(folder_name):
     global backup24_folder, backup_version, current_version, service, hostname
 
@@ -481,6 +500,7 @@ def main(folder_name):
     stopOpenDJ()
     copyFiles(backup24_folder)
     updateCertKeystore()
+    copyCustomLDAPSchema(backup24_folder)
 
     exportLDIF(outputFolder)
     processPeople(ldif_folder)
