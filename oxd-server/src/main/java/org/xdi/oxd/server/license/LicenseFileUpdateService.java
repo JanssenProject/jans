@@ -6,6 +6,7 @@ package org.xdi.oxd.server.license;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
@@ -81,6 +82,8 @@ class LicenseFileUpdateService {
                 LOG.info("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
                 return;
             }
+        } catch (ClientResponseFailure e) {
+            LOG.error(e.getMessage() + ", " + e.getResponse().getEntity(String.class), e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
