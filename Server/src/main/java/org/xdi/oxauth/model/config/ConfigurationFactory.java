@@ -181,7 +181,7 @@ public class ConfigurationFactory {
     }
 
     private String confDir() {
-        final String confDir = getLdapConfiguration().getString("confDir");
+        final String confDir = getLdapConfiguration().getString("confDir", null);
         if (StringUtils.isNotBlank(confDir)) {
             return confDir;
         }
