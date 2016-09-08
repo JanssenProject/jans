@@ -20,6 +20,7 @@ import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
 import org.jboss.seam.log.Log;
+import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.SimplePrincipal;
 import org.xdi.model.AuthenticationScriptUsageType;
@@ -31,11 +32,11 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -64,9 +65,6 @@ public class Authenticator implements Serializable {
 
     @In
     private Identity identity;
-
-    @In
-    private OAuthCredentials credentials;
 
     @In
     private ClientService clientService;
@@ -126,17 +124,18 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateImpl(Context context, boolean interactive, boolean skipPassword) {
+        Credentials credentials = ServerUtil.instance(Credentials.class);
         boolean authenticated = false;
         try {
             log.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword + ", credentials.username: " + credentials.getUsername() + ")");
             if (StringHelper.isNotEmpty(credentials.getUsername()) && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword()))
                     && credentials.getUsername().startsWith("@!")) {
-                authenticated = clientAuthentication(context, interactive, skipPassword);
+                authenticated = clientAuthentication(credentials, context, interactive, skipPassword);
             } else {
                 if (interactive) {
-                    authenticated = userAuthenticationInteractive();
+                    authenticated = userAuthenticationInteractive(credentials);
                 } else {
-                    authenticated = userAuthenticationService();
+                    authenticated = userAuthenticationService(credentials);
                 }
             }
         } catch (Exception ex) {
@@ -152,7 +151,7 @@ public class Authenticator implements Serializable {
         return false;
     }
 
-    private boolean clientAuthentication(Context context, boolean interactive, boolean skipPassword) {
+    private boolean clientAuthentication(Credentials credentials, Context context, boolean interactive, boolean skipPassword) {
         boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
         if (isServiceUsesExternalAuthenticator) {
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
@@ -189,7 +188,7 @@ public class Authenticator implements Serializable {
         return false;
     }
 
-    private boolean userAuthenticationInteractive() {
+    private boolean userAuthenticationInteractive(Credentials credentials) {
         SessionState sessionState = sessionStateService.getSessionState();
         Map<String, String> sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
         if (sessionIdAttributes == null) {
@@ -227,7 +226,7 @@ public class Authenticator implements Serializable {
             }
 
             boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
-            log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
+            log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}', credentials: '{3}'", credentials.getUsername(), this.authStep, result, System.identityHashCode(credentials));
 
             int overridenNextStep = -1;
 
@@ -344,7 +343,7 @@ public class Authenticator implements Serializable {
 		return true;
 	}
 
-    private boolean userAuthenticationService() {
+    private boolean userAuthenticationService(Credentials credentials) {
         if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                     .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);

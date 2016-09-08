@@ -19,7 +19,6 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.session.OAuthCredentials;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
@@ -50,9 +49,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Logger
     private Log log;
-
-    @In
-    private OAuthCredentials credentials;
 
     @In
     private ErrorResponseFactory errorResponseFactory;
@@ -211,7 +207,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (user == null) {
                         boolean authenticated = authenticationService.authenticate(username, password);
                         if (authenticated) {
-                            user = credentials.getUser();
+                            user = authenticationService.getAuthenticatedUser();
                         }
                     }
 
