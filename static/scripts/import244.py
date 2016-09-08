@@ -429,13 +429,16 @@ def copyCustomLDAPSchema(backup):
     logging.info("Copying the Custom LDAP Schema")
     backup_schema_dir = os.path.join(backup, 'opt/opendj/config/schema/')
     present_schema_dir = '/opt/opendj/config/schema/'
-    shutil.copyfile(
-        os.path.join(backup_schema_dir, '100-user.ldif'),
-        os.path.join(present_schema_dir, '100-user.ldif')
-    )
+    custom_files = ['100-user.ldif', '99-user.ldif']
+    for cf in custom_files:
+        if os.path.isfile(os.path.join(backup_schema_dir, cf)):
+            shutil.copyfile(
+                os.path.join(backup_schema_dir, cf),
+                os.path.join(present_schema_dir, cf)
+            )
 
-    diff = filecmp.dircmp(backup_schema_dir, present_schema_dir)
     # Copy the extra files like user created custom schema files
+    diff = filecmp.dircmp(backup_schema_dir, present_schema_dir)
     for ldif_file in diff.left_only:
         shutil.copyfile(
             os.path.join(backup_schema_dir, ldif_file),
