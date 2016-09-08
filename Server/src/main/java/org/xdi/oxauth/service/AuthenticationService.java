@@ -339,6 +339,10 @@ public class AuthenticationService {
     private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
+		if (StringHelper.isEmpty(attributeValue)) {
+			return null;
+		}
+
         SimpleUser sampleUser = new SimpleUser();
         sampleUser.setDn(baseDn);
 
@@ -347,6 +351,7 @@ public class AuthenticationService {
 
         sampleUser.setCustomAttributes(customAttributes);
 
+        log.debug("Searching user by atriburtes: '{0}', baseDn: '{1}'", customAttributes, baseDn);
         List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
         log.debug("Found '{0}' entries", entries.size());
 
