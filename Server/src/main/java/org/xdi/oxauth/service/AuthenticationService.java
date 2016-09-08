@@ -139,11 +139,13 @@ public class AuthenticationService {
         SessionState sessionState = sessionStateService.getSessionState();
         if (sessionState != null) {
         	Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
-        	sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+            if (authenticated) {
+            	sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+            }
         	sessionStateService.updateSessionState(sessionState);
 
         	// TODO: Remove after 2.4.5
-        	if (!StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
+        	if (authenticated && !StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
         		throw new InvalidStateException("authenticate: User name and user in credentials don't match");
         	}
         }
