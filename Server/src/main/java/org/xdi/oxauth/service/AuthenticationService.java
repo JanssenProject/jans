@@ -6,40 +6,18 @@
 
 package org.xdi.oxauth.service;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.log.Log;
-import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.Credentials;
+import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
@@ -59,12 +37,21 @@ import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
+import javax.annotation.Nonnull;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
+
 /**
  * Authentication service methods
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version September 9, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("authenticationService")
@@ -73,7 +60,7 @@ public class AuthenticationService {
 
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
 
-	public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
+    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             "scope", "response_type", "client_id", "redirect_uri", "state", "response_mode", "nonce", "display", "prompt", "max_age",
             "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_state", "request", "request_uri",
             AuthorizeRequestParam.ORIGIN_HEADERS, AuthorizeRequestParam.CODE_CHALLENGE, AuthorizeRequestParam.CODE_CHALLENGE_METHOD));
@@ -138,16 +125,16 @@ public class AuthenticationService {
 
         SessionState sessionState = sessionStateService.getSessionState();
         if (sessionState != null) {
-        	Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
             if (authenticated) {
-            	sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
-        	sessionStateService.updateSessionState(sessionState);
+            sessionStateService.updateSessionState(sessionState);
 
-        	// TODO: Remove after 2.4.5
-        	if (authenticated && !StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
-        		throw new InvalidStateException("authenticate: User name and user in credentials don't match");
-        	}
+            // TODO: Remove after 2.4.5
+            if (authenticated && !StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
+                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
+            }
         }
 
         MetricType metricType;
@@ -175,7 +162,7 @@ public class AuthenticationService {
                 configureAuthenticatedUser(user);
                 updateLastLogonUserTime(user);
 
-            	log.trace("Authenticate: credentials: '{0}', credentials.userName: '{1}', authenticatedUser.userId: '{2}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                log.trace("Authenticate: credentials: '{0}', credentials.userName: '{1}', authenticatedUser.userId: '{2}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
             }
 
             return authenticated;
@@ -244,9 +231,9 @@ public class AuthenticationService {
         return authenticated;
     }
 
-	/*
-	 * Utility method which can be used in custom scripts
-	 */
+    /*
+     * Utility method which can be used in custom scripts
+     */
     public boolean authenticate(Credentials credentials, GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}', credentials: '{2}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
@@ -280,10 +267,10 @@ public class AuthenticationService {
                                 return false;
                             }
 
-                        	// TODO: Remove after 2.4.5
-                        	if (!StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
-                        		throw new InvalidStateException("authenticate_external: User name and user in credentials don't match");
-                        	}
+                            // TODO: Remove after 2.4.5
+                            if (!StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
+                                throw new InvalidStateException("authenticate_external: User name and user in credentials don't match");
+                            }
 
                             configureAuthenticatedUser(localUser);
                             updateLastLogonUserTime(localUser);
@@ -339,9 +326,9 @@ public class AuthenticationService {
     private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
-		if (StringHelper.isEmpty(attributeValue)) {
-			return null;
-		}
+        if (StringHelper.isEmpty(attributeValue)) {
+            return null;
+        }
 
         SimpleUser sampleUser = new SimpleUser();
         sampleUser.setDn(baseDn);
@@ -351,7 +338,7 @@ public class AuthenticationService {
 
         sampleUser.setCustomAttributes(customAttributes);
 
-        log.debug("Searching user by atriburtes: '{0}', baseDn: '{1}'", customAttributes, baseDn);
+        log.debug("Searching user by attributes: '{0}', baseDn: '{1}'", customAttributes, baseDn);
         List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
         log.debug("Found '{0}' entries", entries.size());
 
@@ -392,7 +379,7 @@ public class AuthenticationService {
     public void configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
         Credentials credentials = ServerUtil.instance(Credentials.class);
 
-		log.trace("configureSessionUser: credentials: '{0}', sessionState: '{1}', credentials.userName: '{2}', authenticatedUser.userId: '{3}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
+        log.trace("configureSessionUser: credentials: '{0}', sessionState: '{1}', credentials.userName: '{2}', authenticatedUser.userId: '{3}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
 
@@ -400,14 +387,14 @@ public class AuthenticationService {
         if (sessionState == null) {
             newSessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn(), sessionIdAttributes);
         } else {
-        	// TODO: Remove after 2.4.5
-        	String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-        	if (!StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
-        		throw new InvalidStateException("configureSessionUser: User in session and in credentials don't match");
-        	}
-        	log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
+            // TODO: Remove after 2.4.5
+            String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
+            if (!StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
+                throw new InvalidStateException("configureSessionUser: User in session and in credentials don't match");
+            }
+            log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
 
-        	newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
+            newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
         }
 
         configureEventUserContext(newSessionState);
@@ -442,27 +429,27 @@ public class AuthenticationService {
         Contexts.getEventContext().set("sessionUser", sessionState);
     }
 
-	private void configureAuthenticatedUser(User user) {
-		Contexts.getEventContext().set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
-	}
+    private void configureAuthenticatedUser(User user) {
+        Contexts.getEventContext().set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+    }
 
-	public User getAuthenticatedUser() {
-		Context eventContext = Contexts.getEventContext();
-		if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
-			return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
-		}
+    public User getAuthenticatedUser() {
+        Context eventContext = Contexts.getEventContext();
+        if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
+            return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	private String getAuthenticatedUserId() {
-		User authenticatedUser = getAuthenticatedUser();
-		if (authenticatedUser != null) {
-			return authenticatedUser.getUserId();
-		}
+    private String getAuthenticatedUserId() {
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser != null) {
+            return authenticatedUser.getUserId();
+        }
 
-		return null;
-	}
+        return null;
+    }
 
     public void configureSessionClient(Context context) {
         Credentials credentials = ServerUtil.instance(Credentials.class);
