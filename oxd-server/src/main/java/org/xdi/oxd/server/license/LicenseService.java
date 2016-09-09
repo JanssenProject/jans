@@ -63,9 +63,6 @@ public class LicenseService {
         if (Strings.isNullOrEmpty(conf.getLicenseId())) {
             throw new ShutdownException("Unable to validate license. license_id is not set in oxd configuration.");
         }
-        if (Strings.isNullOrEmpty(conf.getLicenseServerEndpoint())) {
-            throw new ShutdownException("Unable to validate license. license_server_endpoint is not set in oxd configuration.");
-        }
         if (Strings.isNullOrEmpty(conf.getPublicKey())) {
             throw new ShutdownException("Unable to validate license. public_key is not set in oxd configuration.");
         }

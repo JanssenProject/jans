@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.license.LicenseFileUpdateService;
 
 import java.util.Date;
 
@@ -38,7 +39,7 @@ public class TimeService {
 
     private Optional<Date> currentLicenseServerTime() {
         try {
-            final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint(), httpService.getClientExecutor());
+            final GenerateWS generateWS = LicenseClient.generateWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
             long millis = Long.parseLong(generateWS.currentServerTime());
             if (millis > 0) {
                 return Optional.of(new Date(millis));

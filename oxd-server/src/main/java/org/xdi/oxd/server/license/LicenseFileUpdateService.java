@@ -29,9 +29,11 @@ import java.util.concurrent.TimeUnit;
  * @version 0.9, 12/10/2014
  */
 
-class LicenseFileUpdateService {
+public class LicenseFileUpdateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseFileUpdateService.class);
+
+    public static final String LICENSE_SERVER_ENDPOINT = "https://license.gluu.org/oxLicense";
 
     private static final int ONE_HOUR_AS_MILLIS = 3600000;
     private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;
@@ -68,9 +70,9 @@ class LicenseFileUpdateService {
 
     private void updateLicenseFromServer() {
         try {
-            final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint(), httpService.getClientExecutor());
+            final GenerateWS generateWS = LicenseClient.generateWs(LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
 
-            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", license_endpoint: " + conf.getLicenseServerEndpoint() + " ... ");
+            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + " ... ");
             final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId(), macAddress());
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseFile.getLicenseFile();
@@ -81,7 +83,7 @@ class LicenseFileUpdateService {
                     return;
                 }
             } else {
-                LOG.info("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+                LOG.info("No license update, licenseId: " + conf.getLicenseId());
                 return;
             }
         } catch (ClientResponseFailure e) {
@@ -89,7 +91,7 @@ class LicenseFileUpdateService {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        LOG.trace("Failed to update license file from server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+        LOG.trace("Failed to update license file by licenseId: " + conf.getLicenseId());
     }
 
     private String macAddress() {
