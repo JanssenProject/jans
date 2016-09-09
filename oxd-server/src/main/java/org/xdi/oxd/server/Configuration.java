@@ -39,8 +39,6 @@ public class Configuration {
     private String keyStorePath;
     @JsonProperty(value = "trust_store_password")
     private String keyStorePassword;
-    @JsonProperty(value = "license_server_endpoint")
-    private String licenseServerEndpoint;
     @JsonProperty(value = "license_id")
     private String licenseId;
     @JsonProperty(value = "public_key")
@@ -104,14 +102,6 @@ public class Configuration {
 
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
-    }
-
-    public String getLicenseServerEndpoint() {
-        return licenseServerEndpoint;
-    }
-
-    public void setLicenseServerEndpoint(String licenseServerEndpoint) {
-        this.licenseServerEndpoint = licenseServerEndpoint;
     }
 
     public String getKeyStorePath() {
@@ -200,7 +190,6 @@ public class Configuration {
         sb.append(", trustAllCerts=").append(trustAllCerts);
         sb.append(", keyStorePath='").append(keyStorePath).append('\'');
         sb.append(", keyStorePassword='").append(keyStorePassword).append('\'');
-        sb.append(", licenseServerEndpoint='").append(licenseServerEndpoint).append('\'');
         sb.append(", licenseId='").append(licenseId).append('\'');
         sb.append(", publicKey='").append(publicKey).append('\'');
         sb.append(", publicPassword='").append(publicPassword).append('\'');
