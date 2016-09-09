@@ -199,7 +199,14 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterResponse registerClient(RegisterSiteParams params) {
-        final RegisterClient registerClient = new RegisterClient(getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getRegistrationEndpoint());
+        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getRegistrationEndpoint();
+        if (Strings.isNullOrEmpty(registrationEndpoint)) {
+            LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
+                    "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
+        }
+
+        final RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(createRegisterClientRequest(params));
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
