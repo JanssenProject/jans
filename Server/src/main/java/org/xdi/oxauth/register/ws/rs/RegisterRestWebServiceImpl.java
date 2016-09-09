@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 15, 2016
+ * @version September 9, 2016
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -104,7 +104,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
                 if (r.getSubjectType() == null) {
-                    if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
+                    SubjectType defaultSubjectType = SubjectType.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSubjectType());
+                    if (defaultSubjectType != null) {
+                        r.setSubjectType(defaultSubjectType);
+                    } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
                         r.setSubjectType(SubjectType.PUBLIC);
                     } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
                         r.setSubjectType(SubjectType.PAIRWISE);
