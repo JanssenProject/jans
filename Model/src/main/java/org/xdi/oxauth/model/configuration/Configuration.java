@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version June 15, 2016
+ * @version September 9, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -57,6 +57,7 @@ public class Configuration {
     private List<String> responseTypesSupported;
     private List<String> grantTypesSupported;
     private List<String> subjectTypesSupported;
+    private String defaultSubjectType;
     private List<String> userInfoSigningAlgValuesSupported;
     private List<String> userInfoEncryptionAlgValuesSupported;
     private List<String> userInfoEncryptionEncValuesSupported;
@@ -516,6 +517,15 @@ public class Configuration {
 
     public void setSubjectTypesSupported(List<String> subjectTypesSupported) {
         this.subjectTypesSupported = subjectTypesSupported;
+    }
+
+    @XmlElement(name = "default-subject-type")
+    public String getDefaultSubjectType() {
+        return defaultSubjectType;
+    }
+
+    public void setDefaultSubjectType(String defaultSubjectType) {
+        this.defaultSubjectType = defaultSubjectType;
     }
 
     @XmlElementWrapper(name = "userinfo-signing-alg-values-supported")
