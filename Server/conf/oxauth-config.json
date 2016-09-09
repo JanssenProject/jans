@@ -43,6 +43,7 @@
         "public",
         "pairwise"
     ],
+    "defaultSubjectType": "public",
     "userInfoSigningAlgValuesSupported":[
         "HS256",
         "HS384",
@@ -154,8 +155,8 @@
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
-    "opPolicyUri":"http://ox.gluu.org/doku.php?id=oxauth:policy",
-    "opTosUri":"http://ox.gluu.org/doku.php?id=oxauth:tos",
+    "opPolicyUri":"https://www.gluu.org/privacy-policy/",
+    "opTosUri":"https://www.gluu.org/terms/",
     "authorizationCodeLifetime":${config.client.authorization-code-lifetime},
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
