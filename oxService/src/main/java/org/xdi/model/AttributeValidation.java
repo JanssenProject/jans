@@ -11,8 +11,8 @@ public class AttributeValidation implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private String minLength;
-	private String maxLength;
+	private Integer minLength;
+	private Integer maxLength;
 	private String regexp;
 	
 	public String getRegexp() {
@@ -21,16 +21,16 @@ public class AttributeValidation implements Serializable{
 	public void setRegexp(String regexp) {
 		this.regexp = regexp;
 	}
-	public String getMinLength() {
+	public Integer getMinLength() {
 		return minLength;
 	}
-	public void setMinLength(String minLength) {
+	public void setMinLength(Integer minLength) {
 		this.minLength = minLength;
 	}
-	public String getMaxLength() {
+	public Integer getMaxLength() {
 		return maxLength;
 	}
-	public void setMaxLength(String maxLength) {
+	public void setMaxLength(Integer maxLength) {
 		this.maxLength = maxLength;
 	}
 

@@ -473,15 +473,15 @@ public class GluuAttribute extends Entry implements Serializable {
 	
 	public void validateAttribute(FacesContext context, UIComponent comp,
 			Object value) {
-		String minvalue = this.attributeValidation != null ? this.attributeValidation.getMinLength() : null;
-		String maxValue = this.attributeValidation != null ? this.attributeValidation.getMaxLength() : null;
+		Integer minvalue = this.attributeValidation != null ? this.attributeValidation.getMinLength() : null;
+		Integer maxValue = this.attributeValidation != null ? this.attributeValidation.getMaxLength() : null;
 		String regexpValue = this.attributeValidation != null ? this.attributeValidation.getRegexp() : null;
 
 		String attribute = (String) value;
 		
 		//Minimum length validation 
-		if ((minvalue != null) && !(minvalue.trim().equals(""))) {
-			int min = Integer.parseInt(this.attributeValidation.getMinLength());
+		if ((minvalue != null) ) {
+			int min = this.attributeValidation.getMinLength();
 
 			if ((attribute != null)  && (attribute.length() < min)) {
 				((UIInput) comp).setValid(false);
@@ -493,8 +493,8 @@ public class GluuAttribute extends Entry implements Serializable {
 		}
 		
 		//Maximum Length validation 
-		if ((maxValue != null) && !(maxValue.trim().equals(""))) {
-			int max = Integer.parseInt(this.attributeValidation.getMaxLength());
+		if ((maxValue != null)) {
+			int max = this.attributeValidation.getMaxLength();
 			if ((attribute != null)  &&  (attribute.length() > max)) {
 				((UIInput) comp).setValid(false);
 
