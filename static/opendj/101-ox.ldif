@@ -2111,6 +2111,12 @@ attributeTypes: ( oxValidation-oid NAME 'oxValidation'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( gluuEntityType-oid NAME 'gluuEntityType'
+  DESC 'This data has information about TR EntityType'
+  SUBSTR caseIgnoreSubstringsMatch
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectclasses: ( pairwiseIdentifier-oid NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
    ( oxId $ oxSectorIdentifier )
     X-ORIGIN 'Gluu created objectclass' )
@@ -2183,7 +2189,7 @@ objectclasses: ( gluuSAMLconfig-oid NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUS
   $ gluuSAMLspMetaDataFN $ gluuSAMLspMetaDataSourceType $ gluuSAMLspMetaDataURL
   $ gluuSpecificRelyingPartyConfig $ gluuStatus $ gluuTrustContact $ gluuTrustDeconstruction
   $ gluuValidationLog $ gluuValidationStatus $ iname $ inum $ o $ objectClass $ oxAuthPostLogoutRedirectURI
-  $ url $ researchAndScholarshipEnabled ) 
+  $ url $ researchAndScholarshipEnabled $ gluuEntityType ) 
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( gluuInumMap-oid NAME 'gluuInumMap' SUP top STRUCTURAL MUST objectclass MAY 
  ( gluuStatus $ inum $ primaryKeyAttrName $ primaryKeyValue $ secondaryKeyAttrName
