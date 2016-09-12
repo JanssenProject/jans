@@ -67,7 +67,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     private String nonce() {
-        return "n-0S6_WzA2Mj"; // fixme todo
+        return getInjector().getInstance(StateService.class).generateNonce();
     }
 
     private String state() {
