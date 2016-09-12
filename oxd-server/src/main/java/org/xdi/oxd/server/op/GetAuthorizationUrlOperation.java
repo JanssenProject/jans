@@ -54,6 +54,9 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         if (!Strings.isNullOrEmpty(params.getPrompt())) {
             authorizationEndpoint += "&prompt=" + params.getPrompt();
         }
+        if (!Strings.isNullOrEmpty(params.getHostedDomain())) {
+            authorizationEndpoint += "&hd=" + params.getHostedDomain();
+        }
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
     }
