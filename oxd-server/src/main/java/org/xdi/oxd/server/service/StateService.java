@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.service;
 
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
@@ -19,10 +20,10 @@ public class StateService {
     private static final Logger LOG = LoggerFactory.getLogger(StateService.class);
 
     private final Cache<String, String> states = CacheBuilder.newBuilder()
-            .expireAfterWrite(12, TimeUnit.HOURS)
+            .expireAfterWrite(2, TimeUnit.HOURS)
             .build();
     private final Cache<String, String> nonces = CacheBuilder.newBuilder()
-            .expireAfterWrite(12, TimeUnit.HOURS)
+            .expireAfterWrite(2, TimeUnit.HOURS)
             .build();
 
     private final SecureRandom random = new SecureRandom();
@@ -46,5 +47,11 @@ public class StateService {
         return new BigInteger(130, random).toString(32);
     }
 
+    public boolean isStateValid(String state) {
+        return !Strings.isNullOrEmpty(states.getIfPresent(state));
+    }
 
+    public void invalidateState(String state) {
+        states.invalidate(state);
+    }
 }

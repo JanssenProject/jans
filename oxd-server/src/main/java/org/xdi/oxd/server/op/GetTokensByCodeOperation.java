@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,8 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
@@ -41,6 +44,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
     @Override
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
+        validate(params);
 
         final SiteConfiguration site = getSite();
 
@@ -74,6 +78,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     site.setIdToken(response.getIdToken());
                     site.setAccessToken(response.getAccessToken());
                     getSiteService().update(site);
+                    getStateService().invalidateState(params.getState());
 
                     return okResponse(opResponse);
                 } else {
@@ -84,5 +89,17 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
         return null;
+    }
+
+    private void validate(GetTokensByCodeParams params) {
+        if (Strings.isNullOrEmpty(params.getCode())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+        }
+        if (Strings.isNullOrEmpty(params.getState())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+        }
+        if (!getStateService().isStateValid(params.getState())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+        }
     }
 }
