@@ -21,6 +21,9 @@ public class StateService {
     private final Cache<String, String> states = CacheBuilder.newBuilder()
             .expireAfterWrite(12, TimeUnit.HOURS)
             .build();
+    private final Cache<String, String> nonces = CacheBuilder.newBuilder()
+            .expireAfterWrite(12, TimeUnit.HOURS)
+            .build();
 
     private final SecureRandom random = new SecureRandom();
 
@@ -28,9 +31,19 @@ public class StateService {
     }
 
     public String generateState() {
-        String state = new BigInteger(130, random).toString(32);
+        String state = generateSecureString();
         states.put(state, state);
         return state;
+    }
+
+    public String generateNonce() {
+        String nonce = generateSecureString();
+        nonces.put(nonce, nonce);
+        return nonce;
+    }
+
+    private String generateSecureString() {
+        return new BigInteger(130, random).toString(32);
     }
 
 
