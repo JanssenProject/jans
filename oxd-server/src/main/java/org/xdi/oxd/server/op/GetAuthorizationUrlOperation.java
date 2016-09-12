@@ -9,6 +9,7 @@ import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.StateService;
 
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     private String state() {
-        return "af0ifjsldkj"; // fixme todo
+        return getInjector().getInstance(StateService.class).generateState();
     }
 
 
