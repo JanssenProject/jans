@@ -21,8 +21,18 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
     private String username;
     @JsonProperty(value = "password")
     private String password;
+    @JsonProperty(value = "state")
+    private String state;
 
     public GetAuthorizationCodeParams() {
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getPassword() {
@@ -65,6 +75,7 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", username='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
+        sb.append(", state='").append(state).append('\'');
         sb.append('}');
         return sb.toString();
     }
