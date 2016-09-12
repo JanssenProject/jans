@@ -28,10 +28,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -216,7 +218,7 @@ public class CoreUtils {
 
     /**
      * @param pathToKeyStore path to key store, e.g. D:/Development/gluu_conf/etc/certs/DA855F9895A1CA3B9E7D4BF5-java.jks
-     * @param password key store password
+     * @param password       key store password
      * @return http client
      * @throws Exception
      */
@@ -251,11 +253,11 @@ public class CoreUtils {
 //        }, new AllowAllHostnameVerifier());
 
         SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
-                   @Override
-                   public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                       return true;
-                   }
-               }, new X509HostnameVerifier() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true;
+            }
+        }, new X509HostnameVerifier() {
             @Override
             public void verify(String host, SSLSocket ssl) throws IOException {
             }
@@ -272,12 +274,17 @@ public class CoreUtils {
             public boolean verify(String s, SSLSession sslSession) {
                 return true;
             }
-        });
+        }
+        );
 
         SchemeRegistry registry = new SchemeRegistry();
         registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         registry.register(new Scheme("https", 443, sf));
         ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
         return new DefaultHttpClient(ccm);
+    }
+
+    public static String secureRandomString() {
+        return new BigInteger(130, new SecureRandom()).toString(32);
     }
 }
