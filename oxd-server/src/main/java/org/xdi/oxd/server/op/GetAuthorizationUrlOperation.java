@@ -9,7 +9,6 @@ import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.StateService;
 
 import java.util.List;
 
@@ -67,12 +66,11 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     private String nonce() {
-        return getInjector().getInstance(StateService.class).generateNonce();
+        return getStateService().generateNonce();
     }
 
     private String state() {
-        return getInjector().getInstance(StateService.class).generateState();
+        return getStateService().generateState();
     }
-
 
 }
