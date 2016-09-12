@@ -57,6 +57,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
         ClientUtils.showClient(authorizeClient);
         if (response != null) {
+            getStateService().putState(params.getState());
             return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
         } else {
             LOG.error("Failed to get response from oxauth client.");

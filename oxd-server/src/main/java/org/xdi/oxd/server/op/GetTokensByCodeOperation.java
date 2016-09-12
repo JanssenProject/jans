@@ -99,7 +99,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         if (!getStateService().isStateValid(params.getState())) {
-            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
     }
 }
