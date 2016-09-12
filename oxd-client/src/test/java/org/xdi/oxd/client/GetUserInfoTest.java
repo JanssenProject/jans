@@ -4,6 +4,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.params.GetUserInfoParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
@@ -46,9 +47,12 @@ public class GetUserInfoTest {
 
     private GetTokensByCodeResponse requestTokens(CommandClient client, RegisterSiteResponse site, String userId, String userSecret) {
 
+        final String state = CoreUtils.secureRandomString();
+
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret));
+        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state));
+        commandParams.setState(state);
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
 
