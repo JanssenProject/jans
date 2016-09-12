@@ -21,8 +21,18 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
     private String prompt;
     @JsonProperty(value = "scope")
     private List<String> scope;
+    @JsonProperty(value = "hd")
+    private String hostedDomain; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
 
     public GetAuthorizationUrlParams() {
+    }
+
+    public String getHostedDomain() {
+        return hostedDomain;
+    }
+
+    public void setHostedDomain(String hostedDomain) {
+        this.hostedDomain = hostedDomain;
     }
 
     public List<String> getScope() {
@@ -85,6 +95,7 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", prompt='").append(prompt).append('\'');
         sb.append(", scope='").append(scope).append('\'');
+        sb.append(", hostedDomain='").append(hostedDomain).append('\'');
         sb.append('}');
         return sb.toString();
     }
