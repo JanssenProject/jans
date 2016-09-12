@@ -33,7 +33,7 @@ public class StateService {
 
     public String generateState() {
         String state = generateSecureString();
-        states.put(state, state);
+        putState(state);
         return state;
     }
 
@@ -53,5 +53,9 @@ public class StateService {
 
     public void invalidateState(String state) {
         states.invalidate(state);
+    }
+
+    public void putState(String state) {
+        states.put(state, state);
     }
 }
