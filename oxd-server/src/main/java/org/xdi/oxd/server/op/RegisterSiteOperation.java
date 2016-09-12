@@ -63,6 +63,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
             RegisterSiteResponse opResponse = new RegisterSiteResponse();
             opResponse.setOxdId(siteId);
+            opResponse.setOpHost(params.getOpHost());
             return okResponse(opResponse);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
