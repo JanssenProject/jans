@@ -2,8 +2,10 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -21,6 +23,8 @@ import java.net.URLEncoder;
 
 public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
+    private static final String GOOGLE_OP_HOST = "https://accounts.google.com";
+
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
     /**
@@ -36,7 +40,12 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
         final SiteConfiguration site = getSite();
 
-        String endSessionEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint();
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
+
+        if (site.getOpHost().startsWith(GOOGLE_OP_HOST)) {
+            return googleLogout(discoveryResponse, site.getOpHost(), site);
+        }
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
@@ -56,6 +65,30 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         }
 
         return okResponse(new LogoutResponse(uri));
+    }
+
+    private CommandResponse googleLogout(OpenIdConfigurationResponse discoveryResponse, String opHost, SiteConfiguration site) {
+
+        try {
+            String entity = discoveryResponse.getEntity();
+            JSONObject jsonObj = new JSONObject(entity);
+
+            if (jsonObj.has("revocation_endpoint")) {
+                String revocationEndpoint = jsonObj.getString("revocation_endpoint");
+                if (!Strings.isNullOrEmpty(revocationEndpoint)) {
+                    revocationEndpoint += "?token=" + site.getAccessToken();
+                    return okResponse(new LogoutResponse(revocationEndpoint));
+                } else {
+                    LOG.error("revocation_endpoint is blank.");
+                }
+            } else {
+                LOG.error("Unable to parse revocation_endpoint.");
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        LOG.error("Failed to get revocation_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(opHost));
+        throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_REVOCATION_ENDPOINT);
     }
 
     private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {
