@@ -228,5 +228,6 @@
 		"reset_code"],
 		"3": ["oxpush2",
 		"u2f"]
-	}
+	},
+    "endSessionWithAccessToken":false
 }
