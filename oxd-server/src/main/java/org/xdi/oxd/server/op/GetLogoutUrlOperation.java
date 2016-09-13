@@ -2,7 +2,6 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
@@ -46,7 +45,8 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
             if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleRevocationEndpoint()) {
-                return googleLogout(discoveryResponse, site.getOpHost(), site);
+                String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + site.getPostLogoutRedirectUri();
+                return okResponse(new LogoutResponse(logoutUrl));
             }
 
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
@@ -66,30 +66,6 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         }
 
         return okResponse(new LogoutResponse(uri));
-    }
-
-    private CommandResponse googleLogout(OpenIdConfigurationResponse discoveryResponse, String opHost, SiteConfiguration site) {
-
-        try {
-            String entity = discoveryResponse.getEntity();
-            JSONObject jsonObj = new JSONObject(entity);
-
-            if (jsonObj.has("revocation_endpoint")) {
-                String revocationEndpoint = jsonObj.getString("revocation_endpoint");
-                if (!Strings.isNullOrEmpty(revocationEndpoint)) {
-                    revocationEndpoint += "?token=" + site.getAccessToken();
-                    return okResponse(new LogoutResponse(revocationEndpoint));
-                } else {
-                    LOG.error("revocation_endpoint is blank.");
-                }
-            } else {
-                LOG.error("Unable to parse revocation_endpoint.");
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        LOG.error("Failed to get revocation_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(opHost));
-        throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_REVOCATION_ENDPOINT);
     }
 
     private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {
