@@ -12,6 +12,7 @@ import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
 import java.net.URLEncoder;
@@ -43,11 +44,11 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
-        if (site.getOpHost().startsWith(GOOGLE_OP_HOST)) {
-            return googleLogout(discoveryResponse, site.getOpHost(), site);
-        }
-
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
+            if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleRevocationEndpoint()) {
+                return googleLogout(discoveryResponse, site.getOpHost(), site);
+            }
+
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
             throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }

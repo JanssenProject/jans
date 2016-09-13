@@ -47,6 +47,16 @@ public class Configuration {
     private String publicPassword;
     @JsonProperty(value = "license_password")
     private String licensePassword;
+    @JsonProperty(value = "support-google-revocation-endpoint")
+    private Boolean supportGoogleRevocationEndpoint = true;
+
+    public Boolean getSupportGoogleRevocationEndpoint() {
+        return supportGoogleRevocationEndpoint;
+    }
+
+    public void setSupportGoogleRevocationEndpoint(Boolean supportGoogleRevocationEndpoint) {
+        this.supportGoogleRevocationEndpoint = supportGoogleRevocationEndpoint;
+    }
 
     public String getKeyStorePassword() {
         return keyStorePassword;
@@ -194,6 +204,7 @@ public class Configuration {
         sb.append(", publicKey='").append(publicKey).append('\'');
         sb.append(", publicPassword='").append(publicPassword).append('\'');
         sb.append(", licensePassword='").append(licensePassword).append('\'');
+        sb.append(", supportGoogleRevocationEndpoint='").append(supportGoogleRevocationEndpoint).append('\'');
         sb.append('}');
         return sb.toString();
     }
