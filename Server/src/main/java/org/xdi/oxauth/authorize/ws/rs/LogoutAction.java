@@ -25,6 +25,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
@@ -134,6 +135,12 @@ public class LogoutAction {
         }
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
+        if (authorizationGrant == null) {
+        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
+        	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+        		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+        	}
+        }
 		if (authorizationGrant == null) {
 			return ExternalLogoutResult.FAILURE;
 		}
