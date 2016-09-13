@@ -16,6 +16,7 @@ import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -131,6 +132,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
+        if (authorizationGrant == null) {
+        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
+        	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+        		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+        	}
+        }
         if (authorizationGrant == null) {
             log.info("Failed to find out authorization grant for id_token_hint '{0}'", idTokenHint);
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
