@@ -35,7 +35,6 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
     private static final Log LOG = Logging.getLog(GenerateKeyRestServiceImpl.class);
 
-    @Override
     public Response generateKey(String sigAlg, Long expirationTime) {
         Response.ResponseBuilder builder = Response.ok();
 

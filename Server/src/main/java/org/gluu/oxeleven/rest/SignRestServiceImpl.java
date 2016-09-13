@@ -37,7 +37,6 @@ public class SignRestServiceImpl implements SignRestService {
 
     private static final Log LOG = Logging.getLog(SignRestServiceImpl.class);
 
-    @Override
     public Response sign(SignRequestParam signRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
 

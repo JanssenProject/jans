@@ -36,7 +36,6 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 
     private static final Log LOG = Logging.getLog(DeleteKeyRestServiceImpl.class);
 
-    @Override
     public Response sign(String alias) {
         Response.ResponseBuilder builder = Response.ok();
 

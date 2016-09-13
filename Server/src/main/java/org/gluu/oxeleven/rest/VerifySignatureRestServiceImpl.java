@@ -38,7 +38,6 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
 
     private static final Log LOG = Logging.getLog(VerifySignatureRestServiceImpl.class);
 
-    @Override
     public Response verifySignature(VerifySignatureRequestParam verifySignatureRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
 
