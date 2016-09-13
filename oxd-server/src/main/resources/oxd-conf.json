@@ -10,5 +10,6 @@
     "license_id":"",
     "public_key":"",
     "public_password":"",
-    "license_password":""
+    "license_password":"",
+    "support-google-revocation-endpoint": true
 }
