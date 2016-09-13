@@ -219,5 +219,6 @@
     "webKeysStorage": "keystore",
     "dnName": "CN=oxAuth CA Certificates",
     "keyStoreFile": "./conf/keystore.jks",
-    "keyStoreSecret": "secret"
+    "keyStoreSecret": "secret",
+    "endSessionWithAccessToken":false
 }
