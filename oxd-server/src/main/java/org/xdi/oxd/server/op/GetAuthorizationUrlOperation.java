@@ -47,8 +47,8 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&client_id=" + site.getClientId();
         authorizationEndpoint += "&redirect_uri=" + site.getAuthorizationRedirectUri();
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
-        authorizationEndpoint += "&state=" + state();
-        authorizationEndpoint += "&nonce=" + nonce();
+        authorizationEndpoint += "&state=" + getStateService().generateState();
+        authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
         authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
 
         if (!Strings.isNullOrEmpty(params.getPrompt())) {
@@ -64,13 +64,4 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     private List<String> acrValues(SiteConfiguration site, GetAuthorizationUrlParams params) {
         return params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
     }
-
-    private String nonce() {
-        return getStateService().generateNonce();
-    }
-
-    private String state() {
-        return getStateService().generateState();
-    }
-
 }

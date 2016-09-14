@@ -27,9 +27,7 @@ public class StateService {
     private final SecureRandom random = new SecureRandom();
 
     @Inject
-    ConfigurationService configurationService;
-
-    public StateService() {
+    public StateService(ConfigurationService configurationService) {
 
         Configuration conf = configurationService.get();
 
