@@ -20,6 +20,7 @@ public enum ErrorResponseCode {
     BAD_REQUEST_NO_CODE("bad_request", "'code' is empty or not specified."),
     BAD_REQUEST_NO_STATE("bad_request", "'state' is empty or not specified."),
     BAD_REQUEST_STATE_NOT_VALID("bad_request", "'state' is not registered."),
+    INVALID_NONCE("invalid_nonce", "Nonce value is not registered by oxd."),
     INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),

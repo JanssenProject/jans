@@ -9,6 +9,7 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TestUtils {
     }
 
 
-    public static TokenResponse obtainAccessToken(String userId, String userSecret, String clientId, String clientSecret,
+    public static Pair<TokenResponse, String> obtainAccessToken(String userId, String userSecret, String clientId, String clientSecret,
                                                   String redirectUrl, String opHost) {
         try {
             OpenIdConfigurationResponse discovery = discovery(opHost);
@@ -49,12 +50,15 @@ public class TestUtils {
             final List<String> scopes = new ArrayList<String>();
             scopes.add("openid");
 
+            String nonce = UUID.randomUUID().toString();
+
             final AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUrl, null);
             request.setState("af0ifjsldkj");
             request.setAuthUsername(userId);
             request.setAuthPassword(userSecret);
             request.getPrompts().add(Prompt.NONE);
-            request.setNonce(UUID.randomUUID().toString());
+
+            request.setNonce(nonce);
             request.setMaxAge(Integer.MAX_VALUE);
 
             final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
@@ -85,7 +89,7 @@ public class TestUtils {
 
                 ClientUtils.showClient(tokenClient1);
                 if (response2.getStatus() == 200) {
-                    return response2;
+                    return new Pair<>(response2, nonce);
                 }
             }
         } catch (Exception e) {

@@ -11,6 +11,7 @@ import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -70,7 +71,12 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                 opResponse.setExpiresIn(response.getExpiresIn());
 
                 final Jwt jwt = Jwt.parse(response.getIdToken());
-                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()))) {
+                final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+                if (!getStateService().isNonceValid(nonceFromToken)) {
+                    throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+                }
+
+                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken)) {
                     final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
                     opResponse.setIdTokenClaims(claims);
 

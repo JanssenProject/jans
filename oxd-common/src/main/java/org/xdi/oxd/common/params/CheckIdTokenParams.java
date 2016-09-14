@@ -18,8 +18,18 @@ public class CheckIdTokenParams implements HasOxdIdParams {
     private String oxdId;
     @JsonProperty(value = "id_token")
     private String idToken;
+    @JsonProperty(value = "nonce")
+    private String nonce;
 
     public CheckIdTokenParams() {
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 
     public String getOxdId() {
@@ -49,6 +59,7 @@ public class CheckIdTokenParams implements HasOxdIdParams {
         sb.append("CheckIdTokenParams");
         sb.append("{idToken='").append(idToken).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", nonce='").append(nonce).append('\'');
         sb.append('}');
         return sb.toString();
     }
