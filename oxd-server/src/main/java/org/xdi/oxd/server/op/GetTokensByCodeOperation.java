@@ -76,7 +76,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
                 }
 
-                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken)) {
+                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken, site.getClientId())) {
                     final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
                     opResponse.setIdTokenClaims(claims);
 
