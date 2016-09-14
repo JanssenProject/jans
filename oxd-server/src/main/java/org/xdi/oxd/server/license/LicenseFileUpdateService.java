@@ -106,6 +106,7 @@ public class LicenseFileUpdateService {
         retry.incrementAndGet();
 
         if (isRetryLimitExceeded()) {
+            LicenseFile.deleteSilently();
             throw new ShutdownException("Shutdown server after trying to update license. Retry count: " + retry.get());
         }
 
