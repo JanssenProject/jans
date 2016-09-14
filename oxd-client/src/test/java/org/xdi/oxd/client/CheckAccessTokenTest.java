@@ -10,6 +10,7 @@ import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.CheckAccessTokenParams;
 import org.xdi.oxd.common.response.CheckAccessTokenResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.util.Pair;
 
 import java.io.IOException;
 
@@ -28,14 +29,14 @@ public class CheckAccessTokenTest {
         try {
             client = new CommandClient(host, port);
 
-            final TokenResponse tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
+            final Pair<TokenResponse, String> tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
                     clientId, clientSecret, redirectUrl, opHost);
 
             RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
             final CheckAccessTokenParams params = new CheckAccessTokenParams();
-            params.setAccessToken(tokenResponse.getAccessToken());
-            params.setIdToken(tokenResponse.getIdToken());
+            params.setAccessToken(tokenResponse.getFirst().getAccessToken());
+            params.setIdToken(tokenResponse.getFirst().getIdToken());
             params.setOxdId(site.getOxdId());
 
             final Command checkIdTokenCommand = new Command(CommandType.CHECK_ACCESS_TOKEN);

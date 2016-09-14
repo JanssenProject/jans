@@ -54,14 +54,14 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
 
         final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-        opResponse.setActive(isValid(jwt, discoveryResponse));
+        opResponse.setActive(isValid(jwt, discoveryResponse, params.getNonce()));
         opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
         opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
         opResponse.setClaims(jwt.getClaims().toMap());
         return okResponse(opResponse);
     }
 
-    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
+    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse, String nonce) {
         try {
             //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
@@ -69,6 +69,12 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 
             final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            if (!nonceFromToken.endsWith(nonce)) {
+                LOG.trace("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
+                return false;
+            }
+
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
             if (now.after(expiresAt)) {
