@@ -43,15 +43,11 @@ public class StateService {
     }
 
     public String generateState() {
-        String state = generateSecureString();
-        putState(state);
-        return state;
+        return putState(generateSecureString());
     }
 
     public String generateNonce() {
-        String nonce = generateSecureString();
-        nonces.put(nonce, nonce);
-        return nonce;
+        return putNonce(generateSecureString());
     }
 
     private String generateSecureString() {
@@ -62,11 +58,25 @@ public class StateService {
         return !Strings.isNullOrEmpty(states.getIfPresent(state));
     }
 
+    public boolean isNonceValid(String nonce) {
+        return !Strings.isNullOrEmpty(nonces.getIfPresent(nonce));
+    }
+
     public void invalidateState(String state) {
         states.invalidate(state);
     }
 
-    public void putState(String state) {
+    public void invalidateNonce(String nonce) {
+        nonces.invalidate(nonce);
+    }
+
+    public String putState(String state) {
         states.put(state, state);
+        return state;
+    }
+
+    public String putNonce(String nonce) {
+        nonces.put(nonce, nonce);
+        return nonce;
     }
 }

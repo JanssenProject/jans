@@ -10,6 +10,7 @@ import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.util.Pair;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,12 +34,13 @@ public class CheckIdTokenTest {
 
             RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            final TokenResponse tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
+            final Pair<TokenResponse, String> tokenResponse = TestUtils.obtainAccessToken(userId, userSecret,
                     clientId, clientSecret, redirectUrl, opHost);
 
             final CheckIdTokenParams params = new CheckIdTokenParams();
             params.setOxdId(site.getOxdId());
-            params.setIdToken(tokenResponse.getIdToken());
+            params.setIdToken(tokenResponse.getFirst().getIdToken());
+            params.setNonce(tokenResponse.getSecond());
 
             final Command checkIdTokenCommand = new Command(CommandType.CHECK_ID_TOKEN);
             checkIdTokenCommand.setParamsObject(params);
