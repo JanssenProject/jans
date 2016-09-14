@@ -73,7 +73,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                 final Jwt jwt = Jwt.parse(response.getIdToken());
                 final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
                 if (!getStateService().isNonceValid(nonceFromToken)) {
-                    throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
                 }
 
                 if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken)) {
