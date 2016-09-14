@@ -44,7 +44,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
-            if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleRevocationEndpoint()) {
+            if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + site.getPostLogoutRedirectUri();
                 return okResponse(new LogoutResponse(logoutUrl));
             }

@@ -11,5 +11,5 @@
     "public_key":"",
     "public_password":"",
     "license_password":"",
-    "support-google-revocation-endpoint": true
+    "support-google-logout": true
 }
