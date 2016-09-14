@@ -14,6 +14,7 @@ import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
 import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.service.HttpService;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,9 +39,11 @@ public class LicenseFileUpdateService {
 
     private static final int ONE_HOUR_AS_MILLIS = 3600000;
     private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;
+    public static final int RETRY_LIMIT = 3;
 
     private final Configuration conf;
     private final HttpService httpService;
+    private AtomicInteger retry = new AtomicInteger();
 
     LicenseFileUpdateService(Configuration conf, HttpService httpService) {
         this.conf = conf;
@@ -59,8 +63,7 @@ public class LicenseFileUpdateService {
     }
 
     private void scheduleUpdatePinger() {
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
-        executorService.scheduleAtFixedRate(new Runnable() {
+        newExecutor().scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 updateLicenseFromServer();
@@ -68,21 +71,28 @@ public class LicenseFileUpdateService {
         }, 24, 24, TimeUnit.HOURS);
     }
 
+    private ScheduledExecutorService newExecutor() {
+         return Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
+    }
+
     private void updateLicenseFromServer() {
         try {
             final GenerateWS generateWS = LicenseClient.generateWs(LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
 
-            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + " ... ");
+            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", retry: " + retry + " ... ");
             final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId(), macAddress());
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseFile.getLicenseFile();
                 if (file != null) {
                     final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense()).asJson();
                     FileUtils.write(file, json);
+
+                    retry.set(0);
                     LOG.info("License file updated successfully.");
                     return;
                 }
             } else {
+                retry.set(0);
                 LOG.info("No license update, licenseId: " + conf.getLicenseId());
                 return;
             }
@@ -92,6 +102,23 @@ public class LicenseFileUpdateService {
             LOG.error(e.getMessage(), e);
         }
         LOG.trace("Failed to update license file by licenseId: " + conf.getLicenseId());
+
+        retry.incrementAndGet();
+
+        if (isRetryLimitExceeded()) {
+            throw new ShutdownException("Shutdown server after trying to update license. Retry count: " + retry.get());
+        }
+
+        newExecutor().schedule(new Runnable() {
+            @Override
+            public void run() {
+                updateLicenseFromServer();
+            }
+        }, 3, TimeUnit.HOURS);
+    }
+
+    public boolean isRetryLimitExceeded() {
+        return retry.get() > RETRY_LIMIT;
     }
 
     private String macAddress() {
