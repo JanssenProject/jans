@@ -11,5 +11,7 @@
     "public_key":"",
     "public_password":"",
     "license_password":"",
-    "support-google-logout": true
+    "support-google-logout": true,
+    "state_expiration_in_minutes":5,
+    "nonce_expiration_in_minutes":5
 }
