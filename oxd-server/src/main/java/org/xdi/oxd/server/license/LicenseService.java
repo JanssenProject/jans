@@ -59,6 +59,10 @@ public class LicenseService {
         }
     }
 
+    public boolean isRetryLimitExceeded() {
+        return updateService.isRetryLimitExceeded();
+    }
+
     private void validateConfiguration() {
         if (Strings.isNullOrEmpty(conf.getLicenseId())) {
             throw new ShutdownException("Unable to validate license. license_id is not set in oxd configuration.");
