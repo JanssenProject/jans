@@ -84,15 +84,11 @@ public class SocketService {
                     final Socket clientSocket = serverSocket.accept();
 
                     if (!licenseService.isLicenseValid()) {
-                        LOG.warn("License is invalid. Please check your license_id and make sure it is not expired.");
-
-                        if (licenseService.isRetryLimitExceeded()) {
-                            String msg = "Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
-                                    " re-tries. Shutdown the server.";
-                            LOG.error(msg);
-                            throw new ShutdownException(msg);
-
-                        }
+                        LOG.error("License is invalid. Please check your license_id and make sure it is not expired.");
+                        LOG.error("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
+                                " re-tries. Shutdown the server.");
+                        throw new ShutdownException("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
+                                " re-tries. Shutdown the server.");
                     }
 
                     LOG.debug("Start new SocketProcessor...");
