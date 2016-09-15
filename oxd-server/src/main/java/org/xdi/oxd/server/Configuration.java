@@ -25,7 +25,7 @@ public class Configuration {
     private boolean startJetty;
     //@JsonProperty(value = "register_client_app_type")
     private String registerClientAppType = "web";
-//    @JsonProperty(value = "register_client_response_types")
+    //    @JsonProperty(value = "register_client_response_types")
     private String registerClientResponesType = "code";
     @JsonProperty(value = "localhost_only")
     private Boolean localhostOnly;
@@ -39,8 +39,6 @@ public class Configuration {
     private String keyStorePath;
     @JsonProperty(value = "trust_store_password")
     private String keyStorePassword;
-    @JsonProperty(value = "license_server_endpoint")
-    private String licenseServerEndpoint;
     @JsonProperty(value = "license_id")
     private String licenseId;
     @JsonProperty(value = "public_key")
@@ -49,8 +47,36 @@ public class Configuration {
     private String publicPassword;
     @JsonProperty(value = "license_password")
     private String licensePassword;
-    @JsonProperty(value = "license_check_period_in_hours")
-    private Integer licenseCheckPeriodInHours = 24;
+    @JsonProperty(value = "support-google-logout")
+    private Boolean supportGoogleLogout = true;
+    @JsonProperty(value = "state_expiration_in_minutes")
+    private int stateExpirationInMinutes = 5;
+    @JsonProperty(value = "nonce_expiration_in_minutes")
+    private int nonceExpirationInMinutes = 5;
+
+    public int getStateExpirationInMinutes() {
+        return stateExpirationInMinutes;
+    }
+
+    public void setStateExpirationInMinutes(int stateExpirationInMinutes) {
+        this.stateExpirationInMinutes = stateExpirationInMinutes;
+    }
+
+    public int getNonceExpirationInMinutes() {
+        return nonceExpirationInMinutes;
+    }
+
+    public void setNonceExpirationInMinutes(int nonceExpirationInMinutes) {
+        this.nonceExpirationInMinutes = nonceExpirationInMinutes;
+    }
+
+    public Boolean getSupportGoogleLogout() {
+        return supportGoogleLogout;
+    }
+
+    public void setSupportGoogleLogout(Boolean supportGoogleLogout) {
+        this.supportGoogleLogout = supportGoogleLogout;
+    }
 
     public String getKeyStorePassword() {
         return keyStorePassword;
@@ -74,14 +100,6 @@ public class Configuration {
 
     public void setStartJetty(boolean startJetty) {
         this.startJetty = startJetty;
-    }
-
-    public Integer getLicenseCheckPeriodInHours() {
-        return licenseCheckPeriodInHours;
-    }
-
-    public void setLicenseCheckPeriodInHours(Integer licenseCheckPeriodInHours) {
-        this.licenseCheckPeriodInHours = licenseCheckPeriodInHours;
     }
 
     public String getLicenseId() {
@@ -114,14 +132,6 @@ public class Configuration {
 
     public void setLicenseId(String licenseId) {
         this.licenseId = licenseId;
-    }
-
-    public String getLicenseServerEndpoint() {
-        return licenseServerEndpoint;
-    }
-
-    public void setLicenseServerEndpoint(String licenseServerEndpoint) {
-        this.licenseServerEndpoint = licenseServerEndpoint;
     }
 
     public String getKeyStorePath() {
@@ -210,12 +220,13 @@ public class Configuration {
         sb.append(", trustAllCerts=").append(trustAllCerts);
         sb.append(", keyStorePath='").append(keyStorePath).append('\'');
         sb.append(", keyStorePassword='").append(keyStorePassword).append('\'');
-        sb.append(", licenseServerEndpoint='").append(licenseServerEndpoint).append('\'');
         sb.append(", licenseId='").append(licenseId).append('\'');
         sb.append(", publicKey='").append(publicKey).append('\'');
         sb.append(", publicPassword='").append(publicPassword).append('\'');
         sb.append(", licensePassword='").append(licensePassword).append('\'');
-        sb.append(", licenseCheckPeriodInHours=").append(licenseCheckPeriodInHours);
+        sb.append(", supportGoogleLogout='").append(supportGoogleLogout).append('\'');
+        sb.append(", stateExpirationInMinutes='").append(stateExpirationInMinutes).append('\'');
+        sb.append(", nonceExpirationInMinutes='").append(nonceExpirationInMinutes).append('\'');
         sb.append('}');
         return sb.toString();
     }

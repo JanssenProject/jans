@@ -22,6 +22,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.server.service.SiteConfiguration;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -47,6 +48,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
+        final SiteConfiguration site = getSite();
         final String idToken = params.getIdToken();
         final Jwt jwt = Jwt.parse(idToken);
 
@@ -54,14 +56,14 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
 
         final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-        opResponse.setActive(isValid(jwt, discoveryResponse));
+        opResponse.setActive(isValid(jwt, discoveryResponse, params.getNonce(), site.getClientId()));
         opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
         opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
         opResponse.setClaims(jwt.getClaims().toMap());
         return okResponse(opResponse);
     }
 
-    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
+    public static boolean isValid(Jwt jwt, OpenIdConfigurationResponse discoveryResponse, String nonce, String clientId) {
         try {
             //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
@@ -69,16 +71,30 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 
             final String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            final String audienceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
+
+
+            if (!nonceFromToken.endsWith(nonce)) {
+                LOG.error("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
+                return false;
+            }
+
+            if (!clientId.equalsIgnoreCase(audienceFromToken)) {
+                LOG.error("ID Token has invalid audience. Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
+                return false;
+            }
+
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
             if (now.after(expiresAt)) {
-                LOG.trace("ID Token is expired. (It is after " + now + ").");
+                LOG.error("ID Token is expired. (It is after " + now + ").");
                 return false;
             }
 
             // 1. validate issuer
             if (!issuer.equals(discoveryResponse.getIssuer())) {
-                LOG.trace("ID Token issuer is invalid. Token issuer: " + issuer + ", discovery issuer: " + discoveryResponse.getIssuer());
+                LOG.error("ID Token issuer is invalid. Token issuer: " + issuer + ", discovery issuer: " + discoveryResponse.getIssuer());
                 return false;
             }
 
@@ -89,7 +105,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
             final boolean signature = rsaSigner.validate(jwt);
             if (!signature) {
-                LOG.trace("ID Token signature is invalid.");
+                LOG.error("ID Token signature is invalid.");
             }
             return signature;
         } catch (Exception e) {

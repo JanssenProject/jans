@@ -15,6 +15,8 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
     private String oxdId;
     @JsonProperty(value = "code")
     private String code;
+    @JsonProperty(value = "state")
+    private String state;
 
     public GetTokensByCodeParams() {
     }
@@ -25,6 +27,14 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getOxdId() {
@@ -58,6 +68,7 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         sb.append("GetTokensByCodeParams");
         sb.append("{code='").append(code).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", state='").append(state).append('\'');
         sb.append('}');
         return sb.toString();
     }

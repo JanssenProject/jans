@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
@@ -41,14 +42,18 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
     public CommandResponse execute(GetAuthorizationCodeParams params) {
         final SiteConfiguration site = getSite();
 
+        String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
+
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
-                site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), UUID.randomUUID().toString());
-        request.setState("af0ifjsldkj");
+                site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), nonce);
+        request.setState(params.getState());
         request.setAuthUsername(params.getUsername());
         request.setAuthPassword(params.getPassword());
         request.getPrompts().add(Prompt.NONE);
-        request.setNonce(UUID.randomUUID().toString());
         request.setAcrValues(acrValues(params, site));
+
+        getStateService().putNonce(nonce);
+        getStateService().putState(params.getState());
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
@@ -57,6 +62,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
         ClientUtils.showClient(authorizeClient);
         if (response != null) {
+            getStateService().putState(params.getState());
             return okResponse(new GetAuthorizationCodeResponse(response.getCode()));
         } else {
             LOG.error("Failed to get response from oxauth client.");

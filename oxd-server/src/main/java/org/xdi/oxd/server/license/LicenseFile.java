@@ -108,6 +108,19 @@ public class LicenseFile implements Serializable {
         return file;
     }
 
+    public static boolean delete() throws IOException {
+        return getLicenseFile().delete();
+    }
+
+    public static boolean deleteSilently() {
+        try {
+            return delete();
+        } catch (IOException e) {
+            LOG.error("Failed to delete license file.", e);
+            return false;
+        }
+    }
+
     public String asJson() {
         return Jackson.asJsonSilently(this);
     }

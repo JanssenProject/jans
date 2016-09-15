@@ -4,12 +4,14 @@ import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
 import java.net.URLEncoder;
@@ -20,6 +22,8 @@ import java.net.URLEncoder;
  */
 
 public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
+
+    private static final String GOOGLE_OP_HOST = "https://accounts.google.com";
 
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
@@ -36,9 +40,15 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
         final SiteConfiguration site = getSite();
 
-        String endSessionEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getEndSessionEndpoint();
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
+            if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
+                String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + site.getPostLogoutRedirectUri();
+                return okResponse(new LogoutResponse(logoutUrl));
+            }
+
             LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
             throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
