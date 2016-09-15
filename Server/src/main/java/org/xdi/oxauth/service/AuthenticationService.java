@@ -123,19 +123,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionState sessionState = sessionStateService.getSessionState();
-        if (sessionState != null) {
-            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
-            if (authenticated) {
-                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
-            }
-            sessionStateService.updateSessionState(sessionState);
-
-            // TODO: Remove after 2.4.5
-            if (authenticated && !StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
-                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
-            }
-        }
+        setAuthenticastedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -148,6 +136,23 @@ public class AuthenticationService {
 
         return authenticated;
     }
+
+	private void setAuthenticastedUserSessionAttribute(String userName, boolean authenticated) {
+		SessionState sessionState = sessionStateService.getSessionState();
+        if (sessionState != null) {
+            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+            if (authenticated) {
+                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+            }
+            sessionStateService.updateSessionState(sessionState);
+
+            // TODO: Remove after 2.4.5
+            String sessionAuthUser = getAuthenticatedUserId();
+            if (authenticated && (sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(userName, sessionAuthUser)) {
+                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
+            }
+        }
+	}
 
     private boolean localAuthenticate(Credentials credentials, String userName, String password) {
         User user = userService.getUser(userName);
@@ -268,7 +273,7 @@ public class AuthenticationService {
                             }
 
                             // TODO: Remove after 2.4.5
-                            if (!StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
+                            if ((keyValue != null) && !StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
                                 throw new InvalidStateException("authenticate_external: User name and user in credentials don't match");
                             }
 
@@ -310,6 +315,8 @@ public class AuthenticationService {
         } finally {
             timerContext.stop();
         }
+
+        setAuthenticastedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -389,7 +396,7 @@ public class AuthenticationService {
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            if (!StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
+            if ((sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
                 throw new InvalidStateException("configureSessionUser: User in session and in credentials don't match");
             }
             log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
