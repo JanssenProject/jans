@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.SocketProcessor;
+import org.xdi.oxd.server.license.LicenseFileUpdateService;
 import org.xdi.oxd.server.license.LicenseService;
 
 import java.io.IOException;
@@ -82,7 +84,11 @@ public class SocketService {
                     final Socket clientSocket = serverSocket.accept();
 
                     if (!licenseService.isLicenseValid()) {
-                        LOG.warn("License is invalid. Please check your license_id and make sure it is not expired.");
+                        LOG.error("License is invalid. Please check your license_id and make sure it is not expired.");
+                        LOG.error("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
+                                " re-tries. Shutdown the server.");
+                        throw new ShutdownException("Unable to fetch valid license after " + LicenseFileUpdateService.RETRY_LIMIT +
+                                " re-tries. Shutdown the server.");
                     }
 
                     LOG.debug("Start new SocketProcessor...");

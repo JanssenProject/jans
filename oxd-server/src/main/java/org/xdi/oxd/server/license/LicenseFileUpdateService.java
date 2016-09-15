@@ -6,6 +6,7 @@ package org.xdi.oxd.server.license;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import org.apache.commons.io.FileUtils;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
@@ -13,28 +14,36 @@ import org.xdi.oxd.license.client.GenerateWS;
 import org.xdi.oxd.license.client.LicenseClient;
 import org.xdi.oxd.license.client.data.LicenseResponse;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.service.HttpService;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 12/10/2014
  */
 
-class LicenseFileUpdateService {
+public class LicenseFileUpdateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseFileUpdateService.class);
 
+    public static final String LICENSE_SERVER_ENDPOINT = "https://license.gluu.org/oxLicense";
+
     private static final int ONE_HOUR_AS_MILLIS = 3600000;
-    private static final int TWELVE_HOUR_AS_MILLIS = 12 * ONE_HOUR_AS_MILLIS;
+    private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;
+    public static final int RETRY_LIMIT = 3;
 
     private final Configuration conf;
     private final HttpService httpService;
+    private AtomicInteger retry = new AtomicInteger();
 
     LicenseFileUpdateService(Configuration conf, HttpService httpService) {
         this.conf = conf;
@@ -50,46 +59,83 @@ class LicenseFileUpdateService {
 
     private boolean lastModifiedLessThan12HoursAgo(long lastModified) {
         long diff = System.currentTimeMillis() - lastModified;
-        return diff < TWELVE_HOUR_AS_MILLIS;
+        return diff < _24_HOURS_AS_MILLIS;
     }
 
     private void scheduleUpdatePinger() {
-        Integer licenseCheckPeriodInHours = conf.getLicenseCheckPeriodInHours();
-        int sevenDaysInHours = 24 * 7;
-        if (licenseCheckPeriodInHours <= 0 || licenseCheckPeriodInHours > sevenDaysInHours) {
-            licenseCheckPeriodInHours = 24;
-        }
-
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
-        executorService.scheduleAtFixedRate(new Runnable() {
+        newExecutor().scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 updateLicenseFromServer();
             }
-        }, licenseCheckPeriodInHours, licenseCheckPeriodInHours, TimeUnit.HOURS);
+        }, 24, 24, TimeUnit.HOURS);
+    }
+
+    private ScheduledExecutorService newExecutor() {
+         return Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
     }
 
     private void updateLicenseFromServer() {
         try {
-            final GenerateWS generateWS = LicenseClient.generateWs(conf.getLicenseServerEndpoint(), httpService.getClientExecutor());
+            final GenerateWS generateWS = LicenseClient.generateWs(LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
 
-            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", license_endpoint: " + conf.getLicenseServerEndpoint() + " ... ");
-            final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId());
+            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", retry: " + retry + " ... ");
+            final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId(), macAddress());
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseFile.getLicenseFile();
                 if (file != null) {
                     final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense()).asJson();
                     FileUtils.write(file, json);
+
+                    retry.set(0);
                     LOG.info("License file updated successfully.");
                     return;
                 }
             } else {
-                LOG.info("No license update on server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+                retry.set(0);
+                LOG.info("No license update, licenseId: " + conf.getLicenseId());
                 return;
             }
+        } catch (ClientResponseFailure e) {
+            LOG.error(e.getMessage() + ", " + e.getResponse().getEntity(String.class), e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        LOG.trace("Failed to update license file from server:" + conf.getLicenseServerEndpoint() + ", licenseId: " + conf.getLicenseId());
+        LOG.trace("Failed to update license file by licenseId: " + conf.getLicenseId());
+
+        retry.incrementAndGet();
+
+        if (isRetryLimitExceeded()) {
+            LicenseFile.deleteSilently();
+            throw new ShutdownException("Shutdown server after trying to update license. Retry count: " + retry.get());
+        }
+
+        newExecutor().schedule(new Runnable() {
+            @Override
+            public void run() {
+                updateLicenseFromServer();
+            }
+        }, 3, TimeUnit.HOURS);
+    }
+
+    public boolean isRetryLimitExceeded() {
+        return retry.get() > RETRY_LIMIT;
+    }
+
+    private String macAddress() {
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return "unknown";
+        }
     }
 }

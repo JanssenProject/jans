@@ -19,6 +19,7 @@ import org.xdi.oxd.server.service.DiscoveryService;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.SiteConfiguration;
 import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.service.StateService;
 import org.xdi.oxd.server.service.UmaTokenService;
 import org.xdi.oxd.server.service.ValidationService;
 
@@ -72,19 +73,27 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public HttpService getHttpService() {
-        return injector.getInstance(HttpService.class);
+        return getInstance(HttpService.class);
+    }
+
+    public <T> T getInstance(Class<T> type) {
+        return injector.getInstance(type);
+    }
+
+    public StateService getStateService(){
+        return getInstance(StateService.class);
     }
 
     public DiscoveryService getDiscoveryService() {
-        return injector.getInstance(DiscoveryService.class);
+        return getInstance(DiscoveryService.class);
     }
 
     public UmaTokenService getUmaTokenService() {
-        return injector.getInstance(UmaTokenService.class);
+        return getInstance(UmaTokenService.class);
     }
 
     public SiteConfigurationService getSiteService() {
-        return getInjector().getInstance(SiteConfigurationService.class);
+        return getInstance(SiteConfigurationService.class);
     }
 
     public SiteConfiguration getSite() {
@@ -97,7 +106,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
     }
 
     public ValidationService getValidationService() {
-        return getInjector().getInstance(ValidationService.class);
+        return getInstance(ValidationService.class);
     }
 
     /**

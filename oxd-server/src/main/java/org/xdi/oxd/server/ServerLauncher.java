@@ -6,6 +6,7 @@ package org.xdi.oxd.server;
 import com.google.common.base.Strings;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -21,8 +22,10 @@ import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
+import java.io.InputStream;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Properties;
 
 /**
  * Server launcher.
@@ -51,12 +54,28 @@ public class ServerLauncher {
     public static void start() {
         configureLogger();
         LOG.info("Starting...");
+        printBuildNumber();
         addSecurityProviders();
         registerResteasyProviders();
         checkConfiguration();
 
         startOxd();
         startJetty();
+    }
+
+    private static void printBuildNumber() {
+        InputStream is = null;
+        try {
+            is = ClassLoader.getSystemClassLoader().getResourceAsStream("git.properties");
+            Properties properties = new Properties();
+            properties.load(is);
+            LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
+                    ", build time:" + properties.getProperty("git.build.time"));
+        } catch (Exception e) {
+            LOG.warn("Unable to read git.properties and print build number, " + e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
     }
 
     private static void startOxd() {
