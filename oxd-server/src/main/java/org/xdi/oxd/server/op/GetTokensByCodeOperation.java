@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +11,12 @@ import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.server.service.SiteConfiguration;
@@ -41,6 +45,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
     @Override
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
+        validate(params);
 
         final SiteConfiguration site = getSite();
 
@@ -66,7 +71,12 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                 opResponse.setExpiresIn(response.getExpiresIn());
 
                 final Jwt jwt = Jwt.parse(response.getIdToken());
-                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()))) {
+                final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+                if (!getStateService().isNonceValid(nonceFromToken)) {
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
+                }
+
+                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken, site.getClientId())) {
                     final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
                     opResponse.setIdTokenClaims(claims);
 
@@ -74,6 +84,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     site.setIdToken(response.getIdToken());
                     site.setAccessToken(response.getAccessToken());
                     getSiteService().update(site);
+                    getStateService().invalidateState(params.getState());
 
                     return okResponse(opResponse);
                 } else {
@@ -84,5 +95,17 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
         return null;
+    }
+
+    private void validate(GetTokensByCodeParams params) {
+        if (Strings.isNullOrEmpty(params.getCode())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
+        }
+        if (Strings.isNullOrEmpty(params.getState())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
+        }
+        if (!getStateService().isStateValid(params.getState())) {
+            throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
+        }
     }
 }

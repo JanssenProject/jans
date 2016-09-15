@@ -17,6 +17,10 @@ public enum ErrorResponseCode {
     INTERNAL_ERROR_UNKNOWN("internal_error", "Unknown internal server error occurs."),
     INTERNAL_ERROR_NO_PARAMS("internal_error", "Command parameters are not specified or otherwise malformed."),
     BAD_REQUEST_NO_OXD_ID("bad_request", "oxd_id is empty or not specified or is otherwise invalid (not registered)."),
+    BAD_REQUEST_NO_CODE("bad_request", "'code' is empty or not specified."),
+    BAD_REQUEST_NO_STATE("bad_request", "'state' is empty or not specified."),
+    BAD_REQUEST_STATE_NOT_VALID("bad_request", "'state' is not registered."),
+    INVALID_NONCE("invalid_nonce", "Nonce value is not registered by oxd."),
     INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),
@@ -27,6 +31,7 @@ public enum ErrorResponseCode {
     INVALID_SCOPE("invalid_scope", "Invalid scope parameter (empty or blank)."),
     INVALID_ACR_VALUES("invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
     NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
+    NO_REGISTRATION_ENDPOINT("invalid_request", "OP does not support dynamic client registration. Please register client manually and provide client_id and client_secret to register_site command."),
     NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma-configuration"),
     NO_UMA_RESOURCES_TO_PROTECT("invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
     NO_UMA_HTTP_METHOD("invalid_http_method", "http_method is not specified or otherwise not GET or POST or PUT or DELETE. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
@@ -34,6 +39,7 @@ public enum ErrorResponseCode {
     NO_UMA_TICKET_PARAMETER("invalid_ticket_parameter", "ticket parameter is not specified or otherwise is not valid"),
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
+    FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
     FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
     FAILED_TO_GET_GAT("internal_error", "Failed to get GAT.");
 

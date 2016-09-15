@@ -27,6 +27,7 @@ public class GuiceModule extends AbstractModule {
         bind(ValidationService.class).in(Singleton.class);
         bind(SiteStorage.class).in(Singleton.class);
         bind(TimeService.class).in(Singleton.class);
+        bind(StateService.class).in(Singleton.class);
 
         bind(Configuration.class).toProvider(ConfigurationService.class);
     }
