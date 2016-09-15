@@ -1,5 +1,6 @@
 package org.xdi.oxd.server.op;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
     public CommandResponse execute(GetAuthorizationCodeParams params) {
         final SiteConfiguration site = getSite();
 
-        String nonce = UUID.randomUUID().toString();
+        String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
                 site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), nonce);
