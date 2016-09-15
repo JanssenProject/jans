@@ -31,19 +31,19 @@ public class GetTokensByCodeTest {
             client = new CommandClient(host, port);
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-            tokenByCode(client, site, redirectUrl, userId, userSecret);
+            tokenByCode(client, site, redirectUrl, userId, userSecret, CoreUtils.secureRandomString());
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret) {
+    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
 
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setCode(codeRequest(client, site.getOxdId(), userId, userSecret, state));
+        commandParams.setCode(codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
         commandParams.setState(state);
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
@@ -55,12 +55,13 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    public static String codeRequest(CommandClient client, String siteId, String userId, String userSecret, String state) {
+    public static String codeRequest(CommandClient client, String siteId, String userId, String userSecret, String state, String nonce) {
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(siteId);
         params.setUsername(userId);
         params.setPassword(userSecret);
         params.setState(state);
+        params.setNonce(nonce);
 
         final Command command = new Command(CommandType.GET_AUTHORIZATION_CODE).setParamsObject(params);
         return client.send(command).dataAsResponse(GetAuthorizationCodeResponse.class).getCode();
