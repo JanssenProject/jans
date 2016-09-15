@@ -78,6 +78,7 @@ public class UserService {
      * @param localPrimaryKey Local authentication key attribute name
      * @return <code>true</code> if success, otherwise <code>false</code>
      */
+    @Deprecated
     public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
         return authenticationService.authenticate(keyValue, password, primaryKey, localPrimaryKey);
     }
