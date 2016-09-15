@@ -49,7 +49,11 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + getStateService().generateState();
         authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
-        authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues(site, params));
+
+        List<String> acrValues = acrValues(site, params);
+        if (!acrValues.isEmpty()) {
+            authorizationEndpoint += "&acr_values=" + Utils.joinAndUrlEncode(acrValues);
+        }
 
         if (!Strings.isNullOrEmpty(params.getPrompt())) {
             authorizationEndpoint += "&prompt=" + params.getPrompt();
