@@ -48,10 +48,11 @@ public class GetUserInfoTest {
     private GetTokensByCodeResponse requestTokens(CommandClient client, RegisterSiteResponse site, String userId, String userSecret) {
 
         final String state = CoreUtils.secureRandomString();
+        final String nonce = CoreUtils.secureRandomString();
 
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state));
+        commandParams.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
         commandParams.setState(state);
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);

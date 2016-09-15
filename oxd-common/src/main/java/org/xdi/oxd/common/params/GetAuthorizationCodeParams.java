@@ -23,8 +23,18 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
     private String password;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "nonce")
+    private String nonce;
 
     public GetAuthorizationCodeParams() {
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 
     public String getState() {
