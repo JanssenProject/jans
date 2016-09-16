@@ -357,27 +357,27 @@ def exportLDIF(folder):
 
 def processLDIF(backupFolder, newFolder):
     logging.info('Processing the LDIF data')
-    current = os.path.join(newFolder, 'current.ldif')
-    currentDNs = getDns(current)
+    current_ldif = os.path.join(newFolder, 'current.ldif')
+    currentDNs = getDns(current_ldif)
 
-    ldifFile = open(os.path.join(newFolder, 'processed.ldif'), 'w')
-    ldif_writer = LDIFWriter(ldifFile)
+    processed_ldif = open(os.path.join(newFolder, 'processed.ldif'), 'w')
+    ldif_writer = LDIFWriter(processed_ldif)
 
     ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
-    dnMap = getOldEntryMap(backupFolder)
+    old_dn_map = getOldEntryMap(backupFolder)
 
     multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
                        'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                        'oxTrustEntitlements', 'oxTrustx509Certificate']
     # Rewriting all the new DNs in the new installation to ldif file
     for dn in currentDNs:
-        new_entry = getEntry(current, dn)
-        if dn not in dnMap.keys():
+        new_entry = getEntry(current_ldif, dn)
+        if dn not in old_dn_map.keys():
             #  Write directly to the file if there is no matching old DN data
             ldif_writer.unparse(dn, new_entry)
             continue
 
-        old_entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
+        old_entry = getEntry(os.path.join(backupFolder, old_dn_map[dn]), dn)
         for attr in old_entry.keys():
             if attr in ignoreList:
                 continue
@@ -400,29 +400,32 @@ def processLDIF(backupFolder, newFolder):
         ldif_writer.unparse(dn, new_entry)
 
     # Pick all the left out DNs from the old DN map and write them to the LDIF
-    for dn in dnMap.keys():
+    for dn in old_dn_map.keys():
         if dn in currentDNs:
             continue  # Already processed
 
-        entry = getEntry(os.path.join(backupFolder, dnMap[dn]), dn)
+        entry = getEntry(os.path.join(backupFolder, old_dn_map[dn]), dn)
 
         for attr in entry.keys():
             if attr not in multivalueAttrs:
                 continue  # skip conversion
 
-            json_value = None
-            try:
-                json_value = json.loads(entry[attr][0])
-            except:
-                loggin.debug('Cannot parse multival %s in DN %s', attr, dn)
-
-            if type(json_value) is list:
-                entry[attr] = [json.dumps(v) for v in json_value]
+            attr_values = []
+            for val in entry[attr]:
+                json_value = None
+                try:
+                    json_value = json.loads(val)
+                    if type(json_value) is list:
+                        attr_values.extend([json.dumps(v) for v in json_value])
+                except:
+                    loggin.debug('Cannot parse multival %s in DN %s', attr, dn)
+                    attr_values.append(val)
+            entry[attr] = attr_values
 
         ldif_writer.unparse(dn, entry)
 
     # Finally
-    ldifFile.close()
+    processed_ldif.close()
 
 
 def copyCustomLDAPSchema(backup):
