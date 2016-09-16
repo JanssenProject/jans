@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
@@ -78,8 +79,19 @@ public class SessionStateService {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
-            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAttributes.get("acr_values"));
+            String sessionAcr = sessionAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+            if (StringUtils.isBlank(sessionAcr)) {
+                sessionAcr = sessionAttributes.get("acr_values");
+            }
+
+            if (StringUtils.isBlank(sessionAcr)) {
+                log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
+                return session;
+            }
+
+            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
             if (isAcrChanged) {
+                log.error("Session acr: " + sessionAcr);
                 throw new AcrChangedException();
             }
 
