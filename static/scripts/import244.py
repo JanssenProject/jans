@@ -400,7 +400,7 @@ def processLDIF(backupFolder, newFolder):
         ldif_writer.unparse(dn, new_entry)
 
     # Pick all the left out DNs from the old DN map and write them to the LDIF
-    for dn in old_dn_map.keys():
+    for dn in sorted(old_dn_map, key=len):
         if dn in currentDNs:
             continue  # Already processed
 
