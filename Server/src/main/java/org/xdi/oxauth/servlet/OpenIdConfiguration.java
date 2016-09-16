@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.servlet;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -16,7 +14,6 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -342,20 +339,7 @@ public class OpenIdConfiguration extends HttpServlet {
     private JSONObject createAuthLevelMapping() {
         final JSONObject mappings = new JSONObject();
         try {
-            ExternalAuthenticationService service = ExternalAuthenticationService.instance();
-
-            Map<Integer, Set<String>> map = Maps.newHashMap();
-            for (CustomScriptConfiguration script : service.getCustomScriptConfigurationsMap()) {
-                int level = script.getLevel();
-                String acr = script.getName();
-
-                Set<String> acrs = map.get(level);
-                if (acrs == null) {
-                    acrs = Sets.newHashSet();
-                    map.put(level, acrs);
-                }
-                acrs.add(acr);
-            }
+            Map<Integer, Set<String>> map = ExternalAuthenticationService.instance().levelToAcrMapping();
 
             for (Integer level : map.keySet()) {
                 final JSONArray mappingList = new JSONArray();

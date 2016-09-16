@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.service.external;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -24,10 +26,7 @@ import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -417,5 +416,29 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     public static ExternalAuthenticationService instance() {
         return (ExternalAuthenticationService) Component.getInstance(ExternalAuthenticationService.class);
     }
+
+	public Map<Integer, Set<String>> levelToAcrMapping() {
+		Map<Integer, Set<String>> map = Maps.newHashMap();
+		for (CustomScriptConfiguration script : getCustomScriptConfigurationsMap()) {
+			int level = script.getLevel();
+			String acr = script.getName();
+
+			Set<String> acrs = map.get(level);
+			if (acrs == null) {
+				acrs = Sets.newHashSet();
+				map.put(level, acrs);
+			}
+			acrs.add(acr);
+		}
+		return map;
+	}
+
+	public Map<String, Integer> acrToLevelMapping() {
+		Map<String, Integer> map = Maps.newHashMap();
+		for (CustomScriptConfiguration script : getCustomScriptConfigurationsMap()) {
+			map.put(script.getName(), script.getLevel());
+		}
+		return map;
+	}
 
 }
