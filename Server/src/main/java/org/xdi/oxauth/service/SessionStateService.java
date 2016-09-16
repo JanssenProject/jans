@@ -26,6 +26,7 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -91,8 +92,17 @@ public class SessionStateService {
 
             boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
             if (isAcrChanged) {
-                log.error("Session acr: " + sessionAcr);
-                throw new AcrChangedException();
+                Map<String, Integer> acrToLevel = ExternalAuthenticationService.instance().acrToLevelMapping();
+                Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
+                Integer currentAcrLevel = acrToLevel.get(acrValuesStr);
+
+                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
+                        "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
+                if (sessionAcrLevel < currentAcrLevel ) {
+                    throw new AcrChangedException();
+                } else { // https://github.com/GluuFederation/oxAuth/issues/291
+                    return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
+                }
             }
 
             reinitLogin(session, false);
