@@ -40,20 +40,20 @@ def convert(ldif_file):
             line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
                           re.IGNORECASE)
             oid = attr_oid + '.' + str(attrs+1)
-            output += re.sub('[a-z]+-oid', oid, line, 1, re.IGNORECASE)
+            output += re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
             attrs += 1
         # Change the keyword for objectclass
         elif re.match('^objectClasses:\s', line, re.IGNORECASE):
             line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
                           re.IGNORECASE)
             oid = objc_oid + '.' + str(objclasses+1)
-            output += re.sub('[a-z]+-oid', oid, line, 1, re.IGNORECASE)
+            output += re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
             objclasses += 1
         else:
             print "Unknown Case: {}".format(line)
 
-    print "AttributeTypes = %d" % attrs
-    print "Object Classes = %d" % objclasses
+    # print "AttributeTypes = %d" % attrs
+    # print "Object Classes = %d" % objclasses
     print output
 
 if __name__ == '__main__':
