@@ -2241,7 +2241,7 @@ objectclasses: ( oxAuthCustomScope-oid NAME 'oxAuthCustomScope' SUP top STRUCTUR
  ( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxAuthGroupClaims )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthSessionId-oid NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
- ( lastModifiedTime $ oxAuthAuthenticationTime $ oxAuthPermissionGranted
+ ( oxAuthAuthenticationTime $ oxAuthPermissionGranted
   $ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute
   $ oxAsJwt $ oxJwt $ oxInvolvedClients )
   X-ORIGIN 'Gluu created objectclass' )
@@ -2270,7 +2270,7 @@ objectclasses: ( oxAuthGrant-oid NAME 'oxAuthGrant' SUP top STRUCTURAL MUST obje
    ( oxAuthGrantId $ oxAuthCreation )
     X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthToken-oid NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY
-  ( createTimestamp $ oxAuthAuthenticationTime $ oxAuthAuthorizationCode
+  ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode
   $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
   $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId
   $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthSessionDn )
