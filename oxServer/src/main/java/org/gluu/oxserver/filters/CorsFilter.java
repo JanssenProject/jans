@@ -12,6 +12,12 @@ import javax.servlet.ServletResponse;
 
 import org.apache.log4j.Logger;
 
+/**
+ * CORS wrapper to support both Tomcat and Jetty
+ * 
+ * @author Yuriy Movchan
+ * @version September 07, 2016
+ */
 public class CorsFilter implements Filter {
 
 	private static final Logger LOG = Logger.getLogger(CorsFilter.class);
