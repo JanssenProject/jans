@@ -27,30 +27,31 @@ def convert(ldif_file):
                 re.match('^cn:', line):
             continue
 
-        if re.match('^#', line):  # comments copied as such
-            output += line
-        elif re.match('^\s*$', line):  # empty lines copied as such
-            output += line
+        # empty lines and the comments are copied as such
+        if re.match('^#', line) or re.match('^\s*$', line):
+            pass
         elif re.match('^\s\s', line):  # change the space indendation to tabs
-            output += re.sub('^\s\s', '\t', line)
+            line = re.sub('^\s\s', '\t', line)
         elif re.match('^\s', line):
-            output += re.sub('^\s', '\t', line)
+            line = re.sub('^\s', '\t', line)
         # Change the keyword for attributetype
         elif re.match('^attributeTypes:\s', line, re.IGNORECASE):
             line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
                           re.IGNORECASE)
             oid = attr_oid + '.' + str(attrs+1)
-            output += re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+            line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
             attrs += 1
         # Change the keyword for objectclass
         elif re.match('^objectClasses:\s', line, re.IGNORECASE):
             line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
                           re.IGNORECASE)
             oid = objc_oid + '.' + str(objclasses+1)
-            output += re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+            line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
             objclasses += 1
         else:
-            print "Unknown Case: {}".format(line)
+            print "Unknown line starting: {}".format(line)
+
+        output += line
 
     # print "AttributeTypes = %d" % attrs
     # print "Object Classes = %d" % objclasses
