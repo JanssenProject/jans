@@ -15,8 +15,9 @@ attr_oid = published + '.3'
 objc_oid = published + '.4'
 
 
-def convert(ldif_file):
-    ldif = open(ldif_file, 'r')
+def convert(in_file, out_file):
+    ldif = open(in_file, 'r')
+    schema = open(out_file, 'w')
     output = ''
 
     attrs = 0
@@ -55,8 +56,11 @@ def convert(ldif_file):
 
     # print "AttributeTypes = %d" % attrs
     # print "Object Classes = %d" % objclasses
-    print output
+    schema.write(output)
+    schema.close()
+    ldif.close()
 
 if __name__ == '__main__':
     input_ldif = './static/opendj/101-ox.ldif'
-    convert(input_ldif)
+    output_file = './static/openldap/gluu.schema'
+    convert(input_ldif, output_file)
