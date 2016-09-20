@@ -6,7 +6,14 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -17,6 +24,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -34,12 +42,7 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum
@@ -66,6 +69,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private SessionStateService sessionStateService;
     @In
     private ClientService clientService;
+
     @In(required = false)
     private Identity identity;
 
@@ -148,9 +152,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
-        if (isExternalLogoutPresent) {
-            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, authorizationGrant);
-            log.info("End session result for '{0}': '{1}'", authorizationGrant.getUser().getUserId(), "logout", externalLogoutResult);
+        if (isExternalLogoutPresent && (ldapSessionState != null)) {
+        	String userName = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionState);
+            log.info("End session result for '{0}': '{1}'", userName, "logout", externalLogoutResult);
         }
 
         boolean isGrantAndExternalLogoutSuccessful = isExternalLogoutPresent && externalLogoutResult;
