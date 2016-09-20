@@ -6,10 +6,6 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -22,6 +18,9 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.session.ApplicationSessionType;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.service.custom.script.ExternalScriptService;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external application session extension
