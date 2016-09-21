@@ -231,6 +231,7 @@ public class AuthorizeAction {
             // Create unauthenticated session
             SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
+            unauthenticatedSession.addPermission(clientId, false);
             boolean persisted = sessionStateService.persistSessionState(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
                 log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
