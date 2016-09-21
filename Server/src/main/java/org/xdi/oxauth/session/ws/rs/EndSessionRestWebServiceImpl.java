@@ -68,6 +68,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 idTokenHint, postLogoutRedirectUri, sessionState, sec.isSecure());
 
         final Optional<SessionState> endedSession = endSession(sessionState, httpRequest, httpResponse);
+        if (!endedSession.isPresent()) {
+            log.error("Unable to identify session_state (session state does not exist on OP or otherwise no parameters for correct identification," +
+                    " e.g. cookie or session_state query parameter.). Reject request and send back invalid_request error.");
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+        }
 
         return httpBased(postLogoutRedirectUri, state, endedSession);
     }
