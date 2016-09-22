@@ -97,9 +97,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not logged_in):
                 return False
 
-            user = credentials.getUser()
             print "Wikid. Authenticate for step 1. Attempting to find wikid_user: " + user_name
-
             wc_user = self.wc.findUser(wikid_server_code, user_name)
 
             if (wc_user == None):
