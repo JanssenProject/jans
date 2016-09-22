@@ -2241,7 +2241,7 @@ objectclasses: ( oxAuthCustomScope-oid NAME 'oxAuthCustomScope' SUP top STRUCTUR
  ( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxAuthGroupClaims )
   X-ORIGIN 'Gluu created objectclass' )
 objectclasses: ( oxAuthSessionId-oid NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
- ( oxAuthAuthenticationTime $ oxAuthPermissionGranted
+ ( oxLastAccessTime $ oxAuthAuthenticationTime $ oxAuthPermissionGranted
   $ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute
   $ oxAsJwt $ oxJwt $ oxInvolvedClients )
   X-ORIGIN 'Gluu created objectclass' )

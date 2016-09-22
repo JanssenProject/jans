@@ -70,7 +70,7 @@
 	},
 
 	{
-		"attribute": "oxLastAccessTimes",
+		"attribute": "oxLastAccessTime",
 		"type": "date",
 		"index": ["ordering"],
 		"backend": ["userRoot"]
