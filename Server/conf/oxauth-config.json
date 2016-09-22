@@ -220,5 +220,7 @@
     "dnName": "CN=oxAuth CA Certificates",
     "keyStoreFile": "./conf/keystore.jks",
     "keyStoreSecret": "secret",
-    "endSessionWithAccessToken":false
+    "endSessionWithAccessToken":false,
+    "clientWhiteList": ["*"],
+    "clientBlackList": ["*.attacker.com/*"]
 }
