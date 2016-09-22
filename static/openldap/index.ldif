@@ -1,0 +1,62 @@
+dn: olcDatabase={1}mdb,cn=config
+changetype: modify
+add: olcDbIndex
+olcDbIndex: inum eq
+-
+add: olcDbIndex
+olcDbIndex: uniqueIdentifier eq
+-
+add: olcDbIndex
+olcDbIndex: oxID eq
+-
+add: olcDbIndex
+olcDbIndex: oxAuthGrantId eq
+-
+add: olcDbIndex
+olcDbIndex: oxAuthAuthorizationCode eq
+-
+add: olcDbIndex
+olcDbIndex: oxAuthTokenCode eq
+-
+add: olcDbIndex
+olcDbIndex: oxSectorIdentifier eq
+-
+add: olcDbIndex
+olcDbIndex: gluuStatus eq
+-
+add: olcDbIndex
+olcDbIndex: oxState eq
+-
+add: olcDbIndex
+olcDbIndex: oxAuthExpiration eq
+-
+add: olcDbIndex
+olcDbIndex: oxApplication eq
+-
+add: olcDbIndex
+olcDbIndex: oxRequestId eq
+-
+add: olcDbIndex
+olcDbIndex: creationDate eq
+-
+add: olcDbIndex
+olcDbIndex: oxStartDate eq
+-
+add: olcDbIndex
+olcDbIndex: oxEndDate eq
+-
+add: olcDbIndex
+olcDbIndex: oxApplicationType eq
+-
+add: olcDbIndex
+olcDbIndex: oxMetricType eq
+-
+add: olcDbIndex
+olcDbIndex: oxDeviceHashCode eq
+-
+add: olcDbIndex
+olcDbIndex: oxAuthSessionDn eq
+-
+add: olcDbIndex
+olcDbIndex: oxExternalUid eq
+
