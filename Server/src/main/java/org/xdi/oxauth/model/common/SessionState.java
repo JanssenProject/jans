@@ -36,7 +36,7 @@ public class SessionState implements Serializable {
     @LdapAttribute(name = "uniqueIdentifier")
     private String id;
 
-    @LdapAttribute(name = "lastModifiedTime")
+    @LdapAttribute(name = "oxLastAccessTime")
     private Date lastUsedAt;
 
     @LdapAttribute(name = "oxAuthUserDN")
