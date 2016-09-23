@@ -43,9 +43,9 @@
 			  helper.onSignInCallback(authResult);
 			}
 
-			var request = '${super_gluu_request}';
-			var label = '${super_gluu_label}';
-			var qr_options = ${super_gluu_qr_options};
+			var request = '${otp_enrollment_request}';
+			var label = '${qr_label}';
+			var qr_options = ${qr_options};
 			$(document).ready(function() {
 
 				if (request == '') {
@@ -53,8 +53,7 @@
 				}
 
 				gluu_auth.renderQrCode('#container', request, qr_options, label);
-				gluu_auth.startProgressBar('#progressbar', 60);
-				gluu_auth.startSessionChecker(onSignInCallback, 60);
+				gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
 			});
 
         </script>
@@ -92,7 +91,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Super-Gluu Login</ui:define>
+    <ui:define name="pageTitle">oxAuth - OTP Login</ui:define>
 
     <ui:define name="body">
         <form method="post" id="response" action="#{request.contextPath}/postlogin">
@@ -118,10 +117,17 @@
                                         </s:div>
 
                                         <div class="dialog">
-                                        	<p>Scan QR code using Super-Gluu</p>
+                                        	<p>Scan QR code using OTP authenticator and press finish button</p>
                                         	<div id="container"></div>
                                         	<div id="progressbar"></div>
                                         </div>
+
+										<div class="gradient contact-button green span2 offset3">
+											<div id="submit_block" class="login_input">
+													<h:commandButton id="finishButton" value="Finish" action="#{authenticator.authenticate}"/>
+											</div>                
+											<span class="sprite-green_click_icon"></span>
+						                </div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
