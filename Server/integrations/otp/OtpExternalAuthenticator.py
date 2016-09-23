@@ -22,15 +22,26 @@ from org.xdi.oxauth.service import UserService, AuthenticationService, SessionSt
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.oxauth.model.config import Constants
-from org.jboss.resteasy.client import ClientResponseFailure
-from javax.ws.rs.core import Response
 from java.util import Arrays
-from org.xdi.oxauth.service.net import HttpService
-from org.apache.http.params import CoreConnectionPNames
+
+from java.security import SecureRandom
+from java.util.concurrent import TimeUnit
+
+from com.google.common.io import BaseEncoding
+
+from com.lochbridge.oath.otp import TOTP
+from com.lochbridge.oath.otp import HOTP
+from com.lochbridge.oath.otp import HOTPValidationResult
+from com.lochbridge.oath.otp import HOTPValidator
+from com.lochbridge.oath.otp import HmacShaAlgorithm
+
+from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder;
+from com.lochbridge.oath.otp.keyprovisioning import OTPKey;
+from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType;
 
 import sys
 import java
+import jarray
 
 try:
     import json
@@ -47,11 +58,28 @@ class PersonAuthentication(PersonAuthenticationType):
         if not configurationAttributes.containsKey("otp_type"):
             print "OTP. Initialization. Property otp_type is mandatory"
             return False
-
         self.otpType = configurationAttributes.get("otp_type").getValue2()
+
         if not self.otpType in ["hotp", "totp"]:
             print "OTP. Initialization. Property value otp_type is invalid"
             return False
+
+        if not configurationAttributes.containsKey("issuer"):
+            print "OTP. Initialization. Property issuer is mandatory"
+            return False
+        self.otpIssuer = configurationAttributes.get("issuer").getValue2()
+
+        self.customLabel = None
+        if configurationAttributes.containsKey("label"):
+            self.customLabel = configurationAttributes.get("label").getValue2()
+
+        self.customQrOptions = {}
+        if configurationAttributes.containsKey("qr_options"):
+            self.customQrOptions = configurationAttributes.get("qr_options").getValue2()
+
+        self.registrationUri = None
+        if configurationAttributes.containsKey("registration_uri"):
+            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
 
         validOtpConfiguration = self.loadOtpConfiguration(configurationAttributes)
         if not validOtpConfiguration:
@@ -140,7 +168,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             #  Validation auth_code
         elif (step == 3):
-
             otp_user_external_uid = "otp: %s" % otp_user_device_handle
             print "OTP. Authenticate for step 2. OTP handle: '%s'" % otp_user_external_uid
 
@@ -206,54 +233,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "OTP. Prepare for step 2. otp_auth_method: '%s'" % otp_auth_method
 
-            otp_obb_auth_method = "OOB_REG"
-            otp_obb_server_uri = self.otp_server_uri + "/nnl/v2/reg" 
-            if StringHelper.equalsIgnoreCase(otp_auth_method, "authenticate"):
-                otp_obb_auth_method = "OOB_AUTH"
-                otp_obb_server_uri = self.otp_server_uri + "/nnl/v2/auth" 
+            if otp_auth_method == 'enroll':
+                if self.otpType == "hotp":
+                    otp_secret_key = self.generateSecretHotpKey()
+                    otp_enrollment_request = self.generateHotpSecretKeyUri(otp_secret_key, self.otpIssuer, user.getAttribute("displayName"))
+                elif self.otpType == "totp":
+                    otp_secret_key = self.generateSecretTotpKey()
+                    otp_enrollment_request = self.generateTotpSecretKeyUri(otp_secret_key, self.otpIssuer, user.getAttribute("displayName"))
+                else:
+                    print "OTP. Prepare for step 2. Unknown otp_auth_method: '%s'" % self.otpType
+                    return False
 
-            # Prepare START_OBB
-            otp_obb_start_request_dictionary = { "operation": "START_%s" % otp_obb_auth_method,
-                                                 "userName": user.getUserId(),
-                                                 "policyName": "default",
-                                                 "oobMode":
-                                                    { "qr": "true", "rawData": "false", "push": "false" } 
-                                               }
-
-            otp_obb_start_request = json.dumps(otp_obb_start_request_dictionary, separators=(',',':'))
-            print "OTP. Prepare for step 2. Prepared START request: '%s' to send to '%s'" % (otp_obb_start_request, otp_obb_server_uri)
-
-            # Request START_OBB
-            otp_obb_start_response = self.executePost(otp_obb_server_uri, otp_obb_start_request)
-            if otp_obb_start_response == None:
-                return False
-
-            print "OTP. Prepare for step 2. Get START response: '%s'" % otp_obb_start_response
-            otp_obb_start_response_json = json.loads(otp_obb_start_response)
-
-            # Prepare STATUS_OBB
-            #TODO: Remove needDetails parameter
-            otp_obb_status_request_dictionary = { "operation": "STATUS_%s" % otp_obb_auth_method,
-                                                  "userName": user.getUserId(),
-                                                  "needDetails": 1,
-                                                  "oobStatusHandle": otp_obb_start_response_json["oobStatusHandle"],
-                                                }
-
-            otp_obb_status_request = json.dumps(otp_obb_status_request_dictionary, separators=(',',':'))
-            print "OTP. Prepare for step 2. Prepared STATUS request: '%s' to send to '%s'" % (otp_obb_status_request, otp_obb_server_uri)
-
-            context.set("otp_obb_auth_method", otp_obb_auth_method)
-            context.set("otp_obb_server_uri", otp_obb_server_uri)
-            context.set("otp_obb_start_response", otp_obb_start_response)
-            context.set("qr_image", otp_obb_start_response_json["modeResult"]["qrCode"]["qrImage"])
-            context.set("otp_obb_status_request", otp_obb_status_request)
+                print "OTP. Prepare for step 2. Prepared enrollment request for user: '%s'" % user.getUserId()
+                context.set("otp_secret_key", otp_secret_key)
+                context.set("otp_enrollment_request", otp_enrollment_request)
 
             return True
         else:
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList("otp_auth_method", "otp_obb_auth_method", "otp_obb_server_uri", "otp_obb_start_response")
+        return Arrays.asList("otp_auth_method", "otp_secret_key", "otp_auth_enrollment_request")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
@@ -268,8 +268,12 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def setEventContextParameters(self, context):
-        if self.registration_uri != None:
-            context.set("external_registration_uri", self.registration_uri)
+        if self.registrationUri != None:
+            context.set("external_registration_uri", self.registrationUri)
+
+        if self.customLabel != None:
+            context.set("qr_label", self.customLabel)
+
         context.set("qr_options", self.customQrOptions)
 
     def processBasicAuthentication(self, credentials):
@@ -336,8 +340,8 @@ class PersonAuthentication(PersonAuthenticationType):
         
         # Check configuration file settings
         try:
-            self.hotpConfiguration = self.otpConfiguration["htop"]
-            self.totpConfiguration = self.otpConfiguration["totp"]
+            self.hotpConfiguration = otpConfiguration["htop"]
+            self.totpConfiguration = otpConfiguration["totp"]
             
             hmacShaAlgorithm = self.totpConfiguration["hmacShaAlgorithm"]
             hmacShaAlgorithmType = None
@@ -353,7 +357,7 @@ class PersonAuthentication(PersonAuthenticationType):
                  
             self.totpConfiguration["hmacShaAlgorithmType"] = hmacShaAlgorithmType
         except:
-            print "OTP. Load OTP configuration. Invalid configuration file '%s' format:" % otp_conf_file
+            print "OTP. Load OTP configuration. Invalid configuration file '%s' format. Exception: '%s'" % (otp_conf_file, sys.exc_info()[1])
             return False
         
 
@@ -363,9 +367,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def generateSecretKey(self, keyLength):
         bytes = jarray.zeros(keyLength, "b")
         secureRandom = SecureRandom()
-        random.nextBytes(bytes)
+        secureRandom.nextBytes(bytes)
         
-        return secretKey
+        return bytes
     
     # HOTP methods
     def generateSecretHotpKey(self):
@@ -389,11 +393,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return { "result":False, "movingFactor": None }
 
-    def generateHotpSecretKeyUri(self, secretKey):
+    def generateHotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.hotpConfiguration["digits"]
 
         secretKeyBase32 = self.toBase32(secretKey)
-        otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
+        otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
         label = issuer + ":%s" % userDisplayName;
 
         otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build();

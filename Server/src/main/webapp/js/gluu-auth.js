@@ -4,9 +4,9 @@
 
 'use strict';
 
-/** Super-Gluu API.
+/** Gluu Authentiocation API.
  */
-var super_gluu = {
+var gluu_auth = {
 
 	//--------------------------------------------------------------------------------
 	// Utility methods
@@ -39,7 +39,7 @@ var super_gluu = {
 		// render method: 'canvas', 'image' or 'div'
 		render : 'canvas',
 	
-		// version range somewhere in 1 .. 40
+		// version range somewhere in 1 . 40
 		minVersion : 1,
 		maxVersion : 40,
 	
@@ -62,7 +62,7 @@ var super_gluu = {
 		// content
 	    text: '',
 	
-		// corner radius relative to module width: 0.0 .. 0.5
+		// corner radius relative to module width: 0.0 . 0.5
 		radius : 0.3,
 	
 		// quiet zone in modules
@@ -80,7 +80,7 @@ var super_gluu = {
 		mPosX : 0.5,
 		mPosY : 0.5,
 	
-		label : 'Super-Gluu',
+		label : 'Gluu Auth',
 		fontname : 'sans',
 		fontcolor : '#000',
 	
@@ -115,27 +115,31 @@ var super_gluu = {
 		timer: null
 	},
 	
-	startProgressBar: function(container, timeout) {
+	startProgressBar: function(container, timeout, callback) {
 		this.progress.value = 0;
 		this.progress.maxValue = 4 * timeout;
 		this.progress.container = $(container);
 	
 		this.progress.container.progressbar({
-			value : super_gluu.progress.value,
-			max : super_gluu.progress.maxValue
+			value : gluu_auth.progress.value,
+			max : gluu_auth.progress.maxValue
 		});
 
 		function worker() {
-			super_gluu.progress.container.progressbar({
-				value : ++super_gluu.progress.value
+			gluu_auth.progress.container.progressbar({
+				value : ++gluu_auth.progress.value
 			});
 		
-			if (super_gluu.progress.value >= super_gluu.progress.maxValue) {
-				clearInterval(super_gluu.progress.timer);
-				super_gluu.progress.timer = null;
-				super_gluu.progress.container = null;
+			if (gluu_auth.progress.value >= gluu_auth.progress.maxValue) {
+				clearInterval(gluu_auth.progress.timer);
+				gluu_auth.progress.timer = null;
+				gluu_auth.progress.container = null;
+				
+				if (callback !== undefined) {
+					callback.call(this, "timeout");
+				}
 			}
-		}
+		};
 
 		this.progress.timer = setInterval(worker, 1000 / 4);
 	},
@@ -151,13 +155,13 @@ var super_gluu = {
 	},
 
 	startSessionChecker : function(callback, timeout) {
-		super_gluu.checker.stop = false;
-		super_gluu.endTime = (new Date()).getTime() + timeout * 1000;
+		gluu_auth.checker.stop = false;
+		gluu_auth.endTime = (new Date()).getTime() + timeout * 1000;
 
 		(function worker() {
 			$.ajax({
 				url: '/oxauth/seam/resource/restv1/oxauth/session_status',
-				timeout: super_gluu.checker.timeout,
+				timeout: gluu_auth.checker.timeout,
 				success: function(result, status, xhr) {
 					if ((result.state == 'unknown') || ((result.state == 'unauthenticated') && ((result.custom_state == 'declined') || (result.custom_state == 'expired')))) {
 						callCallback(callback, 'error');
@@ -170,20 +174,20 @@ var super_gluu = {
 					callCallback(callback, 'error');
 				},
 				complete: function(xhr, status) {
-					if (super_gluu.endTime < (new Date()).getTime()) {
+					if (gluu_auth.endTime < (new Date()).getTime()) {
 						callCallback(callback, 'error');
 					}
 					// Schedule the next request when the current one's complete
-					if (!super_gluu.checker.stop) {
-						setTimeout(worker, super_gluu.checker.poolInterval);
+					if (!gluu_auth.checker.stop) {
+						setTimeout(worker, gluu_auth.checker.poolInterval);
 					}
 				}
 			});
 		})();
 		
 		function callCallback(callback, status) {
-			super_gluu.checker.stop = true
+			gluu_auth.checker.stop = true
 			callback.call(this, status);
-		}
+		};
 	},
 };
