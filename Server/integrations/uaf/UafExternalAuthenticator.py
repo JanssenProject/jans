@@ -16,8 +16,7 @@
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
-from org.xdi.oxauth.service import UserService
-from org.xdi.oxauth.service import SessionStateService
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
@@ -237,7 +236,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "UAF. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            user = credentials.getUser()
+            authenticationService = AuthenticationService.instance()
+            user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "UAF. Prepare for step 2. Failed to determine user name"
                 return False
