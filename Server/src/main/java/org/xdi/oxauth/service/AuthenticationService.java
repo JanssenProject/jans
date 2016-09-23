@@ -123,7 +123,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticastedUserSessionAttribute(userName, authenticated);
+        setAuthenticatedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -137,7 +137,7 @@ public class AuthenticationService {
         return authenticated;
     }
 
-	private void setAuthenticastedUserSessionAttribute(String userName, boolean authenticated) {
+	private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
 		SessionState sessionState = sessionStateService.getSessionState();
         if (sessionState != null) {
             Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
@@ -320,7 +320,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticastedUserSessionAttribute(userName, authenticated);
+        setAuthenticatedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -448,6 +448,18 @@ public class AuthenticationService {
         Context eventContext = Contexts.getEventContext();
         if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
             return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
+        } else {
+    		SessionState sessionState = sessionStateService.getSessionState();
+            if (sessionState != null) {
+                Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+                String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
+                if (StringHelper.isNotEmpty(userId)) {
+                	User user = userService.getUser(userId);
+                    eventContext.set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+                    
+                    return user;
+                }
+            }
         }
 
         return null;
