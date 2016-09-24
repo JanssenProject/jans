@@ -1,23 +1,30 @@
 package org.xdi.oxauth.ws.rs;
 
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.RegisterClient;
+import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.URLPatternList;
 
+import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
 
 /**
  * @author Javier Rojas Blum
- * @version September 21, 2016
+ * @version September 23, 2016
  */
 public class ClientWhiteListBlackListRedirectUris extends BaseTest {
+
+    private String registrationAccessToken1;
+    private String registrationClientUri1;
 
     @Test
     public void testUrlPatterList() {
@@ -52,6 +59,53 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getEntity(), "The entity is null");
+        assertNotNull(response.getErrorType(), "The error type is null");
+        assertNotNull(response.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void requestClientAssociate(final String redirectUris) throws Exception {
+        showTitle("requestClientAssociate2");
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getClaims().get(SCOPES.toString()));
+
+        registrationAccessToken1 = response.getRegistrationAccessToken();
+        registrationClientUri1 = response.getRegistrationClientUri();
+    }
+
+    @Test(dependsOnMethods = "requestClientAssociate")
+    public void requestClientUpdate() throws Exception {
+        showTitle("requestClientUpdate");
+
+        final String redirectUris = "https://www.attacker.com";
+
+        final RegisterRequest registerRequest = new RegisterRequest(registrationAccessToken1);
+        registerRequest.setHttpMethod(HttpMethod.PUT);
+        registerRequest.setRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
+
+        final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
+        registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
+        final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
