@@ -65,6 +65,13 @@
         </classes>
     </test>
 
+    <!-- Client White List Black List Redirect Uris -->
+    <test name="Client White List Black List Redirect Uris" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientWhiteListBlackListRedirectUris"/>
+        </classes>
+    </test>
+
     <!-- Configuration test -->
     <test name="Configuration test (HTTP)" enabled="true">
         <classes>
