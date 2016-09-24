@@ -70,7 +70,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
     @Parameters({"redirectUris"})
     @Test
     public void requestClientAssociate(final String redirectUris) throws Exception {
-        showTitle("requestClientAssociate2");
+        showTitle("requestClientAssociate");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
