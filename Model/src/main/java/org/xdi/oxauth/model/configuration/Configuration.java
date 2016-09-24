@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 9, 2016
+ * @version September 21, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -135,6 +135,9 @@ public class Configuration {
     private String oxElevenDeleteKeyEndpoint;
 
     private Boolean endSessionWithAccessToken;
+
+    private List<String> clientWhiteList;
+    private List<String> clientBlackList;
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -1149,13 +1152,27 @@ public class Configuration {
         this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
     }
 
-	public Boolean getEndSessionWithAccessToken() {
-		return endSessionWithAccessToken;
-	}
+    public Boolean getEndSessionWithAccessToken() {
+        return endSessionWithAccessToken;
+    }
 
-	public void setEndSessionWithAccessToken(Boolean endSessionWithAccessToken) {
-		this.endSessionWithAccessToken = endSessionWithAccessToken;
-	}
-    
-    
+    public void setEndSessionWithAccessToken(Boolean endSessionWithAccessToken) {
+        this.endSessionWithAccessToken = endSessionWithAccessToken;
+    }
+
+    public List<String> getClientWhiteList() {
+        return clientWhiteList;
+    }
+
+    public void setClientWhiteList(List<String> clientWhiteList) {
+        this.clientWhiteList = clientWhiteList;
+    }
+
+    public List<String> getClientBlackList() {
+        return clientBlackList;
+    }
+
+    public void setClientBlackList(List<String> clientBlackList) {
+        this.clientBlackList = clientBlackList;
+    }
 }

@@ -59,7 +59,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 9, 2016
+ * @version September 21, 2016
  */
 @Name("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -358,22 +358,30 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams);
                 if (request != null) {
-                    if (request.getSubjectType() != null
-                            && !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(request.getSubjectType())) {
-                        log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
-                        return Response.status(Response.Status.BAD_REQUEST).
-                                entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
+                    boolean redirectUrisValidated = true;
+                    if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
+                        redirectUrisValidated = RegisterParamsValidator.validateRedirectUris(request.getApplicationType(), request.getSubjectType(),
+                                request.getRedirectUris(), request.getSectorIdentifierUri());
                     }
 
-                    final Client client = clientService.getClient(clientId, accessToken);
-                    if (client != null) {
-                        updateClientFromRequestObject(client, request);
-                        clientService.merge(client);
-                        return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
-                    } else {
-                        log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
-                        return Response.status(Response.Status.BAD_REQUEST).
-                                entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN)).build();
+                    if (redirectUrisValidated) {
+                        if (request.getSubjectType() != null
+                                && !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(request.getSubjectType())) {
+                            log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
+                            return Response.status(Response.Status.BAD_REQUEST).
+                                    entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
+                        }
+
+                        final Client client = clientService.getClient(clientId, accessToken);
+                        if (client != null) {
+                            updateClientFromRequestObject(client, request);
+                            clientService.merge(client);
+                            return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
+                        } else {
+                            log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                            return Response.status(Response.Status.BAD_REQUEST).
+                                    entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN)).build();
+                        }
                     }
                 }
             }
