@@ -151,6 +151,16 @@ public final class ApplicationConfiguration implements Serializable {
 	private int rptConnectionPoolDefaultMaxPerRoute;
 	private int rptConnectionPoolValidateAfterInactivity;  // In seconds; will be converted to millis
 	private int rptConnectionPoolCustomKeepAliveTimeout;  // In seconds; will be converted to millis
+	
+	private boolean oxIncommonFlag;
+
+	public boolean isOxIncommonFlag() {
+		return oxIncommonFlag;
+	}
+
+	public void setOxIncommonFlag(boolean oxIncommonFlag) {
+		this.oxIncommonFlag = oxIncommonFlag;
+	}
 
 	public String getBaseDN() {
 		return baseDN;
