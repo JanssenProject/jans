@@ -10,7 +10,6 @@
 #   otp_conf_file: /etc/certs/otp_configuration.json
 #
 # These are non mandatory custom properties and values:
-#TODO: Update parameters
 #   label: Gluu OTP
 #   qr_options: { width: 400, height: 400 }
 #   registration_uri: https://ce-dev.gluu.org/identity/register
