@@ -452,7 +452,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Validate TOTP
                     validation_result = self.validateHotpKey(otp_secret_key, moving_factor, otpCode)
                     if (validation_result != None) and validation_result["result"]:
-                        print "OTP. Process HOTP authentication during enrollment. otpCode is valid"
+                        print "OTP. Process HOTP authentication during authentication. otpCode is valid"
                         otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, moving_factor )
                         new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
     
@@ -461,7 +461,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         if find_user_by_external_uid != None:
                             return True
     
-                        print "OTP. Process HOTP authentication during enrollment. Failed to update user entry"
+                        print "OTP. Process HOTP authentication during authentication. Failed to update user entry"
             elif self.otpType == "totp":
                 for user_enrollment in user_enrollments:
                     otp_secret_key = self.fromBase64Url(user_enrollment)
@@ -469,7 +469,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Validate TOTP
                     validation_result = self.validateTotpKey(otp_secret_key, otpCode)
                     if (validation_result != None) and validation_result["result"]:
-                        print "OTP. Process TOTP authentication during enrollment. otpCode is valid"
+                        print "OTP. Process TOTP authentication during authentication. otpCode is valid"
                         return True
 
         facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. OTP code is invalid")
