@@ -6,15 +6,18 @@
 
 # Requires the following custom properties and values:
 #   otp_type: totp/htop
+#   issuer: Gluu Inc
+#   otp_conf_file: /etc/certs/otp_configuration.json
 #
 # These are non mandatory custom properties and values:
-#   otp_policy_name: default
-#   send_push_notifaction: false
-#   registration_uri: https://ce-dev.gluu.org/identity/register
+#TODO: Update parameters
+#   label: Gluu OTP
 #   qr_options: { width: 400, height: 400 }
+#   registration_uri: https://ce-dev.gluu.org/identity/register
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.faces import FacesMessages
+from javax.faces.context import FacesContext
 from org.jboss.seam.international import StatusMessage
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
@@ -111,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.setEventContextParameters(context)
 
-        if (step == 1):
+        if step == 1:
             print "OTP. Authenticate for step 1"
             
             authenticated_user = self.processBasicAuthentication(credentials)
@@ -125,81 +128,57 @@ class PersonAuthentication(PersonAuthenticationType):
             #    otp_auth_method = "enroll"
             
             if otp_auth_method == "authenticate":
-                user_enrollments = self.findEnrollments(credentials)
+                user_enrollments = self.findEnrollments(user_name)
                 if len(user_enrollments) == 0:
                     otp_auth_method = "enroll"
                     print "OTP. Authenticate for step 1. There is no OTP enrollment for user '%s'. Changing otp_auth_method to '%s'" % (user_name, otp_auth_method)
+                    
+            if otp_auth_method == "enroll":
+                print "OTP. Authenticate for step 1. Setting count steps: '%s'" % 3
+                context.set("otp_count_login_steps", 3)
 
             print "OTP. Authenticate for step 1. otp_auth_method: '%s'" % otp_auth_method
-
             context.set("otp_auth_method", otp_auth_method)
 
             return True
-        elif (step == 2):
+        elif step == 2:
             print "OTP. Authenticate for step 2"
 
-            session_state = SessionStateService.instance().getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "OTP. Prepare for step 2. Failed to determine session_state"
-                return False
-
-            if user_name == None:
-                print "OTP. Authenticate for step 2. Failed to determine user name"
+            session_state_validation = self.validateSessionState(session_attributes)
+            if not session_state_validation:
                 return False
 
             # Restore state from session
             otp_auth_method = session_attributes.get("otp_auth_method")
-            if not otp_auth_method in ['enroll', 'authenticate']:
-                print "OTP. Authenticate for step 2. Failed to authenticate user. otp_auth_method: '%s'" % otp_auth_method
-                return False
-            
             if otp_auth_method == 'enroll':
+                auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
+                if not StringHelper.isEmpty(auth_result):
+                    print "OTP. Authenticate for step 2. User not enrolled OTP"
+                    return False
+
                 print "OTP. Authenticate for step 2. Skipping this step during enrollment"
                 return True
 
-            auth_code = ServerUtil.getFirstValue(requestParameters, "auth_code")
-            if StringHelper.isEmpty(auth_code):
-                facesMessages = FacesMessages.instance()
-                facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. Authentication code is empty")
-                FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user_name, session_attributes, otp_auth_method)
+            print "OTP. Authenticate for step 2. OTP authentication result: '%s'" % otp_auth_result
 
-                print "OTP. Authenticate for step 2. auth_code is empty"
+            return otp_auth_result
+        elif step == 3:
+            print "OTP. Authenticate for step 3"
+
+            session_state_validation = self.validateSessionState(session_attributes)
+            if not session_state_validation:
                 return False
 
-            #  Validation auth_code
-        elif (step == 3):
-            otp_user_external_uid = "otp: %s" % otp_user_device_handle
-            print "OTP. Authenticate for step 2. OTP handle: '%s'" % otp_user_external_uid
+            # Restore state from session
+            otp_auth_method = session_attributes.get("otp_auth_method")
+            if otp_auth_method != 'enroll':
+                return False
 
-            if otp_auth_method == "authenticate":
-                # Validate if user used device with same keYHandle
-                user_enrollments = self.findEnrollments(credentials)
-                if len(user_enrollments) == 0:
-                    otp_auth_method = "enroll"
-                    print "OTP. Authenticate for step 2. There is no OTP enrollment for user '%s'." % user_name
-                    return False
-                
-                for user_enrollment in user_enrollments:
-                    if StringHelper.equalsIgnoreCase(user_enrollment, otp_user_device_handle):
-                        print "OTP. Authenticate for step 2. There is OTP enrollment for user '%s'. User authenticated successfully" % user_name
-                        return True
-            else:
-                userService = UserService.instance()
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user_name, session_attributes, otp_auth_method)
+            print "OTP. Authenticate for step 3. OTP authentication result: '%s'" % otp_auth_result
 
-                # Double check just to make sure. We did checking in previous step
-                # Check if there is user which has otp_user_external_uid
-                # Avoid mapping user cert to more than one IDP account
-                find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", otp_user_external_uid)
-                if find_user_by_external_uid == None:
-                    # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
-                    if find_user_by_external_uid == None:
-                        print "OTP. Authenticate for step 2. Failed to update current user"
-                        return False
-    
-                    return True
-
-            return False
+            return otp_auth_result
         else:
             return False
 
@@ -210,30 +189,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.setEventContextParameters(context)
 
-        if (step == 1):
+        if step == 1:
+            print "OTP. Prepare for step 1"
+
             return True
-        elif (step == 2):
+        elif step == 2:
             print "OTP. Prepare for step 2"
 
-            session_state = SessionStateService.instance().getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "OTP. Prepare for step 2. Failed to determine session_state"
-                return False
-
-            authenticationService = AuthenticationService.instance()
-            user = authenticationService.getAuthenticatedUser()
-            if (user == None):
-                print "OTP. Prepare for step 2. Failed to determine user name"
+            session_state_validation = self.validateSessionState(session_attributes)
+            if not session_state_validation:
                 return False
 
             otp_auth_method = session_attributes.get("otp_auth_method")
-            if StringHelper.isEmpty(otp_auth_method):
-                print "OTP. Prepare for step 2. Failed to determine auth_method"
-                return False
-
             print "OTP. Prepare for step 2. otp_auth_method: '%s'" % otp_auth_method
 
             if otp_auth_method == 'enroll':
+                authenticationService = AuthenticationService.instance()
+                user = authenticationService.getAuthenticatedUser()
+                if user == None:
+                    print "OTP. Prepare for step 2. Failed to load user enty"
+                    return False
+
                 if self.otpType == "hotp":
                     otp_secret_key = self.generateSecretHotpKey()
                     otp_enrollment_request = self.generateHotpSecretKeyUri(otp_secret_key, self.otpIssuer, user.getAttribute("displayName"))
@@ -241,26 +217,55 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_secret_key = self.generateSecretTotpKey()
                     otp_enrollment_request = self.generateTotpSecretKeyUri(otp_secret_key, self.otpIssuer, user.getAttribute("displayName"))
                 else:
-                    print "OTP. Prepare for step 2. Unknown otp_auth_method: '%s'" % self.otpType
+                    print "OTP. Prepare for step 2. Unknown OTP type: '%s'" % self.otpType
                     return False
 
                 print "OTP. Prepare for step 2. Prepared enrollment request for user: '%s'" % user.getUserId()
-                context.set("otp_secret_key", otp_secret_key)
+                context.set("otp_secret_key", self.toBase64Url(otp_secret_key))
                 context.set("otp_enrollment_request", otp_enrollment_request)
 
             return True
-        else:
-            return False
+        elif step == 3:
+            print "OTP. Prepare for step 3"
+
+            session_state_validation = self.validateSessionState(session_attributes)
+            if not session_state_validation:
+                return False
+
+            otp_auth_method = session_attributes.get("otp_auth_method")
+            print "OTP. Prepare for step 3. otp_auth_method: '%s'" % otp_auth_method
+
+            if otp_auth_method == 'enroll':
+                return True
+
+        return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList("otp_auth_method", "otp_secret_key", "otp_auth_enrollment_request")
+        return Arrays.asList("otp_auth_method", "otp_count_login_steps", "otp_secret_key", "otp_enrollment_request")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        return 2
+        context = Contexts.getEventContext()
+        session_attributes = context.get("sessionAttributes")
+
+        if session_attributes.containsKey("otp_count_login_steps"):
+            return StringHelper.toInteger(session_attributes.get("otp_count_login_steps"))
+        else:
+            return 2
 
     def getPageForStep(self, configurationAttributes, step):
-        if (step == 2):
-            return "/auth/otp/login.xhtml"
+        if step == 2:
+            context = Contexts.getEventContext()
+            session_attributes = context.get("sessionAttributes")
+    
+            otp_auth_method = session_attributes.get("otp_auth_method")
+            print "OTP. Gep page for step 2. otp_auth_method: '%s'" % otp_auth_method
+    
+            if otp_auth_method == 'enroll':
+                return "/auth/otp/enroll.xhtml"
+            else:
+                return "/auth/otp/otplogin.xhtml"
+        elif step == 3:
+            return "/auth/otp/otplogin.xhtml"
 
         return ""
 
@@ -275,51 +280,6 @@ class PersonAuthentication(PersonAuthenticationType):
             context.set("qr_label", self.customLabel)
 
         context.set("qr_options", self.customQrOptions)
-
-    def processBasicAuthentication(self, credentials):
-        userService = UserService.instance()
-
-        user_name = credentials.getUsername()
-        user_password = credentials.getPassword()
-
-        logged_in = False
-        if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = userService.authenticate(user_name, user_password)
-
-        if not logged_in:
-            return None
-
-        find_user_by_uid = userService.getUser(user_name)
-        if find_user_by_uid == None:
-            print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
-            return None
-        
-        return find_user_by_uid
-
-    def findEnrollments(self, credentials):
-        result = []
-
-        userService = UserService.instance()
-        user_name = credentials.getUsername()
-        user = userService.getUser(user_name, "oxExternalUid")
-        if user == None:
-            print "OTP. Find enrollments. Failed to find user"
-            return result
-        
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
-        if user_custom_ext_attribute == None:
-            return result
-
-        otp_prefix = "%s: " % self.otpType
-        
-        otp_prefix_length = len(otp_prefix) 
-        for user_external_uid in user_custom_ext_attribute.getValues():
-            index = user_external_uid.find(otp_prefix)
-            if index != -1:
-                enrollment_uid = user_external_uid[otp_prefix_length:]
-                result.append(enrollment_uid)
-        
-        return result
 
     def loadOtpConfiguration(self, configurationAttributes):
         print "OTP. Load OTP configuration"
@@ -363,6 +323,161 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return True
 
+    def processBasicAuthentication(self, credentials):
+        userService = UserService.instance()
+
+        user_name = credentials.getUsername()
+        user_password = credentials.getPassword()
+
+        logged_in = False
+        if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
+            logged_in = userService.authenticate(user_name, user_password)
+
+        if not logged_in:
+            return None
+
+        find_user_by_uid = userService.getUser(user_name)
+        if find_user_by_uid == None:
+            print "OTP. Process basic authentication. Failed to find user '%s'" % user_name
+            return None
+        
+        return find_user_by_uid
+
+    def findEnrollments(self, user_name, skipPrefix = True):
+        result = []
+
+        userService = UserService.instance()
+        user = userService.getUser(user_name, "oxExternalUid")
+        if user == None:
+            print "OTP. Find enrollments. Failed to find user"
+            return result
+        
+        user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
+        if user_custom_ext_attribute == None:
+            return result
+
+        otp_prefix = "%s:" % self.otpType
+        
+        otp_prefix_length = len(otp_prefix) 
+        for user_external_uid in user_custom_ext_attribute.getValues():
+            index = user_external_uid.find(otp_prefix)
+            if index != -1:
+                if skipPrefix:
+                    enrollment_uid = user_external_uid[otp_prefix_length:]
+                else:
+                    enrollment_uid = user_external_uid
+
+                result.append(enrollment_uid)
+        
+        return result
+
+    def validateSessionState(self, session_attributes):
+        session_state = SessionStateService.instance().getSessionStateFromCookie()
+        if StringHelper.isEmpty(session_state):
+            print "OTP. Validate session state. Failed to determine session_state"
+            return False
+
+        otp_auth_method = session_attributes.get("otp_auth_method")
+        if not otp_auth_method in ['enroll', 'authenticate']:
+            print "OTP. Validate session state. Failed to authenticate user. otp_auth_method: '%s'" % otp_auth_method
+            return False
+
+        return True
+
+    def processOtpAuthentication(self, requestParameters, user_name, session_attributes, otp_auth_method):
+        facesMessages = FacesMessages.instance()
+        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+
+        userService = UserService.instance()
+
+        otpCode = ServerUtil.getFirstValue(requestParameters, "loginForm:otpCode")
+        if StringHelper.isEmpty(otpCode):
+            facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. OTP code is empty")
+            print "OTP. Process OTP authentication. otpCode is empty"
+
+            return False
+        
+        if otp_auth_method == "enroll":
+            # Get key from session
+            otp_secret_key_encoded = session_attributes.get("otp_secret_key")
+            if otp_secret_key_encoded == None:
+                print "OTP. Process OTP authentication. OTP secret key is invalid"
+                return False
+            
+            otp_secret_key = self.fromBase64Url(otp_secret_key_encoded)
+
+            if self.otpType == "hotp":
+                validation_result = self.validateHotpKey(otp_secret_key, 1, otpCode)
+                
+                if (validation_result != None) and validation_result["result"]:
+                    print "OTP. Process HOTP authentication during enrollment. otpCode is valid"
+                    # Store HOTP Secret Key and moving factor in user entry
+                    otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
+
+                    # Add otp_user_external_uid to user's external GUID list
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    if find_user_by_external_uid != None:
+                        return True
+
+                    print "OTP. Process HOTP authentication during enrollment. Failed to update user entry"
+            elif self.otpType == "totp":
+                validation_result = self.validateTotpKey(otp_secret_key, otpCode)
+                if (validation_result != None) and validation_result["result"]:
+                    print "OTP. Process TOTP authentication during enrollment. otpCode is valid"
+                    # Store TOTP Secret Key and moving factor in user entry
+                    otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
+
+                    # Add otp_user_external_uid to user's external GUID list
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    if find_user_by_external_uid != None:
+                        return True
+
+                    print "OTP. Process TOTP authentication during enrollment. Failed to update user entry"
+        elif otp_auth_method == "authenticate":
+            user_enrollments = self.findEnrollments(user_name)
+
+            if len(user_enrollments) == 0:
+                print "OTP. Process OTP authentication. There is no OTP enrollment for user '%s'" % user_name
+                facesMessages.add(StatusMessage.Severity.ERROR, "There is no valid OTP user enrollments")
+                return False
+
+            if self.otpType == "hotp":
+                for user_enrollment in user_enrollments:
+                    user_enrollment_data = user_enrollment.split(";")
+                    otp_secret_key_encoded = user_enrollment_data[0]
+
+                    # Get current moving factor from user entry
+                    moving_factor = StringHelper.toInteger(user_enrollment_data[1])
+                    otp_secret_key = self.fromBase64Url(otp_secret_key_encoded)
+
+                    # Validate TOTP
+                    validation_result = self.validateHotpKey(otp_secret_key, moving_factor, otpCode)
+                    if (validation_result != None) and validation_result["result"]:
+                        print "OTP. Process HOTP authentication during enrollment. otpCode is valid"
+                        otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, moving_factor )
+                        new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
+    
+                        # Update moving factor in user entry
+                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid)
+                        if find_user_by_external_uid != None:
+                            return True
+    
+                        print "OTP. Process HOTP authentication during enrollment. Failed to update user entry"
+            elif self.otpType == "totp":
+                for user_enrollment in user_enrollments:
+                    otp_secret_key = self.fromBase64Url(user_enrollment)
+
+                    # Validate TOTP
+                    validation_result = self.validateTotpKey(otp_secret_key, otpCode)
+                    if (validation_result != None) and validation_result["result"]:
+                        print "OTP. Process TOTP authentication during enrollment. otpCode is valid"
+                        return True
+
+        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. OTP code is invalid")
+        print "OTP. Process OTP authentication. OTP code is invalid"
+
+        return False
+
     # Shared HOTP/TOTP methods
     def generateSecretKey(self, keyLength):
         bytes = jarray.zeros(keyLength, "b")
@@ -384,14 +499,14 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return hotp.value()
 
-    def validateHotpKey(self, key, movingFactor, totpKey):
+    def validateHotpKey(self, secretKey, movingFactor, totpKey):
         digits = self.hotpConfiguration["digits"]
 
         htopValidationResult = HOTPValidator.lookAheadWindow(1).validate(secretKey, movingFactor, digits, totpKey)
         if htopValidationResult.isValid():
-            return { "result":True, "movingFactor": htopValidationResult.getNewMovingFactor() }
+            return { "result": True, "movingFactor": htopValidationResult.getNewMovingFactor() }
 
-        return { "result":False, "movingFactor": None }
+        return { "result": False, "movingFactor": None }
 
     def generateHotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.hotpConfiguration["digits"]
@@ -405,26 +520,26 @@ class PersonAuthentication(PersonAuthenticationType):
         return otpAuthURI.toUriString()
 
     # TOTP methods
+    def generateSecretTotpKey(self):
+        keyLength = self.totpConfiguration["keyLength"]
+        
+        return self.generateSecretKey(keyLength)
+
     def generateTotpKey(self, secretKey):
         digits = self.totpConfiguration["digits"]
         timeStep = self.totpConfiguration["timeStep"]
         hmacShaAlgorithmType = self.totpConfiguration["hmacShaAlgorithmType"]
 
-        totp = TOTP.key(secretKey).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).digits(6).hmacSha(hmacShaAlgorithmType).build()
+        totp = TOTP.key(secretKey).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).hmacSha(hmacShaAlgorithmType).build()
         
         return totp.value()
 
     def validateTotpKey(self, secretKey, totpKey):
         localTotpKey = self.generateTotpKey(secretKey)
-        if StringHelper.equals(localTotpKey.value(), totpKey):
-            return True
-        
-        return False
+        if StringHelper.equals(localTotpKey, totpKey):
+            return { "result": True }
 
-    def generateSecretTotpKey(self):
-        keyLength = self.totpConfiguration["keyLength"]
-        
-        return self.generateSecretKey(keyLength)
+        return { "result": False }
 
     def generateTotpSecretKeyUri(self, secretKey, issuer, userDisplayName):
         digits = self.totpConfiguration["digits"]
