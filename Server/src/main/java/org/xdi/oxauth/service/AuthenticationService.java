@@ -277,11 +277,6 @@ public class AuthenticationService {
                                 return false;
                             }
 
-                            // TODO: Remove after 2.4.5
-                            if ((keyValue != null) && !StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
-                                throw new InvalidStateException("authenticate_external: User name and user in credentials don't match");
-                            }
-
                             configureAuthenticatedUser(localUser);
                             updateLastLogonUserTime(localUser);
 
