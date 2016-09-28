@@ -18,7 +18,7 @@ from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.model.common import User
 from org.xdi.ldap.model import CustomAttribute
-from java.lang import String
+from java.lang import String, StringBuilder
 
 from jarray import array
 import java
@@ -67,6 +67,10 @@ class PersonAuthentication(PersonAuthenticationType):
         samlConfiguration.loadCertificateFromString(asimba_saml_certificate)
         
         self.samlConfiguration = samlConfiguration
+
+        self.generateNameId = False
+        if configurationAttributes.containsKey("saml_generate_name_id"):
+            self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_generate_name_id").getValue2(), False)
 
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
@@ -202,20 +206,14 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (not samlResponse.isValid()):
                     print "Saml. Authenticate for step 1. saml_response isn't valid"
 
-            saml_response_name_id = samlResponse.getNameId()
-            if (StringHelper.isEmpty(saml_response_name_id)):
-                print "Saml. Authenticate for step 1. saml_response_name_id is invalid"
-                return False
-
-            print "Saml. Authenticate for step 1. saml_response_name_id: '%s'" % saml_response_name_id
-
             saml_response_attributes = samlResponse.getAttributes()
             print "Saml. Authenticate for step 1. attributes: '%s'" % saml_response_attributes
-
-            # Use persistent Id as saml_user_uid
-            saml_user_uid = saml_response_name_id
             
             if (saml_map_user):
+                saml_user_uid = self.getSamlNameId(samlResponse)
+                if saml_user_uid == None:
+                    return False
+
                 # Use mapping to local IDP user
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
@@ -245,47 +243,24 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return post_login_result
             elif (saml_enroll_user):
+                # Convert SAML response to user entry
+                newUser = self.getMappedUser(configurationAttributes, requestParameters, saml_response_attributes)
+
+                saml_user_uid = self.getNameId(samlResponse, newUser)
+                if saml_user_uid == None:
+                    return False
+
                 # Use auto enrollment to local IDP
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
-                # Check if the is user with specified saml_user_uid
+                # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
-
                 if (find_user_by_uid == None):
-                    # Auto user enrollemnt
+                    # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
-
-                    # Convert saml result attributes keys to lover case
-                    saml_response_normalized_attributes = HashMap()
-                    for saml_response_attribute_entry in saml_response_attributes.entrySet():
-                        saml_response_normalized_attributes.put(
-                            StringHelper.toLowerCase(saml_response_attribute_entry.getKey()), saml_response_attribute_entry.getValue())
-
-                    currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
-                    print "Saml. Authenticate for step 1. Using next attributes mapping '%s'" % currentAttributesMapping
-                    
-                    newUser = User()
-                    
-                    # Set custom object classes
-                    if self.userObjectClasses != None:
-                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
-                        newUser.setCustomObjectClasses(self.userObjectClasses)
-
-                    for attributesMappingEntry in currentAttributesMapping.entrySet():
-                        idpAttribute = attributesMappingEntry.getKey()
-                        localAttribute = attributesMappingEntry.getValue()
-                        
-                        if self.debugEnrollment:
-                            print "Saml. Authenticate for step 1. Trying to map '%s' into '%s'" % ( idpAttribute, localAttribute)
-
-                        localAttributeValue = saml_response_normalized_attributes.get(idpAttribute)
-                        if (localAttributeValue != None):
-                            if self.debugEnrollment:
-                                print "Saml. Authenticate for step 1. Setting attribute '%s' value '%s'" % ( localAttribute, localAttributeValue)
-                            newUser.setAttribute(localAttribute, localAttributeValue)
-
+        
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
-                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % ( saml_user_uid, newUser.getCustomAttributes() )
+                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
@@ -314,47 +289,23 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return post_login_result
             elif (saml_enroll_all_user_attr):
+                # Convert SAML response to user entry
+                newUser = self.getMappedAllAttributesUser(saml_response_attributes)
+
+                saml_user_uid = self.getNameId(samlResponse, newUser)
+                if saml_user_uid == None:
+                    return False
+
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:" + saml_user_uid
 
-                # Check if the is user with specified saml_user_uid
+                # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
-
                 if (find_user_by_uid == None):
-                    print "Saml. Authenticate for step 1. Failed to find user"
+                    # Auto user enrollment
+                    print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
-                    user = User()
-                    
-                    # Set custom object classes
-                    if self.userObjectClasses != None:
-                        print "Saml. Authenticate for step 1. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
-                        user.setCustomObjectClasses(self.userObjectClasses)
-
-                    customAttributes = ArrayList()
-                    for key in saml_response_attributes.keySet():
-                        ldapAttributes = attributeService.getAllAttributes()
-                        for ldapAttribute in ldapAttributes:
-                            saml2Uri = ldapAttribute.getSaml2Uri()
-                            if(saml2Uri == None):
-                                saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
-                            if(saml2Uri == key):
-                                attribute = CustomAttribute(ldapAttribute.getName())
-                                attribute.setValues(attributes.get(key))
-                                customAttributes.add(attribute)
-
-                    attribute = CustomAttribute("oxExternalUid")
-                    attribute.setValue("saml:" + saml_user_uid)
-                    customAttributes.add(attribute)
-                    user.setCustomAttributes(customAttributes)
-
-                    if(user.getAttribute("sn") == None):
-                        attribute = CustomAttribute("sn")
-                        attribute.setValue(saml_user_uid)
-                        customAttributes.add(attribute)
-
-                    if(user.getAttribute("cn") == None):
-                        attribute = CustomAttribute("cn")
-                        attribute.setValue(saml_user_uid)
-                        customAttributes.add(attribute)
+                    newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
                     user_unique = self.checkUserUniqueness(user)
                     if not user_unique:
@@ -383,6 +334,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return post_login_result
             else:
+                if saml_user_uid == None:
+                    return False
+
                 # Check if the is user with specified saml_user_uid
                 print "Saml. Authenticate for step 1. Attempting to find user by uid: '%s'" % saml_user_uid
 
@@ -466,7 +420,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Saml. Prepare for step 1"
             
-            httpService = HttpService.instance();
+            httpService = HttpService.instance()
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin"
             print "Saml. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
@@ -692,11 +646,111 @@ class PersonAuthentication(PersonAuthenticationType):
             if (attribute_values_list != None) and (attribute_values_list.size() > 0):
                 userToSearch.setAttribute(userAttributeName, attribute_values_list)
 
-        ldapEntryManager = Component.getInstance("ldapEntryManager");
+        ldapEntryManager = Component.getInstance("ldapEntryManager")
 
         # TODO: Replace with userService.findEntries in CE 2.4.5
         users = ldapEntryManager.findEntries(userToSearch, 1, 1)
         if users.size() > 0:
-            return False;
-                    
+            return False
+
         return True
+
+    def getMappedUser(self, configurationAttributes, requestParameters, saml_response_attributes):
+        # Convert Saml result attributes keys to lover case
+        saml_response_normalized_attributes = HashMap()
+        for saml_response_attribute_entry in saml_response_attributes.entrySet():
+            saml_response_normalized_attributes.put(StringHelper.toLowerCase(saml_response_attribute_entry.getKey()), saml_response_attribute_entry.getValue())
+        
+        currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
+        print "Saml. Get mapped user. Using next attributes mapping '%s'" % currentAttributesMapping
+
+        newUser = User()
+
+        # Set custom object classes
+        if self.userObjectClasses != None:
+            print "Saml. Get mapped user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
+            newUser.setCustomObjectClasses(self.userObjectClasses)
+
+        for attributesMappingEntry in currentAttributesMapping.entrySet():
+            idpAttribute = attributesMappingEntry.getKey()
+            localAttribute = attributesMappingEntry.getValue()
+
+            if self.debugEnrollment:
+                print "Saml. Get mapped user. Trying to map '%s' into '%s'" % (idpAttribute, localAttribute)
+
+            localAttributeValue = saml_response_normalized_attributes.get(idpAttribute)
+            if (localAttributeValue != None):
+                if self.debugEnrollment:
+                    print "Saml. Get mapped user. Setting attribute '%s' value '%s'" % (localAttribute, localAttributeValue)
+
+                newUser.setAttribute(localAttribute, localAttributeValue)
+
+        return newUser
+
+    def getMappedAllAttributesUser(self, saml_response_attributes):
+        user = User()
+
+        # Set custom object classes
+        if self.userObjectClasses != None:
+            print "Saml. Get mapped all attributes user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
+            user.setCustomObjectClasses(self.userObjectClasses)
+
+        customAttributes = ArrayList()
+        for key in saml_response_attributes.keySet():
+            ldapAttributes = attributeService.getAllAttributes()
+            for ldapAttribute in ldapAttributes:
+                saml2Uri = ldapAttribute.getSaml2Uri()
+                if (saml2Uri == None):
+                    saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
+                if (saml2Uri == key):
+                    attribute = CustomAttribute(ldapAttribute.getName())
+                    attribute.setValues(attributes.get(key))
+                    customAttributes.add(attribute)
+        
+        user.setCustomAttributes(customAttributes)
+
+        if (user.getAttribute("sn") == None):
+            attribute = CustomAttribute("sn")
+            attribute.setValue(saml_user_uid)
+            customAttributes.add(attribute)
+        
+        if (user.getAttribute("cn") == None):
+            attribute = CustomAttribute("cn")
+            attribute.setValue(saml_user_uid)
+            customAttributes.add(attribute)
+
+        return user
+
+    def getNameId(self, samlResponse, newUser):
+        if self.generateNameId:
+            saml_user_uid = self.generateNameUid(newUser)
+        else:
+            saml_user_uid = self.getSamlNameId(samlResponse)
+        return saml_user_uid
+
+    def getSamlNameId(self, samlResponse):
+        saml_response_name_id = samlResponse.getNameId()
+        if (StringHelper.isEmpty(saml_response_name_id)):
+            print "Saml. Get Saml response. saml_response_name_id is invalid"
+            return None
+
+        print "Saml. Get Saml response. saml_response_name_id: '%s'" % saml_response_name_id
+
+        # Use persistent Id as saml_user_uid
+        return saml_response_name_id
+
+    def generateNameUid(self, user):
+        if (self.userEnforceAttributesUniqueness == None):
+            print "Saml. Build local external uid. User enforce attributes uniqueness not specified"
+            return None
+        
+        sb = StringBuilder()
+        for userAttributeName in self.userEnforceAttributesUniqueness:
+            if sb.length() > 0:
+                sb.append("!")
+            attribute_values_list = user.getAttributeValues(userAttributeName)
+            if (attribute_values_list != None) and (attribute_values_list.size() > 0):
+                first_attribute_value = attribute_values_list.get(0)
+                sb.append(first_attribute_value)
+
+        return sb.toString()
