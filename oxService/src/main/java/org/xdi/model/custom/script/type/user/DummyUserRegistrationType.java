@@ -49,4 +49,10 @@ public class DummyUserRegistrationType implements UserRegistrationType {
 		return false;
 	}
 
+	@Override
+	public boolean confirmRegistration(Object user,	Map<String, String[]> requestParameters,
+			Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
 }
