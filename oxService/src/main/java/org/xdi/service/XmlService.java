@@ -167,7 +167,18 @@ public class XmlService {
     public Document getXmlDocument(byte[] xmlDocumentBytes) throws SAXException, IOException, ParserConfigurationException {
     	ByteArrayInputStream bis = new ByteArrayInputStream(xmlDocumentBytes);
     	try {
-			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(bis);
+    		DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
+
+    		fty.setNamespaceAware(true);
+    		
+    		// Fix XXE vulnerability
+    		fty.setXIncludeAware(false);
+    		fty.setExpandEntityReferences(false);
+    		fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+    		fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    		fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+    		return fty.newDocumentBuilder().parse(bis);
     	} finally {
     		IOUtils.closeQuietly(bis);
     	}

@@ -32,6 +32,14 @@ public class XMLValidator {
    public static GluuErrorHandler validateMetadata(InputStream stream, Schema validationSchema) 
            throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
+
+        // Fix XXE vulnerability
+        newFactory.setXIncludeAware(false);
+        newFactory.setExpandEntityReferences(false);
+        newFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        newFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        newFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
         newFactory.setCoalescing(false);
         newFactory.setExpandEntityReferences(true);
         newFactory.setIgnoringComments(false);

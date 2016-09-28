@@ -71,7 +71,16 @@ public class Response {
 
 	public void loadXml(String xml) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
+
 		fty.setNamespaceAware(true);
+
+		// Fix XXE vulnerability
+		fty.setXIncludeAware(false);
+		fty.setExpandEntityReferences(false);
+		fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+		fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
 		DocumentBuilder builder = fty.newDocumentBuilder();
 		ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
 		xmlDoc = builder.parse(bais);
