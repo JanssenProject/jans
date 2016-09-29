@@ -14,14 +14,15 @@ match_oid = published + '.2'
 attr_oid = published + '.3'
 objc_oid = published + '.4'
 
+attrs = 0
+objclasses = 0
+
 
 def convert(in_file, out_file):
+    global attrs, objclasses
     ldif = open(in_file, 'r')
     schema = open(out_file, 'w')
     output = ''
-
-    attrs = 0
-    objclasses = 0
 
     for line in ldif:
         if re.match('^dn:', line) or re.match('^objectClass:', line) or \
@@ -60,7 +61,12 @@ def convert(in_file, out_file):
     schema.close()
     ldif.close()
 
+
 if __name__ == '__main__':
-    input_ldif = './static/opendj/101-ox.ldif'
-    output_file = './static/openldap/gluu.schema'
-    convert(input_ldif, output_file)
+    ox101 = './static/opendj/101-ox.ldif'
+    gluu_schema = './static/openldap/gluu.schema'
+    convert(ox101, gluu_schema)
+
+    custom77 = './static/opendj/101-ox.ldif'
+    custom_schema = './static/openldap/custom.schema'
+    convert(custom77, custom_schema)
