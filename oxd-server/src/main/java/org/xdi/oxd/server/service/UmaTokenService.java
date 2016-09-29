@@ -68,7 +68,7 @@ public class UmaTokenService {
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
-            boolean isExpired = site.getRptExpiresAt().after(new Date());
+            boolean isExpired = site.getRptExpiresAt().before(new Date());
             if (!isExpired) {
                 LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
                 return site.getRpt();
@@ -103,7 +103,7 @@ public class UmaTokenService {
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
-            boolean isExpired = site.getGatExpiresAt().after(new Date());
+            boolean isExpired = site.getGatExpiresAt().before(new Date());
             if (!isExpired) {
                 LOG.debug("GAT from site configuration, GAT: " + site.getGat() + ", site: " + site);
                 return site.getGat();
@@ -144,7 +144,7 @@ public class UmaTokenService {
             c.setTime(site.getPatCreatedAt());
             c.add(Calendar.SECOND, site.getPatExpiresIn());
 
-            boolean isExpired = c.getTime().after(new Date());
+            boolean isExpired = c.getTime().before(new Date());
             if (!isExpired) {
                 LOG.debug("PAT from site configuration, PAT: " + site.getPat());
                 return new Pat(site.getPat(), "", site.getPatExpiresIn());
@@ -178,7 +178,7 @@ public class UmaTokenService {
             c.setTime(site.getAatCreatedAt());
             c.add(Calendar.SECOND, site.getAatExpiresIn());
 
-            boolean isExpired = c.getTime().after(new Date());
+            boolean isExpired = c.getTime().before(new Date());
             if (!isExpired) {
                 LOG.debug("AAT from site configuration, site: " + site);
                 return new Aat(site.getAat(), "", site.getAatExpiresIn());
