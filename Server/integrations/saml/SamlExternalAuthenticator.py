@@ -264,7 +264,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
-                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
                         facesMessages = FacesMessages.instance()
                         facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
                         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
@@ -309,7 +309,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
-                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
+                        print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
                         facesMessages = FacesMessages.instance()
                         facesMessages.add(StatusMessage.Severity.ERROR, "Failed to enroll. User with same key attributes exist already")
                         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
