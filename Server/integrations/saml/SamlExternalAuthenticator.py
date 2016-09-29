@@ -250,6 +250,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 if saml_user_uid == None:
                     return False
 
+                self.setDefaultUid(newUser, saml_user_uid)
+
                 # Use auto enrollment to local IDP
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
@@ -295,6 +297,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 saml_user_uid = self.getNameId(samlResponse, newUser)
                 if saml_user_uid == None:
                     return False
+
+                self.setDefaultUid(newUser, saml_user_uid)
 
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:" + saml_user_uid
 
@@ -753,3 +757,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 sb.append(first_attribute_value)
 
         return sb.toString()
+
+    def setDefaultUid(self, user, saml_user_uid):
+        if StringHelper.isEmpty(user.getUserId()):
+            user.setUserId(saml_user_uid)
