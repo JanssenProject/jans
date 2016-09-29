@@ -218,7 +218,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
                 # Check if the is user with specified saml_user_uid
-                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
                 if (find_user_by_uid == None):
                     print "Saml. Authenticate for step 1. Failed to find user"
@@ -256,12 +256,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
                 # Check if there is user with specified saml_user_uid
-                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
                 if (find_user_by_uid == None):
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
         
-                    newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                    newUser.setAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
                     user_unique = self.checkUserUniqueness(newUser)
@@ -300,15 +300,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 self.setDefaultUid(newUser, saml_user_uid)
 
-                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:" + saml_user_uid
+                print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:%s" % saml_user_uid
 
                 # Check if there is user with specified saml_user_uid
-                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
                 if (find_user_by_uid == None):
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
-                    newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
+                    newUser.setAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
                     user_unique = self.checkUserUniqueness(newUser)
@@ -390,11 +390,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Check if there is user which has saml_user_uid
             # Avoid mapping Saml account to more than one IDP account
-            find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:" + saml_user_uid)
+            find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
             if (find_user_by_uid == None):
                 # Add saml_user_uid to user one id UIDs
-                find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "saml:" + saml_user_uid)
+                find_user_by_uid = userService.addUserAttribute(user_name, "oxExternalUid", "saml:%s" % saml_user_uid)
                 if (find_user_by_uid == None):
                     print "Saml. Authenticate for step 2. Failed to update current user"
                     return False
@@ -729,6 +729,7 @@ class PersonAuthentication(PersonAuthenticationType):
             saml_user_uid = self.generateNameUid(newUser)
         else:
             saml_user_uid = self.getSamlNameId(samlResponse)
+
         return saml_user_uid
 
     def getSamlNameId(self, samlResponse):
@@ -748,9 +749,11 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
         
         sb = StringBuilder()
+        first = True
         for userAttributeName in self.userEnforceAttributesUniqueness:
-            if sb.length() > 0:
+            if not first:
                 sb.append("!")
+            first = False
             attribute_values_list = user.getAttributeValues(userAttributeName)
             if (attribute_values_list != None) and (attribute_values_list.size() > 0):
                 first_attribute_value = attribute_values_list.get(0)
