@@ -307,7 +307,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     newUser.setAttribute("oxExternalUid", "saml:" + saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
-                    user_unique = self.checkUserUniqueness(user)
+                    user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
                         print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getAttribute("uid")
                         facesMessages = FacesMessages.instance()
@@ -315,7 +315,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
                         return False
 
-                    find_user_by_uid = userService.addUser(user, True)
+                    find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
@@ -695,29 +695,28 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Saml. Get mapped all attributes user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
             user.setCustomObjectClasses(self.userObjectClasses)
 
+        # Prepare map to do quick mapping 
+        attributeService = AttributeService.instance()
+        ldapAttributes = attributeService.getAllAttributes()
+        samlUriToAttributesMap = HashMap()
+        for ldapAttribute in ldapAttributes:
+            saml2Uri = ldapAttribute.getSaml2Uri()
+            if (saml2Uri == None):
+                saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
+            samlUriToAttributesMap.put(saml2Uri, ldapAttribute.getName())
+
         customAttributes = ArrayList()
         for key in saml_response_attributes.keySet():
-            ldapAttributes = attributeService.getAllAttributes()
-            for ldapAttribute in ldapAttributes:
-                saml2Uri = ldapAttribute.getSaml2Uri()
-                if (saml2Uri == None):
-                    saml2Uri = attributeService.getDefaultSaml2Uri(ldapAttribute.getName())
-                if (saml2Uri == key):
-                    attribute = CustomAttribute(ldapAttribute.getName())
-                    attribute.setValues(attributes.get(key))
-                    customAttributes.add(attribute)
+            ldapAttributeName = samlUriToAttributesMap.get(key)
+            if ldapAttributeName == None:
+                print "Saml. Get mapped all attributes user. Skipping saml attribute: '%s'" %  key
+                continue
+
+            attribute = CustomAttribute(ldapAttributeName)
+            attribute.setValues(saml_response_attributes.get(key))
+            customAttributes.add(attribute)
         
         user.setCustomAttributes(customAttributes)
-
-        if (user.getAttribute("sn") == None):
-            attribute = CustomAttribute("sn")
-            attribute.setValue(saml_user_uid)
-            customAttributes.add(attribute)
-        
-        if (user.getAttribute("cn") == None):
-            attribute = CustomAttribute("cn")
-            attribute.setValue(saml_user_uid)
-            customAttributes.add(attribute)
 
         return user
 
