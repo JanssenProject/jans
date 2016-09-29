@@ -1,3 +1,11 @@
+# Macros defining the OID structure
+objectIdentifier oxOrgOID      1.3.6.1.4.1.12345
+objectIdentifier oxReserved    oxOrgOID:0
+objectIdentifier oxPublished   oxOrgOID:1
+objectIdentifier oxSyntax      oxPublished:1
+objectIdentifier oxMatchRules  oxPublished:2
+objectIdentifier oxAttribute   oxPublished:3
+objectIdentifier oxObjectClass oxPublished:4
 # NOTES:     photo1 changed to picture
 #            oxTrustMiddleName changed to middleName
 #            oxTrustLocale changed to locale
@@ -9,56 +17,56 @@
 # use is deprecated and they should be removed when its safe
 
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.1 NAME ( 'oxAssociatedClient' 'associatedClient' )
+attributetype ( oxAttribute:1 NAME ( 'oxAssociatedClient' 'associatedClient' )
 	DESC 'Associate the dn of an OAuth2 client with a person or UMA Resource Set.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.2 NAME 'associatedPerson'
+attributetype ( oxAttribute:2 NAME 'associatedPerson'
 	DESC 'Reference the dn of a person.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.3 NAME 'blowfishPassword'
+attributetype ( oxAttribute:3 NAME 'blowfishPassword'
 	DESC 'Blowfish crypted text'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.4 NAME 'county'
+attributetype ( oxAttribute:4 NAME 'county'
 	DESC 'ISO 3166-1 Alpha-2 Country Code'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.5 NAME 'creationDate'
+attributetype ( oxAttribute:5 NAME 'creationDate'
 	DESC 'Creation Date used for password reset requests'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.6 NAME 'defaultScope'
+attributetype ( oxAttribute:6 NAME 'defaultScope'
 	DESC 'Track the default scope for an custom OAuth2 Scope.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.7 NAME 'deployedAppliances'
+attributetype ( oxAttribute:7 NAME 'deployedAppliances'
 	DESC 'Track which appliances are deployed at an organization.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.8 NAME 'federationRules'
+attributetype ( oxAttribute:8 NAME 'federationRules'
 	DESC 'Track rules for the federation in Gluu SAML config. Deprecated
 	as multi-party federation management should move to Jagger.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -66,7 +74,7 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.8 NAME 'federationRules'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.9 NAME 'gluuAddPersonCapability'
+attributetype ( oxAttribute:9 NAME 'gluuAddPersonCapability'
 	DESC 'Organizational attribute to control whether new users can be added
 	via the oxTrust GUI.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -74,42 +82,42 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.9 NAME 'gluuAddPersonCapability'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.10 NAME 'gluuAdditionalBandwidth'
+attributetype ( oxAttribute:10 NAME 'gluuAdditionalBandwidth'
 	DESC 'Track bandwidth requirements for the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.11 NAME 'gluuAdditionalMemory'
+attributetype ( oxAttribute:11 NAME 'gluuAdditionalMemory'
 	DESC 'Track additional memory requirements for the Gluu Server instance.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.12 NAME 'gluuAdditionalUsers'
+attributetype ( oxAttribute:12 NAME 'gluuAdditionalUsers'
 	DESC 'TODO : use unclear'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.13 NAME 'gluuApplianceDnsServer'
+attributetype ( oxAttribute:13 NAME 'gluuApplianceDnsServer'
 	DESC 'Persist the DNS server that should be used for the Gluu Server instance.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.14 NAME 'gluuAppliancePollingInterval'
+attributetype ( oxAttribute:14 NAME 'gluuAppliancePollingInterval'
 	DESC 'Set the frequency of the health status update of the Gluu Server'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.15
+attributetype ( oxAttribute:15
 	NAME ( 'gluuApplianceUpdateRequestList' 'gluuApplianceUpdateReuestList' )
 	DESC 'Used by the Gluu Server to request an update'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -117,21 +125,21 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.15
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.16 NAME 'gluuAttributeViewType'
+attributetype ( oxAttribute:16 NAME 'gluuAttributeViewType'
 	DESC 'Specify in oxTrust who can view an attribute, admin or user'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.17 NAME 'gluuAttributeEditType'
+attributetype ( oxAttribute:17 NAME 'gluuAttributeEditType'
 	DESC 'Specify in oxTrust who can update an attribute, admin or user'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.18 NAME 'gluuAttributeName'
+attributetype ( oxAttribute:18 NAME 'gluuAttributeName'
 	DESC 'Specify an identifier for an attribute. May be multi-value
 	where an attribute has two names, like givenName and first-name.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -139,7 +147,7 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.18 NAME 'gluuAttributeName'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.19 NAME 'gluuAttributeOrigin'
+attributetype ( oxAttribute:19 NAME 'gluuAttributeOrigin'
 	DESC 'Specify the person objectclass associated with the attribute,
 	used for display purposes in oxTrust.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -147,209 +155,209 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.19 NAME 'gluuAttributeOrigin'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.20 NAME 'gluuAttributeSystemEditType'
+attributetype ( oxAttribute:20 NAME 'gluuAttributeSystemEditType'
 	DESC 'TODO - still required?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.21 NAME 'gluuAttributeType'
+attributetype ( oxAttribute:21 NAME 'gluuAttributeType'
 	DESC 'Data type of attribute. Values can be string, photo, numeric, date'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.22 NAME 'gluuAttributeUsageType'
+attributetype ( oxAttribute:22 NAME 'gluuAttributeUsageType'
 	DESC 'TODO - Usage? Value can be OpenID'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.23 NAME 'gluuBandwidthRX'
+attributetype ( oxAttribute:23 NAME 'gluuBandwidthRX'
 	DESC 'Track data received by the Gluu Server'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.24 NAME 'gluuBandwidthTX'
+attributetype ( oxAttribute:24 NAME 'gluuBandwidthTX'
 	DESC 'Track data sent by the Gluu Server'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.25 NAME 'gluuCategory'
+attributetype ( oxAttribute:25 NAME 'gluuCategory'
 	DESC 'TODO - in use? Used to group attributes together.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.26 NAME 'gluuContainerFederation'
+attributetype ( oxAttribute:26 NAME 'gluuContainerFederation'
 	DESC 'SAML Trust Relationship federation info'
 	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.27 NAME 'gluuCustomMessage'
+attributetype ( oxAttribute:27 NAME 'gluuCustomMessage'
 	DESC 'oxTrust custom welcome message'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.28 NAME 'gluuDSstatus'
+attributetype ( oxAttribute:28 NAME 'gluuDSstatus'
 	DESC 'Monitor health of the instance LDAP server.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.29 NAME 'gluuEntityId'
+attributetype ( oxAttribute:29 NAME 'gluuEntityId'
 	DESC 'Specifies SAML trust relationship entity ID'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.30 NAME 'gluuFaviconImage'
+attributetype ( oxAttribute:30 NAME 'gluuFaviconImage'
 	DESC 'TODO - Stores URL of favicon'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.31 NAME 'gluuFederationHostingEnabled'
+attributetype ( oxAttribute:31 NAME 'gluuFederationHostingEnabled'
 	DESC 'oxTrust flag for the federation feature. Values enabled or disabled.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.32 NAME 'gluuFreeDiskSpace'
+attributetype ( oxAttribute:32 NAME 'gluuFreeDiskSpace'
 	DESC 'Monitor free disk space on the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.33 NAME 'gluuFreeMemory'
+attributetype ( oxAttribute:33 NAME 'gluuFreeMemory'
 	DESC 'Monitor free memory on the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.34 NAME 'gluuFreeSwap'
+attributetype ( oxAttribute:34 NAME 'gluuFreeSwap'
 	DESC 'Monitor swap space on the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.35 NAME 'gluuHTTPstatus'
+attributetype ( oxAttribute:35 NAME 'gluuHTTPstatus'
 	DESC 'Monitor HTTP availability of the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.36 NAME 'gluuGroupCount'
+attributetype ( oxAttribute:36 NAME 'gluuGroupCount'
 	DESC 'Monitor the number of groups. TODO - Remove?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.37 NAME 'gluuGroupType'
+attributetype ( oxAttribute:37 NAME 'gluuGroupType'
 	DESC 'Type of Group. Not used.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.38 NAME 'gluuGroupVisibility'
+attributetype ( oxAttribute:38 NAME 'gluuGroupVisibility'
 	DESC 'Group visibility. Not used.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.39 NAME 'gluuHostname'
+attributetype ( oxAttribute:39 NAME 'gluuHostname'
 	DESC 'The hostname of the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.40 NAME 'gluuInvoiceAmount'
+attributetype ( oxAttribute:40 NAME 'gluuInvoiceAmount'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.41 NAME 'gluuInvoiceDate'
+attributetype ( oxAttribute:41 NAME 'gluuInvoiceDate'
 	DESC 'TODO - in use?'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.42 NAME 'gluuInvoiceLineItemName'
+attributetype ( oxAttribute:42 NAME 'gluuInvoiceLineItemName'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.43 NAME 'gluuInvoiceNo'
+attributetype ( oxAttribute:43 NAME 'gluuInvoiceNo'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.44 NAME 'gluuInvoiceNumber'
+attributetype ( oxAttribute:44 NAME 'gluuInvoiceNumber'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.45 NAME 'gluuInvoiceProductNumber'
+attributetype ( oxAttribute:45 NAME 'gluuInvoiceProductNumber'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.46 NAME 'gluuInvoiceQuantity'
+attributetype ( oxAttribute:46 NAME 'gluuInvoiceQuantity'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.47 NAME 'gluuInvoiceStatus'
+attributetype ( oxAttribute:47 NAME 'gluuInvoiceStatus'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.48 NAME 'gluuIpAddress'
+attributetype ( oxAttribute:48 NAME 'gluuIpAddress'
 	DESC 'IP address of the Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.49 NAME 'gluuIsFederation'
+attributetype ( oxAttribute:49 NAME 'gluuIsFederation'
 	DESC 'Used in oxTrust to specify if a SAML Trust Relationship is a federation.
 	It could also be a website'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -357,7 +365,7 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.49 NAME 'gluuIsFederation'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.50 NAME 'gluuLastUpdate'
+attributetype ( oxAttribute:50 NAME 'gluuLastUpdate'
 	DESC 'Monitors last time the server was able to connect to
 	the monitoring system.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -365,49 +373,49 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.50 NAME 'gluuLastUpdate'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.51 NAME ( 'gluuLifeRay'
+attributetype ( oxAttribute:51 NAME ( 'gluuLifeRay'
 	'TODO-remove' )
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.52 NAME 'gluuLoadAvg'
+attributetype ( oxAttribute:52 NAME 'gluuLoadAvg'
 	DESC 'Montior the average CPU load for a Gluu Server instance.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.53 NAME 'gluuLogoImage'
+attributetype ( oxAttribute:53 NAME 'gluuLogoImage'
 	DESC 'Logo used by oxTrust for default look and feel.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.54 NAME 'gluuManageIdentityPermission'
+attributetype ( oxAttribute:54 NAME 'gluuManageIdentityPermission'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.55 NAME 'gluuManagedOrganizations'
+attributetype ( oxAttribute:55 NAME 'gluuManagedOrganizations'
 	DESC 'Used to track with which organizations a person is associated'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.56 NAME 'gluuManager'
+attributetype ( oxAttribute:56 NAME 'gluuManager'
 	DESC 'Used to specify if a person has the manager role'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.57 NAME 'gluuManagerGroup'
+attributetype ( oxAttribute:57 NAME 'gluuManagerGroup'
 	DESC 'Used in organizatoin entry to specifies the dn of the group that
 	has admin priviledges in oxTrust.'
 	SUBSTR caseIgnoreSubstringsMatch
@@ -415,2068 +423,2068 @@ attributetype ( 1.3.6.1.4.1.12345.1.3.57 NAME 'gluuManagerGroup'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.58 NAME 'gluuMaxLogSize'
+attributetype ( oxAttribute:58 NAME 'gluuMaxLogSize'
 	DESC 'Maximum Log File Size'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.59 NAME 'gluuOptOuts'
+attributetype ( oxAttribute:59 NAME 'gluuOptOuts'
 	DESC 'White pages attributes restricted by person in oxTrust profile management'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.60 NAME 'gluuOrgProfileMgt'
+attributetype ( oxAttribute:60 NAME 'gluuOrgProfileMgt'
 	DESC 'enable or disable profile management feature in oxTrust'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.61 NAME 'gluuOrgShortName'
+attributetype ( oxAttribute:61 NAME 'gluuOrgShortName'
 	DESC 'Short description, as few letters as possible, no spaces.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.62 NAME 'gluuPaidUntil'
+attributetype ( oxAttribute:62 NAME 'gluuPaidUntil'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.63 NAME 'gluuPaymentProcessorTimestamp'
+attributetype ( oxAttribute:63 NAME 'gluuPaymentProcessorTimestamp'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.64 NAME 'gluuPersonCount'
+attributetype ( oxAttribute:64 NAME 'gluuPersonCount'
 	DESC 'Monitor the number of people in the LDAP severs for a Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.65 NAME 'gluuPrivate'
+attributetype ( oxAttribute:65 NAME 'gluuPrivate'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.66 NAME 'gluuProStoresUser'
+attributetype ( oxAttribute:66 NAME 'gluuProStoresUser'
 	DESC 'TODO - remove'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.67 NAME 'gluuProfileConfiguration'
+attributetype ( oxAttribute:67 NAME 'gluuProfileConfiguration'
 	DESC 'SAML Trust Relationship attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.68 NAME 'gluuPublishIdpMetadata'
+attributetype ( oxAttribute:68 NAME 'gluuPublishIdpMetadata'
 	DESC 'Gluu Server flag to publish the IDP metadata via the web server'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.69 NAME 'gluuReleasedAttribute'
+attributetype ( oxAttribute:69 NAME 'gluuReleasedAttribute'
 	DESC 'oxTrust reference for the dn of the released attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.70 NAME 'gluuResizeInitiated'
+attributetype ( oxAttribute:70 NAME 'gluuResizeInitiated'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.71 NAME 'gluuRulesAccepted'
+attributetype ( oxAttribute:71 NAME 'gluuRulesAccepted'
 	DESC 'TODO - use unknown for Gluu SAML config'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.72 NAME 'gluuSAML1URI'
+attributetype ( oxAttribute:72 NAME 'gluuSAML1URI'
 	DESC 'SAML 1 uri of attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.73 NAME 'gluuSAML2URI'
+attributetype ( oxAttribute:73 NAME 'gluuSAML2URI'
 	DESC 'SAML 2 uri of attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.74 NAME 'gluuSAMLMetaDataFilter'
+attributetype ( oxAttribute:74 NAME 'gluuSAMLMetaDataFilter'
 	DESC 'Metadata filter in SAML trust relationship'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.75 NAME 'gluuSAMLTrustEngine'
+attributetype ( oxAttribute:75 NAME 'gluuSAMLTrustEngine'
 	DESC 'SAML trust relationship configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.76 NAME 'gluuSAMLmaxRefreshDelay'
+attributetype ( oxAttribute:76 NAME 'gluuSAMLmaxRefreshDelay'
 	DESC 'SAML trust relationship refresh time'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.77 NAME 'gluuSAMLspMetaDataFN'
+attributetype ( oxAttribute:77 NAME 'gluuSAMLspMetaDataFN'
 	DESC 'SAML Trust Relationship file location of metadata'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.78 NAME 'gluuSAMLspMetaDataSourceType'
+attributetype ( oxAttribute:78 NAME 'gluuSAMLspMetaDataSourceType'
 	DESC 'SAML Trust Relationship SP metadata type - file, URI, federation'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.79 NAME 'gluuSAMLspMetaDataURL'
+attributetype ( oxAttribute:79 NAME 'gluuSAMLspMetaDataURL'
 	DESC 'SAML Trust Relationship URI location of metadata'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.80 NAME 'gluuSLAManager'
+attributetype ( oxAttribute:80 NAME 'gluuSLAManager'
 	DESC 'Specifies if the person has the SLA manager role'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.81 NAME 'gluuSPTR'
+attributetype ( oxAttribute:81 NAME 'gluuSPTR'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.82 NAME 'gluuScimEnabled'
+attributetype ( oxAttribute:82 NAME 'gluuScimEnabled'
 	DESC 'oxTrust SCIM feature - enabled or disabled'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.83 NAME 'gluuShibAssertionsIssued'
+attributetype ( oxAttribute:83 NAME 'gluuShibAssertionsIssued'
 	DESC 'Monitors activity of Gluu Server Shibboleth IDP'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.84 NAME 'gluuShibFailedAuth'
+attributetype ( oxAttribute:84 NAME 'gluuShibFailedAuth'
 	DESC 'Monitors failed login attempts on Gluu Server Shibboleth IDP'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.85 NAME 'gluuShibSecurityEvents'
+attributetype ( oxAttribute:85 NAME 'gluuShibSecurityEvents'
 	DESC 'Monitors security events on Gluu Server Shibboleth IDP'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.86 NAME 'gluuShibSuccessfulAuths'
+attributetype ( oxAttribute:86 NAME 'gluuShibSuccessfulAuths'
 	DESC 'Monitors login attempts on Gluu Server Shibboleth IDP'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.87 NAME 'gluuSmtpFromEmailAddress'
+attributetype ( oxAttribute:87 NAME 'gluuSmtpFromEmailAddress'
 	DESC 'Gluu Server SMTP configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.88 NAME 'gluuSmtpFromName'
+attributetype ( oxAttribute:88 NAME 'gluuSmtpFromName'
 	DESC 'SMTP From Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.89 NAME 'gluuSmtpHost'
+attributetype ( oxAttribute:89 NAME 'gluuSmtpHost'
 	DESC 'SMTP Host'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.90 NAME 'gluuSmtpPassword'
+attributetype ( oxAttribute:90 NAME 'gluuSmtpPassword'
 	DESC 'SMTP User Password'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.91 NAME 'gluuSmtpPort'
+attributetype ( oxAttribute:91 NAME 'gluuSmtpPort'
 	DESC 'SMTP Port'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.92 NAME 'gluuSmtpRequiresAuthentication'
+attributetype ( oxAttribute:92 NAME 'gluuSmtpRequiresAuthentication'
 	DESC 'SMTP Requires Authentication'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.93 NAME 'gluuSmtpRequiresSsl'
+attributetype ( oxAttribute:93 NAME 'gluuSmtpRequiresSsl'
 	DESC 'SMTP Requires SSL'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.94 NAME 'gluuSmtpUserName'
+attributetype ( oxAttribute:94 NAME 'gluuSmtpUserName'
 	DESC 'SMTP User Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.95 NAME 'gluuSpecificRelyingPartyConfig'
+attributetype ( oxAttribute:95 NAME 'gluuSpecificRelyingPartyConfig'
 	DESC 'SAML Trust Relationship configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.96 NAME 'gluuSslExpiry'
+attributetype ( oxAttribute:96 NAME 'gluuSslExpiry'
 	DESC 'SAML Trust Relationship configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.97 NAME 'gluuStatus'
+attributetype ( oxAttribute:97 NAME 'gluuStatus'
 	DESC 'Status of the entry, used by many objectclasses'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.98 NAME 'gluuSystemUptime'
+attributetype ( oxAttribute:98 NAME 'gluuSystemUptime'
 	DESC 'Monitors how long the Gluu Server instance has been running.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.99 NAME 'gluuTargetRAM'
+attributetype ( oxAttribute:99 NAME 'gluuTargetRAM'
 	DESC 'Monitors total available RAM on Gluu Server instance'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.100 NAME 'gluuTempFaviconImage'
+attributetype ( oxAttribute:100 NAME 'gluuTempFaviconImage'
 	DESC 'Store location for upload of Favicon'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.101 NAME 'gluuThemeColor'
+attributetype ( oxAttribute:101 NAME 'gluuThemeColor'
 	DESC 'oxTrust login page configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.102 NAME 'gluuTrustContact'
+attributetype ( oxAttribute:102 NAME 'gluuTrustContact'
 	DESC 'oxTrust login page configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.103 NAME 'gluuTrustDeconstruction'
+attributetype ( oxAttribute:103 NAME 'gluuTrustDeconstruction'
 	DESC 'TODO - in use?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.104 NAME 'gluuUrl'
+attributetype ( oxAttribute:104 NAME 'gluuUrl'
 	DESC 'Gluu instance URL'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.105 NAME 'gluuVDSenabled'
+attributetype ( oxAttribute:105 NAME 'gluuVDSenabled'
 	DESC 'oxTrust VDS enabled or disabled'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.106 NAME 'gluuVDSstatus'
+attributetype ( oxAttribute:106 NAME 'gluuVDSstatus'
 	DESC 'Gluu VDS configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.107 NAME 'gluuValidationLog'
+attributetype ( oxAttribute:107 NAME 'gluuValidationLog'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.108 NAME 'gluuValidationStatus'
+attributetype ( oxAttribute:108 NAME 'gluuValidationStatus'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.109 NAME 'gluuVdsCacheRefreshEnabled'
+attributetype ( oxAttribute:109 NAME 'gluuVdsCacheRefreshEnabled'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.110 NAME 'gluuVdsCacheRefreshLastUpdate'
+attributetype ( oxAttribute:110 NAME 'gluuVdsCacheRefreshLastUpdate'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.111 NAME 'gluuVdsCacheRefreshLastUpdateCount'
+attributetype ( oxAttribute:111 NAME 'gluuVdsCacheRefreshLastUpdateCount'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.112 NAME 'gluuVdsCacheRefreshPollingInterval'
+attributetype ( oxAttribute:112 NAME 'gluuVdsCacheRefreshPollingInterval'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.113 NAME 'gluuVdsCacheRefreshProblemCount'
+attributetype ( oxAttribute:113 NAME 'gluuVdsCacheRefreshProblemCount'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.114 NAME 'gluuWhitePagesEnabled'
+attributetype ( oxAttribute:114 NAME 'gluuWhitePagesEnabled'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.115 NAME 'gluuWhitePagesListed'
+attributetype ( oxAttribute:115 NAME 'gluuWhitePagesListed'
 	DESC 'Allow Publication'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.116 NAME 'iname'
+attributetype ( oxAttribute:116 NAME 'iname'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.117 NAME 'inum'
+attributetype ( oxAttribute:117 NAME 'inum'
 	DESC 'XRI i-number'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.118 NAME 'inumFN'
+attributetype ( oxAttribute:118 NAME 'inumFN'
 	DESC 'XRI i-number sans punctuation'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.119 NAME 'literalBinaryValue'
+attributetype ( oxAttribute:119 NAME 'literalBinaryValue'
 	DESC 'OX literalValue'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.120 NAME 'literalValue'
+attributetype ( oxAttribute:120 NAME 'literalValue'
 	DESC 'OX literalValue'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.121 NAME 'memberOf'
+attributetype ( oxAttribute:121 NAME 'memberOf'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.122 NAME 'nonProfit'
+attributetype ( oxAttribute:122 NAME 'nonProfit'
 	DESC 'TODO - in use?'
 	EQUALITY booleanMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.123 NAME 'organizationalOwner'
+attributetype ( oxAttribute:123 NAME 'organizationalOwner'
 	DESC 'OX organizationalOwner'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.124 NAME 'oxAmHost'
+attributetype ( oxAttribute:124 NAME 'oxAmHost'
 	DESC 'am host'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.125 NAME 'oxAttributeType'
+attributetype ( oxAttribute:125 NAME 'oxAttributeType'
 	DESC 'NameId or attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.126 NAME 'oxAuthClaimName'
+attributetype ( oxAttribute:126 NAME 'oxAuthClaimName'
 	DESC 'Used by oxAuth in conjunction with gluuttributeName to map claims to attributes in LDAP.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.127 NAME 'oxAuthAppType'
+attributetype ( oxAttribute:127 NAME 'oxAuthAppType'
 	DESC 'oxAuth App Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.128 NAME 'oxAuthAuthenticationTime'
+attributetype ( oxAttribute:128 NAME 'oxAuthAuthenticationTime'
 	DESC 'oxAuth Authentication Time'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.129 NAME 'oxAuthAuthorizationCode'
+attributetype ( oxAttribute:129 NAME 'oxAuthAuthorizationCode'
 	DESC 'oxAuth authorization code'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.130 NAME 'oxAuthClaim'
+attributetype ( oxAttribute:130 NAME 'oxAuthClaim'
 	DESC 'oxAuth Attribute Claim'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.131 NAME 'oxAuthGroupClaims'
+attributetype ( oxAttribute:131 NAME 'oxAuthGroupClaims'
 	DESC 'oxAuth Group Attribute Claims (true or false)'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.132 NAME 'oxAuthClientId'
+attributetype ( oxAttribute:132 NAME 'oxAuthClientId'
 	DESC 'oxAuth Client id'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.133 NAME 'oxAuthClientIdIssuedAt'
+attributetype ( oxAttribute:133 NAME 'oxAuthClientIdIssuedAt'
 	DESC 'oxAuth Client Issued At'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.134 NAME 'oxAuthClientSecret'
+attributetype ( oxAttribute:134 NAME 'oxAuthClientSecret'
 	DESC 'oxAuth Client Secret'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.135 NAME 'oxAuthClientSecretExpiresAt'
+attributetype ( oxAttribute:135 NAME 'oxAuthClientSecretExpiresAt'
 	DESC 'Date client expires'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.136 NAME 'oxAuthClientURI'
+attributetype ( oxAttribute:136 NAME 'oxAuthClientURI'
 	DESC 'oxAuth Client URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.137 NAME 'oxAuthConfDynamic'
+attributetype ( oxAttribute:137 NAME 'oxAuthConfDynamic'
 	DESC 'oxAuth Dynamic Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.138 NAME 'oxAuthConfErrors'
+attributetype ( oxAttribute:138 NAME 'oxAuthConfErrors'
 	DESC 'oxAuth Errors Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.139 NAME 'oxAuthConfStatic'
+attributetype ( oxAttribute:139 NAME 'oxAuthConfStatic'
 	DESC 'oxAuth Static Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.140 NAME 'oxAuthConfWebKeys'
+attributetype ( oxAttribute:140 NAME 'oxAuthConfWebKeys'
 	DESC 'oxAuth Web Keys Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.141 NAME 'oxAuthContact'
+attributetype ( oxAttribute:141 NAME 'oxAuthContact'
 	DESC 'oxAuth Contact'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.142 NAME 'oxAuthCreation'
+attributetype ( oxAttribute:142 NAME 'oxAuthCreation'
 	DESC 'oxAuth Creation'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.143 NAME 'oxAuthDefaultAcrValues'
+attributetype ( oxAttribute:143 NAME 'oxAuthDefaultAcrValues'
 	DESC 'oxAuth Default Acr Values'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.144 NAME 'oxAuthDefaultMaxAge'
+attributetype ( oxAttribute:144 NAME 'oxAuthDefaultMaxAge'
 	DESC 'oxAuth Default Max Age'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.145 NAME 'oxAuthExpiration'
+attributetype ( oxAttribute:145 NAME 'oxAuthExpiration'
 	DESC 'oxAuth Expiration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.146 NAME 'oxAuthGrantId' DESC 'oxAuth grant id'
+attributetype ( oxAttribute:146 NAME 'oxAuthGrantId' DESC 'oxAuth grant id'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.147 NAME 'oxAuthGrantType' DESC 'oxAuth Grant Type'
+attributetype ( oxAttribute:147 NAME 'oxAuthGrantType' DESC 'oxAuth Grant Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.148 NAME 'oxAuthIdTokenEncryptedResponseAlg'
+attributetype ( oxAttribute:148 NAME 'oxAuthIdTokenEncryptedResponseAlg'
 	DESC 'oxAuth ID Token Encrypted Response Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.149 NAME 'oxAuthIdTokenEncryptedResponseEnc'
+attributetype ( oxAttribute:149 NAME 'oxAuthIdTokenEncryptedResponseEnc'
 	DESC 'oxAuth ID Token Encrypted Response Enc'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.150 NAME 'oxAuthIdTokenSignedResponseAlg'
+attributetype ( oxAttribute:150 NAME 'oxAuthIdTokenSignedResponseAlg'
 	DESC 'oxAuth ID Token Signed Response Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.151 NAME 'oxAuthInitiateLoginURI'
+attributetype ( oxAttribute:151 NAME 'oxAuthInitiateLoginURI'
 	DESC 'oxAuth Initiate Login URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.152 NAME 'oxAuthJwksURI'
+attributetype ( oxAttribute:152 NAME 'oxAuthJwksURI'
 	DESC 'oxAuth JWKs URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.153 NAME 'oxAuthJwks'
+attributetype ( oxAttribute:153 NAME 'oxAuthJwks'
 	DESC 'oxAuth JWKs'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.154 NAME 'oxAuthJwtRequest'
+attributetype ( oxAttribute:154 NAME 'oxAuthJwtRequest'
 	DESC 'oxAuth JWT Request'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.155 NAME 'oxAuthLogoURI'
+attributetype ( oxAttribute:155 NAME 'oxAuthLogoURI'
 	DESC 'oxAuth Logo URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.156 NAME 'oxAuthNonce'
+attributetype ( oxAttribute:156 NAME 'oxAuthNonce'
 	DESC 'oxAuth nonce'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.157 NAME 'oxAuthPermissionGranted'
+attributetype ( oxAttribute:157 NAME 'oxAuthPermissionGranted'
 	DESC 'oxAuth Permission Granted'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.158 NAME 'oxAuthPermissionGrantedMap'
+attributetype ( oxAttribute:158 NAME 'oxAuthPermissionGrantedMap'
 	DESC 'oxAuth Permission Granted Map'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.159 NAME 'oxAuthPersistentJWT'
+attributetype ( oxAttribute:159 NAME 'oxAuthPersistentJWT'
 	DESC 'oxAuth Persistent JWT'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.160 NAME 'oxAuthPolicyURI'
+attributetype ( oxAttribute:160 NAME 'oxAuthPolicyURI'
 	DESC 'oxAuth Policy URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.161 NAME 'oxAuthLogoutURI'
+attributetype ( oxAttribute:161 NAME 'oxAuthLogoutURI'
 	  DESC 'oxAuth Policy URI'
 	  SUBSTR caseIgnoreSubstringsMatch
 	  EQUALITY caseIgnoreMatch
 	  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	  X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.162 NAME 'oxAuthLogoutSessionRequired'
+attributetype ( oxAttribute:162 NAME 'oxAuthLogoutSessionRequired'
 	  DESC 'oxAuth Policy URI'
 	  SUBSTR caseIgnoreSubstringsMatch
 	  EQUALITY caseIgnoreMatch
 	  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	  X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.163 NAME 'oxAuthPostLogoutRedirectURI'
+attributetype ( oxAttribute:163 NAME 'oxAuthPostLogoutRedirectURI'
 	DESC 'oxAuth Post Logout Redirect URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.164 NAME 'oxAuthRedirectURI'
+attributetype ( oxAttribute:164 NAME 'oxAuthRedirectURI'
 	DESC 'oxAuth Redirect URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.165 NAME 'oxAuthRegistrationAccessToken'
+attributetype ( oxAttribute:165 NAME 'oxAuthRegistrationAccessToken'
 	DESC 'oxAuth Registration Access Token'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.166 NAME 'oxAuthReleasedScope'
+attributetype ( oxAttribute:166 NAME 'oxAuthReleasedScope'
 	DESC 'oxAuth released scope attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.167 NAME 'oxAuthRequestObjectSigningAlg'
+attributetype ( oxAttribute:167 NAME 'oxAuthRequestObjectSigningAlg'
 	DESC 'oxAuth Request Object Signing Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.168 NAME 'oxAuthRequestObjectEncryptionAlg'
+attributetype ( oxAttribute:168 NAME 'oxAuthRequestObjectEncryptionAlg'
 	DESC 'oxAuth Request Object Encryption Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.169 NAME 'oxAuthRequestObjectEncryptionEnc'
+attributetype ( oxAttribute:169 NAME 'oxAuthRequestObjectEncryptionEnc'
 	DESC 'oxAuth Request Object Encryption Enc'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.170 NAME 'oxAuthRequestURI'
+attributetype ( oxAttribute:170 NAME 'oxAuthRequestURI'
 	DESC 'oxAuth Request URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.171 NAME 'oxAuthRequireAuthTime'
+attributetype ( oxAttribute:171 NAME 'oxAuthRequireAuthTime'
 	DESC 'oxAuth Require Authentication Time'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.172 NAME 'oxAuthResponseType'
+attributetype ( oxAttribute:172 NAME 'oxAuthResponseType'
 	DESC 'oxAuth Response Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.173 NAME 'oxAuthScope'
+attributetype ( oxAttribute:173 NAME 'oxAuthScope'
 	DESC 'oxAuth Attribute Scope'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.174 NAME 'oxScopeType'
+attributetype ( oxAttribute:174 NAME 'oxScopeType'
 	DESC 'OX Attribute Scope type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.175 NAME 'oxAuthSectorIdentifierURI'
+attributetype ( oxAttribute:175 NAME 'oxAuthSectorIdentifierURI'
 	DESC 'oxAuth Sector Identifier URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.176 NAME 'oxAuthSignedResponseAlg'
+attributetype ( oxAttribute:176 NAME 'oxAuthSignedResponseAlg'
 	DESC 'oxAuth Signed Response Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.177 NAME 'oxAuthSkipAuthorization'
+attributetype ( oxAttribute:177 NAME 'oxAuthSkipAuthorization'
 	DESC 'oxAuth skip authorization attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.178 NAME 'oxAuthSubjectType'
+attributetype ( oxAttribute:178 NAME 'oxAuthSubjectType'
 	DESC 'oxAuth Subject Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.179 NAME 'oxAuthTokenCode'
+attributetype ( oxAttribute:179 NAME 'oxAuthTokenCode'
 	DESC 'oxAuth Token Code'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.180 NAME 'oxAuthTokenEndpointAuthMethod'
+attributetype ( oxAttribute:180 NAME 'oxAuthTokenEndpointAuthMethod'
 	DESC 'oxAuth Token Endpoint Auth Method'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.181 NAME 'oxAuthTokenEndpointAuthSigningAlg'
+attributetype ( oxAttribute:181 NAME 'oxAuthTokenEndpointAuthSigningAlg'
 	DESC 'oxAuth Token Endpoint Auth Signing Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.182 NAME 'oxAuthTokenType'
+attributetype ( oxAttribute:182 NAME 'oxAuthTokenType'
 	DESC 'oxAuth Token Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.183 NAME 'oxAuthTosURI'
+attributetype ( oxAttribute:183 NAME 'oxAuthTosURI'
 	DESC 'oxAuth TOS URI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.184 NAME 'oxAuthTrustedClient'
+attributetype ( oxAttribute:184 NAME 'oxAuthTrustedClient'
 	DESC 'oxAuth Trusted Client'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.185 NAME 'oxAuthUmaScope'
+attributetype ( oxAttribute:185 NAME 'oxAuthUmaScope'
 	DESC 'URI reference of scope descriptor'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.186 NAME 'oxAuthUserDN'
+attributetype ( oxAttribute:186 NAME 'oxAuthUserDN'
 	DESC 'oxAuth User DN'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.187 NAME 'oxAuthUserId'
+attributetype ( oxAttribute:187 NAME 'oxAuthUserId'
 	DESC 'oxAuth user id'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.188 NAME 'oxAuthUserInfoEncryptedResponseAlg'
+attributetype ( oxAttribute:188 NAME 'oxAuthUserInfoEncryptedResponseAlg'
 	DESC 'oxAuth User Info Encrypted Response Alg'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.189 NAME 'oxAuthUserInfoEncryptedResponseEnc'
+attributetype ( oxAttribute:189 NAME 'oxAuthUserInfoEncryptedResponseEnc'
 	DESC 'oxAuth User Info Encrypted Response Enc'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.190 NAME 'oxAuthExtraConf'
+attributetype ( oxAttribute:190 NAME 'oxAuthExtraConf'
 	DESC 'oxAuth additional configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.191 NAME 'oxAuthX509PEM'
+attributetype ( oxAttribute:191 NAME 'oxAuthX509PEM'
 	DESC 'oxAuth x509 in PEM format'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.192 NAME 'oxAuthX509URL'
+attributetype ( oxAttribute:192 NAME 'oxAuthX509URL'
 	DESC 'oxAuth x509 URL'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.193 NAME 'oxAuthenticationMode'
+attributetype ( oxAttribute:193 NAME 'oxAuthenticationMode'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.194 NAME 'oxTrustAuthenticationMode'
+attributetype ( oxAttribute:194 NAME 'oxTrustAuthenticationMode'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.195 NAME 'oxConfigurationCode'
+attributetype ( oxAttribute:195 NAME 'oxConfigurationCode'
 	DESC 'ox configuration code'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.196 NAME 'oxCreationTimestamp'
+attributetype ( oxAttribute:196 NAME 'oxCreationTimestamp'
 	DESC 'Registration time'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.197 NAME 'oxDomain'
+attributetype ( oxAttribute:197 NAME 'oxDomain'
 	DESC 'domain'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.198 NAME 'oxExternalUid'
+attributetype ( oxAttribute:198 NAME 'oxExternalUid'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.199 NAME 'oxFaviconImage'
+attributetype ( oxAttribute:199 NAME 'oxFaviconImage'
 	DESC 'URI for a graphic icon'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.200 NAME 'oxGroup'
+attributetype ( oxAttribute:200 NAME 'oxGroup'
 	DESC 'User group'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.201 NAME 'oxGuid'
+attributetype ( oxAttribute:201 NAME 'oxGuid'
 	DESC 'A random string to mark temporary tokens'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.202 NAME 'oxHost'
+attributetype ( oxAttribute:202 NAME 'oxHost'
 	DESC 'ox host'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.203 NAME 'oxIDPAuthentication'
+attributetype ( oxAttribute:203 NAME 'oxIDPAuthentication'
 	DESC 'Custom IDP authentication configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.204 NAME 'oxIconUrl'
+attributetype ( oxAttribute:204 NAME 'oxIconUrl'
 	DESC 'ox icon url'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.205 NAME 'oxId'
+attributetype ( oxAttribute:205 NAME 'oxId'
 	DESC 'Identifier'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.206 NAME 'oxAsJwt'
+attributetype ( oxAttribute:206 NAME 'oxAsJwt'
 	  DESC 'Boolean field to indicate whether object is used as JWT'
 	  SUBSTR caseIgnoreSubstringsMatch
 	  EQUALITY caseIgnoreMatch
 	  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	  X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.207 NAME 'oxJwt'
+attributetype ( oxAttribute:207 NAME 'oxJwt'
 	  DESC 'JWT representation of the object or otherwise jwt associated with the object'
 	  SUBSTR caseIgnoreSubstringsMatch
 	  EQUALITY caseIgnoreMatch
 	  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	  X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.208 NAME 'oxInvolvedClients'
+attributetype ( oxAttribute:208 NAME 'oxInvolvedClients'
 	  DESC 'Involved clients'
 	  SUBSTR caseIgnoreSubstringsMatch
 	  EQUALITY caseIgnoreMatch
 	  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	  X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.209 NAME 'oxLastAccessTime'
+attributetype ( oxAttribute:209 NAME 'oxLastAccessTime'
 	DESC 'Last access time'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.210 NAME 'oxLastLogonTime'
+attributetype ( oxAttribute:210 NAME 'oxLastLogonTime'
 	DESC 'Last logon time'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.211 NAME 'oxLinkCreator'
+attributetype ( oxAttribute:211 NAME 'oxLinkCreator'
 	DESC 'Link Creator'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.212 NAME 'oxLinkExpirationDate'
+attributetype ( oxAttribute:212 NAME 'oxLinkExpirationDate'
 	DESC 'Link Expiration Date'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.213 NAME 'oxLinkLinktrack'
+attributetype ( oxAttribute:213 NAME 'oxLinkLinktrack'
 	DESC 'Linktrack link'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.214 NAME 'oxLinkModerated'
+attributetype ( oxAttribute:214 NAME 'oxLinkModerated'
 	DESC 'Is Link Moderated?'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.215 NAME 'oxLinkModerators'
+attributetype ( oxAttribute:215 NAME 'oxLinkModerators'
 	DESC 'Link Moderators'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.216 NAME 'oxLinkPending'
+attributetype ( oxAttribute:216 NAME 'oxLinkPending'
 	DESC 'Pending Registrations'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.217 NAME 'oxLinktrackEnabled'
+attributetype ( oxAttribute:217 NAME 'oxLinktrackEnabled'
 	DESC 'Is Linktrack API configured'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.218 NAME 'oxLinktrackLogin'
+attributetype ( oxAttribute:218 NAME 'oxLinktrackLogin'
 	DESC 'Linktrack API login'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.219 NAME 'oxLinktrackPassword'
+attributetype ( oxAttribute:219 NAME 'oxLinktrackPassword'
 	DESC 'Linktrack API password'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.220 NAME 'oxLogViewerConfig'
+attributetype ( oxAttribute:220 NAME 'oxLogViewerConfig'
 	DESC 'Log viewer configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.221 NAME 'oxMultivaluedAttribute'
+attributetype ( oxAttribute:221 NAME 'oxMultivaluedAttribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.222 NAME 'oxName' DESC 'Name'
+attributetype ( oxAttribute:222 NAME 'oxName' DESC 'Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.223 NAME 'oxNameIdType'
+attributetype ( oxAttribute:223 NAME 'oxNameIdType'
 	DESC 'NameId Type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.224 NAME 'oxPolicyRule'
+attributetype ( oxAttribute:224 NAME 'oxPolicyRule'
 	DESC 'Policy Rule'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.225 NAME 'oxPolicyScriptDn'
+attributetype ( oxAttribute:225 NAME 'oxPolicyScriptDn'
 	DESC 'OX policy script Dn'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.226 NAME 'oxProxConf'
+attributetype ( oxAttribute:226 NAME 'oxProxConf'
 	DESC 'oxProx Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.227 NAME 'oxProxyAccessToken'
+attributetype ( oxAttribute:227 NAME 'oxProxyAccessToken'
 	DESC 'oxProx access token'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.228 NAME 'oxProxyClaimMapping'
+attributetype ( oxAttribute:228 NAME 'oxProxyClaimMapping'
 	DESC 'oxProx claim mapping'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.229 NAME 'oxState'
+attributetype ( oxAttribute:229 NAME 'oxState'
 	DESC 'oxState'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.230 NAME 'oxCounter'
+attributetype ( oxAttribute:230 NAME 'oxCounter'
 	DESC 'oxCounter'
 	EQUALITY integerMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
 	SINGLE-VALUE
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.231 NAME 'oxStatus'
+attributetype ( oxAttribute:231 NAME 'oxStatus'
 	DESC 'oxStatus'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.232 NAME 'oxApplication'
+attributetype ( oxAttribute:232 NAME 'oxApplication'
 	DESC 'oxApplication'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.233 NAME 'oxDeviceRegistrationConf'
+attributetype ( oxAttribute:233 NAME 'oxDeviceRegistrationConf'
 	DESC 'oxDeviceRegistrationConf'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.234 NAME 'oxDeviceKeyHandle'
+attributetype ( oxAttribute:234 NAME 'oxDeviceKeyHandle'
 	DESC 'oxDeviceKeyHandle'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.235 NAME 'oxDeviceHashCode'
+attributetype ( oxAttribute:235 NAME 'oxDeviceHashCode'
 	DESC 'oxDeviceHashCode'
 	EQUALITY integerMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
 	SINGLE-VALUE
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.236 NAME 'oxRequest'
+attributetype ( oxAttribute:236 NAME 'oxRequest'
 	DESC 'oxRequest'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.237 NAME 'oxRequestId'
+attributetype ( oxAttribute:237 NAME 'oxRequestId'
 	DESC 'oxRequestId'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.238 NAME 'oxDeviceData'
+attributetype ( oxAttribute:238 NAME 'oxDeviceData'
 	DESC 'oxDeviceData'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.239 NAME 'oxEnrollmentCode'
+attributetype ( oxAttribute:239 NAME 'oxEnrollmentCode'
 	DESC 'oxEnrollmentCode'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.240 NAME 'oxProxyClientId'
+attributetype ( oxAttribute:240 NAME 'oxProxyClientId'
 	DESC 'oxProx client id'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.241 NAME 'oxProxyScope'
+attributetype ( oxAttribute:241 NAME 'oxProxyScope'
 	DESC 'oxProx scope'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.242 NAME 'oxProxyToOpClientMapping'
+attributetype ( oxAttribute:242 NAME 'oxProxyToOpClientMapping'
 	DESC 'oxProx client mapping to op client'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.243 NAME 'oxPushApplication'
+attributetype ( oxAttribute:243 NAME 'oxPushApplication'
 	DESC 'oxPush application DN'
 	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.244 NAME 'oxPushApplicationConf'
+attributetype ( oxAttribute:244 NAME 'oxPushApplicationConf'
 	DESC 'oxPush application configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.245 NAME 'oxPushDeviceConf'
+attributetype ( oxAttribute:245 NAME 'oxPushDeviceConf'
 	DESC 'oxPush device configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.246 NAME 'oxRegistrationConfiguration'
+attributetype ( oxAttribute:246 NAME 'oxRegistrationConfiguration'
 	DESC 'Registration Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.247 NAME 'oxResource'
+attributetype ( oxAttribute:247 NAME 'oxResource'
 	DESC 'Host path'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.248 NAME 'oxResourceSetId'
+attributetype ( oxAttribute:248 NAME 'oxResourceSetId'
 	DESC 'ox resource set id'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.249 NAME 'oxRevision'
+attributetype ( oxAttribute:249 NAME 'oxRevision'
 	DESC 'Revision'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.250 NAME 'oxLevel'
+attributetype ( oxAttribute:250 NAME 'oxLevel'
 	DESC 'Level'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.251 NAME 'oxSCIMCustomAttribute'
+attributetype ( oxAttribute:251 NAME 'oxSCIMCustomAttribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.252 NAME 'oxScript' DESC 'Attribute that contains script (python, java script)'
+attributetype ( oxAttribute:252 NAME 'oxScript' DESC 'Attribute that contains script (python, java script)'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.253 NAME 'oxScriptDn' DESC 'Script object DN'
+attributetype ( oxAttribute:253 NAME 'oxScriptDn' DESC 'Script object DN'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.254 NAME 'oxScriptType'
+attributetype ( oxAttribute:254 NAME 'oxScriptType'
 	DESC 'Attribute that contains script type (e.g. python, java script)'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.255 NAME 'oxSmtpConfiguration'
+attributetype ( oxAttribute:255 NAME 'oxSmtpConfiguration'
 	DESC 'SMTP configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.256 NAME 'oxSourceAttribute'
+attributetype ( oxAttribute:256 NAME 'oxSourceAttribute'
 	DESC 'Source Attribute for this Attribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.257 NAME 'oxTicket' DESC 'ox ticket'
+attributetype ( oxAttribute:257 NAME 'oxTicket' DESC 'ox ticket'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.258 NAME 'oxTrustActive'
+attributetype ( oxAttribute:258 NAME 'oxTrustActive'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.259 NAME 'oxTrustCacheRefreshServerIpAddress'
+attributetype ( oxAttribute:259 NAME 'oxTrustCacheRefreshServerIpAddress'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Specifies the oxTrust server which should run Cache refresh' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.260 NAME 'oxTrustAddresses'
+attributetype ( oxAttribute:260 NAME 'oxTrustAddresses'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.261 NAME 'oxTrustConfApplication'
+attributetype ( oxAttribute:261 NAME 'oxTrustConfApplication'
 	DESC 'oxTrust Application Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.262 NAME 'oxTrustConfCacheRefresh'
+attributetype ( oxAttribute:262 NAME 'oxTrustConfCacheRefresh'
 	DESC 'oxTrust Cache Refresh Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.263 NAME 'oxConfApplication'
+attributetype ( oxAttribute:263 NAME 'oxConfApplication'
 	DESC 'ox Application Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.264 NAME 'oxTrustCustAttrB' DESC 'scim status'
+attributetype ( oxAttribute:264 NAME 'oxTrustCustAttrB' DESC 'scim status'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.265 NAME 'oxTrustEmail'
+attributetype ( oxAttribute:265 NAME 'oxTrustEmail'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.266 NAME 'oxTrustEntitlements'
+attributetype ( oxAttribute:266 NAME 'oxTrustEntitlements'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.267 NAME 'oxTrustExternalId'
+attributetype ( oxAttribute:267 NAME 'oxTrustExternalId'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.268 NAME 'oxTrustImsValue'
+attributetype ( oxAttribute:268 NAME 'oxTrustImsValue'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.269 NAME 'oxTrustMetaCreated'
+attributetype ( oxAttribute:269 NAME 'oxTrustMetaCreated'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.270 NAME 'oxTrustMetaLastModified'
+attributetype ( oxAttribute:270 NAME 'oxTrustMetaLastModified'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.271 NAME 'oxTrustMetaLocation'
+attributetype ( oxAttribute:271 NAME 'oxTrustMetaLocation'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.272 NAME 'oxTrustMetaVersion'
+attributetype ( oxAttribute:272 NAME 'oxTrustMetaVersion'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.273 NAME 'oxTrustNameFormatted'
+attributetype ( oxAttribute:273 NAME 'oxTrustNameFormatted'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.274 NAME 'oxTrustPhoneValue'
+attributetype ( oxAttribute:274 NAME 'oxTrustPhoneValue'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.275 NAME 'oxTrustPhotos'
+attributetype ( oxAttribute:275 NAME 'oxTrustPhotos'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.276 NAME 'oxTrustProfileURL'
+attributetype ( oxAttribute:276 NAME 'oxTrustProfileURL'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.277 NAME 'oxTrustRole'
+attributetype ( oxAttribute:277 NAME 'oxTrustRole'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.278 NAME 'oxTrustStoreCert'
+attributetype ( oxAttribute:278 NAME 'oxTrustStoreCert'
 	DESC 'oxPush device configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.279 NAME 'oxTrustStoreConf'
+attributetype ( oxAttribute:279 NAME 'oxTrustStoreConf'
 	DESC 'oxPush application configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.280 NAME 'oxTrustTitle'
+attributetype ( oxAttribute:280 NAME 'oxTrustTitle'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.281 NAME 'oxTrustUserType'
+attributetype ( oxAttribute:281 NAME 'oxTrustUserType'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.282 NAME 'oxTrusthonorificPrefix'
+attributetype ( oxAttribute:282 NAME 'oxTrusthonorificPrefix'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.283 NAME 'oxTrusthonorificSuffix'
+attributetype ( oxAttribute:283 NAME 'oxTrusthonorificSuffix'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.284 NAME 'oxTrustx509Certificate'
+attributetype ( oxAttribute:284 NAME 'oxTrustx509Certificate'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.285 NAME 'oxType' DESC 'ox type'
+attributetype ( oxAttribute:285 NAME 'oxType' DESC 'ox type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.286 NAME 'oxUmaPermission'
+attributetype ( oxAttribute:286 NAME 'oxUmaPermission'
 	DESC 'ox uma permission'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.287 NAME 'oxUrl' DESC 'ox url'
+attributetype ( oxAttribute:287 NAME 'oxUrl' DESC 'ox url'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.288 NAME 'oxX509PEM' DESC 'x509 in PEM format'
+attributetype ( oxAttribute:288 NAME 'oxX509PEM' DESC 'x509 in PEM format'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.289 NAME 'oxX509URL' DESC 'x509 URL'
+attributetype ( oxAttribute:289 NAME 'oxX509URL' DESC 'x509 URL'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.290 NAME 'passwordResetAllowed'
+attributetype ( oxAttribute:290 NAME 'passwordResetAllowed'
 	DESC 'Is password reset mechanics allowed'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.291 NAME 'persistentId'
+attributetype ( oxAttribute:291 NAME 'persistentId'
 	DESC 'PersistentId'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.292 NAME 'personInum'
+attributetype ( oxAttribute:292 NAME 'personInum'
 	DESC 'Inum of a person'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.293 NAME 'primaryKeyAttrName'
+attributetype ( oxAttribute:293 NAME 'primaryKeyAttrName'
 	DESC 'Primary Key Attribute Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.294 NAME 'primaryKeyValue'
+attributetype ( oxAttribute:294 NAME 'primaryKeyValue'
 	DESC 'Primary Key Value'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.295 NAME 'proStoresToken'
+attributetype ( oxAttribute:295 NAME 'proStoresToken'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.296 NAME 'programmingLanguage'
+attributetype ( oxAttribute:296 NAME 'programmingLanguage'
 	DESC 'programming language'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.297 NAME 'prostoresTimestamp'
+attributetype ( oxAttribute:297 NAME 'prostoresTimestamp'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.298 NAME 'registrationDate'
+attributetype ( oxAttribute:298 NAME 'registrationDate'
 	DESC 'Registration date'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.299 NAME 'role' DESC 'Role'
+attributetype ( oxAttribute:299 NAME 'role' DESC 'Role'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.300 NAME 'scimAuthMode'
+attributetype ( oxAttribute:300 NAME 'scimAuthMode'
 	DESC 'SCIM Authorization mode'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.301 NAME 'scimGroup'
+attributetype ( oxAttribute:301 NAME 'scimGroup'
 	DESC 'scim Group'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.302 NAME 'scimStatus'
+attributetype ( oxAttribute:302 NAME 'scimStatus'
 	DESC 'scim status'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.303 NAME 'secondaryKeyAttrName'
+attributetype ( oxAttribute:303 NAME 'secondaryKeyAttrName'
 	DESC 'Secondary Key Attribute Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.304 NAME 'secondaryKeyValue'
+attributetype ( oxAttribute:304 NAME 'secondaryKeyValue'
 	DESC 'Secondary Key Value'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.305 NAME 'secretAnswer'
+attributetype ( oxAttribute:305 NAME 'secretAnswer'
 	DESC 'Secret Answer'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.306 NAME 'secretQuestion'
+attributetype ( oxAttribute:306 NAME 'secretQuestion'
 	DESC 'Secret Question'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.307 NAME 'softwareVersion'
+attributetype ( oxAttribute:307 NAME 'softwareVersion'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.308 NAME 'sourceRelationalXdiStatement'
+attributetype ( oxAttribute:308 NAME 'sourceRelationalXdiStatement'
 	DESC 'OX SourceRelationalXdiStatement'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.309 NAME 'targetRelationalXdiStatement'
+attributetype ( oxAttribute:309 NAME 'targetRelationalXdiStatement'
 	DESC 'OX TargetRelationalXdiStatement'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.310 NAME 'tertiaryKeyAttrName'
+attributetype ( oxAttribute:310 NAME 'tertiaryKeyAttrName'
 	DESC 'Tertiary Key Attribute Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.311 NAME 'tertiaryKeyValue'
+attributetype ( oxAttribute:311 NAME 'tertiaryKeyValue'
 	DESC 'Tertiary Key Value'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.312 NAME 'transientId'
+attributetype ( oxAttribute:312 NAME 'transientId'
 	DESC 'TransientId'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.313 NAME 'url'
+attributetype ( oxAttribute:313 NAME 'url'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.314 NAME 'urn'
+attributetype ( oxAttribute:314 NAME 'urn'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.315 NAME 'x'
+attributetype ( oxAttribute:315 NAME 'x'
 	DESC 'OX XRI Component'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.316 NAME 'xdiStatement'
+attributetype ( oxAttribute:316 NAME 'xdiStatement'
 	DESC 'OX xdiStatement'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.317 NAME 'xri' DESC 'OX XRI address'
+attributetype ( oxAttribute:317 NAME 'xri' DESC 'OX XRI address'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.318 NAME ( 'middleName' 'oxTrustMiddleName' )
+attributetype ( oxAttribute:318 NAME ( 'middleName' 'oxTrustMiddleName' )
 	DESC 'Middle name(s)'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.319 NAME ( 'nickname' 'oxTrustnickname' )
+attributetype ( oxAttribute:319 NAME ( 'nickname' 'oxTrustnickname' )
 	DESC 'Casual name of the End-User'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.320 NAME 'preferredUsername'
+attributetype ( oxAttribute:320 NAME 'preferredUsername'
 	DESC 'Shorthand Name'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.321 NAME 'profile'
+attributetype ( oxAttribute:321 NAME 'profile'
 	DESC 'Profile page URL of the person'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.322 NAME ( 'picture' 'photo1' )
+attributetype ( oxAttribute:322 NAME ( 'picture' 'photo1' )
 	DESC 'Profile picture URL of the person'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.323 NAME 'website'
+attributetype ( oxAttribute:323 NAME 'website'
 	DESC 'Web page or blog URL of the person'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.324 NAME 'emailVerified'
+attributetype ( oxAttribute:324 NAME 'emailVerified'
 	DESC 'True if the e-mail address of the person has been verified; otherwise false'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.325 NAME 'gender'
+attributetype ( oxAttribute:325 NAME 'gender'
 	DESC 'Gender of the person either female or male'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.326 NAME 'birthdate'
+attributetype ( oxAttribute:326 NAME 'birthdate'
 	DESC 'Birthday of the person, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.327 NAME ( 'zoneinfo' 'timezone' )
+attributetype ( oxAttribute:327 NAME ( 'zoneinfo' 'timezone' )
 	DESC 'Time zone database representing the End-Users time zone. For example, Europe/Paris or America/Los_Angeles'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.328 NAME ( 'locale' 'oxTrustLocale' )
+attributetype ( oxAttribute:328 NAME ( 'locale' 'oxTrustLocale' )
 	DESC 'Locale of the person, represented as a BCP47 [RFC5646] language tag'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.329 NAME 'phoneNumberVerified'
+attributetype ( oxAttribute:329 NAME 'phoneNumberVerified'
 	DESC 'True if the phone number of the person has been verified, otherwise false'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.330 NAME 'address'
+attributetype ( oxAttribute:330 NAME 'address'
 	DESC 'OpenID Connect formatted JSON object representing the address of the person'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.331 NAME 'updatedAt'
+attributetype ( oxAttribute:331 NAME 'updatedAt'
 	DESC 'Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.332 NAME 'gluuRegExp'
+attributetype ( oxAttribute:332 NAME 'gluuRegExp'
 	DESC 'Regular expression used to validate attribute data'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.333 NAME 'gluuTooltip'
+attributetype ( oxAttribute:333 NAME 'gluuTooltip'
 	DESC 'Custom tooltip to be shown on the UI'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'OpenID Connect 1.0 Standard Claim' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.334 NAME 'oxModuleProperty'
+attributetype ( oxAttribute:334 NAME 'oxModuleProperty'
 	DESC 'Module property'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.335 NAME 'oxConfigurationProperty'
+attributetype ( oxAttribute:335 NAME 'oxConfigurationProperty'
 	DESC 'Configuration property'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.336 NAME 'oxAuthSessionAttribute'
+attributetype ( oxAttribute:336 NAME 'oxAuthSessionAttribute'
 	DESC 'oxAuthSessionAttribute'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.337 NAME 'researchAndScholarshipEnabled'
+attributetype ( oxAttribute:337 NAME 'researchAndScholarshipEnabled'
 	DESC 'Trust relationship attribute to show that InCommon R&S activated'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.338 NAME 'oxStartDate'
+attributetype ( oxAttribute:338 NAME 'oxStartDate'
 	DESC 'Start date'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.339 NAME 'oxEndDate'
+attributetype ( oxAttribute:339 NAME 'oxEndDate'
 	DESC 'End date'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.340 NAME 'oxApplicationType'
+attributetype ( oxAttribute:340 NAME 'oxApplicationType'
 	DESC 'Application type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.341 NAME 'oxMetricType'
+attributetype ( oxAttribute:341 NAME 'oxMetricType'
 	DESC 'Metric type'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.342 NAME 'oxData'
+attributetype ( oxAttribute:342 NAME 'oxData'
 	DESC 'OX data'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.343 NAME 'oxCodeChallenge'
+attributetype ( oxAttribute:343 NAME 'oxCodeChallenge'
 	DESC 'OX PKCE code challenge'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.344 NAME 'oxCodeChallengeMethod'
+attributetype ( oxAttribute:344 NAME 'oxCodeChallengeMethod'
 	DESC 'OX PKCE code challenge method'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.345 NAME 'oxSectorIdentifier'
+attributetype ( oxAttribute:345 NAME 'oxSectorIdentifier'
 	DESC 'ox Sector Identifier'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.346 NAME 'oxPersistClientAuthorizations'
+attributetype ( oxAttribute:346 NAME 'oxPersistClientAuthorizations'
 	DESC 'ox Persist Client Authorizations'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.347 NAME 'oxTrustConfImportPerson'
+attributetype ( oxAttribute:347 NAME 'oxTrustConfImportPerson'
 	DESC 'oxTrust Import Person Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.348 NAME 'oxSessionStateId'
+attributetype ( oxAttribute:348 NAME 'oxSessionStateId'
 	DESC 'oxSessionStateId'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.349 NAME 'oxAuthSessionDn'
+attributetype ( oxAttribute:349 NAME 'oxAuthSessionDn'
 	DESC 'oxAuth Session DN'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.350 NAME 'oxPasswordExpirationDate'
+attributetype ( oxAttribute:350 NAME 'oxPasswordExpirationDate'
 	DESC 'Password Expiration date, represented as an ISO 8601 (YYYY-MM-DD) format'
 	ORDERING generalizedTimeOrderingMatch
 	EQUALITY generalizedTimeMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.351 NAME 'friendlyName'
+attributetype ( oxAttribute:351 NAME 'friendlyName'
 	DESC 'oxAsimba friendlyName field'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.352 NAME 'organizationId'
+attributetype ( oxAttribute:352 NAME 'organizationId'
 	DESC 'oxAsimba IDP organizationId field'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.353 NAME 'oxAsimbaEntry'
+attributetype ( oxAttribute:353 NAME 'oxAsimbaEntry'
 	DESC 'oxAsimba configuration JSON/XML serialization field'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.354 NAME 'oxCountInvalidLogin'
+attributetype ( oxAttribute:354 NAME 'oxCountInvalidLogin'
 	DESC 'Invalid login attempts count'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.355 NAME 'gluuIMAPData'
+attributetype ( oxAttribute:355 NAME 'gluuIMAPData'
 	DESC 'This data has information about your imap connection'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.356 NAME 'gluuPassportConfiguration'
+attributetype ( oxAttribute:356 NAME 'gluuPassportConfiguration'
 	DESC 'oxTrust Passport Strategy Configuration'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.357 NAME 'gluuPassportEnabled'
+attributetype ( oxAttribute:357 NAME 'gluuPassportEnabled'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.358 NAME 'oxValidation'
+attributetype ( oxAttribute:358 NAME 'oxValidation'
 	DESC 'This data has information about attribute Validation'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( 1.3.6.1.4.1.12345.1.3.359 NAME 'gluuEntityType'
+attributetype ( oxAttribute:359 NAME 'gluuEntityType'
 	DESC 'This data has information about TR EntityType'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.1 NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
 	 ( oxId $ oxSectorIdentifier )
 	  X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.2 NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:2 NAME 'gluuPerson' SUP top STRUCTURAL MUST objectclass MAY
 	( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations
 	$ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum
 	$ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid
@@ -2492,13 +2500,13 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.2 NAME 'gluuPerson' SUP top STRUCTURAL MUST 
 	$ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.3 NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:3 NAME 'gluuGroup' SUP top STRUCTURAL MUST objectclass MAY 
 	( c $ description $ displayName $ gluuGroupType $ gluuGroupVisibility $ gluuStatus
 	$ iname $ inum $ member $ o $ owner $ seeAlso
 	$ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.4 NAME 'gluuOrganization' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:4 NAME 'gluuOrganization' SUP top STRUCTURAL MUST objectclass MAY 
 	( c $ county $ deployedAppliances $ description $ displayName $ gluuAddPersonCapability
 	$ gluuAdditionalUsers $ gluuApplianceUpdateRequestList $ gluuCustomMessage
 	$ gluuFaviconImage $ gluuFederationHostingEnabled $ gluuInvoiceNo $ gluuLogoImage
@@ -2512,7 +2520,7 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.4 NAME 'gluuOrganization' SUP top STRUCTURAL
 	$ title $ uid $ userPassword ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.5 NAME 'gluuAppliance' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:5 NAME 'gluuAppliance' SUP top STRUCTURAL MUST objectclass MAY 
 	( blowfishPassword $ c $ description $ displayName $ gluuAdditionalBandwidth
 	$ gluuAdditionalMemory $ gluuApplianceDnsServer $ gluuAppliancePollingInterval
 	$ gluuBandwidthRX $ gluuBandwidthTX 
@@ -2535,7 +2543,7 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.5 NAME 'gluuAppliance' SUP top STRUCTURAL MU
 	$ passwordResetAllowed $ softwareVersion $ userPassword $ oxTrustCacheRefreshServerIpAddress $ gluuPassportEnabled )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.6 NAME 'gluuAttribute' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:6 NAME 'gluuAttribute' SUP top STRUCTURAL MUST objectclass MAY 
 	( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin
 	$ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName
 	$ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI
@@ -2543,7 +2551,7 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.6 NAME 'gluuAttribute' SUP top STRUCTURAL MU
 	$ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.7 NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:7 NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUST objectclass MAY 
 	( description $ displayName $ federationRules $ gluuContainerFederation $ gluuEntityId
 	$ gluuIsFederation $ gluuProfileConfiguration $ gluuReleasedAttribute
 	$ gluuRulesAccepted $ gluuSAMLMetaDataFilter $ gluuSAMLTrustEngine $ gluuSAMLmaxRefreshDelay
@@ -2553,48 +2561,48 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.7 NAME 'gluuSAMLconfig' SUP top STRUCTURAL M
 	$ url $ researchAndScholarshipEnabled $ gluuEntityType ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.8 NAME 'gluuInumMap' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:8 NAME 'gluuInumMap' SUP top STRUCTURAL MUST objectclass MAY 
 	( gluuStatus $ inum $ primaryKeyAttrName $ primaryKeyValue $ secondaryKeyAttrName
 	$ secondaryKeyValue $ tertiaryKeyAttrName $ tertiaryKeyValue ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.9 NAME 'gluuInvoice' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:9 NAME 'gluuInvoice' SUP top STRUCTURAL MUST objectclass MAY 
 	( gluuInvoiceAmount $ gluuInvoiceDate $ gluuInvoiceLineItemName $ gluuInvoiceNumber
 	$ gluuInvoiceProductNumber $ gluuInvoiceQuantity $ gluuInvoiceStatus $ inum
 	)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.10 NAME 'gluuPasswordResetRequest' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:10 NAME 'gluuPasswordResetRequest' SUP top STRUCTURAL MUST objectclass MAY 
 	( creationDate $ oxGuid $ personInum ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.11 NAME 'oxLink' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:11 NAME 'oxLink' SUP top STRUCTURAL MUST objectclass MAY 
 	( description $ oxGuid $ oxLinkCreator $ oxLinkExpirationDate $ oxLinkLinktrack
 	$ oxLinkModerated $ oxLinkModerators $ oxLinkPending ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.12 NAME 'vdapcontainer' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:12 NAME 'vdapcontainer' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.13 NAME 'vdDirectoryView' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:13 NAME 'vdDirectoryView' SUP top STRUCTURAL MUST objectclass MAY 
 	( o ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.14 NAME 'vdlabel' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:14 NAME 'vdlabel' SUP top STRUCTURAL MUST objectclass MAY 
 	( o ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.15 NAME 'oxEntry' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:15 NAME 'oxEntry' SUP top STRUCTURAL MUST objectclass MAY 
 	( displayName $ iname $ inum ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.16 NAME 'oxNode' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:16 NAME 'oxNode' SUP top STRUCTURAL MUST objectclass MAY 
 	( organizationalOwner $ owner $ sourceRelationalXdiStatement $ targetRelationalXdiStatement
 	$ x $ xdiStatement $ xri ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.17 NAME 'oxAuthClient' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:17 NAME 'oxAuthClient' SUP top STRUCTURAL MUST objectclass MAY 
 	( associatedPerson $ displayName $ inum $ oxAuthAppType $ oxAuthClientIdIssuedAt
 	$ oxAuthClientSecret $ oxAuthClientSecretExpiresAt $ oxAuthClientURI
 	$ oxAuthContact $ oxAuthDefaultAcrValues $ oxAuthDefaultMaxAge $ oxAuthGrantType $ oxAuthIdTokenEncryptedResponseAlg
@@ -2609,141 +2617,141 @@ objectclass ( 1.3.6.1.4.1.12345.1.4.17 NAME 'oxAuthClient' SUP top STRUCTURAL MU
 	$ oxLastAccessTime $ oxLastLogonTime $ oxPersistClientAuthorizations $ oxAuthLogoutURI $ oxAuthLogoutSessionRequired )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.18 NAME 'oxAuthCustomScope' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:18 NAME 'oxAuthCustomScope' SUP top STRUCTURAL MUST objectclass MAY 
 	( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxAuthGroupClaims )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.19 NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:19 NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxLastAccessTime $ oxAuthAuthenticationTime $ oxAuthPermissionGranted
 	$ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute
 	$ oxAsJwt $ oxJwt $ oxInvolvedClients )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.20 NAME 'oxAuthConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:20 NAME 'oxAuthConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou $ oxAuthConfDynamic $ oxAuthConfErrors $ oxAuthConfStatic $ oxAuthConfWebKeys $ oxRevision )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.21 NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:21 NAME 'oxTrustConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.22 NAME 'oxApplicationConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:22 NAME 'oxApplicationConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou $ oxConfApplication $ oxRevision ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.23 NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:23 NAME 'oxAuthUmaResourceSet' SUP top STRUCTURAL MUST objectclass MAY 
 	( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage
 	$ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.24 NAME 'oxAuthUmaScopeDescription' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription' SUP top STRUCTURAL MUST objectclass MAY 
 	( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision
 	$ oxType $ oxUrl ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.25 NAME 'oxAuthUmaResourceSetPermission' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:25 NAME 'oxAuthUmaResourceSetPermission' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxAmHost $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxHost
 	$ oxResourceSetId $ oxTicket ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.26 NAME 'oxAuthGrant' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:26 NAME 'oxAuthGrant' SUP top STRUCTURAL MUST objectclass MAY
 	 ( oxAuthGrantId $ oxAuthCreation )
 	  X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.27 NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:27 NAME 'oxAuthToken' SUP top STRUCTURAL MUST objectclass MAY
 	( oxAuthAuthenticationTime $ oxAuthAuthorizationCode
 	$ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest
 	$ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId
 	$ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthSessionDn )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.28 NAME 'oxAuthUmaRPT' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:28 NAME 'oxAuthUmaRPT' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration
 	$ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.29 NAME 'oxLiteralNode' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:29 NAME 'oxLiteralNode' SUP top STRUCTURAL MUST objectclass MAY 
 	( literalBinaryValue $ literalValue $ organizationalOwner $ owner $ targetRelationalXdiStatement
 	$ x $ xdiStatement $ xri ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.30 NAME 'oxProxConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:30 NAME 'oxProxConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou $ oxProxConf $ oxScriptDn ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.31 NAME 'oxProxOp' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:31 NAME 'oxProxOp' SUP top STRUCTURAL MUST objectclass MAY 
 	( c $ displayName $ inum $ l $ oxDomain $ oxId $ oxX509PEM $ oxX509URL ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.32 NAME 'oxProxClient' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:32 NAME 'oxProxClient' SUP top STRUCTURAL MUST objectclass MAY 
 	( displayName $ inum $ oxProxyClaimMapping $ oxProxyScope $ oxProxyToOpClientMapping
 	)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.33 NAME 'oxProxAccessToken' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:33 NAME 'oxProxAccessToken' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxAuthCreation $ oxAuthExpiration $ oxProxyAccessToken $ oxProxyClientId
 	)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.34 NAME 'oxScript' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:34 NAME 'oxScript' SUP top STRUCTURAL MUST objectclass MAY 
 	( inum $ oxScript $ oxScriptType ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.35 NAME 'oxPushApplication' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:35 NAME 'oxPushApplication' SUP top STRUCTURAL MUST objectclass MAY 
 	( displayName $ oxId $ oxName $ oxPushApplicationConf ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.36 NAME 'oxPushDevice' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:36 NAME 'oxPushDevice' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxAuthUserId $ oxId $ oxPushApplication $ oxPushDeviceConf $ oxType ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.37 NAME 'oxCustomScript' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:37 NAME 'oxCustomScript' SUP top STRUCTURAL MUST objectclass MAY 
 	( inum $ displayName $ description $ oxScript $ oxScriptType $ programmingLanguage $ oxModuleProperty
 	$ oxConfigurationProperty $ oxLevel $ oxRevision $ gluuStatus ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.38 NAME 'oxDeviceRegistration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:38 NAME 'oxDeviceRegistration' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication
 	$ oxDeviceRegistrationConf $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime
 	$ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.39 NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:39 NAME 'oxU2fRequest' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxId $ oxRequestId $ oxRequest $ oxSessionStateId $ personInum $ creationDate )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.40 NAME 'oxMetric' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:40 NAME 'oxMetric' SUP top STRUCTURAL MUST objectclass MAY 
 	( uniqueIdentifier $ oxStartDate $ oxEndDate $ oxApplicationType $ oxMetricType $ creationDate $ oxData ) 
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.41 NAME 'oxClientAuthorizations' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:41 NAME 'oxClientAuthorizations' SUP top STRUCTURAL MUST objectclass MAY
 	( oxId $ oxAuthClientId $ oxAuthScope )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.42 NAME 'oxSectorIdentifier' SUP top STRUCTURAL MUST objectclass MAY
+objectclass ( oxObjectClass:42 NAME 'oxSectorIdentifier' SUP top STRUCTURAL MUST objectclass MAY
 	( inum $ oxAuthRedirectURI $ oxAuthClientId )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.43 NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectclass )
+objectclass ( oxObjectClass:43 NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxConfApplication $ oxRevision)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.44 NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectclass )
+objectclass ( oxObjectClass:44 NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.45 NAME 'oxAsimbaIDP' SUP top STRUCTURAL MUST ( objectclass )
+objectclass ( oxObjectClass:45 NAME 'oxAsimbaIDP' SUP top STRUCTURAL MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.46 NAME 'oxAsimbaRequestorPool' SUP top STRUCTURAL MUST ( objectclass )
+objectclass ( oxObjectClass:46 NAME 'oxAsimbaRequestorPool' SUP top STRUCTURAL MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.47 NAME 'oxAsimbaSPRequestor' SUP top STRUCTURAL MUST ( objectclass )
+objectclass ( oxObjectClass:47 NAME 'oxAsimbaSPRequestor' SUP top STRUCTURAL MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( 1.3.6.1.4.1.12345.1.4.48 NAME 'oxPassportConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
+objectclass ( oxObjectClass:48 NAME 'oxPassportConfiguration' SUP top STRUCTURAL MUST objectclass MAY 
 	( ou $ gluuPassportConfiguration $ gluuStatus) 
 	X-ORIGIN 'Gluu created objectclass' )
