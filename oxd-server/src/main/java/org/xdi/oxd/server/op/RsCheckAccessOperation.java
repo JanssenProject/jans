@@ -87,14 +87,17 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             } else {
                 throw e;
             }
-
         }
+
+        LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
         final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
             for (UmaPermission permission : status.getPermissions()) {
                 final List<String> requiredScopes = resource.getScopes();
                 boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
+
+                LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
 
                 if (containsAny) {
                     if (isGat) { // GAT
