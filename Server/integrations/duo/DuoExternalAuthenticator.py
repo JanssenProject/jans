@@ -7,8 +7,7 @@
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.oxauth.service import UserGroupService
+from org.xdi.oxauth.service import UserService, UserGroupService, AuthenticationService
 from org.xdi.service import MailService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -104,7 +103,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not logged_in):
                 return False
 
-            user = credentials.getUser()
+            authenticationService = AuthenticationService.instance()
+            user = authenticationService.getAuthenticatedUser()
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
                 is_member_duo_group = self.isUserMemberOfGroup(user, self.audit_attribute, self.duo_group)
@@ -138,7 +138,9 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            self.processAuditGroup(credentials.getUser())
+            authenticationService = AuthenticationService.instance()
+            user = authenticationService.getAuthenticatedUser()
+            self.processAuditGroup(user)
 
             return True
         else:

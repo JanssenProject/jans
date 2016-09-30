@@ -6,10 +6,6 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -19,12 +15,12 @@ import org.jboss.seam.annotations.Startup;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.client.ClientRegistrationType;
 import org.xdi.model.custom.script.type.session.ApplicationSessionType;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.service.custom.script.ExternalScriptService;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external application session extension
@@ -43,12 +39,12 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
 		super(CustomScriptType.APPLICATION_SESSION);
 	}
 
-	public boolean executeExternalEndSessionMethod(CustomScriptConfiguration customScriptConfiguration, HttpServletRequest httpRequest, AuthorizationGrant authorizationGrant) {
+	public boolean executeExternalEndSessionMethod(CustomScriptConfiguration customScriptConfiguration, HttpServletRequest httpRequest, SessionState sessionState) {
 		try {
 			log.debug("Executing python 'endSession' method");
 			ApplicationSessionType applicationSessionType = (ApplicationSessionType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-			return applicationSessionType.endSession(httpRequest, authorizationGrant, configurationAttributes);
+			return applicationSessionType.endSession(httpRequest, sessionState, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
@@ -56,10 +52,10 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
 		return false;
 	}
 
-	public boolean executeExternalEndSessionMethods(HttpServletRequest httpRequest, AuthorizationGrant authorizationGrant) {
+	public boolean executeExternalEndSessionMethods(HttpServletRequest httpRequest, SessionState sessionState) {
 		boolean result = true;
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			result &= executeExternalEndSessionMethod(customScriptConfiguration, httpRequest, authorizationGrant);
+			result &= executeExternalEndSessionMethod(customScriptConfiguration, httpRequest, sessionState);
 			if (!result) {
 				return result;
 			}

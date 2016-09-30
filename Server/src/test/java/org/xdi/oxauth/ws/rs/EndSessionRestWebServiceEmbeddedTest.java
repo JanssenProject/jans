@@ -197,7 +197,6 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 assertNotNull(response.getContentAsString(), "Unexpected html.");
                 assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
-                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
 
             }
 
@@ -278,7 +277,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                 super.onResponse(response);
                 showResponse("requestEndSessionFail2", response);
 
-                assertEquals(response.getStatus(), 401, "Unexpected response code.");
+                assertEquals(response.getStatus(), 400, "Unexpected response code.");
                 assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
                 try {
                     JSONObject jsonObj = new JSONObject(response.getContentAsString());

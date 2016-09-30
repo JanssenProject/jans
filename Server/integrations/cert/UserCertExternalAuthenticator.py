@@ -159,7 +159,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. Fingerprint is '%s' of certificate with DN '%s'" % (x509CertificateFingerprint, subjectX500Principal)
             
             # Attempt to find user by certificate fingerprint
-            cert_user_external_uid = "cert: %s" % x509CertificateFingerprint
+            cert_user_external_uid = "cert:%s" % x509CertificateFingerprint
             print "Cert. Authenticate for step 2. Attempting to find user by oxExternalUid attribute value %s" % cert_user_external_uid
 
             find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)

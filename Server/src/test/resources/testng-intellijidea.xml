@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Custom suite" parallel="false">
+  <test verbose="1" name="oxauth" annotations="JDK">
+    <classes>
+      <class name="org.xdi.oxauth.ws.rs.EndSessionRestWebServiceEmbeddedTest">
+        <methods>
+          <include name="requestEndSessionStep1"/>
+          <include name="requestEndSessionStep2"/>
+          <include name="requestEndSessionStep3"/>
+          <include name="requestEndSessionFail1"/>
+          <include name="requestEndSessionFail2"/>
+        </methods>
+      </class>
+    </classes>
+  </test>
+
+  <parameter name="serverUri" value="https://localhost:80"/>
+  <parameter name="authorizePath" value="/restv1/oxauth/authorize"/>
+  <parameter name="introspectionPath" value="/restv1/introspection"/>
+  <parameter name="tokenPath" value="/restv1/oxauth/token"/>
+  <parameter name="validateTokenPath" value="/restv1/oxauth/validate"/>
+  <parameter name="jwksPath" value="/restv1/oxauth/jwks"/>
+  <parameter name="userInfoPath" value="/restv1/oxauth/userinfo"/>
+  <parameter name="clientInfoPath" value="/restv1/oxauth/clientinfo"/>
+  <parameter name="checkSessionPath" value="/restv1/oxauth/check_session"/>
+  <parameter name="endSessionPath" value="/restv1/oxauth/end_session"/>
+  <parameter name="endSessionPagePath" value="/restv1/oxauth/end_session_page"/>
+  <parameter name="registerPath" value="/restv1/oxauth/register"/>
+  <parameter name="redirectUri" value="https://client.example.com/cb"/>
+  <parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2"/>
+  <parameter name="postLogoutRedirectUri" value="https://client.example.com/pl"/>
+  <parameter name="userId" value="yuriy"/>
+  <parameter name="userSecret" value="secret"/>
+</suite>

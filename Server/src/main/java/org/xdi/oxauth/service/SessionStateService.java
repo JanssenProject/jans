@@ -22,9 +22,11 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -67,6 +69,18 @@ public class SessionStateService {
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
 
+    public static String getAcr(SessionState session) {
+        if (session == null || session.getSessionAttributes() == null) {
+            return null;
+        }
+
+        String acr =  session.getSessionAttributes().get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+        if (StringUtils.isBlank(acr)) {
+            acr = session.getSessionAttributes().get("acr_values");
+        }
+        return acr;
+    }
+
 
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
@@ -78,9 +92,26 @@ public class SessionStateService {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
-            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAttributes.get("acr_values"));
+            String sessionAcr = getAcr(session);
+
+            if (StringUtils.isBlank(sessionAcr)) {
+                log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
+                return session;
+            }
+
+            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
             if (isAcrChanged) {
-                throw new AcrChangedException();
+                Map<String, Integer> acrToLevel = ExternalAuthenticationService.instance().acrToLevelMapping();
+                Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
+                Integer currentAcrLevel = acrToLevel.get(acrValuesStr);
+
+                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
+                        "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
+                if (sessionAcrLevel < currentAcrLevel ) {
+                    throw new AcrChangedException();
+                } else { // https://github.com/GluuFederation/oxAuth/issues/291
+                    return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
+                }
             }
 
             reinitLogin(session, false);
@@ -382,6 +413,10 @@ public class SessionStateService {
     }
 
     public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt, boolean forceUpdate) {
+        if (sessionState == null) {
+            return false;
+        }
+
         List<Prompt> prompts = getPromptsFromSessionState(sessionState);
 
         try {
@@ -499,7 +534,8 @@ public class SessionStateService {
     public List<SessionState> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {
         try {
             final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
-            final Filter filter = Filter.create(String.format("&(lastModifiedTime<=%s)(oxState=unauthenticated)", StaticUtils.encodeGeneralizedTime(new Date(dateInPast))));
+            String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+            final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
             return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -511,7 +547,8 @@ public class SessionStateService {
     public List<SessionState> getIdsOlderThan(int p_intervalInSeconds) {
         try {
             final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
-            final Filter filter = Filter.create(String.format("(lastModifiedTime<=%s)", StaticUtils.encodeGeneralizedTime(new Date(dateInPast))));
+            String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+            final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
             return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
