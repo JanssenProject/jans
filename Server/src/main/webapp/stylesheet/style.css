@@ -145,6 +145,7 @@ background: linear-gradient(to bottom,  #21c87a 0%,#1ab26b 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#21c87a', endColorstr='#1ab26b',GradientType=0 ); /* IE6-8 */}
 .contact-button.green{display:inline-block; width:130px; height:35px; border-radius:3px; position:relative; box-shadow: 1px 2px 2px rgba(43, 43, 43, 0.4);}
 .contact-button input[type="submit"]{position:absolute; width:130px; height:35px; z-index:2; text-align:left; background:none; border:none; color:#fff; text-transform:uppercase; font-size:12px; line-height:1em; letter-spacing:.04em; font-weight:bold; padding-left:15px;}
+.contact-button input[type="button"]{position:absolute; width:130px; height:35px; z-index:2; text-align:left; background:none; border:none; color:#fff; text-transform:uppercase; font-size:12px; line-height:1em; letter-spacing:.04em; font-weight:bold; padding-left:15px;}
 .contact-button span{width:20px; height:20px; position:absolute; right:6px; top:7px; border:0px solid black;}
 .sprite-green_click_icon{background: url('img/sprite-s3f8b0bb6dc.png') no-repeat; background-position: 0 -388px;}
 .sprite-pointer{background: url('img/sprite-s3f8b0bb6dc.png') no-repeat; background-position: 0 -883px;}

@@ -1,0 +1,170 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.org/schema/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
+
+	<ui:define name="head">
+		<meta name="description" content="Gluu Inc." />
+        <link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/jquery-ui-1.11.4.min.css"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.11.4.min.js"/>
+        <script src="../../js/gluu-auth.js"/>
+
+        <script>
+			var helper = (function() {
+				var authResult = undefined;
+
+				return {
+	 			    /**
+	 			    * Resume on getting authentication result from server
+	 			    */
+					onSignInCallback: function(authResult) {
+				        console.log('Get authentication result: ' + authResult);
+						helper.resumeAuthentication(authResult);
+					},
+
+					/**
+					* Send form to server to resume authentication workflow
+					*/
+					resumeAuthentication: function(authResult) {
+						$('input#auth_result').val(authResult);
+						$('form#response').submit();
+					},
+				};
+			})();
+			
+			/**
+			 * Calls the helper method that handles the authentication flow.
+			 */
+			function onSignInCallback(authResult) {
+			  helper.onSignInCallback(authResult);
+			}
+
+			var request = '${otp_enrollment_request}';
+			var label = '${qr_label}';
+			var qr_options = ${qr_options};
+			$(document).ready(function() {
+
+				if (request == '') {
+					onSignInCallback('error');
+				}
+
+				gluu_auth.renderQrCode('#container', request, qr_options, label);
+				gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
+			});
+
+        </script>
+        <style type="text/css">
+            .otp-progress-bar {
+                margin-right: 40px;
+            }
+
+			.otp-container {
+				width: 1160px;
+			}
+        </style>
+	</ui:define>
+
+	<ui:define name="pageTitle">
+		<h:outputText value="oxAuth - OTP Login" />
+	</ui:define>
+
+	<ui:define name="body">
+        <form method="post" id="response" action="#{request.contextPath}/postlogin">
+            <input type="hidden" id="auth_result" name="auth_result" />
+        </form>
+
+		<header>
+		<div class="container otp-container">
+			<div id="header" class="row-fluid">
+				<div class="logo span2">
+					<ui:param name="client"
+						value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+
+					<s:div rendered='#{!empty client.getLogoUri()}'>
+						<h:graphicImage url='#{client.getLogoUri()}' />
+					</s:div>
+					<s:div rendered='#{empty client.getLogoUri()}'>
+						<a href="http://www.gluu.org/"> <h:graphicImage
+								url="../../img/logo.png" />
+						</a>
+					</s:div>
+				</div>
+				<!-- end logo-->
+			</div>
+		</div>
+
+		</header>
+		<!-- end header-->
+		<div class="container otp-container">
+			<div id="content" class="sign-in-page">
+				<div class="row-fluid">
+					<h:form id="loginForm" class="signin-form span6 offset3">
+						<h:panelGroup rendered="#{not identity.loggedIn}">
+							<div class="inner-form-container row-fluid">
+								<ul class="offset2 span10">
+									<s:token />
+									<h:messages style="color:red;" />
+									<div class="row-fluid">
+                                        <div class="dialog">
+                                        	<p>Scan QR code using OTP authenticator and press finish button</p>
+                                        	<div id="container"></div>
+                                        	<div id="progressbar" class="otp-progress-bar"></div>
+                                        </div>
+									</div>
+
+									<li class="row-fluid submit-container">
+										<div class="gradient contact-button green span2 offset3">
+											<div id="submit_block" class="login_input">
+												<h:commandButton id="finishButton" style="padding-left: 35%;"
+													value="Finish"
+													action="#{authenticator.authenticate}" />
+											</div>
+											<span class="sprite-green_click_icon"></span>
+										</div>
+									</li>
+									<s:div rendered='#{!empty client.getPolicyUri()}'>
+										<p>
+											<h:outputText value="#{messages['common.agreePolicy']}" />
+											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+													value="#{messages['common.privacyPolicy']}" />
+											</a>
+										</p>
+									</s:div>
+
+									<s:div rendered='#{!empty client.getTosUri()}'>
+										<p>
+											<h:outputText value="#{messages['common.pleaseReadTheTos']}" />
+											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+													value="#{messages['common.termsOfService']}" />
+											</a>
+										</p>
+									</s:div>
+								</ul>
+
+							</div>
+						</h:panelGroup>
+					</h:form>
+				</div>
+			</div>
+			<div id="footer">
+				<p>
+					<h:outputText value="#{messages['common.gluuInc']}" />
+					, |
+					<h:outputText value="#{messages['common.caution']}" />
+				</p>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+            window.onload = function () {
+                var otpCodeField = document.getElementById("loginForm:otpCode");
+                otpCodeField.focus();
+            };
+        </script>
+	</ui:define>
+</ui:composition>
