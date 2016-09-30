@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.crypto;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -19,6 +20,7 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -56,7 +58,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 17, 2016
+ * @version September 30, 2016
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -145,6 +147,9 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
             jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         }
+        JSONArray x5c = new JSONArray();
+        x5c.put(Base64.encodeBase64String(cert.getEncoded()));
+        jsonObject.put(CERTIFICATE_CHAIN, x5c);
 
         return jsonObject;
     }
