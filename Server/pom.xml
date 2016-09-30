@@ -822,6 +822,36 @@
 		</profile>
 
 		<profile>
+			<id>otp_auth</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>!disable-otp_auth</name>
+				</property>
+			</activation>
+			<repositories>
+				<repository>
+					<id>otp_auth-local</id>
+					<url>file://${project.basedir}/integrations/otp/repository</url>
+				</repository>
+			</repositories>
+			<dependencies>
+				<dependency>
+					<groupId>com.lochbridge.oath</groupId>
+					<artifactId>oath-otp</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+					<scope>compile</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.lochbridge.oath</groupId>
+					<artifactId>oath-otp-keyprovisioning</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+					<scope>compile</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<profile>
 			<id>test-dependencies</id>
 			<activation>
 				<property>

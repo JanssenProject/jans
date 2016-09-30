@@ -60,9 +60,10 @@ public class AuthenticationService {
 
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
 
+    // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             "scope", "response_type", "client_id", "redirect_uri", "state", "response_mode", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr_values", "session_state", "request", "request_uri",
+            "ui_locales", "id_token_hint", "login_hint", "acr", "session_state", "request", "request_uri",
             AuthorizeRequestParam.ORIGIN_HEADERS, AuthorizeRequestParam.CODE_CHALLENGE, AuthorizeRequestParam.CODE_CHALLENGE_METHOD));
 
     @Logger
@@ -123,19 +124,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        SessionState sessionState = sessionStateService.getSessionState();
-        if (sessionState != null) {
-            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
-            if (authenticated) {
-                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
-            }
-            sessionStateService.updateSessionState(sessionState);
-
-            // TODO: Remove after 2.4.5
-            if (authenticated && !StringHelper.equalsIgnoreCase(userName, getAuthenticatedUserId())) {
-                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
-            }
-        }
+        setAuthenticatedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -148,6 +137,23 @@ public class AuthenticationService {
 
         return authenticated;
     }
+
+	private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
+		SessionState sessionState = sessionStateService.getSessionState();
+        if (sessionState != null) {
+            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+            if (authenticated) {
+                sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
+            }
+            sessionStateService.updateSessionState(sessionState);
+
+            // TODO: Remove after 2.4.5
+            String sessionAuthUser = getAuthenticatedUserId();
+            if (authenticated && (sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(userName, sessionAuthUser)) {
+                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
+            }
+        }
+	}
 
     private boolean localAuthenticate(Credentials credentials, String userName, String password) {
         User user = userService.getUser(userName);
@@ -234,6 +240,10 @@ public class AuthenticationService {
     /*
      * Utility method which can be used in custom scripts
      */
+    public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
+        Credentials credentials = ServerUtil.instance(Credentials.class);
+    	return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+    }
     public boolean authenticate(Credentials credentials, GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}', credentials: '{2}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
@@ -265,11 +275,6 @@ public class AuthenticationService {
                         if (localUser != null) {
                             if (!checkUserStatus(localUser)) {
                                 return false;
-                            }
-
-                            // TODO: Remove after 2.4.5
-                            if (!StringHelper.equalsIgnoreCase(localUser.getUserId(), keyValue)) {
-                                throw new InvalidStateException("authenticate_external: User name and user in credentials don't match");
                             }
 
                             configureAuthenticatedUser(localUser);
@@ -310,6 +315,8 @@ public class AuthenticationService {
         } finally {
             timerContext.stop();
         }
+
+        setAuthenticatedUserSessionAttribute(userName, authenticated);
 
         MetricType metricType;
         if (authenticated) {
@@ -389,7 +396,7 @@ public class AuthenticationService {
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            if (!StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
+            if ((sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
                 throw new InvalidStateException("configureSessionUser: User in session and in credentials don't match");
             }
             log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
@@ -437,6 +444,18 @@ public class AuthenticationService {
         Context eventContext = Contexts.getEventContext();
         if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
             return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
+        } else {
+    		SessionState sessionState = sessionStateService.getSessionState();
+            if (sessionState != null) {
+                Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+                String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
+                if (StringHelper.isNotEmpty(userId)) {
+                	User user = userService.getUser(userId);
+                    eventContext.set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+                    
+                    return user;
+                }
+            }
         }
 
         return null;

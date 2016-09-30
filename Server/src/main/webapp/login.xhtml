@@ -8,7 +8,7 @@
 
     <ui:define name="head">
           <meta name="description" content="Gluu Inc." />
-          
+
      </ui:define>
      
      <ui:define name="pageTitle">
@@ -49,108 +49,100 @@
 			       <h:form id="loginForm" class="signin-form span6 offset3">
 			        <h:panelGroup rendered="#{not identity.loggedIn}">
 				      <div class="inner-form-container row-fluid">
-					     <ul class="offset2 span10">
+								<ul class="offset2 span10">
 
-                                    <s:token/>
+									<s:token />
+									<h:messages style="color:red;" />
+									<div class="row-fluid">
+										<span class="input-name span3"> <h:outputLabel
+												for="username" value="#{messages['login.username']}" />
+										</span>
 
-                                    <!-- <input type="hidden" name="auth_step" value="1"/>
-                                    <input type="hidden" name="response_type" value="${param.response_type}"/>
-                                    <input type="hidden" name="scope" value="#{param.scope}"/>
-                                    <input type="hidden" name="client_id" value="#{param.client_id}"/>
-                                    <input type="hidden" name="redirect_uri" value="#{param.redirect_uri}"/>
-                                    <input type="hidden" name="state" value="#{param.state}"/>
-                                    <input type="hidden" name="nonce" value="#{param.nonce}"/>
-                                    <input type="hidden" name="display" value="#{param.display}"/>
-                                    <input type="hidden" name="prompt" value="#{param.prompt}"/>
-                                    <input type="hidden" name="max_age" value="#{param.max_age}"/>
-                                    <input type="hidden" name="ui_locales" value="#{param.ui_locales}"/>
-                                    <input type="hidden" name="id_token_hint" value="#{param.id_token_hint}"/>
-                                    <input type="hidden" name="login_hint" value="#{param.login_hint}"/>
-                                    <input type="hidden" name="acr_values" value="#{param.acr_values}"/>
-                                    <input type="hidden" name="request_uri" value="#{param.request_uri}"/>
-                                    <input type="hidden" name="request" value="#{param.request}"/>
-                                    <input type="hidden" name="auth_mode" value="#{param.auth_mode}"/>
-                                    <input type="hidden" name="auth_level" value="#{param.auth_level}"/>
- -->
-				<h:messages style="color:red;" />
-				<div class="row-fluid">
-							<span class="input-name span3">
-								<h:outputLabel for="username" value="#{messages['login.username']}"/>
-							</span>
-
-						 <div class="span6">
-							<h:inputText id="username" value="#{credentials.username}" autocomplete="off"/>
-						</div>
-                    </div>
+										<div class="span6">
+											<h:inputText id="username" value="#{credentials.username}"
+												autocomplete="off" />
+										</div>
+									</div>
 
 
-				<div class="row-fluid">
-          					<span class="input-name span3">
-               					<h:outputLabel for="password" value="#{messages['login.password']}" />
-                                   </span>
-						<div class="span6">
-							<h:inputSecret id="password" value="#{credentials.password}" autocomplete="off"/>
+									<div class="row-fluid">
+										<span class="input-name span3"> <h:outputLabel
+												for="password" value="#{messages['login.password']}" />
+										</span>
+										<div class="span6">
+											<h:inputSecret id="password" value="#{credentials.password}"
+												autocomplete="off" />
 
-						</div>
-                    </div>
+										</div>
+									</div>
 
-                     <li class="row-fluid submit-container">
-	                   <div class="gradient contact-button green span2 offset3">
-                              <div id="submit_block" class="login_input">
-                                        <h:commandButton id="loginButton" style="padding-left: 35%;" value="#{messages['login.login']}" action="#{authenticator.authenticate}"/>
-                              </div>                
-                              <span class="sprite-green_click_icon"></span>
-                         </div>
-                    </li>
-                    <s:div id="registerId" style="display:none">
-                     <li class="row-fluid submit-container">
-	                   <div class="gradient contact-button green span2 offset3">
-                              <div id="submit_block" class="login_input">
-                                        <h:commandButton id="registerButton" style="padding-left: 35%;" value="#{messages['login.register']}" action="#{authenticator.authenticate}"/>
-                              </div>                
-                              <span class="sprite-green_click_icon"></span>
-                         </div>
-                    </li>
-                    </s:div> 
-                    <li class="row-fluid">
-                         <div class="span9 offset3">
-                              <a class="need-account,register" href="/identity/person/passwordReminder.htm">Forgot your password?</a>
-                         </div>
-                    </li>
-                     <s:div rendered='#{!empty client.getPolicyUri()}'>
-                        <p>
-                          <h:outputText value="#{messages['common.agreePolicy']}"/>
-                          <a target="_blank" href='#{client.getPolicyUri()}'>
-                                 <h:outputText value="#{messages['common.privacyPolicy']}"/>
-                         </a>
-                        </p>
-                    </s:div>
+									<li class="row-fluid submit-container">
+										<div class="gradient contact-button green span2 offset3">
+											<div id="submit_block" class="login_input">
+												<h:commandButton id="loginButton" style="padding-left: 35%;"
+													value="#{messages['login.login']}"
+													action="#{authenticator.authenticate}" />
+											</div>
+											<span class="sprite-green_click_icon"></span>
+										</div>
+									</li>
+									<li class="row-fluid submit-container"><s:div
+											id="registerId" style="display:none">
+											<div class="gradient contact-button green span2 offset3">
+												<div id="submit_block" class="login_input">
+													<h:commandButton id="registerButton"
+														style="padding-left: 35%;"
+														value="#{messages['login.register']}"
+														action="#{authenticator.authenticate}" />
+												</div>
+												<span class="sprite-green_click_icon"></span>
+											</div>
+										</s:div></li>
+									<li class="row-fluid">
+										<div class="span9 offset3">
+											<a class="need-account,register"
+												href="/identity/person/passwordReminder.htm">Forgot your
+												password?</a>
+										</div>
+									</li>
+									<s:div rendered='#{!empty client.getPolicyUri()}'>
+										<p>
+											<h:outputText value="#{messages['common.agreePolicy']}" />
+											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+													value="#{messages['common.privacyPolicy']}" />
+											</a>
+										</p>
+									</s:div>
 
-                    <s:div rendered='#{!empty client.getTosUri()}'>
-                         <p>
-                            <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
-                           <a target="_blank" href='#{client.getTosUri()}'>
-                        	   <h:outputText value="#{messages['common.termsOfService']}"/>
-                           </a>
-                         </p>
-                    </s:div>
-                    <br/>
-                    <div class="login-panel">
-                                    <s:fragment rendered="#{external_auth_request_uri != Null}">
-                                        <a id="externalAuthButton"
-                                           href="#{external_auth_request_uri}">
-                                            <input type="button" value="Use External Authentification"/>
-                                        </a>
-                                    </s:fragment>
-                                    <s:fragment rendered="#{external_registration_uri != Null}">
-                                        <a id="externalRegistrationButton" href="#{external_registration_uri}">
-                                            <input type="button" value="Register new user"/>
-                                        </a>
-                                    </s:fragment>
-                      </div>
-                         </ul>
-                     
-                    </div>
+									<s:div rendered='#{!empty client.getTosUri()}'>
+										<p>
+											<h:outputText value="#{messages['common.pleaseReadTheTos']}" />
+											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+													value="#{messages['common.termsOfService']}" />
+											</a>
+										</p>
+									</s:div>
+									<s:fragment rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+										<li class="row-fluid submit-container">
+											<div class="gradient contact-button green span2 offset3" style="width:220px;">
+												<s:fragment rendered="#{external_auth_request_uri != Null}">
+													<a id="externalAuthButton"
+														href="#{external_auth_request_uri}"> <input
+														type="button" value="Use External Authentification" />
+													</a>
+												</s:fragment>
+												<s:fragment rendered="#{external_registration_uri != Null}">
+													<a id="externalRegistrationButton"
+														href="#{external_registration_uri}"> <input
+														type="button" style="width:220px;" value="Register new user" />
+													</a>
+												</s:fragment>
+											</div>
+										</li>
+									</s:fragment>
+								</ul>
+
+							</div>
                     </h:panelGroup>
                     </h:form>
                     </div>
