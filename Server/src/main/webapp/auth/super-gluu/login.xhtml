@@ -11,7 +11,7 @@
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.11.4.min.js"/>
-        <script src="./js/super-gluu.js"/>
+        <script src="../../js/gluu-auth.js"/>
 
         <script>
 			var helper = (function() {
@@ -52,9 +52,9 @@
 					onSignInCallback('error');
 				}
 
-				super_gluu.renderQrCode('#container', request, qr_options, label);
-				super_gluu.startProgressBar('#progressbar', 60);
-				super_gluu.startSessionChecker(onSignInCallback, 60);
+				gluu_auth.renderQrCode('#container', request, qr_options, label);
+				gluu_auth.startProgressBar('#progressbar', 60);
+				gluu_auth.startSessionChecker(onSignInCallback, 60);
 			});
 
         </script>
@@ -92,7 +92,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - U2F Login</ui:define>
+    <ui:define name="pageTitle">oxAuth - Super-Gluu Login</ui:define>
 
     <ui:define name="body">
         <form method="post" id="response" action="#{request.contextPath}/postlogin">

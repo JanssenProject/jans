@@ -7,7 +7,7 @@
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.util.security import StringEncrypter 
@@ -94,7 +94,8 @@ class PersonAuthentication(PersonAuthenticationType):
             pf_phone_number_attr = configurationAttributes.get("pf_phone_number_attr").getValue2()
 
             # Get user entry from credentials
-            credentials_user = credentials.getUser()
+            authenticationService = AuthenticationService.instance()
+            credentials_user = authenticationService.getAuthenticatedUser()
             
             userService = UserService.instance()
             phone_number_with_country_code_attr = userService.getCustomAttribute(credentials_user, pf_phone_number_attr)

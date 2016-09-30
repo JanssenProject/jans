@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -22,10 +19,8 @@ import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
 import org.jboss.seam.log.Log;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
@@ -33,6 +28,9 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.JsonService;
 import org.xdi.util.StringHelper;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 03.13.2012
@@ -134,18 +132,7 @@ public class LogoutAction {
 			return ExternalLogoutResult.SUCCESS;
         }
 
-        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
-        if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
-        	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
-        		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
-        	}
-        }
-		if (authorizationGrant == null) {
-			return ExternalLogoutResult.FAILURE;
-		}
-
-		String authMode = authorizationGrant.getAcrValues();
+		String authMode = SessionStateService.getAcr(sessionState);
 
 		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(authMode);
 		if (isExternalAuthenticatorLogoutPresent) {
@@ -156,10 +143,9 @@ public class LogoutAction {
 				log.error("Failed to get ExternalAuthenticatorConfiguration. auth_mode: {0}", authMode);
 				return ExternalLogoutResult.FAILURE;
 			} else {
-				String userId = authorizationGrant.getUser().getUserId();
 				boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
 				ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-				log.debug("Logout result is '{0}' for user '{1}'", externalLogoutResult, userId);
+				log.debug("Logout result is '{0}' for session '{1}', userDn: '{2}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());
 
 				int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 	            if (apiVersion < 3) {
@@ -167,14 +153,9 @@ public class LogoutAction {
 					return externalLogoutResult;
 	            }
 
-				if (sessionState == null) {
-					log.warn("Session was expired. Redirect to external URL is not possible.");
-					return ExternalLogoutResult.FAILURE;
-				}
-	            	
             	log.trace("According to API version script supports logout redirects");
             	String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-				log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, userId);
+				log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, sessionState.getUserDn());
 				
 				if (StringHelper.isEmpty(logoutExternalUrl)) {
 					return externalLogoutResult;
