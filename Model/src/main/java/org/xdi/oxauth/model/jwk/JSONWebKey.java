@@ -10,6 +10,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version September 30, 2016
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
@@ -229,6 +230,9 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         if (!Util.isNullOrEmpty(y)) {
             jsonObj.put(Y, y);
         }
+        if (x5c != null && !x5c.isEmpty()) {
+            jsonObj.put(CERTIFICATE_CHAIN, StringUtils.toJSONArray(x5c));
+        }
 
         return jsonObj;
     }
@@ -242,7 +246,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         return getExp().compareTo(o.getExp());
     }
 
-    public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) {
+    public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) throws JSONException {
         JSONWebKey jwk = new JSONWebKey();
 
         jwk.setKid(jwkJSONObject.optString(KEY_ID));
@@ -264,6 +268,9 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         }
         if (jwkJSONObject.has(Y)) {
             jwk.setY(jwkJSONObject.optString(Y));
+        }
+        if (jwkJSONObject.has(CERTIFICATE_CHAIN)) {
+            jwk.setX5c(StringUtils.toList(jwkJSONObject.optJSONArray(CERTIFICATE_CHAIN)));
         }
 
         return jwk;
