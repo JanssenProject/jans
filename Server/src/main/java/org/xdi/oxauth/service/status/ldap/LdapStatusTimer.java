@@ -20,7 +20,6 @@ import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.service.AppInitializer;
@@ -45,7 +44,7 @@ public class LdapStatusTimer {
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
-        log.debug("Initializing LdapStatusTimer");
+        log.info("Initializing LdapStatusTimer");
         this.isActive = new AtomicBoolean(false);
 
         Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
@@ -91,7 +90,7 @@ public class LdapStatusTimer {
             if (ldapConnectionProvider.getConnectionPool() == null) {
             	log.error("{0} is empty", connectionProviderName);
             } else {
-            	log.debug("{0} statistics: {1}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{0} statistics: {1}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 
@@ -101,7 +100,7 @@ public class LdapStatusTimer {
             if (bindLdapConnectionProvider.getConnectionPool() == null) {
             	log.error("{0} is empty", bindConnectionProviderName);
             } else {
-            	log.debug("{0} statistics: {1}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{0} statistics: {1}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 	}
