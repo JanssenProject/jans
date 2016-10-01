@@ -11,6 +11,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -19,6 +20,7 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -30,14 +32,14 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * Command example:
  * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512
- *              -keystore /Users/JAVIER/tmp/mykeystore.jks
- *              -keypasswd secret
- *              -dnname "CN=oxAuth CA Certificates"
- *              -expiration 365
+ * -keystore /Users/JAVIER/tmp/mykeystore.jks
+ * -keypasswd secret
+ * -dnname "CN=oxAuth CA Certificates"
+ * -expiration 365
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 16, 2016
+ * @version September 30, 2016
  */
 public class KeyGenerator {
 
@@ -99,9 +101,9 @@ public class KeyGenerator {
                         help();
                     } else {
                         try {
-                        	SecurityProviderUtility.installBCProvider(true);
+                            SecurityProviderUtility.installBCProvider(true);
 
-                        	JSONWebKeySet jwks = new JSONWebKeySet();
+                            JSONWebKeySet jwks = new JSONWebKeySet();
                             OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
 
                             Calendar calendar = new GregorianCalendar();
@@ -123,12 +125,15 @@ public class KeyGenerator {
                                 key.setX(result.optString(X));
                                 key.setY(result.optString(Y));
 
+                                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                                key.setX5c(StringUtils.toList(x5c));
+
                                 jwks.getKeys().add(key);
                             }
 
                             System.out.println(jwks);
                         } catch (Exception e) {
-                        	log.error("Failed to generate keys", e);
+                            log.error("Failed to generate keys", e);
                             help();
                         }
                     }
@@ -136,7 +141,7 @@ public class KeyGenerator {
                     help();
                 }
             } catch (ParseException e) {
-            	log.error("Failed to generate keys", e);
+                log.error("Failed to generate keys", e);
                 help();
             }
         }
