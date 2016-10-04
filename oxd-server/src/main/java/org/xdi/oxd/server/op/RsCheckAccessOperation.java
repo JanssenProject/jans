@@ -3,6 +3,7 @@ package org.xdi.oxd.server.op;
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.codehaus.jackson.node.POJONode;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.core.ServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,13 +75,29 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         };
 
         final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
-        final RptIntrospectionResponse status = registrationService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
-        final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
 
+        RptIntrospectionResponse status;
+        try {
+            status = registrationService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
+        } catch (ClientResponseFailure e) {
+            int httpStatus = e.getResponse().getStatus();
+            if (httpStatus == 401 || httpStatus == 400 || httpStatus == 403) {
+                String freshPat = getUmaTokenService().obtainPat(params.getOxdId()).getToken();
+                status = registrationService.requestRptStatus("Bearer " + freshPat, params.getRpt(), "");
+            } else {
+                throw e;
+            }
+        }
+
+        LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
+
+        final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
             for (UmaPermission permission : status.getPermissions()) {
                 final List<String> requiredScopes = resource.getScopes();
                 boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
+
+                LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
 
                 if (containsAny) {
                     if (isGat) { // GAT
