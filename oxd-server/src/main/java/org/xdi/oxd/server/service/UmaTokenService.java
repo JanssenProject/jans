@@ -68,8 +68,7 @@ public class UmaTokenService {
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
-            boolean isExpired = site.getRptExpiresAt().before(new Date());
-            if (!isExpired) {
+            if (!isExpired(site.getRptExpiresAt())) {
                 LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
                 return site.getRpt();
             }
@@ -98,13 +97,16 @@ public class UmaTokenService {
         throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
 
+    public static boolean isExpired(Date expiredAt) {
+        return expiredAt.before(new Date());
+    }
+
     public String getGat(String oxdId, List<String> scopes) {
         SiteConfiguration site = siteService.getSite(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
-            boolean isExpired = site.getGatExpiresAt().before(new Date());
-            if (!isExpired) {
+            if (!isExpired(site.getGatExpiresAt())) {
                 LOG.debug("GAT from site configuration, GAT: " + site.getGat() + ", site: " + site);
                 return site.getGat();
             }
@@ -140,12 +142,11 @@ public class UmaTokenService {
         SiteConfiguration site = siteService.getSite(oxdId);
 
         if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
-            Calendar c = Calendar.getInstance();
-            c.setTime(site.getPatCreatedAt());
-            c.add(Calendar.SECOND, site.getPatExpiresIn());
+            Calendar expiredAt = Calendar.getInstance();
+            expiredAt.setTime(site.getPatCreatedAt());
+            expiredAt.add(Calendar.SECOND, site.getPatExpiresIn());
 
-            boolean isExpired = c.getTime().before(new Date());
-            if (!isExpired) {
+            if (!isExpired(expiredAt.getTime())) {
                 LOG.debug("PAT from site configuration, PAT: " + site.getPat());
                 return new Pat(site.getPat(), "", site.getPatExpiresIn());
             }
@@ -174,12 +175,11 @@ public class UmaTokenService {
         SiteConfiguration site = siteService.getSite(oxdId);
 
         if (site.getAat() != null && site.getAatCreatedAt() != null && site.getAatExpiresIn() > 0) {
-            Calendar c = Calendar.getInstance();
-            c.setTime(site.getAatCreatedAt());
-            c.add(Calendar.SECOND, site.getAatExpiresIn());
+            Calendar expiredAt = Calendar.getInstance();
+            expiredAt.setTime(site.getAatCreatedAt());
+            expiredAt.add(Calendar.SECOND, site.getAatExpiresIn());
 
-            boolean isExpired = c.getTime().before(new Date());
-            if (!isExpired) {
+            if (!isExpired(expiredAt.getTime())) {
                 LOG.debug("AAT from site configuration, site: " + site);
                 return new Aat(site.getAat(), "", site.getAatExpiresIn());
             }
