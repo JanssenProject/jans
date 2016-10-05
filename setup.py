@@ -86,6 +86,7 @@ class Setup(object):
 
         self.jre_version = '102'
         self.jre_home = '/opt/jre'
+        self.jre_java_path = '/opt/jre/bin/java'
 
         self.distFolder = '/opt/dist'
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
@@ -755,9 +756,10 @@ class Setup(object):
         return "3.0"
 
     def installJRE(self):
-        self.logIt("Installing server JRE 1.8 %s..." % (self.jre_version))
-        jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % (self.jre_version)
-        jreDestinationPath = '/opt/jdk1.8.0_-%s' % (self.jre_version)
+        self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
+
+        jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
+        jreDestinationPath = '/opt/jdk1.8.0_-%s' % self.jre_version
         try:
             self.logIt("Extracting %s in /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
@@ -771,9 +773,11 @@ class Setup(object):
             self.logIt("Error creating symlink %s from %s" % (self.jre_home, jreDestinationPath))
             self.logIt(traceback.format_exc(), True)
 
-        self.run(["/bin/chmod", '-R', "755", "%s/bin/" % jreDestinationPath])
-        self.run(["/bin/chown", '-R', 'root:root', jreDestinationPath])
-        self.run(["/bin/chown", '-h', 'root:root', self.jre_home])
+        chmod = '/bin/chmod'
+        chown = '/bin/chown'
+        self.run([chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
+        self.run([chown, '-R', 'root:root', jreDestinationPath])
+        self.run([chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
         openDJArchive = 'opendj-server-3.0.0.zip'
@@ -813,9 +817,9 @@ class Setup(object):
         self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/tomcat'])
 
     def installJetty(self):
-        self.logIt("Installing jetty %s..." % (self.jetty_version))
-        jettyArchive = 'jetty-distribution-%s.tar.gz' % (self.jetty_version)
-        jettyDestinationPath = '/opt/jetty-distribution-%s' % (self.jetty_version)
+        self.logIt("Installing jetty %s..." % self.jetty_version)
+        jettyArchive = 'jetty-distribution-%s.tar.gz' % self.jetty_version
+        jettyDestinationPath = '/opt/jetty-distribution-%s' % self.jetty_version
         try:
             self.logIt("Extracting %s in /opt/" % jettyArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jettyArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
@@ -829,9 +833,51 @@ class Setup(object):
             self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
             self.logIt(traceback.format_exc(), True)
 
-        self.run(["/bin/chmod", '-R', "755", "%s/bin/" % jettyDestinationPath])
-        self.run(["/bin/chown", '-R', 'jetty:jetty', jettyDestinationPath])
-        self.run(["/bin/chown", '-h', 'jetty:jetty', self.jetty_home])
+        chmod = '/bin/chmod'
+        chown = '/bin/chown'
+        self.run([chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
+        self.run([chown, '-R', 'root:root', jettyDestinationPath])
+        self.run([chown, '-h', 'root:root', self.jetty_home])
+
+    def installJettyService(self, serviceName):
+        self.logIt("Installing jetty service %s..." % serviceName)
+        jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
+
+        mkdir = '/bin/mkdir'
+        chown = '/bin/chown'
+
+        try:
+            self.logIt("Preparing %s service base folders" % serviceName)
+            self.run([mkdir, '-p', jettyServiceBase])
+            self.run([mkdir, '-p', '%s/webapps' % jettyServiceBase])
+            self.run([mkdir, '-p', '%s/logs' % jettyServiceBase])
+            self.run([mkdir, '-p', '%s/tmp' % jettyServiceBase])
+
+            self.run([chown, '-R', 'jetty:jetty', jettyServiceBase])
+        except:
+            self.logIt("Error encountered while preparing %s service base folders" % serviceName)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Preparing %s service base configuration" % serviceName)
+            jettyEnv = os.environ.copy()
+            jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
+            jettyEnv['JETTY_BASE'] = jettyServiceBase
+            jettyEnv['JETTY_HOME'] = self.jetty_home
+
+            self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
+        except:
+            self.logIt("Error encountered while preparing %s service base configuration" % serviceName)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                print "jetty service installation not suppoorted"
+            else:
+                self.run(['ln', '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
+        except:
+            self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
+            self.logIt(traceback.format_exc(), True)
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % (self.jython_version))
@@ -853,7 +899,6 @@ class Setup(object):
         except:
             self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % (self.jython_version))
             self.logIt(traceback.format_exc(), True)
-
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1956,10 +2001,10 @@ class Setup(object):
         self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None):
+    def run(self, args, cwd=None, env=None):
         self.logIt('Running: %s' % ' '.join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
             output, err = p.communicate()
             if output:
                 self.logIt(output)
