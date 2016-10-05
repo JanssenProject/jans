@@ -79,7 +79,10 @@ class Setup(object):
         self.opendj_version = None
         self.tomcat_version = '7.0.65'
         self.jython_version = '2.7.0'
+
         self.jetty_version = '9.3.12.v20160915'
+        self.jetty_home = '/opt/jetty'
+        self.jetty_user_home = '/home/jetty'
 
         self.distFolder = '/opt/dist'
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
@@ -92,7 +95,7 @@ class Setup(object):
         self.configFolder = '/etc/gluu/config'
         self.certFolder = '/etc/certs'
         self.tomcatHome = '/opt/tomcat'
-        self.jettyHome = '/opt/jetty'
+
         self.tomcat_user_home_lib = '/home/tomcat/lib'
         self.oxauth_lib = '/opt/tomcat/webapps/oxauth/WEB-INF/lib'
         self.tomcatWebAppFolder = "/opt/tomcat/webapps"
@@ -797,14 +800,14 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
-            self.run(['ln', '-sf', jettyDestinationPath, self.jettyHome])
+            self.run(['ln', '-sf', jettyDestinationPath, self.jetty_home])
         except:
-            self.logIt("Error creating symlink %s from %s" % (self.jettyHome, jettyDestinationPath))
+            self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
             self.logIt(traceback.format_exc(), True)
 
         self.run(["/bin/chmod", '-R', "755", "%s/bin/" % jettyDestinationPath])
         self.run(["/bin/chown", '-R', 'jetty:jetty', jettyDestinationPath])
-        self.run(["/bin/chown", '-h', 'jetty:jetty', self.jettyHome])
+        self.run(["/bin/chown", '-h', 'jetty:jetty', self.jetty_home])
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % (self.jython_version))
@@ -1633,6 +1636,15 @@ class Setup(object):
         if self.os_type in ['debian', 'ubuntu']:
             self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
 
+    def createUsers(self):
+        try:
+            useradd = '/usr/sbin/useradd'
+            self.run([mkdir, '-p', self.jetty_user_home])
+            self.run([useradd, '--system', '--create-home', '--user-group', '--shell /bin/bash', '--home-dir %s' % self.jetty_user_home, 'jetty'])
+        except:
+            self.logIt("Error adding users", True)
+            self.logIt(traceback.format_exc(), True)
+
     def makeFolders(self):
         try:
             # Create these folder on all instances
@@ -2272,6 +2284,7 @@ if __name__ == '__main__':
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
             installObject.configureOsPatches()
+            installObject.createUsers()
             installObject.makeFolders()
             installObject.installJetty()
 #            installObject.installTomcat()
