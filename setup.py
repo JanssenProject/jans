@@ -84,6 +84,9 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_user_home = '/home/jetty'
 
+        self.jre_version = '102'
+        self.jre_home = '/opt/jre'
+
         self.distFolder = '/opt/dist'
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
@@ -751,6 +754,27 @@ class Setup(object):
 
         return "3.0"
 
+    def installJRE(self):
+        self.logIt("Installing server JRE 1.8 %s..." % (self.jre_version))
+        jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % (self.jre_version)
+        jreDestinationPath = '/opt/jdk1.8.0_-%s' % (self.jre_version)
+        try:
+            self.logIt("Extracting %s in /opt/" % jreArchive)
+            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+        except:
+            self.logIt("Error encountered while extracting archive %s" % jreArchive)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.run(['ln', '-sf', jreDestinationPath, self.jre_home])
+        except:
+            self.logIt("Error creating symlink %s from %s" % (self.jre_home, jreDestinationPath))
+            self.logIt(traceback.format_exc(), True)
+
+        self.run(["/bin/chmod", '-R', "755", "%s/bin/" % jreDestinationPath])
+        self.run(["/bin/chown", '-R', 'root:root', jreDestinationPath])
+        self.run(["/bin/chown", '-h', 'root:root', self.jre_home])
+
     def extractOpenDJ(self):
         openDJArchive = 'opendj-server-3.0.0.zip'
         try:
@@ -793,10 +817,10 @@ class Setup(object):
         jettyArchive = 'jetty-distribution-%s.tar.gz' % (self.jetty_version)
         jettyDestinationPath = '/opt/jetty-distribution-%s' % (self.jetty_version)
         try:
-            self.logIt("Unzipping %s in /opt/" % jettyArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jettyArchive), '-C', '/opt/' ])
+            self.logIt("Extracting %s in /opt/" % jettyArchive)
+            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jettyArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
-            self.logIt("Error encountered while doing tgz %s/%s -d /opt/" % (self.distFolder, jettyArchive))
+            self.logIt("Error encountered while extracting archive %s" % jettyArchive)
             self.logIt(traceback.format_exc(), True)
 
         try:
@@ -2286,6 +2310,7 @@ if __name__ == '__main__':
             installObject.configureOsPatches()
             installObject.createUsers()
             installObject.makeFolders()
+            installObject.installJRE()
             installObject.installJetty()
 #            installObject.installTomcat()
             installObject.installJython()
