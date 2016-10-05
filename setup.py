@@ -79,6 +79,7 @@ class Setup(object):
         self.opendj_version = None
         self.tomcat_version = '7.0.65'
         self.jython_version = '2.7.0'
+        self.jetty_version = '9.3.12.v20160915'
 
         self.distFolder = '/opt/dist'
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
@@ -91,6 +92,7 @@ class Setup(object):
         self.configFolder = '/etc/gluu/config'
         self.certFolder = '/etc/certs'
         self.tomcatHome = '/opt/tomcat'
+        self.jettyHome = '/opt/jetty'
         self.tomcat_user_home_lib = '/home/tomcat/lib'
         self.oxauth_lib = '/opt/tomcat/webapps/oxauth/WEB-INF/lib'
         self.tomcatWebAppFolder = "/opt/tomcat/webapps"
@@ -782,6 +784,27 @@ class Setup(object):
         self.run(["/bin/chmod", '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
         self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
         self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/tomcat'])
+
+    def installJetty(self):
+        self.logIt("Installing jetty %s..." % (self.jetty_version))
+        jettyArchive = 'jetty-distribution-%s.tar.gz' % (self.jetty_version)
+        jettyDestinationPath = '/opt/jetty-distribution-%s' % (self.jetty_version)
+        try:
+            self.logIt("Unzipping %s in /opt/" % jettyArchive)
+            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jettyArchive), '-C', '/opt/' ])
+        except:
+            self.logIt("Error encountered while doing tgz %s/%s -d /opt/" % (self.distFolder, jettyArchive))
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.run(['ln', '-sf', jettyDestinationPath, self.jettyHome])
+        except:
+            self.logIt("Error creating symlink %s from %s" % (self.jettyHome, jettyDestinationPath))
+            self.logIt(traceback.format_exc(), True)
+
+        self.run(["/bin/chmod", '-R', "755", "%s/bin/" % jettyDestinationPath])
+        self.run(["/bin/chown", '-R', 'jetty:jetty', jettyDestinationPath])
+        self.run(["/bin/chown", '-h', 'jetty:jetty', self.jettyHome])
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % (self.jython_version))
@@ -2250,7 +2273,8 @@ if __name__ == '__main__':
         try:
             installObject.configureOsPatches()
             installObject.makeFolders()
-            installObject.installTomcat()
+            installObject.installJetty()
+#            installObject.installTomcat()
             installObject.installJython()
             installObject.make_salt()
             installObject.make_oxauth_salt()
