@@ -89,6 +89,10 @@ class Setup(object):
         self.jre_java_path = '/opt/jre/bin/java'
 
         self.distFolder = '/opt/dist'
+        self.distAppFolder = '%s/app' % self.distFolder
+        self.distWarFolder = '%s/war' % self.distFolder
+        self.distTmpFolder = '/%s/tmp' % self.distFolder
+
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
         self.logError = '%s/setup_error.log' % self.install_dir
@@ -762,7 +766,7 @@ class Setup(object):
         jreDestinationPath = '/opt/jdk1.8.0_-%s' % self.jre_version
         try:
             self.logIt("Extracting %s in /opt/" % jreArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
@@ -783,9 +787,9 @@ class Setup(object):
         openDJArchive = 'opendj-server-3.0.0.zip'
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
-            self.run(['unzip', '-n', '%s/%s' % (self.distFolder, openDJArchive), '-d', '/opt/' ])
+            self.run(['unzip', '-n', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
         except:
-            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distFolder, openDJArchive))
+            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, openDJArchive))
             self.logIt(traceback.format_exc(), True)
 
     def installTomcat(self):
@@ -793,9 +797,9 @@ class Setup(object):
         tomcatArchive = 'apache-tomcat-%s.zip' % (self.tomcat_version)
         try:
             self.logIt("Unzipping %s in /opt/" % tomcatArchive)
-            self.run(['unzip', '-n', '%s/%s' % (self.distFolder, tomcatArchive), '-d', '/opt/' ])
+            self.run(['unzip', '-n', '%s/%s' % (self.distAppFolder, tomcatArchive), '-d', '/opt/' ])
         except:
-            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distFolder, tomcatArchive))
+            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, tomcatArchive))
             self.logIt(traceback.format_exc(), True)
 
         try:
@@ -808,9 +812,9 @@ class Setup(object):
         self.createDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
 
         self.logIt("Copying identity.war into tomcat webapps folder...")
-        self.copyFile('%s/identity.war' % self.distFolder, self.tomcatWebAppFolder)
+        self.copyFile('%s/identity.war' % self.distAppFolder, self.tomcatWebAppFolder)
         self.logIt("Copying oxauth.war into tomcat webapps folder...")
-        self.copyFile('%s/oxauth.war' % self.distFolder, self.tomcatWebAppFolder)
+        self.copyFile('%s/oxauth.war' % self.distAppFolder, self.tomcatWebAppFolder)
 
         self.run(["/bin/chmod", '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
         self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
@@ -822,7 +826,7 @@ class Setup(object):
         jettyDestinationPath = '/opt/jetty-distribution-%s' % self.jetty_version
         try:
             self.logIt("Extracting %s in /opt/" % jettyArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distFolder, jettyArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jettyArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
             self.logIt(traceback.format_exc(), True)
@@ -880,36 +884,36 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def installJython(self):
-        self.logIt("Installing Jython %s..." % (self.jython_version))
-        jythonInstaller = 'jython-%s.jar' % (self.jython_version)
+        self.logIt("Installing Jython %s..." % self.jython_version)
+        jythonInstaller = 'jython-%s.jar' % self.jython_version
 
         try:
             self.run(['rm', '-fr', '/opt/jython-%s' % self.jython_version])
-            self.run(['java', '-jar', '%s/jython-installer-%s.jar' % (self.distFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
+            self.run(['java', '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
         except:
-            self.logIt("Error installing jython-installer-%s.jar" % (self.jython_version))
+            self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
             
-        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % (self.jython_version)])
+        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
         self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
 
 
         try:
-            self.run(['ln', '-sf', '/opt/jython-%s' % (self.jython_version), '/opt/jython'])
+            self.run(['ln', '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
         except:
-            self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % (self.jython_version))
+            self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
 
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distAppFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.tomcatWebAppFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distAppFolder])
             print "Downloading Shibboleth IDP 2 war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idpWarFolder])
+            self.run(['/usr/bin/wget', self.idp_war, '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distAppFolder])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxcas.war' % self.distFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
 
             print "Finished downloading latest war files"
 
@@ -1410,7 +1414,7 @@ class Setup(object):
             oxauthWar = 'oxauth.war'
             distOxAuthPath = '%s/%s' % (self.tomcatWebAppFolder, oxauthWar)
 
-            tmpOxAuthDir = '%s/tmp_oxauth' % self.distFolder
+            tmpOxAuthDir = '%s/tmp_oxauth' % self.distWarFolder
 
             self.logIt("Unpacking %s..." % oxauthWar)
             self.removeDirs(tmpOxAuthDir)
@@ -1461,7 +1465,7 @@ class Setup(object):
             identityWar = 'identity.war'
             distIdentityPath = '%s/%s' % (self.tomcatWebAppFolder, identityWar)
 
-            tmpIdentityDir = '%s/tmp_identity' % self.distFolder
+            tmpIdentityDir = '%s/tmp_identity' % self.distWarFolder
 
             self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
             self.removeDirs(tmpIdentityDir)
@@ -1492,7 +1496,7 @@ class Setup(object):
             idpWar = "idp.war"
             distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
 
-            tmpIdpDir = '%s/tmp_idp' % self.distFolder
+            tmpIdpDir = '%s/tmp_idp' % self.distWarFolder
 
             self.logIt("Unpacking %s..." % idpWar)
             self.removeDirs(tmpIdpDir)
@@ -1515,12 +1519,12 @@ class Setup(object):
             print "Downloading Shibboleth IDP 3 war file..."
             self.run(['/usr/bin/wget', self.idp3_war, '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
             print "Downloading Shibboleth IDP 3 keygenerator..."
-            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '-c', '--retry-connrefused', '--tries=10', '-O', self.distFolder + '/idp3_cml_keygenerator.jar'])
+            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP 3 binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-c', '--retry-connrefused', '--tries=10', '-O', self.distFolder + '/shibboleth-idp.jar'])
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
             
             # unpack IDP3 JAR with static configs
-            self.run([self.jarCommand, 'xf', self.distFolder + '/shibboleth-idp.jar'], '/opt')
+            self.run([self.jarCommand, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
             
             # copy templates
@@ -1550,7 +1554,7 @@ class Setup(object):
             
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
-            self.run(['java','-classpath', self.distFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
+            self.run(['java','-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run(['chown','-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
@@ -1559,14 +1563,14 @@ class Setup(object):
     def install_asimba_war(self):
         if self.installAsimba:
             asimbaWar = 'oxasimba.war'
-            distAsimbaPath = '%s/%s' % (self.distFolder, asimbaWar)
+            distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
 
             # Asimba is not part of CE package. We need to download it if needed
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxasimba.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxasimba.war' % self.distWarFolder])
 
-            tmpAsimbaDir = '%s/tmp_asimba' % self.distFolder
+            tmpAsimbaDir = '%s/tmp_asimba' % self.distWarFolder
 
             self.logIt("Unpacking %s..." % asimbaWar)
             self.removeDirs(tmpAsimbaDir)
@@ -1587,19 +1591,19 @@ class Setup(object):
                       'asimba.war',
                       '-C',
                       '%s/' % tmpAsimbaDir ,
-                      '.'], self.distFolder)
+                      '.'], self.distWarFolder)
 
             self.logIt("Copying asimba.war into tomcat webapps folder...")
-            self.copyFile('%s/asimba.war' % self.distFolder, self.tomcatWebAppFolder)
+            self.copyFile('%s/asimba.war' % self.distWarFolder, self.tomcatWebAppFolder)
 
             self.removeDirs(tmpAsimbaDir)
-            self.removeFile('%s/asimba.war' % self.distFolder)
+            self.removeFile('%s/asimba.war' % self.distWarFolder)
 
     def install_cas_war(self):
         if self.installCas:
             casWar = 'oxcas.war'
-            distCasPath = '%s/%s' % (self.distFolder, casWar)
-            tmpCasDir = '%s/tmp_cas' % self.distFolder
+            distCasPath = '%s/%s' % (self.distWarFolder, casWar)
+            tmpCasDir = '%s/tmp_cas' % self.distWarFolder
 
             self.logIt("Unpacking %s..." % casWar)
             self.removeDirs(tmpCasDir)
@@ -1622,28 +1626,28 @@ class Setup(object):
                       'cas.war',
                       '-C',
                       '%s/' % tmpCasDir,
-                      '.'], self.distFolder)
+                      '.'], self.distWarFolder)
 
             self.logIt("Copying cas.war into tomcat webapps folder...")
-            self.copyFile('%s/cas.war' % self.distFolder, self.tomcatWebAppFolder)
+            self.copyFile('%s/cas.war' % self.distWarFolder, self.tomcatWebAppFolder)
 
             self.removeDirs(tmpCasDir)
-            self.removeFile('%s/cas.war' % self.distFolder)
+            self.removeFile('%s/cas.war' % self.distWarFolder)
 
     def install_oxauth_rp_war(self):
         if self.installOxAuthRP:
             oxAuthRPWar = 'oxauth-rp.war'
-            distOxAuthRpPath = '%s/%s' % (self.distFolder, oxAuthRPWar)
+            distOxAuthRpPath = '%s/%s' % (self.distWarFolder, oxAuthRPWar)
 
             # oxAuth RP is not part of CE package. We need to download it if needed
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distFolder])
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
 
             self.logIt("Copying oxauth-rp.war into tomcat webapps folder...")
-            self.copyFile('%s/oxauth-rp.war' % self.distFolder, self.tomcatWebAppFolder)
+            self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, self.tomcatWebAppFolder)
 
-            self.removeFile('%s/oxauth-rp.war' % self.distFolder)
+            self.removeFile('%s/oxauth-rp.war' % self.distWarFolder)
 
     def isIP(self, address):
         try:
