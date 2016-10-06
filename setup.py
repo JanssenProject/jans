@@ -811,11 +811,6 @@ class Setup(object):
         self.removeDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
         self.createDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
 
-        self.logIt("Copying identity.war into tomcat webapps folder...")
-        self.copyFile('%s/identity.war' % self.distAppFolder, self.tomcatWebAppFolder)
-        self.logIt("Copying oxauth.war into tomcat webapps folder...")
-        self.copyFile('%s/oxauth.war' % self.distAppFolder, self.tomcatWebAppFolder)
-
         self.run(["/bin/chmod", '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
         self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
         self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/tomcat'])
@@ -897,7 +892,6 @@ class Setup(object):
         self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
         self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
 
-
         try:
             self.run(['ln', '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
         except:
@@ -916,6 +910,18 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.cas_war, '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
 
             print "Finished downloading latest war files"
+
+        if self.installAsimba:
+            # Asimba is not part of CE package. We need to download it if needed
+            if not os.path.exists(distAsimbaPath):
+                print "Downloading Asimba war file..."
+                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWarFolder])
+
+        if self.installOxAuthRP:
+            # oxAuth RP is not part of CE package. We need to download it if needed
+            if not os.path.exists(distOxAuthRpPath):
+                print "Downloading oxAuth RP war file..."
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1408,6 +1414,11 @@ class Setup(object):
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
 
+    def index_opendj(self):
+        self.index_opendj('userRoot')
+        self.index_opendj('site')
+
+    # Deprecated
     def install_ox_base(self):
         if self.installOxAuth or self.installOxTrust:
             # Unpack oxauth.war to get bcprov-jdk16.jar
@@ -1446,7 +1457,24 @@ class Setup(object):
         f.close()
         certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
         return certificate_text
-        
+
+    def install_oxauth(self):
+        self.logIt("Copying identity.war into jetty webapps folder...")
+
+        jettyServiceName = 'oxauth'
+        self.installJettyService(jettyServiceName)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/oxauth.war' % self.distWarFolder, jettyServiceWebapps)
+
+    def install_oxtrust(self):
+        self.logIt("Copying oxauth.war into jetty webapps folder...")
+
+        jettyServiceName = 'identity'
+        self.installJettyService(jettyServiceName)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/identity.war' % self.distWarFolder, jettyServiceWebapps)
 
     def install_saml(self):
         if self.installSaml:
@@ -1558,96 +1586,112 @@ class Setup(object):
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run(['chown','-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
-            
-            
-    def install_asimba_war(self):
-        if self.installAsimba:
-            asimbaWar = 'oxasimba.war'
-            distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
 
-            # Asimba is not part of CE package. We need to download it if needed
-            if not os.path.exists(distAsimbaPath):
-                print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxasimba.war' % self.distWarFolder])
+    def install_asimba(self):
+        asimbaWar = 'asimba.war'
+        distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
 
-            tmpAsimbaDir = '%s/tmp_asimba' % self.distWarFolder
+        tmpAsimbaDir = '%s/tmp_asimba' % self.distTmpFolder
 
-            self.logIt("Unpacking %s..." % asimbaWar)
-            self.removeDirs(tmpAsimbaDir)
-            self.createDirs(tmpAsimbaDir)
+        self.logIt("Unpacking %s..." % asimbaWar)
+        self.removeDirs(tmpAsimbaDir)
+        self.createDirs(tmpAsimbaDir)
 
-            self.run([self.jarCommand,
-                      'xf',
-                      distAsimbaPath], tmpAsimbaDir)
+        self.run([self.jarCommand,
+                  'xf',
+                  distAsimbaPath], tmpAsimbaDir)
 
-            self.logIt("Configuring Asimba...")
-            self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
-            self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
+        self.logIt("Configuring Asimba...")
+        self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
+        self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
 
-            self.logIt("Generating asimba.war...")
-            self.run([self.jarCommand,
-                      'cmf',
-                      'tmp_asimba/META-INF/MANIFEST.MF',
-                      'asimba.war',
-                      '-C',
-                      '%s/' % tmpAsimbaDir ,
-                      '.'], self.distWarFolder)
+        self.logIt("Generating asimba.war...")
+        self.run([self.jarCommand,
+                  'cmf',
+                  'tmp_asimba/META-INF/MANIFEST.MF',
+                  'asimba.war',
+                  '-C',
+                  '%s/' % tmpAsimbaDir ,
+                  '.'], self.distTmpFolder)
 
-            self.logIt("Copying asimba.war into tomcat webapps folder...")
-            self.copyFile('%s/asimba.war' % self.distWarFolder, self.tomcatWebAppFolder)
+        self.logIt("Copying asimba.war into jetty webapps folder...")
+        jettyServiceName = 'asimba'
+        self.installJettyService(jettyServiceName)
 
-            self.removeDirs(tmpAsimbaDir)
-            self.removeFile('%s/asimba.war' % self.distWarFolder)
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/asimba.war' % self.distTmpFolder, jettyServiceWebapps)
 
-    def install_cas_war(self):
+        self.removeDirs(tmpAsimbaDir)
+        self.removeFile('%s/asimba.war' % self.distTmpFolder)
+
+    def install_cas(self):
+        casWar = 'cas.war'
+        distCasPath = '%s/%s' % (self.distWarFolder, casWar)
+        tmpCasDir = '%s/tmp_cas' % self.distTmpFolder
+
+        self.logIt("Unpacking %s..." % casWar)
+        self.removeDirs(tmpCasDir)
+        self.createDirs(tmpCasDir)
+
+        self.run([self.jarCommand,
+                  'xf',
+                  distCasPath], tmpCasDir)
+
+        self.logIt("Configuring CAS...")
+        casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
+        casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
+
+        self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
+
+        self.logIt("Generating cas.war...")
+        self.run([self.jarCommand,
+                  'cmf',
+                  'tmp_cas/META-INF/MANIFEST.MF',
+                  'cas.war',
+                  '-C',
+                  '%s/' % tmpCasDir,
+                  '.'], self.distTmpFolder)
+
+        self.logIt("Copying cas.war into jetty webapps folder...")
+        jettyServiceName = 'cas'
+        self.installJettyService(jettyServiceName)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/cas.war' % self.distTmpFolder, jettyServiceWebapps)
+
+        self.removeDirs(tmpCasDir)
+        self.removeFile('%s/cas.war' % self.distTmpFolder)
+
+    def install_oxauth_rp(self):
+        oxAuthRPWar = 'oxauth-rp.war'
+        distOxAuthRpPath = '%s/%s' % (self.distWarFolder, oxAuthRPWar)
+
+        self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
+
+        jettyServiceName = 'oxauth-rp'
+        self.installJettyService(jettyServiceName)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
+
+    def install_gluu_components(self):
+        if self.installOxAuth:
+            self.install_oxauth()
+
+        if self.installOxTrust:
+            self.install_oxtrust()
+
+        if self.installSaml or self.installSamlIDP2 or self.installSamlIDP3:
+            self.install_saml()
+
         if self.installCas:
-            casWar = 'oxcas.war'
-            distCasPath = '%s/%s' % (self.distWarFolder, casWar)
-            tmpCasDir = '%s/tmp_cas' % self.distWarFolder
+            self.install_cas()
 
-            self.logIt("Unpacking %s..." % casWar)
-            self.removeDirs(tmpCasDir)
-            self.createDirs(tmpCasDir)
+        if self.installAsimba:
+            self.install_asimba()
 
-            self.run([self.jarCommand,
-                      'xf',
-                      distCasPath], tmpCasDir)
-
-            self.logIt("Configuring CAS...")
-            casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
-            casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
-
-            self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
-
-            self.logIt("Generating cas.war...")
-            self.run([self.jarCommand,
-                      'cmf',
-                      'tmp_cas/META-INF/MANIFEST.MF',
-                      'cas.war',
-                      '-C',
-                      '%s/' % tmpCasDir,
-                      '.'], self.distWarFolder)
-
-            self.logIt("Copying cas.war into tomcat webapps folder...")
-            self.copyFile('%s/cas.war' % self.distWarFolder, self.tomcatWebAppFolder)
-
-            self.removeDirs(tmpCasDir)
-            self.removeFile('%s/cas.war' % self.distWarFolder)
-
-    def install_oxauth_rp_war(self):
         if self.installOxAuthRP:
-            oxAuthRPWar = 'oxauth-rp.war'
-            distOxAuthRpPath = '%s/%s' % (self.distWarFolder, oxAuthRPWar)
-
-            # oxAuth RP is not part of CE package. We need to download it if needed
-            if not os.path.exists(distOxAuthRpPath):
-                print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
-
-            self.logIt("Copying oxauth-rp.war into tomcat webapps folder...")
-            self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, self.tomcatWebAppFolder)
-
-            self.removeFile('%s/oxauth-rp.war' % self.distWarFolder)
+            self.install_oxauth_rp()
 
     def isIP(self, address):
         try:
@@ -2381,19 +2425,14 @@ if __name__ == '__main__':
             installObject.configure_httpd()
             installObject.setup_opendj()
             installObject.configure_opendj()
-            installObject.index_opendj('userRoot')
-            installObject.index_opendj('site')
+            installObject.index_opendj()
             installObject.import_ldif()
             installObject.deleteLdapPw()
             installObject.export_opendj_public_cert()
-            installObject.install_ox_base()
-            installObject.install_saml()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.copy_static()
-            installObject.install_cas_war()
-            installObject.install_asimba_war()
-            installObject.install_oxauth_rp_war()
+            installObject.install_gluu_components()
             installObject.change_ownership()
             installObject.change_permissions()
             installObject.start_services()
