@@ -71,7 +71,7 @@ public class InumGenerator implements IdGenerator {
                         append(InumGenerator.SEPARATOR).
                         append(p_idType.getInum()).
                         append(InumGenerator.SEPARATOR).
-                        append(INumGenerator.generate(2));
+                        append(INumGenerator.generate(4));
                 inum = sb.toString();
                 if (StringUtils.isBlank(inum)) {
                     log.error("Unable to generate inum: {0}", inum);
