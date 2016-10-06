@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * Command example:
- * KeyGenerator -h
+ * java -cp bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar org.xdi.oxauth.util.KeyGenerator -h
  * <p/>
  * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=oxAuth CA Certificates" -expiration 365
  * <p/>
