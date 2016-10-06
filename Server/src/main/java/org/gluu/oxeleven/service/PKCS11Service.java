@@ -40,7 +40,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version May 21, 2016
+ * @version October 5, 2016
  */
 public class PKCS11Service {
 
@@ -233,7 +233,7 @@ public class PKCS11Service {
                 return null;
             }
 
-            Certificate certificate = keyStore.getCertificate(alias);
+            Certificate certificate = getCertificate(alias);
             if (certificate == null) {
                 return null;
             }
@@ -243,6 +243,10 @@ public class PKCS11Service {
         }
 
         return publicKey;
+    }
+
+    public Certificate getCertificate(String alias) throws KeyStoreException {
+        return keyStore.getCertificate(alias);
     }
 
     private PrivateKey getPrivateKey(String alias)
@@ -289,4 +293,38 @@ public class PKCS11Service {
     }
 
 
+    /*public X509Certificate generateV3Certificate(KeyPair keyPair, String issuer, SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws CertIOException, OperatorCreationException, CertificateException {
+        PrivateKey privateKey = keyPair.getPrivate();
+        PublicKey publicKey = keyPair.getPublic();
+
+        // Signers name
+        X500Name issuerName = new X500Name(issuer);
+
+        // Subjects name - the same as we are self signed.
+        X500Name subjectName = new X500Name(issuer);
+
+        // Serial
+        BigInteger serial = new BigInteger(256, new SecureRandom());
+
+        // Not before
+        Date notBefore = new Date(System.currentTimeMillis() - 10000);
+        Date notAfter = new Date(expirationTime);
+
+        // Create the certificate - version 3
+        JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(issuerName, serial, notBefore, notAfter, subjectName, publicKey);
+
+        ASN1EncodableVector purposes = new ASN1EncodableVector();
+        purposes.add(KeyPurposeId.id_kp_serverAuth);
+        purposes.add(KeyPurposeId.id_kp_clientAuth);
+        purposes.add(KeyPurposeId.anyExtendedKeyUsage);
+
+        ASN1ObjectIdentifier extendedKeyUsage = new ASN1ObjectIdentifier("2.5.29.37").intern();
+        builder.addExtension(extendedKeyUsage, false, new DERSequence(purposes));
+
+        ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider("BC").build(privateKey);
+        X509CertificateHolder holder = builder.build(signer);
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
+
+        return cert;
+    }*/
 }

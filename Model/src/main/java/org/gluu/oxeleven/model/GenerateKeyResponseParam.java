@@ -8,7 +8,7 @@ package org.gluu.oxeleven.model;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version October 5, 2016
  */
 public interface GenerateKeyResponseParam {
 
@@ -18,4 +18,9 @@ public interface GenerateKeyResponseParam {
     public static final String ALGORITHM = "alg";
     public static final String CURVE = "crv";
     public static final String EXPIRATION_TIME = "exp";
+    public static final String MODULUS = "n";
+    public static final String EXPONENT = "e";
+    public static final String X = "x";
+    public static final String Y = "y";
+    public static final String CERTIFICATE_CHAIN = "x5c";
 }
