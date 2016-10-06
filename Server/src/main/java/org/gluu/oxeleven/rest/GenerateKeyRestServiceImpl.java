@@ -6,6 +6,8 @@
 
 package org.gluu.oxeleven.rest;
 
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
@@ -13,22 +15,26 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
+import org.gluu.oxeleven.util.Base64Util;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import sun.security.rsa.RSAPublicKeyImpl;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 import java.util.Map;
 
 import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 20, 2016
+ * @version October 5, 2016
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
@@ -58,16 +64,28 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
                 PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
                 String alias = pkcs11.generateKey(dnName, signatureAlgorithm, expirationTime);
+                PublicKey publicKey = pkcs11.getPublicKey(alias);
+                Certificate certificate = pkcs11.getCertificate(alias);
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put(KEY_TYPE, signatureAlgorithm.getFamily());
                 jsonObject.put(KEY_ID, alias);
+                jsonObject.put(KEY_TYPE, signatureAlgorithm.getFamily());
                 jsonObject.put(KEY_USE, "sig");
                 jsonObject.put(ALGORITHM, signatureAlgorithm.getName());
-                if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-                    jsonObject.put(CURVE, signatureAlgorithm.getCurve());
-                }
                 jsonObject.put(EXPIRATION_TIME, expirationTime);
+                if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
+                    RSAPublicKeyImpl rsaPublicKey = (RSAPublicKeyImpl) publicKey;
+                    jsonObject.put(MODULUS, Base64Util.base64UrlEncode(rsaPublicKey.getModulus().toByteArray()));
+                    jsonObject.put(EXPONENT, Base64Util.base64UrlEncode(rsaPublicKey.getPublicExponent().toByteArray()));
+                } else if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+                    ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+                    jsonObject.put(CURVE, signatureAlgorithm.getCurve());
+                    jsonObject.put(X, Base64Util.base64UrlEncode(ecPublicKey.getW().getAffineX().toByteArray()));
+                    jsonObject.put(Y, Base64Util.base64UrlEncode(ecPublicKey.getW().getAffineY().toByteArray()));
+                }
+                JSONArray x5c = new JSONArray();
+                x5c.put(Base64.encodeBase64String(certificate.getEncoded()));
+                jsonObject.put(CERTIFICATE_CHAIN, x5c);
 
                 builder.entity(jsonObject.toString());
             }

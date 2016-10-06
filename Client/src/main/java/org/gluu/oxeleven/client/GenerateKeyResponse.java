@@ -7,22 +7,30 @@
 package org.gluu.oxeleven.client;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxeleven.util.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
+
+import java.util.List;
 
 import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version October 5, 2016
  */
 public class GenerateKeyResponse extends BaseResponse {
 
-    private String keyType;
     private String keyId;
+    private String keyType;
     private String keyUse;
     private String algorithm;
-    private String curve;
     private Long expirationTime;
+    private String modulus;
+    private String exponent;
+    private String curve;
+    private String x;
+    private String y;
+    private List<String> x5c;
 
     public GenerateKeyResponse(ClientResponse<String> clientResponse) {
         super(clientResponse);
@@ -33,17 +41,22 @@ public class GenerateKeyResponse extends BaseResponse {
             keyId = jsonObject.optString(KEY_ID);
             keyUse = jsonObject.optString(KEY_USE);
             algorithm = jsonObject.optString(ALGORITHM);
+            modulus = jsonObject.optString(MODULUS);
+            exponent = jsonObject.optString(EXPONENT);
             curve = jsonObject.optString(CURVE);
+            x = jsonObject.optString(X);
+            y = jsonObject.optString(Y);
             expirationTime = jsonObject.optLong(EXPIRATION_TIME);
+            x5c = StringUtils.toList(jsonObject.optJSONArray(CERTIFICATE_CHAIN));
         }
-    }
-
-    public String getKeyType() {
-        return keyType;
     }
 
     public String getKeyId() {
         return keyId;
+    }
+
+    public String getKeyType() {
+        return keyType;
     }
 
     public String getKeyUse() {
@@ -54,11 +67,31 @@ public class GenerateKeyResponse extends BaseResponse {
         return algorithm;
     }
 
+    public Long getExpirationTime() {
+        return expirationTime;
+    }
+
+    public String getModulus() {
+        return modulus;
+    }
+
+    public String getExponent() {
+        return exponent;
+    }
+
     public String getCurve() {
         return curve;
     }
 
-    public Long getExpirationTime() {
-        return expirationTime;
+    public String getX() {
+        return x;
+    }
+
+    public String getY() {
+        return y;
+    }
+
+    public List<String> getX5c() {
+        return x5c;
     }
 }
