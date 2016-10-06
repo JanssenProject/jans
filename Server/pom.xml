@@ -58,7 +58,7 @@
 					<configuration>
 						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
 							-Dcatalina.base=${project.build.directory}
-							-Dgluu.conf.folder=${project.build.directory}
+							-Dgluu.base=${project.build.directory}
 						</argLine>
 					</configuration>
 				</plugin>
