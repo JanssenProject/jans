@@ -2405,7 +2405,7 @@ if __name__ == '__main__':
             installObject.makeFolders()
             installObject.installJRE()
             installObject.installJetty()
-#            installObject.installTomcat()
+            installObject.installTomcat()
             installObject.installJython()
             installObject.make_salt()
             installObject.make_oxauth_salt()
