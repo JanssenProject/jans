@@ -126,7 +126,6 @@ class Setup(object):
         self.idpSPFolder = "/opt/idp/sp"
         self.idpWarFullPath = '%s/idp.war' % self.idpWarFolder
 
-        
         self.idp3Folder = "/opt/shibboleth-idp"
         self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
         self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
@@ -1756,8 +1755,7 @@ class Setup(object):
     def createUsers(self):
         try:
             useradd = '/usr/sbin/useradd'
-            self.run([mkdir, '-p', self.jetty_user_home])
-            self.run([useradd, '--system', '--create-home', '--user-group', '--shell /bin/bash', '--home-dir %s' % self.jetty_user_home, 'jetty'])
+            self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', self.jetty_user_home, 'jetty'])
         except:
             self.logIt("Error adding users", True)
             self.logIt(traceback.format_exc(), True)
