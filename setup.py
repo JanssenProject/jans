@@ -793,10 +793,10 @@ class Setup(object):
 
     def installTomcat(self):
         self.logIt("Installing tomcat %s..." % (self.tomcat_version))
-        tomcatArchive = 'apache-tomcat-%s.zip' % (self.tomcat_version)
+        tomcatArchive = 'apache-tomcat-%s.tar.gz' % (self.tomcat_version)
         try:
             self.logIt("Unzipping %s in /opt/" % tomcatArchive)
-            self.run(['unzip', '-n', '%s/%s' % (self.distAppFolder, tomcatArchive), '-d', '/opt/' ])
+            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, tomcatArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, tomcatArchive))
             self.logIt(traceback.format_exc(), True)
