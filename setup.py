@@ -97,7 +97,7 @@ class Setup(object):
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
         self.distWarFolder = '%s/war' % self.distFolder
-        self.distTmpFolder = '/%s/tmp' % self.distFolder
+        self.distTmpFolder = '%s/tmp' % self.distFolder
 
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
         self.log = '%s/setup.log' % self.install_dir
@@ -831,38 +831,20 @@ class Setup(object):
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
 
-        try:
-            self.logIt("Preparing %s service base folders" % serviceName)
-            self.run([self.cmd_mkdir, '-p', jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', '%s/webapps' % jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', '%s/logs' % jettyServiceBase])
-            self.run([self.cmd_mkdir, '-p', '%s/tmp' % jettyServiceBase])
+        self.logIt("Preparing %s service base folders" % serviceName)
+        self.run([self.cmd_mkdir, '-p', jettyServiceBase])
 
-            self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
-        except:
-            self.logIt("Error encountered while preparing %s service base folders" % serviceName)
-            self.logIt(traceback.format_exc(), True)
+        self.logIt("Preparing %s service base configuration" % serviceName)
+        jettyEnv = os.environ.copy()
+        jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        try:
-            self.logIt("Preparing %s service base configuration" % serviceName)
-            jettyEnv = os.environ.copy()
-            jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
-            jettyEnv['JETTY_BASE'] = jettyServiceBase
-            jettyEnv['JETTY_HOME'] = self.jetty_home
+        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home', self.jetty_home, 'jetty.base', jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
-            self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
-        except:
-            self.logIt("Error encountered while preparing %s service base configuration" % serviceName)
-            self.logIt(traceback.format_exc(), True)
-
-        try:
-            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                print "jetty service installation not suppoorted"
-            else:
-                self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
-        except:
-            self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
-            self.logIt(traceback.format_exc(), True)
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+            print "jetty service installation not suppoorted"
+        else:
+            self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
