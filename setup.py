@@ -762,7 +762,7 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
-        jreDestinationPath = '/opt/jdk1.8.0_-%s' % self.jre_version
+        jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
         try:
             self.logIt("Extracting %s in /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
@@ -887,15 +887,15 @@ class Setup(object):
         except:
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
-            
-        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
-        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
 
         try:
             self.run(['ln', '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
         except:
             self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
+            
+        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
+        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -912,12 +912,14 @@ class Setup(object):
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
+            distAsimbaPath = '%s/%s' % (self.distWarFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
                 self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWarFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
+            distOxAuthRpPath = '%s/%s' % (self.distWarFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
