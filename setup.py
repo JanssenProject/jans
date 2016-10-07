@@ -58,6 +58,11 @@ class Setup(object):
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
+        cmd_ln = '/bin/ln'
+        cmd_chmod = '/bin/chmod'
+        cmd_chown = '/bin/chown'
+        cmd_mkdir = '/bin/mkdir'
+
         self.downloadWars = None
 
         self.installOxAuth = True
@@ -82,6 +87,7 @@ class Setup(object):
 
         self.jetty_version = '9.3.12.v20160915'
         self.jetty_home = '/opt/jetty'
+        self.jetty_base = '/opt/jetty_base'
         self.jetty_user_home = '/home/jetty'
 
         self.jre_version = '102'
@@ -403,7 +409,7 @@ class Setup(object):
             self.logIt("Copying LDAP schema")
             for schemaFile in self.schemaFiles:
                 self.copyFile(schemaFile, self.schemaFolder)
-            self.run(['chown', '-R', 'ldap:ldap', self.ldapBaseFolder])
+            self.run([cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
         except:
             self.logIt("Error adding schema")
             self.logIt(traceback.format_exc(), True)
@@ -414,22 +420,22 @@ class Setup(object):
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realCertFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', realTomcatFolder])
-        self.run(['/bin/chown', '-R', 'ldap:ldap', realLdapBaseFolder])
-        self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
+        self.run([cmd_chown, '-R', 'tomcat:tomcat', realCertFolder])
+        self.run([cmd_chown, '-R', 'tomcat:tomcat', realTomcatFolder])
+        self.run([cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+        self.run([cmd_chown, '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
         if self.installSaml:
             realIdpFolder = os.path.realpath(self.idpFolder)
             realIdp3Folder = os.path.realpath(self.idp3Folder)
-            self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdpFolder])
-            self.run(['/bin/chown', '-R', 'tomcat:tomcat', realIdp3Folder])
+            self.run([cmd_chown, '-R', 'tomcat:tomcat', realIdpFolder])
+            self.run([cmd_chown, '-R', 'tomcat:tomcat', realIdp3Folder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
 
-        self.run(['/bin/chmod', '-R', '400', realCertFolder])
-        self.run(['/bin/chmod', 'u+X', realCertFolder])
+        self.run([cmd_chmod, '-R', '400', realCertFolder])
+        self.run([cmd_chmod, 'u+X', realCertFolder])
 
     def get_ip(self):
         testIP = None
@@ -551,7 +557,7 @@ class Setup(object):
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['debian', 'ubuntu']:
             self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
-            self.run(['ln', '-s', '/etc/apache2/sites-available/https_gluu.conf',
+            self.run([cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def configure_oxtrust(self):
@@ -667,7 +673,7 @@ class Setup(object):
         except:
             self.logIt("Error rendering encode script")
             self.logIt(traceback.format_exc(), True)
-        self.run(["chmod", '-R', '700', self.gluuOptBinFolder])
+        self.run([cmd_chmod, '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
@@ -770,17 +776,10 @@ class Setup(object):
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
 
-        try:
-            self.run(['ln', '-sf', jreDestinationPath, self.jre_home])
-        except:
-            self.logIt("Error creating symlink %s from %s" % (self.jre_home, jreDestinationPath))
-            self.logIt(traceback.format_exc(), True)
-
-        chmod = '/bin/chmod'
-        chown = '/bin/chown'
-        self.run([chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
-        self.run([chown, '-R', 'root:root', jreDestinationPath])
-        self.run([chown, '-h', 'root:root', self.jre_home])
+        self.run([cmd_ln, '-sf', jreDestinationPath, self.jre_home])
+        self.run([cmd_chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
+        self.run([cmd_chown, '-R', 'root:root', jreDestinationPath])
+        self.run([cmd_chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
         openDJArchive = 'opendj-server-3.0.0.zip'
@@ -801,18 +800,13 @@ class Setup(object):
             self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, tomcatArchive))
             self.logIt(traceback.format_exc(), True)
 
-        try:
-            self.run(['ln', '-sf', '/opt/apache-tomcat-%s' % (self.tomcat_version), '/opt/tomcat'])
-        except:
-            self.logIt("Error creating symlink /opt/tomcat from /opt/apache-tomcat-%s" % (self.tomcat_version))
-            self.logIt(traceback.format_exc(), True)
-
         self.removeDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
         self.createDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
 
-        self.run(["/bin/chmod", '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
-        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
-        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/tomcat'])
+        self.run([cmd_ln, '-sf', '/opt/apache-tomcat-%s' % (self.tomcat_version), '/opt/tomcat'])
+        self.run([cmd_chmod, '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
+        self.run([cmd_chown, '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
+        self.run([cmd_chown, '-h', 'tomcat:tomcat', '/opt/tomcat'])
 
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
@@ -825,33 +819,26 @@ class Setup(object):
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
             self.logIt(traceback.format_exc(), True)
 
-        try:
-            self.run(['ln', '-sf', jettyDestinationPath, self.jetty_home])
-        except:
-            self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
-            self.logIt(traceback.format_exc(), True)
+        self.run([cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
+        self.run([cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
+        self.run([cmd_chown, '-R', 'root:root', jettyDestinationPath])
+        self.run([cmd_chown, '-h', 'root:root', self.jetty_home])
 
-        chmod = '/bin/chmod'
-        chown = '/bin/chown'
-        self.run([chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
-        self.run([chown, '-R', 'root:root', jettyDestinationPath])
-        self.run([chown, '-h', 'root:root', self.jetty_home])
+        self.run([cmd_mkdir, '-p', self.jetty_base])
+        self.run([cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
     def installJettyService(self, serviceName):
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
 
-        mkdir = '/bin/mkdir'
-        chown = '/bin/chown'
-
         try:
             self.logIt("Preparing %s service base folders" % serviceName)
-            self.run([mkdir, '-p', jettyServiceBase])
-            self.run([mkdir, '-p', '%s/webapps' % jettyServiceBase])
-            self.run([mkdir, '-p', '%s/logs' % jettyServiceBase])
-            self.run([mkdir, '-p', '%s/tmp' % jettyServiceBase])
+            self.run([cmd_mkdir, '-p', jettyServiceBase])
+            self.run([cmd_mkdir, '-p', '%s/webapps' % jettyServiceBase])
+            self.run([cmd_mkdir, '-p', '%s/logs' % jettyServiceBase])
+            self.run([cmd_mkdir, '-p', '%s/tmp' % jettyServiceBase])
 
-            self.run([chown, '-R', 'jetty:jetty', jettyServiceBase])
+            self.run([cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         except:
             self.logIt("Error encountered while preparing %s service base folders" % serviceName)
             self.logIt(traceback.format_exc(), True)
@@ -872,7 +859,7 @@ class Setup(object):
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                 print "jetty service installation not suppoorted"
             else:
-                self.run(['ln', '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
+                self.run([cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
         except:
             self.logIt("Error creating symlink %s from %s" % (self.jetty_home, jettyDestinationPath))
             self.logIt(traceback.format_exc(), True)
@@ -888,25 +875,20 @@ class Setup(object):
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
 
-        try:
-            self.run(['ln', '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
-        except:
-            self.logIt("Error creating symlink /opt/jython from /opt/jython-%s" % self.jython_version)
-            self.logIt(traceback.format_exc(), True)
-            
-        self.run(["/bin/chown", '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
-        self.run(["/bin/chown", '-h', 'tomcat:tomcat', '/opt/jython'])
+        self.run([cmd_ln, '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
+        self.run([cmd_chown, '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
+        self.run([cmd_chown, '-h', 'tomcat:tomcat', '/opt/jython'])
 
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distAppFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distAppFolder])
             print "Downloading Shibboleth IDP 2 war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.idp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distAppFolder])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
 
             print "Finished downloading latest war files"
 
@@ -915,14 +897,14 @@ class Setup(object):
             distAsimbaPath = '%s/%s' % (self.distWarFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWarFolder])
+                self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWarFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distWarFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1039,10 +1021,10 @@ class Setup(object):
                   '-out',
                   public_certificate
         ])
-        self.run(["/bin/chown", '%s:%s' % (user, user), key_with_password])
-        self.run(["/bin/chmod", '700', key_with_password])
-        self.run(["/bin/chown", '%s:%s' % (user, user), key])
-        self.run(["/bin/chmod", '700', key])
+        self.run([cmd_chown, '%s:%s' % (user, user), key_with_password])
+        self.run([cmd_chmod, '700', key_with_password])
+        self.run([cmd_chown, '%s:%s' % (user, user), key])
+        self.run([cmd_chmod, '700', key])
 
         self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
                   "-file", public_certificate, "-keystore", self.defaultTrustStoreFN, \
@@ -1069,8 +1051,8 @@ class Setup(object):
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
                               'tomcat')
-            self.run(['/bin/chown', '-R', 'tomcat:tomcat', self.certFolder])
-            self.run(['/bin/chmod', '-R', '500', self.certFolder])
+            self.run([cmd_chown, '-R', 'tomcat:tomcat', self.certFolder])
+            self.run([cmd_chmod, '-R', '500', self.certFolder])
         except:
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
@@ -1112,10 +1094,10 @@ class Setup(object):
                   'RSA',
                   '-noprompt'
         ])
-        self.run(["/bin/chown", '%s:%s' % (user, user), pkcs_fn])
-        self.run(["/bin/chmod", '700', pkcs_fn])
-        self.run(["/bin/chown", '%s:%s' % (user, user), keystoreFN])
-        self.run(["/bin/chmod", '700', keystoreFN])
+        self.run([cmd_chown, '%s:%s' % (user, user), pkcs_fn])
+        self.run([cmd_chmod, '700', pkcs_fn])
+        self.run([cmd_chown, '%s:%s' % (user, user), keystoreFN])
+        self.run([cmd_chmod, '700', keystoreFN])
 
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, key_expiration = None, dn_name = None, key_algs = None):
         self.logIt("Generating oxAuth OpenID Connect keys")
@@ -1228,8 +1210,8 @@ class Setup(object):
             f = open(fn, 'w')
             f.write(jwks_text)
             f.close()
-            self.run(["/bin/chown", 'tomcat:tomcat', fn])
-            self.run(["/bin/chmod", '600', fn])
+            self.run([cmd_chown, 'tomcat:tomcat', fn])
+            self.run([cmd_chmod, '600', fn])
             self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
         except:
             self.logIt("Error writing command : %s" % fn, True)
@@ -1302,7 +1284,7 @@ class Setup(object):
             self.copyFile(ldif_file_fn, ldifFolder)
             ldif_file_fullpath = "%s/ldif/%s" % (self.ldapBaseFolder,
                                                  os.path.split(ldif_file_fn)[-1])
-            self.run(['/bin/chown', 'ldap:ldap', ldif_file_fullpath])
+            self.run([cmd_chown, 'ldap:ldap', ldif_file_fullpath])
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.loadLdifCommand,
                                   '--hostname',
@@ -1336,7 +1318,7 @@ class Setup(object):
         self.logIt("Importing site LDIF")
         self.copyFile("%s/static/cache-refresh/o_site.ldif" % self.install_dir, ldifFolder)
         site_ldif_fn = "%s/o_site.ldif" % ldifFolder
-        self.run(['/bin/chown', 'ldap:ldap', site_ldif_fn])
+        self.run([cmd_chown, 'ldap:ldap', site_ldif_fn])
         
         importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                               self.importLdifCommand,
@@ -1362,7 +1344,7 @@ class Setup(object):
                   '-c',
                   '%s' % importCmd])
 
-    def index_opendj(self, backend):
+    def index_opendj_backend(self, backend):
         if self.opendj_version == "2.6":
             index_command = 'create-local-db-index'
         else:
@@ -1416,8 +1398,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def index_opendj(self):
-        self.index_opendj('userRoot')
-        self.index_opendj('site')
+        self.index_opendj_backend('userRoot')
+        self.index_opendj_backend('site')
 
     # Deprecated
     def install_ox_base(self):
@@ -1439,7 +1421,7 @@ class Setup(object):
             # Prepare endorsed folder
             endorsedFolder = "%s/endorsed" % self.tomcatHome             
             self.createDirs(endorsedFolder)
-            self.run(['/bin/chmod', '-R', '755', endorsedFolder])
+            self.run([cmd_chmod, '-R', '755', endorsedFolder])
             
             # Copy  files into endorsed
             bcFilePath1 = '%s/WEB-INF/lib/bcprov-jdk15on-1.54.jar' % tmpOxAuthDir
@@ -1546,11 +1528,11 @@ class Setup(object):
             self.logIt("Install Saml Shibboleth IDP v3...")
             
             print "Downloading Shibboleth IDP 3 war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
+            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
             print "Downloading Shibboleth IDP 3 keygenerator..."
-            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
+            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP 3 binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist_jar, '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
             
             # unpack IDP3 JAR with static configs
             self.run([self.jarCommand, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
@@ -1586,7 +1568,7 @@ class Setup(object):
             self.run(['java','-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
-            self.run(['chown','-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
+            self.run([cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
@@ -1765,54 +1747,52 @@ class Setup(object):
     def makeFolders(self):
         try:
             # Create these folder on all instances
-            mkdir = '/bin/mkdir'
-            chown = '/bin/chown'
-            self.run([mkdir, '-p', self.configFolder])
-            self.run([mkdir, '-p', self.certFolder])
-            self.run([mkdir, '-p', self.outputFolder])
+            self.run([cmd_mkdir, '-p', self.configFolder])
+            self.run([cmd_mkdir, '-p', self.certFolder])
+            self.run([cmd_mkdir, '-p', self.outputFolder])
 
             if self.installOxTrust | self.installOxAuth:
-                self.run([mkdir, '-p', self.gluuOptFolder])
-                self.run([mkdir, '-p', self.gluuOptBinFolder])
-                self.run([mkdir, '-p', self.tomcat_user_home_lib])
-                self.run([mkdir, '-p', self.oxPhotosFolder])
-                self.run([mkdir, '-p', self.oxTrustRemovedFolder])
-                self.run([mkdir, '-p', self.oxTrustCacheRefreshFolder])
+                self.run([cmd_mkdir, '-p', self.gluuOptFolder])
+                self.run([cmd_mkdir, '-p', self.gluuOptBinFolder])
+                self.run([cmd_mkdir, '-p', self.tomcat_user_home_lib])
+                self.run([cmd_mkdir, '-p', self.oxPhotosFolder])
+                self.run([cmd_mkdir, '-p', self.oxTrustRemovedFolder])
+                self.run([cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
 
                 # Customizations folders
-                self.run([mkdir, '-p', self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
 
-                self.run([mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
-                self.run([mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
+                self.run([cmd_mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
 
-                self.run([chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
+                self.run([cmd_chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
 
             if self.installSaml:
-                self.run([mkdir, '-p', self.idpFolder])
-                self.run([mkdir, '-p', self.idpMetadataFolder])
-                self.run([mkdir, '-p', self.idpLogsFolder])
-                self.run([mkdir, '-p', self.idpLibFolder])
-                self.run([mkdir, '-p', self.idpConfFolder])
-                self.run([mkdir, '-p', self.idpSslFolder])
-                self.run([mkdir, '-p', self.idpTempMetadataFolder])
-                self.run([mkdir, '-p', self.idpWarFolder])
-                self.run([mkdir, '-p', self.idpSPFolder])
-                self.run([chown, '-R', 'tomcat:tomcat', self.idpFolder])
-                self.run([mkdir, '-p', self.idp3Folder])
-                self.run([mkdir, '-p', self.idp3MetadataFolder])
-                self.run([mkdir, '-p', self.idp3LogsFolder])
-                self.run([mkdir, '-p', self.idp3LibFolder])
-                self.run([mkdir, '-p', self.idp3ConfFolder])
-                self.run([mkdir, '-p', self.idp3ConfAuthnFolder])
-                self.run([mkdir, '-p', self.idp3CredentialsFolder])
-                self.run([mkdir, '-p', self.idp3WarFolder])
-                self.run([chown, '-R', 'tomcat:tomcat', self.idp3Folder])
+                self.run([cmd_mkdir, '-p', self.idpFolder])
+                self.run([cmd_mkdir, '-p', self.idpMetadataFolder])
+                self.run([cmd_mkdir, '-p', self.idpLogsFolder])
+                self.run([cmd_mkdir, '-p', self.idpLibFolder])
+                self.run([cmd_mkdir, '-p', self.idpConfFolder])
+                self.run([cmd_mkdir, '-p', self.idpSslFolder])
+                self.run([cmd_mkdir, '-p', self.idpTempMetadataFolder])
+                self.run([cmd_mkdir, '-p', self.idpWarFolder])
+                self.run([cmd_mkdir, '-p', self.idpSPFolder])
+                self.run([cmd_chown, '-R', 'tomcat:tomcat', self.idpFolder])
+                self.run([cmd_mkdir, '-p', self.idp3Folder])
+                self.run([cmd_mkdir, '-p', self.idp3MetadataFolder])
+                self.run([cmd_mkdir, '-p', self.idp3LogsFolder])
+                self.run([cmd_mkdir, '-p', self.idp3LibFolder])
+                self.run([cmd_mkdir, '-p', self.idp3ConfFolder])
+                self.run([cmd_mkdir, '-p', self.idp3ConfAuthnFolder])
+                self.run([cmd_mkdir, '-p', self.idp3CredentialsFolder])
+                self.run([cmd_mkdir, '-p', self.idp3WarFolder])
+                self.run([cmd_chown, '-R', 'tomcat:tomcat', self.idp3Folder])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -2143,7 +2123,7 @@ class Setup(object):
                 dest_folder = os.path.dirname(self.tomcat_service_centos7)
                 try:
                     self.copyFile(self.tomcat_template_centos7, dest_folder)
-                    self.run(["chmod", "755", self.tomcat_service_centos7])
+                    self.run([cmd_chmod, "755", self.tomcat_service_centos7])
                     self.run([self.tomcat_service_centos7, "install"])
                 except:
                     self.logIt("Error copying script file %s to %s" % (self.tomcat_template_centos7, dest_folder))
@@ -2153,7 +2133,7 @@ class Setup(object):
                 try:
                     script_name = os.path.split(init_file)[-1]
                     self.copyFile(init_file, "/etc/init.d")
-                    self.run(["chmod", "755", "/etc/init.d/%s" % script_name])
+                    self.run([cmd_chmod, "755", "/etc/init.d/%s" % script_name])
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
@@ -2244,7 +2224,7 @@ class Setup(object):
             f = open(self.ldapPassFn, 'w')
             f.write(self.ldapPass)
             f.close()
-            self.run(["/bin/chown", 'ldap:ldap', self.ldapPassFn])
+            self.run([cmd_chown, 'ldap:ldap', self.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
 
