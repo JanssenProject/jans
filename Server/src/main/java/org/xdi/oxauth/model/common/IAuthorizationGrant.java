@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 15, 2015
+ * @version October 7, 2016
  */
 
 public interface IAuthorizationGrant {
@@ -49,7 +49,7 @@ public interface IAuthorizationGrant {
     public RefreshToken createRefreshToken();
 
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-    		AuthorizationGrant authorizationGrant)
+                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException,
             InvalidClaimException, InvalidKeyException, NoSuchAlgorithmException;
 
