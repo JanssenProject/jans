@@ -28,7 +28,7 @@ import java.util.Set;
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version February 15, 2015
+ * @version October 7, 2016
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -47,15 +47,15 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private final GrantService grantService = GrantService.instance();
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                                  Date authenticationTime) {
+                              Date authenticationTime) {
         super(user, authorizationGrantType, client, authenticationTime);
     }
 
     public static IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-            Set<String> scopes)
-            throws Exception {
-        JsonWebResponse jwr = IdTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, scopes);
+            Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
+        JsonWebResponse jwr = IdTokenFactory.createJwr(
+                grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
@@ -139,7 +139,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         try {
             final RefreshToken refreshToken = super.createRefreshToken();
             if (refreshToken.getExpiresIn() > 0) {
-            	persist(asToken(refreshToken));
+                persist(asToken(refreshToken));
             }
             return refreshToken;
         } catch (Exception e) {
@@ -150,11 +150,11 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-    		AuthorizationGrant authorizationGrant)
+                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         try {
-            final IdToken idToken = createIdToken(this, nonce, authorizationCode,
-                    accessToken, getScopes());
+            final IdToken idToken = createIdToken(
+                    this, nonce, authorizationCode, accessToken, getScopes(), includeIdTokenClaims);
             final String acrValues = authorizationGrant.getAcrValues();
             final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
