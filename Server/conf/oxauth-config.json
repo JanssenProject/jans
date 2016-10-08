@@ -218,9 +218,10 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "webKeysStorage": "keystore",
     "dnName": "CN=oxAuth CA Certificates",
-    "keyStoreFile": "./conf/keystore.jks",
+    "keyStoreFile": "/etc/certs/keystore.jks",
     "keyStoreSecret": "secret",
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
-    "clientBlackList": ["*.attacker.com/*"]
+    "clientBlackList": ["*.attacker.com/*"],
+    "legacyIdTokenClaims": true
 }
