@@ -5,4 +5,4 @@ JAVA_OPTIONS="-server -Xms256m -Xmx1024m -XX:+DisableExplicitGC -Dgluu.base=%(gl
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/asimba
 JETTY_USER=jetty
-JETTY_ARGS=jetty.http.port=8084 jetty.ssl.port=8447
+JETTY_ARGS="jetty.http.port=8084 jetty.ssl.port=8447"
