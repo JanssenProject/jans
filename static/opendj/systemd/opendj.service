@@ -6,6 +6,8 @@ After=syslog.target
 Type=forking
 ExecStart=/opt/opendj/bin/start-ds
 ExecStop=/opt/opendj/bin/stop-ds
+User=ldap
+Group=ldap
 
 [Install]
 WantedBy=multi-user.target
