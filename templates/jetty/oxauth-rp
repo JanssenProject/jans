@@ -1,12 +1,8 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS=" -server -Xms256m -Xmx1024m -XX:+DisableExplicitGC "
+JAVA_OPTIONS="-server -Xms256m -Xmx1024m -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dcatalina.base=%(jetty_base)s/oxauth-rp"
 
-JETTY_HOME=%(jetty_home)s/oxauth-rp
-JETTY_BASE=%(jetty_base)s
+JETTY_HOME=%(jetty_home)s
+JETTY_BASE=%(jetty_base)s/oxauth-rp
 JETTY_USER=jetty
-JETTY_PORT=8085
-#JETTY_LOGS=/home/jetty/logs
-#TMPDIR=/home/jetty/temp
-
-GLUU_BASE=/etc/gluu
+JETTY_ARGS=jetty.http.port=8085 jetty.ssl.port=8448
