@@ -838,11 +838,12 @@ class Setup(object):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home', self.jetty_home, 'jetty.base', jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
+        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=' % jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         
         jettyServiceConfiguration = '%s/jetty/%s' % ( self.outputFolder, serviceName )
-        self.copyFile(jettyServiceConfiguration, "/etc/defaults")
+        self.copyFile(jettyServiceConfiguration, "/etc/default")
+        self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
             print "jetty service installation not suppoorted"
@@ -1735,6 +1736,12 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
+
+            # OS /etc/default folder
+            osDefault = "/etc/default"
+            if not os.path.exists(osDefault):
+                self.run([self.cmd_mkdir, '-p', osDefault])
+                self.run([self.cmd_chown, '-R', 'root:root', osDefault])
 
             if self.installOxTrust | self.installOxAuth:
                 self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
