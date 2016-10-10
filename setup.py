@@ -840,6 +840,9 @@ class Setup(object):
 
         self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home', self.jetty_home, 'jetty.base', jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
+        
+        jettyServiceConfiguration = '%s/jetty/%s' % ( self.outputFolder, serviceName )
+        self.copyFile(jettyServiceConfiguration, "/etc/defaults")
 
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
             print "jetty service installation not suppoorted"

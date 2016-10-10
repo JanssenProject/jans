@@ -1,0 +1,12 @@
+JAVA_HOME=%(jre_home)s
+JAVA=$JAVA_HOME/bin/java
+JAVA_OPTIONS=" -server -Xms256m -Xmx1024m -XX:+DisableExplicitGC "
+ 
+JETTY_HOME=%(jetty_home)s/identity
+JETTY_BASE=%(jetty_base)s
+JETTY_USER=jetty
+JETTY_PORT=8082
+#JETTY_LOGS=/home/jetty/logs
+#TMPDIR=/home/jetty/temp
+
+GLUU_BASE=/etc/gluu
