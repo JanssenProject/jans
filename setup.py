@@ -106,7 +106,8 @@ class Setup(object):
 
         self.gluuOptFolder = '/opt/gluu'
         self.gluuOptBinFolder = '/opt/gluu/bin'
-        self.configFolder = '/etc/gluu/config'
+        self.gluuBaseFolder = '/etc/gluu'
+        self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.certFolder = '/etc/certs'
         self.tomcatHome = '/opt/tomcat'
 
@@ -838,7 +839,7 @@ class Setup(object):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=' % jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
+        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         
         jettyServiceConfiguration = '%s/jetty/%s' % ( self.outputFolder, serviceName )
@@ -1644,6 +1645,11 @@ class Setup(object):
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
 
     def install_gluu_components(self):
+        oxLdapProperties = '%s/ox-ldap.properties' % (self.outputFolder, serviceName)
+        oxSalt = "%s/conf/salt" % self.tomcatHome
+        self.copyFile(oxLdapProperties, self.configFolder)
+        self.copyFile(oxSalt, self.configFolder)
+
         if self.installOxAuth:
             self.install_oxauth()
 
@@ -1741,7 +1747,6 @@ class Setup(object):
             osDefault = "/etc/default"
             if not os.path.exists(osDefault):
                 self.run([self.cmd_mkdir, '-p', osDefault])
-                self.run([self.cmd_chown, '-R', 'root:root', osDefault])
 
             if self.installOxTrust | self.installOxAuth:
                 self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
