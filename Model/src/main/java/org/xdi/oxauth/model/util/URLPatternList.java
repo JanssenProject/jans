@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Javier Rojas Blum
- * @version September 21, 2016
+ * @version October 10, 2016
  */
 public class URLPatternList {
 
@@ -26,8 +26,10 @@ public class URLPatternList {
     public URLPatternList(List<String> urlPatternList) {
         this();
 
-        for (String urlPattern : urlPatternList) {
-            addWhiteListEntry(urlPattern);
+        if (urlPatternList != null) {
+            for (String urlPattern : urlPatternList) {
+                addListEntry(urlPattern);
+            }
         }
     }
 
@@ -47,7 +49,7 @@ public class URLPatternList {
         return false;
     }
 
-    public void addWhiteListEntry(String urlPattern) {
+    public void addListEntry(String urlPattern) {
         if (urlPatternList != null) {
             try {
                 if (urlPattern.compareTo("*") == 0) {
