@@ -1945,15 +1945,14 @@ class Setup(object):
             self.logIt("Error writing template %s" % fullPath, True)
             self.logIt(traceback.format_exc(), True)
 
-    def render_test_templates(self):
-        self.logIt("Rendering test templates")
+    def render_templates_folder(self, templatesFolder):
+        self.logIt("Rendering templates folder: %s", templatesFolder)
         
-        testTepmplatesFolder = '%s/test/' % self.templateFolder
-        for templateBase, templateDirectories, templateFiles in os.walk(testTepmplatesFolder):
+        for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
             for templateFile in templateFiles:
                 fullPath = '%s/%s' % (templateBase, templateFile)
                 try:
-                    self.logIt("Rendering test template %s" % fullPath)
+                    self.logIt("Rendering template %s" % fullPath)
                     fn = fullPath[12:] # Remove ./template/ from fullPath
                     f = open(os.path.join(self.templateFolder, fn))
                     template_text = f.read()
@@ -1969,8 +1968,20 @@ class Setup(object):
                     newFn.write(template_text % self.__dict__)
                     newFn.close()
                 except:
-                    self.logIt("Error writing test template %s" % fullPath, True)
+                    self.logIt("Error writing template %s" % fullPath, True)
                     self.logIt(traceback.format_exc(), True)
+
+    def render_test_templates(self):
+        self.logIt("Rendering test templates")
+
+        testTepmplatesFolder = '%s/test/' % self.templateFolder
+        self.render_templates_folder(testTepmplatesFolder)
+
+    def render_jetty_templates(self):
+        self.logIt("Rendering jetty templates")
+
+        jettyTepmplatesFolder = '%s/jetty/' % self.templateFolder
+        self.render_templates_folder(jettyTepmplatesFolder)
 
     def reindent(self, text, num_spaces):
         text = string.split(text, '\n')
@@ -2375,6 +2386,7 @@ if __name__ == '__main__':
             installObject.make_salt()
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
+            installObject.render_jetty_templates()
             installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
