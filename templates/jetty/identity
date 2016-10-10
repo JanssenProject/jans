@@ -6,4 +6,4 @@ JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/identity
 JETTY_USER=jetty
 JETTY_ARGS="jetty.http.port=8082 jetty.ssl.port=8445"
-TMPDIR=%(jetty_home)s/temp
+TMPDIR=%(jetty_dist)s/temp
