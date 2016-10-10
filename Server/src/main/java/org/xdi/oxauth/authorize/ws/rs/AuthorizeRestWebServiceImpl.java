@@ -58,7 +58,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version October 7, 2016
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -92,6 +92,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ClientAuthorizationsService clientAuthorizationsService;
     @In
     private AuthenticationService authenticationService;
+    @In
+    private ConfigurationFactory configurationFactory;
 
     @Override
     public Response requestAuthorizationGet(
@@ -485,7 +487,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
 
                                     if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+                                        boolean includeIdTokenClaims = Boolean.TRUE.equals(configurationFactory.getConfiguration().getLegacyIdTokenClaims());
                                         if (authorizationGrant == null) {
+                                            includeIdTokenClaims = true;
                                             authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
                                                     sessionUser.getAuthenticationTime());
                                             authorizationGrant.setNonce(nonce);
@@ -497,9 +501,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             authorizationGrant.setSessionDn(sessionUser.getDn());
                                             authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                         }
-                                        //Map<String, String> idTokenClaims = getClaims(user, authorizationGrant, scopes);
                                         IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken, authorizationGrant);
+                                                nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims);
 
                                         redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
                                     }

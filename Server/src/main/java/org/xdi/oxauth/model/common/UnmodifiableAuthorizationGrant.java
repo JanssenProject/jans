@@ -24,7 +24,7 @@ import java.util.Set;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version October 7, 2016
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
@@ -82,7 +82,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
-    		AuthorizationGrant authorizationGrant)
+                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims)
             throws SignatureException, StringEncrypter.EncryptionException, InvalidJwtException, InvalidJweException {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
@@ -247,15 +247,15 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 
-	@Override
-	public String getSessionDn() {
-		return grant.getSessionDn();
-	}
+    @Override
+    public String getSessionDn() {
+        return grant.getSessionDn();
+    }
 
-	@Override
-	public void setSessionDn(String sessionDn) {
+    @Override
+    public void setSessionDn(String sessionDn) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
-	}
+    }
 
     @Override
     public void save() {
