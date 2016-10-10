@@ -1,7 +1,7 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
 JAVA_OPTIONS=" -server -Xms256m -Xmx1024m -XX:+DisableExplicitGC "
- 
+
 JETTY_HOME=%(jetty_home)s/cas
 JETTY_BASE=%(jetty_base)s
 JETTY_USER=jetty
