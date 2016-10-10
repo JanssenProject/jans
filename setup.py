@@ -1645,7 +1645,7 @@ class Setup(object):
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
 
     def install_gluu_components(self):
-        oxLdapProperties = '%s/ox-ldap.properties' % (self.outputFolder, serviceName)
+        oxLdapProperties = '%s/ox-ldap.properties' % self.outputFolder
         oxSalt = "%s/conf/salt" % self.tomcatHome
         self.copyFile(oxLdapProperties, self.configFolder)
         self.copyFile(oxSalt, self.configFolder)
