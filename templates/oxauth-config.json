@@ -231,5 +231,6 @@
 	},
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
-    "clientBlackList": ["*.attacker.com/*"]
+    "clientBlackList": ["*.attacker.com/*"],
+    "legacyIdTokenClaims": true
 }
