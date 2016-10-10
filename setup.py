@@ -849,7 +849,7 @@ class Setup(object):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,https,logging,jsp'], None, jettyEnv)
+        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,logging,jsp'], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
