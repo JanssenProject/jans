@@ -427,6 +427,10 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
 
+        if self.installOxAuth:
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
+
         if self.installSaml:
             realIdpFolder = os.path.realpath(self.idpFolder)
             realIdp3Folder = os.path.realpath(self.idp3Folder)
