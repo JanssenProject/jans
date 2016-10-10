@@ -422,7 +422,7 @@ class Setup(object):
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
-        self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realCertFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:tomcat', realCertFolder])
         self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
@@ -440,7 +440,7 @@ class Setup(object):
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
 
-        self.run([self.cmd_chmod, '-R', '400', realCertFolder])
+        self.run([self.cmd_chmod, '-R', '550', realCertFolder])
         self.run([self.cmd_chmod, 'u+X', realCertFolder])
 
     def get_ip(self):
