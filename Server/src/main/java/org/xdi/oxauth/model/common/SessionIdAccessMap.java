@@ -43,7 +43,7 @@ public class SessionIdAccessMap implements Serializable {
     }
 
     @XmlTransient
-    public Set<String> getClientIds() {
+    public Set<String> clientIds() {
         return Sets.newHashSet(permissionGranted.keySet());
     }
 
