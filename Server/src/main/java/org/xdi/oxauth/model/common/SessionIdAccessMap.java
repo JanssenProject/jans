@@ -41,6 +41,10 @@ public class SessionIdAccessMap implements Serializable {
         this.permissionGranted = permissionGranted;
     }
 
+    public Set<String> getClientIds() {
+        return Sets.newHashSet(permissionGranted.keySet());
+    }
+
     public Set<String> getClientIds(boolean granted) {
         Set<String> clientIds = Sets.newHashSet();
         for (Map.Entry<String, Boolean> entry : permissionGranted.entrySet()) {
