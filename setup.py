@@ -1833,7 +1833,7 @@ class Setup(object):
                 self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.idp3Folder])
 
             if self.installLDAP and self.ldap_type is 'openldap':
-                self.run([mkdir, '-p', '/opt/gluu/data'])
+                self.run([self.cmd_mkdir, '-p', '/opt/gluu/data'])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -2508,8 +2508,7 @@ if __name__ == '__main__':
             if installObject.ldap_type is 'opendj':
                 installObject.setup_opendj()
                 installObject.configure_opendj()
-                installObject.index_opendj('userRoot')
-                installObject.index_opendj('site')
+                installObject.index_opendj()
                 installObject.import_ldif()
                 installObject.export_opendj_public_cert()
                 installObject.deleteLdapPw()
