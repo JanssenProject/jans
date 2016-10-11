@@ -131,7 +131,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         final Set<Client> clientsByDns = sessionState.get().getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionState.get().getPermissionGrantedMap().getClientIds(), true) :
+                clientService.getClient(sessionState.get().getPermissionGrantedMap().clientIds(), true) :
                 Sets.<Client>newHashSet();
 
         for (Client client : clientsByDns) {
