@@ -1,5 +1,3 @@
-version: 1
-
 dn: ou=oxauth,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: oxAuthConfiguration
 objectClass: top

@@ -1,5 +1,3 @@
-version: 1
-
 dn: inum=%(inumOrg)s!0011!031C.4A65,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top

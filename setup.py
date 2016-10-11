@@ -245,6 +245,20 @@ class Setup(object):
         self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
 
+        self.openldapBaseFolder = '/opt/symas'
+        self.openldapBinFolder = '/opt/symas/bin'
+        self.openldapConfFolder = '/opt/symas/etc/openldap'
+        self.openldapRootUser = "cn=directory manager,o=gluu"
+        self.user_schema = '%s/user.schema' % self.outputFolder
+        self.openldapKeyPass = None
+        self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
+        self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
+        self.openldapTLSKey = '%s/openldap.key' % self.certFolder
+        self.openldapPassHash = None
+        self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
+        self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
+
+
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
@@ -383,7 +397,10 @@ class Setup(object):
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
                      self.asimba_selector_configuration: True,
-                     self.network: False
+                     self.network: False,
+                     self.user_schema: True,
+                     self.openldapSlapdConf: True,
+                     self.openldapSymasConf: True
                      }
 
     def __repr__(self):
@@ -510,6 +527,8 @@ class Setup(object):
             self.oxauth_openid_jks_pass = self.getPW()
         if not self.asimbaJksPass:
             self.asimbaJksPass = self.getPW()
+        if not self.openldapKeyPass:
+            self.openldapKeyPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -915,7 +934,11 @@ class Setup(object):
         self.logIt("Encoding passwords")
         try:
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
-            
+            # Alternate for openldap
+            if self.ldap_type is 'openldap':
+                cmd = os.path.join(self.openldapBinFolder, "slappasswd") + " -s " + self.ldapPass
+                self.openldapPassHash = os.popen(cmd).read().strip()
+
             cmd = "%s %s" % (self.oxEncodePWCommand, self.shibJksPass)
             self.encoded_shib_jks_pw = os.popen(cmd, 'r').read().strip()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
@@ -1043,6 +1066,7 @@ class Setup(object):
             self.gen_cert('idp-encryption', self.shibJksPass, 'tomcat')
             self.gen_cert('idp-signing', self.shibJksPass, 'tomcat')
             self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
+            self.gen_cert('openldap', self.openldapKeyPass, 'ldap')
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
@@ -1807,6 +1831,9 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.idp3CredentialsFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.idp3Folder])
+
+            if self.installLDAP and self.ldap_type is 'openldap':
+                self.run([mkdir, '-p', '/opt/gluu/data'])
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1878,9 +1905,22 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        promptForLDAP = self.getPrompt("Install Gluu OpenDJ LDAP Server?", "Yes")[0].lower()
+        promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             self.installLdap = True
+            option = None
+            while (option != 1) and (option != 2):
+                try:
+                    option = int(self.getPrompt("Choose a LDAP software. 1.OpenLDAP 2.OpenDJ", "1"))
+                except ValueError:
+                    option = None
+                if (option != 1) and (option != 2):
+                    print "You did not enter the correct option. Enter either 1 or 2."
+
+            if option == 1:
+                self.ldap_type = 'openldap'
+            elif option == 2:
+                self.ldap_type = 'opendj'
         else:
             self.installLdap = False
 
@@ -2141,7 +2181,7 @@ class Setup(object):
                     self.logIt(traceback.format_exc(), True)
         else:
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
-        
+
     def setup_init_scripts(self):
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                 script_name = os.path.split(self.tomcat_template_centos7)[-1]
@@ -2162,7 +2202,7 @@ class Setup(object):
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
-        
+
         if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
                 if service != 'opendj':
@@ -2200,6 +2240,14 @@ class Setup(object):
            self.run([service_path, 'start', 'memcached.service'])
         else:
            self.run([service_path, 'memcached', 'start'])
+
+        # Openldap
+        if self.ldap_type is 'openldap':
+            # FIXME Tested on ubuntu only
+            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+               self.run([service_path, 'start', 'solserver.service'])
+            else:
+               self.run([service_path, 'solserver', 'start'])
 
         # Apache Tomcat
         try:
@@ -2252,6 +2300,32 @@ class Setup(object):
             self.run([self.cmd_chown, 'ldap:ldap', self.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
+
+    def configure_openldap(self):
+        self.logIt("Configuring OpenLDAP")
+        # 1. Copy the conf files to
+        self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
+        self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
+        # 2. Copy the schema files into place
+        self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, "/opt/gluu/")
+        self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, "/opt/gluu/")
+        self.copyFile(self.user_schema, "/opt/gluu/")
+        # 4. Create the PEM file from key and crt
+        with open(self.openldapTLSCACert, 'w') as pem:
+            with open(self.openldapTLSCert, 'r') as crt:
+                pem.write(crt.read())
+            with open(self.openldapTLSKey, 'r') as key:
+                pem.write(key.read())
+
+    def import_ldif_openldap(self):
+        self.logIt("Importing LDIF files into OpenLDAP")
+        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
+        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
+        for ldif in self.ldif_files:
+            if 'site.ldif' in ldif:
+                self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
+            else:
+                self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
 ############################   Main Loop   #################################################
 
@@ -2354,14 +2428,15 @@ if __name__ == '__main__':
 
     # Get the OS type
     installObject.os_type = installObject.detect_os_type()
-    # Get the init type   
+    # Get the init type
     installObject.os_initdaemon = installObject.detect_initd()
-    # Get apache version   
+    # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
-    
+
+    # TODO find if this extraction of opendj by default is necessary as we move to opendlap install
     installObject.extractOpenDJ()
 
-    # Get OpenDJ version   
+    # Get OpenDJ version
     installObject.opendj_version = installObject.determineOpenDJVersion()
 
     print "\nInstalling Gluu Server..."
@@ -2416,7 +2491,8 @@ if __name__ == '__main__':
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
             installObject.render_jetty_templates()
-            installObject.configure_opendj_install()
+            if installObject.ldap_type is 'opendj':
+                installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
@@ -2429,12 +2505,17 @@ if __name__ == '__main__':
             installObject.render_configuration_template()
             installObject.update_hostname()
             installObject.configure_httpd()
-            installObject.setup_opendj()
-            installObject.configure_opendj()
-            installObject.index_opendj()
-            installObject.import_ldif()
-            installObject.deleteLdapPw()
-            installObject.export_opendj_public_cert()
+            if installObject.ldap_type is 'opendj':
+                installObject.setup_opendj()
+                installObject.configure_opendj()
+                installObject.index_opendj('userRoot')
+                installObject.index_opendj('site')
+                installObject.import_ldif()
+                installObject.export_opendj_public_cert()
+                installObject.deleteLdapPw()
+            elif installObject.ldap_type is 'openldap':
+                installObject.configure_openldap()
+                installObject.import_ldif_openldap()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.install_gluu_components()
