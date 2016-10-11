@@ -1832,7 +1832,7 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.idp3Folder])
 
-            if self.installLDAP and self.ldap_type is 'openldap':
+            if self.installLdap and self.ldap_type is 'openldap':
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data'])
         except:
             self.logIt("Error making folders", True)
