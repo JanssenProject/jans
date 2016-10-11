@@ -394,6 +394,7 @@ public class SessionStateService {
                 sessionState.setLastUsedAt(new Date());
 
                 sessionState.setPersisted(true);
+                log.trace("sessionStateAttributes: " + sessionState.getPermissionGrantedMap());
                 ldapEntryManager.persist(sessionState);
                 return true;
             }
