@@ -263,7 +263,7 @@ class Setup(object):
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.tomcat_log_folder = "%s/logs" % self.tomcatHome
         self.tomcat_max_ram = None    # in MB
-        self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.tomcatHome
+        self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
         self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
@@ -285,7 +285,7 @@ class Setup(object):
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
-        self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.tomcatHome
+        self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.gluuBaseFolder
         self.network = "/etc/sysconfig/network"
         
         self.idp3_configuration_properties = '/idp.properties' 
@@ -695,13 +695,13 @@ class Setup(object):
             self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
             self.renderTemplateInOut("%s/conf/Catalina/localhost/idp.xml" % self.tomcatHome, "%s/conf/Catalina/localhost" % self.tomcatHome, "%s/conf/Catalina/localhost" % self.tomcatHome)
             
-            self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/attribute-resolver.xml.vm" % self.tomcatHome)
+            self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth2/idp/attribute-resolver.xml.vm" % self.gluuBaseFolder)
 
             self.copyTree("%s/static/idp/conf/" % self.install_dir, self.idpConfFolder)
             self.copyFile("%s/static/idp/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idpMetadataFolder)
 
         if self.installOxAuth:
-            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.tomcatHome)
+            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.gluuBaseFolder)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/super_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
@@ -1507,10 +1507,9 @@ class Setup(object):
             self.removeDirs(tmpIdentityDir)
         if self.installSamlIDP2:
             self.logIt("Install Saml Shibboleth IDP v2...")
-            # Put files to /opt/idp
-            idpWar = "idp.war"
-            distIdpPath = '%s/%s' % (self.idpWarFolder, idpWar)
 
+            idpWar = "idp.war"
+            distIdpPath = '%s/%s' % (self.distWarFolder, idpWar)
             tmpIdpDir = '%s/tmp_idp' % self.distWarFolder
 
             self.logIt("Unpacking %s..." % idpWar)
@@ -2104,7 +2103,7 @@ class Setup(object):
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
         try:
-            setupCmd = "cd /opt/opendj ; " + " ".join([self.ldapSetupCommand,
+            setupCmd = "cd /opt/opendj ; export JAVA_HOME=" + self.jre_home + " ;" + " ".join([self.ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
                                       '--propertiesFilePath',
