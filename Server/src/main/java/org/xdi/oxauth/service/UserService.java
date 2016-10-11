@@ -227,6 +227,37 @@ public class UserService {
         return (User) entries;
     }
 
+    public User addUserAttributeByinum(String userInum, String attributeName, String attributeValue) {
+    	log.debug("Add user by inum attribute to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+
+        User user = getUserByInum(userInum);
+        if (user == null) {
+        	return null;
+        }
+        
+        CustomAttribute customAttribute = getCustomAttribute(user, attributeName);
+        if (customAttribute == null) {
+        	customAttribute = new CustomAttribute(attributeName, attributeValue);
+            user.getCustomAttributes().add(customAttribute);
+        } else {
+        	List<String> currentAttributeValues = customAttribute.getValues();
+
+        	List<String> newAttributeValues = new ArrayList<String>();
+        	newAttributeValues.addAll(currentAttributeValues);
+
+        	if (newAttributeValues.contains(attributeValue)) {
+        		return null;
+        	} else {
+        		newAttributeValues.add(attributeValue);
+        	}
+        	
+        	customAttribute.setValues(newAttributeValues);
+        }
+
+        return updateUser(user);
+    	
+    }
+    
     public User addUserAttribute(String userId, String attributeName, String attributeValue) {
         log.debug("Add user attribute to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
