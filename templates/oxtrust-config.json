@@ -62,7 +62,7 @@
     "shibboleth2SpConfDir":"/opt/idp/sp",
     "shibboleth2FederationRootDir":"/opt/shibboleth-federation",
 
-    "velocityLog":"/opt/tomcat/logs/velocity.log",
+    "velocityLog":"%(jetty_base)s/identity/logs/velocity.log",
 
     "spMetadataPath":"",
 
