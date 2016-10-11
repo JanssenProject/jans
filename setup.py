@@ -398,9 +398,9 @@ class Setup(object):
                      self.asimba_properties: False,
                      self.asimba_selector_configuration: True,
                      self.network: False,
-                     self.user_schema: True,
-                     self.openldapSlapdConf: True,
-                     self.openldapSymasConf: True
+                     self.user_schema: False,
+                     self.openldapSlapdConf: False,
+                     self.openldapSymasConf: False
                      }
 
     def __repr__(self):
