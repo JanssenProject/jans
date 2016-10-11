@@ -1,9 +1,6 @@
 ####################################
 # Gluu Asimba Default Configuration
 ####################################
-
-version: 1
-
 dn: ou=oxasimba,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxAsimbaConfiguration
