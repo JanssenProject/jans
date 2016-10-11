@@ -251,7 +251,7 @@ class Setup(object):
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
-        self.tomcat_python_readme = '%s/conf/python/python.txt' % self.tomcatHome
+        self.gluu_python_readme = '%s/conf/python/python.txt' % self.gluuBaseFolder
         self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
         self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
@@ -343,7 +343,7 @@ class Setup(object):
         self.ce_templates = {self.oxauth_config_json: False,
                      self.oxauth_context_xml: True,
                      self.oxtrust_context_xml: True,
-                     self.tomcat_python_readme: True,
+                     self.gluu_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
                      self.oxtrust_import_person_json: False,
@@ -419,13 +419,15 @@ class Setup(object):
     def change_ownership(self):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
+        realConfigFolder = os.path.realpath(self.configFolder)
         realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
         self.run([self.cmd_chown, '-R', 'jetty:tomcat', realCertFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:tomcat', realConfigFolder])
         self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realTomcatFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
-        self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.oxBaseDataFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:tomcat', self.oxBaseDataFolder])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
@@ -434,8 +436,8 @@ class Setup(object):
         if self.installSaml:
             realIdpFolder = os.path.realpath(self.idpFolder)
             realIdp3Folder = os.path.realpath(self.idp3Folder)
-            self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realIdpFolder])
-            self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realIdp3Folder])
+            self.run([self.cmd_chown, '-R', 'jetty:tomcat', realIdpFolder])
+            self.run([self.cmd_chown, '-R', 'jetty:tomcat', realIdp3Folder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
@@ -873,8 +875,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
-        self.run([self.cmd_chown, '-R', 'tomcat:tomcat', '/opt/jython-%s' % self.jython_version])
-        self.run([self.cmd_chown, '-h', 'tomcat:tomcat', '/opt/jython'])
+        self.run([self.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % self.jython_version])
+        self.run([self.cmd_chown, '-h', 'root:root', '/opt/jython'])
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1491,13 +1493,12 @@ class Setup(object):
                       identityConfFilePattern], tmpIdentityDir)
 
             self.logIt("Preparing Saml templates...")
-            self.removeDirs('%s/conf/shibboleth2' % self.tomcatHome)
-            self.createDirs('%s/conf/shibboleth2/idp' % self.tomcatHome)
+            self.removeDirs('%s/conf/shibboleth2' % self.gluuBaseFolder)
+            self.createDirs('%s/conf/shibboleth2/idp' % self.gluuBaseFolder)
 
-            self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.tomcatHome)
+            self.copyTree('%s/shibboleth2' % tmpIdentityDir, '%s/conf/shibboleth2' % self.gluuBaseFolder)
 
-            #self.removeDirs(tmpIdentityDir)
-        
+            self.removeDirs(tmpIdentityDir)
         if self.installSamlIDP2:
             self.logIt("Install Saml Shibboleth IDP v2...")
             # Put files to /opt/idp
