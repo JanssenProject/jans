@@ -1473,7 +1473,7 @@ class Setup(object):
 
             # Put latest Saml templates
             identityWar = 'identity.war'
-            distIdentityPath = '%s/%s' % (self.tomcatWebAppFolder, identityWar)
+            distIdentityPath = '%s/%s' % (self.distWarFolder, identityWar)
 
             tmpIdentityDir = '%s/tmp_identity' % self.distWarFolder
 
