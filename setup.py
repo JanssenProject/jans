@@ -58,19 +58,30 @@ class Setup(object):
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
-        self.jre_version = '102'
-        self.jre_home = '/opt/jre'
-        self.cmd_java = '/opt/jre/bin/java'
+        self.downloadWars = None
 
+        # OS commands
         self.cmd_ln = '/bin/ln'
         self.cmd_chmod = '/bin/chmod'
         self.cmd_chown = '/bin/chown'
         self.cmd_mkdir = '/bin/mkdir'
+        self.opensslCommand = '/usr/bin/openssl'
+
+        # java commands
+        self.jre_home = '/opt/jre'
         self.cmd_java = '%s/bin/java' % self.jre_home
+        self.cmd_keytool = '%s/bin/keytool' % self.jre_home
         self.cmd_jar = '%s/bin/jar' % self.jre_home
+        
+        # Component versions
+        self.jre_version = '102'
+        self.jetty_version = '9.3.12.v20160915'
+        self.jython_version = '2.7.0'
+        self.tomcat_version = '7.0.65'
+        self.apache_version = None
+        self.opendj_version = None
 
-        self.downloadWars = None
-
+        # Gluu components installation status
         self.installOxAuth = True
         self.installOxTrust = True
         self.installLdap = True
@@ -86,13 +97,7 @@ class Setup(object):
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
-        self.apache_version = None
-        self.opendj_version = None
 
-        self.tomcat_version = '7.0.65'
-        self.jython_version = '2.7.0'
-
-        self.jetty_version = '9.3.12.v20160915'
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
@@ -236,9 +241,6 @@ class Setup(object):
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
-        self.keytoolCommand = '/usr/java/latest/bin/keytool'
-        self.jarCommand = '/usr/bin/jar'
-        self.opensslCommand = '/usr/bin/openssl'
 #        self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
@@ -873,7 +875,7 @@ class Setup(object):
 
         try:
             self.run(['rm', '-fr', '/opt/jython-%s' % self.jython_version])
-            self.run(['java', '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
+            self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
@@ -955,7 +957,7 @@ class Setup(object):
 
         # Export public OpenDJ certificate
         self.logIt("Exporting OpenDJ certificate")
-        self.run([self.keytoolCommand,
+        self.run([self.cmd_keytool,
                   '-exportcert',
                   '-keystore',
                   openDjTruststoreFn,
@@ -970,7 +972,7 @@ class Setup(object):
         # Import OpenDJ certificate into java truststore
         self.logIt("Import OpenDJ certificate")
 
-        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
+        self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
                   "-file", self.openDjCertFn, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
@@ -1029,7 +1031,7 @@ class Setup(object):
         self.run([self.cmd_chown, '%s:%s' % (user, user), key])
         self.run([self.cmd_chmod, '700', key])
 
-        self.run(["/usr/bin/keytool", "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
+        self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
                   "-file", public_certificate, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
@@ -1079,7 +1081,7 @@ class Setup(object):
                   'pass:%s' % keystorePW
         ])
         # Import p12 to keystore
-        self.run([self.keytoolCommand,
+        self.run([self.cmd_keytool,
                   '-importkeystore',
                   '-srckeystore',
                   '%s/%s.pkcs12' % (self.certFolder, suffix),
@@ -1119,7 +1121,7 @@ class Setup(object):
         if jks_create == True:
             self.logIt("Creating empty JKS keystore")
             # Create JKS with dummy key
-            cmd = " ".join([self.keytoolCommand,
+            cmd = " ".join([self.cmd_keytool,
                       '-genkey',
                       '-alias',
                       'dummy',
@@ -1134,7 +1136,7 @@ class Setup(object):
             self.run(['/bin/sh', '-c', cmd])
 
             # Delete dummy key from JKS
-            cmd = " ".join([self.keytoolCommand,
+            cmd = " ".join([self.cmd_keytool,
                       '-delete',
                       '-alias',
                       'dummy',
@@ -1170,7 +1172,7 @@ class Setup(object):
                        '%s/oxauth-model.jar' % self.tomcat_user_home_lib,
                        '%s/oxauth.jar' % self.tomcat_user_home_lib]
 
-        cmd = " ".join(["/usr/java/latest/bin/java",
+        cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         ":".join(requiredJars),
@@ -1417,7 +1419,7 @@ class Setup(object):
             self.removeDirs(tmpOxAuthDir)
             self.createDirs(tmpOxAuthDir)
 
-            self.run([self.jarCommand,
+            self.run([self.cmd_jar,
                       'xf',
                       distOxAuthPath], tmpOxAuthDir)
 
@@ -1487,12 +1489,12 @@ class Setup(object):
 
             identityConfFilePattern = 'WEB-INF/lib/oxtrust-configuration-%s.jar' % self.oxVersion
 
-            self.run([self.jarCommand,
+            self.run([self.cmd_jar,
                       'xf',
                       distIdentityPath], tmpIdentityDir)
 
             self.logIt("Unpacking %s..." % 'oxtrust-configuration.jar')
-            self.run([self.jarCommand,
+            self.run([self.cmd_jar,
                       'xf',
                       identityConfFilePattern], tmpIdentityDir)
 
@@ -1515,7 +1517,7 @@ class Setup(object):
             self.removeDirs(tmpIdpDir)
             self.createDirs(tmpIdpDir)
 
-            self.run([self.jarCommand,'xf',distIdpPath], tmpIdpDir)
+            self.run([self.cmd_jar,'xf',distIdpPath], tmpIdpDir)
 
             self.logIt("Copying files to %s..." % self.idpLibFolder)
             self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
@@ -1537,7 +1539,7 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
             
             # unpack IDP3 JAR with static configs
-            self.run([self.jarCommand, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
+            self.run([self.cmd_jar, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
             
             # copy templates
@@ -1567,7 +1569,7 @@ class Setup(object):
             
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
-            self.run(['java','-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
+            self.run([self.cmd_java,'-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
@@ -1582,7 +1584,7 @@ class Setup(object):
         self.removeDirs(tmpAsimbaDir)
         self.createDirs(tmpAsimbaDir)
 
-        self.run([self.jarCommand,
+        self.run([self.cmd_jar,
                   'xf',
                   distAsimbaPath], tmpAsimbaDir)
 
@@ -1591,7 +1593,7 @@ class Setup(object):
         self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
 
         self.logIt("Generating asimba.war...")
-        self.run([self.jarCommand,
+        self.run([self.cmd_jar,
                   'cmf',
                   'tmp_asimba/META-INF/MANIFEST.MF',
                   'asimba.war',
@@ -1618,7 +1620,7 @@ class Setup(object):
         self.removeDirs(tmpCasDir)
         self.createDirs(tmpCasDir)
 
-        self.run([self.jarCommand,
+        self.run([self.cmd_jar,
                   'xf',
                   distCasPath], tmpCasDir)
 
@@ -1629,7 +1631,7 @@ class Setup(object):
         self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
 
         self.logIt("Generating cas.war...")
-        self.run([self.jarCommand,
+        self.run([self.cmd_jar,
                   'cmf',
                   'tmp_cas/META-INF/MANIFEST.MF',
                   'cas.war',
