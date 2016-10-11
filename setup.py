@@ -58,10 +58,16 @@ class Setup(object):
         self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
+        self.jre_version = '102'
+        self.jre_home = '/opt/jre'
+        self.cmd_java = '/opt/jre/bin/java'
+
         self.cmd_ln = '/bin/ln'
         self.cmd_chmod = '/bin/chmod'
         self.cmd_chown = '/bin/chown'
         self.cmd_mkdir = '/bin/mkdir'
+        self.cmd_java = '%s/bin/java' % self.jre_home
+        self.cmd_jar = '%s/bin/jar' % self.jre_home
 
         self.downloadWars = None
 
@@ -82,6 +88,7 @@ class Setup(object):
         self.os_initdaemon = None
         self.apache_version = None
         self.opendj_version = None
+
         self.tomcat_version = '7.0.65'
         self.jython_version = '2.7.0'
 
@@ -90,10 +97,6 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
-
-        self.jre_version = '102'
-        self.jre_home = '/opt/jre'
-        self.jre_java_path = '/opt/jre/bin/java'
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -236,7 +239,8 @@ class Setup(object):
         self.keytoolCommand = '/usr/java/latest/bin/keytool'
         self.jarCommand = '/usr/bin/jar'
         self.opensslCommand = '/usr/bin/openssl'
-        self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
+#        self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
+        self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
 
         # Stuff that gets rendered; filname is necessary. Full path should
@@ -851,7 +855,7 @@ class Setup(object):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        self.run([self.jre_java_path, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,logging,jsp'], None, jettyEnv)
+        self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,logging,jsp'], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
@@ -1735,6 +1739,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         return None
 
+    # TODO: Remove. We uses JRE 1.8
     def configureOsPatches(self):
         if self.os_type in ['debian', 'ubuntu']:
             self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
@@ -2399,7 +2404,7 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            installObject.configureOsPatches()
+#            installObject.configureOsPatches()
             installObject.createUsers()
             installObject.makeFolders()
             installObject.installJRE()
