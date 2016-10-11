@@ -2103,7 +2103,7 @@ class Setup(object):
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
         try:
-            setupCmd = "cd /opt/opendj ; export JAVA_HOME=" + self.jre_home + " ;" + " ".join([self.ldapSetupCommand,
+            setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([self.ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
                                       '--propertiesFilePath',
