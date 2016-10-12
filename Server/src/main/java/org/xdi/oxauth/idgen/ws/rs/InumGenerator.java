@@ -70,8 +70,14 @@ public class InumGenerator implements IdGenerator {
                 sb.append(p_idPrefix).
                         append(InumGenerator.SEPARATOR).
                         append(p_idType.getInum()).
-                        append(InumGenerator.SEPARATOR).
-                        append(INumGenerator.generate(4));
+                        append(InumGenerator.SEPARATOR);
+
+                if ((IdType.CLIENTS == p_idType) || (IdType.PEOPLE == p_idType)) { 
+                	sb.append(INumGenerator.generate(4));
+                } else {
+                	sb.append(INumGenerator.generate(2));
+                }
+
                 inum = sb.toString();
                 if (StringUtils.isBlank(inum)) {
                     log.error("Unable to generate inum: {0}", inum);
