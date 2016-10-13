@@ -3,7 +3,7 @@
 
 import re
 
-org_oid = '1.3.6.1.4.1.12345'  # dummy
+org_oid = '1.3.6.1.4.1.48710'
 reserved = org_oid + '.0'
 published = org_oid + '.1'
 
@@ -17,7 +17,7 @@ objc_oid = published + '.4'
 attrs = 0
 objclasses = 0
 header = """# Macros defining the OID structure
-objectIdentifier oxOrgOID      1.3.6.1.4.1.12345
+objectIdentifier oxOrgOID      1.3.6.1.4.1.48710
 objectIdentifier oxReserved    oxOrgOID:0
 objectIdentifier oxPublished   oxOrgOID:1
 objectIdentifier oxSyntax      oxPublished:1
