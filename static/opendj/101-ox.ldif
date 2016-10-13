@@ -1716,7 +1716,7 @@ attributeTypes: ( persistentId-oid NAME 'persistentId'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  X-ORIGIN 'Gluu created attribute' )
+  X-ORIGIN 'Persistent ID reserved for SAML' )
 attributeTypes: ( personInum-oid NAME 'personInum'
   DESC 'Inum of a person'
   SUBSTR caseIgnoreSubstringsMatch
@@ -2118,7 +2118,7 @@ attributeTypes: ( gluuEntityType-oid NAME 'gluuEntityType'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( oxPPID-oid NAME 'oxPPID'
-  DESC 'This data has information about  PairwiseIdentifiers'
+  DESC 'Persistent Pairwise ID for OpenID Connect'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
