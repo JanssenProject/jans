@@ -323,12 +323,12 @@ public class Authenticator implements Serializable {
             if (StringHelper.isNotEmpty(credentials.getUsername())) {
                 boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
                 if (authenticated) {
-                    authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
+                	SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
 
                     // Redirect to authorization workflow
                     if (Events.exists()) {
                         log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
-                        authenticationService.onSuccessfulLogin();
+                        authenticationService.onSuccessfulLogin(eventSessionState);
 //                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
                     }
 
