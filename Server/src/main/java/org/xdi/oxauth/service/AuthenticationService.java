@@ -491,7 +491,7 @@ public class AuthenticationService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
+//    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
     public void onSuccessfulLogin() {
         log.info("Attempting to redirect user: SessionUser: {0}", sessionUser);
 
