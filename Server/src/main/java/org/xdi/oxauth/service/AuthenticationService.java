@@ -95,9 +95,6 @@ public class AuthenticationService {
     private ExternalAuthenticationService externalAuthenticationService;
 
     @In
-    private SessionState sessionUser;
-
-    @In
     private MetricService metricService;
 
     /**
@@ -383,7 +380,7 @@ public class AuthenticationService {
         }
     }
 
-    public void configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
+    public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
         Credentials credentials = ServerUtil.instance(Credentials.class);
 
         log.trace("configureSessionUser: credentials: '{0}', sessionState: '{1}', credentials.userName: '{2}', authenticatedUser.userId: '{3}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
@@ -405,6 +402,8 @@ public class AuthenticationService {
         }
 
         configureEventUserContext(newSessionState);
+        
+        return newSessionState;
     }
 
     public SessionState configureEventUser() {
@@ -492,7 +491,7 @@ public class AuthenticationService {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
 //    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
-    public void onSuccessfulLogin() {
+    public void onSuccessfulLogin(SessionState sessionUser) {
         log.info("Attempting to redirect user: SessionUser: {0}", sessionUser);
 
         if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
