@@ -492,8 +492,8 @@ gluuStatus: active
 urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
 
 dn: inum=%(inumOrg)s!0005!D03E,ou=attributes,o=%(inumOrg)s,o=gluu
-description: Organization i-number
-displayName: Organization i-number
+description: Organization
+displayName: Organization
 gluuAttributeName: o
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
