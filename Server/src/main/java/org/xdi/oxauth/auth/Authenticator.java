@@ -312,7 +312,8 @@ public class Authenticator implements Serializable {
                 // Redirect to authorization workflow
                 if (Events.exists()) {
                     log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
-                    Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
+                    authenticationService.onSuccessfulLogin();
+//                    Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
                 }
 
                 log.info("Authentication success for User: '{0}'", credentials.getUsername());
@@ -327,7 +328,8 @@ public class Authenticator implements Serializable {
                     // Redirect to authorization workflow
                     if (Events.exists()) {
                         log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
-                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
+                        authenticationService.onSuccessfulLogin();
+//                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
                     }
 
                     log.info("Authentication success for User: '{0}'", credentials.getUsername());
