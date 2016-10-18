@@ -18,8 +18,6 @@
 	</prerequisites>
 
 	<build>
-		<finalName>oxSaml</finalName>
-
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>

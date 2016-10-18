@@ -40,6 +40,9 @@ public class CorsFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		if (this.filter != null) {
 			filter.doFilter(request, response, chain);
+		} else {
+			// pass the request along the filter chain
+			chain.doFilter(request, response);
 		}
 	}
 
@@ -57,11 +60,16 @@ public class CorsFilter implements Filter {
 		        Class<?> clazz = Class.forName(filterName);
 		        Constructor<?> cons = clazz.getDeclaredConstructor();
 		        resultFilter = (Filter) cons.newInstance();
+				break;
 			} catch (Exception ex) {
 			}
 		}
 		
-		LOG.debug("Prepared CORS filter: " + resultFilter);
+		if (resultFilter == null) {
+			LOG.error("Failed to prepare CORS filter");
+		} else {
+			LOG.debug("Prepared CORS filter: " + resultFilter);
+		}
 
 		return resultFilter;
 	}
