@@ -133,20 +133,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             String inum = inumService.generateClientInum();
                             String generatedClientSecret = UUID.randomUUID().toString();
 
-                            String[] scopes = new String[0];
-                            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
-                                    && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()
-                                    && r.getScopes().size() > 0) {
-                                scopes = scopeService.getScopesDn(r.getScopes()).toArray(scopes);
-                            } else {
-                                scopes = scopeService.getDefaultScopesDn().toArray(scopes);
-                            }
-
                             final Client client = new Client();
                             client.setDn("inum=" + inum + "," + clientsBaseDN);
                             client.setClientId(inum);
                             client.setClientSecret(generatedClientSecret);
-                            client.setScopes(scopes);
                             client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
 
                             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -224,7 +214,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
-    public static void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject) throws JSONException {
+    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject) throws JSONException {
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
@@ -336,6 +326,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestUris != null && !requestUris.isEmpty()) {
             requestUris = new ArrayList<String>(new HashSet<String>(requestUris)); // Remove repeated elements
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
+        }
+
+        List<String> scopes = requestObject.getScopes();
+        List<String> scopesDn;
+        if (scopes != null && !scopes.isEmpty() && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
+                && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()) {
+            scopesDn = scopeService.getScopesDn(scopes);
+            p_client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
+        }
+        else{
+            scopesDn = scopeService.getDefaultScopesDn();
+            p_client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
         }
 
         Date clientSecretExpiresAt = requestObject.getClientSecretExpiresAt();
@@ -517,7 +519,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
      * @param p_client        client object
      * @param p_requestObject request object
      */
-    private static void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
+    private void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
         // custom object class
         final String customOC = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationCustomObjectClass();
         if (StringUtils.isNotBlank(customOC)) {
