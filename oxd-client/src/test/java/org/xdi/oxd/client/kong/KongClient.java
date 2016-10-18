@@ -15,4 +15,8 @@ public class KongClient {
     public static KongApiService createApiService(String url) {
         return ProxyFactory.create(KongApiService.class, url + API);
     }
+
+    public static MockBinService createMockBinService(String url) {
+        return ProxyFactory.create(MockBinService.class, url);
+    }
 }

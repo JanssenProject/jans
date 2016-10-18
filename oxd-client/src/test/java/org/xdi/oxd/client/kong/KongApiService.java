@@ -14,7 +14,7 @@ public interface KongApiService {
     @POST
     @Consumes({"application/x-www-form-urlencoded"})
     @Produces({"application/json"})
-    ClientResponse<String> addApi(@FormParam("name") String name,
+    ClientResponse<JsonNode> addApi(@FormParam("name") String name,
                                      @FormParam("request_host") String requestHost,
                                   @FormParam("request_path") String requestPath,
                                   @FormParam("strip_request_path") Boolean stripRequestPath,
@@ -28,5 +28,17 @@ public interface KongApiService {
     @Path("{apiId}")
     @DELETE
     ClientResponse<String> deleteApi(@PathParam("apiId") String apiId);
+
+    @POST
+    @Path("{apiId}/plugins/")
+    @Consumes({"application/x-www-form-urlencoded"})
+    @Produces({"application/json"})
+    ClientResponse<JsonNode> addKongUmaRsPlugin(@PathParam("apiId") String apiId,
+                   @FormParam("name") String name,
+                   @FormParam("config.oxd_host") String oxdHost,
+                   @FormParam("config.oxd_port") String oxdPort,
+                   @FormParam("config.uma_server_host") String umaServerHost,
+                   @FormParam("config.protection_document") String protectionDocumentJson
+    );
 
 }
