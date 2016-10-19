@@ -735,7 +735,7 @@ class Setup(object):
             encode_script = f.read()
             f.close()
             f = open("%s/encode.py" % self.gluuOptBinFolder, 'w')
-            f.write(encode_script % self.__dict__)
+            f.write(encode_script % self.merge_dicts(self.__dict__, self.templateRenderingDict))
             f.close()
         except:
             self.logIt("Error rendering encode script")
@@ -2025,7 +2025,7 @@ class Setup(object):
         template_text = f.read()
         f.close()
         newFn = open(os.path.join(outputFolder, fn), 'w+')
-        newFn.write(template_text % self.__dict__)
+        newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
         newFn.close()
 
     def renderTemplate(self, filePath):
@@ -2071,7 +2071,7 @@ class Setup(object):
                         os.makedirs(fullOutputDir)
 
                     newFn = open(fullOutputFile, 'w+')
-                    newFn.write(template_text % self.__dict__)
+                    newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
                     newFn.close()
                 except:
                     self.logIt("Error writing template %s" % fullPath, True)
@@ -2408,17 +2408,27 @@ class Setup(object):
         
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            allowedMemory = round(allowedRatio * int(self.tomcat_max_ram))
+            allowedMemory = int(round(allowedRatio * int(self.tomcat_max_ram)))
             
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
                 allowedMemory = installedComponent['memory']['max_allowed_mb']
 
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
-            
-        for applicationName, applicationMemory in allowedApplicationsMemory.iteritems():
-            self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
 
+        #Iterate through all components into order to prepare all keys            
+        for applicationName, applicationConfiguration in self.iteritems():
+            if allowedApplicationsMemory.has_key(applicationName):
+                applicationMemory = allowedApplicationsMemory.get(applicationName)
+                self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+            else:
+                self.templateRenderingDict["%s_max_mem" % applicationName] = 256
 
+    def merge_dicts(self, *dict_args):
+        result = {}
+        for dictionary in dict_args:
+            result.update(dictionary)
+
+        return result
 ############################   Main Loop   #################################################
 
 def print_help():
