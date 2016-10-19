@@ -104,43 +104,36 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
-        self.jetty_app_configuration = [
-            {
+        self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
                             'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096}
-            }},
-            {
+            },
                 'identity' : {'name' : 'identity',
                               'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                               'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048}
-            }},
-            {
+            },
                 'idp' : {'name' : 'idp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
-            }},
-            {
+            },
                 'asimba' : {'name' : 'asimba',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
-            }},
-            {
+            },
                 'cas' : {'name' : 'cas',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
-            }},
-            {
+            },
                 'credmgr' : {'name' : 'credmgr',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
-            }},
-            {
+            },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512}
-            }}
-        ]
+            }
+        }
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -2407,24 +2400,24 @@ class Setup(object):
         if self.installOxAuthRP:
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
             
-        print "!!!!!!!!!!!!!!!!! %s" % installedComponents
-            
         usedRatio = 0.0
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
-
-        print "!!!!!!!!!!!!!!!!! %s" % usedRatio
             
-        unusedRatio = 1.0 - usedRatio
-        ratioMultiplier = 1.0 + unusedRatio/userRatio
-
-        print "!!!!!!!!!!!!!!!!! %s" % unusedRatio
-        print "!!!!!!!!!!!!!!!!! %s" % ratioMultiplier
+        ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
         
         for installedComponent in installedComponents:
-            allowedApplicationsMemory[installedComponent['name']] = installedComponent['memory']['ratio'] * ratioMultiplier
+            allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
+            allowedMemory = round(allowedRatio * int(self.tomcat_max_ram))
+            
+            if allowedMemory > installedComponent['memory']['max_allowed_mb']:
+                allowedMemory = installedComponent['memory']['max_allowed_mb']
 
-        print "!!!!!!!!!!!!!!!!! %s" % allowedApplicationsMemory
+            allowedApplicationsMemory[installedComponent['name']] = allowedMemory
+            
+        for applicationName, applicationMemory in allowedApplicationsMemory.iteritems():
+            self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+
 
 ############################   Main Loop   #################################################
 
