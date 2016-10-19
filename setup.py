@@ -2320,6 +2320,7 @@ class Setup(object):
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
         # 5. Generate the cn=config directory
+        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
         self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def import_ldif_openldap(self):
