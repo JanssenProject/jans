@@ -1,6 +1,6 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms256m -Xmx1024m -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dcatalina.base=%(jetty_base)s/identity"
+JAVA_OPTIONS="-server -Xms256m -Xmx%(identity_max_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dcatalina.base=%(jetty_base)s/identity"
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/identity
