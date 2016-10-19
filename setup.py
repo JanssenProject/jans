@@ -285,6 +285,7 @@ class Setup(object):
         self.openldapBaseFolder = '/opt/symas'
         self.openldapBinFolder = '/opt/symas/bin'
         self.openldapConfFolder = '/opt/symas/etc/openldap'
+        self.openldapCnConfig = '%s/slapd.d' % self.openldapConfFolder
         self.openldapRootUser = "cn=directory manager,o=gluu"
         self.user_schema = '%s/user.schema' % self.outputFolder
         self.openldapKeyPass = None
@@ -294,6 +295,7 @@ class Setup(object):
         self.openldapPassHash = None
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
+        self.slaptest = '%s/slaptest' % self.openldapBinFolder
 
 
         # Stuff that gets rendered; filname is necessary. Full path should
@@ -2060,8 +2062,9 @@ class Setup(object):
             for templateFile in templateFiles:
                 fullPath = '%s/%s' % (templateBase, templateFile)
                 try:
-                    self.logIt("Rendering template %s" % fullPath)
-                    fn = fullPath[12:] # Remove ./template/ from fullPath
+                    self.logIt("Rendering test template %s" % fullPath)
+                    # Remove ./template/ and everything left of it from fullPath
+                    fn = re.match(r'(^.+/templates/)(.*$)', fullPath).groups()[1]
                     f = open(os.path.join(self.templateFolder, fn))
                     template_text = f.read()
                     f.close()
@@ -2355,6 +2358,9 @@ class Setup(object):
                 pem.write(crt.read())
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
+        # 5. Generate the cn=config directory
+        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
+        self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def import_ldif_openldap(self):
         self.logIt("Importing LDIF files into OpenLDAP")
@@ -2472,7 +2478,7 @@ if __name__ == '__main__':
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
 
-    # TODO find if this extraction of opendj by default is necessary as we move to opendlap install
+    # TODO find if this extraction of opendj by default is necessary as we move to openldap install
     installObject.extractOpenDJ()
 
     # Get OpenDJ version
