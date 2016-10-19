@@ -11,17 +11,12 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
-import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
-import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
-import org.xdi.oxauth.model.fido.u2f.U2fConstants;
-import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
+import org.xdi.oxauth.model.fido.u2f.*;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
@@ -29,6 +24,7 @@ import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RegistrationService;
 import org.xdi.oxauth.service.fido.u2f.UserSessionStateService;
@@ -36,10 +32,9 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import java.util.List;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * The endpoint allows to start and finish U2F registration process
@@ -119,7 +114,7 @@ public class U2fRegistrationWS {
 			
 			if (sessionBasedEnrollment) {
 				List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, appId);
-				if (deviceRegistrations.size() > 0) {
+				if (deviceRegistrations.size() > 0 && !isCurrentAuthenticationLevelCorrespondsToU2fLevel(sessionState)) {
 					throw new RegistrationNotAllowed(String.format("It's not possible to start registration with user_name and session_state becuase user '%s' has already enrolled device", userName));
 				}
 			}
@@ -209,6 +204,33 @@ public class U2fRegistrationWS {
 			throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
 		}
+	}
+
+	private boolean isCurrentAuthenticationLevelCorrespondsToU2fLevel(String session) {
+		SessionState sessionState = sessionStateService.getSessionState(session);
+		if (sessionState == null)
+			return false;
+
+		String acrValuesStr = sessionStateService.getAcr(sessionState);
+		if (acrValuesStr == null)
+			return false;
+
+		ExternalAuthenticationService service = ExternalAuthenticationService.instance();
+		CustomScriptConfiguration u2fScriptConfiguration = service.getCustomScriptConfigurationByName("u2f");
+		if (u2fScriptConfiguration == null)
+			return false;
+
+		String[] acrValuesArray = acrValuesStr.split(" ");
+		for (String acrValue : acrValuesArray) {
+			CustomScriptConfiguration currentScriptConfiguration = service.getCustomScriptConfigurationByName(acrValue);
+			if (currentScriptConfiguration == null)
+				continue;
+
+			if (currentScriptConfiguration.getLevel() >= u2fScriptConfiguration.getLevel())
+				return true;
+		}
+
+		return false;
 	}
 
 }
