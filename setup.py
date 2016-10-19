@@ -2416,7 +2416,7 @@ class Setup(object):
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
 
         #Iterate through all components into order to prepare all keys            
-        for applicationName, applicationConfiguration in self.iteritems():
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if allowedApplicationsMemory.has_key(applicationName):
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
                 self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
