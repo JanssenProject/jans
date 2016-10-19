@@ -59,6 +59,8 @@ class Setup(object):
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
+        
+        self.templateRenderingDict = {}
 
         # OS commands
         self.cmd_ln = '/bin/ln'
@@ -106,37 +108,37 @@ class Setup(object):
             {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
-                            'memory' : {'mem_ration' : 0.3, "max_allowed_mb" : 4096}
+                            'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096}
             }},
             {
                 'identity' : {'name' : 'identity',
                               'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                              'memory' : {'mem_ration' : 0.2, "max_allowed_mb" : 2048}
+                              'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048}
             }},
             {
                 'idp' : {'name' : 'idp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
             }},
             {
                 'asimba' : {'name' : 'asimba',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
             }},
             {
                 'cas' : {'name' : 'cas',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
             }},
             {
                 'credmgr' : {'name' : 'credmgr',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
             }},
             {
                 'oxauth-rp' : {'name' : 'oxauth-rp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 512}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512}
             }}
         ]
 
@@ -2386,6 +2388,44 @@ class Setup(object):
             installObject.configure_openldap()
             installObject.import_ldif_openldap()
 
+    def calculate_aplications_memory(self):
+        self.logIt("Calculating memory setting for applications")
+        
+        installedComponents = []
+        allowedApplicationsMemory = {}
+
+        if self.installOxAuth:
+            installedComponents.append(self.jetty_app_configuration['oxauth'])
+        if self.installOxTrust:
+            installedComponents.append(self.jetty_app_configuration['identity'])
+        if self.installSaml or self.installSamlIDP2 or self.installSamlIDP3:
+            installedComponents.append(self.jetty_app_configuration['idp'])
+        if self.installCas:
+            installedComponents.append(self.jetty_app_configuration['cas'])
+        if self.installAsimba:
+            installedComponents.append(self.jetty_app_configuration['asimba'])
+        if self.installOxAuthRP:
+            installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
+            
+        print "!!!!!!!!!!!!!!!!! %s" % installedComponents
+            
+        usedRatio = 0.0
+        for installedComponent in installedComponents:
+            usedRatio += installedComponent['memory']['ratio']
+
+        print "!!!!!!!!!!!!!!!!! %s" % usedRatio
+            
+        unusedRatio = 1.0 - usedRatio
+        ratioMultiplier = 1.0 + unusedRatio/userRatio
+
+        print "!!!!!!!!!!!!!!!!! %s" % unusedRatio
+        print "!!!!!!!!!!!!!!!!! %s" % ratioMultiplier
+        
+        for installedComponent in installedComponents:
+            allowedApplicationsMemory[installedComponent['name']] = installedComponent['memory']['ratio'] * ratioMultiplier
+
+        print "!!!!!!!!!!!!!!!!! %s" % allowedApplicationsMemory
+
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -2542,6 +2582,7 @@ if __name__ == '__main__':
 #            installObject.configureOsPatches()
             installObject.createUsers()
             installObject.makeFolders()
+            installObject.calculate_aplications_memory()
             installObject.installJRE()
             installObject.installJetty()
             installObject.installTomcat()
