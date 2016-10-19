@@ -2372,6 +2372,20 @@ class Setup(object):
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
+    def install_ldap_server(self):
+        self.logIt("Running LDAP Setup")
+        if installObject.ldap_type is 'opendj':
+            installObject.configure_opendj_install()
+            installObject.setup_opendj()
+            installObject.configure_opendj()
+            installObject.index_opendj()
+            installObject.import_ldif()
+            installObject.export_opendj_public_cert()
+            installObject.deleteLdapPw()
+        elif installObject.ldap_type is 'openldap':
+            installObject.configure_openldap()
+            installObject.import_ldif_openldap()
+
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -2536,8 +2550,6 @@ if __name__ == '__main__':
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
             installObject.render_jetty_templates()
-            if installObject.ldap_type is 'opendj':
-                installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
@@ -2550,16 +2562,7 @@ if __name__ == '__main__':
             installObject.render_configuration_template()
             installObject.update_hostname()
             installObject.configure_httpd()
-            if installObject.ldap_type is 'opendj':
-                installObject.setup_opendj()
-                installObject.configure_opendj()
-                installObject.index_opendj()
-                installObject.import_ldif()
-                installObject.export_opendj_public_cert()
-                installObject.deleteLdapPw()
-            elif installObject.ldap_type is 'openldap':
-                installObject.configure_openldap()
-                installObject.import_ldif_openldap()
+            installObject.install_ldap_server()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.install_gluu_components()
