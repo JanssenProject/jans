@@ -102,6 +102,43 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
+        self.jetty_app_configuration = [
+            {
+                'oxauth' : {'name' : 'oxauth',
+                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
+                            'memory' : {'mem_ration' : 0.3, "max_allowed_mb" : 4096}
+            }},
+            {
+                'identity' : {'name' : 'identity',
+                              'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                              'memory' : {'mem_ration' : 0.2, "max_allowed_mb" : 2048}
+            }},
+            {
+                'idp' : {'name' : 'idp',
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+            }},
+            {
+                'asimba' : {'name' : 'asimba',
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+            }},
+            {
+                'cas' : {'name' : 'cas',
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+            }},
+            {
+                'credmgr' : {'name' : 'credmgr',
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 1024}
+            }},
+            {
+                'oxauth-rp' : {'name' : 'oxauth-rp',
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'memory' : {'mem_ration' : 0.1, "max_allowed_mb" : 512}
+            }}
+        ]
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -865,7 +902,8 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
-    def installJettyService(self, serviceName):
+    def installJettyService(self, serviceConfiguration):
+        serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
 
@@ -876,7 +914,8 @@ class Setup(object):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=deploy,http,logging,jsp'], None, jettyEnv)
+        jettyModules = serviceConfiguration['jetty']['modules']
+        self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
         
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
@@ -1474,7 +1513,7 @@ class Setup(object):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth'
-        self.installJettyService(jettyServiceName)
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distWarFolder, jettyServiceWebapps)
@@ -1483,7 +1522,7 @@ class Setup(object):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
         jettyServiceName = 'identity'
-        self.installJettyService(jettyServiceName)
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/identity.war' % self.distWarFolder, jettyServiceWebapps)
@@ -1626,7 +1665,7 @@ class Setup(object):
 
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
-        self.installJettyService(jettyServiceName)
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/asimba.war' % self.distTmpFolder, jettyServiceWebapps)
@@ -1664,7 +1703,7 @@ class Setup(object):
 
         self.logIt("Copying cas.war into jetty webapps folder...")
         jettyServiceName = 'cas'
-        self.installJettyService(jettyServiceName)
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/cas.war' % self.distTmpFolder, jettyServiceWebapps)
@@ -1679,7 +1718,7 @@ class Setup(object):
         self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth-rp'
-        self.installJettyService(jettyServiceName)
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
