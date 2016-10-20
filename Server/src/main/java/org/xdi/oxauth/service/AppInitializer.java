@@ -109,7 +109,7 @@ public class AppInitializer {
         LdapEntryManager localLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true);
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
-        
+
         setDefaultAuthenticationMethod(localLdapEntryManager);
 
         addSecurityProviders();
