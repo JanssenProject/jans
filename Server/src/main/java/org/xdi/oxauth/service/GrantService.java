@@ -19,6 +19,7 @@ import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.oxauth.util.TokenHashUtil;
 
 import java.util.*;
 
@@ -70,6 +71,7 @@ public class GrantService {
 
     public void persist(TokenLdap p_token) {
         prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
+        p_token.setTokenCode(TokenHashUtil.getHashedToken(p_token.getTokenCode()));
         ldapEntryManager.persist(p_token);
     }
 
@@ -145,7 +147,7 @@ public class GrantService {
 
     private TokenLdap load(String p_baseDn, String p_code) {
         try {
-            final List<TokenLdap> entries = ldapEntryManager.findEntries(p_baseDn, TokenLdap.class, Filter.create(String.format("oxAuthTokenCode=%s", p_code)));
+            final List<TokenLdap> entries = ldapEntryManager.findEntries(p_baseDn, TokenLdap.class, Filter.create(String.format("oxAuthTokenCode=%s", TokenHashUtil.getHashedToken(p_code))));
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
             }
