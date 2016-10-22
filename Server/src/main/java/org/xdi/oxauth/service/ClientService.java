@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 04/15/2014
- * @version March 4, 2016
+ * @version October 22, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("clientService")
@@ -175,8 +175,12 @@ public class ClientService {
         String key = getClientDnCacheKey(dn);
         Client client = (Client) cacheService.get(CACHE_CLIENT_NAME, key);
         if (client == null) {
-            client = ldapEntryManager.find(Client.class, dn);
-            cacheService.put(CACHE_CLIENT_NAME, key, client);
+            try {
+                client = ldapEntryManager.find(Client.class, dn);
+                cacheService.put(CACHE_CLIENT_NAME, key, client);
+            } catch (Exception ex) {
+                log.debug(ex.getMessage());
+            }
         } else {
             log.trace("Get client from cache by Dn '{0}'", dn);
         }
