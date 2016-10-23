@@ -1118,6 +1118,8 @@ class Setup(object):
                               'tomcat')
             self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
+            # oxTrust UI can add key to asimba's keystore
+            self.run([self.cmd_chmod, 'u+w', self.asimbaJksFn])
         except:
             self.logIt("Error generating cyrpto")
             self.logIt(traceback.format_exc(), True)
