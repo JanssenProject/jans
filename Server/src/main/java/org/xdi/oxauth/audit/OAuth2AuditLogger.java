@@ -17,7 +17,7 @@ import java.io.IOException;
 @Startup
 public class OAuth2AuditLogger {
 
-    private final String BROKER_URL = "tcp://localhost:61616";
+    private final String BROKER_URL = "failover:(tcp://localhost:61616)?timeout=5000";
     private final int ACK_MODE = Session.AUTO_ACKNOWLEDGE;
     private final String CLIENT_QUEUE_NAME = "oauth2.audit.logging";
 
@@ -32,7 +32,7 @@ public class OAuth2AuditLogger {
 
 
     public OAuth2AuditLogger() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
                 BROKER_URL);
         try {
             this.connection = connectionFactory.createConnection();
