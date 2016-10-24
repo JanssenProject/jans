@@ -13,6 +13,9 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.CodeVerifier;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -52,6 +55,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private Log log;
 
     @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
+
+    @In
     private ErrorResponseFactory errorResponseFactory;
 
     @In
@@ -83,6 +89,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         "clientId = {5}, ExtraParams = {6}, isSecure = {7}, codeVerifier = {8}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
                 sec.isSecure(), codeVerifier);
+
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REQUEST);
+        oAuth2AuditLog.setClientId(clientId);
+        oAuth2AuditLog.setUsername(username);
+        oAuth2AuditLog.setScope(scope);
 
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
@@ -132,6 +143,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 scope,
                                 idToken));
 
+                        oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
+
                         grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
                         // if authorization code is not found then code was already used = remove all grants with this auth code
@@ -167,6 +180,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 reToken,
                                 scope,
                                 null));
+                        oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                     } else {
                         builder = error(401, TokenErrorResponseType.INVALID_GRANT);
                     }
@@ -191,6 +205,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 null, null, null, clientCredentialsGrant, includeIdTokenClaims);
                     }
 
+                    oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
                     builder.entity(getJSonResponse(accessToken,
                             accessToken.getTokenType(),
                             accessToken.getExpiresIn(),
@@ -236,6 +251,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims);
                         }
 
+                        oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
                         builder.entity(getJSonResponse(accessToken,
                                 accessToken.getTokenType(),
                                 accessToken.getExpiresIn(),
@@ -254,6 +270,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (authorizationGrant != null) {
                         final AccessToken accessToken = authorizationGrant.createLongLivedAccessToken();
 
+                        oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                         builder.entity(getJSonResponse(accessToken,
                                 accessToken.getTokenType(),
                                 accessToken.getExpiresIn(),
@@ -282,6 +299,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.error(e.getMessage(), e);
         }
 
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
         return response(builder);
     }
 
