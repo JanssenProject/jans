@@ -586,6 +586,8 @@ class Setup(object):
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
+        if not self.tomcat_max_ram:
+            self.tomcat_max_ram = 3072
 
     def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
         return_value = None
