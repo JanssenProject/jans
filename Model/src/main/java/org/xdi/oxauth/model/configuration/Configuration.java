@@ -135,6 +135,7 @@ public class Configuration {
     private String oxElevenDeleteKeyEndpoint;
 
     private Boolean endSessionWithAccessToken;
+    private Boolean enabledOAuthAuditLogging;
 
     private List<String> clientWhiteList;
     private List<String> clientBlackList;
@@ -1158,6 +1159,14 @@ public class Configuration {
 
     public void setEndSessionWithAccessToken(Boolean endSessionWithAccessToken) {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
+    }
+
+    public Boolean getEnabledOAuthAuditLogging() {
+        return enabledOAuthAuditLogging;
+    }
+
+    public void setEnabledOAuthAuditLogging(Boolean enabledOAuthAuditLogging) {
+        this.enabledOAuthAuditLogging = enabledOAuthAuditLogging;
     }
 
     public List<String> getClientWhiteList() {
