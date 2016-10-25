@@ -162,6 +162,13 @@ public final class ApplicationConfiguration implements Serializable {
 		this.oxIncommonFlag = oxIncommonFlag;
 	}
 
+	private String shibbolethVersion;
+	private String shibboleth3IdpRootDir;
+	private String shibboleth3SpConfDir;
+	private String organizationName;
+	private String idp3SigningCert;
+	private String idp3EncryptionCert;
+
 	public String getBaseDN() {
 		return baseDN;
 	}
@@ -888,5 +895,53 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setRptConnectionPoolCustomKeepAliveTimeout(int rptConnectionPoolCustomKeepAliveTimeout) {
 		this.rptConnectionPoolCustomKeepAliveTimeout = rptConnectionPoolCustomKeepAliveTimeout;
+	}
+
+	public String getShibbolethVersion() {
+		return shibbolethVersion;
+	}
+
+	public void setShibbolethVersion(String shibbolethVersion) {
+		this.shibbolethVersion = shibbolethVersion;
+	}
+
+	public String getShibboleth3IdpRootDir() {
+		return shibboleth3IdpRootDir;
+	}
+
+	public void setShibboleth3IdpRootDir(String shibboleth3IdpRootDir) {
+		this.shibboleth3IdpRootDir = shibboleth3IdpRootDir;
+	}
+
+	public String getShibboleth3SpConfDir() {
+		return shibboleth3SpConfDir;
+	}
+
+	public void setShibboleth3SpConfDir(String shibboleth3SpConfDir) {
+		this.shibboleth3SpConfDir = shibboleth3SpConfDir;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public String getIdp3SigningCert() {
+		return idp3SigningCert;
+	}
+
+	public void setIdp3SigningCert(String idp3SigningCert) {
+		this.idp3SigningCert = idp3SigningCert;
+	}
+
+	public String getIdp3EncryptionCert() {
+		return idp3EncryptionCert;
+	}
+
+	public void setIdp3EncryptionCert(String idp3EncryptionCert) {
+		this.idp3EncryptionCert = idp3EncryptionCert;
 	}
 }
