@@ -23,22 +23,16 @@
     cd community-edition-setup/openldap_migration
     ```
 
-4. Export the data from OpenDJ
+4. Stop OpenDJ and Setup OpenLDAP
 
     ```bash
-    python export_opendj.py
-    ```
-
-5. Setup OpenLDAP
-
-    ```bash
+    service opendj stop
     python setup_openldap.py
     ```
 
-4. Stop OpenDJ and  Start the OpenLDAP server
+5. Start the OpenLDAP server
 
     ```
-    service opendj stop
     service solserver start
     ```
 

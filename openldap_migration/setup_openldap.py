@@ -30,6 +30,7 @@ class SetupOpenLDAP(object):
         self.backupLdifFolder = os.path.join(self.backupFolder, 'ldif')
 
         self.cmd_mkdir = '/bin/mkdir'
+        self.ldif_export = "/opt/opendj/bin/export-ldif"
 
         self.ip = None
         self.inumOrg = None
@@ -53,24 +54,8 @@ class SetupOpenLDAP(object):
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapDataDir = '/opt/gluu/data'
-
-        self.ldif_files = [
-                           "%s/appliance.ldif" % self.backupLdifFolder,
-                           "%s/attributes.ldif" % self.backupLdifFolder,
-                           "%s/clients.ldif" % self.backupLdifFolder,
-                           "%s/groups.ldif" % self.backupLdifFolder,
-                           "%s/hosts.ldif" % self.backupLdifFolder,
-                           "%s/organization.ldif" % self.backupLdifFolder,
-                           "%s/oxauth_config.ldif" % self.backupLdifFolder,
-                           "%s/oxtrust_config.ldif" % self.backupLdifFolder,
-                           "%s/people.ldif" % self.backupLdifFolder,
-                           "%s/scopes.ldif" % self.backupLdifFolder,
-                           "%s/scripts.ldif" % self.backupLdifFolder,
-                           "%s/site.ldif" % self.backupLdifFolder,
-                           "%s/trust_relationships.ldif" % self.backupLdifFolder,
-                           "%s/u2f.ldif" % self.backupLdifFolder,
-                           "%s/uma.ldif" % self.backupLdifFolder,
-                           ]
+        self.o_gluu = '%s/o_gluu.ldif' % self.miniSetupFolder
+        self.o_site = '%s/o_site.ldif' % self.miniSetupFolder
 
     def copyFile(self, infile, destfolder):
         try:
@@ -103,9 +88,6 @@ class SetupOpenLDAP(object):
         # 3. user.schema
         self.renderTemplate(self.user_schema, self.templateFolder,
                             self.outputFolder)
-        # 4. base.ldif
-        base = os.path.join(self.templateFolder, 'base.ldif')
-        self.renderTemplate(base, self.templateFolder, self.outputFolder)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None):
@@ -143,21 +125,21 @@ class SetupOpenLDAP(object):
         self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
         self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
-    def import_ldif_openldap(self):
+    def export_opendj(self):
+        logging.info("Exporting all the data from OpenDJ")
+        command = [self.ldif_export, '-n', 'userRoot', '-l', self.o_gluu]
+        self.run(command)
+        command = [self.ldif_export, '-n', 'site', '-l', self.o_site]
+        self.run(command)
+
+    def import_openldap(self):
         logging.info("Importing LDIF files into OpenLDAP")
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
 
         # Import the base.ldif
-        base = os.path.join(self.outputFolder, 'base.ldif')
-        self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', base])
-
-        # Then all the others from the old export
-        for ldif in self.ldif_files:
-            if 'site.ldif' in ldif:
-                self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
-            else:
-                self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
+        self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', self.o_gluu])
+        self.run([cmd, '-b', 'o=site', '-f', config, '-l', self.o_site])
 
     def get_old_data(self):
         # grab the old inumOrgFN
@@ -184,4 +166,5 @@ if __name__ == '__main__':
     setup.get_old_data()
     setup.render_templates()
     setup.configure_openldap()
-    setup.import_ldif_openldap()
+    setup.export_opendj()
+    setup.import_openldap()
