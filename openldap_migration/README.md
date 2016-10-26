@@ -35,9 +35,10 @@
     python setup_openldap.py
     ```
 
-4. Start the OpenLDAP server
+4. Stop OpenDJ and  Start the OpenLDAP server
 
     ```
+    service opendj stop
     service solserver start
     ```
 

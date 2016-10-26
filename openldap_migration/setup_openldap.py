@@ -1,3 +1,4 @@
+import sys
 import os
 import os.path
 import logging
@@ -19,14 +20,14 @@ logging.getLogger('').addHandler(console)
 
 class SetupOpenLDAP(object):
 
-    def __init__(self, ip, ldap_pass, backup_folder):
+    def __init__(self, ip, ldap_pass):
         self.miniSetupFile = os.path.abspath(__file__)
         self.miniSetupFolder = os.path.dirname(self.miniSetupFile)
         self.setupFolder = os.path.dirname(self.miniSetupFolder)
         self.templatesFolder = os.path.join(self.setupFolder, 'templates')
         self.outputFolder = os.path.join(self.setupFolder, 'output')
-        self.backupFolder = backup_folder
-        self.backupLdifFolder = os.path.join(backup_folder, 'ldif')
+        self.backupFolder = os.path.join(self.miniSetupFolder, 'opendj_export')
+        self.backupLdifFolder = os.path.join(self.backupFolder, 'ldif')
 
         self.cmd_mkdir = '/bin/mkdir'
 
@@ -67,8 +68,6 @@ class SetupOpenLDAP(object):
                            "%s/uma.ldif" % self.backupLdifFolder,
                            ]
 
-
-
     def copyfile(self, infile, destfolder):
         try:
             shutil.copy(infile, destfolder)
@@ -87,7 +86,7 @@ class SetupOpenLDAP(object):
         newFn.write(template_text % self.__dict__)
         newFn.close()
 
-    def renderTemplates(self):
+    def render_templates(self):
         # 1. slapd.conf
         cmd = os.path.join(self.openldapBinFolder, "slappasswd") + " -s " \
             + self.ldapPass
@@ -147,11 +146,15 @@ class SetupOpenLDAP(object):
 
 
 if __name__ == '__main__':
+    # Check if the opendj export has been done
+    if not os.path.isdir('opendj_export'):
+        print "OpenDJ export not found! Did you run export_opendj.py?"
+        sys.exit(1)
+
     ip = raw_input('Enter the IP address: ').strip()
     ldapPass = raw_input('Enter the LDAP Password: ').strip()
-    backup_folder = raw_input('Enter full path of backup folder (e.g., /root/backup_24): ').strip()
 
-    setup = SetupOpenLDAP(ip, ldapPass, backup_folder)
+    setup = SetupOpenLDAP(ip, ldapPass)
     # grab the old inumOrgFN
     with open('/install/community-edition-setup/setup.properties.last') as ofile:
         for line in ofile:
