@@ -2,8 +2,48 @@
 - Ubuntu 14.04
 - OpenLDAP Binary as a deb package - Preferably Symas Openldap Gold 
 
+### Procedure for replacing OpenDJ with OpenLDAP in 2.4.4
+1. Install the Openldap debian package  `dpkg -i <openldap.deb>`
+2. Generate the certificates using OpenSSL
+
+    ```bash
+    cd /etc/certs
+    openssl genrsa -des3 -out openldap.key 2048
+    openssl rsa -in openldap.key -out openldap.key.insecure
+    mv openldap.key.insecure openldap.key
+    openssl req -new -key openldap.key -out openldap.csr
+    openssl x509 -req -days 365 -in openldap.csr -signkey openldap.key -out openldap.crt
+    ```
+
+3. Clone the community-edition-setup for the scripts
+
+    ```bash
+    cd ~
+    git clone https://github.com/GluuFederation/community-edition-setup.git
+    cd community-edition-setup/openldap_migration
+    ```
+
+4. Export the data from OpenDJ
+
+    ```bash
+    python export_opendj.py
+    ```
+
+5. Setup OpenLDAP
+
+    ```bash
+    python setup_openldap.py
+    ```
+
+4. Start the OpenLDAP server
+
+    ```
+    service solserver start
+    ```
+
+
 ### Procedure for migrating an existing Gluu Server 2.4.4
-1. Export the ldap data using the export_opendj script
+1. Export the ldap data using the export\_opendj script
 
   ```bash
   service gluu-server-2.4.4 login
@@ -12,7 +52,7 @@
   exit
   ```
   
-  This creates a folder called backup_24 that will contain all the LDAP data in the ldif file format.
+  This creates a folder called backup\_24 that will contain all the LDAP data in the ldif file format.
 2. Install the Gluu Server 3.0.0 alpha version.
 
   ```bash
