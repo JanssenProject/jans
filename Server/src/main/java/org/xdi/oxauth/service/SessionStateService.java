@@ -68,7 +68,18 @@ public class SessionStateService {
         }
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
+    
+	public static String getAcr(SessionState session) {
+		if (session == null || session.getSessionAttributes() == null) {
+			return null;
+		}
 
+		String acr = session.getSessionAttributes().get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+		if (StringUtils.isBlank(acr)) {
+			acr = session.getSessionAttributes().get("acr_values");
+		}
+		return acr;
+	}
 
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
