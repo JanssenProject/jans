@@ -1646,6 +1646,9 @@ class Setup(object):
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
 
+        print "Shibboleth IDP version = %s" % self.shibboleth_version
+        self.logIt('Shibboleth IDP version = %s' % self.shibboleth_version)
+
     def install_asimba(self):
         asimbaWar = 'asimba.war'
         distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
@@ -2142,10 +2145,6 @@ class Setup(object):
         self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
         self.oxcas_config_base64 = self.generate_base64_ldap_file(self.oxcas_config_json)
         self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
-
-        if self.installSaml:
-            print "Shibboleth IDP version = %s" % self.shibboleth_version
-            self.logIt('Shibboleth IDP version = %s' % self.shibboleth_version)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None):
