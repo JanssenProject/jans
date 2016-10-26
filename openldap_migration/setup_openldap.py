@@ -20,19 +20,23 @@ logging.getLogger('').addHandler(console)
 
 class SetupOpenLDAP(object):
 
-    def __init__(self, ip, ldap_pass):
+    def __init__(self):
         self.miniSetupFile = os.path.abspath(__file__)
         self.miniSetupFolder = os.path.dirname(self.miniSetupFile)
         self.setupFolder = os.path.dirname(self.miniSetupFolder)
-        self.templatesFolder = os.path.join(self.setupFolder, 'templates')
+        self.templateFolder = os.path.join(self.setupFolder, 'templates')
         self.outputFolder = os.path.join(self.setupFolder, 'output')
         self.backupFolder = os.path.join(self.miniSetupFolder, 'opendj_export')
         self.backupLdifFolder = os.path.join(self.backupFolder, 'ldif')
 
         self.cmd_mkdir = '/bin/mkdir'
 
-        self.ip = ip
+        self.ip = None
+        self.inumOrg = None
         self.inumOrgFN = None
+        self.orgName = None
+        self.ldapPass = None
+
         self.certFolder = '/etc/certs'
         self.openldapBaseFolder = '/opt/symas'
         self.openldapBinFolder = '/opt/symas/bin'
@@ -44,11 +48,11 @@ class SetupOpenLDAP(object):
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
-        self.ldapPass = ldap_pass
         self.openldapPassHash = None
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
+        self.openldapDataDir = '/opt/gluu/data'
 
         self.ldif_files = [
                            "%s/appliance.ldif" % self.backupLdifFolder,
@@ -68,7 +72,7 @@ class SetupOpenLDAP(object):
                            "%s/uma.ldif" % self.backupLdifFolder,
                            ]
 
-    def copyfile(self, infile, destfolder):
+    def copyFile(self, infile, destfolder):
         try:
             shutil.copy(infile, destfolder)
             logging.debug("copied %s to %s" % (infile, destfolder))
@@ -77,7 +81,7 @@ class SetupOpenLDAP(object):
             logging.error(traceback.format_exc())
 
     def renderTemplate(self, filePath, templateFolder, outputFolder):
-        self.logIt("Rendering template %s" % filePath)
+        logging.debug("Rendering template %s" % filePath)
         fn = os.path.split(filePath)[-1]
         f = open(os.path.join(templateFolder, fn))
         template_text = f.read()
@@ -99,6 +103,9 @@ class SetupOpenLDAP(object):
         # 3. user.schema
         self.renderTemplate(self.user_schema, self.templateFolder,
                             self.outputFolder)
+        # 4. base.ldif
+        base = os.path.join(self.templateFolder, 'base.ldif')
+        self.renderTemplate(base, self.templateFolder, self.outputFolder)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None):
@@ -117,6 +124,8 @@ class SetupOpenLDAP(object):
 
     def configure_openldap(self):
         logging.info("Configuring OpenLDAP")
+        # 0. Create the data dir
+        self.run([self.cmd_mkdir, '-p', self.openldapDataDir])
         # 1. Copy the conf files to
         self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
         self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
@@ -135,15 +144,35 @@ class SetupOpenLDAP(object):
         self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def import_ldif_openldap(self):
-        self.logIt("Importing LDIF files into OpenLDAP")
+        logging.info("Importing LDIF files into OpenLDAP")
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
+
+        # Import the base.ldif
+        base = os.path.join(self.outputFolder, 'base.ldif')
+        self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', base])
+
+        # Then all the others from the old export
         for ldif in self.ldif_files:
             if 'site.ldif' in ldif:
                 self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
+    def get_old_data(self):
+        # grab the old inumOrgFN
+        with open('/install/community-edition-setup/setup.properties.last') as ofile:
+            for line in ofile:
+                if 'inumOrgFN=' in line:
+                    self.inumOrgFN = line.split('=')[-1].strip()
+                elif 'inumOrg=' in line:
+                    self.inumOrg = line.split('=')[-1].strip()
+                elif 'orgName=' in line:
+                    self.orgName = line.split('=')[-1].strip()
+                elif 'ip=' in line:
+                    self.ip = line.split('=')[-1].strip()
+                elif 'ldapPass=' in line:
+                    self.ldapPass = line.split('=')[-1].strip()
 
 if __name__ == '__main__':
     # Check if the opendj export has been done
@@ -151,17 +180,8 @@ if __name__ == '__main__':
         print "OpenDJ export not found! Did you run export_opendj.py?"
         sys.exit(1)
 
-    ip = raw_input('Enter the IP address: ').strip()
-    ldapPass = raw_input('Enter the LDAP Password: ').strip()
-
-    setup = SetupOpenLDAP(ip, ldapPass)
-    # grab the old inumOrgFN
-    with open('/install/community-edition-setup/setup.properties.last') as ofile:
-        for line in ofile:
-            if 'inumOrgFN' in line:
-                setup.inumOrgFN = line.split('=')[-1].strip()
-                break
-
+    setup = SetupOpenLDAP()
+    setup.get_old_data()
     setup.render_templates()
     setup.configure_openldap()
     setup.import_ldif_openldap()
