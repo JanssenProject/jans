@@ -111,7 +111,7 @@ public class RedirectionUriService {
         }
 
         final Set<Client> clientsByDns = sessionState.get().getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionState.get().getPermissionGrantedMap().keySet(), true) :
+                clientService.getClient(sessionState.get().getPermissionGrantedMap().getClientIds(true), true) :
                 Sets.<Client>newHashSet();
 
         log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {0}", postLogoutRedirectUri);
