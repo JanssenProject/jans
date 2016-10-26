@@ -10,16 +10,13 @@
 
 import os
 import os.path
-import shutil
 import sys
 import traceback
 from ldif import LDIFParser, LDIFWriter
 from jsonmerge import merge
 import json
-import tempfile
 import logging
 
-password_file = tempfile.mkstemp()[1]
 backup24_folder = None
 
 slapadd = '/opt/symas/bin/slapadd'
@@ -110,32 +107,6 @@ def getOutput(args):
             logging.error("Error running command : %s" % " ".join(args))
             logging.error(traceback.format_exc())
             sys.exit(1)
-
-
-def preparePasswordFile():
-    # prepare password_file
-    with open('/install/community-edition-setup/setup.properties.last', 'r') \
-            as sfile:
-        for line in sfile:
-            if 'ldapPass=' in line:
-                with open(password_file, 'w') as pfile:
-                    pfile.write(line.split('=')[-1])
-                break
-
-
-def processPeople(ldif_folder):
-    logging.info('Updating oxSectorIdentifierURI to oxSectorIdentifier in' +
-                 ' people.ldif')
-    peopleldif = os.path.join(ldif_folder, 'people.ldif')
-    new_peopleldif = os.path.join(ldif_folder, 'people_updated.ldif')
-
-    with open(peopleldif, 'r') as infile:
-        with open(new_peopleldif, 'w') as outfile:
-            for line in infile:
-                if 'oxSectorIdentifierURI' in line:
-                    line.replace('oxSectorIdentifierURI', 'oxSectorIdentifier')
-                outfile.write(line)
-    shutil.move(new_peopleldif, peopleldif)
 
 
 def importLDIF(folder):
@@ -266,6 +237,7 @@ def main(folder_name):
     # Verify that all required folders are present
     backup24_folder = folder_name
     ldif_folder = os.path.join(backup24_folder, 'ldif')
+    outputFolder = "./output_ldif"
 
     if not os.path.exists(backup24_folder):
         logging.critical("Backup folder %s does not exist.", backup24_folder)
@@ -276,22 +248,13 @@ def main(folder_name):
                          " Rerun export_opendj.py")
         sys.exit(1)
 
-    outputFolder = "./output_ldif"
-    outputLdifFolder = "%s/config" % outputFolder
-
     if not os.path.exists(outputFolder):
         os.mkdir(outputFolder)
 
-    if not os.path.exists(outputLdifFolder):
-        os.mkdir(outputLdifFolder)
-
-    preparePasswordFile()
     exportLDIF(outputFolder)
-    processPeople(ldif_folder)
     processLDIF(ldif_folder, outputFolder)
     removeDBFile()
     importLDIF(outputFolder)
-    os.remove(password_file)
     logging.info("Import finished.")
 
 
