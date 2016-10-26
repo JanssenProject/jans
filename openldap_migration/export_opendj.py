@@ -19,9 +19,9 @@ unzip = "/usr/bin/unzip"
 find = "/usr/bin/find"
 mkdir = "/bin/mkdir"
 
-log = "./export_24.log"
-logError = "./export_24.error"
-bu_folder = "./backup_24"
+log = "./export_opendj.log"
+logError = "./export_opendj.error"
+bu_folder = "./opendj_export"
 propertiesFn = "%s/setup.properties" % bu_folder
 
 # LDAP Stuff
