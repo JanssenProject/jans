@@ -9,7 +9,7 @@ import subprocess
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(name)s %(message)s',
-                    filename='openldap_import.log',
+                    filename='setup_openldap.log',
                     filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
