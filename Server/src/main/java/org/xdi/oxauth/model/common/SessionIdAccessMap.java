@@ -57,10 +57,6 @@ public class SessionIdAccessMap implements Serializable {
         return clientIds;
     }
 
-    public Set<String> keySet() {
-        return permissionGranted.keySet();
-    }
-
     public Boolean get(String clientId) {
         ensureInitialized();
         final Boolean result = permissionGranted.get(clientId);
