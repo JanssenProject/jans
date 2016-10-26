@@ -43,7 +43,7 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '2.4.5-SNAPSHOT'
+        self.oxVersion = '3.0.0-SNAPSHOT'
         self.githubBranchName = 'install_procedures_ganesh'
 
         # Used only if -w (get wars) options is given to setup.py
