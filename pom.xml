@@ -5,15 +5,15 @@
 	<groupId>org.xdi</groupId>
 	<artifactId>oxauth</artifactId>
 	<packaging>pom</packaging>
-	<version>2.4.5-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>oxAuth</name>
 	<url>http://ox.gluu.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		<oxCore.version>2.4.5-SNAPSHOT</oxCore.version>
-		<oxeleven.version>2.4.5-SNAPSHOT</oxeleven.version>
+		<oxCore.version>3.0.0-SNAPSHOT</oxCore.version>
+		<oxeleven.version>3.0.0-SNAPSHOT</oxeleven.version>
 		<jackson.version>1.9.11</jackson.version>
 		<jettison.version>1.3</jettison.version>
 		<resteasy.version>2.3.7.Final</resteasy.version>
