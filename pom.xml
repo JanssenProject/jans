@@ -5,18 +5,18 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>2.4.5-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>2.4.5-SNAPSHOT</oxCore.version>
+        <oxCore.version>3.0.0-SNAPSHOT</oxCore.version>
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.11</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>2.4.5-SNAPSHOT</oxauth.version>
+        <oxauth.version>3.0.0-SNAPSHOT</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
@@ -24,7 +24,7 @@
         <jetty.version>9.2.13.v20150730</jetty.version>
         <gwt.version>2.6.0</gwt.version>
         <gxt.version>3.1.0</gxt.version>
-        <oxlicense.version>2.4.5-SNAPSHOT</oxlicense.version>
+        <oxlicense.version>3.0.0-SNAPSHOT</oxlicense.version>
     </properties>
 
     <prerequisites>
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
-                <version>2.4.5-SNAPSHOT</version>
+                <version>3.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sencha.gxt</groupId>
