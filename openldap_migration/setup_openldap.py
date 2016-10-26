@@ -157,11 +157,6 @@ class SetupOpenLDAP(object):
                     self.ldapPass = line.split('=')[-1].strip()
 
 if __name__ == '__main__':
-    # Check if the opendj export has been done
-    if not os.path.isdir('opendj_export'):
-        print "OpenDJ export not found! Did you run export_opendj.py?"
-        sys.exit(1)
-
     setup = SetupOpenLDAP()
     setup.get_old_data()
     setup.render_templates()
