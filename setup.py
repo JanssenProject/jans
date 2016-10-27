@@ -2598,6 +2598,9 @@ if __name__ == '__main__':
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
             installObject.render_jetty_templates()
+            # Temporary fix to render correct setup properties
+            if installObject.ldap_type is 'opendj':
+                installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
