@@ -1,67 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<resolver:AttributeResolver xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pc="urn:mace:shibboleth:2.0:resolver:pc"
-                   xmlns:ad="urn:mace:shibboleth:2.0:resolver:ad" xmlns:dc="urn:mace:shibboleth:2.0:resolver:dc"
-                   xmlns:enc="urn:mace:shibboleth:2.0:attribute:encoder" xmlns:sec="urn:mace:shibboleth:2.0:security"
-                   xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver classpath:/schema/shibboleth-2.0-attribute-resolver.xsd
-                                       urn:mace:shibboleth:2.0:resolver:pc classpath:/schema/shibboleth-2.0-attribute-resolver-pc.xsd
-                                       urn:mace:shibboleth:2.0:resolver:ad classpath:/schema/shibboleth-2.0-attribute-resolver-ad.xsd
-                                       urn:mace:shibboleth:2.0:resolver:dc classpath:/schema/shibboleth-2.0-attribute-resolver-dc.xsd
-                                       urn:mace:shibboleth:2.0:attribute:encoder classpath:/schema/shibboleth-2.0-attribute-encoder.xsd
-                                       urn:mace:shibboleth:2.0:security classpath:/schema/shibboleth-2.0-security.xsd">
+<resolver:AttributeResolver
+        xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
+        xmlns:ad="urn:mace:shibboleth:2.0:resolver:ad" 
+        xmlns:dc="urn:mace:shibboleth:2.0:resolver:dc"
+        xmlns:enc="urn:mace:shibboleth:2.0:attribute:encoder" 
+        xmlns:sec="urn:mace:shibboleth:2.0:security"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd
+                            urn:mace:shibboleth:2.0:resolver:ad http://shibboleth.net/schema/idp/shibboleth-attribute-resolver-ad.xsd
+                            urn:mace:shibboleth:2.0:resolver:dc http://shibboleth.net/schema/idp/shibboleth-attribute-resolver-dc.xsd
+                            urn:mace:shibboleth:2.0:attribute:encoder http://shibboleth.net/schema/idp/shibboleth-attribute-encoder.xsd
+                            urn:mace:shibboleth:2.0:security http://shibboleth.net/schema/idp/shibboleth-security.xsd">
 
     <!-- ========================================== -->
     <!--      Attribute Definitions                 -->
     <!-- ========================================== -->
+
 #foreach( $attribute in $attrParams.attributes )
-#if( ! ($attribute.name.equals('transientId') ) )
+#if( ! ($attribute.name.equals('transientId') or $attribute.name.equals('persistentId') ) )
+#if($attribute.name.equals('eppnForNIH'))
+
+    <resolver:AttributeDefinition id="eduPersonPrincipalName" xsi:type="ad:Scoped" scope="%{idp.scope}" sourceAttributeID="uid">
+        <resolver:Dependency ref="siteLDAP" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML1ScopedString" name="urn:mace:dir:attribute-def:eduPersonPrincipalName" encodeType="false" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML2ScopedString" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.6" friendlyName="eduPersonPrincipalName" encodeType="false" />
+    </resolver:AttributeDefinition>
+
+#else
+
     <resolver:AttributeDefinition xsi:type="ad:Simple" id="$attribute.name" sourceAttributeID="$attribute.name">
         <resolver:Dependency ref="siteLDAP" />
-        <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="$attrParams.attributeSAML1Strings.get($attribute.name)" />
-        <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="$attrParams.attributeSAML2Strings.get($attribute.name)" friendlyName="$attribute.name" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML1String" name="$attrParams.attributeSAML1Strings.get($attribute.name)" encodeType="false" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML2String" name="$attrParams.attributeSAML2Strings.get($attribute.name)" friendlyName="$attribute.name" encodeType="false" />
     </resolver:AttributeDefinition>
 #end
 #end
-
-    <!-- Name Identifier related attributes -->
-    <resolver:AttributeDefinition id="transientId" xsi:type="ad:TransientId">
-        <resolver:AttributeEncoder xsi:type="enc:SAML1StringNameIdentifier" nameFormat="urn:mace:shibboleth:1.0:nameIdentifier" />
-        <resolver:AttributeEncoder xsi:type="enc:SAML2StringNameID" nameFormat="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" />
-    </resolver:AttributeDefinition>
+#end
 
     <!-- ========================================== -->
     <!--      Data Connectors                       -->
     <!-- ========================================== -->
 
-    <!-- Example Static Connector -->
-
-    <!-- LDAP Connector -->
     <resolver:DataConnector id="siteLDAP" xsi:type="dc:LDAPDirectory"
-        ldapURL="$ldapUrl"
-        baseDN="o=gluu"
-        principal="$bindDN"
-        principalCredential="$ldapPass">
+                            ldapURL="%{idp.attribute.resolver.LDAP.ldapURL}"
+                            baseDN="%{idp.attribute.resolver.LDAP.baseDN}"
+                            principal="%{idp.attribute.resolver.LDAP.bindDN}"
+                            principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
+                            useStartTLS="%{idp.attribute.resolver.LDAP.useStartTLS:true}">
+
         <dc:FilterTemplate>
             <![CDATA[
-                (|(uid=$requestContext.principalName)(mail=$requestContext.principalName))
+                (uid=$requestContext.principalName)
             ]]>
         </dc:FilterTemplate>
+
+        <!-- <dc:ReturnAttributes>%{idp.attribute.resolver.LDAP.returnAttributes}</dc:ReturnAttributes> -->
+
+        <dc:StartTLSTrustCredential id="LDAPtoIdPCredential" xsi:type="sec:X509ResourceBacked">
+            <sec:Certificate>%{idp.attribute.resolver.LDAP.trustCertificates}</sec:Certificate>
+        </dc:StartTLSTrustCredential>
+
     </resolver:DataConnector>
 
-    <!--resolver:DataConnector xsi:type="dc:ComputedId"
-                            id="computedID"
-                            generatedAttributeID="computedID"
-                            sourceAttributeID="uid"
-                            salt="ufujAWGSuzbCtRRcMYpnCujW0r8+55jE8Ez64AO7NV1">
-        <resolver:Dependency ref="siteLDAP" />
-
-    </resolver:DataConnector-->
-
-    <!-- ========================================== -->
-    <!--      Principal Connectors                  -->
-    <!-- ========================================== -->
-    <resolver:PrincipalConnector xsi:type="pc:Transient" id="shibTransient" nameIDFormat="urn:mace:shibboleth:1.0:nameIdentifier" />
-    <resolver:PrincipalConnector xsi:type="pc:Transient" id="saml1Unspec" nameIDFormat="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified" />
-    <resolver:PrincipalConnector xsi:type="pc:Transient" id="saml2Transient" nameIDFormat="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" />
 </resolver:AttributeResolver>

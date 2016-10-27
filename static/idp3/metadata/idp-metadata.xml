@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-     This is example metadata only. Do *NOT* supply it as is without review,
-     and do *NOT* provide it in real time to your partners.
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
+                  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                  xmlns:shibmd="urn:mace:shibboleth:metadata:1.0"
+                  xmlns:xml="http://www.w3.org/XML/1998/namespace"
+                  entityID="https://%(hostname)s/idp/shibboleth">
 
-     This metadata is not dynamic - it will not change as your configuration changes.
--->
-<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xml="http://www.w3.org/XML/1998/namespace" entityID="https://%(hostname)s/idp/shibboleth">
+    <IDPSSODescriptor errorURL="$idpHost/identity/feedback.htm" protocolSupportEnumeration="urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
 
-    <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <Extensions>
+            <shibmd:Scope regexp="false">%(hostname)s</shibmd:Scope>
+        </Extensions>
 
         <KeyDescriptor use="signing">
             <ds:KeyInfo>
@@ -28,22 +30,65 @@
             </ds:KeyInfo>
         </KeyDescriptor>
 
+        <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
         <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
 
+        <SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="$idpHost/idp/profile/Shibboleth/SSO" />
+        <SingleSignOnService Binding="urn:mace:shibboleth:2.0:profiles:AuthnRequest" Location="$idpHost/idp/profile/SAML2/Unsolicited/SSO"/>
         <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://%(hostname)s/idp/profile/SAML2/POST/SSO"/>
         <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://%(hostname)s/idp/profile/SAML2/POST-SimpleSign/SSO"/>
         <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://%(hostname)s/idp/profile/SAML2/Redirect/SSO"/>
 
+        <!--
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://%(hostname)s/idp/profile/SAML2/Redirect/SLO"/>
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://%(hostname)s/idp/profile/SAML2/POST/SLO"/>
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://%(hostname)s/idp/profile/SAML2/POST-SimpleSign/SLO"/>
         <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://%(hostname)s/idp/profile/SAML2/SOAP/SLO"/>
+        -->
 
     </IDPSSODescriptor>
-    
+
+    <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+
+        <Extensions>
+            <shibmd:Scope regexp="false">$domain</shibmd:Scope>
+        </Extensions>
+
+        <KeyDescriptor use="signing">
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>
+%(idp3SigningCertificateText)s
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        <KeyDescriptor use="encryption">
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>
+%(idp3EncryptionCertificateText)s
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+
+        <AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding"
+                          Location="$idpHost:9443/idp/profile/SAML1/SOAP/AttributeQuery"/>
+
+        <AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+                          Location="$idpHost:9443/idp/profile/SAML2/SOAP/AttributeQuery"/>
+
+        <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+        <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
+
+    </AttributeAuthorityDescriptor>
+
     <Organization>
         <OrganizationName xml:lang="en">%(orgName)s</OrganizationName>
-        <OrganizationDisplayName xml:lang="en">%(orgShortName)s</OrganizationDisplayName>
+        <OrganizationDisplayName xml:lang="en">%(orgName)s</OrganizationDisplayName>
         <OrganizationURL xml:lang="en">https://%(hostname)s</OrganizationURL>
     </Organization>
 
