@@ -156,14 +156,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
+//        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
+
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
         try {
             sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
-            if (sessionUser != null) {
-                sessionUser.addPermission(clientId, false);
-            }
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
@@ -208,7 +207,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 } else {
                                     user = userService.getUser(authorizationGrant.getUserId());
                                     sessionUser = sessionStateService.generateAuthenticatedSessionState(user.getDn(), prompt);
-                                    sessionUser.addPermission(clientId, false);
                                 }
                             }
 
@@ -576,8 +574,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
             log.error(e.getMessage(), e);
-        } finally {
-            sessionStateService.updateSessionState(sessionUser);
         }
 
         return builder.build();
