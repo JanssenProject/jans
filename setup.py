@@ -89,8 +89,6 @@ class Setup(object):
         self.installLdap = True
         self.installHttpd = True
         self.installSaml = False
-        self.installSamlIDP2 = False
-        self.installSamlIDP3 = False
         self.installAsimba = False
         self.installCas = False
         self.installOxAuthRP = False
@@ -165,17 +163,6 @@ class Setup(object):
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
-        self.idpFolder = "/opt/idp"
-        self.idpMetadataFolder = "/opt/idp/metadata"
-        self.idpLogsFolder = "/opt/idp/logs"
-        self.idpLibFolder = "/opt/idp/lib"
-        self.idpConfFolder = "/opt/idp/conf"
-        self.idpSslFolder = "/opt/idp/ssl"
-        self.idpTempMetadataFolder = "/opt/idp/temp_metadata"
-        self.idpWarFolder = "/opt/idp/war"
-        self.idpSPFolder = "/opt/idp/sp"
-        # self.idpWarFullPath = '%s/idp.war' % self.idpWarFolder
-
         self.idp3Folder = "/opt/shibboleth-idp"
         self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
         self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
@@ -184,7 +171,6 @@ class Setup(object):
         self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
         self.idp3CredentialsFolder = "/opt/shibboleth-idp/credentials"
         self.idp3WarFolder = "/opt/shibboleth-idp/war"
-        # self.idp3WarFullPath = '%s/idp.war' % self.idp3WarFolder
 
         self.hostname = None
         self.ip = None
@@ -364,7 +350,6 @@ class Setup(object):
         self.oxcas_config_base64 = None
         self.oxasimba_config_base64 = None
 
-
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
         self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'        
@@ -495,9 +480,7 @@ class Setup(object):
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
 
         if self.installSaml:
-            realIdpFolder = os.path.realpath(self.idpFolder)
             realIdp3Folder = os.path.realpath(self.idp3Folder)
-            self.run([self.cmd_chown, '-R', 'jetty:tomcat', realIdpFolder])
             self.run([self.cmd_chown, '-R', 'jetty:tomcat', realIdp3Folder])
 
     def change_permissions(self):
@@ -951,8 +934,6 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distAppFolder])
             print "Downloading oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distAppFolder])
-            print "Downloading Shibboleth IDP 2 war file..."
-            self.run(['/usr/bin/wget', self.idp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distAppFolder])
             print "Downloading CAS war file..."
             self.run(['/usr/bin/wget', self.cas_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
 
@@ -1534,7 +1515,8 @@ class Setup(object):
 
     def install_saml(self):
         if self.installSaml:
-            self.logIt("Install Saml general files...")
+            self.logIt("Install SAML Shibboleth IDP v3...")
+            self.shibboleth_version = 'v3'
             # choose SAML IDP version
             # if self.allowPreReleasedApplications:
             #     saml_version_var = self.choose_from_list(['IDP v2', 'IDP v3'], "Shibboleth IDP version")
@@ -1545,9 +1527,7 @@ class Setup(object):
             # else:
             #     self.installSamlIDP2 = True
 
-            self.installSamlIDP3 = True
-
-            # Put latest Saml templates
+            # Put latest SAML templates
             identityWar = 'identity.war'
             distIdentityPath = '%s/%s' % (self.distWarFolder, identityWar)
 
@@ -1568,42 +1548,13 @@ class Setup(object):
                       'xf',
                       identityConfFilePattern], tmpIdentityDir)
 
-            self.logIt("Preparing Saml templates...")
+            self.logIt("Preparing SAML templates...")
             self.removeDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
             self.createDirs('%s/conf/shibboleth3/idp' % self.gluuBaseFolder)
 
             self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/conf/shibboleth3' % self.gluuBaseFolder)
 
             self.removeDirs(tmpIdentityDir)
-
-        if self.installSamlIDP2:
-            self.logIt("Install Saml Shibboleth IDP v2...")
-
-            self.shibboleth_version = 'v2'
-
-            idpWar = "idp.war"
-            distIdpPath = '%s/%s' % (self.distWarFolder, idpWar)
-            tmpIdpDir = '%s/tmp_idp' % self.distWarFolder
-
-            self.logIt("Unpacking %s..." % idpWar)
-            self.removeDirs(tmpIdpDir)
-            self.createDirs(tmpIdpDir)
-
-            self.run([self.cmd_jar,'xf',distIdpPath], tmpIdpDir)
-
-            self.logIt("Copying files to %s..." % self.idpLibFolder)
-            self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, self.idpLibFolder)
-            self.copyFile("%s/static/idp/lib/jsp-api-2.1.jar" % self.install_dir, self.idpLibFolder)
-            self.copyFile("%s/static/idp/lib/servlet-api-2.5.jar" % self.install_dir, self.idpLibFolder)
-
-            self.removeDirs(tmpIdpDir)
-            
-            # self.idpWarFullPath = '%s/idp.war' % self.idpWarFolder
-
-        if self.installSamlIDP3:
-            self.logIt("Install Saml Shibboleth IDP v3...")
-
-            self.shibboleth_version = 'v3'
 
             print "Downloading Shibboleth IDP v3 war file..."
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
@@ -1630,14 +1581,12 @@ class Setup(object):
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_saml_nameid, self.idp3ConfFolder, self.idp3ConfFolder)
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_services, self.idp3ConfFolder, self.idp3ConfFolder)
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_password_authn, self.idp3ConfFolder + '/authn', self.idp3ConfFolder + '/authn')
-            
-            # load certificates to update metadata 
+
+            # load certificates to update metadata
             self.idp3EncryptionCertificateText = self.load_certificate_text(self.certFolder + '/idp-encryption.crt')
             self.idp3SigningCertificateText = self.load_certificate_text(self.certFolder + '/idp-signing.crt')
             # update IDP3 metadata 
-            self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder) 
-            
-            # self.idp3WarFullPath = '%s/idp.war' % self.idp3WarFolder
+            self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
             
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
@@ -1646,8 +1595,8 @@ class Setup(object):
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
 
-        print "Shibboleth IDP version = %s" % self.shibboleth_version
-        self.logIt('Shibboleth IDP version = %s' % self.shibboleth_version)
+            print "Shibboleth IDP version = %s" % self.shibboleth_version
+            self.logIt('Shibboleth IDP version = %s' % self.shibboleth_version)
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
@@ -1748,7 +1697,7 @@ class Setup(object):
         if self.installOxTrust:
             self.install_oxtrust()
 
-        if self.installSaml or self.installSamlIDP2 or self.installSamlIDP3:
+        if self.installSaml:
             self.install_saml()
 
         if self.installCas:
@@ -1864,16 +1813,6 @@ class Setup(object):
                 self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
 
             if self.installSaml:
-                self.run([self.cmd_mkdir, '-p', self.idpFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpMetadataFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpLogsFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpLibFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpConfFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpSslFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpTempMetadataFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpWarFolder])
-                self.run([self.cmd_mkdir, '-p', self.idpSPFolder])
-                self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.idpFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3Folder])
                 self.run([self.cmd_mkdir, '-p', self.idp3MetadataFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3LogsFolder])
@@ -2407,7 +2346,7 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['oxauth'])
         if self.installOxTrust:
             installedComponents.append(self.jetty_app_configuration['identity'])
-        if self.installSaml or self.installSamlIDP2 or self.installSamlIDP3:
+        if self.installSaml:
             installedComponents.append(self.jetty_app_configuration['idp'])
         if self.installCas:
             installedComponents.append(self.jetty_app_configuration['cas'])
