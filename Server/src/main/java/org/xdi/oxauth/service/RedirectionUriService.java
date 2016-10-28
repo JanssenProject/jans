@@ -6,27 +6,26 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import org.xdi.oxauth.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
-import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -104,35 +103,6 @@ public class RedirectionUriService {
 
         return null;
     }
-
-    public String validatePostLogoutRedirectUri(Optional<SessionState> sessionState, String postLogoutRedirectUri) {
-        if (Strings.isNullOrEmpty(postLogoutRedirectUri) || !sessionState.isPresent()) {
-            return "";
-        }
-
-        final Set<Client> clientsByDns = sessionState.get().getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionState.get().getPermissionGrantedMap().keySet(), true) :
-                Sets.<Client>newHashSet();
-
-        log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {0}", postLogoutRedirectUri);
-
-        for (Client client : clientsByDns) {
-            String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
-            if (postLogoutRedirectUris == null) {
-                continue;
-            }
-
-            for (String uri : postLogoutRedirectUris) {
-                log.debug("Comparing {0} == {1}, clientId: {2}", uri, postLogoutRedirectUri, client.getClientId());
-                if (uri.equals(postLogoutRedirectUri)) {
-                    return postLogoutRedirectUri;
-                }
-            }
-        }
-        log.trace("Unable to find postLogoutRedirectUri = {0}", postLogoutRedirectUri);
-        return "";
-    }
-
 
     public String validatePostLogoutRedirectUri(String clientId, String postLogoutRedirectUri) {
 
