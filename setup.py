@@ -98,7 +98,7 @@ class Setup(object):
         self.os_type = None
         self.os_initdaemon = None
 
-        self.shibboleth_version = None
+        self.shibboleth_version = 'v3'
 
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
@@ -1516,7 +1516,6 @@ class Setup(object):
     def install_saml(self):
         if self.installSaml:
             self.logIt("Install SAML Shibboleth IDP v3...")
-            self.shibboleth_version = 'v3'
             # choose SAML IDP version
             # if self.allowPreReleasedApplications:
             #     saml_version_var = self.choose_from_list(['IDP v2', 'IDP v3'], "Shibboleth IDP version")
@@ -1587,16 +1586,15 @@ class Setup(object):
             self.idp3SigningCertificateText = self.load_certificate_text(self.certFolder + '/idp-signing.crt')
             # update IDP3 metadata 
             self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
-            
+
+            self.idpWarFullPath = '%s/idp.war' % self.idp3WarFolder
+
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
             self.run([self.cmd_java,'-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
             
             # chown -R tomcat:tomcat /opt/shibboleth-idp
             self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
-
-            print "Shibboleth IDP version = %s" % self.shibboleth_version
-            self.logIt('Shibboleth IDP version = %s' % self.shibboleth_version)
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
