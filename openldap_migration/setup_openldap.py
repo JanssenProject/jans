@@ -55,7 +55,9 @@ class SetupOpenLDAP(object):
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapDataDir = '/opt/gluu/data'
         self.o_gluu = '%s/o_gluu.ldif' % self.miniSetupFolder
+        self.o_gluu_temp = '%s/o_gluu.temp' % self.miniSetupFolder
         self.o_site = '%s/o_site.ldif' % self.miniSetupFolder
+        self.o_site_temp = '%s/o_site.temp' % self.miniSetupFolder
 
     def copyFile(self, infile, destfolder):
         try:
@@ -127,9 +129,9 @@ class SetupOpenLDAP(object):
 
     def export_opendj(self):
         logging.info("Exporting all the data from OpenDJ")
-        command = [self.ldif_export, '-n', 'userRoot', '-l', self.o_gluu]
+        command = [self.ldif_export, '-n', 'userRoot', '-l', self.o_gluu_temp]
         self.run(command)
-        command = [self.ldif_export, '-n', 'site', '-l', self.o_site]
+        command = [self.ldif_export, '-n', 'site', '-l', self.o_site_temp]
         self.run(command)
 
     def import_openldap(self):
@@ -141,7 +143,7 @@ class SetupOpenLDAP(object):
         self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', self.o_gluu])
         self.run([cmd, '-b', 'o=site', '-f', config, '-l', self.o_site])
 
-    def get_old_data(self):
+    def get_old_properties(self):
         # grab the old inumOrgFN
         with open('/install/community-edition-setup/setup.properties.last') as ofile:
             for line in ofile:
@@ -156,10 +158,22 @@ class SetupOpenLDAP(object):
                 elif 'ldapPass=' in line:
                     self.ldapPass = line.split('=')[-1].strip()
 
+    def clean_ldif_data(self):
+        with open(self.o_gluu_temp, 'r') as infile:
+            with open(self.o_gluu, 'w') as outfile:
+                for line in infile:
+                    outfile.write(line.replace("lastModifiedTime", "oxLastAccessTime"))
+
+        with open(self.o_site_temp, 'r') as infile:
+            with open(self.o_site, 'w') as outfile:
+                for line in infile:
+                    outfile.write(line.replace("lastModifiedTime", "oxLastAccessTime"))
+
 if __name__ == '__main__':
     setup = SetupOpenLDAP()
-    setup.get_old_data()
+    setup.get_old_properties()
     setup.render_templates()
     setup.configure_openldap()
     setup.export_opendj()
+    setup.clean_ldif_data()
     setup.import_openldap()
