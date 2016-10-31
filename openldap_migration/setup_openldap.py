@@ -146,6 +146,7 @@ class SetupOpenLDAP(object):
 
     def get_old_properties(self):
         # grab the old inumOrgFN
+        logging.info('Scanning setup.properties.last for data')
         with open('/install/community-edition-setup/setup.properties.last') as ofile:
             for line in ofile:
                 if 'inumOrgFN=' in line:
@@ -200,7 +201,8 @@ class SetupOpenLDAP(object):
                 line = re.sub('ox-[\w]+-oid', oid, line, 1, re.IGNORECASE)
                 self.objclasses += 1
             else:
-                print "Unknown line starting: {}".format(line)
+                logging.warning("Skipping Line: {}".format(line))
+                line = ""
 
             output += line
 
@@ -208,12 +210,21 @@ class SetupOpenLDAP(object):
         return output
 
     def create_user_schema(self):
+        logging.info('Converting existing custom attributes to OpenLDAP schema')
         schema_99 = '/opt/opendj/config/schema/99-user.ldif'
         schema_100 = '/opt/opendj/config/schema/100-user.ldif'
+        new_user = '%s/new_99.ldif' % self.miniSetupFolder
+
+        with open(schema_99, 'r') as olduser:
+            with open(new_user, 'w') as newuser:
+                for line in olduser:
+                    if re.match('SUP top', line):
+                        line = re.sub('SUP top', 'SUP gluuPerson', line)
+                    newuser.write(line)
 
         outfile = open('%s/user.schema' % self.outputFolder, 'w')
         output = self.convert_schema(schema_100)
-        output = output + "\n" + self.convert_schema(schema_99)
+        output = output + "\n" + self.convert_schema(new_user)
         outfile.write(output)
         outfile.close()
 
