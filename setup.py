@@ -920,11 +920,11 @@ class Setup(object):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'redhat']:
             if self.os_initdaemon == 'systemd':
-                self.run(["/usr/bin/systemctl", 'enable', service])
+                self.run(["/usr/bin/systemctl", 'enable', serviceName])
             else:
-                self.run(["/sbin/chkconfig", service, "on"])
+                self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", service, 'enable'])
+            self.run(["/usr/sbin/update-rc.d", serviceName, 'enable'])
             
         serviceConfiguration['installed'] = True
 
