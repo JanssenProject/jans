@@ -208,8 +208,8 @@ class SetupOpenLDAP(object):
         return output
 
     def create_user_schema(self):
-        schema_99 = '/opt/opendj/config/schema/99-user.schema'
-        schema_100 = '/opt/opendj/config/schema/100-user.schema'
+        schema_99 = '/opt/opendj/config/schema/99-user.ldif'
+        schema_100 = '/opt/opendj/config/schema/100-user.ldif'
 
         outfile = open('%s/user.schema' % self.outputFolder, 'w')
         output = self.convert_schema(schema_100)
