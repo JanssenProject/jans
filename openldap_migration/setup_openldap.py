@@ -218,8 +218,8 @@ class SetupOpenLDAP(object):
         with open(schema_99, 'r') as olduser:
             with open(new_user, 'w') as newuser:
                 for line in olduser:
-                    if re.match('SUP top', line):
-                        line = re.sub('SUP top', 'SUP gluuPerson', line)
+                    if 'SUP top' in line:
+                        line = line.replace('SUP top', 'SUP gluuPerson')
                     newuser.write(line)
 
         outfile = open('%s/user.schema' % self.outputFolder, 'w')
