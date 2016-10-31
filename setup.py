@@ -2099,15 +2099,19 @@ class Setup(object):
         self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None, env=None):
+    def run(self, args, cwd=None, env=None, useWait=False):
         self.logIt('Running: %s' % ' '.join(args))
         try:
             p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
-            output, err = p.communicate()
-            if output:
-                self.logIt(output)
-            if err:
-                self.logIt(err, True)
+            if useWait:
+                code = p.wait()
+                self.logIt('Run: %s with result code: %d' % (' '.join(args), code) )
+            else:
+                output, err = p.communicate()
+                if output:
+                    self.logIt(output)
+                if err:
+                    self.logIt(err, True)
         except:
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
@@ -2280,9 +2284,9 @@ class Setup(object):
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
                     if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                       self.run([service_path, 'start', applicationName])
+                       self.run([service_path, 'start', applicationName, None, None, True])
                     else:
-                       self.run([service_path, applicationName, 'start'])
+                       self.run([service_path, applicationName, 'start', None, None, True])
         except:
             self.logIt("Error starting Jetty services")
             self.logIt(traceback.format_exc(), True)
