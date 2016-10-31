@@ -107,31 +107,38 @@ class Setup(object):
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
-                            'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096}
+                            'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096},
+                            'installed' : False
             },
                 'identity' : {'name' : 'identity',
                               'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                              'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048}
+                              'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048},
+                              'installed' : False
             },
                 'idp' : {'name' : 'idp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'installed' : False
             },
                 'asimba' : {'name' : 'asimba',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'installed' : False
             },
                 'cas' : {'name' : 'cas',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'installed' : False
             },
                 'credmgr' : {'name' : 'credmgr',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'installed' : False
             },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512}
+                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512},
+                         'installed' : False
             }
         }
 
@@ -908,10 +915,18 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-            print "jetty service installation not suppoorted"
-        else:
-            self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
+        self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
+        
+        # Enable service autoload on Gluu-Server startup
+        if self.os_type in ['centos', 'fedora', 'redhat']:
+            if self.os_initdaemon == 'systemd':
+                self.run(["/usr/bin/systemctl", 'enable', service])
+            else:
+                self.run(["/sbin/chkconfig", service, "on"])
+        elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", service, 'enable'])
+            
+        serviceConfiguration['installed'] = True
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
@@ -2259,6 +2274,18 @@ class Setup(object):
             self.logIt("Error starting tomcat")
             self.logIt(traceback.format_exc(), True)
 
+        # Jetty services
+        try:
+            # Iterate through all components and start installed            
+            for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                   self.run([service_path, 'start', applicationName])
+                else:
+                   self.run([service_path, applicationName, 'start'])
+        except:
+            self.logIt("Error starting Jetty services")
+            self.logIt(traceback.format_exc(), True)
+
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
             
@@ -2340,18 +2367,10 @@ class Setup(object):
         installedComponents = []
         allowedApplicationsMemory = {}
 
-        if self.installOxAuth:
-            installedComponents.append(self.jetty_app_configuration['oxauth'])
-        if self.installOxTrust:
-            installedComponents.append(self.jetty_app_configuration['identity'])
-        if self.installSaml:
-            installedComponents.append(self.jetty_app_configuration['idp'])
-        if self.installCas:
-            installedComponents.append(self.jetty_app_configuration['cas'])
-        if self.installAsimba:
-            installedComponents.append(self.jetty_app_configuration['asimba'])
-        if self.installOxAuthRP:
-            installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
+        # Iterate through all components into order to prepare array with installed components            
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+            if applicationConfiguration['installed']:
+                installedComponents.append(applicationConfiguration)
             
         usedRatio = 0.0
         for installedComponent in installedComponents:
@@ -2368,7 +2387,7 @@ class Setup(object):
 
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
 
-        #Iterate through all components into order to prepare all keys            
+        # Iterate through all components into order to prepare all keys            
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if allowedApplicationsMemory.has_key(applicationName):
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
