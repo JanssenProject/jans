@@ -190,14 +190,14 @@ class SetupOpenLDAP(object):
                 line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
                               re.IGNORECASE)
                 oid = 'oxAttribute:' + str(self.attrs+1)
-                line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                line = re.sub('\s[\d]+\s', oid, line, 1, re.IGNORECASE)
                 self.attrs += 1
             # Change the keyword for objectclass
             elif re.match('^objectClasses:\s', line, re.IGNORECASE):
                 line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
                               re.IGNORECASE)
                 oid = 'oxObjectClass:' + str(self.objclasses+1)
-                line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                line = re.sub('ox-[\w]+-oid', oid, line, 1, re.IGNORECASE)
                 self.objclasses += 1
             else:
                 print "Unknown line starting: {}".format(line)
