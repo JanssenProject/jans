@@ -2019,7 +2019,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def render_templates_folder(self, templatesFolder):
-        self.logIt("Rendering templates folder: %s", templatesFolder)
+        self.logIt("Rendering templates folder: %s" % templatesFolder)
         
         for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
             for templateFile in templateFiles:
@@ -2278,10 +2278,11 @@ class Setup(object):
         try:
             # Iterate through all components and start installed            
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                   self.run([service_path, 'start', applicationName])
-                else:
-                   self.run([service_path, applicationName, 'start'])
+                if applicationConfiguration['installed']:
+                    if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                       self.run([service_path, 'start', applicationName])
+                    else:
+                       self.run([service_path, applicationName, 'start'])
         except:
             self.logIt("Error starting Jetty services")
             self.logIt(traceback.format_exc(), True)
