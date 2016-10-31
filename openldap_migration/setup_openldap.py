@@ -5,6 +5,7 @@ import logging
 import shutil
 import traceback
 import subprocess
+import re
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
@@ -59,6 +60,9 @@ class SetupOpenLDAP(object):
         self.o_site = '%s/o_site.ldif' % self.miniSetupFolder
         self.o_site_temp = '%s/o_site.temp' % self.miniSetupFolder
 
+        self.attrs = 1000
+        self.objclasses = 1000
+
     def copyFile(self, infile, destfolder):
         try:
             shutil.copy(infile, destfolder)
@@ -86,9 +90,6 @@ class SetupOpenLDAP(object):
                             self.outputFolder)
         # 2. symas-openldap.conf
         self.renderTemplate(self.openldapSymasConf, self.templateFolder,
-                            self.outputFolder)
-        # 3. user.schema
-        self.renderTemplate(self.user_schema, self.templateFolder,
                             self.outputFolder)
 
     # args = command + args, i.e. ['ls', '-ltr']
@@ -169,9 +170,58 @@ class SetupOpenLDAP(object):
                 for line in infile:
                     outfile.write(line.replace("lastModifiedTime", "oxLastAccessTime"))
 
+    def convert_schema(self, f):
+        infile = open(f, 'r')
+        output = ""
+
+        for line in infile:
+            if re.match('^dn:', line) or re.match('^objectClass:', line) or \
+                    re.match('^cn:', line):
+                continue
+            # empty lines and the comments are copied as such
+            if re.match('^#', line) or re.match('^\s*$', line):
+                pass
+            elif re.match('^\s\s', line):  # change the space indendation to tabs
+                line = re.sub('^\s\s', '\t', line)
+            elif re.match('^\s', line):
+                line = re.sub('^\s', '\t', line)
+            # Change the keyword for attributetype
+            elif re.match('^attributeTypes:\s', line, re.IGNORECASE):
+                line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
+                              re.IGNORECASE)
+                oid = 'oxAttribute:' + str(self.attrs+1)
+                line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                self.attrs += 1
+            # Change the keyword for objectclass
+            elif re.match('^objectClasses:\s', line, re.IGNORECASE):
+                line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
+                              re.IGNORECASE)
+                oid = 'oxObjectClass:' + str(self.objclasses+1)
+                line = re.sub('[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                self.objclasses += 1
+            else:
+                print "Unknown line starting: {}".format(line)
+
+            output += line
+
+        infile.close()
+        return output
+
+    def create_user_schema(self):
+        schema_99 = '/opt/opendj/config/schema/99-user.schema'
+        schema_100 = '/opt/opendj/config/schema/100-user.schema'
+
+        outfile = open('%s/user.schema' % self.outputFolder, 'w')
+        output = self.convert_schema(schema_100)
+        output = output + "\n" + self.convert_schema(schema_99)
+        outfile.write(output)
+        outfile.close()
+
+
 if __name__ == '__main__':
     setup = SetupOpenLDAP()
     setup.get_old_properties()
+    setup.create_user_schema()
     setup.render_templates()
     setup.configure_openldap()
     setup.export_opendj()
