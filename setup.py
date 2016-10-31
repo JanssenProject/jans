@@ -2367,10 +2367,18 @@ class Setup(object):
         installedComponents = []
         allowedApplicationsMemory = {}
 
-        # Iterate through all components into order to prepare array with installed components            
-        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-            if applicationConfiguration['installed']:
-                installedComponents.append(applicationConfiguration)
+        if self.installOxAuth:
+            installedComponents.append(self.jetty_app_configuration['oxauth'])
+        if self.installOxTrust:
+            installedComponents.append(self.jetty_app_configuration['identity'])
+        if self.installSaml:
+            installedComponents.append(self.jetty_app_configuration['idp'])
+        if self.installCas:
+            installedComponents.append(self.jetty_app_configuration['cas'])
+        if self.installAsimba:
+            installedComponents.append(self.jetty_app_configuration['asimba'])
+        if self.installOxAuthRP:
+            installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
             
         usedRatio = 0.0
         for installedComponent in installedComponents:
