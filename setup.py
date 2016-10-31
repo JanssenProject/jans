@@ -924,7 +924,7 @@ class Setup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", serviceName, 'enable'])
+            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
             
         serviceConfiguration['installed'] = True
 
