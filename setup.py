@@ -2284,9 +2284,9 @@ class Setup(object):
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
                     if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                       self.run([service_path, 'start', applicationName, None, None, True])
+                       self.run([service_path, 'start', applicationName], None, None, True)
                     else:
-                       self.run([service_path, applicationName, 'start', None, None, True])
+                       self.run([service_path, applicationName, 'start'], None, None, True)
         except:
             self.logIt("Error starting Jetty services")
             self.logIt(traceback.format_exc(), True)
