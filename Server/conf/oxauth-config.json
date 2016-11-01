@@ -43,7 +43,7 @@
         "public",
         "pairwise"
     ],
-    "defaultSubjectType": "public",
+    "defaultSubjectType": "pairwise",
     "userInfoSigningAlgValuesSupported":[
         "HS256",
         "HS384",
