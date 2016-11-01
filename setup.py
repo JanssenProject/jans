@@ -2380,9 +2380,9 @@ class Setup(object):
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
     def setup_openldap_logging(self):
-        self.run([self.mkdir, '-p', self.openldapLogDir])
+        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
         if not os.path.isdir('/etc/rsyslog.d/'):
-            self.run([self.mkdir, '-p', '/etc/rsyslog.d/'])
+            self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
 
     def install_ldap_server(self):
