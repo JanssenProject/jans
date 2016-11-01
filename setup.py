@@ -290,6 +290,8 @@ class Setup(object):
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
+        self.openldapLogDir = "/var/log/openldap/"
+        self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
 
 
         # Stuff that gets rendered; filname is necessary. Full path should
@@ -2377,6 +2379,12 @@ class Setup(object):
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
+    def setup_openldap_logging(self):
+        self.run([self.mkdir, '-p', self.openldapLogDir])
+        if not os.path.isdir('/etc/rsyslog.d/'):
+            self.run([self.mkdir, '-p', '/etc/rsyslog.d/'])
+        self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
+
     def install_ldap_server(self):
         self.logIt("Running LDAP Setup")
         if installObject.ldap_type is 'opendj':
@@ -2388,6 +2396,7 @@ class Setup(object):
             installObject.export_opendj_public_cert()
             installObject.deleteLdapPw()
         elif installObject.ldap_type is 'openldap':
+            installObject.setup_openldap_logging()
             installObject.install_openldap()
             installObject.configure_openldap()
             installObject.import_ldif_openldap()
