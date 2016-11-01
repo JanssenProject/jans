@@ -1920,6 +1920,7 @@ class Setup(object):
 
             if option == 1:
                 self.ldap_type = 'openldap'
+                self.ldap_binddn = 'cn=directory manager,o=gluu'
             elif option == 2:
                 self.ldap_type = 'opendj'
         else:
