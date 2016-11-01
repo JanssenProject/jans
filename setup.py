@@ -67,6 +67,8 @@ class Setup(object):
         self.cmd_chmod = '/bin/chmod'
         self.cmd_chown = '/bin/chown'
         self.cmd_mkdir = '/bin/mkdir'
+        self.cmd_rpm = '/bin/rpm'
+        self.cmd_dpkg = '/usr/bin/dpkg'
         self.opensslCommand = '/usr/bin/openssl'
 
         # java commands
@@ -2323,6 +2325,33 @@ class Setup(object):
         except:
             self.logIt("Error writing temporary LDAP password.")
 
+    def install_openldap(self):
+        self.logIt("Installing OpenLDAP from package")
+
+        # Determine package type 
+        packageRpm = True
+        packageExtension = ".rpm"
+        if self.os_type in ['debian', 'ubuntu']:
+            packageRpm = False
+            packageExtension = ".deb"
+        
+        openLdapDistFolder = "%s/%s" % (self.distFolder, "symas")
+
+        # Find package
+        packageName = None
+        for file in os.listdir(openLdapDistFolder):
+            if file.endswith(packageExtension):
+                packageName = "%s/%s" % ( openLdapDistFolder, file )
+                
+        if packageName == None:
+            raise Exception('Failed to find OpenLDAP package in folder %s !' % directory)
+
+        self.logIt("Found package '%s' for install" % packageName)
+        if packageRpm:
+           self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+        else:
+           self.run([self.cmd_dpkg, '--install', packageName])
+
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
         # 1. Copy the conf files to
@@ -2363,6 +2392,7 @@ class Setup(object):
             installObject.export_opendj_public_cert()
             installObject.deleteLdapPw()
         elif installObject.ldap_type is 'openldap':
+            installObject.install_openldap()
             installObject.configure_openldap()
             installObject.import_ldif_openldap()
 
