@@ -83,9 +83,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
 		// Add object classes
-		for (String objectClass : objectClasses) {
-			attributes.add(new AttributeData(OBJECT_CLASS, objectClass));
-		}
+		attributes.add(new AttributeData(OBJECT_CLASS, objectClasses));
 
 		log.debug(String.format("LDAP attributes for persist: %s", attributes));
 
