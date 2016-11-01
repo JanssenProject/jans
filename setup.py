@@ -287,7 +287,6 @@ class Setup(object):
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
-        self.openldapPassHash = None
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
@@ -974,10 +973,6 @@ class Setup(object):
         self.logIt("Encoding passwords")
         try:
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
-            # Alternate for openldap
-            if self.ldap_type is 'openldap':
-                cmd = os.path.join(self.openldapBinFolder, "slappasswd") + " -s " + self.ldapPass
-                self.openldapPassHash = os.popen(cmd).read().strip()
 
             cmd = "%s %s" % (self.oxEncodePWCommand, self.shibJksPass)
             self.encoded_shib_jks_pw = os.popen(cmd, 'r').read().strip()
