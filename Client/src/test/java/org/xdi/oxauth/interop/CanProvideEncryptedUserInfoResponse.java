@@ -29,14 +29,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Provide Encrypted UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version July 29, 2016
+ * @version November 2, 2016
  */
 public class CanProvideEncryptedUserInfoResponse extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgA128KWEncA128GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response A128KW A128GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -47,6 +48,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -105,10 +107,11 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgA256KWEncA256GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response A256KW A256GCM");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -119,6 +122,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -177,12 +181,13 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA1_5 A128CBC_PLUS_HS256");
 
@@ -195,6 +200,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -258,12 +264,13 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA1_5 A256CBC_PLUS_HS512");
 
@@ -276,6 +283,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -339,12 +347,13 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted UserInfo Response RSA_OAEP A256GCM");
 
@@ -357,6 +366,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
