@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Parameters;
@@ -19,7 +25,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
 
 /**
  * @author Javier Rojas Blum
- * @version September 23, 2016
+ * @version November 2, 2016
  */
 public class ClientWhiteListBlackListRedirectUris extends BaseTest {
 
@@ -67,13 +73,14 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestClientAssociate(final String redirectUris) throws Exception {
+    public void requestClientAssociate(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientAssociate");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

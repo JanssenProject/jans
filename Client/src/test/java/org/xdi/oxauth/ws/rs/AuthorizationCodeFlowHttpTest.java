@@ -13,6 +13,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -33,10 +34,9 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version May 24, 2016
+ * @version November 2, 2016
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
-
 
     /**
      * Test for the complete Authorization Code Flow.
@@ -600,6 +600,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
