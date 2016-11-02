@@ -31,16 +31,17 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 4, 2016
+ * @version November 2, 2016
  */
 public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
     private String clientId;
     private String customAttrValue1;
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestClientRegistrationWithCustomAttributes(final String redirectUris) throws Exception {
+    public void requestClientRegistrationWithCustomAttributes(
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientRegistrationWithCustomAttributes");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -52,6 +53,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
 

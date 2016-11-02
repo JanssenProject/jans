@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version June 15, 2016
+ * @version November 2, 2016
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -41,14 +41,18 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     private String registrationAccessToken1;
     private String registrationClientUri1;
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestClientAssociate1(final String redirectUris) throws Exception {
+    public void requestClientAssociate1(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientAssociate1");
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
@@ -226,11 +230,12 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get("scopes"));
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
     // ATTENTION : uncomment test annotation only if 112-customAttributes.ldif (located in server test resources)
     // is loaded by ldap server.
-    public void requestClientRegistrationWithCustomAttributes(final String redirectUris) throws Exception {
+    public void requestClientRegistrationWithCustomAttributes(
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientRegistrationWithCustomAttributes");
 
         final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -239,6 +244,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         // custom attribute must be declared in oxauth-config.xml in dynamic-registration-custom-attribute tag
         request.addCustomAttribute("myCustomAttr1", "customAttrValue1");
         request.addCustomAttribute("myCustomAttr2", "customAttrValue2");
+        request.setSectorIdentifierUri(sectorIdentifierUri);
 
         final RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(request);
@@ -324,10 +330,14 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
         redirectUriList.add("myschema://client.example.com/cb"); // URI with custom schema
 
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
+                redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setExecutor(clientExecutor(true));
-        RegisterResponse response = registerClient.execRegister(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
-                redirectUriList);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());

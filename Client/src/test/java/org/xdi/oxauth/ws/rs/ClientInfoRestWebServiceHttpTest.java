@@ -27,14 +27,15 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Client Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 2, 2016
  */
 public class ClientInfoRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestClientInfoImplicitFlow(final String userId, final String userSecret,
-                                              final String redirectUris, final String redirectUri) throws Exception {
+    public void requestClientInfoImplicitFlow(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientInfoImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -45,6 +46,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -102,15 +104,16 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("oxAuthScope"), "Unexpected result: oxAuthScope not found");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestClientInfoPasswordFlow(
-            final String userId, final String userSecret, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestClientInfoPasswordFlow");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
