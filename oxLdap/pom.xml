@@ -3,11 +3,6 @@
     <artifactId>oxLdap</artifactId>
     <packaging>jar</packaging>
     <name>oxLdap</name>
-
-    <scm>
-        <developerConnection>scm:svn:file:///c:/sourcecontrol/gluu/openxdi_release_trunk/oxCore/tags/oxCore-0.1.5/oxCore-0.1.4
-        </developerConnection>
-    </scm>
     
     <parent>
         <groupId>org.xdi</groupId>

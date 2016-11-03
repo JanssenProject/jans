@@ -52,6 +52,7 @@
         <module>oxUtil</module>
         <module>oxLdap</module>
         <module>oxLdap-annotations</module>
+        <module>oxLdapSample</module>
         <module>oxModel</module>
         <module>oxSaml</module>
         <module>oxService</module>
@@ -97,12 +98,12 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.4.2</version>
+                <version>1.7.2</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
-                <version>1.4.2</version>
+                <version>1.7.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
