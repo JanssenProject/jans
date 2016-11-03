@@ -13,6 +13,7 @@ import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -33,10 +34,9 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version May 24, 2016
+ * @version November 3, 2016
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
-
 
     /**
      * Test for the complete Authorization Code Flow.
@@ -217,11 +217,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString("work_phone"));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizationCodeFlowWithOptionalNonce(final String userId, final String userSecret,
-                                                       final String redirectUris,
-                                                       final String redirectUri) throws Exception {
+    public void authorizationCodeFlowWithOptionalNonce(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeFlowWithOptionalNonce");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -232,6 +232,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -331,10 +332,10 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
      * When an authorization code is used more than once, all the tokens issued
      * for that authorization code must be revoked.
      */
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void revokeTokens(final String userId, final String userSecret, final String redirectUris,
-                             final String redirectUri) throws Exception {
+                             final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("revokeTokens");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -345,6 +346,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -600,6 +602,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
