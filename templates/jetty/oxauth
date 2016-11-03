@@ -5,5 +5,5 @@ JAVA_OPTIONS="-server -Xms256m -Xmx%(oxauth_max_mem)sm -XX:+DisableExplicitGC -D
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/oxauth
 JETTY_USER=jetty
-JETTY_ARGS="jetty.http.port=8081 jetty.ssl.port=8444"
+JETTY_ARGS="jetty.http.port=8081"
 TMPDIR=%(jetty_dist)s/temp
