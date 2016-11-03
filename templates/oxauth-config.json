@@ -43,7 +43,7 @@
         "public",
         "pairwise"
     ],
-    "defaultSubjectType": "public",
+    "defaultSubjectType": "pairwise",
     "userInfoSigningAlgValuesSupported":[
         "HS256",
         "HS384",
@@ -215,7 +215,7 @@
     "imgLocation":"",
     "metricReporterInterval":300,
     "metricReporterKeepDataDays":15,
-    "pairwiseIdType":"persistent",
+    "pairwiseIdType":"algorithmic",
     "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
     "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
     "webKeysStorage": "keystore",
