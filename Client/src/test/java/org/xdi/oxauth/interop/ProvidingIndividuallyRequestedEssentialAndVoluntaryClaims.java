@@ -34,14 +34,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing Individually Requested Essential and Voluntary Claims
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version November 3, 2016
  */
 public class ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void providingIndividuallyRequestedEssentialAndVoluntaryClaims(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Providing Individually Requested Essential and Voluntary Claims");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -50,6 +51,7 @@ public class ProvidingIndividuallyRequestedEssentialAndVoluntaryClaims extends B
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
