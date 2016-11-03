@@ -30,15 +30,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Verifies Correct c hash when Code Flow Used
  *
  * @author Javier Rojas Blum
- * @version June 22, 2015
+ * @version November 3, 2016
  */
 public class VerifiesCorrectCHashWhenCodeFlowUsed extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void verifiesCorrectCHashWhenCodeFlowUsed(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Verifies Correct c hash when Code Flow Used");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -49,6 +49,7 @@ public class VerifiesCorrectCHashWhenCodeFlowUsed extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

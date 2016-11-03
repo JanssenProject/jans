@@ -24,18 +24,20 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version November 2, 2016
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris", "userInum", "userEmail"})
+    @Parameters({"redirectUris", "userInum", "userEmail", "sectorIdentifierUri"})
     @Test
-    public void requestAccessTokenCustomAuth1(final String redirectUris, final String userInum, final String userEmail) throws Exception {
+    public void requestAccessTokenCustomAuth1(
+            final String redirectUris, final String userInum, final String userEmail, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenCustomAuth1");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -74,15 +76,16 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void requestAccessTokenCustomAuth2(final String redirectUris, final String userId,
-                                              final String userSecret) throws Exception {
+    public void requestAccessTokenCustomAuth2(
+            final String redirectUris, final String userId, final String userSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenCustomAuth2");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -121,14 +124,16 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "userInum", "userEmail"})
+    @Parameters({"redirectUris", "userInum", "userEmail", "sectorIdentifierUri"})
     @Test
-    public void requestAccessTokenCustomAuth3(final String redirectUris, final String userInum, final String userEmail) throws Exception {
+    public void requestAccessTokenCustomAuth3(
+            final String redirectUris, final String userInum, final String userEmail, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenCustomAuth3");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -167,15 +172,16 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestAccessTokenCustomAuth4(final String userId, final String userSecret,
-                                              final String redirectUris) throws Exception {
+    public void requestAccessTokenCustomAuth4(
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenCustomAuth4");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -218,9 +224,11 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         assertNotNull(response1.getIdToken(), "The id token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "sectorIdentifierUri"})
     @Test
-    public void requestAccessTokenCustomAuth5(final String redirectUris, final String redirectUri, final String userInum, final String userEmail) throws Exception {
+    public void requestAccessTokenCustomAuth5(
+            final String redirectUris, final String redirectUri, final String userInum, final String userEmail,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenCustomAuth5");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -232,6 +240,7 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

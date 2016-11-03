@@ -34,15 +34,16 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing ID Token with Essential auth time Claim
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version November 3, 2016
  */
 public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void providingIdTokenWithEssentialAuthTimeClaim(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Providing ID Token with Essential auth time Claim");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -51,6 +52,7 @@ public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

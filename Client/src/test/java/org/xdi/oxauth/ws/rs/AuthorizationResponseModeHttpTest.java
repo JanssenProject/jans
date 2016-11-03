@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Parameters;
@@ -18,14 +24,15 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version November 2, 2016
  */
 public class AuthorizationResponseModeHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeBasicCode(final String userId, final String userSecret,
-                                             final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeBasicCode(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -34,6 +41,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -65,10 +73,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeBasicCode(final String userId, final String userSecret,
-                                              final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeBasicCode(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -77,6 +86,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -109,10 +119,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeBasicCode(final String userId, final String userSecret,
-                                           final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeBasicCode(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -121,6 +132,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -153,10 +165,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeBasicCode(final String userId, final String userSecret,
-                                              final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeBasicCode(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -165,6 +178,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -194,10 +208,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertEquals(authorizationResponse.getResponseMode(), ResponseMode.FORM_POST);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeImplicitIdToken(final String userId, final String userSecret,
-                                                   final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeImplicitIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -206,6 +221,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -238,10 +254,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeImplicitIdToken(final String userId, final String userSecret,
-                                                    final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeImplicitIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -250,6 +267,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -283,10 +301,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeImplicitIdToken(final String userId, final String userSecret,
-                                                 final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeImplicitIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -295,6 +314,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -328,10 +348,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeImplicitIdToken(final String userId, final String userSecret,
-                                                    final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeImplicitIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -340,6 +361,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -370,10 +392,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertEquals(authorizationResponse.getResponseMode(), ResponseMode.FORM_POST);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeImplicitIdTokenToken(final String userId, final String userSecret,
-                                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeImplicitIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -382,6 +405,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -415,10 +439,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeImplicitIdTokenToken(final String userId, final String userSecret,
-                                                         final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeImplicitIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -427,6 +452,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -461,10 +487,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeImplicitIdTokenToken(final String userId, final String userSecret,
-                                                      final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeImplicitIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -473,6 +500,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -507,10 +535,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeImplicitIdTokenToken(final String userId, final String userSecret,
-                                                         final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeImplicitIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -519,6 +548,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -549,10 +579,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertEquals(authorizationResponse.getResponseMode(), ResponseMode.FORM_POST);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeHybridCodeIdToken(final String userId, final String userSecret,
-                                                     final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeHybridCodeIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -561,6 +592,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -594,10 +626,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeHybridCodeIdToken(final String userId, final String userSecret,
-                                                      final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeHybridCodeIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -606,6 +639,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -640,10 +674,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeHybridCodeIdToken(final String userId, final String userSecret,
-                                                   final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeHybridCodeIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -652,6 +687,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -686,10 +722,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeHybridCodeIdToken(final String userId, final String userSecret,
-                                                      final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeHybridCodeIdToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -698,6 +735,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -728,10 +766,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertEquals(authorizationResponse.getResponseMode(), ResponseMode.FORM_POST);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeHybridCodeIdTokenToken(final String userId, final String userSecret,
-                                                          final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeHybridCodeIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -740,6 +779,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -774,10 +814,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeHybridCodeIdTokenToken(final String userId, final String userSecret,
-                                                           final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeHybridCodeIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -786,6 +827,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -821,10 +863,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeHybridCodeIdTokenToken(final String userId, final String userSecret,
-                                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeHybridCodeIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -833,6 +876,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -868,10 +912,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeHybridCodeIdTokenToken(final String userId, final String userSecret,
-                                                           final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeHybridCodeIdTokenToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
@@ -880,6 +925,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -910,10 +956,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertEquals(authorizationResponse.getResponseMode(), ResponseMode.FORM_POST);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void defaultResponseModeHybridCodeToken(final String userId, final String userSecret,
-                                                   final String redirectUris, final String redirectUri) throws Exception {
+    public void defaultResponseModeHybridCodeToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
@@ -922,6 +969,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -955,10 +1003,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void fragmentResponseModeHybridCodeToken(final String userId, final String userSecret,
-                                                    final String redirectUris, final String redirectUri) throws Exception {
+    public void fragmentResponseModeHybridCodeToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("fragmentResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
@@ -967,6 +1016,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1001,10 +1051,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void queryResponseModeHybridCodeToken(final String userId, final String userSecret,
-                                                 final String redirectUris, final String redirectUri) throws Exception {
+    public void queryResponseModeHybridCodeToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("queryResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
@@ -1013,6 +1064,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1047,10 +1099,11 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState());
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void formPostResponseModeHybridCodeToken(final String userId, final String userSecret,
-                                                    final String redirectUris, final String redirectUri) throws Exception {
+    public void formPostResponseModeHybridCodeToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("formPostResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
@@ -1059,6 +1112,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
