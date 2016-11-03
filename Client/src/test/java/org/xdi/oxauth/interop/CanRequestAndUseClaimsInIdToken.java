@@ -33,15 +33,16 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Request and Use Claims in id token
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version November 3, 2016
  */
 public class CanRequestAndUseClaimsInIdToken extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canRequestAndUseClaimsInIdToken(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Claims in id token");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -51,6 +52,7 @@ public class CanRequestAndUseClaimsInIdToken extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

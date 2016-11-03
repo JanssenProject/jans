@@ -30,14 +30,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Support Requests Containing nonce
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class SupportRequestsContainingNonce extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
-    public void supportRequestsContainingNonce(final String userId, final String userSecret, final String redirectUri,
-                                               final String redirectUris) throws Exception {
+    public void supportRequestsContainingNonce(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Support Requests Containing nonce");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -46,6 +47,7 @@ public class SupportRequestsContainingNonce extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
