@@ -6,38 +6,12 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
@@ -47,19 +21,27 @@ import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+
 /**
  * Functional tests for Authorize Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9, 05/28/2014
+ * @version October 31, 2016
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCode(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -68,6 +50,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -122,11 +105,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -135,6 +118,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -195,11 +179,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeNoRedirection(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeNoRedirection");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -208,6 +192,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -288,10 +273,10 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeFail2(
-            final String userId, final String userSecret, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeFail2");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -300,6 +285,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -386,11 +372,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationToken(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -399,6 +385,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -456,11 +443,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -469,6 +456,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -557,11 +545,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenFail2(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenFail2");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -570,6 +558,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -631,11 +620,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenIdToken(
             final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -646,6 +635,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -725,11 +715,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenIdTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenIdTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -740,6 +730,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -825,11 +816,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeIdToken(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -840,6 +831,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -918,11 +910,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeIdTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeIdTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -933,6 +925,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1017,11 +1010,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenCode(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenCode");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1032,6 +1025,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1088,11 +1082,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenCodeUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenCodeUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1103,6 +1097,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1165,11 +1160,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenCodeIdToken(
             final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1181,6 +1176,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1264,11 +1260,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationTokenCodeIdTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationTokenCodeIdTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1280,6 +1276,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1369,11 +1366,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationIdToken(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -1382,6 +1379,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1436,11 +1434,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationIdTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationIdTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -1449,6 +1447,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1509,11 +1508,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationWithoutScope(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationWithoutScope");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -1524,6 +1523,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1585,11 +1585,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptNone(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptNone");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1598,6 +1598,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1657,10 +1658,10 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri"})
+    @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptNoneFail(
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptNoneFail");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1669,6 +1670,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1727,11 +1729,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptLogin(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptLogin");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1740,6 +1742,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1795,11 +1798,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptConsent(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1808,6 +1811,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1863,11 +1867,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptConsentTrustedClient(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptConsentTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1876,6 +1880,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1932,11 +1937,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptLoginConsent(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptLoginConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1945,6 +1950,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2001,11 +2007,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptLoginConsentTrustedClient(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptLoginConsentTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2014,6 +2020,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -2071,11 +2078,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationPromptNoneLoginConsentFail(
             final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationPromptLoginConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2084,6 +2091,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2193,6 +2201,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", redirectUriList);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2229,15 +2238,16 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret"})
+    @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationCodeWithoutRedirectUriFail(
-            final String redirectUris, final String userId, final String userSecret) throws Exception {
+            final String redirectUris, final String userId, final String userSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeWithoutRedirectUriFail");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2272,11 +2282,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationAccessToken(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationAccessToken");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -2288,6 +2298,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2399,11 +2410,11 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response3.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationAccessTokenUserBasicAuth(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationAccessTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -2415,6 +2426,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2531,10 +2543,10 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response3.getRefreshToken(), "The refresh token is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri"})
+    @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestAuthorizationAccessTokenFail(
-            final String redirectUris, final String redirectUri) throws Exception {
+            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationAccessTokenFail");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -2545,6 +2557,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

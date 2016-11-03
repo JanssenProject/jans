@@ -30,14 +30,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Rejects Incorrect at hash when Implicit Flow Used
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class RejectsIncorrectAtHashWhenImplicitFlowUsed extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void rejectsIncorrectAtHashWhenImplicitFlowUsed(final String userId, final String userSecret,
-                                                           final String redirectUris, final String redirectUri) throws Exception {
+    public void rejectsIncorrectAtHashWhenImplicitFlowUsed(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Rejects Incorrect at hash when Implicit Flow Used");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -48,6 +49,7 @@ public class RejectsIncorrectAtHashWhenImplicitFlowUsed extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

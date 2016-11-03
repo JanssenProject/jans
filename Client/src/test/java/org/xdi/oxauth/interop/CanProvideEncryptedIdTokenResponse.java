@@ -32,14 +32,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Provide Encrypted ID Token Response
  *
  * @author Javier Rojas Blum
- * @version July 29, 2016
+ * @version November 2, 2016
  */
 public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgA128KWEncA128GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response A128KW A128GCM");
 
@@ -51,6 +52,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -103,10 +105,11 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgA256KWEncA256GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response A256KW A256GCM");
 
@@ -118,6 +121,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -170,12 +174,13 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA1_5 A128CBC_PLUS_HS256");
 
@@ -188,6 +193,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -242,12 +248,13 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA1_5 A256CBC_PLUS_HS512");
 
@@ -260,6 +267,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -314,12 +322,13 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
+            "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
-            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret) {
+            final String jwksUri, final String keyId, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) {
         try {
             showTitle("OC5:FeatureTest-Can Provide Encrypted ID Token Response RSA_OAEP A256GCM");
 
@@ -332,6 +341,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setJwksUri(jwksUri);
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
