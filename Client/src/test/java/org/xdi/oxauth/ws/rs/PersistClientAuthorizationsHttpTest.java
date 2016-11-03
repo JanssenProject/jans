@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Parameters;
@@ -20,14 +26,15 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version November 3, 2016
  */
 public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void persistentClientAuthorizations(final String userId, final String userSecret,
-                                               final String redirectUris, final String redirectUri) throws Exception {
+    public void persistentClientAuthorizations(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("persistentClientAuthorizations");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -36,6 +43,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
