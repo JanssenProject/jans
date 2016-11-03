@@ -2263,8 +2263,10 @@ class Setup(object):
         if self.ldap_type is 'openldap':
             # FIXME Tested on ubuntu only
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+               self.run([service_path, 'restart', 'rsyslog.service'])
                self.run([service_path, 'start', 'solserver.service'])
             else:
+               self.run([service_path, 'rsyslog', 'restart'])
                self.run([service_path, 'solserver', 'start'])
 
         # Apache Tomcat
