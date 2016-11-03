@@ -744,9 +744,6 @@ class Setup(object):
     def copy_static(self):
         self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.installSaml:
-            self.copyFile("%s/static/tomcat/idp.xml" % self.install_dir, "%s/conf/Catalina/localhost/" % self.tomcatHome)
-            self.renderTemplateInOut("%s/conf/Catalina/localhost/idp.xml" % self.tomcatHome, "%s/conf/Catalina/localhost" % self.tomcatHome, "%s/conf/Catalina/localhost" % self.tomcatHome)
-            
             self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth3/idp/attribute-resolver.xml.vm" % self.gluuBaseFolder)
 
             self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)

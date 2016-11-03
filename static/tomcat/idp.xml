@@ -1,6 +1,0 @@
-<Context docBase="%(idpWarFullPath)s"
-         privileged="true"
-         antiResourceLocking="false"
-         antiJARLocking="false"
-         unpackWAR="false"
-         swallowOutput="true" />
