@@ -179,7 +179,7 @@ class Setup(object):
         self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
         self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
         self.idp3CredentialsFolder = "/opt/shibboleth-idp/credentials"
-        self.idp3WarFolder = "/opt/shibboleth-idp/war"
+        # self.idp3WarFolder = "/opt/shibboleth-idp/war"
 
         self.hostname = None
         self.ip = None
@@ -1565,12 +1565,17 @@ class Setup(object):
             self.removeDirs('%s/conf/shibboleth3' % self.gluuBaseFolder)
             self.createDirs('%s/conf/shibboleth3/idp' % self.gluuBaseFolder)
 
-            self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/conf/shibboleth3' % self.gluuBaseFolder)
+            # Put IDP templates to oxTrust conf folder
+            jettyIdentityServiceName = 'identity'
+            jettyIdentityServiceConf = '%s/%s/conf' % (self.jetty_base, jettyIdentityServiceName)
+            self.run([self.cmd_mkdir, '-p', jettyIdentityServiceConf])
+
+            self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/shibboleth3' % jettyIdentityServiceConf)
 
             self.removeDirs(tmpIdentityDir)
 
             print "Downloading Shibboleth IDP v3 war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.idp3WarFolder])
+            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWarFolder])
             print "Downloading Shibboleth IDP v3 keygenerator..."
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP v3 binary distributive file..."
@@ -1601,14 +1606,21 @@ class Setup(object):
             # update IDP3 metadata 
             self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
 
-            self.idpWarFullPath = '%s/idp.war' % self.idp3WarFolder
+            self.idpWarFullPath = '%s/idp.war' % self.distWarFolder
 
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
             self.run([self.cmd_java,'-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
-            
+
+            jettyIdpServiceName = 'idp'
+            jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)
+
+            self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
+            self.copyFile('%s/idp.war' % self.distWarFolder, jettyIdpServiceWebapps)
+
             # chown -R tomcat:tomcat /opt/shibboleth-idp
-            self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
+            # self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyIdpServiceWebapps], '/opt')
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
@@ -1832,8 +1844,8 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.idp3ConfFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3ConfAuthnFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3CredentialsFolder])
-                self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
-                self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.idp3Folder])
+                # self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
+                self.run([self.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
 
             if self.installLdap and self.ldap_type is 'openldap':
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data'])
