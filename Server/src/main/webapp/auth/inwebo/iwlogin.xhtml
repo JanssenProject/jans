@@ -52,7 +52,7 @@
         </s:fragment>
 
         <h:form id="loginForm" rendered="#{not helium_enabled}">
-            <s:token />
+            <s:token allowMultiplePosts="true" />
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
