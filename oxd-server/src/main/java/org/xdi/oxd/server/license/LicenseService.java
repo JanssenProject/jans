@@ -15,9 +15,11 @@ import org.xdi.oxd.license.validator.LicenseContent;
 import org.xdi.oxd.license.validator.LicenseValidator;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ShutdownException;
+import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.HttpService;
 import org.xdi.oxd.server.service.TimeService;
 
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,11 +51,20 @@ public class LicenseService {
         validateConfiguration();
 
         Optional<LicenseFile> licenseFile = LicenseFile.load();
+
+        // before license update, check existing license and make sure autoupdate=true, otherwise skip update
+        if (validateLicense() && metadata != null && metadata.getAutoupdate() != null &&
+                !metadata.getAutoupdate()) {
+            licenseValid = true;
+            schedulePeriodicValidation(Utils.hoursDiff(new Date(), metadata.getExpirationDate()));
+            return; // skip update procedure, autoupdate=false !
+        }
+
         this.updateService.start(licenseFile);
 
         licenseValid = validateLicense();
         if (licenseValid) {
-            schedulePeriodicValidation();
+            schedulePeriodicValidation(1);
         } else {
             throw new ShutdownException("Failed to validate license, shutdown server ... ");
         }
@@ -113,13 +124,13 @@ public class LicenseService {
         return false;
     }
 
-    private void schedulePeriodicValidation() {
+    private void schedulePeriodicValidation(int initialDelayInHours) {
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 licenseValid = validateLicense();
             }
-        }, 1, 24, TimeUnit.HOURS);
+        }, initialDelayInHours, 24, TimeUnit.HOURS);
     }
 }
