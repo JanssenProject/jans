@@ -292,6 +292,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         siteConf.setRedirectUris(params.getRedirectUris());
         siteConf.setApplicationType("web");
 
+        if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
+           siteConf.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        }
+
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
             siteConf.setAcrValues(params.getAcrValues());
         }
