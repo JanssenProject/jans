@@ -181,7 +181,7 @@
 					
 								<nameidpolicy enabled="false" />
 								<metadata>
-									<file>/opt/idp/metadata/%(inumOrgFN)s-idp-metadata.xml</file>
+									<file>/opt/shibboleth-idp/metadata/idp-metadata.xml</file>
 								</metadata>
 							</idp>
 						</idps>

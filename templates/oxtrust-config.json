@@ -58,9 +58,7 @@
     "photoRepositoryCountLeveles":3,
     "photoRepositoryCountFoldersPerLevel":20,
 
-    "shibboleth2IdpRootDir":"/opt/idp",
-    "shibboleth2SpConfDir":"/opt/idp/sp",
-    "shibboleth2FederationRootDir":"/opt/shibboleth-federation",
+    "shibboleth3FederationRootDir":"/opt/shibboleth-federation",
 
     "velocityLog":"%(jetty_base)s/identity/logs/velocity.log",
 
