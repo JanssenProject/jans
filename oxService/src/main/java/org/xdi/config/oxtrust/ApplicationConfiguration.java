@@ -53,9 +53,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String ldifStore;
 
-	private String shibboleth2IdpRootDir;
-	private String shibboleth2SpConfDir;
-
 	private boolean updateApplianceStatus;
 
 	private String svnConfigurationStoreRoot;
@@ -94,7 +91,7 @@ public final class ApplicationConfiguration implements Serializable {
 	private String mysqlUser;
 	private String mysqlPassword;
 
-	private String shibboleth2FederationRootDir;
+	private String shibboleth3FederationRootDir;
 
 	private String caCertsLocation;
 	private String caCertsPassphrase;
@@ -351,22 +348,6 @@ public final class ApplicationConfiguration implements Serializable {
 		this.ldifStore = ldifStore;
 	}
 
-	public String getShibboleth2IdpRootDir() {
-		return shibboleth2IdpRootDir;
-	}
-
-	public void setShibboleth2IdpRootDir(String shibboleth2IdpRootDir) {
-		this.shibboleth2IdpRootDir = shibboleth2IdpRootDir;
-	}
-
-	public String getShibboleth2SpConfDir() {
-		return shibboleth2SpConfDir;
-	}
-
-	public void setShibboleth2SpConfDir(String shibboleth2SpConfDir) {
-		this.shibboleth2SpConfDir = shibboleth2SpConfDir;
-	}
-
 	public boolean isUpdateApplianceStatus() {
 		return updateApplianceStatus;
 	}
@@ -560,13 +541,12 @@ public final class ApplicationConfiguration implements Serializable {
 		this.mysqlPassword = mysqlPassword;
 	}
 
-	public String getShibboleth2FederationRootDir() {
-		return shibboleth2FederationRootDir;
+	public String getShibboleth3FederationRootDir() {
+		return shibboleth3FederationRootDir;
 	}
 
-	public void setShibboleth2FederationRootDir(
-			String shibboleth2FederationRootDir) {
-		this.shibboleth2FederationRootDir = shibboleth2FederationRootDir;
+	public void setShibboleth3FederationRootDir(String shibboleth3FederationRootDir) {
+		this.shibboleth3FederationRootDir = shibboleth3FederationRootDir;
 	}
 
 	public String getCaCertsLocation() {
