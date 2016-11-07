@@ -35,7 +35,7 @@ else
         OPENDX="opendj"
 fi
 
-DIRS="/opt/idp/logs/ /opt/tomcat/logs/ /opt/tomcat/temp /opt/$OPENDX/logs/ /opt/vds/vds_server/logs/ /var/log/ /var/log/httpd/ /var/log/puppet/ /var/log/shibboleth/ /var/log/cups/ /var/removedldif/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/backup_$OPENDX/userRoot/ /opt/$OPENDX/backup_$OPENDX/schema/ /opt/$OPENDX/backup_$OPENDX/site/ /opt/$OPENDX/backup_$OPENDX/tasks/ /opt/$OPENDX/backup_$OPENDX/config/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/config/archived-configs /opt/ds01/backup_opendj /opt/ds02/backup_opendj /home/ldap/backup_opendj"
+DIRS="/opt/shibboleth-idp/logs/ /opt/tomcat/logs/ /opt/tomcat/temp /opt/$OPENDX/logs/ /opt/vds/vds_server/logs/ /var/log/ /var/log/httpd/ /var/log/puppet/ /var/log/shibboleth/ /var/log/cups/ /var/removedldif/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/backup_$OPENDX/userRoot/ /opt/$OPENDX/backup_$OPENDX/schema/ /opt/$OPENDX/backup_$OPENDX/site/ /opt/$OPENDX/backup_$OPENDX/tasks/ /opt/$OPENDX/backup_$OPENDX/config/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/config/archived-configs /opt/ds01/backup_opendj /opt/ds02/backup_opendj /home/ldap/backup_opendj"
 
 PWD=`pwd`
 PWD1=$PWD
