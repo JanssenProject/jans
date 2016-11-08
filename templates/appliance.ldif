@@ -33,22 +33,12 @@ oxLogViewerConfig: {
   "log_template":[
     {
       "value1":"oxAuth logs",
-      "value2":"/opt/tomcat/logs/oxauth.log*",
+      "value2":"%(jetty_base)s/oxauth/logs/*.log",
       "description":""
     },
     {
       "value1":"oxTrust logs",
-      "value2":"/opt/tomcat/logs/oxtrust.log*",
-      "description":""
-    },
-    {
-      "value1":"oxTrust cache refresh logs",
-      "value2":"/opt/tomcat/logs/oxtrust_cache_refresh.log*",
-      "description":""
-    },
-    {
-      "value1":"console log",
-      "value2":"/opt/tomcat/logs/wrapper.log*",
+      "value2":"%(jetty_base)s/identity/logs/*.log",
       "description":""
     }
   ]}

@@ -105,7 +105,7 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
-        self.jetty_user_home_lib = '%s/lib' % jetty_user_home
+        self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
@@ -381,8 +381,6 @@ class Setup(object):
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
-                     self.oxauth_context_xml: True,
-                     self.oxtrust_context_xml: True,
                      self.gluu_python_readme: True,
                      self.oxtrust_config_json: False,
                      self.oxtrust_cache_refresh_json: False,
@@ -1798,7 +1796,7 @@ class Setup(object):
 
     def make_salt(self):
         try:
-            f = open("%s/conf/salt" % self.configFolder, 'w')
+            f = open("%s/salt" % self.configFolder, 'w')
             f.write('encodeSalt = %s' % self.encode_salt)
             f.close()
         except:
