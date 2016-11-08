@@ -72,6 +72,10 @@ class PersonAuthentication(PersonAuthenticationType):
         if configurationAttributes.containsKey("saml_generate_name_id"):
             self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_generate_name_id").getValue2(), False)
 
+        self.updateUser = False
+        if configurationAttributes.containsKey("saml_update_user"):
+            self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_update_user").getValue2(), False)
+
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
             self.userObjectClasses = self.prepareUserObjectClasses(configurationAttributes)
@@ -274,6 +278,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
+                else:
+                    if self.updateUser:
+                        find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
+                        userService.updateUser(find_user_by_uid)
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
@@ -321,6 +330,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
+                else:
+                    if self.updateUser:
+                        find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
+                        userService.updateUser(find_user_by_uid)
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % find_user_by_uid.getUserId()
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
