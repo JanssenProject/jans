@@ -71,10 +71,13 @@ class PersonAuthentication(PersonAuthenticationType):
         self.generateNameId = False
         if configurationAttributes.containsKey("saml_generate_name_id"):
             self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_generate_name_id").getValue2(), False)
+        print "Saml. Initialization. The property saml_generate_name_id is %s" % self.updateUser
 
         self.updateUser = False
         if configurationAttributes.containsKey("saml_update_user"):
             self.updateUser = StringHelper.toBoolean(configurationAttributes.get("saml_update_user").getValue2(), False)
+
+        print "Saml. Initialization. The property saml_update_user is %s" % self.updateUser
 
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
@@ -262,7 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
-                if (find_user_by_uid == None):
+                if find_user_by_uid == None:
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
