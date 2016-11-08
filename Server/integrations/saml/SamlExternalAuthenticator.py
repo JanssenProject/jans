@@ -71,7 +71,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.generateNameId = False
         if configurationAttributes.containsKey("saml_generate_name_id"):
             self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_generate_name_id").getValue2(), False)
-        print "Saml. Initialization. The property saml_generate_name_id is %s" % self.updateUser
+        print "Saml. Initialization. The property saml_generate_name_id is %s" % self.generateNameId
 
         self.updateUser = False
         if configurationAttributes.containsKey("saml_update_user"):
