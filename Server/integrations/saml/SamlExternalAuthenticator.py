@@ -74,7 +74,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.updateUser = False
         if configurationAttributes.containsKey("saml_update_user"):
-            self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_update_user").getValue2(), False)
+            self.updateUser = StringHelper.toBoolean(configurationAttributes.get("saml_update_user").getValue2(), False)
 
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
