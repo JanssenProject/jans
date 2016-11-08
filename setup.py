@@ -296,7 +296,7 @@ class Setup(object):
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.gluu_python_readme = '%s/conf/python/python.txt' % self.gluuBaseFolder
-        self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.configFolder
+        self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.application_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
