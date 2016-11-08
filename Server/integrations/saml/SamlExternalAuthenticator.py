@@ -255,6 +255,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
+                newUser.setAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
                 # Use auto enrollment to local IDP
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
@@ -264,10 +265,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (find_user_by_uid == None):
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
-        
-                    newUser.setAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
-                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
+                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
                         print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
@@ -280,9 +279,10 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
                 else:
                     if self.updateUser:
+                        print "Saml. Authenticate for step 1. Attempting to update user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
                         find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
                         userService.updateUser(find_user_by_uid)
-                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % find_user_by_uid.getUserId()
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % saml_user_uid
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
@@ -308,6 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
+                newUser.setAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
 
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:%s" % saml_user_uid
 
@@ -317,9 +318,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
-                    newUser.setAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
-
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
                         print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
@@ -332,9 +331,10 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
                 else:
                     if self.updateUser:
+                        print "Saml. Authenticate for step 1. Attempting to update user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
                         find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
                         userService.updateUser(find_user_by_uid)
-                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % find_user_by_uid.getUserId()
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % saml_user_uid
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
