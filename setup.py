@@ -81,7 +81,6 @@ class Setup(object):
         self.jre_version = '102'
         self.jetty_version = '9.3.12.v20160915'
         self.jython_version = '2.7.0'
-        self.tomcat_version = '7.0.65'
         self.apache_version = None
         self.opendj_version = None
 
@@ -106,6 +105,7 @@ class Setup(object):
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
+        self.jetty_user_home_lib = '%s/lib' % jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
@@ -159,11 +159,7 @@ class Setup(object):
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.certFolder = '/etc/certs'
-        self.tomcatHome = '/opt/tomcat'
 
-        self.tomcat_user_home_lib = '/home/tomcat/lib'
-        self.oxauth_lib = '/opt/tomcat/webapps/oxauth/WEB-INF/lib'
-        self.tomcatWebAppFolder = "/opt/tomcat/webapps"
         self.oxBaseDataFolder = "/var/ox"
         self.oxPhotosFolder = "/var/ox/photos"
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
@@ -259,17 +255,13 @@ class Setup(object):
                             "%s/output/100-user.ldif" % self.install_dir]
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
-        self.init_files = ['%s/static/tomcat/tomcat' % self.install_dir,
-                           '%s/static/opendj/opendj' % self.install_dir]
+        self.init_files = ['%s/static/opendj/opendj' % self.install_dir]
         self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
-        self.tomcat_template_centos7 = '%s/static/tomcat/systemd/tomcat' % self.install_dir
-        self.tomcat_service_centos7 = "%s/bin/tomcat" % self.tomcatHome
-        self.redhat_services = ['memcached', 'opendj', 'tomcat', 'httpd']
-        self.debian_services = ['memcached', 'opendj', 'tomcat', 'apache2']
+        self.redhat_services = ['memcached', 'opendj', 'httpd']
+        self.debian_services = ['memcached', 'opendj', 'apache2']
 
         self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
-        self.tomcat_start_script = '/etc/init.d/tomcat'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
@@ -297,21 +289,16 @@ class Setup(object):
         # Stuff that gets rendered; filname is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
-        self.oxauth_context_xml = '%s/conf/Catalina/localhost/oxauth.xml' % self.tomcatHome
-        self.oxtrust_context_xml = '%s/conf/Catalina/localhost/identity.xml' % self.tomcatHome
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
-        self.tomcat_server_xml = '%s/conf/server.xml' % self.tomcatHome
         self.gluu_python_readme = '%s/conf/python/python.txt' % self.gluuBaseFolder
-        self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.tomcatHome
-        self.tomcat_gluuTomcatWrapper = '%s/conf/gluuTomcatWrapper.conf' % self.tomcatHome
+        self.ox_ldap_properties = '%s/conf/ox-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
-        self.tomcat_log_folder = "%s/logs" % self.tomcatHome
-        self.tomcat_max_ram = None    # in MB
+        self.application_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
@@ -403,9 +390,7 @@ class Setup(object):
                      self.oxidp_config_json: False,
                      self.oxcas_config_json: False,
                      self.oxasimba_config_json: False,
-                     self.tomcat_server_xml: True,
                      self.ox_ldap_properties: True,
-                     self.tomcat_gluuTomcatWrapper: True,
                      self.oxauth_static_conf_json: False,
                      self.oxTrust_log_rotation_configuration: True,
                      self.ldap_setup_properties: False,
@@ -445,7 +430,7 @@ class Setup(object):
                 + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
                 + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
                 + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
-                + 'tomcat max ram'.ljust(30) + self.tomcat_max_ram.rjust(35) + "\n" \
+                + 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n" \
                 + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
                 + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
                 + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
@@ -476,14 +461,12 @@ class Setup(object):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
         realConfigFolder = os.path.realpath(self.configFolder)
-        realTomcatFolder = os.path.realpath(self.tomcatHome)
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
-        self.run([self.cmd_chown, '-R', 'jetty:tomcat', realCertFolder])
-        self.run([self.cmd_chown, '-R', 'jetty:tomcat', realConfigFolder])
-        self.run([self.cmd_chown, '-R', 'tomcat:tomcat', realTomcatFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', realCertFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', realConfigFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
-        self.run([self.cmd_chown, '-R', 'jetty:tomcat', self.oxBaseDataFolder])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxBaseDataFolder])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
@@ -491,7 +474,7 @@ class Setup(object):
 
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
-            self.run([self.cmd_chown, '-R', 'jetty:tomcat', realIdp3Folder])
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
 
     def change_permissions(self):
         realCertFolder = os.path.realpath(self.certFolder)
@@ -583,8 +566,8 @@ class Setup(object):
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
             self.inumOrgFN = self.inumOrg.replace('@', '').replace('!', '').replace('.', '')
-        if not self.tomcat_max_ram:
-            self.tomcat_max_ram = 3072
+        if not self.application_max_ram:
+            self.application_max_ram = 3072
 
     def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
         return_value = None
@@ -742,10 +725,7 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        self.copyFile("%s/static/tomcat/tomcat7-1.1.jar" % self.install_dir, "%s/lib/" % self.tomcatHome)
         if self.installSaml:
-            self.copyFile("%s/static/tomcat/attribute-resolver.xml.vm" % self.install_dir, "%s/conf/shibboleth3/idp/attribute-resolver.xml.vm" % self.gluuBaseFolder)
-
             self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)
             self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
 
@@ -852,24 +832,6 @@ class Setup(object):
         except:
             self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, openDJArchive))
             self.logIt(traceback.format_exc(), True)
-
-    def installTomcat(self):
-        self.logIt("Installing tomcat %s..." % (self.tomcat_version))
-        tomcatArchive = 'apache-tomcat-%s.tar.gz' % (self.tomcat_version)
-        try:
-            self.logIt("Unzipping %s in /opt/" % tomcatArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, tomcatArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except:
-            self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, tomcatArchive))
-            self.logIt(traceback.format_exc(), True)
-
-        self.removeDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
-        self.createDirs('/opt/apache-tomcat-%s/webapps' % (self.tomcat_version))
-
-        self.run([self.cmd_ln, '-sf', '/opt/apache-tomcat-%s' % (self.tomcat_version), '/opt/tomcat'])
-        self.run([self.cmd_chmod, '-R', "755", "/opt/apache-tomcat-%s/bin/" % (self.tomcat_version)])
-        self.run([self.cmd_chown, '-R', 'tomcat:tomcat', '/opt/apache-tomcat-%s' % (self.tomcat_version)])
-        self.run([self.cmd_chown, '-h', 'tomcat:tomcat', '/opt/tomcat'])
 
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
@@ -1095,11 +1057,11 @@ class Setup(object):
     def generate_crypto(self):
         try:
             self.logIt('Generating certificates and keystores')
-            self.gen_cert('httpd', self.httpdKeyPass, 'tomcat')
-            self.gen_cert('shibIDP', self.shibJksPass, 'tomcat')
-            self.gen_cert('idp-encryption', self.shibJksPass, 'tomcat')
-            self.gen_cert('idp-signing', self.shibJksPass, 'tomcat')
-            self.gen_cert('asimba', self.asimbaJksPass, 'tomcat')
+            self.gen_cert('httpd', self.httpdKeyPass, 'jetty')
+            self.gen_cert('shibIDP', self.shibJksPass, 'jetty')
+            self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
+            self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
+            self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
             self.gen_cert('openldap', self.openldapKeyPass, 'ldap')
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
@@ -1107,14 +1069,14 @@ class Setup(object):
                               self.shibJksPass,
                               '%s/shibIDP.key' % self.certFolder,
                               '%s/shibIDP.crt' % self.certFolder,
-                              'tomcat')
+                              'jetty')
             self.gen_keystore('asimba',
                               self.asimbaJksFn,
                               self.asimbaJksPass,
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
-                              'tomcat')
-            self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.certFolder])
+                              'jetty')
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
             # oxTrust UI can add key to asimba's keystore
             self.run([self.cmd_chmod, 'u+w', self.asimbaJksFn])
@@ -1210,27 +1172,27 @@ class Setup(object):
                       '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
-        self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/bcprov-jdk15on-1.54.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/bcpkix-jdk15on-1.54.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-cli-1.2.jar" % self.install_dir, self.tomcat_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.tomcat_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/bcprov-jdk15on-1.54.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/bcpkix-jdk15on-1.54.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/commons-cli-1.2.jar" % self.install_dir, self.jetty_user_home_lib)
+        self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.jetty_user_home_lib)
 
         self.change_ownership()
 
-        requiredJars =['%s/bcprov-jdk15on-1.54.jar' % self.tomcat_user_home_lib,
-                       '%s/bcpkix-jdk15on-1.54.jar' % self.tomcat_user_home_lib,
-                       '%s/commons-lang-2.6.jar' % self.tomcat_user_home_lib,
-                       '%s/log4j-1.2.14.jar' % self.tomcat_user_home_lib,
-                       '%s/commons-codec-1.5.jar' % self.tomcat_user_home_lib,
-                       '%s/commons-cli-1.2.jar' % self.tomcat_user_home_lib,
-                       '%s/jettison-1.3.jar' % self.tomcat_user_home_lib,
-                       '%s/oxauth-model.jar' % self.tomcat_user_home_lib,
-                       '%s/oxauth.jar' % self.tomcat_user_home_lib]
+        requiredJars =['%s/bcprov-jdk15on-1.54.jar' % self.jetty_user_home_lib,
+                       '%s/bcpkix-jdk15on-1.54.jar' % self.jetty_user_home_lib,
+                       '%s/commons-lang-2.6.jar' % self.jetty_user_home_lib,
+                       '%s/log4j-1.2.14.jar' % self.jetty_user_home_lib,
+                       '%s/commons-codec-1.5.jar' % self.jetty_user_home_lib,
+                       '%s/commons-cli-1.2.jar' % self.jetty_user_home_lib,
+                       '%s/jettison-1.3.jar' % self.jetty_user_home_lib,
+                       '%s/oxauth-model.jar' % self.jetty_user_home_lib,
+                       '%s/oxauth.jar' % self.jetty_user_home_lib]
 
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
@@ -1275,7 +1237,7 @@ class Setup(object):
             f = open(fn, 'w')
             f.write(jwks_text)
             f.close()
-            self.run([self.cmd_chown, 'tomcat:tomcat', fn])
+            self.run([self.cmd_chown, 'jetty:jetty', fn])
             self.run([self.cmd_chmod, '600', fn])
             self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
         except:
@@ -1466,37 +1428,26 @@ class Setup(object):
         self.index_opendj_backend('userRoot')
         self.index_opendj_backend('site')
 
-    # Deprecated
     def install_ox_base(self):
-        if self.installOxAuth or self.installOxTrust:
-            # Unpack oxauth.war to get bcprov-jdk16.jar
-            oxauthWar = 'oxauth.war'
-            distOxAuthPath = '%s/%s' % (self.tomcatWebAppFolder, oxauthWar)
+        # Unpack oxauth.war to get libs needed to run key generator
+        oxauthWar = 'oxauth.war'
+        distOxAuthPath = '%s/%s' % (self.distFolder, oxauthWar)
 
-            tmpOxAuthDir = '%s/tmp_oxauth' % self.distWarFolder
+        tmpOxAuthDir = '%s/tmp_oxauth' % self.distWarFolder
 
-            self.logIt("Unpacking %s..." % oxauthWar)
-            self.removeDirs(tmpOxAuthDir)
-            self.createDirs(tmpOxAuthDir)
+        self.logIt("Unpacking %s..." % oxauthWar)
+        self.removeDirs(tmpOxAuthDir)
+        self.createDirs(tmpOxAuthDir)
 
-            self.run([self.cmd_jar,
-                      'xf',
-                      distOxAuthPath], tmpOxAuthDir)
+        self.run([self.cmd_jar,
+                  'xf',
+                  distOxAuthPath], tmpOxAuthDir)
 
-            # Prepare endorsed folder
-            endorsedFolder = "%s/endorsed" % self.tomcatHome             
-            self.createDirs(endorsedFolder)
-            self.run([self.cmd_chmod, '-R', '755', endorsedFolder])
-            
-            # Copy  files into endorsed
-            bcFilePath1 = '%s/WEB-INF/lib/bcprov-jdk15on-1.54.jar' % tmpOxAuthDir
-            bcFilePath2 = '%s/WEB-INF/lib/bcpkix-jdk15on-1.54.jar' % tmpOxAuthDir
+        self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
+        # TODO: Add copy commands here
+        # We can use it to extract required libs which we put now into static/oxauth/lib
 
-            self.logIt("Copying files to %s..." % endorsedFolder)
-            self.copyFile(bcFilePath1, endorsedFolder)
-            self.copyFile(bcFilePath2, endorsedFolder)
-
-            self.removeDirs(tmpOxAuthDir)
+        self.removeDirs(tmpOxAuthDir)
 
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
@@ -1615,8 +1566,8 @@ class Setup(object):
             self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
             self.copyFile('%s/idp.war' % self.distWarFolder, jettyIdpServiceWebapps)
 
-            # chown -R tomcat:tomcat /opt/shibboleth-idp
-            # self.run([self.cmd_chown,'-R', 'tomcat:tomcat', self.idp3Folder], '/opt')
+            # chown -R jetty:jetty /opt/shibboleth-idp
+            # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyIdpServiceWebapps], '/opt')
 
     def install_asimba(self):
@@ -1707,11 +1658,6 @@ class Setup(object):
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
 
     def install_gluu_components(self):
-        oxLdapProperties = '%s/ox-ldap.properties' % self.outputFolder
-        oxSalt = "%s/conf/salt" % self.tomcatHome
-        self.copyFile(oxLdapProperties, self.configFolder)
-        self.copyFile(oxSalt, self.configFolder)
-
         if self.installOxAuth:
             self.install_oxauth()
 
@@ -1814,7 +1760,7 @@ class Setup(object):
             if self.installOxTrust | self.installOxAuth:
                 self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
                 self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
-                self.run([self.cmd_mkdir, '-p', self.tomcat_user_home_lib])
+                self.run([self.cmd_mkdir, '-p', self.jetty_user_home_lib])
                 self.run([self.cmd_mkdir, '-p', self.oxPhotosFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
@@ -1831,7 +1777,7 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
                 self.run([self.cmd_mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
 
-                self.run([self.cmd_chown, '-R', 'tomcat:tomcat', self.oxCustomizationFolder])
+                self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxCustomizationFolder])
 
             if self.installSaml:
                 self.run([self.cmd_mkdir, '-p', self.idp3Folder])
@@ -1852,7 +1798,7 @@ class Setup(object):
 
     def make_salt(self):
         try:
-            f = open("%s/conf/salt" % self.tomcatHome, 'w')
+            f = open("%s/conf/salt" % self.configFolder, 'w')
             f.write('encodeSalt = %s' % self.encode_salt)
             f.close()
         except:
@@ -1901,7 +1847,7 @@ class Setup(object):
 
         self.orgName = self.getPrompt("Enter Organization Name")
         self.admin_email = self.getPrompt('Enter email address for support at your organization')
-        self.tomcat_max_ram = self.getPrompt("Enter maximum RAM for tomcat in MB", '3072')
+        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
         randomPW = self.getPW()
         self.ldapPass = self.getPrompt("Optional: enter password for oxTrust and LDAP superuser", randomPW)
 
@@ -2201,17 +2147,7 @@ class Setup(object):
               self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                script_name = os.path.split(self.tomcat_template_centos7)[-1]
-                dest_folder = os.path.dirname(self.tomcat_service_centos7)
-                try:
-                    self.copyFile(self.tomcat_template_centos7, dest_folder)
-                    self.run([self.cmd_chmod, "755", self.tomcat_service_centos7])
-                    self.run([self.tomcat_service_centos7, "install"])
-                except:
-                    self.logIt("Error copying script file %s to %s" % (self.tomcat_template_centos7, dest_folder))
-                    self.logIt(traceback.format_exc(), True)
-        else:
+        if self.os_initdaemon == 'initd':
             for init_file in self.init_files:
                 try:
                     script_name = os.path.split(init_file)[-1]
@@ -2230,7 +2166,6 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
-            self.run(["/usr/sbin/update-rc.d", 'tomcat', 'start', '50', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
@@ -2269,28 +2204,16 @@ class Setup(object):
                self.run([service_path, 'rsyslog', 'restart'])
                self.run([service_path, 'solserver', 'start'])
 
-        # Apache Tomcat
+        # Jetty services
         try:
-            # Giving LDAP a few seconds to load the data...
+            # Give LDAP a few seconds to load the data...
             i = 0
             wait_time = 5
             while i < wait_time:
                 time.sleep(1)
                 print ".",
                 i = i + 1
-            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-               # Stop opendj conventionally and now it'll run via systemctl
-               self.run(['/opt/opendj/bin/stop-ds'])
-               self.run([service_path, 'enable', 'tomcat'])
-               self.run([service_path, 'start', 'tomcat'])
-            else:
-               self.run([service_path, 'tomcat', 'start'])
-        except:
-            self.logIt("Error starting tomcat")
-            self.logIt(traceback.format_exc(), True)
 
-        # Jetty services
-        try:
             # Iterate through all components and start installed            
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
@@ -2439,7 +2362,7 @@ class Setup(object):
         
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            allowedMemory = int(round(allowedRatio * int(self.tomcat_max_ram)))
+            allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
             
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
                 allowedMemory = installedComponent['memory']['max_allowed_mb']
@@ -2619,7 +2542,6 @@ if __name__ == '__main__':
             installObject.calculate_aplications_memory()
             installObject.installJRE()
             installObject.installJetty()
-            installObject.installTomcat()
             installObject.installJython()
             installObject.make_salt()
             installObject.make_oxauth_salt()
