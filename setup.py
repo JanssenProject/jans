@@ -627,7 +627,10 @@ class Setup(object):
                               ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                               ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                               ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                              ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true']
+                              ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
+                              ['create-backend-index', '--backend-name', 'site', '--index-name', 'member', '--set', 'index-type:equality'],
+							  ['create-backend-index', '--backend-name', 'site', '--index-name', 'uniqueMember', '--set', 'index-type:equality'],
+							  ['set-plugin-prop', '--plugin-name', '"Referential Integrity"','--set', 'enabled:true']
                               ]
             for changes in config_changes:
                 dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
